@@ -12,6 +12,8 @@
   "dependencies": {
     "@koa/router": "^9.0.0",
     "koa": "^2.11.0",
+    "koa-cors": "0.0.16",
+    "koa-session": "^5.13.1",
     "mongodb": "^3.5.6"
   }
 }
