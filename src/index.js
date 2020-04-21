@@ -1,9 +1,8 @@
 const Router = require('@koa/router')
-const { User, Customer } = require('./router')
+const Api = require('./router')
 
 const router = new Router()
 
-router.use('/api/user', User.routes(), User.allowedMethods())
-router.use('/api/customer', Customer.routes(), Customer.allowedMethods())
+router.use('/api', Api.routes(), Api.allowedMethods())
 
 module.exports = router

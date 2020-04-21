@@ -1,7 +1,5 @@
 const Router = require('@koa/router')
-const {
-  Detail
-} =  require('./routes')
+const Detail = require('./routes/detail')
 
 const router = new Router()
 

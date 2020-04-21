@@ -1,10 +1,8 @@
 const Router = require('@koa/router')
-const {
-  Classify,
-  Rank,
-  Detail,
-  Search
-} = require('./routes')
+const Classify = require('./routes/classify')
+const Rank = require('./routes/rank')
+const Detail = require('./routes/detail')
+const Search = require('./routes/search')
 
 const router = new Router()
 

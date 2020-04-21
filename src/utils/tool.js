@@ -53,7 +53,23 @@ function isEmpty(data) {
   return false
 }
 
+function flat(array) {
+  if(!isType(array, 'array')) return array
+  if(Array.prototype.flat) return array.flat(Infinity)
+  let newArray = []
+  array.forEach(item => {
+    if(isType(item, 'array')) {
+      const data = flat(item)
+      newArray = [...newArray, ...data]
+    }else {
+      newArray.push(item)
+    }
+  })
+  return newArray
+}
+
 module.exports = {
   isType,
-  isEmpty
+  isEmpty,
+  flat
 }
