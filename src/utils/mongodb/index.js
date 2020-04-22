@@ -1,33 +1,18 @@
 const MongoClient = require('mongodb').MongoClient
 const MongoId = require('mongodb').ObjectID
-const $create = require('./create')
-const $delete = require('./delete')
-const $find = require('./find')
-const $insert = require('./insert')
-const $update = require('./update')
+
+//查找选择性返回
 
 const { isType, isEmpty, flat } = require('../tool')
-
-const url = ''
-
-//连接
-function connect() {
-  return new Promise((resolve, reject) => {
-    MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
-      if(err) {
-        reject(err)
-      }
-      resolve(db)
-    })
-  })
-}
 
 class MongoDB {
 
   static instance
 
+  //数据库地址
   url
 
+  //数据库名称
   mongoName
 
   // timer = {
@@ -57,15 +42,34 @@ class MongoDB {
     return this.instance
   }
 
-  //数据库连接
+  //数据库连接 | 创建
   connect() {
     return new Promise((resolve, reject) => {
-      MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
+      MongoClient.connect(this.url, { useNewUrlParser: true }, function(err, db) {
         if(err) {
           reject(err)
         }
         resolve(db)
       })
+    })
+  }
+
+  //删除数据库
+  deleteMongo() {
+    this.connect()
+    .then(db => {
+      return new Promise((resolve, reject) => {
+        db.dropDataBase(function(err, res) {
+          if(err) {
+            reject(err)
+          }else {
+            resolve(res)
+          }
+        })
+      })
+    })
+    .catch(err => {
+      console.log('fail connect: ' + err)
     })
   }
 
@@ -83,6 +87,26 @@ class MongoDB {
         })
       })
     }).catch(err => {
+      console.log('fail connect: ' + err)
+    })
+  }
+
+  //删除集合
+  deleteCollection(collectionName) {
+    this.connect()
+    .then(db => {
+      const dataBase = db.db(this.mongoName)
+      return new Promise((resolve, reject) => {
+        dataBase.collection(collectionName).drop(function(err, res) {
+          if(err) {
+            reject(err)
+          }else {
+            resolve(res)
+          }
+        })
+      })
+    })
+    .catch(err => {
       console.log('fail connect: ' + err)
     })
   }
@@ -113,15 +137,50 @@ class MongoDB {
 
   //查找数据
   find(collectionName, rules) {
-    const data = this.findInternal(collectionName, rules)
-    return new Promise((resolve, reject) => {
-      data.toArray(function(err, res) {
-        if(err) {
-          reject(err)
-        }else {
-          resolve(res)
-        }
+    return this.findInternal(collectionName, rules).then(data => {
+      return new Promise((resolve, reject) => {
+        data.toArray(function(err, res) {
+          if(err) {
+            reject(err)
+          }else {
+            resolve(res)
+          }
+        })
       })
+    })
+  }
+
+  //查找一条
+  findOne(collectionName, rules) {
+    this.connect()
+    .then(db => {
+      const dataBase = db.db(this.mongoName)
+      return new Promise((resolve, reject) => {
+       let collection = dataBase.collection(collectionName)
+       let hasFindOne = !!collection.findOne
+       if(hasFindOne) {
+        collection.findOne(rules).toArray(function(err, res) {
+          if(err) {
+            reject(err)
+          }else {
+            resolve(res)
+          }
+        })
+       }else {
+        this.findInternal(collectionName, { ...rules, query: [ { type: 'limit', 1:1 } ] }).then(data => {
+          data.toArray(function(err, res) {
+            if(err) {
+              reject(err)
+            }else {
+              resolve(res)
+            }
+          })
+        })
+       }
+      })
+    })
+    .catch(err => {
+      console.log('fail connect: ' + err)
     })
   }
 
@@ -133,18 +192,24 @@ class MongoDB {
         query,
         ...nextRules
       } = rules
-      const dataBase = db.db(collectionName)
+      const dataBase = db.db(this.mongoName)
 
-      let data = dataBase.find(nextRules)
+      let data = dataBase.collection(collectionName).find(nextRules)
 
       if(!isType(query, 'array')) return data
       query.forEach(item => {
-        if(!isType(item, 'object') || isEmpty(item) || !('type' in item)) return
-        const {
-          type,
-          ...args
-        } = item
-        data = data[type](...args)
+        if(!isType(item, 'object') || !isType(item, 'array') || isEmpty(item)) return 
+        if(isType(item, 'object') && 'type' in item) {
+          const {
+            type,
+            ...args={}
+          } = item
+          data = data[type](...args)
+        }else if(isType(item, 'array')) {
+          const type = item.slice(0, 1)
+          const args = item.slice(1)
+          data = data[type](...args)
+        }
       })
 
       return data
@@ -159,7 +224,7 @@ class MongoDB {
     if(isEmpty(data)) return Promise.reject('can not insert empty data')
     this.connect()
     .then(db => {
-      const dataBase = db.db(collectionName)
+      const dataBase = db.db(this.mongoName)
       return this.update(dataBase.collection(collectionName), rules, data)
     })
     .catch(err => {
@@ -171,7 +236,7 @@ class MongoDB {
     if(isEmpty(datas)) return Promise.reject('can not insert empty data')
     this.connect()
     .then(db => {
-      const dataBase = db.db(collectionName)
+      const dataBase = db.db(this.mongoName)
       return this.update(dataBase.collection(collectionName), rules, flat(datas))
     })
     .catch(err => {
@@ -236,10 +301,17 @@ class MongoDB {
       ...nextRules
     } = rules
     if(!isEmpty(queryConfig)) {
-      query.push({
-        type: name,
-        ...queryConfig
-      })
+      if(!isType(queryConfig, 'object')) {
+        query.push([
+          name,
+          queryConfig
+        ])
+      }else {
+        query.push({
+          type: name,
+          ...queryConfig
+        })
+      }
     }
     return {
       query,
@@ -252,18 +324,23 @@ class MongoDB {
 
     const { query, rules } = this.delArgs(rules, sort, 'sort')
 
-    const data = this.findInternal(collectionName, {
+    return this.findInternal(collectionName, {
       ...rules,
       query
-    })
-    return new Promise((resolve, reject) => {
-      data.toArray(function(err, res) {
-        if(err) {
-          reject(err)
-        }else {
-          resolve(res)
-        }
+    }).
+    then(data => {
+      return new Promise((resolve, reject) => {
+        data.toArray(function(err, res) {
+          if(err) {
+            reject(err)
+          }else {
+            resolve(res)
+          }
+        })
       })
+    }).
+    catch(err => {
+      console.log('something error: ' + err)
     })
 
   }
@@ -273,18 +350,23 @@ class MongoDB {
 
     const { query, rules } = this.delArgs(rules, skip, 'skip')
 
-    const data = this.findInternal(collectionName, {
+    return this.findInternal(collectionName, {
       ...rules,
       query
-    })
-    return new Promise((resolve, reject) => {
-      data.toArray(function(err, res) {
-        if(err) {
-          reject(err)
-        }else {
-          resolve(res)
-        }
+    }).
+    then(data => {
+      return new Promise((resolve, reject) => {
+        data.toArray(function(err, res) {
+          if(err) {
+            reject(err)
+          }else {
+            resolve(res)
+          }
+        })
       })
+    }).
+    catch(err => {
+      console.log('something error: ' + err)
     })
   }
 
@@ -292,21 +374,150 @@ class MongoDB {
   limit(collectionName, rules, limit) {
 
     const { query, rules } = this.delArgs(rules, limit, 'limit')
-    const data = this.findInternal(collectionName, {
+    return this.findInternal(collectionName, {
       ...rules,
       query
-    })
-    return new Promise((resolve, reject) => {
-      data.toArray(function(err, res) {
-        if(err) {
-          reject(err)
-        }else {
-          resolve(res)
-        }
+    }).
+    then(data => {
+      return new Promise((resolve, reject) => {
+        data.toArray(function(err, res) {
+          if(err) {
+            reject(err)
+          }else {
+            resolve(res)
+          }
+        })
       })
+    }).
+    catch(err => {
+      console.log('something error: ' + err)
     })
 
   }
+
+  //查询总数
+  count(collectionName, rules) {
+    this.findInternal(collectionName, rules)
+    .then(data => {
+      return new Promise((resolve, reject) => {
+        let _data = data
+        data.toArray(function(err, res) {
+          if(err) {
+            reject(err)
+          }else {
+            resolve({
+              data: res,
+              count: _data.count ? _data.count() : res.length
+            })
+          }
+        })
+      })
+    })
+    .catch(err => {
+      console.log('something error: ' + err)
+    }) 
+  }
+
+  //查看索引
+  getIndexInfo(collectionName, type="list") {
+    this.connect()
+    .then(db => {
+      const dataBase = db.db(this.mongoName).collection(collectionName)
+      return new Promise((resolve, reject) => {
+        switch(type) {
+          case 'size':
+            dataBase.totalIndexSize(function(err, res) {
+              if(err) {
+                reject(err)
+              }else {
+                resolve(res)
+              }
+            })
+            break
+          case 'list':
+          default: 
+            dataBase.getIndexs(function(err, res) {
+              if(err) {
+                reject(err)
+              }else {
+                resolve(res)
+              }
+            })
+        }
+      })
+    })
+    .catch(err => {
+      console.log('fail connect: ' + err)
+    })
+  }
+
+  //删除索引
+  dropIndex(collectionName, name=undefined) {
+    this.connect()
+    .then(db => {
+      const dataBase = db.db(this.mongoName)
+      return new Promise((resolve, reject) => {
+        let collection = dataBase.collection(collectionName)
+        if(name) {
+          collection.dropIndex(name, function(err, res) {
+            if(err) {
+              reject(err)
+            }else {
+              resolve(res)
+            }
+          })
+        }else {
+          collection.dropIndex(function(err, res) {
+            if(err) {
+              reject(err)
+            }else {
+              resolve(res)
+            }
+          })
+        }
+      })
+    })
+    .catch(err => {
+      console.log('fail connect: ' + err)
+    })
+  }
+
+  //创建索引
+  createIndex(collectionName, rules, options={}) {
+    let method
+    this.connect()
+    .then(db => {
+      const dataBase = db.db(this.mongoName).collection(collectionName)
+      const isBefore3 = !!!dataBase.createIndex
+      method = isBefore3 ? 'ensureIndex' : 'createIndex'
+      return new Promise((resolve, reject) => {
+        dataBase[method](rules, options, function(err, res) {
+          if(err) {
+            reject(err)
+          }else {
+            resolve(res)
+          }
+        })
+      })
+    })
+    .catch(err => {
+      console.log('fail connect: ' + err)
+    })
+  }
+
+  //聚合
+  aggregate(collectionName, args) {
+    this.connect()
+    .then(db => {
+      const dataBase = db.db(this.mongoName)
+      dataBase.collection(collectionName).aggregate(args)
+    })
+    .catch(err => {
+      console.log('fail connect: ' + err)
+    })
+  }
+
+  //id获取
 
 }
 
@@ -326,7 +537,7 @@ module.exports = MongoDB
  * 查找第一条 db.findOne
  * 统计 db.find().count()
  * 删除数据库 创建数据库
- * 索引设置 查看 删除 唯一索引 创建 
+ * 索引查看 删除 唯一索引 创建 
  * 聚合
  * 
  * 分片
@@ -334,3 +545,10 @@ module.exports = MongoDB
  * 备份恢复
  * 监控
  */
+
+// 集合中索引不能超过64个
+// 索引名的长度不能超过128个字符
+// 一个复合索引最多可以有31个字段
+//控制集合中的索引，当索引数量超过最大值时自动删除最先添加的索引
+//长度超过时自动截断
+//超出字段默认自动截断
