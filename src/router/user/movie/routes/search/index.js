@@ -5,7 +5,13 @@ const Query = require('./routes/query')
 
 const router = new Router()
 
-router.use('./about', About.routes(), About.allowedMethods())
-router.use('./query', Query.routes(), Query.allowedMethods())
+// { content: 搜索内容, area: 地区, director: 导演, actor: 演员, lang: 语言, price: 价格, sort: 排序, time: 时间, fee: 免付费, currPage: 当前页, pageSize: 数量 }
+
+router
+.get('/', async(ctx) => {
+  ctx.body = '关键词搜索'
+})
+.use('./about', About.routes(), About.allowedMethods())
+.use('./query', Query.routes(), Query.allowedMethods())
 
 module.exports = router

@@ -6,9 +6,10 @@ const Search = require('./routes/search')
 
 const router = new Router()
 
-router.use('/classify', Classify.routes(), Classify.allowedMethods())
-router.use('/rank', Rank.routes(), Rank.allowedMethods())
-router.use('/detail', Detail.routes(), Detail.allowedMethods())
-router.use('/search', Search.routes(), Search.allowedMethods())
+router
+.use('/classify', Classify.routes(), Classify.allowedMethods())
+.use('/rank', Rank.routes(), Rank.allowedMethods())
+.use('/detail', Detail.routes(), Detail.allowedMethods())
+.use('/search', Search.routes(), Search.allowedMethods())
 
 module.exports = router

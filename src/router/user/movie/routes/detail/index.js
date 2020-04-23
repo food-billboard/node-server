@@ -4,7 +4,13 @@ const Simple = require('./routes/simple')
 
 const router = new Router()
 
-router.use('/comment', Comment.routes(), Comment.allowedMethods())
-router.use('/simple', Simple.routes(), Simple.allowedMethods())
+// { id: 电影id }
+
+router
+.get('/', async (ctx) => {
+  ctx.body('电影详情')
+})
+.use('/comment', Comment.routes(), Comment.allowedMethods())
+.use('/simple', Simple.routes(), Simple.allowedMethods())
 
 module.exports = router

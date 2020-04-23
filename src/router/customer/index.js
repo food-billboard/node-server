@@ -5,8 +5,9 @@ const Movie = require('./movie')
 
 const router = new Router()
 
-router.use('/message', Message.routes(), Message.allowedMethods())
-router.use('/manage', Manage.routes(), Manage.allowedMethods())
-router.use('/movie', Movie.routes(), Movie,this.allowedMethods())
+router
+.use('/message', Message.routes(), Message.allowedMethods())
+.use('/manage', Manage.routes(), Manage.allowedMethods())
+.use('/movie', Movie.routes(), Movie.allowedMethods())
 
 module.exports = router

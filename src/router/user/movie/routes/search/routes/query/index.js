@@ -7,10 +7,11 @@ const Sort = require('./sort')
 
 const router = new Router()
 
-router.use('/actor', Actor.routes(), Actor.allowedMethods())
-router.use('/area', Area.routes(), Area.allowedMethods())
-router.use('/director', Director.routes(), Director.allowedMethods())
-router.use('/lang', Lang.routes(), Lang.allowedMethods())
-router.use('/sort', Sort.routes(), Sort.allowedMethods())
+router
+.use('/actor', Actor.routes(), Actor.allowedMethods())
+.use('/area', Area.routes(), Area.allowedMethods())
+.use('/director', Director.routes(), Director.allowedMethods())
+.use('/lang', Lang.routes(), Lang.allowedMethods())
+.use('/sort', Sort.routes(), Sort.allowedMethods())
 
 module.exports = router

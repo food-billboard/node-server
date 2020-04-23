@@ -3,6 +3,12 @@ const SpecDropList = require('./sepcDropList')
 
 const router = new Router()
 
-router.use('/specDropList', SpecDropList.routes(), SpecDropList.allowedMethods())
+// params: { currPage: 当前页, pageSize: 数量 }
+
+router
+.get('/', async(ctx) => {
+  ctx.body = '分类列表'
+})
+.use('/specDropList', SpecDropList.routes(), SpecDropList.allowedMethods())
 
 module.exports = router
