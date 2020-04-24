@@ -53,7 +53,7 @@ class MongoDB {
 
   //删除数据库
   deleteMongo() {
-    this.connect()
+    return this.connect()
     .then(db => {
       return new Promise((resolve, reject) => {
         db.dropDataBase(function(err, res) {
@@ -72,7 +72,7 @@ class MongoDB {
 
   //创建集合
   createCollection(collectionName, options={}) {
-    this.connect()
+    return this.connect()
     .then(db=> {
       const dataBase = db.db(this.mongoName)
       return new Promise((resolve, reject) => {
@@ -90,7 +90,7 @@ class MongoDB {
 
   //删除集合
   deleteCollection(collectionName) {
-    this.connect()
+    return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
       return new Promise((resolve, reject) => {
@@ -110,12 +110,12 @@ class MongoDB {
 
   insert(collectionName, ...datas) {
     if(isEmpty(datas)) return Promise.reject('can not insert empty data')
-    this.insertInternal(collectionName, flat(datas))
+    return this.insertInternal(collectionName, flat(datas))
   }
 
   //插入数据
   insertInternal(collectionName, data) {
-    this.connect()
+    return this.connect()
     .then(db=> {
       const dataBase = db.db(this.mongoName)
       return new Promise((resolve, reject) => {
@@ -149,7 +149,7 @@ class MongoDB {
 
   //查找一条
   findOne(collectionName, rules) {
-    this.connect()
+    return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
       return new Promise((resolve, reject) => {
@@ -183,7 +183,7 @@ class MongoDB {
 
   findInternal(collectionName, rules) {
     rules = isType(rules, 'object') ? rules : {}
-    this.connect()
+    return this.connect()
     .then(db => {
       const {
         query,
@@ -219,7 +219,7 @@ class MongoDB {
 
   updateOne(collectionName, rules, data) {
     if(isEmpty(data)) return Promise.reject('can not insert empty data')
-    this.connect()
+    return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
       return this.update(dataBase.collection(collectionName), rules, data)
@@ -231,7 +231,7 @@ class MongoDB {
 
   updateMany(collectionName, rules, ...datas) {
     if(isEmpty(datas)) return Promise.reject('can not insert empty data')
-    this.connect()
+    return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
       return this.update(dataBase.collection(collectionName), rules, flat(datas))
@@ -256,7 +256,7 @@ class MongoDB {
   }
 
   deleteOne(collectionName, rules) {
-    this.connect()
+    return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
       return this.delete(dataBase.collection(collectionName, rules))
@@ -267,7 +267,7 @@ class MongoDB {
   }
 
   deleteMany(collectionName, rules) {
-    this.connect()
+    return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
       return this.delete(dataBase.collection(collectionName, rules, false))
@@ -394,7 +394,7 @@ class MongoDB {
 
   //查询总数
   count(collectionName, rules) {
-    this.findInternal(collectionName, rules)
+    return this.findInternal(collectionName, rules)
     .then(data => {
       return new Promise((resolve, reject) => {
         let _data = data
@@ -417,7 +417,7 @@ class MongoDB {
 
   //查看索引
   getIndexInfo(collectionName, type="list") {
-    this.connect()
+    return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName).collection(collectionName)
       return new Promise((resolve, reject) => {
@@ -450,7 +450,7 @@ class MongoDB {
 
   //删除索引
   dropIndex(collectionName, name=undefined) {
-    this.connect()
+    return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
       return new Promise((resolve, reject) => {
@@ -482,7 +482,7 @@ class MongoDB {
   //创建索引
   createIndex(collectionName, rules, options={}) {
     let method
-    this.connect()
+    return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName).collection(collectionName)
       const isBefore3 = !!!dataBase.createIndex
@@ -504,7 +504,7 @@ class MongoDB {
 
   //聚合
   aggregate(collectionName, args) {
-    this.connect()
+    return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
       dataBase.collection(collectionName).aggregate(args)
