@@ -1,18 +1,3 @@
-//symbol function regexp array number string object null undefined NaN
-
-const __type = {
-  symbol: isSymbol,
-  number: isNumber,
-  nan: _isNaN,
-  string: isString,
-  function: isFunction,
-  regexp: isRegExp,
-  array: isArray,
-  object: isObject,
-  null: isNull,
-  undefined: isUndefined
-}
-
 const typeProto = arg => Object.prototype.toString.call(arg)
 
 const isNumber = arg => !Number.isNaN(arg) && typeProto(arg) === '[object Number]'
@@ -34,6 +19,20 @@ const isObject = arg => typeProto(arg) === '[object Object]'
 const isNull = arg => typeProto(arg) === "[object Null]"
 
 const isUndefined = arg => typeof arg === undefined
+
+//symbol function regexp array number string object null undefined NaN
+const __type = {
+  symbol: isSymbol,
+  number: isNumber,
+  nan: _isNaN,
+  string: isString,
+  function: isFunction,
+  regexp: isRegExp,
+  array: isArray,
+  object: isObject,
+  null: isNull,
+  undefined: isUndefined
+}
 
 function isType(data, type) {
   let _type = String(type).toLowerCase()

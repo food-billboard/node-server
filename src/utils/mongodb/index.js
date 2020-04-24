@@ -33,13 +33,10 @@ class MongoDB {
   // connected = false
 
   constructor(url, name) {
-    if(!this.instance) {
-      this.instance = new MongoDB(url, name)
-      return this
-    }
+    if(this.instance) return this.instance
+    this.instance = this
     this.url = url
     this.mongoName = name
-    return this.instance
   }
 
   //数据库连接 | 创建
@@ -202,7 +199,7 @@ class MongoDB {
         if(isType(item, 'object') && 'type' in item) {
           const {
             type,
-            ...args={}
+            ...args
           } = item
           data = data[type](...args)
         }else if(isType(item, 'array')) {
@@ -322,10 +319,10 @@ class MongoDB {
   //排序
   sort(collectionName, rules, sort) {
 
-    const { query, rules } = this.delArgs(rules, sort, 'sort')
+    const { query, rules:detailRules } = this.delArgs(rules, sort, 'sort')
 
     return this.findInternal(collectionName, {
-      ...rules,
+      ...detailRules,
       query
     }).
     then(data => {
@@ -348,10 +345,10 @@ class MongoDB {
   //跳过数据
   skip(collectionName, rules, skip) {
 
-    const { query, rules } = this.delArgs(rules, skip, 'skip')
+    const { query, rules:detailRules } = this.delArgs(rules, skip, 'skip')
 
     return this.findInternal(collectionName, {
-      ...rules,
+      ...detailRules,
       query
     }).
     then(data => {
@@ -373,9 +370,9 @@ class MongoDB {
   //限制数量
   limit(collectionName, rules, limit) {
 
-    const { query, rules } = this.delArgs(rules, limit, 'limit')
+    const { query, rules:detailRules } = this.delArgs(rules, limit, 'limit')
     return this.findInternal(collectionName, {
-      ...rules,
+      ...detailRules,
       query
     }).
     then(data => {
