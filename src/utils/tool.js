@@ -41,13 +41,13 @@ function isType(data, type) {
 
 function isEmpty(data) {
   if(isType(data, 'string')) {
-    return !!data.length
+    return !!!data.length
   }else if(isType(data, 'null') || isType(data, 'undefined')) {
     return true
   }else if(isType(data, 'array')) {
-    return !!data.length
+    return !!!data.length
   }else if(isType(data, 'object')) {
-    return !!Object.keys(data).length
+    return !!!Object.keys(data).length
   }
   return false
 }
