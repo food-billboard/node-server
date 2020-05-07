@@ -1,4 +1,5 @@
 const Koa = require('koa')
+require('module-alias/register')
 const Router = require('./src/index')
 const Cors = require('koa-cors')
 

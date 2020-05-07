@@ -12,7 +12,7 @@ router
   ctx.body = '详情'
 })
 .use('/comment', Comment.routes(), Comment.allowedMethods())
-.use('/rate', Rate.routes(), Rate,this.allowedMethods())
+.use('/rate', Rate.routes(), Rate.allowedMethods())
 .use('/store', Store.routes(), Store.allowedMethods())
 
 module.exports = router
