@@ -1,8 +1,5 @@
 const MongoClient = require('mongodb').MongoClient
-const MongoId = require('mongodb').ObjectID
-
-//查找选择性返回
-
+const ObjectID = require('mongodb').ObjectID
 const { isType, isEmpty, flat } = require('../tool')
 
 class MongoDB {
@@ -14,23 +11,6 @@ class MongoDB {
 
   //数据库名称
   mongoName
-
-  // timer = {
-  //   derail: 1,
-  //   time: 5000,
-  //   start: (callback=()=>{}) => {
-  //     this.timer.close()
-  //     this.timer.derail = setTimeout(() => {
-  //       callback()
-  //     }, this.timer.time)
-  //   },
-  //   close: (callback=()=>{}) => {
-  //     clearTimeout(this.timer.derail)
-  //     callback()
-  //   }
-  // }
-
-  // connected = false
 
   constructor(url, name) {
     if(this.instance) return this.instance
@@ -138,8 +118,8 @@ class MongoDB {
   } 
 
   //查找数据
-  find(collectionName, rules) {
-    return this.findInternal(collectionName, rules).then(data => {
+  find(collectionName, rules={}, returnWhat={}) {
+    return this.findInternal(collectionName, rules, returnWhat).then(data => {
       return new Promise((resolve, reject) => {
         if(!data) {
           reject('something error')
@@ -157,7 +137,7 @@ class MongoDB {
   }
 
   //查找一条
-  findOne(collectionName, rules) {
+  findOne(collectionName, rules={}, returnWhat={}) {
     return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
@@ -167,7 +147,7 @@ class MongoDB {
        if(hasFindOne) {
         collection.findOne(rules).then(res => resolve(res)).catch(err => reject(err))
        }else {
-        this.findInternal(collectionName, { ...rules, query: [ { type: 'limit', 1:1 } ] }).then(data => {
+        this.findInternal(collectionName, rules, returnWhat).then(data => {
           data.toArray(function(err, res) {
             if(err) {
               reject(err)
@@ -184,7 +164,7 @@ class MongoDB {
     })
   }
 
-  findInternal(collectionName, rules) {
+  findInternal(collectionName, rules={}, returnWhat={}) {
     rules = isType(rules, 'object') ? rules : {}
     return this.connect()
     .then(db => {
@@ -193,25 +173,23 @@ class MongoDB {
         ...nextRules
       } = rules
       const dataBase = db.db(this.mongoName)
-
       let data = dataBase.collection(collectionName).find(nextRules)
-      if(!isType(query, 'array')) return data
+      if(!isType(query, 'array')) return data.project(returnWhat)
       query.forEach(item => {
         if(!isType(item, 'object') && !isType(item, 'array') && isEmpty(item)) return 
-        if(isType(item, 'object') && ('type' in item)) {
+        if(isType(item, 'object') && ('__type__' in item)) {
           const {
-            type,
+            __type__,
             ...args
           } = item
-          data = data[type](args)
+          data = data[__type__](args)
         }else if(isType(item, 'array')) {
           const type = item.slice(0, 1)
           const args = item.slice(1)
           data = data[type](...args)
         }
       })
-
-      return data
+      return data.project(returnWhat)
  
     })
     .catch(err => {
@@ -322,14 +300,14 @@ class MongoDB {
       }else {
         if(isEmpty(newQuery)) {
           newQuery.push({
-            type: name,
+            __type__: name,
             ...queryConfig
           }) 
         }else {
           newQuery = newQuery.map(item => {
             if(isType(item, 'object')) {
-              const { type } = item
-              if(type === name) item = { ...item, ...queryConfig }
+              const { __type__ } = item
+              if(__type__ === name) item = { ...item, ...queryConfig }
             }
             return item
           })
@@ -343,14 +321,15 @@ class MongoDB {
   }
 
   //排序
-  sort(collectionName, sort, rules={}) {
+  sort(collectionName, sort, rules={}, returnWhat={}) {
 
     const { query, rules:detailRules } = this.delArgs(rules, sort, 'sort')
 
     return this.findInternal(collectionName, {
       ...detailRules,
       query
-    }).
+    },
+    returnWhat).
     then(data => {
       return new Promise((resolve, reject) => {
         data.toArray(function(err, res) {
@@ -369,14 +348,15 @@ class MongoDB {
   }
 
   //跳过数据
-  skip(collectionName, skip, rules={}) {
+  skip(collectionName, skip, rules={}, returnWhat={}) {
 
     const { query, rules:detailRules } = this.delArgs(rules, skip, 'skip')
     
     return this.findInternal(collectionName, {
       ...detailRules,
       query
-    }).
+    },
+    returnWhat).
     then(data => {
       return new Promise((resolve, reject) => {
         data.toArray(function(err, res) {
@@ -394,14 +374,14 @@ class MongoDB {
   }
 
   //限制数量
-  limit(collectionName, limit, rules={}) {
+  limit(collectionName, limit, rules={}, returnWhat={}) {
 
     const { query, rules:detailRules } = this.delArgs(rules, limit, 'limit')
     
     return this.findInternal(collectionName, {
       ...detailRules,
       query
-    }).
+    }, returnWhat).
     then(data => {
       return new Promise((resolve, reject) => {
         data.toArray(function(err, res) {
@@ -537,8 +517,15 @@ class MongoDB {
     })
   }
 
-  //id获取
+  //判断是否为合法的id
+  isValidId(id) {
+    return ObjectID.isValid(id)
+  }
 
+  //id处理
+  dealId(id) {
+    return new ObjectID(id)
+  }
 }
 
 module.exports = MongoDB

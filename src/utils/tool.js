@@ -67,8 +67,20 @@ function flat(array) {
   return newArray
 }
 
+const withTry = (callback) => {
+  return async (...args) => {
+    try {
+      const data = await callback(args)
+      return [null, data]
+    }catch(err) {
+      return [err, null]
+    }
+  }
+}
+
 module.exports = {
   isType,
   isEmpty,
-  flat
+  flat,
+  withTry
 }
