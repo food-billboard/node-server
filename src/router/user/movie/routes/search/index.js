@@ -1,15 +1,31 @@
 const Router = require('@koa/router') 
 const About = require('./routes/about')
 const Query = require('./routes/query')
+const { MongoDB } = require('@src/utils')
 
 
 const router = new Router()
+const mongo = MongoDB()
 
 // { content: 搜索内容, area: 地区, director: 导演, actor: 演员, lang: 语言, price: 价格, sort: 排序, time: 时间, fee: 免付费, currPage: 当前页, pageSize: 数量 }
 
 router
 .get('/', async(ctx) => {
   ctx.body = '关键词搜索'
+  const { 
+    content, 
+    area, 
+    director, 
+    actor, 
+    lang, 
+    price, 
+    sort, 
+    time, 
+    fee, 
+    currPage, 
+    pageSize 
+  } = ctx.query
+  
 })
 .use('./about', About.routes(), About.allowedMethods())
 .use('./query', Query.routes(), Query.allowedMethods())
