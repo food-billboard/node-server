@@ -1,14 +1,66 @@
 const Router = require('@koa/router')
 const List = require('./list')
 const Detail = require('./detail')
+const { MongoDB } = require('@src/utils')
 
 const router = new Router()
-
-// { id: 电影id, count: 数量 }
+const mongo = MongoDB()
 
 router
 .get('/', async (ctx) => {
-  ctx.body = '评论信息'
+  const { _id, count } = ctx.query
+  let res
+  let result
+  const data = await mongo.find("_movie_", {
+    _id: mongo.dealId(_id)
+  }, {
+    comment: 1
+  })
+  .then(data => {
+    return mongo.find("_comment_", {
+      query: [["limit", count]],
+      $or: data.map(id => ({_id: mongo.dealId(id)}))
+    }, {
+      content: 1,
+      user_info: 1,
+      source: 0
+    })
+  })
+  .then(data => {
+    result = [...data]
+    return mongo.find("_user_", {
+      $or: data.map(d => ({_id: mongo.dealId(d.user_info)}))
+    }, {
+      avatar:1
+    })
+  })
+  .then(data => {
+    result.forEach((r, i) => {
+      let [avatar] = data.filter(d => d._id === r.user_info)
+      result[i][user_info] = {
+        _id: r.user_info,
+        avatar
+      }
+    })
+    return result
+  })
+  .catch(err => {
+    return err
+  })
+  if(!data) {
+    res = {
+      success: false,
+      res: null
+    }
+  }else {
+   res = {
+     success: true,
+     res: {
+       data
+     }
+   }
+  }
+  ctx.body = JSON.stringify(res)
 })
 .use('/list', List.routes(), List.allowedMethods())
 .use('/detail', Detail.routes(), Detail.allowedMethods())

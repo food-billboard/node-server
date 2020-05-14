@@ -1,13 +1,44 @@
 const Router = require('@koa/router')
 const SpecDropList = require('./specDropList')
+const { MongoDB, withTry } = require("@src/utils")
 
 const router = new Router()
-
-// params: { currPage: 当前页, pageSize: 数量 }
+const mongo = MongoDB()
 
 router
 .get('/', async (ctx) => {
-  ctx.body = '排行榜详情'
+  const { currPage, pageSize, _id } = ctx.query
+  let res
+  const [ , result] = await withTry(mongo.find)("_movie_", {
+    query: [
+      {
+        __type__: 'sort',
+        total_rate: -1,
+        hot: -1
+      },
+      ["limit", pageSize]
+      ["skip", pageSize * currPage]
+    ],
+    _id: mongo.dealId(_id)
+  }, {
+    info: 1,
+    poster: 1,
+    publish_time: 1,
+    hot: 1
+  })
+  if(!result) {
+    res = {
+      success: false,
+      res: null
+    }
+  }else {
+    res = {
+      success: true,
+      res: {
+        data: result
+      }
+    }
+  }
 })
 .use('/specDropList', SpecDropList.routes(), SpecDropList.allowedMethods())
 
