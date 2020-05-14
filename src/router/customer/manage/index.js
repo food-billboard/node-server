@@ -3,14 +3,48 @@ const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
+const { MongoDB, withTry, verifyToken } = require('@src/utils')
 
 const router = new Router()
-
-// params: { id: 用户id }
+const mongo = MongoDB()
 
 router
+.use(verifyToken())
 .get('/', async (ctx) => {
-  ctx.body = '用户信息'
+  const { body: { mobile } } = ctx.request
+  let res
+  const [, info] = await withTry(mongo.findOne)("_user_", {
+    mobile
+  }, {
+    mobile: 1,
+    username: 1,
+    avatar: 1,
+    hot: 1,
+    fans:1,
+    attention: 1,
+    create_time: 1,
+    status: 1
+  })
+  if(!info) {
+    ctx.status = 401
+    res = {
+      success: false,
+      res: null
+    }
+  }else {
+    const { fans, attentions, ...nextInfo } = info
+    res = {
+      success: true,
+      res: {
+        data: {
+          fans: fans.length,
+          attentions: attentions.length,
+          ...nextInfo
+        }
+      }
+    }
+  }
+
 })
 .use('/attention', Attention.routes(), Attention.allowedMethods())
 .use('/movie', Movie.routes(), Movie.allowedMethods())

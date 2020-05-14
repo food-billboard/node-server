@@ -13,6 +13,11 @@ router
   const [, result] = await withTry(mongo.find)('_movie_', {
     _id: mongo.dealId(_id)
   })
+  await withTry(mongo.update)("_movie", {
+    _id: mongo.dealId(_id)
+  }, {
+    $inc: { glance: 1 }
+  })
   if(!result) {
     res = {
       success: false,

@@ -4,8 +4,6 @@ const { MongoDB } = require('@src/utils')
 const router = new Router()
 const mongo = MongoDB()
 
-// params: { currPage: 当前页, pageSize: 数量, id: 评论id }
-
 router.get('/', async (ctx) => {
   const { currPage, pageSize, _id } = ctx.query
   let res 

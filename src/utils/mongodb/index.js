@@ -20,7 +20,7 @@ class MongoDB {
   }
 
   //数据库连接 | 创建
-  connect() {
+  connect = () => {
     return new Promise((resolve, reject) => {
       MongoClient.connect(this.url, 
       { 
@@ -37,7 +37,7 @@ class MongoDB {
   }
 
   //删除数据库
-  deleteMongo() {
+  deleteMongo = () => {
     return this.connect()
     .then(db => {
       return new Promise((resolve, reject) => {
@@ -56,7 +56,7 @@ class MongoDB {
   }
 
   //创建集合
-  createCollection(collectionName, options={}) {
+  createCollection = (collectionName, options={}) => {
     return this.connect()
     .then(db=> {
       const dataBase = db.db(this.mongoName)
@@ -74,7 +74,7 @@ class MongoDB {
   }
 
   //删除集合
-  deleteCollection(collectionName) {
+  deleteCollection = (collectionName) => {
     return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
@@ -99,7 +99,7 @@ class MongoDB {
   }
 
   //插入数据
-  insertInternal(collectionName, data) {
+  insertInternal = (collectionName, data) => {
     return this.connect()
     .then(db=> {
       const dataBase = db.db(this.mongoName)
@@ -118,7 +118,7 @@ class MongoDB {
   } 
 
   //查找数据
-  find(collectionName, rules={}, returnWhat={}) {
+  find = (collectionName, rules={}, returnWhat={}) => {
     return this.findInternal(collectionName, rules, returnWhat).then(data => {
       return new Promise((resolve, reject) => {
         if(!data) {
@@ -137,7 +137,7 @@ class MongoDB {
   }
 
   //查找一条
-  findOne(collectionName, rules={}, returnWhat={}) {
+  findOne = (collectionName, rules={}, returnWhat={}) => {
     return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
@@ -164,7 +164,7 @@ class MongoDB {
     })
   }
 
-  findInternal(collectionName, rules={}, returnWhat={}) {
+  findInternal = (collectionName, rules={}, returnWhat={}) => {
     rules = isType(rules, 'object') ? rules : {}
     return this.connect()
     .then(db => {
@@ -197,7 +197,7 @@ class MongoDB {
     })
   }
 
-  updateOne(collectionName, rules, data) {
+  updateOne = (collectionName, rules, data) => {
     if(isEmpty(data)) return Promise.reject('can not insert empty data')
     return this.connect()
     .then(db => {
@@ -209,7 +209,7 @@ class MongoDB {
     }) 
   }
 
-  updateMany(collectionName, rules, datas) {
+  updateMany = (collectionName, rules, datas) => {
     if(isEmpty(datas)) return Promise.reject('can not insert empty data')
     return this.connect()
     .then(db => {
@@ -222,7 +222,7 @@ class MongoDB {
   }
 
   //更新数据
-  update(collection, rules, data, updateOne) {
+  update = (collection, rules, data, updateOne=true) => {
     const method = updateOne ? 'updateOne' : 'updateMany'
     return new Promise((resolve, reject) => {
       collection[method](rules, data, function(err, res) {
@@ -235,7 +235,7 @@ class MongoDB {
     })
   }
 
-  deleteOne(collectionName, rules={}) {
+  deleteOne = (collectionName, rules={}) => {
     return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
@@ -246,7 +246,7 @@ class MongoDB {
     }) 
   }
 
-  deleteMany(collectionName, rules={}) {
+  deleteMany = (collectionName, rules={}) => {
     return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
@@ -258,7 +258,7 @@ class MongoDB {
   }
 
   //删除数据
-  delete(collection, rules,  deleteOne=true) {
+  delete = (collection, rules,  deleteOne=true) => {
     const method = deleteOne ? 'deleteOne' : 'deleteMany'
     return new Promise((resolve, reject) => {
       collection[method](rules, function(err, res) {
@@ -270,7 +270,7 @@ class MongoDB {
     })
   }
 
-  delArgs(rules, queryConfig, name) {
+  delArgs = (rules, queryConfig, name) => {
     rules = isType(rules, 'object') ? rules : {}
     
     const {
@@ -321,7 +321,7 @@ class MongoDB {
   }
 
   //排序
-  sort(collectionName, sort, rules={}, returnWhat={}) {
+  sort = (collectionName, sort, rules={}, returnWhat={}) => {
 
     const { query, rules:detailRules } = this.delArgs(rules, sort, 'sort')
 
@@ -348,7 +348,7 @@ class MongoDB {
   }
 
   //跳过数据
-  skip(collectionName, skip, rules={}, returnWhat={}) {
+  skip = (collectionName, skip, rules={}, returnWhat={}) => {
 
     const { query, rules:detailRules } = this.delArgs(rules, skip, 'skip')
     
@@ -374,7 +374,7 @@ class MongoDB {
   }
 
   //限制数量
-  limit(collectionName, limit, rules={}, returnWhat={}) {
+  limit = (collectionName, limit, rules={}, returnWhat={}) => {
 
     const { query, rules:detailRules } = this.delArgs(rules, limit, 'limit')
     
@@ -400,7 +400,7 @@ class MongoDB {
   }
 
   //查询总数
-  count(collectionName, rules={}) {
+  count = (collectionName, rules={}) => {
     return this.findInternal(collectionName, rules)
     .then(data => {
       return data.count()
@@ -411,7 +411,7 @@ class MongoDB {
   }
 
   //查看索引(无效)
-  getIndexInfo(collectionName, type="list") {
+  getIndexInfo = (collectionName, type="list") => {
     return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName).collection(collectionName)
@@ -444,7 +444,7 @@ class MongoDB {
   }
 
   //删除索引(无效)
-  dropIndex(collectionName, name=undefined) {
+  dropIndex = (collectionName, name=undefined) => {
     return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
@@ -475,7 +475,7 @@ class MongoDB {
   }
 
   //创建索引(无效)
-  createIndex(collectionName, rules, options={}) {
+  createIndex = (collectionName, rules, options={}) => {
     let method
     return this.connect()
     .then(db => {
@@ -498,7 +498,7 @@ class MongoDB {
   }
 
   //聚合
-  aggregate(collectionName, args) {
+  aggregate = (collectionName, args) => {
     return this.connect()
     .then(db => {
       const dataBase = db.db(this.mongoName)
@@ -518,12 +518,12 @@ class MongoDB {
   }
 
   //判断是否为合法的id
-  isValidId(id) {
+  isValidId = (id) => {
     return ObjectID.isValid(id)
   }
 
   //id处理
-  dealId(id) {
+  dealId = (id) => {
     return new ObjectID(id)
   }
 }

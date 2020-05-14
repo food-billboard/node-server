@@ -70,7 +70,7 @@ function flat(array) {
 const withTry = (callback) => {
   return async (...args) => {
     try {
-      const data = await callback(args)
+      const data = await callback(...args)
       return [null, data]
     }catch(err) {
       return [err, null]

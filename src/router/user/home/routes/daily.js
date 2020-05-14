@@ -5,6 +5,7 @@ const router = new Router()
 const mongo = MongoDB()
 
 router.get('/', async(ctx) => {
+
   const { count=12 } = ctx.query
   let dataList
   try {

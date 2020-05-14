@@ -5,8 +5,6 @@ const { MongoDB, withTry } = require('@src/utils')
 const router = new Router()
 const mongo = MongoDB()
 
-// params: { currPage: 当前页, pageSize: 数量 }
-
 router
 .get('/', async(ctx) => {
   const { currPage, pageSize, _id, sort } = ctx.query

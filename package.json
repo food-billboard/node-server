@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@koa/router": "^9.0.0",
+    "jsonwebtoken": "^8.5.1",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.3.0",
     "koa-cors": "0.0.16",
