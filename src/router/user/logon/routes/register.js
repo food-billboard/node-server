@@ -63,7 +63,6 @@ router
         res = {
           success: true,
           res: {
-            mobile,
             avatar: '默认头像',
             fans:0,
             attention:0,

@@ -1,13 +1,15 @@
 const Router = require('@koa/router')
-const { MongoDB } = require("@src/utils")
+const { MongoDB, verifyTokenToData } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
 
-// params: { id: 用户id, currPage: 当前页, pageSize: 数量 }
+// params: { currPage: 当前页, pageSize: 数量 }
 
 router.get('/', async (ctx) => {
-  const { mobile, currPage, pageSize } = ctx.query
+  const [, token] = verifyTokenToData(ctx)
+  const { mobile } = token
+  const { currPage, pageSize } = ctx.query
   let res
   const data = await mongo.findOne("_user_", {
     mobile,
@@ -16,7 +18,7 @@ router.get('/', async (ctx) => {
     fans: 1
   }).then(data => {
     return mongo.find("_user_", {
-      mobile: { $in: [...data] }
+      _id: { $in: [...data] }
     })
   }, {
     username: 1,

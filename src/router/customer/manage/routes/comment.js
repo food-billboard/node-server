@@ -1,19 +1,23 @@
 const Router = require('@koa/router')
-const { MongoDB } = require('@src/utils')
+const { MongoDB, verifyTokenToData } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
 
 router.get('/', async (ctx) => {
-  const { _id, currPage, pageSize } = ctx.query
+  const [, token] = verifyTokenToData(ctx)
+  const { mobile } = token
+  const { currPage, pageSize } = ctx.query
   let result
   let res
+  //查找评论id
   const data = await mongo.findOne("_user_", {
-    _id: mongo.dealId(_id),
+    mobile,
     query: [ [ "limit", pageSize ], [ "skip", pageSize * currPage ] ]
   }, {
     comment: 1
   })
+  //查找具体评论
   .then(data => {
     const { comment } = data
     return mongo.find("_comment_", {
@@ -25,6 +29,7 @@ router.get('/', async (ctx) => {
       content: 1,
     })
   })
+  //查找源评论
   .then(data => {
     result = [...data]
     let comments = []

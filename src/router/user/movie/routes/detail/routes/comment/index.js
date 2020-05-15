@@ -19,7 +19,7 @@ router
   .then(data => {
     return mongo.find("_comment_", {
       query: [["limit", count]],
-      $or: data.map(id => ({_id: mongo.dealId(id)}))
+      _id: { $in: [...data] }
     }, {
       content: 1,
       user_info: 1,
@@ -29,7 +29,7 @@ router
   .then(data => {
     result = [...data]
     return mongo.find("_user_", {
-      $or: data.map(d => ({_id: mongo.dealId(d.user_info)}))
+      _id: { $in: data.map(d => mongo.dealId(d.user_info)) }
     }, {
       avatar:1
     })

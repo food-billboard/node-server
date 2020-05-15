@@ -23,7 +23,7 @@ router.get('/', async (ctx) => {
       return []
     }else {
       return mongo.find("_comment_", {
-        $or: sub_comments.map(sub => ({_id: sub}))
+        _id: { $in: [...sub_comments] }
       }, {
         sub_comments: 0,
         source: 0
@@ -42,7 +42,7 @@ router.get('/', async (ctx) => {
     listId = listId.flat(Infinity)
     return data.length ?
     mongo.find("_user_", {
-      $or: [...listId.map(d => ({_id: mongo.dealId(d)}))]
+      _id: { $in: [...listId] }
     }, {
       avatar:1
     }) 

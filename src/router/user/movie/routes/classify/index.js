@@ -19,7 +19,7 @@ router
   ] : [...commonQuery]
   const [, result] = await withTry(mongo.find)('_movie_', {
     query,
-    "info.classify": { $elemMatch: { $eq: mongo.dealId(_id) } }
+    "info.classify": { $in: [mongo.dealId(_id)] }
   }, {
     poster: 1,
     info: 1,

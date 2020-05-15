@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, isEmpty, isType, withTry } = require('@src/utils')
+const { MongoDB, isEmpty, withTry } = require('@src/utils')
 const router = new Router()
 
 const mongo = MongoDB()

@@ -1,13 +1,12 @@
 const Router = require('@koa/router')
-const { MongoDB } = require('@src/utils')
+const { MongoDB, withTry } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
 
 router.get('/', async(ctx) => {
-  let data 
-  try {
-    data = await mongo.find('_global_', {
+  let res
+  const [,data] = await withTry(mongo.find)('_global_', {
       query: [
         {
           __type__: 'sort',
@@ -16,15 +15,22 @@ router.get('/', async(ctx) => {
         [ 'limit', 1 ]
       ]
     }, { notice: 1 })
-  }catch(_) {
-    data = '欢迎各位光临'
-  }
-  ctx.body = JSON.stringify({
-    success: true,
-    res: {
-      notice: data
+  
+  if(!data) {
+    ctx.status = 500
+    res = {
+      success: false,
+      res: null
     }
-  })
+  }else {
+    res = {
+      success: true,
+      res: {
+        data: dataList
+      }
+    }
+  }
+  ctx.body = JSON.stringify(res)
 })
 
 module.exports = router

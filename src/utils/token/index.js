@@ -9,6 +9,8 @@ try {
 //秘钥
 const SECRET = "________SE__C_R__E_T"
 
+const MIDDEL = "MIDDEL"
+
 const encoded = (password) => {
   if(crypto) {
     const hmac = crypto.createHmac('sha256', SECRET)
@@ -27,50 +29,56 @@ const signToken = ({username, password}, options={expiresIn: '1d'}, callback=(er
   }
   return jwt.sign({
     username,
-    password
+    password,
+    middel: MIDDEL
   }, SECRET, newOptions, newCallback)
 }
 
-//验证token
-const verifyToken = (successCallback, failCallback) => {
-  return async (ctx, next) => {
-    const { body: { token, mobile } } = ctx.request
-    try{
-      const { mobile: verifyData } = jwt.verify(token, SECRET)
-      if(mobile === verifyData) {
-        ctx.status = 200
-        successCallback && successCallback(mobile)
-        await next()
-      }else {
-        if(failCallback) {
-          await failCallback(401, ctx)
-        }else {
-          ctx.status = 401
-          await callback && callback(401)
-          ctx.body = JSON.stringify({
-            success: false,
-            res: null
-          })
-        }
-      }
-    }catch(err) {
-      if(failCallback) {
-        await failCallback(err, ctx)
-      }else {
-        ctx.status = 401
-        ctx.body = JSON.stringify({
-          success: false,
-          res: {
-            data: '请求失败'
-          }
-        })
-      }
+const verifyToken = token => jwt.verify(token, SECRET)
+
+//中间件验证token
+const middlewareVerifyToken = async (ctx, next) => {
+  const { header } = ctx.req
+  const token = "token"
+
+  try{
+    const { middel } = verifyToken(token)
+    if(MIDDEL === middel) {
+      ctx.status = 200
+      await next()
+    }else {
+      ctx.status = 401
+      ctx.body = JSON.stringify({
+        success: false,
+        res: null
+      })
     }
+  }catch(err) {
+    ctx.status = 401
+    ctx.body = JSON.stringify({
+      success: false,
+      res: {
+        data: '请求失败'
+      }
+    })
+  }
+}
+
+//token验证并返回内容
+const verifyTokenToData = (ctx) => {
+  const { header } = ctx.req
+  const token = "token"
+  try { 
+    const { middel, ...nextToken } = verifyToken(token)
+    return [null, nextToken]
+  }catch(err) {
+    return [err, null]
   }
 }
 
 module.exports = {
   encoded,
   signToken,
-  verifyToken
+  middlewareVerifyToken,
+  verifyTokenToData
 }

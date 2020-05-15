@@ -3,16 +3,17 @@ const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
-const { MongoDB, withTry, verifyToken } = require('@src/utils')
+const { MongoDB, withTry, verifyTokenToData } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
 
 router
-.use(verifyToken())
+.use(middlewareVerifyToken)
 .get('/', async (ctx) => {
-  const { body: { mobile } } = ctx.request
+  const [, token] = verifyTokenToData(ctx)
   let res
+  const { mobile } = token
   const [, info] = await withTry(mongo.findOne)("_user_", {
     mobile
   }, {
@@ -44,7 +45,6 @@ router
       }
     }
   }
-
 })
 .use('/attention', Attention.routes(), Attention.allowedMethods())
 .use('/movie', Movie.routes(), Movie.allowedMethods())

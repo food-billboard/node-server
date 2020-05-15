@@ -14,7 +14,6 @@ router.post('/', async(ctx) => {
     allow_many: 1,
     create_time: 1,
     modified_time: 1,
-    mobile: 1,
     username:1,
     avatar: 1,
     hot:1,
@@ -29,14 +28,13 @@ router.post('/', async(ctx) => {
     }
   }else {
     if(data) {
-      const { fans, attentions, mobile, ...nextData } = data
+      const { fans, attentions, ...nextData } = data
       res = {
         success: true,
         res: {
           data: {
             fans: fans.length,
             attentions: attentions.length,
-            mobile,
             token: signToken({mobile, password}),
             ...nextData
           }
