@@ -93,7 +93,7 @@ class MongoDB {
     })
   }
 
-  insert(collectionName, ...datas) {
+  insert = (collectionName, ...datas) => {
     if(isEmpty(datas)) return Promise.reject('can not insert empty data')
     return this.insertInternal(collectionName, flat(datas))
   }

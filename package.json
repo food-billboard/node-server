@@ -13,6 +13,7 @@
     "@koa/router": "^9.0.0",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.11.0",
+    "koa-body": "^4.1.1",
     "koa-bodyparser": "^4.3.0",
     "koa-cors": "0.0.16",
     "koa-session": "^5.13.1",

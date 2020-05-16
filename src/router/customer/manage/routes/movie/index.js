@@ -199,7 +199,7 @@ router
     video: {
       src,
       poster,
-      id
+      id:videoId
     }, 
     info: {
       name,
@@ -213,7 +213,7 @@ router
     },
     image: {
       image,
-      id,
+      id:imageId,
     }
   } } = ctx.request
 

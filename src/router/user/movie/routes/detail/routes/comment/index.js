@@ -11,19 +11,19 @@ router
   const { _id, count } = ctx.query
   let res
   let result
-  const data = await mongo.find("_movie_", {
+  const data = await mongo.findOne("_movie_", {
     _id: mongo.dealId(_id)
   }, {
     comment: 1
   })
   .then(data => {
+    const { comment } = data
     return mongo.find("_comment_", {
       query: [["limit", count]],
-      _id: { $in: [...data] }
+      _id: { $in: [...comment] }
     }, {
       content: 1,
       user_info: 1,
-      source: 0
     })
   })
   .then(data => {

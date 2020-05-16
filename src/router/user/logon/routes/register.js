@@ -29,7 +29,9 @@ router
   const { body: { mobile, password } } = ctx.request
   let res
   //判断账号是否存在
-  const [, data] = await withTry(mongo.find)("_user_", {}, {
+  const [, data] = await withTry(mongo.find)("_user_", {
+    mobile
+  }, {
     mobile: 1
   })
   if(!data) {
@@ -39,8 +41,8 @@ router
       res: null
     }
   }else {
-    const result = data.filter(d => d == mobile)
-    if(result.length) {
+    if(data.length) {
+      ctx.status = 403
       res = {
         success: false,
         res: {
@@ -48,7 +50,8 @@ router
         }
       }
     }else {
-      const [, data] = await withTry(mongo.insert)("_user_", createInitialUserInfo({mobile, password}))
+      const [err, data] = await withTry(mongo.insert)("_user_", createInitialUserInfo({mobile, password}))
+      console.log(err, data)
       if(!data) {
         ctx.status = 500
         res = {

@@ -8,14 +8,14 @@ router.get('/', async(ctx) => {
   const { count=3 } = ctx.query
   let res
   const [,dataList] = await withTry(mongo.find)('_search_', {
-      query: [
-        {
-          __type__: 'sort',
-          hot: -1
-        },
-        [ 'limit', count ]
-      ]
-    }, { key_word: 1 })
+    query: [
+      {
+        __type__: 'sort',
+        hot: -1
+      },
+      [ 'limit', count ]
+    ]
+  }, { key_word: 1 })
   if(!dataList) {
     ctx.status = 500
     res = {

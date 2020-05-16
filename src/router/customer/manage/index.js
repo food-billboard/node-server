@@ -3,7 +3,7 @@ const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
-const { MongoDB, withTry, verifyTokenToData } = require('@src/utils')
+const { MongoDB, withTry, verifyTokenToData, middlewareVerifyToken } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()

@@ -26,7 +26,8 @@ router.get('/', async (ctx) => {
         _id: { $in: [...sub_comments] }
       }, {
         sub_comments: 0,
-        source: 0
+        source: 0,
+        like_person: 0
       })
     }
   })

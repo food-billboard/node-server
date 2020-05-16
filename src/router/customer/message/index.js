@@ -31,7 +31,7 @@ const TEMPLATE_MESSAGE = {
 }
 
 router
-use(middlewareVerifyToken)
+.use(middlewareVerifyToken)
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   let res

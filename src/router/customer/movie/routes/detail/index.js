@@ -2,7 +2,7 @@ const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Rate = require('./routes/rate')
 const Store = require('./routes/store')
-const { MongoDB, verifyTokenToData } = require("@src/utils")
+const { MongoDB, verifyTokenToData, middlewareVerifyToken } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
@@ -13,6 +13,7 @@ router
 .get('/', async (ctx) => {
   const { _id } = ctx.query
   const [, token] = verifyTokenToData(ctx)
+  if(!token) return ctx.redirect("/api/user/movie/detail")
   const { mobile } = token
   let res
   let result
@@ -29,7 +30,6 @@ router
       _id: mongo.dealiD(_ID)
     }, {
       modified_time: 0,
-      rate: 0,
       source_type: 0,
       stauts: 0,
       related_to: 0
@@ -110,20 +110,15 @@ router
   .then(data => {
     const [ actor, director, district, classify, language, tag, comment, author, same_film ] = data
     const { 
-      info: {
-        actor,
-        director,
-        district,
-        classify,
-        language,
-        ...nextInfo
-      },
+      info,
       same_film: _same_film,
+      total_rate,
+      rate_person
     } = result
     result = {
       ...result,
       info: {
-        ...nextInfo,
+        ...info,
         actor,
         district,
         director,
@@ -131,6 +126,7 @@ router
         language
       },
       tag,
+      rate: total_rate / rate_person,
       comment,
       author,
       same_film: _same_film.map(film => {
@@ -139,7 +135,7 @@ router
         if(target) {
           return {
             ...film,
-            film: target.name
+            name: target.name,
           }
         }else {
           return film
@@ -169,6 +165,7 @@ router
 
   ctx.body = JSON.stringify(res)
 })
+.use(middlewareVerifyToken)
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 .use('/rate', Rate.routes(), Rate.allowedMethods())
 .use('/store', Store.routes(), Store.allowedMethods())
