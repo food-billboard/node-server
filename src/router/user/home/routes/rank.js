@@ -10,10 +10,11 @@ router.get('/', async(ctx) => {
   let resultID = []
   let res
   
-  const data = await mongo.find('_rank_', {}, {other: 0, create_time: 0}).then(data => {
+  const data = await mongo.find('rank', {}, {other: 0, create_time: 0}).then(data => {//_rank_
     const length = data.length
+    const len = Math.min(length, count)
     //随机选取排行榜的类型
-    for(let i = 0; i < count; i ++) {
+    for(let i = 0; i < len; i ++) {
       const random = Math.floor(Math.random() * length)
       if(!resultID.includes(data[random])) {
         resultID.push(data[random])
@@ -21,36 +22,33 @@ router.get('/', async(ctx) => {
         i --
       }
     }
-
-    return mongo.find('_movie_', {
-      query: [
-        {
-          __type__: 'sort',
-          hot: -1,
-          total_rate: -1
-        }
-      ],
-      "info.classify": { $in: [...resultID] }
-    }, { poster: 1, info: 1 })
-
+    return Promise.all(resultID.map(result => {
+      const { match } = result
+      return mongo.find("movie", {//_movie_
+        query: [
+          {
+            __type__: 'sort',
+            ...match.reduce((acc, m) => {
+              acc[m] = -1
+              return acc
+            }, {})
+          },
+          [ "limit", 3 ]
+        ],
+      }, {
+        poster: 1, 
+        name: 1
+      })
+    }))
   })
   .then(data => {
-    return data.reduce((acc, re) => {
-      const { info: { classify }, ...nextData } = re
-      resultID.forEach(r => {
-        if(classify.includes(r)) {
-          if(!acc[r] || acc[r].length < count) {
-            if(!acc[r]) acc[r] = []
-            const len = acc[r].length
-            acc[r].push({
-              ...nextData,
-              top: len
-            })
-          }
-        }
-      })
-      return acc
-    }, {})
+    data.forEach((re, index) => {
+      resultID[index] = {
+        ...resultID[index],
+        match: [...re]
+      }
+    })
+    return resultID
   })
   .catch(err => {
     console.log(err)
@@ -61,7 +59,9 @@ router.get('/', async(ctx) => {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg: '服务器错误'
+      }
     }
   }else {
     res = {

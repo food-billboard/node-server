@@ -5,10 +5,10 @@ const router = new Router()
 const mongo = MongoDB()
 
 router.get('/', async (ctx) => {
-  const { currPage, pageSize, _id } = ctx.query
+  const { currPage=0, pageSize=30, _id } = ctx.query
   let res 
   let result
-  const data = await mongo.find("_comment_", {
+  const data = await mongo.findOne("comment", {//_comment_
     _id: mongo.dealId(_id)
   })
   .then(data => {
@@ -22,8 +22,8 @@ router.get('/', async (ctx) => {
     if(skip >= len) {
       return []
     }else {
-      return mongo.find("_comment_", {
-        _id: { $in: [...sub_comments] }
+      return mongo.find("comment", {//_comment_
+        _id: { $in: [...sub_comments.map(s => mongo.dealId(s))] }
       }, {
         sub_comments: 0,
         source: 0,
@@ -42,8 +42,8 @@ router.get('/', async (ctx) => {
     })
     listId = listId.flat(Infinity)
     return data.length ?
-    mongo.find("_user_", {
-      _id: { $in: [...listId] }
+    mongo.find("user", {//_user_
+      _id: { $in: [...listId.map(l => mongo.dealId(l))] }
     }, {
       avatar:1
     }) 
@@ -81,12 +81,17 @@ router.get('/', async (ctx) => {
     }
     return result
   })
-  .catch(err => err)
+  .catch(err => {
+    console.log(err)
+    return false
+  })
 
   if(data) {
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg: '服务器错误'
+      }
     }
   }else {
     res = {

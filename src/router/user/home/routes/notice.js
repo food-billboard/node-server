@@ -6,7 +6,7 @@ const mongo = MongoDB()
 
 router.get('/', async(ctx) => {
   let res
-  const [,data] = await withTry(mongo.find)('_global_', {
+  const [,data] = await withTry(mongo.find)('global', {//_global_
       query: [
         {
           __type__: 'sort',
@@ -20,13 +20,15 @@ router.get('/', async(ctx) => {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg: '服务器错误'
+      }
     }
   }else {
     res = {
       success: true,
       res: {
-        data: dataList
+        data
       }
     }
   }

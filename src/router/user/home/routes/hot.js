@@ -7,7 +7,7 @@ const mongo = MongoDB()
 router.get('/', async(ctx) => {
   const { count=3 } = ctx.query
   let res
-  const [,dataList] = await withTry(mongo.find)('_search_', {
+  const [,dataList] = await withTry(mongo.find)('search', {//_search_
     query: [
       {
         __type__: 'sort',
@@ -20,7 +20,9 @@ router.get('/', async(ctx) => {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg: '服务器错误'
+      }
     }
   }else {
     res = {

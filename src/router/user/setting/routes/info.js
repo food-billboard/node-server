@@ -5,9 +5,8 @@ const router = new Router()
 const mongo = MongoDB()
 
 router.get('/', async (ctx) => {
-  ctx.body = '小程序信息'
   let res
-  const [, data] = await withTry(mongo.find)("_global_", {
+  const [, data] = await withTry(mongo.find)("global", {//_global_
     query: [
       {
         __type__: 'sort',
@@ -21,7 +20,9 @@ router.get('/', async (ctx) => {
   if(!data) {
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg: '服务器错误'
+      }
     }
   }else {
     res = {

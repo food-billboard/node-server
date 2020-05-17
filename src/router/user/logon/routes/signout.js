@@ -16,8 +16,8 @@ router
     }
   }else {
     const { mobile } = token
-    const [err, data] = await withTry(mongo.updateOne)("_user_", {
-      mobile
+    const [err, data] = await withTry(mongo.updateOne)("user", {//_user_
+      mobile: Number(mobile)
     }, 
     {
       $set: { status: "SIGNOUT" }

@@ -29,7 +29,7 @@ router
   const { body: { mobile, password } } = ctx.request
   let res
   //判断账号是否存在
-  const [, data] = await withTry(mongo.find)("_user_", {
+  const [, data] = await withTry(mongo.find)("user", { //_user_
     mobile
   }, {
     mobile: 1
@@ -50,8 +50,7 @@ router
         }
       }
     }else {
-      const [err, data] = await withTry(mongo.insert)("_user_", createInitialUserInfo({mobile, password}))
-      console.log(err, data)
+      const [err, data] = await withTry(mongo.insert)("user", createInitialUserInfo({mobile, password})) //_user_
       if(!data) {
         ctx.status = 500
         res = {
@@ -80,11 +79,6 @@ router
 
   ctx.body = JSON.stringify(res)
   
-})
-.get('/', async (ctx) => {
-  mongo.insert("hello", {name: '妖怪3号', age: 1000}).then(res => {
-    console.log(res)
-  })
 })
 
 module.exports = router

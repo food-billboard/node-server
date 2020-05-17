@@ -20,7 +20,7 @@ const handle = {
           )
         ) return Reflect.get(target, prop)
       //为空或过时
-      const [movieErr, movieData] = await withTry(mongo.find)('_movie_', {
+      const [movieErr, movieData] = await withTry(mongo.find)('movie', {//_movie_
         query: [
           {
             __type__: 'sort',
@@ -29,7 +29,7 @@ const handle = {
           ['limit', 3]
         ]
       }, { poster: 1 })
-      const [specialErr, specialData] = await withTry(mongo.find)('_special_', {
+      const [specialErr, specialData] = await withTry(mongo.find)('special', {//_special_
         query: [
           {
             __type__: 'sort',

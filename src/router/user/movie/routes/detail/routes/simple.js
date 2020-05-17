@@ -7,11 +7,12 @@ const mongo = MongoDB()
 router.get('/', async (ctx) => {
   const { _id } = ctx.query
   let res
-  const [ , result ] = await withTry(mongo.find)('_movie_', {
+  const [ , result ] = await withTry(mongo.find)('movie', {//_movie_
     _id: mongo.dealId(_id)
   }, {
     poster: 1,
-    info: 1
+    name: 1,
+    "info.description": 1
   })
   if(!result) {
     res = {

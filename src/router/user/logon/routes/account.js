@@ -7,8 +7,9 @@ const mongo = MongoDB()
 router.post('/', async(ctx) => {
   const { body: {mobile, password} } = ctx.request
   let res
-  const [err, data] = await withTry(mongo.findOne)("_user_", {
-    mobile,
+  console.log(encoded(password))
+  const [err, data] = await withTry(mongo.findOne)("user", {//_user_
+    mobile:Number(mobile),
     password: encoded(password)
   },{
     allow_many: 1,
@@ -28,14 +29,16 @@ router.post('/', async(ctx) => {
     }
   }else {
     if(data) {
-      const { fans, attentions, ...nextData } = data
+      const { fans, attentions=[], password:_, ...nextData } = data
+      const token = signToken({mobile, password})
+      console.log(token)
       res = {
         success: true,
         res: {
           data: {
             fans: fans.length,
             attentions: attentions.length,
-            token: signToken({mobile, password}),
+            token,
             ...nextData
           }
         }

@@ -7,7 +7,7 @@ const mongo = MongoDB()
 router.get('/', async (ctx) => {
   const { count=12 } = ctx.query
   let res
-  const [, result] = await withTry(mongo.find)('_classify_', {
+  const [, result] = await withTry(mongo.find)('classify', {//_classify_
     query: [['limit', count]]
   }, {
     name: 1,
@@ -16,7 +16,9 @@ router.get('/', async (ctx) => {
   if(!result) {
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg: '服务器错误'
+      }
     }
   }else {
     res = {

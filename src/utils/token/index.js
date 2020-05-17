@@ -21,26 +21,26 @@ const encoded = (password) => {
 }
 
 //创建token
-const signToken = ({username, password}, options={expiresIn: '1d'}, callback=(err, token)=>{}) => {
+const signToken = ({mobile, password}, options={expiresIn: '1d'}, callback=(err, token)=>{}) => {
   let newOptions = options, newCallback = callback
   if(typeof options === 'function') {
     newOptions = {}
     newCallback = options
   }
   return jwt.sign({
-    username,
+    mobile,
     password,
     middel: MIDDEL
-  }, SECRET, newOptions, newCallback)
+  }, SECRET, newOptions)
 }
 
 const verifyToken = token => jwt.verify(token, SECRET)
 
 //中间件验证token
 const middlewareVerifyToken = async (ctx, next) => {
-  const { header } = ctx.req
-  const token = "token"
-
+  const { header: {authorization} } = ctx.request
+  if(!authorization) return ['过期', null]
+  const token = authorization.split(' ')[1]
   try{
     const { middel } = verifyToken(token)
     if(MIDDEL === middel) {
@@ -66,8 +66,9 @@ const middlewareVerifyToken = async (ctx, next) => {
 
 //token验证并返回内容
 const verifyTokenToData = (ctx) => {
-  const { header } = ctx.req
-  const token = "token"
+  const { header: {authorization} } = ctx.request
+  if(!authorization) return ['过期', null]
+  const token = authorization.split(' ')[1]
   try { 
     const { middel, ...nextToken } = verifyToken(token)
     return [null, nextToken]
