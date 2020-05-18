@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, withTry } = require('@src/utils')
+const { MongoDB } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
@@ -7,16 +7,25 @@ const mongo = MongoDB()
 router.get('/', async(ctx) => {
   const { count=3 } = ctx.query
   let res
-  const [,dataList] = await withTry(mongo.find)('search', {//_search_
-    query: [
-      {
-        __type__: 'sort',
+  const data = await mongo.connect("search")
+  .then(db => db.find({}, 
+    {
+      sort: {
         hot: -1
       },
-      [ 'limit', count ]
-    ]
-  }, { key_word: 1 })
-  if(!dataList) {
+      limit: count,
+      projection: {
+        key_word: 1
+      }
+    })
+  )
+  .then(data => data.toArray())
+  .catch(err => {
+    console.log(err)
+    return false
+  })
+
+  if(!data) {
     ctx.status = 500
     res = {
       success: false,
@@ -28,7 +37,7 @@ router.get('/', async(ctx) => {
     res = {
       success: true,
       res: {
-        data: dataList
+        data
       }
     }
   }

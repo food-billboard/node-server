@@ -7,7 +7,7 @@ const mongo = MongoDB()
 router.get('/', async (ctx) => {
   const { count=8 } = ctx.query
   let res
-  const [, data] = await withTry(mongo.find)("rank", {//_rank_
+  const [, data] = await withTry(mongo.find)("rank", {
     query: [ [ "limit", count ] ]
   }, {
     name: 1

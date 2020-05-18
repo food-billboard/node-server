@@ -14,7 +14,7 @@ router
   const [, token] = verifyTokenToData(ctx)
   let res
   const { mobile } = token
-  const [, info] = await withTry(mongo.findOne)("_user_", {
+  const [err, info] = await withTry(mongo.findOne)("user", {
     mobile
   }, {
     mobile: 1,
@@ -26,25 +26,38 @@ router
     create_time: 1,
     status: 1
   })
-  if(!info) {
-    ctx.status = 401
+  if(err) {
+    ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg: '服务器错误'
+      }
     }
   }else {
-    const { fans, attentions, ...nextInfo } = info
-    res = {
-      success: true,
-      res: {
-        data: {
-          fans: fans.length,
-          attentions: attentions.length,
-          ...nextInfo
+    if(!info) {
+      ctx.status = 401
+      res = {
+        success: false,
+        res: {
+          errMsg: '登录过期'
+        }
+      }
+    }else {
+      const { fans, attentions, ...nextInfo } = info
+      res = {
+        success: true,
+        res: {
+          data: {
+            fans: fans.length,
+            attentions: attentions.length,
+            ...nextInfo
+          }
         }
       }
     }
   }
+  ctx.body = JSON.stringify(res)
 })
 .use('/attention', Attention.routes(), Attention.allowedMethods())
 .use('/movie', Movie.routes(), Movie.allowedMethods())

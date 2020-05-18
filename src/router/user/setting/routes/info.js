@@ -6,22 +6,25 @@ const mongo = MongoDB()
 
 router.get('/', async (ctx) => {
   let res
-  const [, data] = await withTry(mongo.find)("global", {//_global_
-    query: [
-      {
-        __type__: 'sort',
-        create_time: -1
-      },
-      ["limit", 1]
-    ]
-  }, {
-    info: 1
+  let errMsg
+  const [, data] = await mongo.connect("global")
+  .then(db => db.findOne({}, {
+    sort: {
+      create_time: -1
+    },
+    limit: 1,
+    projection: {
+      info: 1
+    }
+  }))
+  .catch(err => {
+    errMsg = err
   })
-  if(!data) {
+  if(errMsg) {
     res = {
       success: false,
       res: {
-        errMsg: '服务器错误'
+        errMsg
       }
     }
   }else {

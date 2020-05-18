@@ -5,21 +5,21 @@ const router = new Router()
 const mongo = MongoDB()
 
 router.get('/', async (ctx) => {
-  const { currPage, pageSize, _id } = ctx.query
+  const { currPage=0, pageSize=30, _id } = ctx.query
   let res
   let result
-  const data = await mongo.find("_movie_", {
-    query: [
-      ["limit", pageSize],
-      ["skip", pageSize * currPage]
-    ],
+  const data = await mongo.findOne("movie", {
     _id: mongo.dealId(_id),
   }, {
     comment: 1
   })
   .then(data => {
-    return mongo.find("_comment_", {
-      _id: { $in: [...data] }
+    return mongo.find("comment", {
+      _id: { $in: [...data.comment] },
+      query: [
+        ["limit", pageSize],
+        ["skip", pageSize * currPage]
+      ],
     }, {
       sub_comments: 0,
       source: 0,
@@ -28,47 +28,58 @@ router.get('/', async (ctx) => {
   })
   .then(data => {
     result = [...data]
+    let newListId = []
     let listId = data.map(d => {
       const { user_info, comment_users } = d
       return [user_info, ...comment_users]
     })
-    listId = listId.flat(Infinity)
-    return mongo.find("_user_", {
-      _id: { $in: [...listId] }
+    listId.flat(Infinity).forEach(id => {
+      if(!newListId.some(i => i.toString() == id.toString())) newListId.push(id)
+    })
+    return mongo.find("user", {
+      _id: { $in: [...newListId] }
     }, {
-      avatar:1
+      avatar:1,
+      username: 1
     })
   })
   .then(data => {
     result.forEach((r, i) => {
       const { comment_users, user_info } = r
       let _comment_users = []
-      let _user_info = ''
+      let _user_info = false
       data.forEach(d => {
-        const { _id, avatar } = d
-        let index = comment_users.indexOf(_id)
-        if(user_info == _id) {
-          _user_info = {
-            _id: user_info,
-            avatar: avatar
+        const { _id, avatar, username } = d
+        comment_users.forEach(c => {
+          if(_id.toString() == c.toString()) {
+            _comment_users.push({
+              _id,
+              avatar
+            })
           }
-        }
-        if(index > -1) {
-          _comment_users.push({
+        })
+        if(!_user_info && _id.toString() == user_info.toString()) {
+          _user_info = {
             _id,
-            avatar
-          })
+            avatar,
+            username
+          }
         }
       })
       result[i] = { ...result[i], user_info: _user_info, comment_users: _comment_users }
     })
     return result
   })
-  .catch(err => err)
-  if(!isList) {
+  .catch(err => {
+    console.log(err)
+    return false
+  })
+  if(!data) {
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg: '服务器错误'
+      }
     }
   }else {
     res = {

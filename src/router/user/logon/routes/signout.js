@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, verifyTokenToData, withTry } = require("@src/utils")
+const { MongoDB, verifyTokenToData } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
@@ -8,6 +8,7 @@ router
 .post('/', async(ctx) => {
   const [, token] = verifyTokenToData(ctx)
   let res
+  let errMsg
   if(!token) {
     ctx.status = 401
     res = {
@@ -16,17 +17,22 @@ router
     }
   }else {
     const { mobile } = token
-    const [err, data] = await withTry(mongo.updateOne)("user", {//_user_
+    const data = await mongo.connect("user")
+    .then(db => db.updateOne({
       mobile: Number(mobile)
-    }, 
-    {
+    }, {
       $set: { status: "SIGNOUT" }
+    }))
+    .catch(err => {
+      errMsg = err
     })
-    if(err) {
+    if(errMsg) {
       ctx.status = 500
       res = {
         success: false,
-        res: null
+        res: {
+          errMsg
+        }
       }
     }else {
       if(!data) {

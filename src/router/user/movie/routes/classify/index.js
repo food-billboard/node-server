@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const SpecDropList = require('./sepcDropList')
-const { MongoDB, withTry } = require('@src/utils')
+const { MongoDB } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
@@ -18,9 +18,9 @@ router
       ...sort
     }
   ] : [...commonQuery]
-  const data = await mongo.find('movie', {//_movie_
+  const data = await mongo.find('movie', {
     query,
-    "info.classify": { $in: [_id] }
+    "info.classify": { $in: [mongo.dealId(_id)] }
   }, {
     poster: 1,
     name: 1,
@@ -33,7 +33,7 @@ router
     return Promise.all(data.map(d => {
       const { info: {classify} } = d
       return mongo.find("classify", {
-        _id: { $in: classify.map(c => mongo.dealId(c)) }
+        _id: { $in: [...classify] }
       }, {
         name: 1,
         _id: 0

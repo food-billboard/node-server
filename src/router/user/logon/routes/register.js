@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, withTry, encoded, signToken } = require('@src/utils')
+const { MongoDB, encoded, signToken } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
@@ -28,20 +28,23 @@ router
 .post('/', async(ctx) => {
   const { body: { mobile, password } } = ctx.request
   let res
+  let errMsg
+  const db = await mongo.connect("user")
   //判断账号是否存在
-  const [, data] = await withTry(mongo.find)("user", { //_user_
-    mobile
-  }, {
-    mobile: 1
+  const data = await db.findOne({mobile}, {projection: {mobile: 1}})
+  .catch(err => {
+    errMsg = err
   })
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
-    if(data.length) {
+    if(data) {
       ctx.status = 403
       res = {
         success: false,
@@ -50,8 +53,8 @@ router
         }
       }
     }else {
-      const [err, data] = await withTry(mongo.insert)("user", createInitialUserInfo({mobile, password})) //_user_
-      if(!data) {
+      const [err, data] = await withTry(db.insert)(createInitialUserInfo({mobile, password}))
+      if(err) {
         ctx.status = 500
         res = {
           success: false,

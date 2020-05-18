@@ -11,16 +11,16 @@ router
   const { _id, count=20 } = ctx.query
   let res
   let result
-  const data = await mongo.findOne("movie", {//_movie_
+  const data = await mongo.findOne("movie", {
     _id: mongo.dealId(_id)
   }, {
     comment: 1
   })
   .then(data => {
     const { comment } = data
-    return mongo.find("comment", {//_comment_
+    return mongo.find("comment", {
       query: [["limit", count]],
-      _id: { $in: [...comment.map(c => mongo.dealId(c))] }
+      _id: { $in: [...comment] }
     }, {
       content: 1,
       user_info: 1,
@@ -28,8 +28,8 @@ router
   })
   .then(data => {
     result = [...data]
-    return mongo.find("user", {//_user_
-      _id: { $in: data.map(d => mongo.dealId(d.user_info)) }
+    return mongo.find("user", {
+      _id: { $in: data.map(d => d.user_info) }
     }, {
       avatar:1
     })
@@ -37,7 +37,7 @@ router
   .then(data => {
     console.log(result)
     result.forEach((r, i) => {
-      let [avatar] = data.filter(d => d._id == r.user_info)
+      let [avatar] = data.filter(d => d._id.toString() == r.user_info.toString())
       const { _id, ...nextData } = avatar
       result[i]['user_info'] = {
         _id: r.user_info,

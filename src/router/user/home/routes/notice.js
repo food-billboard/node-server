@@ -1,20 +1,24 @@
 const Router = require('@koa/router')
-const { MongoDB, withTry } = require('@src/utils')
+const { MongoDB } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
 
 router.get('/', async(ctx) => {
   let res
-  const [,data] = await withTry(mongo.find)('global', {//_global_
-      query: [
-        {
-          __type__: 'sort',
-          create_time: -1
-        },
-        [ 'limit', 1 ]
-      ]
-    }, { notice: 1 })
+  const data = await mongo.connect("global")
+  .then(db => db.findOne({}, {
+    sort: {
+      create_time: -1
+    },
+    projection: {
+      notice: 1
+    }
+  }))
+  .catch(err => {
+    console.log(err)
+    return false
+  } )
   
   if(!data) {
     ctx.status = 500

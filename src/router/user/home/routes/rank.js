@@ -10,11 +10,19 @@ router.get('/', async(ctx) => {
   let resultID = []
   let res
   
-  const data = await mongo.find('rank', {}, {other: 0, create_time: 0}).then(data => {//_rank_
+  const data = await mongo.connect("rank")
+  .then(db => db.find({}, {
+    projection: {
+      other: 0,
+      create_time: 0
+    }
+  }))
+  .then(data => data.toArray())
+  .then(data => {
     const length = data.length
-    const len = Math.min(length, count)
+    const realLen = Math.min(length, count)
     //随机选取排行榜的类型
-    for(let i = 0; i < len; i ++) {
+    for(let i = 0; i < realLen; i ++) {
       const random = Math.floor(Math.random() * length)
       if(!resultID.includes(data[random])) {
         resultID.push(data[random])
@@ -24,21 +32,21 @@ router.get('/', async(ctx) => {
     }
     return Promise.all(resultID.map(result => {
       const { match } = result
-      return mongo.find("movie", {//_movie_
-        query: [
-          {
-            __type__: 'sort',
-            ...match.reduce((acc, m) => {
-              acc[m] = -1
-              return acc
-            }, {})
-          },
-          [ "limit", 3 ]
-        ],
-      }, {
-        poster: 1, 
-        name: 1
-      })
+      return mongo.connect("movie")
+      .then(db => db.find({}, {
+        sort: {
+          ...match.reduce((acc, m) => {
+            acc[m] = -1
+            return acc
+          }, {})
+        },
+        limit: 3,
+        projection: {
+          poster: 1, 
+          name: 1
+        }
+      }))
+      .then(data => data.toArray())
     }))
   })
   .then(data => {

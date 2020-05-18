@@ -7,31 +7,41 @@ const mongo = MongoDB()
 router.post('/', async(ctx) => {
   const { body: {mobile, password} } = ctx.request
   let res
-  console.log(encoded(password))
-  const [err, data] = await withTry(mongo.findOne)("user", {//_user_
-    mobile:Number(mobile),
+  let errMsg
+  const data = await mongo.connect("user")
+  .then(db => db.findOneAndUpdate({
+    mobile: Number(mobile),
     password: encoded(password)
-  },{
-    allow_many: 1,
-    create_time: 1,
-    modified_time: 1,
-    username:1,
-    avatar: 1,
-    hot:1,
-    fans: 1,
-    attention:1
+  }, {
+    status: 'SIGNIN'
+  }, {
+    projection: {
+      allow_many: 1,
+      create_time: 1,
+      modified_time: 1,
+      username:1,
+      avatar: 1,
+      hot:1,
+      fans: 1,
+      attention:1
+    }
+  }))
+  .catch(err => {
+    errMsg = err
   })
-  if(err) {
+
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        ...errMsg
+      }
     }
   }else {
     if(data) {
       const { fans, attentions=[], password:_, ...nextData } = data
       const token = signToken({mobile, password})
-      console.log(token)
       res = {
         success: true,
         res: {

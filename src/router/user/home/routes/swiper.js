@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, isEmpty, withTry } = require('@src/utils')
+const { MongoDB, isEmpty } = require('@src/utils')
 const router = new Router()
 
 const mongo = MongoDB()
@@ -20,24 +20,36 @@ const handle = {
           )
         ) return Reflect.get(target, prop)
       //为空或过时
-      const [movieErr, movieData] = await withTry(mongo.find)('movie', {//_movie_
-        query: [
-          {
-            __type__: 'sort',
-            create_time: -1
-          },
-          ['limit', 3]
-        ]
-      }, { poster: 1 })
-      const [specialErr, specialData] = await withTry(mongo.find)('special', {//_special_
-        query: [
-          {
-            __type__: 'sort',
-            create_time: -1
-          },
-          ['limit', 3]
-        ]
-      }, { poster: 1 })
+      const movieData = await mongo.connect('movie')
+      .then(db => db.find({}, {
+        sort: {
+          create_time: -1
+        },
+        limit: 3,
+        projection: {
+          poster: 1 
+        }
+      }))
+      .then(data => data.toArray())
+      .catch(err => {
+        console.log(err)
+        return false
+      })
+      const specialData = await mongo.connect('special')
+      .then(db => db.find({}, {
+        sort: {
+          create_time: -1
+        },
+        limit: 3,
+        projection: {
+          poster: 1 
+        }
+      }))
+      .then(data => data.toArray())
+      .catch(err => {
+        console.log(err)
+        return false
+      })
       const result = [ ...(!movieErr ? movieData : [] ), ...(!specialErr ? specialData : []) ]
       Reflect.set(target, 'data', result)
       Reflect.set(target, 'expire', Date.now())

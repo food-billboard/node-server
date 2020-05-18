@@ -10,13 +10,13 @@ router
   const { currPage=0, pageSize=30, _id } = ctx.query
   let res
   let result
-  const data = await mongo.findOne("rank", { //_rank_
+  const data = await mongo.findOne("rank", { 
     _id: mongo.dealId(_id)
   }, {
     match: 1
   })
   .then(data => {
-    return mongo.find("movie", {//_movie_
+    return mongo.find("movie", {
       query: [
         {
           __type__: 'sort',
@@ -39,8 +39,8 @@ router
     result = [...data]
     return Promise.all(data.map(d => {
       const { info: {classify} } = d
-      return mongo.find("classify", {//_classify_
-        _id: { $in: classify.map(c => mongo.dealId(c)) }
+      return mongo.find("classify", {
+        _id: { $in: [...classify] }
       }, {
         name: 1
       })
