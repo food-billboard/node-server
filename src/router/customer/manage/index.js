@@ -13,29 +13,37 @@ router
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   let res
+  let errMsg
   const { mobile } = token
-  const [err, info] = await withTry(mongo.findOne)("user", {
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
     mobile
   }, {
-    mobile: 1,
-    username: 1,
-    avatar: 1,
-    hot: 1,
-    fans:1,
-    attention: 1,
-    create_time: 1,
-    status: 1
+    projection: {
+      mobile: 1,
+      username: 1,
+      avatar: 1,
+      hot: 1,
+      fans:1,
+      attention: 1,
+      create_time: 1,
+      status: 1
+    }
+  }))
+  .catch(err => {
+    errMsg = err
+    return false
   })
-  if(err) {
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
       res: {
-        errMsg: '服务器错误'
+        errMsg
       }
     }
   }else {
-    if(!info) {
+    if(!data) {
       ctx.status = 401
       res = {
         success: false,
@@ -44,14 +52,14 @@ router
         }
       }
     }else {
-      const { fans, attentions, ...nextInfo } = info
+      const { fans, attentions, ...nextData } = data
       res = {
         success: true,
         res: {
           data: {
             fans: fans.length,
             attentions: attentions.length,
-            ...nextInfo
+            ...nextData
           }
         }
       }

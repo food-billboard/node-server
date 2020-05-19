@@ -10,21 +10,30 @@ router.get('/', async (ctx) => {
   const { currPage=0, pageSize=30 } = ctx.query
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const data = await mongo.findOne("_user_", {
-    mobile,
-    query: [ [ "limit", pageSize ], [ "skip", pageSize * currPage ] ]
+  let errMsg
+  const data = await mongo.connect("user")
+  .then(db => db.findone({
+    mobile
   }, {
-    glance: 1
-  })
+    limit: pageSize,
+    skip: pageSize * currPage,
+    projection: {
+      glance: 1
+    }
+  }))
   //查找电影详情
   .then(data => {
     const { glance } = data
-    return mongo.find("_movie_", {
+    return mongo.connect("movie")
+    .then(db => db.find({
       _id: { $in: [...glance] }
     }, {
-      info: 1,
-      poster: 1
-    })
+      projection: {
+        info: 1,
+        poster: 1
+      }
+    }))
+    .then(data => data.toArray())
   })
   .then(data => {
     return data.map(d => {
@@ -38,13 +47,16 @@ router.get('/', async (ctx) => {
   })
   .catch(err => {
     console.log(err)
+    errMsg = err
     return false
   })
 
-  if(!data) {
+  if(errMsg) {
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {

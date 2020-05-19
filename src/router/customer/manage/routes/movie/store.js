@@ -9,21 +9,28 @@ router.get('/', async (ctx) => {
   const { currPage=0, pageSize=30 } = ctx.query
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const data = await mongo.findOne("_user_", {
-    mobile,
-    query: [ [ "limit", pageSize ], [ "skip", pageSize * currPage ] ]
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
+    mobile
   }, {
-    store: 1
-  })
-  //查找电影详情
+    projection: {
+      store: 1
+    }
+  }))
   .then(data => {
     const { store } = data
-    return mongo.find("_movie_", {
+    return mongo.connect("movie")
+    .then(db => db.find({
       _id: { $in: [...store] }
     }, {
-      info: 1,
-      poster: 1
-    })
+      projection: {
+        info: 1,
+        poster: 1
+      },
+      limit: pageSize,
+      skip: pageSize * currPage,
+    }))
+    .then(data => data.toArray())
   })
   .then(data => {
     return data.map(d => {

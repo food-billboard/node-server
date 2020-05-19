@@ -10,35 +10,48 @@ router
   const { currPage, pageSize } = ctx.query
   const { mobile } = token
   let res
-  const data = await mongo.findOne("_user_", {
+  let errMsg
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
     mobile,
-    query: [ [ "limit", pageSize ], [ "skip", pageSize * currPage ] ]
   }, {
-    attentions: 1
-  }).then(data => {
-    return mongo.find("_user_", {
+    projection: {
+      attentions: 1
+    },
+    limit: pageSize,
+    skip: pageSize * currPage
+  }))
+  .then(data => {
+    return mongo.connect("user")
+    .then(db => db.find({
       mobile: { $in: [...data] }
-    })
-  }, {
-    username: 1,
-    avatar: 1
+    }, {
+      projection: {
+        username: 1,
+        avatar: 1
+      }
+    }))
+    .then(data => data.toArray())
   })
   .catch(err => {
-    console.log("获取关注错误", err)
+    errMsg = err
     return false
   })
 
-  if(!data) {
+
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {
       success: true,
       res: {
-        data: data
+        data
       }
     }
   }
@@ -49,23 +62,32 @@ router
   const { body: { _id } } = ctx.request
   const { mobile } = token
   let res
-  const [, mineRes] = await withTry(mongo.updateOne)("_user_", {
+  const mineRes = await mongo.connect("user")
+  .then(db => db.updateOne({
     mobile
   }, {
-    $push: { attentions: _id } 
+    $push: { attentions: _id }
+  }))
+  .catch(err => {
+    console.log(err)
+    return false
   })
-  const userRes = await mongo.findOne("_user_", {
+  const userRes = await mongo.connect("user")
+  .then(db => db.findOne({
     mobile
   }, {
-    _id: 1
-  })
+    projection: {
+      _id: 1
+    }
+  }))
   .then(data => {
     const { _id:userId } = data
-    return mongo.updateOne("_user_", {
+    return mongo.connect("user")
+    .then(db => db.updateOne({
       _id: mongo.dealId(_id)
     }, {
       $push: { fans: userId }
-    })
+    }))
   })
   .catch(err => {
     console.log(err)
@@ -91,23 +113,28 @@ router
   const { body: { _id } } = ctx.request
   const { mobile } = token
   let res
-  const [, mineRes] = await withTry(mongo.updateOne)("_user_", {
+  const mineRes = await mongo.connect("user")
+  .then(db => db.updateOne({
     mobile
   }, {
-    $pull: { attentions: _id } 
-  })
-  const userRes = await mongo.findOne("_user_", {
+    $push: { attentions: _id }
+  }))
+  const userRes = await mongo.connect("user")
+  .then(db => db.findOne({
     mobile
   }, {
-    _id: 1
-  })
+    projection: {
+      _id: 1
+    }
+  }))
   .then(data => {
     const { _id:userId } = data
-    return mongo.updateOne("_user_", {
+    return mongo.connect("user")
+    .then(db => db.updateOne({
       _id: mongo.dealId(_id)
     }, {
-      $pull: { fans: userId }
-    })
+      $push: { fans: userId }
+    }))
   })
   .catch(err => {
     console.log(err)

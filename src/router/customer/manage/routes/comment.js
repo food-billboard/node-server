@@ -11,25 +11,29 @@ router.get('/', async (ctx) => {
   let result
   let res
   //查找评论id
-  const data = await mongo.findOne("_user_", {
-    mobile,
-    query: [ [ "limit", pageSize ], [ "skip", pageSize * currPage ] ]
-  }, {
-    comment: 1
-  })
-  //查找具体评论
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({mobile}, {
+    projection: {
+      comment: 1
+    }
+  }))
   .then(data => {
     const { comment } = data
-    return mongo.find("_comment_", {
-      _id: { $in: [...comment]}
+    return mongo.connect("comment")
+    .then(db => db.find({
+      _id: { $in: [...comment] }
     }, {
-      source: 1,
-      create_time: 1,
-      toal_like: 1,
-      content: 1,
-    })
+      projection: {
+        source: 1,
+        create_time: 1,
+        toal_like: 1,
+        content: 1,
+      },
+      limit: pageSize,
+      skip: currPage * pageSize
+    }))
+    .then(data => data.toArray())
   })
-  //查找源评论
   .then(data => {
     result = [...data]
     let comments = []
@@ -39,11 +43,15 @@ router.get('/', async (ctx) => {
         comments.push(comment)
       }
     })
-    return mongo.find("_comment_", {
-      _id: { $in: [ ...comments ] }
+    return mongo.connect("comment")
+    .then(db => db.find({
+      _id: { $in: [...comment] }
     }, {
-      content: 1
-    })
+      projection: {
+        content: 1
+      }
+    }))
+    .then(data => data.toArray())
   })
   .then(data => {
     let newData = []

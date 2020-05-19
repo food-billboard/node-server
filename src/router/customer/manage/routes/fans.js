@@ -11,29 +11,40 @@ router.get('/', async (ctx) => {
   const { mobile } = token
   const { currPage, pageSize } = ctx.query
   let res
-  const data = await mongo.findOne("_user_", {
-    mobile,
-    query: [ [ "limit", pageSize ], [ "skip", pageSize * currPage ] ]
+  let errMsg
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
+    mobile
   }, {
-    fans: 1
-  }).then(data => {
-    return mongo.find("_user_", {
+    limit: pageSize,
+    skip: pageSize * currPage,
+    projection: {
+      fans: 1
+    }
+  }))
+  .then(data => {
+    return mongo.connect("user")
+    .then(db => db.findOne({
       _id: { $in: [...data] }
-    })
-  }, {
-    username: 1,
-    avatar: 1
+    }, {
+      projection: {
+        username: 1,
+        avatar: 1
+      },
+    }))
   })
   .catch(err => {
-    console.log("获取关注错误", err)
+    errMsg = err
     return false
   })
 
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {
