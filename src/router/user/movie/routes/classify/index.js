@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const SpecDropList = require('./sepcDropList')
-const { MongoDB } = require('@src/utils')
+const { MongoDB, isType } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
@@ -10,53 +10,56 @@ router
   const { currPage=0, pageSize=30, _id, sort } = ctx.query
   let res
   let result
-  const commonQuery = [ ['limit', pageSize], ['skip', currPage * pageSize]]
-  const query = sort ? [
-    ...commonQuery,
-    { 
-      __type__: 'sort',
-      ...sort
-    }
-  ] : [...commonQuery]
-  const data = await mongo.find('movie', {
-    query,
-    "info.classify": { $in: [mongo.dealId(_id)] }
+  const data = await mongo.connect("movie")
+  .then(db => db.find({
+	  "info.classify": { $in: [mongo.dealId(_id)] }
   }, {
-    poster: 1,
-    name: 1,
-    "info.classify": 1,
-    publish_time: 1,
-    hot: 1
+	  sort: sort ? ( isType(sort, 'array') ? [...sort] : {...sort} ) : [],
+	  limit: pageSize,
+	  skip: currPage * pageSize,
+	  projection: {
+		poster: 1,
+		name: 1,
+		"info.classify": 1,
+		publish_time: 1,
+		hot: 1
+	  }
+  }))
+  .then(data => data.toArray())
+  .then(data => {
+	result = [...data]
+	return Promise.all(data.map(d => {
+		const { info: { classify } } = d
+		return mongo.connect("classify")
+		.then(db => db.find({
+			_id: { $in: [...classify] }
+		}, {
+			projection: {
+				name: 1,
+				_id: 0
+			}
+		}))
+		.then(data => data.toArray())
+	}))
   })
   .then(data => {
-    result = [...data]
-    return Promise.all(data.map(d => {
-      const { info: {classify} } = d
-      return mongo.find("classify", {
-        _id: { $in: [...classify] }
-      }, {
-        name: 1,
-        _id: 0
-      })
-    }))
-  })
-  .then(data => {
-    return result.map((r, i) => {
-      const { info: {classify, ...nextInfo} } = r
-      return {
-        ...r,
-        info: {
-          ...nextInfo,
-          classify: data[i]
-        }
-      }
-    })
+	return result.map((r, i) => {
+		const { info: { classify, ...nextInfo } } = r
+		return {
+			...r,
+			info: {
+				...nextInfo,
+				classify: data[i]
+			}
+		}
+	})
   })
   .catch(err => {
     console.log(err)
     return false
   })
-  if(!result) {
+
+  if(!data) {
     res = {
       success: false,
       res: {
@@ -67,7 +70,7 @@ router
     res = {
       success: true,
       res: {
-        data: data
+        data
       }
     }
   }

@@ -8,23 +8,29 @@ router.get('/', async (ctx) => {
   const { currPage=0, pageSize=30, _id } = ctx.query
   let res
   let result
-  const data = await mongo.findOne("movie", {
-    _id: mongo.dealId(_id),
+  let errMsg
+  const data = await mongo.connect("movie")
+  .then(db => db.findOne({
+    _id: mongo.dealId(_id)
   }, {
-    comment: 1
-  })
+    projection: {
+      comment: 1
+    }
+  }))
   .then(data => {
-    return mongo.find("comment", {
-      _id: { $in: [...data.comment] },
-      query: [
-        ["limit", pageSize],
-        ["skip", pageSize * currPage]
-      ],
+    return mongo.connect("comment")
+    .then(db => db.find({
+      _id: { $in: [...data.comment] }
     }, {
-      sub_comments: 0,
-      source: 0,
-      like_person: 0
-    })
+      limit: pageSize,
+      skip: pageSize * currPage,
+      projection: {
+        sub_comments: 0,
+        source: 0,
+        like_person: 0
+      }
+    }))
+    .then(data => data.toArray())
   })
   .then(data => {
     result = [...data]
@@ -36,12 +42,16 @@ router.get('/', async (ctx) => {
     listId.flat(Infinity).forEach(id => {
       if(!newListId.some(i => i.toString() == id.toString())) newListId.push(id)
     })
-    return mongo.find("user", {
-      _id: { $in: [...newListId] }
+    return mongo.connect("user")
+    .then(db => db.find({
+      _id: { $in:[...newListId] }
     }, {
-      avatar:1,
-      username: 1
-    })
+      projection: {
+        avatar: 1,
+        username: 1
+      }
+    }))
+    .then(data => data.toArray())
   })
   .then(data => {
     result.forEach((r, i) => {
@@ -71,14 +81,15 @@ router.get('/', async (ctx) => {
     return result
   })
   .catch(err => {
-    console.log(err)
+    errMsg = err
     return false
   })
+
   if(!data) {
     res = {
       success: false,
       res: {
-        errMsg: '服务器错误'
+        errMsg
       }
     }
   }else {

@@ -11,31 +11,41 @@ router
   const { _id, count=20 } = ctx.query
   let res
   let result
-  const data = await mongo.findOne("movie", {
+  const data = await mongo.connect("movie")
+  .then(db => db.findOne({
     _id: mongo.dealId(_id)
   }, {
-    comment: 1
-  })
+    projection: {
+      comment: 1
+    }
+  }))
   .then(data => {
     const { comment } = data
-    return mongo.find("comment", {
-      query: [["limit", count]],
+    return mongo.connect("comment")
+    .then(db => db.find({
       _id: { $in: [...comment] }
     }, {
-      content: 1,
-      user_info: 1,
-    })
+      projection: {
+        content: 1,
+        user_info: 1,
+      },
+      limit: count
+    }))
   })
+  .then(data => data.toArray())
   .then(data => {
-    result = [...data]
-    return mongo.find("user", {
-      _id: { $in: data.map(d => d.user_info) }
+    returl = [...data]
+    return mongo.connect("user")
+    .then(db => db.find({
+      _id: { $in: data.map(d => db.user_info) }
     }, {
-      avatar:1
-    })
+      projection: {
+        avatar: 1
+      }
+    }))
+    .then(data => data.toArray())
   })
   .then(data => {
-    console.log(result)
     result.forEach((r, i) => {
       let [avatar] = data.filter(d => d._id.toString() == r.user_info.toString())
       const { _id, ...nextData } = avatar
@@ -50,6 +60,7 @@ router
     console.log(err)
     return false
   })
+  
   if(!data) {
     res = {
       success: false,

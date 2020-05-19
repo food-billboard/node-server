@@ -8,12 +8,15 @@ router.get('/', async (ctx) => {
   const { currPage=0, pageSize=30, _id } = ctx.query
   let res 
   let result
-  const data = await mongo.findOne("comment", {
+  const data = await mongo.connect("comment")
+  .then(db => db.findOne({
     _id: mongo.dealId(_id)
   }, {
-    source: 0,
-    like_person: 0,
-  })
+    projection: {
+      source: 0,
+      like_person: 0,
+    }
+  }))
   .then(data => {
     const { sub_comments, comment_users, ...nextComment } = data  
     result = {
@@ -25,13 +28,17 @@ router.get('/', async (ctx) => {
     if(skip >= len) {
       return []
     }else {
-      return mongo.find("comment", {
+      return mongo.connect("comment")
+      .then(db => db.find({
         _id: { $in: [...sub_comments] }
       }, {
-        sub_comments: 0,
-        source: 0,
-        like_person: 0
-      })
+        projection: {
+          sub_comments: 0,
+          source: 0,
+          like_person: 0
+        }
+      }))
+      .then(data => data.toArray())
     }
   })
   .then(data => {
@@ -48,12 +55,16 @@ router.get('/', async (ctx) => {
       if(!newListId.some(i => i.toString() == id.toString())) newListId.push(id)
     })
     return data.length ?
-    mongo.find("user", {
+    mongo.connect("user")
+    .then(db => db.find({
       _id: { $in: [...newListId] }
     }, {
-      avatar:1,
-      username: 1
-    }) 
+      projection: {
+        avatar: 1,
+        username: 1
+      }
+    }))
+    .then(data => data.toArray())
     : []
   })
   .then(data => {

@@ -7,37 +7,38 @@ const mongo = MongoDB()
 // params: { id: 用户id, currPage, pageSize }
 
 router.get('/', async (ctx) => {
-  ctx.body = '详情'
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   const { id, pageSize, currPage } = ctx.query
   let res
+  let errMsg
   let _id = id
   //系统消息
   if(id === 'admin') {
     _id = "__admin__"
   }
-  const [, data] = await mongo.findOne("_user_", {
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
     mobile
   }, {
-    _id: 1
-  })
+    projection: {
+      _id: 1
+    }
+  }))
   .then(data => {
     const { _id:userId } = data
     let search = {
-      query: [
-        {
-          __type__: "sort",
-          create_time: -1
-        },
-        ["limit", pageSize],
-        ["skip", pageSize * currPage]
-      ]
+      sort: {
+        create_time: -1
+      },
+      limit: pageSize,
+      skip: pageSize * currPage
     }
+    let rules = {}
     //系统消息
     if(_id !== id) {
-      search = {
-        ...search,
+      rules = {
+        ...rules,
         send_to: userId,
         user_info: {
           type: "system",
@@ -45,18 +46,25 @@ router.get('/', async (ctx) => {
         }
       }
     }else {
-      search = {
-        ...search,
+      rules = {
+        ...rules,
         send_to: { $in: [ userId, _id ] },
         "user_info.id": { $in: [ _id, userId ] } 
       }
     }
-    return mongo.find("_message_", {...search}, {
-      type: 1,
-      content: 1,
-      readed: 1,
-      create_time:1
-    })
+    return mongo.connect("message")
+    .then(db => db.find({
+      ...rules
+    }, {
+      ...search,
+      projection: {
+        type: 1,
+        content: 1,
+        readed: 1,
+        create_time:1
+      }
+    }))
+    .then(data => data.toArray())
   })
   .then(data => {
     return data.map(d => {
@@ -86,14 +94,17 @@ router.get('/', async (ctx) => {
   })
   .catch(err => {
     console.log(err)
+    errMsg = err
     return false
   })
 
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {

@@ -7,13 +7,16 @@ const mongo = MongoDB()
 router.get('/', async (ctx) => {
   const { count=12 } = ctx.query
   let res
-  const [, result] = await withTry(mongo.find)('classify', {
-    query: [['limit', count]]
-  }, {
-    name: 1,
-    poster: 1
-  })
-  if(!result) {
+  const data = mongo.connect("classify")
+  .then(db => db.find({}, {
+	  limit: count,
+	  projection: {
+		  name: 1,
+		  poster: 1
+	  }
+  }))
+
+  if(!data) {
     res = {
       success: false,
       res: {
@@ -24,7 +27,7 @@ router.get('/', async (ctx) => {
     res = {
       success: true,
       res: {
-        data: result
+        data
       }
     }
   }

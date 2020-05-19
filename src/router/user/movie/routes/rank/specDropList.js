@@ -7,16 +7,25 @@ const mongo = MongoDB()
 router.get('/', async (ctx) => {
   const { count=8 } = ctx.query
   let res
-  const [, data] = await withTry(mongo.find)("rank", {
-    query: [ [ "limit", count ] ]
-  }, {
-    name: 1
+  let errMsg
+  const data = await mongo.connect("rank")
+  .then(db => db.find({}, {
+	  limit: count,
+	  projection: {
+		  name: 1
+	  }
+  }))
+  .then(data => data.toArray())
+  .catch(err => {
+	errMsg = err
+	return false
   })
-  if(!data) {
+  
+  if(errMsg) {
     res = {
       success: false,
       res: {
-        errMsg: '服务器错误'
+        errMsg
       }
     }
   }else {

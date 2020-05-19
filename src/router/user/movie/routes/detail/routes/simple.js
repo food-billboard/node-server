@@ -7,23 +7,34 @@ const mongo = MongoDB()
 router.get('/', async (ctx) => {
   const { _id } = ctx.query
   let res
-  const [ , result ] = await withTry(mongo.find)('movie', {
+  let errMsg
+  const data = mongo.connect("movie")
+  .then(db => db.findOne({
     _id: mongo.dealId(_id)
   }, {
-    poster: 1,
-    name: 1,
-    "info.description": 1
+    projection: {
+      poster: 1,
+      name: 1,
+      "info.description": 1
+    }
+  }))
+  .catch(err => {
+    errMsg = err
+    return false
   })
-  if(!result) {
+
+  if(errMsg) {
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {
       success: true,
       res: {
-        data: result
+        data
       }
     }
   }
