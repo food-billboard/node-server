@@ -12,46 +12,58 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
+  let errMsg
 
-  const data = await mongo.findOne("_user_", {
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
     mobile
   }, {
-    _id: 1
-  })
+    projection: {
+      _id: 1
+    }
+  }))
   .then(data => {
     const { _id:userId } = data
-    mongo.updateOne("_comment_", {
+    return mongo.connect("comment")
+    .then(db => db.updateOne({
       _id: mongo.dealId(_id)
     }, {
       $inc: { total_like: 1 },
       $push: { like_person: userId }
-    })
+    }))
   })
   .then(_ => {
-    return mongo.findOne("_comment_", {
+    return mongo.connect("comment")
+    .then(db => db.findOne({
       _id: mongo.dealId(_id)
     }, {
-      user_info: 1
-    })
+      projection: {
+        user_info: 1
+      }
+    }))
   })
   .then(data => {
     const { user_info } = data
-    return mongo.updateOne("_user_", {
+    return mongo.connect("user")
+    .then(db => db.updateOne({
       _id: user_info
     }, {
       $inc: { hot: 1 }
-    })
+    }))
   })
   .catch(err => {
     console.log(err)
+    errMsg = err
     return false
   })
 
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {
@@ -68,46 +80,54 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
+  let errMsg
 
-  const data = await mongo.findOne("_user_", {
+  await mongo.connect("user")
+  .then(db => db.findOne({
     mobile
   }, {
     _id: 1
-  })
+  }))
   .then(data => {
     const { _id:userId } = data
-    mongo.updateOne("_comment_", {
+    return mongo.connect("comment")
+    .then(db => db.updateOne({
       _id: mongo.dealId(_id)
     }, {
       $inc: { total_like: -1 },
       $pull: { like_person: userId }
-    })
+    }))
   })
   .then(_ => {
-    return mongo.findOne("_comment_", {
+    return mongo.connect("comment")
+    .then(db => db.findOne({
       _id: mongo.dealId(_id)
     }, {
       user_info: 1
-    })
+    }))
   })
   .then(data => {
     const { user_info } = data
-    return mongo.updateOne("_user_", {
+    return mongo.connect("user")
+    .then(db => db.updateOne({
       _id: user_info
     }, {
       $inc: { hot: -1 }
-    })
+    }))
   })
   .catch(err => {
     console.log(err)
+    errMsg = err
     return false
   })
 
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {

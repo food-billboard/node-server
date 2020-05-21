@@ -11,14 +11,17 @@ router
   const { _id } = ctx.query
   let res
   let result
-  const data = await mongo.findOne('movie', { 
+  const data = await mongo.connect("movie")
+  .then(db => db.findOne({
     _id: mongo.dealId(_id)
   }, {
-    modified_time: 0,
-    source_type: 0,
-    stauts: 0,
-    related_to: 0,
-  })
+    projection: {
+      modified_time: 0,
+      source_type: 0,
+      stauts: 0,
+      related_to: 0,
+    }
+  }))
   .then(data => {
     const {
       info: {
@@ -35,66 +38,90 @@ router
     } = data
     result = { ...data }
     return Promise.all([
-      mongo.find("actor", {
+      mongo.connect("actor")
+      .then(db => db.find({
         _id: { $in: [...actor] }
       }, {
-        name: 1,
-        other: 1,
-        _id: 0
-      }),
-      mongo.find("director", {
+        projection: {
+          name: 1,
+          other: 1,
+          _id: 0
+        }
+      }))
+      .then(data => data.toArray()),
+      mongo.connect("director")
+      .then(db => db.find({
         _id: { $in: [...director] }
       }, {
-        name: 1,
-        _id: 0
-      }),
-      mongo.find("district", {
+        projection: {
+          name: 1,
+          _id: 0
+        }
+      }))
+      .then(data => data.toArray()),
+      mongo.connect("district")
+      .then(db => db.find({
         _id: { $in: [...district] }
       }, {
-        name: 1,
-        _id: 0
-      }),
-      mongo.find("classify", {
+        projection: {
+          name: 1,
+          _id: 0
+        }
+      }))
+      .then(data => data.toArray()),
+      mongo.connect("classify")
+      .then(db => db.find({
         _id: { $in: [...classify] }
       }, {
-        name: 1,
-        _id: 0
-      }),
-      mongo.find("language", {
+        projection: {
+          name: 1,
+          _id: 0
+        }
+      }))
+      .then(data => data.toArray()),
+      mongo.connect("language")
+      .then(db => db.find({
         _id: { $in: [...language] }
       }, {
         _id: 0,
         name: 1
-      }),
-      mongo.find("tag", {
+      }))
+      .then(data => data.toArray()),
+      mongo.connect("tag")
+      .then(db => db.find({
         _id: { $in: [...tag] }
       }, {
         text: 1,
         _id: 0
-      }),
-      mongo.find("comment", {
-        _id:{$in: [...comment]},
-        query: [
-          {
-            __type__: "sort",
-            create_time: -1,
-          },
-          ["limit", 20]
-        ]
+      }))
+      .then(data => data.toArray()),
+      mongo.connect("comment")
+      .then(db => db.find({
+        _id: { $in: [...comment] }
       }, {
-        "content.text": 1,
-        user_info: 1,
-        _id: 0
-      })
-      .then(async (data) => {
-        const _data = await mongo.find("user", {
-          _id: {$in: [...data.map(d => d.user_info)]}
+        projection: {
+          "content.text": 1,
+          user_info: 1,
+          _id: 0
+        },
+        sort: {
+          create_time: -1
+        },
+        limit: 20
+      }))
+      .then(data => data.toArray())
+      .then(async(data) => {
+        const _data = await mongo.connect("user")
+        .then(db => db.find({
+          _id: { $in: [...data.map(d => d.user_info)] }
         }, {
-          avatar: 1
-        })
+          projection: {
+            avatar: 1
+          }
+        }))
+        .then(data => data.toArray())
         return data.map(d => {
           const { user_info, ...next } = d
-          
           const [avatar] = _data.filter(_d => _d._id.toString() == user_info.toString())
           const { _id, ...nextData } = avatar
           return {
@@ -103,14 +130,24 @@ router
           }
         })
       }),
-      mongo.findOne("user", {
+      mongo.connect("user")
+      .then(db => db.findOne({
         _id: author
-      }, {username: 1, _id: 0}),
-      mongo.find("movie", {
+      }, {
+        projection: {
+          username: 1,
+          _id: 0
+        }
+      })),
+      mongo.connect("movie")
+      .then(db => db.find({
         _id: { $in: [...same_film.map(s => s.film)] }
       }, {
-        name: 1,
-      })
+        projection: {
+          name: 1
+        }
+      }))
+      .then(data => data.toArray())
     ])
   })
   .then(data => {
@@ -161,10 +198,14 @@ router
     return false
   })
 
-  await withTry(mongo.update)("_movie", {
+  await mongo.connect("movie")
+  .then(db => db.updateOne({
     _id: mongo.dealId(_id)
   }, {
     $inc: { glance: 1 }
+  }))
+  .catch(err => {
+    console.log(err)
   })
 
   if(!data) {

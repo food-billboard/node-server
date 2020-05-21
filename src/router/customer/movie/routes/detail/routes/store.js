@@ -12,19 +12,27 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
+  let errMsg
 
-  const [, data] = await withTry(mongo.updateOne)("_user_", {
+  const data = await mongo.connect("user")
+  .then(db => db.updateOne({
     mobile,
     rate: { $ne: mongo.dealId(_id) }
   }, {
     $push: { rate: mongo.dealId(_id) }
+  }))
+  .catch(err => {
+    errMsg = err
+    return false
   })
 
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {
@@ -40,19 +48,27 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
+  let errMsg
 
-  const [, data] = await withTry(mongo.updateOne)("_user_", {
+  const data = await mongo.connect("user")
+  .then(db => db.updateOne({
     mobile,
     rate: { $in: [mongo.dealId(_id)] }
   }, {
     $pull: { rate: mongo.dealId(_id) }
+  }))
+  .catch(err => {
+    errMsg = err
+    return false
   })
 
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {

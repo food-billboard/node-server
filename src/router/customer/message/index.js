@@ -35,20 +35,33 @@ router
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   let res
+  let errMsg
   const { mobile } = token
-  const [, data] = await withTry(mongo.find)("_message_", {
+  const data = await mongo.connect("message")
+  .then(db => db.find({
     send_to: mobile
   }, {
-    user_info: 1,
-    "content.text": 1,
-    readed: 1,
-    create_time: 1
+    projection: {
+      user_info: 1,
+      "content.text": 1,
+      readed: 1,
+      create_time: 1
+    }
+  }))
+  .then(data => data.toArray())
+  .catch(err => {
+    console.log(err)
+    errMsg = err
+    return false
   })
-  if(!data) {
+
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     const newData = data.map(d => {
@@ -75,54 +88,89 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   const { body: { _id } } = ctx.request
-  const [, data] = await withTry(mongo.updateOne)("_message_", {
+  let errMsg
+  let res
+  const data = await mongo.connect("message")
+  .then(db => db.updateOne({
     send_to: mobile,
     _id: mongo.detalId(_id)
   }, {
     $set: { readed: true }
+  }))
+  .catch(err => {
+    errMsg = err
+    return false
   })
 
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
+    res = {
+      success: false,
+      res: {
+        errMsg
+      }
+    }
+  }else {
+    res = {
+      success: true,
+      res: null
+    }
   }
 
-  ctx.body = JSON.stringify({
-    success: false,
-    res: null
-  })
+  ctx.body = JSON.stringify(res)
   
 })
 .delete('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   const { body: { _id } } = ctx.request
-  const [, data] = await withTry(mongo.deleteOne)("_message_", {
+  let res
+  let errMsg
+  const data = await mongo.connect("message")
+  .then(db => db.deleteOne({
     send_to: mobile,
     _id: mongo.detalId(_id)
+  }))
+  .catch(err => {
+    errMsg = err
+    console.log(err)
+    return false
   })
 
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
+    res = {
+      success: false,
+      res: {
+        errMsg
+      }
+    }
+  }else {
+    res = {
+      success: true,
+      res: null
+    }
   }
 
-  ctx.body = JSON.stringify({
-    success: false,
-    res: null
-  })
+  ctx.body = JSON.stringify(res)
 })
 .post('/', async (ctx) => {
   let res
+  let errMsg
   const { body: {  
     content,
     type,
     id,
   } } = ctx.request
 
-  const [, data] = await mongo.findOne("_user_", {
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
     mobile
   }, {
-    _id: 1
-  })
+    projection: {
+      _id: 1
+    }
+  }))
   .then(data => {
     const { _id } = data
     const { content:template } = TEMPLATE_MESSAGE
@@ -154,7 +202,8 @@ router
         }
         break 
     }
-    return mongo.insert("_message_", {
+    return mongo.connect("message")
+    .then(db => db.insert({
       ...TEMPLATE_MESSAGE,
       user_info: {
         type: 'user',
@@ -164,18 +213,21 @@ router
       content: {...newContent},
       readed:false,
       create_time: Date.now()
-    })
+    }))
   })
   .catch(err => {
     console.log(err)
+    errMsg = err
     return false
   })  
 
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {

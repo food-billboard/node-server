@@ -34,14 +34,18 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
-  const data = await mongo.findOne("_user_", {
+  let errMsg
+
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
     mobile
   }, {
     _id: 1
-  })
+  }))
   .then(data => {
     const { _id:user_info } = data
-    return mongo.insert("_comment_", {
+    return mongo.connect("comment")
+    .then(db => db.insert({
       ...TEMPLATE_COMMENT,
       source: {
         type: 'movie',
@@ -54,26 +58,30 @@ router
         video,
         image
       }
-    })
+    }))
   })
   .then(data => {
     const { _id:commentId } = data
-    return mongo.updateOne("_movie_", {
+    return mongo.connect("movie")
+    .then(db => db.updateOne({
       _id: mongo.dealId(_id)
     }, {
       $push: { comment: commentId }
-    })
+    }))
   })
   .catch(err => {
     console.log(err)
+    errMsg = err
     return false
   })
 
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {
@@ -95,15 +103,21 @@ router
   const { mobile } = token
   let res
   let userId
-  const data = await mongo.findOne("_user_", {
+  let errMsg
+
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
     mobile
   }, {
-    _id: 1
-  })
+    projection: {
+      _id: 1
+    }
+  }))
   .then(data => {
     const { _id:user_info } = data
     userId = user_info
-    return mongo.insert("_comment_", {
+    return mongo.connect("comment")
+    .then(db => db.insert({
       ...TEMPLATE_COMMENT,
       source: {
         type: 'user',
@@ -116,27 +130,31 @@ router
         video,
         image
       }
-    })
+    }))
   })
   .then(data => {
     const { _id:commentId } = data
-    return mongo.updateOne("_comment_", {
+    return mongo.connect("comment")
+    .then(db => db.updateOne({
       _id: mongo.dealId(_id)
     }, {
       $push: { sub_comments: commentId },
       $addToSet: { comment_users: [userId] }
-    })
+    }))
   })
   .catch(err => {
     console.log(err)
+    errMsg = err
     return false
   })
 
-  if(!data) {
+  if(errMsg) {
     ctx.status = 500
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
     res = {
