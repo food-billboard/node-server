@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Browse = require('./browse')
 const Store = require('./store')
-const { MongoDB, verifyTokenToData, withTry } = require("@src/utils")
+const { MongoDB, verifyTokenToData, withTry, isType } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
@@ -85,7 +85,7 @@ const TEMPLATE_MOVIE = {
 
 
 router
-.put('/', async (ctx) => {
+.post('/', async (ctx) => {
   ctx.body = '发布电影'
   const [, token] = verifyTokenToData(ctx)
   const { mobile }  = token
@@ -191,7 +191,7 @@ router
 
   ctx.body = JSON.stringify(res)
 })
-.post('/', async (ctx) => {
+.put('/', async (ctx) => {
   ctx.body = '修改电影'
   let res
   const { body: { 
@@ -229,28 +229,39 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   const { currPage=0, pageSize=30 } = ctx.query
-  const data = await mongo.findOne("_user_", {
-    mobile,
-    query: [ [ "limit", pageSize ], [ "skip", pageSize * currPage ] ]
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
+    mobile: Number(mobile)
   }, {
-    issue: 1
-  })
+    projection: {
+      issue: 1
+    }
+  }))
   .then(data => {
+    if(data && data.issue && !data.issue.length) return Promise.reject({err: null, data: []})
     const { issue } = data
-    return mongo.find("_movie_", {
+    return mongo.connect("movie")
+    .then(db => db.find({
       _id: { $in: [...issue] }
     }, {
-      info: 1,
-      poster: 1,
-      hot: 1
-    })  
+      skip: pageSize * currPage,
+      limit: pageSize,
+      projection: {
+        name: 1,
+        poster: 1,
+        hot: 1
+      }
+    }))
+    .then(data => data.toArray()) 
   })
   .catch(err => {
+    if(isType(err, 'object') && err.data) return err.data
     console.log(err)
     return false
   })
 
   if(!data) {
+    console.log(data)
     res = {
       success: false,
       res: null
@@ -265,7 +276,7 @@ router
   }
   ctx.body = JSON.stringify(res)
 })
-.use('/browse', Browse.routes(), Browse.allowedMethods())
+.use('/browser', Browse.routes(), Browse.allowedMethods())
 .use('/store', Store.routes(), Store.allowedMethods())
 
 module.exports = router

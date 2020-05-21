@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, withTry } = require("@src/utils")
+const { MongoDB } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
@@ -7,7 +7,7 @@ const mongo = MongoDB()
 router.get('/', async (ctx) => {
   let res
   let errMsg
-  const [, data] = await mongo.connect("global")
+  const data = await mongo.connect("global")
   .then(db => db.findOne({}, {
     sort: {
       create_time: -1

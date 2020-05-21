@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, withTry } = require("@src/utils")
+const { MongoDB } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
@@ -8,7 +8,7 @@ router.get('/', async (ctx) => {
   const { _id } = ctx.query
   let res
   let errMsg
-  const data = mongo.connect("movie")
+  const data = await mongo.connect("movie")
   .then(db => db.findOne({
     _id: mongo.dealId(_id)
   }, {

@@ -34,27 +34,38 @@ router
 .use(middlewareVerifyToken)
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
+  const { mobile } = token
   let res
   let errMsg
-  const { mobile } = token
-  const data = await mongo.connect("message")
-  .then(db => db.find({
-    send_to: mobile
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
+    mobile: Number(mobile)
   }, {
     projection: {
-      user_info: 1,
-      "content.text": 1,
-      readed: 1,
-      create_time: 1
+      _id: 1
     }
   }))
-  .then(data => data.toArray())
+  .then(data => {
+    const { _id } = data
+    return  mongo.connect("message")
+    .then(db => db.find({
+      send_to: _id
+    }, {
+      projection: {
+        user_info: 1,
+        "content.text": 1,
+        readed: 1,
+        create_time: 1
+      }
+    }))
+    .then(data => data.toArray())
+  })
   .catch(err => {
     console.log(err)
     errMsg = err
     return false
   })
-
+  
   if(errMsg) {
     ctx.status = 500
     res = {
@@ -71,7 +82,7 @@ router
         ...nextData,
         user_info: {
           ...user_info,
-          id: type === '__admin__' ? 'admin' : id
+          id: type === '__admin__' ? '__admin__' : id
         }
       }
     })
@@ -85,19 +96,17 @@ router
   ctx.body = JSON.stringify(res)
 })
 .put('/', async (ctx) => {
-  const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
   const { body: { _id } } = ctx.request
   let errMsg
   let res
-  const data = await mongo.connect("message")
-  .then(db => db.updateOne({
-    send_to: mobile,
-    _id: mongo.detalId(_id)
-  }, {
-    $set: { readed: true }
-  }))
+  await mongo.connect("message")
+    .then(db => db.updateOne({
+      _id: mongo.dealId(_id)
+    }, {
+      $set: { readed: true }
+    }))
   .catch(err => {
+    console.log(err)
     errMsg = err
     return false
   })
@@ -121,15 +130,12 @@ router
   
 })
 .delete('/', async (ctx) => {
-  const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
-  const { body: { _id } } = ctx.request
+  const { _id } = ctx.query
   let res
   let errMsg
-  const data = await mongo.connect("message")
+  await mongo.connect("message")
   .then(db => db.deleteOne({
-    send_to: mobile,
-    _id: mongo.detalId(_id)
+    _id: mongo.dealId(_id)
   }))
   .catch(err => {
     errMsg = err
@@ -160,12 +166,14 @@ router
   const { body: {  
     content,
     type,
-    id,
+    _id:send_to,
   } } = ctx.request
+  const [, token] = verifyTokenToData(ctx)
+  const { mobile } = token
 
-  const data = await mongo.connect("user")
+  await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: Number(mobile)
   }, {
     projection: {
       _id: 1
@@ -203,13 +211,13 @@ router
         break 
     }
     return mongo.connect("message")
-    .then(db => db.insert({
+    .then(db => db.insertOne({
       ...TEMPLATE_MESSAGE,
       user_info: {
         type: 'user',
         id: _id
       },
-      send_to: id,
+      send_to,
       content: {...newContent},
       readed:false,
       create_time: Date.now()

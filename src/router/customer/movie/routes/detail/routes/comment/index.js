@@ -5,8 +5,6 @@ const { MongoDB, verifyTokenToData } = require("@src/utils")
 const router = new Router()
 const mongo = MongoDB()
 
-// data: { content: 内容, id: 回复的评论id或电影id  }
-
 const TEMPLATE_COMMENT = {
   source: {
     type: 'movie',
@@ -15,7 +13,8 @@ const TEMPLATE_COMMENT = {
   user_info: '',
 	create_time: Date.now(),
 	sub_comments: [],
-  hot: 0,
+  total_like: 0,
+  like_person: [],
   content: {
     text: '',
     video: [],
@@ -35,17 +34,18 @@ router
   const { mobile } = token
   let res
   let errMsg
+  let numNumber = Number(mobile)
 
-  const data = await mongo.connect("user")
+  await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: numNumber
   }, {
     _id: 1
   }))
   .then(data => {
     const { _id:user_info } = data
     return mongo.connect("comment")
-    .then(db => db.insert({
+    .then(db => db.insertOne({
       ...TEMPLATE_COMMENT,
       source: {
         type: 'movie',
@@ -61,13 +61,22 @@ router
     }))
   })
   .then(data => {
-    const { _id:commentId } = data
-    return mongo.connect("movie")
-    .then(db => db.updateOne({
-      _id: mongo.dealId(_id)
-    }, {
-      $push: { comment: commentId }
-    }))
+    const { ops } = data
+    const { _id:commentId } = ops[0]
+    return Promise.all([
+      mongo.connect("movie")
+      .then(db => db.updateOne({
+        _id: mongo.dealId(_id)
+      }, {
+        $push: { comment: commentId }
+      })),
+      mongo.connect("user")
+      .then(db => db.updateOne({
+        mobile: numNumber
+      }, {
+        $push: { comment: commentId }
+      }))
+    ])
   })
   .catch(err => {
     console.log(err)
@@ -93,7 +102,7 @@ router
   ctx.body = JSON.stringify(res)
   
 })
-.post('/comment', async(ctx) => {
+.post('/', async(ctx) => {
   const { body: { content: {
     text='',
     video=[],
@@ -104,10 +113,11 @@ router
   let res
   let userId
   let errMsg
+  let numNumber = Number(mobile)
 
-  const data = await mongo.connect("user")
+  await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: numNumber
   }, {
     projection: {
       _id: 1
@@ -117,7 +127,7 @@ router
     const { _id:user_info } = data
     userId = user_info
     return mongo.connect("comment")
-    .then(db => db.insert({
+    .then(db => db.insertOne({
       ...TEMPLATE_COMMENT,
       source: {
         type: 'user',
@@ -133,14 +143,24 @@ router
     }))
   })
   .then(data => {
-    const { _id:commentId } = data
-    return mongo.connect("comment")
-    .then(db => db.updateOne({
-      _id: mongo.dealId(_id)
-    }, {
-      $push: { sub_comments: commentId },
-      $addToSet: { comment_users: [userId] }
-    }))
+    const { ops } = data
+    const { _id:commentId } = ops[0]
+    return Promise.all([
+      mongo.connect("comment")
+      .then(db => db.updateOne({
+        _id: mongo.dealId(_id)
+      }, {
+        $push: { sub_comments: commentId },
+        $addToSet: { comment_users: [userId] }
+      })),
+      mongo.connect("user")
+      .then(db => db.updateOne({
+        mobile: numNumber,
+        _id: mongo.dealId(_id)
+      }, {
+        $push: { comment: commentId },
+      }))
+    ])
   })
   .catch(err => {
     console.log(err)

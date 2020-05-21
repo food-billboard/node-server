@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, withTry, signToken, encoded } = require("@src/utils")
+const { MongoDB, signToken, encoded } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
@@ -13,7 +13,7 @@ router.post('/', async(ctx) => {
     mobile: Number(mobile),
     password: encoded(password)
   }, {
-    status: 'SIGNIN'
+    $set: {status: 'SIGNIN'}
   }, {
     projection: {
       allow_many: 1,
@@ -28,6 +28,8 @@ router.post('/', async(ctx) => {
   }))
   .catch(err => {
     errMsg = err
+    console.log(err)
+    return false
   })
 
   if(errMsg) {
@@ -35,12 +37,12 @@ router.post('/', async(ctx) => {
     res = {
       success: false,
       res: {
-        ...errMsg
+        errMsg
       }
     }
   }else {
-    if(data) {
-      const { fans, attentions=[], password:_, ...nextData } = data
+    if(data && data.ok) {
+      const { value: { fans=[], attentions=[], password:_, ...nextData } } = data
       const token = signToken({mobile, password})
       res = {
         success: true,

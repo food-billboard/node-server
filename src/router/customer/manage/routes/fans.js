@@ -1,42 +1,46 @@
 const Router = require('@koa/router')
-const { MongoDB, verifyTokenToData } = require("@src/utils")
+const { MongoDB, verifyTokenToData, isType } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
 
-// params: { currPage: 当前页, pageSize: 数量 }
-
 router.get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const { currPage, pageSize } = ctx.query
+  const { currPage=0, pageSize=30 } = ctx.query
   let res
   let errMsg
   const data = await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: Number(mobile)
   }, {
-    limit: pageSize,
-    skip: pageSize * currPage,
     projection: {
       fans: 1
     }
   }))
   .then(data => {
+    if(data && data.fans && !data.fans.length) return Promise.reject({err: null, data: []})
+    const { fans } = data
     return mongo.connect("user")
-    .then(db => db.findOne({
-      _id: { $in: [...data] }
+    .then(db => db.find({
+      _id: { $in: [...fans] }
     }, {
+      limit: pageSize,
+      skip: pageSize * currPage,
       projection: {
         username: 1,
         avatar: 1
       },
     }))
+    .then(data => data.toArray())
   })
   .catch(err => {
+    if(isType(err, 'object') && err.data) return err.data
     errMsg = err
+    console.log(err)
     return false
   })
+
 
   if(errMsg) {
     ctx.status = 500
@@ -50,7 +54,7 @@ router.get('/', async (ctx) => {
     res = {
       success: true,
       res: {
-        data: data
+        data
       }
     }
   }

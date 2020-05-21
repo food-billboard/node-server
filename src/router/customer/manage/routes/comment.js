@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, verifyTokenToData } = require('@src/utils')
+const { MongoDB, verifyTokenToData, isType } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
@@ -7,18 +7,19 @@ const mongo = MongoDB()
 router.get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const { currPage, pageSize } = ctx.query
+  const { currPage=0, pageSize=30 } = ctx.query
   let result
   let res
   //查找评论id
   const data = await mongo.connect("user")
-  .then(db => db.findOne({mobile}, {
+  .then(db => db.findOne({mobile: Number(mobile)}, {
     projection: {
       comment: 1
     }
   }))
   .then(data => {
     const { comment } = data
+    if(comment && !comment.length) return Promise.reject({err: null, data: []})
     return mongo.connect("comment")
     .then(db => db.find({
       _id: { $in: [...comment] }
@@ -45,7 +46,7 @@ router.get('/', async (ctx) => {
     })
     return mongo.connect("comment")
     .then(db => db.find({
-      _id: { $in: [...comment] }
+      _id: { $in: [...comments] }
     }, {
       projection: {
         content: 1
@@ -73,6 +74,7 @@ router.get('/', async (ctx) => {
     return newData
   })
   .catch(err => {
+    if(isType(err, "object") && err.data) return err.data
     console.log(err)
     return false
   })

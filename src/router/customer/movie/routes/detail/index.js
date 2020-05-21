@@ -2,12 +2,10 @@ const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Rate = require('./routes/rate')
 const Store = require('./routes/store')
-const { MongoDB, verifyTokenToData, middlewareVerifyToken } = require("@src/utils")
+const { MongoDB, verifyTokenToData, middlewareVerifyToken, isType } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
-
-// params: { id: 电影id }
 
 router
 .get('/', async (ctx) => {
@@ -21,7 +19,7 @@ router
   let store = true
   const data = await mongo.connect("user")
   .then(db => db.findOne({
-    mobile,
+    mobile: Number(mobile),
     store: { $in: [mongo.dealId(_id)] }
   }, {
     projection: {
@@ -63,8 +61,9 @@ router
         _id: { $in: [...actor] }
       }, {
         projection: {
+          _id: 0,
           name: 1,
-          other: 1
+          "other.avatar": 1
         }
       }))
       .then(data => data.toArray()),
@@ -73,7 +72,8 @@ router
         _id: { $in: [...director] }
       }, {
         projection: {
-          name: 1
+          name: 1,
+          _id: 0
         }
       }))
       .then(data => data.toArray()),
@@ -82,15 +82,18 @@ router
         _id: { $in: [...district] }
       }, {
         projection: {
-          name: 1
+          name: 1,
+          _id: 0
         }
-      })),
+      }))
+      .then(data => data.toArray()),
       mongo.connect("classify")
       .then(db => db.find({
         _id: { $in: [...classify] }
       }, {
         projection: {
-          name: 1
+          name: 1,
+          _id: 0
         }
       }))
       .then(data => data.toArray()),
@@ -99,7 +102,8 @@ router
         _id: { $in: [...language] }
       }, {
         projection: { 
-          name: 1
+          name: 1,
+          _id: 0
         }
       }))
       .then(data => data.toArray()),
@@ -108,7 +112,8 @@ router
         _id: { $in: [...tag] }
       }, {
         projection: {
-          text: 1
+          text: 1,
+          _id: 0
         }
       }))
       .then(data => data.toArray()),
@@ -125,13 +130,43 @@ router
           "content.text":1
         }
       }))
-      .then(data => data.toArray()),
+      .then(data => data.toArray())
+      .then(async (data) => {
+        if(data && !data.length) return []
+        let result = [...data]
+        //获取头像
+        const userData = await Promise.all(data.map(d => {
+          const { user_info } = d
+          return mongo.connect("user")
+          .then(db => db.findOne({
+            _id: user_info
+          }, {
+            projection: {
+              avatar: 1,
+            }
+          }))
+        }))
+        userData.forEach((d, i) => {
+          if(isType(d, 'object')) {
+            const { _id, ...nextResult } = result[i]
+            const { avatar } = d
+            result[i] = {
+              ...nextResult,
+              user_info: {
+                avatar
+              }
+            }
+          }
+        })
+        return result
+      }),
       mongo.connect("user")
       .then(db => db.findOne({
         _id: author
       }, {
         projection: {
-          username: 1
+          username: 1,
+          _id: 0
         }
       })),
       mongo.connect("movie")
@@ -151,10 +186,11 @@ router
       info,
       same_film: _same_film,
       total_rate,
-      rate_person
+      rate_person,
+      nextResult
     } = result
     result = {
-      ...result,
+      ...nextResult,
       info: {
         ...info,
         actor,
@@ -167,18 +203,7 @@ router
       rate: total_rate / rate_person,
       comment,
       author,
-      same_film: _same_film.map(film => {
-        const { film: _id } = film
-        const [target] = same_film.filter(s => s._id == _id)
-        if(target) {
-          return {
-            ...film,
-            name: target.name,
-          }
-        }else {
-          return film
-        }
-      })
+      same_film
     }
     return result
   })

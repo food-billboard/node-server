@@ -4,18 +4,17 @@ const { MongoDB, verifyTokenToData } = require("@src/utils")
 const router = new Router()
 const mongo = MongoDB()
 
-// ata: { id: 电影id,  value: 分数 }
-
 router.put('/', async (ctx) => {
-  ctx.body = '评分'
   const { body: { _id, value } } = ctx.request
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
   let errMsg
-  const data = await mongo.connect("user")
+  let numMobile = Number(mobile)
+  let numValue = Number(value)
+  await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: numMobile
   }, {
     projection: {
       rate: 1
@@ -23,38 +22,38 @@ router.put('/', async (ctx) => {
   }))
   .then(data => {
     const { rate } = data
-    const [rateValue] = rate.filter(r => r.id == mongo.dealId(_id))
+    const [rateValue] = rate.filter(r => r.id.toString() == _id)
     //修改评分
     if(rateValue) {
       return Promise.all([
         mongo.connect("user")
         .then(db => db.updateOne({
-          mobile,
-          "rate.$.id": _id
+          mobile: numMobile,
+          "rate.$.id": mongo.dealId(_id)
         }, {
-          "rate.$.rate": value
+          $set: { "rate.$.rate": numValue }
         })),
         mongo.connect("movie")
         .then(db => db.updateOne({
           _id: mongo.dealId(_id),
         }, {
-          $inc: { total_rate: -rateValue.rate+value }
+          $inc: { total_rate: -rateValue.rate+numValue }
         }))
       ])
     }else {
       return Promise.all([
         mongo.connect("user")
         .then(db => db.updateOne({
-          mobile
+          mobile: numMobile
         }, {
-          $push: { rate: { id: mongo.dealId(_id), rate: value } }
+          $push: { rate: { id: mongo.dealId(_id), rate: numValue } }
         })),
         mongo.connect("movie")
         .then(db => db.updateOne({
           _id: mongo.dealId(_id)
         }, {
           $inc: { 
-            total_rate: value,
+            total_rate: numValue,
             rate_person: 1 
           }
         }))

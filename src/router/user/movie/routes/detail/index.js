@@ -83,16 +83,20 @@ router
       .then(db => db.find({
         _id: { $in: [...language] }
       }, {
-        _id: 0,
-        name: 1
+        projection: {
+          _id: 0,
+          name: 1
+        }
       }))
       .then(data => data.toArray()),
       mongo.connect("tag")
       .then(db => db.find({
         _id: { $in: [...tag] }
       }, {
-        text: 1,
-        _id: 0
+        projection: {
+          text: 1,
+          _id: 0
+        }
       }))
       .then(data => data.toArray()),
       mongo.connect("comment")

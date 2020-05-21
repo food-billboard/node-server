@@ -1,12 +1,12 @@
 const Router = require('@koa/router')
-const { MongoDB, encoded, signToken } = require('@src/utils')
+const { MongoDB, encoded, signToken, withTry } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
 
 function createInitialUserInfo({mobile, password}) {
   return {
-    mobile: mobile,
+    mobile,
     password: encoded(password),
     avatar: '默认头像',
     hot: 0,
@@ -17,6 +17,7 @@ function createInitialUserInfo({mobile, password}) {
     glance: [],
     comment: [],
     store: [],
+    rate: [],
     allow_many: false,
     create_time: Date.now(),
     modified_time: Date.now(),
@@ -29,9 +30,9 @@ router
   const { body: { mobile, password } } = ctx.request
   let res
   let errMsg
-  const db = await mongo.connect("user")
   //判断账号是否存在
-  const data = await db.findOne({mobile}, {projection: {mobile: 1}})
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({mobile}, {projection: {mobile: 1}}))
   .catch(err => {
     errMsg = err
   })
@@ -53,13 +54,20 @@ router
         }
       }
     }else {
-      const [err, data] = await withTry(db.insert)(createInitialUserInfo({mobile, password}))
-      if(err) {
+      const data = await mongo.connect("user")
+      .then(db => db.insertOne(createInitialUserInfo({mobile, password})))
+      .catch(err => {
+        console.log(err)
+        errMsg = err
+        return false
+      })
+      if(errMsg) {
+        console.log(err)
         ctx.status = 500
         res = {
           success: false,
           res: {
-            errMsg: '服务器错误'
+            errMsg
           }
         }
       }else {

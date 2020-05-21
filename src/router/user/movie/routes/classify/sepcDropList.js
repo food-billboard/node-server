@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, withTry } = require('@src/utils')
+const { MongoDB } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
@@ -7,7 +7,8 @@ const mongo = MongoDB()
 router.get('/', async (ctx) => {
   const { count=12 } = ctx.query
   let res
-  const data = mongo.connect("classify")
+  let errMsg
+  const data = await mongo.connect("classify")
   .then(db => db.find({}, {
 	  limit: count,
 	  projection: {
@@ -15,12 +16,18 @@ router.get('/', async (ctx) => {
 		  poster: 1
 	  }
   }))
+  .then(data => data.toArray())
+  .catch(err => {
+    console.log(err)
+    errMsg = err
+    return false
+  })
 
-  if(!data) {
+  if(errMsg) {
     res = {
       success: false,
       res: {
-        errMsg: '服务器错误'
+        errMsg
       }
     }
   }else {

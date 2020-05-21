@@ -1,9 +1,8 @@
 const Router = require('@koa/router')
-const { MongoDB, verifyTokenToData } = require("@src/utils")
+const { MongoDB, verifyTokenToData, isType } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
-// { currPage: 当前页, pageSize: 数量 }
 
 router.get('/', async (ctx) => {
   const { currPage=0, pageSize=30 } = ctx.query
@@ -11,13 +10,14 @@ router.get('/', async (ctx) => {
   const { mobile } = token
   const data = await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: Number(mobile)
   }, {
     projection: {
       store: 1
     }
   }))
   .then(data => {
+    if(data && data.store && !data.store.length) return Promise.reject({err: null, data: []})
     const { store } = data
     return mongo.connect("movie")
     .then(db => db.find({
@@ -43,6 +43,7 @@ router.get('/', async (ctx) => {
     })
   })
   .catch(err => {
+    if(isType(err, 'object') && err.data) return err.data
     console.log(err)
     return false
   })

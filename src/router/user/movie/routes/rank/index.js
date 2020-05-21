@@ -9,8 +9,9 @@ router
 .get('/', async (ctx) => {
   const { currPage=0, pageSize=30, _id } = ctx.query
   let res
-  let result
-  const data = mongo.connect("rank")
+	let result
+	let errMsg
+  const data = await mongo.connect("rank")
   .then(db => db.findOne({
 	  _id: mongo.dealId(_id)
   }, {
@@ -19,23 +20,23 @@ router
 	}
   }))
   .then(data => {
-	return mongo.connect("movie")
-	.then(db => db.find({}, {
-		projection: {
-		  "info.classify": 1,
-		  poster: 1,
-		  publish_time: 1,
-		  hot: 1
-		},
-		sort: {
-		  ...data.match.reduce((acc, da) => {
-            acc[da] = -1
-            return acc
-          }, {})
-		},
-		limit: pageSize,
-		skip: pageSize * currPage
-	}))
+		return mongo.connect("movie")
+		.then(db => db.find({}, {
+			projection: {
+				"info.classify": 1,
+				poster: 1,
+				publish_time: 1,
+				hot: 1
+			},
+			sort: {
+				...data.match.reduce((acc, da) => {
+							acc[da] = -1
+							return acc
+						}, {})
+			},
+			limit: pageSize,
+			skip: pageSize * currPage
+		}))
   })
   .then(data => data.toArray())
   .then(data => {
@@ -66,15 +67,16 @@ router
 	  })
   })
   .catch(err => {
-    console.log(err)
+		console.log(err)
+		errMsg = err
     return false
   })
   
-  if(!data) {
+  if(errMsg) {
     res = {
       success: false,
       res: {
-        errMsg: "服务器错误"
+        errMsg
       }
     }
   }else {

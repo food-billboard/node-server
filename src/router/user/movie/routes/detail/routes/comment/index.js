@@ -11,6 +11,7 @@ router
   const { _id, count=20 } = ctx.query
   let res
   let result
+  let errMsg
   const data = await mongo.connect("movie")
   .then(db => db.findOne({
     _id: mongo.dealId(_id)
@@ -26,7 +27,7 @@ router
       _id: { $in: [...comment] }
     }, {
       projection: {
-        content: 1,
+        "content.text": 1,
         user_info: 1,
       },
       limit: count
@@ -34,13 +35,14 @@ router
   })
   .then(data => data.toArray())
   .then(data => {
-    returl = [...data]
+    result = [...data]
     return mongo.connect("user")
     .then(db => db.find({
-      _id: { $in: data.map(d => db.user_info) }
+      _id: { $in: data.map(d => d.user_info) }
     }, {
       projection: {
-        avatar: 1
+        avatar: 1,
+        _id: 0
       }
     }))
     .then(data => data.toArray())
@@ -58,13 +60,16 @@ router
   })
   .catch(err => {
     console.log(err)
+    errMsg = err
     return false
   })
   
-  if(!data) {
+  if(errMsg) {
     res = {
       success: false,
-      res: null
+      res: {
+        errMsg
+      }
     }
   }else {
    res = {

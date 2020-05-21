@@ -12,7 +12,8 @@ router.get('/', async (ctx) => {
   .then(db => db.find({}, {
 	  limit: count,
 	  projection: {
-		  name: 1
+      name: 1,
+      icon: 1
 	  }
   }))
   .then(data => data.toArray())

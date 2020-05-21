@@ -1,10 +1,8 @@
 const Router = require('@koa/router')
-const { MongoDB, verifyTokenToData, withTry } = require("@src/utils")
+const { MongoDB, verifyTokenToData } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
-
-// data: { id: 电影id }
 
 router
 .put('/', async (ctx) => {
@@ -13,13 +11,13 @@ router
   const { mobile } = token
   let res
   let errMsg
-
-  const data = await mongo.connect("user")
+  
+  await mongo.connect("user")
   .then(db => db.updateOne({
-    mobile,
-    rate: { $ne: mongo.dealId(_id) }
+    mobile: Number(mobile),
+    store: { $ne: mongo.dealId(_id) }
   }, {
-    $push: { rate: mongo.dealId(_id) }
+    $push: { store: mongo.dealId(_id) }
   }))
   .catch(err => {
     errMsg = err
@@ -44,20 +42,21 @@ router
   ctx.body = JSON.stringify(res)
 })
 .delete('/', async(ctx) => {
-  const { body: { _id } } = ctx.request
+  const { _id } = ctx.query
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
   let errMsg
 
-  const data = await mongo.connect("user")
+  await mongo.connect("user")
   .then(db => db.updateOne({
-    mobile,
-    rate: { $in: [mongo.dealId(_id)] }
+    mobile: Number(mobile),
+    store: { $in: [mongo.dealId(_id)] }
   }, {
-    $pull: { rate: mongo.dealId(_id) }
+    $pull: { store: mongo.dealId(_id) }
   }))
   .catch(err => {
+    console.log(err)
     errMsg = err
     return false
   })

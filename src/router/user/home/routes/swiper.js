@@ -50,7 +50,7 @@ const handle = {
         console.log(err)
         return false
       })
-      const result = [ ...(!movieErr ? movieData : [] ), ...(!specialErr ? specialData : []) ]
+      const result = [ ...(movieData ? movieData : [] ), ...(specialData ? specialData : []) ]
       Reflect.set(target, 'data', result)
       Reflect.set(target, 'expire', Date.now())
       Reflect.set(target, 'max-age', 1000 * 60 * 60 * 24)

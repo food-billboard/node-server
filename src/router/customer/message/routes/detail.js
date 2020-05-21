@@ -4,22 +4,16 @@ const { MongoDB, verifyTokenToData } = require("@src/utils")
 const router = new Router()
 const mongo = MongoDB()
 
-// params: { id: 用户id, currPage, pageSize }
-
 router.get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const { id, pageSize, currPage } = ctx.query
+  const { _id:messageId, pageSize=0, currPage=30 } = ctx.query
   let res
   let errMsg
-  let _id = id
-  //系统消息
-  if(id === 'admin') {
-    _id = "__admin__"
-  }
+  let _id = messageId
   const data = await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: Number(mobile)
   }, {
     projection: {
       _id: 1
@@ -35,21 +29,19 @@ router.get('/', async (ctx) => {
       skip: pageSize * currPage
     }
     let rules = {}
+
     //系统消息
-    if(_id !== id) {
+    if(_id == '__admin__') {
       rules = {
         ...rules,
         send_to: userId,
-        user_info: {
-          type: "system",
-          id: _id
-        }
+        "user_info.type": "__admin__"
       }
     }else {
       rules = {
         ...rules,
         send_to: { $in: [ userId, _id ] },
-        "user_info.id": { $in: [ _id, userId ] } 
+        "user_info.id": { $in: [ mongo.dealId(_id), userId ] } 
       }
     }
     return mongo.connect("message")

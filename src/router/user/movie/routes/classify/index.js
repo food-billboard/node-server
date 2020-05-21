@@ -18,41 +18,41 @@ router
 	  limit: pageSize,
 	  skip: currPage * pageSize,
 	  projection: {
-		poster: 1,
-		name: 1,
-		"info.classify": 1,
-		publish_time: 1,
-		hot: 1
+			poster: 1,
+			name: 1,
+			"info.classify": 1,
+			publish_time: 1,
+			hot: 1
 	  }
   }))
   .then(data => data.toArray())
   .then(data => {
-	result = [...data]
-	return Promise.all(data.map(d => {
-		const { info: { classify } } = d
-		return mongo.connect("classify")
-		.then(db => db.find({
-			_id: { $in: [...classify] }
-		}, {
-			projection: {
-				name: 1,
-				_id: 0
-			}
+		result = [...data]
+		return Promise.all(data.map(d => {
+			const { info: { classify } } = d
+			return mongo.connect("classify")
+			.then(db => db.find({
+				_id: { $in: [...classify] }
+			}, {
+				projection: {
+					name: 1,
+					_id: 0
+				}
+			}))
+			.then(data => data.toArray())
 		}))
-		.then(data => data.toArray())
-	}))
   })
   .then(data => {
-	return result.map((r, i) => {
-		const { info: { classify, ...nextInfo } } = r
-		return {
-			...r,
-			info: {
-				...nextInfo,
-				classify: data[i]
+		return result.map((r, i) => {
+			const { info: { classify, ...nextInfo } } = r
+			return {
+				...r,
+				info: {
+					...nextInfo,
+					classify: data[i]
+				}
 			}
-		}
-	})
+		})
   })
   .catch(err => {
     console.log(err)

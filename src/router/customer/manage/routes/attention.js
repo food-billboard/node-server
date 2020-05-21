@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, withTry, verifyTokenToData } = require("@src/utils")
+const { MongoDB, verifyTokenToData } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
@@ -7,13 +7,14 @@ const mongo = MongoDB()
 router
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  const { currPage, pageSize } = ctx.query
+  const { currPage=0, pageSize=30 } = ctx.query
   const { mobile } = token
   let res
   let errMsg
+  let numMobile = Number(mobile)
   const data = await mongo.connect("user")
   .then(db => db.findOne({
-    mobile,
+    mobile: numMobile,
   }, {
     projection: {
       attentions: 1
@@ -22,9 +23,10 @@ router
     skip: pageSize * currPage
   }))
   .then(data => {
+    const { attentions } = data
     return mongo.connect("user")
     .then(db => db.find({
-      mobile: { $in: [...data] }
+      _id: { $in: [...attentions.map(a => typeof a == 'object' ? a : mongo.dealId(a))] }
     }, {
       projection: {
         username: 1,
@@ -35,9 +37,9 @@ router
   })
   .catch(err => {
     errMsg = err
+    console.log(err)
     return false
   })
-
 
   if(errMsg) {
     ctx.status = 500
@@ -58,15 +60,16 @@ router
   ctx.body = JSON.stringify(res)
 })
 .put('/', async (ctx) => {
-  const [, token] = verifyTokenToData
+  const [, token] = verifyTokenToData(ctx)
   const { body: { _id } } = ctx.request
   const { mobile } = token
+  const numMobile = Number(mobile)
   let res
   const mineRes = await mongo.connect("user")
   .then(db => db.updateOne({
-    mobile
+    mobile: numMobile
   }, {
-    $push: { attentions: _id }
+    $push: { attentions: mongo.dealId(_id) }
   }))
   .catch(err => {
     console.log(err)
@@ -74,7 +77,7 @@ router
   })
   const userRes = await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: numMobile
   }, {
     projection: {
       _id: 1
@@ -109,19 +112,26 @@ router
   ctx.body = JSON.stringify(res)
 })
 .delete('/', async(ctx) => {
-  const [, token] = verifyTokenToData
-  const { body: { _id } } = ctx.request
+  const [, token] = verifyTokenToData(ctx)
+  const { _id  } = ctx.query
   const { mobile } = token
+  let numMobile = Number(mobile)
   let res
+  let errMsg
   const mineRes = await mongo.connect("user")
   .then(db => db.updateOne({
-    mobile
+    mobile: numMobile
   }, {
-    $push: { attentions: _id }
+    $pull: { attentions: mongo.dealId(_id) }
   }))
+  .catch(err => {
+    console.log(err)
+    errMsg = err
+    return false
+  })
   const userRes = await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: numMobile
   }, {
     projection: {
       _id: 1
@@ -133,11 +143,12 @@ router
     .then(db => db.updateOne({
       _id: mongo.dealId(_id)
     }, {
-      $push: { fans: userId }
+      $pull: { fans: userId }
     }))
   })
   .catch(err => {
     console.log(err)
+    errMsg = err
     return false
   })
 

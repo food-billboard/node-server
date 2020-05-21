@@ -3,7 +3,7 @@ const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
-const { MongoDB, withTry, verifyTokenToData, middlewareVerifyToken } = require('@src/utils')
+const { MongoDB, verifyTokenToData, middlewareVerifyToken } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
@@ -17,7 +17,7 @@ router
   const { mobile } = token
   const data = await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: Number(mobile)
   }, {
     projection: {
       mobile: 1,
@@ -25,7 +25,7 @@ router
       avatar: 1,
       hot: 1,
       fans:1,
-      attention: 1,
+      attentions: 1,
       create_time: 1,
       status: 1
     }
@@ -34,6 +34,7 @@ router
     errMsg = err
     return false
   })
+
   if(errMsg) {
     ctx.status = 500
     res = {
@@ -53,6 +54,7 @@ router
       }
     }else {
       const { fans, attentions, ...nextData } = data
+      console.log(fans, attentions, nextData)
       res = {
         success: true,
         res: {

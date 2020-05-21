@@ -4,8 +4,6 @@ const { MongoDB, verifyTokenToData } = require("@src/utils")
 const router = new Router()
 const mongo = MongoDB()
 
-// params: { id: 评论id }
-
 router
 .put('/', async (ctx) => {
   const { body: { _id } } = ctx.request
@@ -14,9 +12,9 @@ router
   let res
   let errMsg
 
-  const data = await mongo.connect("user")
+  await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: Number(mobile)
   }, {
     projection: {
       _id: 1
@@ -26,13 +24,15 @@ router
     const { _id:userId } = data
     return mongo.connect("comment")
     .then(db => db.updateOne({
-      _id: mongo.dealId(_id)
+      _id: mongo.dealId(_id),
+      like_person: { $nin: [userId] } 
     }, {
       $inc: { total_like: 1 },
-      $push: { like_person: userId }
+      $addToSet: { like_person: userId }
     }))
   })
-  .then(_ => {
+  .then(data => {
+    if(data && data.result && data.result.nModified == 0) return Promise.reject()
     return mongo.connect("comment")
     .then(db => db.findOne({
       _id: mongo.dealId(_id)
@@ -76,7 +76,7 @@ router
 
 })
 .delete('/', async(ctx) => {
-  const { body: { _id } } = ctx.request
+  const { _id } = ctx.query
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
@@ -84,7 +84,7 @@ router
 
   await mongo.connect("user")
   .then(db => db.findOne({
-    mobile
+    mobile: Number(mobile)
   }, {
     _id: 1
   }))
@@ -92,13 +92,15 @@ router
     const { _id:userId } = data
     return mongo.connect("comment")
     .then(db => db.updateOne({
-      _id: mongo.dealId(_id)
+      _id: mongo.dealId(_id),
+      like_person: { $in: [userId] } 
     }, {
       $inc: { total_like: -1 },
       $pull: { like_person: userId }
     }))
   })
-  .then(_ => {
+  .then(data => {
+    if(data && data.result && data.result.nModified == 0) return Promise.reject()
     return mongo.connect("comment")
     .then(db => db.findOne({
       _id: mongo.dealId(_id)
