@@ -1,19 +1,17 @@
 const Router = require('@koa/router')
-const { MongoDB, verifyTokenToData, isType } = require("@src/utils")
+const { MongoDB, isType } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
 
 router
 .get('/', async (ctx) => {
-  const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
-  const { currPage=0, pageSize=30 } = ctx.query
+  const { currPage=0, pageSize=30, _id } = ctx.query
   let res
   let errMsg
   const data = await mongo.connect("user")
   .then(db => db.findOne({
-    mobile: Number(mobile)
+    _id: mongo.dealId(_id)
   }, {
     projection: {
       fans: 1

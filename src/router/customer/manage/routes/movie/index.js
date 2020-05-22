@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const Browse = require('./browse')
+const Browse = require('./browser')
 const Store = require('./store')
 const { MongoDB, verifyTokenToData, withTry, isType } = require("@src/utils")
 

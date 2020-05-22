@@ -1,47 +1,43 @@
 const Router = require('@koa/router')
-const { MongoDB, verifyTokenToData, isType } = require("@src/utils")
+const { MongoDB } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
 
 router
 .get('/', async (ctx) => {
-  const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
-  const { currPage=0, pageSize=30 } = ctx.query
+  const { currPage=0, pageSize=30, _id } = ctx.query
   let res
   let errMsg
+  const mongoId = mongo.dealId(_id)
   const data = await mongo.connect("user")
   .then(db => db.findOne({
-    mobile: Number(mobile)
+    _id: mongoId
   }, {
     projection: {
-      fans: 1
-    }
+      attentions: 1
+    },
+    limit: pageSize,
+    skip: pageSize * currPage
   }))
   .then(data => {
-    if(data && data.fans && !data.fans.length) return Promise.reject({err: null, data: []})
-    const { fans } = data
+    const { attentions } = data
     return mongo.connect("user")
     .then(db => db.find({
-      _id: { $in: [...fans] }
+      _id: { $in: [...attentions.map(a => typeof a == 'object' ? a : mongo.dealId(a))] }
     }, {
-      limit: pageSize,
-      skip: pageSize * currPage,
       projection: {
         username: 1,
         avatar: 1
-      },
+      }
     }))
     .then(data => data.toArray())
   })
   .catch(err => {
-    if(isType(err, 'object') && err.data) return err.data
     errMsg = err
     console.log(err)
     return false
   })
-
 
   if(errMsg) {
     ctx.status = 500

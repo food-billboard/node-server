@@ -1,33 +1,50 @@
 const Router = require('@koa/router')
-const Attention = require('./routes/attention')
-const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
+const Attention = require('./routes/attention')
+const Movie = require('./routes/movie')
 const { MongoDB, verifyTokenToData } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
 
 router
-.use((ctx, next) => {
+.use(async (ctx, next) => {
   const [, token] = verifyTokenToData(ctx)
+  const { method } = ctx.request
   const { _id } = ctx.query
-  if(token) {
-    if(_id) {
-      // ctx.redirect()
-    }else {
-      await next()
-    }
-  }else {
-    if(_id) {
-      // ctx.redirect()
-    }else {
+  const { url } = ctx.request
+  const pathUrl = url.split("user")[1].split('?')[0]
+  const newUrl = `/api/user/customer${url.split('user')[1]}`
+  if(method.toLocaleLowerCase() == 'get') {
+    if(token && _id) {
+      if(!['', '/comment'].includes(pathUrl)) {
+        return ctx.redirect(newUrl)
+      }else {
+        await next()
+      }
+    }else if(token && !_id) {
       ctx.status = 400
       ctx.body = JSON.stringify({
         success: false,
         res: null
       })
+    }else if(!token && _id) {
+      ctx.status = 401
+      return ctx.redirect(newUrl)
+    }else {
+      ctx.status = 403
+      ctx.body = JSON.stringify({
+        success: false,
+        res: null
+      })
     }
+  }else {
+    ctx.status = 405
+    ctx.body = JSON.stringify({
+      success: false,
+      res: null
+    })
   }
 })
 //个人信息
@@ -90,10 +107,10 @@ router
   }
   ctx.body = JSON.stringify(res)
 })
+.use('/fans', Fans.routes(), Fans.allowedMethods())
 .use('/attention', Attention.routes(), Attention.allowedMethods())
 .use('/movie', Movie.routes(), Movie.allowedMethods())
 .use('/comment', Comment.routes(), Comment.allowedMethods())
-.use('/fans', Fans.routes(), Fans.allowedMethods())
 
 
 module.exports = router

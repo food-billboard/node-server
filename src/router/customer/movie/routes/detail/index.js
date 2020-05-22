@@ -11,7 +11,10 @@ router
 .get('/', async (ctx) => {
   const { _id } = ctx.query
   const [, token] = verifyTokenToData(ctx)
-  if(!token) return ctx.redirect("/api/user/movie/detail")
+  if(!token) {
+    ctx.status = 401
+    return ctx.redirect("/api/user/movie/detail")
+  }
   const { mobile } = token
   let res
   let result

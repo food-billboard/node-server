@@ -7,24 +7,33 @@ const mongo = MongoDB()
 router.get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const { currPage=0, pageSize=30 } = ctx.query
+  const { currPage=0, pageSize=30, _id } = ctx.query
   let result
   let res
   let customerId
   //查找评论id
   const data = await mongo.connect("user")
-  .then(db => db.findOne({mobile: Number(mobile)}, {
+  .then(db => db.findOne({
+    $or: [ { mobile: Number(mobile) }, { _id: mongo.dealId(_id) } ]
+  }, {
     projection: {
       comment: 1
     }
   }))
   .then(data => {
-    const { comment, _id } = data
-    if(comment && !comment.length) return Promise.reject({err: null, data: []})
-    customerId = _id
+    if(data && data.length != 2) return Promise.reject({err: null, data: []})
+    let comments
+    data.forEach(d => {
+      const { comment, _id:id } = d
+      if(id.toString() == _id) {
+        comments = [...comment]
+      }else {
+        customerId = id
+      }
+    })
     return mongo.connect("comment")
     .then(db => db.find({
-      _id: { $in: [...comment] }
+      _id: { $in: [...comments] }
     }, {
       projection: {
         source: 1,
@@ -81,6 +90,7 @@ router.get('/', async (ctx) => {
           like
         })
       }
+
     })
     return newData
   })

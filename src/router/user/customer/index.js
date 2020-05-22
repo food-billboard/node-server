@@ -3,42 +3,20 @@ const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
-const { MongoDB, verifyTokenToData } = require('@src/utils')
+const { MongoDB } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
 
 router
-.use((ctx, next) => {
-  const [, token] = verifyTokenToData(ctx)
-  const { _id } = ctx.query
-  if(token) {
-    if(_id) {
-      // ctx.redirect()
-    }else {
-      await next()
-    }
-  }else {
-    if(_id) {
-      // ctx.redirect()
-    }else {
-      ctx.status = 400
-      ctx.body = JSON.stringify({
-        success: false,
-        res: null
-      })
-    }
-  }
-})
-//个人信息
 .get('/', async (ctx) => {
-  const [, token] = verifyTokenToData(ctx)
+  console.log(ctx.status)
   let res
   let errMsg
-  const { mobile } = token
+  const { _id } = ctx.query
   const data = await mongo.connect("user")
   .then(db => db.findOne({
-    mobile: Number(mobile)
+    _id: mongo.dealId(_id)
   }, {
     projection: {
       mobile: 1,
@@ -65,25 +43,14 @@ router
       }
     }
   }else {
-    if(!data) {
-      ctx.status = 401
-      res = {
-        success: false,
-        res: {
-          errMsg: '登录过期'
-        }
-      }
-    }else {
-      const { fans, attentions, ...nextData } = data
-      console.log(fans, attentions, nextData)
-      res = {
-        success: true,
-        res: {
-          data: {
-            fans: fans.length,
-            attentions: attentions.length,
-            ...nextData
-          }
+    const { fans, attentions, ...nextData } = data
+    res = {
+      success: true,
+      res: {
+        data: {
+          fans: fans.length,
+          attentions: attentions.length,
+          ...nextData
         }
       }
     }
@@ -94,6 +61,5 @@ router
 .use('/movie', Movie.routes(), Movie.allowedMethods())
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 .use('/fans', Fans.routes(), Fans.allowedMethods())
-
 
 module.exports = router

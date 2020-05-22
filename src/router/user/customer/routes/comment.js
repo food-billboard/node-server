@@ -1,27 +1,23 @@
 const Router = require('@koa/router')
-const { MongoDB, verifyTokenToData, isType } = require('@src/utils')
+const { MongoDB, isType } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
 
 router.get('/', async (ctx) => {
-  const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
-  const { currPage=0, pageSize=30 } = ctx.query
+  const { currPage=0, pageSize=30, _id } = ctx.query
   let result
   let res
-  let customerId
   //查找评论id
   const data = await mongo.connect("user")
-  .then(db => db.findOne({mobile: Number(mobile)}, {
+  .then(db => db.findOne({_id: mongo.dealId(_id)}, {
     projection: {
       comment: 1
     }
   }))
   .then(data => {
-    const { comment, _id } = data
+    const { comment } = data
     if(comment && !comment.length) return Promise.reject({err: null, data: []})
-    customerId = _id
     return mongo.connect("comment")
     .then(db => db.find({
       _id: { $in: [...comment] }
@@ -31,7 +27,6 @@ router.get('/', async (ctx) => {
         create_time: 1,
         toal_like: 1,
         content: 1,
-        like_person: 1
       },
       limit: pageSize,
       skip: currPage * pageSize
@@ -60,26 +55,18 @@ router.get('/', async (ctx) => {
   .then(data => {
     let newData = []
     result.forEach(re => {
-      const { source: { type, comment }, like_person, ...nextRe } = re
-      let like = false
-      if(like_person.some(l => l.toString() == customerId.toString())) {
-        like = true
-      }
+      const { source: { type, comment } } = re
       if(type === 'user') {
         let newRe = {
-          ...nextRe,
+          ...re,
           source: {
             type,
             comment: data.filter(d => d._id == comment)[0].content
-          },
-          like
+          }
         }
         newData.push(newRe)
       }else if(type === 'movie') {
-        newData.push({
-          ...nextRe,
-          like
-        })
+        newData.push(re)
       }
     })
     return newData
