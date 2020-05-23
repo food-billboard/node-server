@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Browse = require('./browser')
 const Store = require('./store')
-const { MongoDB, verifyTokenToData, withTry, isType } = require("@src/utils")
+const { MongoDB, verifyTokenToData, isType, isEmpty } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
@@ -16,38 +16,17 @@ const mongo = MongoDB()
   //   area: 地区
   //   director: 导演
   //   actor: 演员
-  //   type: 类型
-  //   time: 时间
+  //   classify: 类型
+  //   screen_time: 时间
   //   description: 描述
-  //   language: 语言
+  //   language: 语言,
+  //   author_rate: 作者评分
+  //   alias: ['别名']
   // }
-  // image: {
+  // images: {
   //   image: 截图地址,
   // }
 // }
-// 修改电影data: { 
-  // id: 电影id
-  // video: {
-  //   src: 视频地址
-  //   poster: 海报地址
-  //   id: 视频id
-  // } 
-  // info: {
-  //   name: 电影名称
-  //   area: 地区
-  //   director: 导演
-  //   actor: 演员
-  //   type: 类型
-  //   time: 时间
-  //   description: 描述
-  //   language: 语言
-  // }
-  // image: {
-  //   image: 截图地址,
-  //   id: id
-  // }
-// }
-// 获取params: { currPage: 当前页, pageSize: 数量 }
 
 const TEMPLATE_MOVIE = {
   name: '',
@@ -60,6 +39,13 @@ const TEMPLATE_MOVIE = {
     district: [],
     classify: [],
     screen_time: Date.now(),
+    language: []
+  },
+  rest: {
+    actor: [],
+    director: [],
+    district: [],
+    classify: [],
     language: []
   },
   video: '',
@@ -83,108 +69,227 @@ const TEMPLATE_MOVIE = {
 	same_film: []
 }
 
+//空内容判断
+function emptyCheck(target) {
+  if(isEmpty(target)) return true
+  if(isType(target, 'object')) {
+    return Object.keys(target).some(key => {
+      if(isType(target[key], 'number')) {
+        return target[key] < 0
+      }else if(isType(target[key], 'string')) {
+        return !target[key].length
+      }else if(isType(target[key], 'object') || isType(target[key], 'array')) {
+        return emptyCheck(target[key])
+      }
+      return false
+    })
+  }
+  if(isType(target, 'array')) {
+    return target.some(t => emptyCheck(target))
+  }
+  return false
+}
+
+//自定义与系统字段内容区分
+function fieldDefine(valid, unValid, target) {
+  let newValid = { ...valid }
+  let newUnValid = { ...unValid }
+  Object.keys(target).forEach(key => {
+    let _valid = []
+    let _unValid = []
+    if(valid[key] && unValid[key]) {
+      if(isType(target[key], 'array')) {
+        target[key].forEach(k => {
+          if(mongo.isValid(k)) {
+            _valid.push(k)
+          }else {
+            _unValid.push(k)
+          }
+        })
+        newValid[key] = [..._valid]
+        newUnValid[key] = [..._unValid]
+      }else if(isType(target[key], 'object')) {
+        const [__valid, __unValid] = fieldDefine(newValid[key], newUnValid[key], target[key])
+        newValid[key] = __valid
+        newUnValid = __unValid
+      }else {
+        if(mongo.isValid(target[key])) {
+          newValid[key] = mongo.dealId(target[key])
+        }else {
+          newUnValid[key] = target[key]
+        }
+      }
+    }
+  })
+  return [newValid, newUnValid]
+}
 
 router
-.post('/', async (ctx) => {
-  ctx.body = '发布电影'
-  const [, token] = verifyTokenToData(ctx)
-  const { mobile }  = token
-  let res
-  const { body: { 
-    video: {
-      src,
-      poster
-    }, 
+.use(async(ctx, next) => {
+  const { method, body } = ctx.request
+  if(method.toLowerCase() === 'get') return await next()
+  const {
+    _id,
     info: {
-      name,
-      time,
+      author_description,
+      alias,
       ...nextInfo
     },
-    image: {
-      image
-    }
-  } } = ctx.request
-  const data = await withTry(mongo.find)("_movie_", {
-    $or: [
-      {
-        "info.name": name,
-      },
-      {
-        "info.alias": { $all: [name] }
-      }
-    ],
-    "info.screen_time": time
-  }, {
-    _id: 1
-  })
+    ...nextBody
+  } = body 
+  let res
 
-  // .then(data => {
-  //   if(data.length) {
-  //     return []
-  //   }else {
-  //     return mongo.findOne("_user_", {mobile}, {_id: 1})
-  //     mongo.insert("_movie_", {
-  //       name,
-  //       info: {
-  //         name: '电影名称'
-  //         alias: ['别名']
-  //         description: '简介'
-  //         actor: ['演员id']
-  //         director: ['导演id']
-  //         district: ['地区id']
-  //         classify: ['分类id']
-  //         screen_time: '上映时间'
-  //         language: ['语言']
-  //       }
-  //       video: '视频id'
-  //       images: ['图片id']
-  //       poster: '海报'
-  //       tag: ['标签id']
-  //       comment: ['评论id']
-  //       author: '作者id'
-  //       glance: '浏览'
-  //       author_description: '作者认为'
-  //       author_rate: '作者评分'
-  //       create_time: '发布时间'
-  //       modified_time: '最后修改时间'
-  //       store: ['收藏人的id']
-  //       hot: '收藏人数'
-  //       rate: ['评分']
-  //       total_rate: '综合评分'
-  //       source_type: '文章来源[初始, 用户]',
-  //       stauts: '电影状态(审核中，完成审核)'
-  //       related_to: ['电影相关']
-  //       same_film: [{
-  //         film: '相同电影名称',
-  //         type: '系列或同名'
-  //       }]
-  //     })
-  //   }
-  // })
-  // .catch(err => {
-  //   console.log(err)
-  //   return false
-  // })
-
-  if(!data) {
-    ctx.body = 500
-    res = {
+  //空数据判断
+  if(emptyCheck({
+    ...nextBody,
+    info: { ...nextInfo }
+  })) {
+    ctx.status = 400
+    ctx.body = JSON.stringify({
       success: false,
-      res: null
-    }
-  }else {
-    if(!data.length) {
-      res = {
-        success: true,
-        res: null
+      res: {
+        errMsg: '请求参数错误'
       }
-    }else {
-      ctx.status = 403
+    })
+    return
+  }
+
+  //判断是否已经存在
+  const data = await mongo.connect("movie")
+  .then(db => db.findOne({
+
+  }))
+  .then(data => {
+    if(data) return Promise.reject({errMsg: '存在相似内容', status: 400}) 
+    return true
+  })
+  .catch(err => {
+    if(err && err.status) {
+      const { status, ...nextErr } = err
+      ctx.status = status
       res = {
         success: false,
         res: {
-          errMsg: '内容已存在'
+          ...nextErr
         }
+      }
+    }else {
+      ctx.status = 500
+      res = {
+        success: false,
+        res: {
+          errMsg: err
+        }
+      }
+    }
+    console.log(err)
+    return false
+  })
+
+  if(data) {
+    return await next()
+  }
+  ctx.body = JSON.stringify(res)
+
+})
+.post('/', async (ctx) => {
+  const [, token] = verifyTokenToData(ctx)
+  const { mobile }  = token
+  let res
+  let templateInsertData
+  const { body } = ctx.request
+  const { 
+    video: {
+      src,
+      poster,
+    },
+    info: {
+      name,
+      author_rate,
+      description,
+      alias,
+      author_description,
+      screen_time,
+      ...nextData
+    },
+    images
+  } = body
+  const {
+    info,
+    rest:originRest,
+    ...nextTemplate
+  } = TEMPLATE_MOVIE
+  //自定义与系统自带字段分类
+  const [valid, unValid] = fieldDefine({
+    ...info,
+    name,
+    description,
+    screen_time,
+    alias: alias ? alias : [],
+  }, {
+    ...originRest
+  }, { ...nextData })
+
+  templateInsertData = {
+    ...nextTemplate,
+    info: {...valid},
+    rest: { ...unValid },
+    name,
+    video: src,
+    poster,
+    images,
+    author_rate,
+    author_description: author_description ? author_description : description,
+    create_time:Date.now(),
+    modified_time: Date.now(),
+  }
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
+    mobile: Number(mobile)
+  }, {
+    projection: {
+      _id: 1
+    }   
+  }))
+  .then(data => {
+    if(!data) return Promise.reject({errMsg: '登录过期', status: 401}) 
+    const { _id } = data
+    templateInsertData = {
+      ...templateInsertData,
+      author: _id
+    }
+    return mongo.connect("movie")
+    .then(db => db.insertOne({...templateInsertData}))
+  })
+  .catch(err => {
+    if(err && err.status) {
+      const { status=400, ...nextErr } = err
+      ctx.status = status
+      res = {
+        success: false,
+        res: {
+          ...nextErr
+        }
+      }
+    }else {
+      ctx.status = 500
+      res = {
+        success: false,
+        res: {
+          errMsg: err
+        }
+      }
+    }
+    console.log(err)
+
+    return false
+  })
+
+  if(data) {
+    res = {
+      success: true,
+      res: {
+        errMsg: '审核中'
       }
     }
   }
@@ -192,36 +297,105 @@ router
   ctx.body = JSON.stringify(res)
 })
 .put('/', async (ctx) => {
-  ctx.body = '修改电影'
   let res
+  let templateUpdateData
   const { body: { 
     _id,
     video: {
       src,
       poster,
-      id:videoId
     }, 
     info: {
       name,
-      area,
-      director,
-      actor,
-      type,
-      time,
+      author_description,
+      author_rate,
       description,
-      language,
+      screen_time,
+      ...nextInfo
     },
-    image: {
-      image,
-      id:imageId,
-    }
+    images
   } } = ctx.request
 
-  const [, data] = await withTry(mongo.updateOne)("_movie_", {
-    _id: mongo.dealId(_id)
-  }, {
-    
+  const mongoId = mongo.dealId(_id)
+
+  const data = await mongo.connect("movie")
+  .then(db => db.findOne({
+    _id:mongoId
+  }))
+  .then(data => {
+    if(!data) return Promise.reject({errMsg: '电影不存在', status: 400})
+    const {
+      info,
+      author_description: origin_author_description,
+      rest: originRest,
+      ...nextData
+    } = data
+
+    //对用户自定义和系统自带字段进行区分
+    const { alias: originAlias } = info
+    const [valid, unValid] = fieldDefine({
+      ...info,
+      screen_time,
+      alias: alias ? alias : originAlias,
+      name,
+      description,
+    }, {
+      ...originRest
+    }, { ...nextInfo })
+
+    //合成最终字段
+    templateUpdateData = {
+      ...nextData,
+      name,
+      video: src,
+      poster,
+      info: {...valid},
+      rest: { ...unValid },
+      images,
+      author_rate,
+      author_description: author_description ? author_description : origin_author_description
+    }
+
+    return mongo.connect("movie")
   })
+  .then(db => db.updateOne({
+    _id: mongo.dealId(_id)  
+  }, {
+    ...templateUpdateData
+  }))
+  .then(data => {
+    if(data && data.result && data.result.nModified == 0) return Promise.reject({errMsg: '更新错误', status: 500})
+    return true
+  })
+  .catch(err => {
+    if(err && err.status) {
+      const { status, ...nextErr } = err
+      ctx.status = status
+      res = {
+        success: false,
+        res: {
+          ...nextErr
+        }
+      }
+    }else {
+      ctx.status = 500
+      res = {
+        success: false,
+        res: {
+          errMsg: err
+        }
+      }
+    }
+    console.log(err)
+    return false
+  })
+
+  if(data) {
+    res = {
+      success: true,
+      res: null
+    }
+  }
 
   ctx.body = JSON.stringify(res)
 })

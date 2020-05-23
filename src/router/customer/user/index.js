@@ -92,7 +92,6 @@ router
       }
     }else {
       const { fans, attentions, ...nextData } = data
-      console.log(fans, attentions, nextData)
       res = {
         success: true,
         res: {

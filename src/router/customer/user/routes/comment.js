@@ -25,7 +25,7 @@ router.get('/', async (ctx) => {
     let comments
     data.forEach(d => {
       const { comment, _id:id } = d
-      if(id.toString() == _id) {
+      if(mongo.equalId(id, _id)) {
         comments = [...comment]
       }else {
         customerId = id
@@ -71,7 +71,7 @@ router.get('/', async (ctx) => {
     result.forEach(re => {
       const { source: { type, comment }, like_person, ...nextRe } = re
       let like = false
-      if(like_person.some(l => l.toString() == customerId.toString())) {
+      if(like_person.some(l => mongo.equalId(l, customerId))) {
         like = true
       }
       if(type === 'user') {
@@ -79,7 +79,7 @@ router.get('/', async (ctx) => {
           ...nextRe,
           source: {
             type,
-            comment: data.filter(d => d._id == comment)[0].content
+            comment: data.filter(d => mongo.equalId(d._id, comment))[0].content
           },
           like
         }

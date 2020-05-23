@@ -61,7 +61,7 @@ router.get('/', async (ctx) => {
           ...re,
           source: {
             type,
-            comment: data.filter(d => d._id == comment)[0].content
+            comment: data.filter(d => mongo.equalId(d._id, comment))[0].content
           }
         }
         newData.push(newRe)

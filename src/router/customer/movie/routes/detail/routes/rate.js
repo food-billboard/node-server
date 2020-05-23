@@ -22,7 +22,7 @@ router.put('/', async (ctx) => {
   }))
   .then(data => {
     const { rate } = data
-    const [rateValue] = rate.filter(r => r.id.toString() == _id)
+    const [rateValue] = rate.filter(r => mongo.equalId(r.id, _id))
     //修改评分
     if(rateValue) {
       return Promise.all([

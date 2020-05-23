@@ -49,7 +49,7 @@ router
   })
   .then(data => {
     result.forEach((r, i) => {
-      let [avatar] = data.filter(d => d._id.toString() == r.user_info.toString())
+      let [avatar] = data.filter(d => mongo.equalId(d._id, r.user_info))
       const { _id, ...nextData } = avatar
       result[i]['user_info'] = {
         _id: r.user_info,

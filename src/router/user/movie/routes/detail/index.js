@@ -126,7 +126,7 @@ router
         .then(data => data.toArray())
         return data.map(d => {
           const { user_info, ...next } = d
-          const [avatar] = _data.filter(_d => _d._id.toString() == user_info.toString())
+          const [avatar] = _data.filter(_d => mongo.equalId(_d._id, user_info))
           const { _id, ...nextData } = avatar
           return {
             ...next,
@@ -187,7 +187,7 @@ router
       same_film: originList.map(o => {
         const { film, ...nextO } = o
         const [name] = same_film.filter(s => {
-          return s._id.toString() == film.toString()
+          return mongo.equalId(s._id, film)
         })
         if(name) return {
           ...nextO,

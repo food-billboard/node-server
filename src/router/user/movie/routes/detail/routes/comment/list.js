@@ -40,7 +40,7 @@ router.get('/', async (ctx) => {
       return [user_info, ...comment_users]
     })
     listId.flat(Infinity).forEach(id => {
-      if(!newListId.some(i => i.toString() == id.toString())) newListId.push(id)
+      if(!newListId.some(i => mongo.equalId(i, id))) newListId.push(id)
     })
     return mongo.connect("user")
     .then(db => db.find({
@@ -61,14 +61,14 @@ router.get('/', async (ctx) => {
       data.forEach(d => {
         const { _id, avatar, username } = d
         comment_users.forEach(c => {
-          if(_id.toString() == c.toString()) {
+          if(mongo.equalId(_id, c)) {
             _comment_users.push({
               _id,
               avatar
             })
           }
         })
-        if(!_user_info && _id.toString() == user_info.toString()) {
+        if(!_user_info && mongo.equalId(_id, user_info)) {
           _user_info = {
             _id,
             avatar,

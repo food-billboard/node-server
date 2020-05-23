@@ -10,13 +10,13 @@ const mongo = MongoDB()
 
 router
 .get('/', async (ctx) => {
-  console.log(ctx.status)
   let res
   let errMsg
   const { _id } = ctx.query
+  const objectId = mongo.dealId(_id)
   const data = await mongo.connect("user")
   .then(db => db.findOne({
-    _id: mongo.dealId(_id)
+    _id: objectId
   }, {
     projection: {
       mobile: 1,
@@ -31,6 +31,7 @@ router
   }))
   .catch(err => {
     errMsg = err
+    console.log(err)
     return false
   })
 

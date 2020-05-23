@@ -62,7 +62,7 @@ router.get('/', async (ctx) => {
     result.forEach(re => {
       const { source: { type, comment }, like_person, ...nextRe } = re
       let like = false
-      if(like_person.some(l => l.toString() == customerId.toString())) {
+      if(like_person.some(l => mongo.equalId(l, customerId))) {
         like = true
       }
       if(type === 'user') {

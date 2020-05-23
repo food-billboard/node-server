@@ -509,6 +509,13 @@ class MongoDB {
     return new ObjectID(id)
   }
 
+  isValid = (id) => ObjectID.isValid(id) 
+
+  equalId = (targetA, targetB) => {
+    if(targetA.equals) return targetA.equals(targetB)
+    if(targetB.equals) return targetB.equals(targetA)
+    return targetA == targetB
+  }
   
 }
 

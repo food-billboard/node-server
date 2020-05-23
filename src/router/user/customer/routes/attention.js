@@ -9,7 +9,7 @@ router
   const { currPage=0, pageSize=30, _id } = ctx.query
   let res
   let errMsg
-  const mongoId = mongo.dealId(_id)
+  let mongoId = mongo.dealId(_id)
   const data = await mongo.connect("user")
   .then(db => db.findOne({
     _id: mongoId

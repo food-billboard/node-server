@@ -9,20 +9,18 @@ const router = new Router()
 const mongo = MongoDB()
 
 router
-.use((ctx, next) => {
+.use(async (ctx, next) => {
   const [, token] = verifyTokenToData(ctx)
   const { _id } = ctx.query
+  const { url } = ctx.request
+  const newUrl = `/api/customer/user/${url.split('manage')[1]}`
   if(token) {
-    if(_id) {
-      // ctx.redirect()
-    }else {
-      await next()
-    }
+    await next()
   }else {
+    ctx.status = 401
     if(_id) {
-      // ctx.redirect()
+      ctx.redirect(newUrl)
     }else {
-      ctx.status = 400
       ctx.body = JSON.stringify({
         success: false,
         res: null
