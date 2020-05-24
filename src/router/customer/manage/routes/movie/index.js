@@ -1,7 +1,8 @@
 const Router = require('@koa/router')
 const Browse = require('./browser')
 const Store = require('./store')
-const { MongoDB, verifyTokenToData, isType, isEmpty } = require("@src/utils")
+const Detail = require('./detail')
+const { MongoDB, verifyTokenToData, isType, isEmpty, dealMedia } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
@@ -13,7 +14,7 @@ const mongo = MongoDB()
   // } 
   // info: {
   //   name: 电影名称
-  //   area: 地区
+  //   district: 地区
   //   director: 导演
   //   actor: 演员
   //   classify: 类型
@@ -21,7 +22,8 @@ const mongo = MongoDB()
   //   description: 描述
   //   language: 语言,
   //   author_rate: 作者评分
-  //   alias: ['别名']
+  //   alias: ['别名'] 选填
+  //   author_description: 电影自我描述(选填)
   // }
   // images: {
   //   image: 截图地址,
@@ -74,18 +76,12 @@ function emptyCheck(target) {
   if(isEmpty(target)) return true
   if(isType(target, 'object')) {
     return Object.keys(target).some(key => {
-      if(isType(target[key], 'number')) {
-        return target[key] < 0
-      }else if(isType(target[key], 'string')) {
-        return !target[key].length
-      }else if(isType(target[key], 'object') || isType(target[key], 'array')) {
-        return emptyCheck(target[key])
-      }
-      return false
+      return emptyCheck(target[key])
     })
-  }
-  if(isType(target, 'array')) {
-    return target.some(t => emptyCheck(target))
+  }else if(isType(target, 'array')) {
+    return target.some(t => emptyCheck(t))
+  }else if(isType(target, 'number')) {
+    return target < 0
   }
   return false
 }
@@ -124,6 +120,193 @@ function fieldDefine(valid, unValid, target) {
   return [newValid, newUnValid]
 }
 
+function aboutFind(template) {
+  return (_) => {
+    let _template = { ...template }
+    return mongo.connect("movie")
+    .then(db => {
+      let reg
+      const {
+        name
+      } = _template
+      const isReg = str => /\d/g.test(str) ? `[${str}]?` : str
+      if(name.length == 1) {
+        reg = name
+      }else if(name.length == 2) {
+        reg = `${name.slice(0, name.length - 1)}${isReg(name.slice(name.length - 1))}`
+      }else {
+        reg = `${name.slice(0, name.length - 2)}${isReg(name.slice(name.length - 2, name.length - 1))}${isReg(name.slice(name.length - 1))}`
+      }
+      return db.find({
+        name: { $regex: reg, $options: 'i' }
+      }, {
+        projection: {
+          _id: 1,
+          name: 1
+        }
+      })
+    })
+    .then(data => data.toArray())
+    .then(data => {
+      let newSameFilm = []
+      let series = []
+      let namesake = []
+      const { name } = _template
+      data.forEach(d => {
+        const { name: same_film, _id } = d
+        let film = {
+          film: _id,
+          type: 'series'
+        }
+        if(name == same_film) {
+          film.type = 'namesake'
+          namesake.push(film)
+        }else {
+          series.push(film)
+        }
+        newSameFilm.push(film)
+      })
+      //合并入模板内容
+      _template = {
+        ..._template,
+        same_film: [...newSameFilm]
+      }
+      return {
+        series,
+        namesake
+      }
+    })
+    .then(({series, namesake}) => {
+      const {
+        _id
+      } = _template
+      if(!_id) return
+      return Promise.all([
+        mongo.connect("movie")
+        .then(db => db.updateMany({
+          _id: { $in: [...series.map(s => s.film)] }
+        }, {
+          $push: { same_film: { film: _id, type: 'series' } }
+        })),
+        mongo.connect("movie")
+        .then(db => db.updateMany({
+          _id: { $in: [...namesake.map(n => n.film)] }
+        }, {
+          $push: { same_film: { film: _id, type: 'namesake' } }
+        }))
+      ])
+      //日志上传
+      .catch(_=> {
+        console.log(_)
+      })
+    })
+    //相关电影关联( 导演 演员 作者 分类 )
+    .then(_ => mongo.connect("movie"))
+    .then(db => {
+      const {
+        info: {
+          director,
+          classify,
+          actor
+        },
+        author
+      } = _template
+      return db.find({
+        $or: [
+          { "info.director": { $in: [...director] } },
+          { "info.classify": { $in: [...classify] } },
+          { "info.actor": { $in: [...actor] } },
+          {author}
+        ]
+      }, {
+      projection: {
+        _id: 1,
+        "info.director": 1,
+        "info.actor": 1,
+        "info.classify": 1,
+        author: 1
+      }
+    })})
+    .then(data => data.toArray())
+    .then(data => {
+      let newRelatedTo = []
+      const { author: originAuthor, info: {
+        classify: originClassify,
+        director: originDirector,
+        actor: originActor
+      } } = _template
+      data.forEach(d => {
+        const { 
+          _id,
+          info: {
+            director,
+            actor,
+            classify
+          },
+          author
+        } = d
+        let result = { film: _id, type: [] }
+        if(director.length && director.some(d => {
+          return originDirector.some(o => mongo.equalId(o, d))
+        })) {
+          result.type.push('director')
+        }
+        if(actor.length && actor.some(a => {
+          return originActor.some(o => mongo.equalId(o, a))
+        })) {
+          result.type.push('actor')
+        }
+        if(classify.length && classify.some(c => {
+          return originClassify.some(o => mongo.equalId(o, c))
+        })) { 
+          result.type.push('classify')
+        }
+        if(originAuthor && author &&  mongo.equalId(originAuthor, author)) {
+          result.type.push('author')
+        }
+        newRelatedTo.push(result)
+      })  
+      //合并入模板内容
+      _template = {
+        ..._template,
+        related_to: [...newRelatedTo]
+      }
+      return newRelatedTo
+    })
+    //反向关联
+    .then(data => {
+      const {
+        _id
+      } = _template
+      if(!_id) return
+      return Promise.all(data.map(d => {
+        const { film, type } = d
+        return mongo.connect("movie")
+        .then(db => db.updateOne({
+          _id: film
+        }, {
+          $push: { related_to: { film, type } }
+        }))
+      }))
+      //日志记录
+      .catch(_ => {
+        console.log(_)
+      })
+    })
+    //媒体内容处理
+    // .then(_ => {
+    //   const {
+    //     images:mediaImages,
+    //     video:mediaVideo,
+    //     poster:mediaPoster,
+    //   } = templateInsertData
+  
+    //   dealMedia()
+    // })
+    .then(_ => _template)
+  }
+}
+
 router
 .use(async(ctx, next) => {
   const { method, body } = ctx.request
@@ -154,13 +337,37 @@ router
     return
   }
 
+  const {
+    screen_time,
+    name,
+    director,
+    actor
+  } = nextInfo
   //判断是否已经存在
   const data = await mongo.connect("movie")
   .then(db => db.findOne({
-
+    //名字类似
+    $or: [
+      { name },
+      { name: { $in: [...alias] } },
+      { "info.alias": { $in: [name] } }
+    ],
+    //上映时间类似
+    $and: [ { "info.screen_time": { $gte: screen_time - 24 * 60 * 60 * 1000 } }, { "info.screen_time": { $lte: screen_time + 24 * 60 * 60 * 1000 } } ], 
+    //导演类似
+    "info.director": { $in: [...director.filter(r => mongo.isValid(r)).map(d => mongo.dealId(d))] },
+    //演员类似
+    "info.actor": { $in: [...actor.filter(d => mongo.isValid(d)).map(d => mongo.dealId(d))] }
+  }, {
+    projection: {
+      _id: 1,
+      name: 1
+    }
   }))
   .then(data => {
-    if(data) return Promise.reject({errMsg: '存在相似内容', status: 400}) 
+    if(data) {
+      return Promise.reject({errMsg: '存在相似内容', status: 400, data: {...data}}) 
+    }
     return true
   })
   .catch(err => {
@@ -228,7 +435,7 @@ router
     alias: alias ? alias : [],
   }, {
     ...originRest
-  }, { ...nextData })
+  }, { ...Object.values(nextData).map(data => isType(data, 'array') ? data : [data]) })
 
   templateInsertData = {
     ...nextTemplate,
@@ -243,7 +450,8 @@ router
     create_time:Date.now(),
     modified_time: Date.now(),
   }
-  const data = await mongo.connect("user")
+
+  const data = await  mongo.connect("user")
   .then(db => db.findOne({
     mobile: Number(mobile)
   }, {
@@ -258,9 +466,19 @@ router
       ...templateInsertData,
       author: _id
     }
-    return mongo.connect("movie")
-    .then(db => db.insertOne({...templateInsertData}))
   })
+  .then(aboutFind(templateInsertData))
+  .then(data => {
+    templateInsertData = {
+      ...templateInsertData,
+      ...data
+    }
+  })
+  .then(_ => {
+    //将完整数据存入数据库
+    return mongo.connect("movie")
+  })
+  .then(db => db.insertOne({...templateInsertData}))
   .catch(err => {
     if(err && err.status) {
       const { status=400, ...nextErr } = err
@@ -311,19 +529,34 @@ router
       author_rate,
       description,
       screen_time,
+      alias,
       ...nextInfo
     },
     images
   } } = ctx.request
-
   const mongoId = mongo.dealId(_id)
+  const [, token] = verifyTokenToData(ctx)
+  const { mobile } = token
 
-  const data = await mongo.connect("movie")
+  const data = await mongo.connect("user")
+  .then(db => db.findOne({
+    mobile: Number(mobile),
+    issue: { $in: [mongoId] }
+  }, {
+    projection: {
+      _id: 1
+    }
+  }))
+  .then(data => {
+    if(!data) return Promise.reject({statsu: 403, errMsg: '非本人发布电影'})
+  })
+  .then(_ => mongo.connect("movie"))
   .then(db => db.findOne({
     _id:mongoId
   }))
-  .then(data => {
+  .then(async (data) => {
     if(!data) return Promise.reject({errMsg: '电影不存在', status: 400})
+
     const {
       info,
       author_description: origin_author_description,
@@ -341,8 +574,7 @@ router
       description,
     }, {
       ...originRest
-    }, { ...nextInfo })
-
+    }, { ...Object.values(nextInfo).map(info => isType(info, 'array') ? info : [info]) })
     //合成最终字段
     templateUpdateData = {
       ...nextData,
@@ -353,11 +585,52 @@ router
       rest: { ...unValid },
       images,
       author_rate,
-      author_description: author_description ? author_description : origin_author_description
+      author_description: author_description ? author_description : origin_author_description,
+      modified_time: Date.now()
     }
-
-    return mongo.connect("movie")
   })
+  .then(async(_) => {
+    const {
+      related_to,
+      same_film
+    } = templateUpdateData
+    //取消之前的电影关联
+    if(related_to.length) {
+      await Promise.all(related_to.filter(r => mongo.isValid(r.film))
+      .map(relate => {
+        const { film } = relate
+        return mongo.connect("movie")
+        .then(db => db.updateOne({
+          _id: typeof film === 'string' ? mongo.dealId(film) : film
+        }, {
+          $pull: { related_to: {film: mongoId} }
+        }))
+      }))
+    }
+    if(same_film.length) {
+      await Promise.all(same_film.filter(r => mongo.isValid(r.film)))
+      .map(same => {
+        const { film } = same
+        return mongo.connect("movie")
+        .then(db => db.updateOne({
+          _id: typeof film === 'string' ? mongo.dealId(film) : film
+        }, {
+          $pull: { same_film: {film: mongoId} }
+        }))
+      })
+    }
+  })
+  .then(_ => {
+    return aboutFind(templateUpdateData)(_)
+  })
+  .then(data => {
+    templateUpdateData = {
+      ...templateUpdateData,
+      ...data
+    }
+    return Promise.reject()
+  }) 
+  .then(_ => mongo.connect("movie"))
   .then(db => db.updateOne({
     _id: mongo.dealId(_id)  
   }, {
@@ -403,6 +676,7 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   const { currPage=0, pageSize=30 } = ctx.query
+
   const data = await mongo.connect("user")
   .then(db => db.findOne({
     mobile: Number(mobile)
@@ -435,7 +709,6 @@ router
   })
 
   if(!data) {
-    console.log(data)
     res = {
       success: false,
       res: null
@@ -452,5 +725,6 @@ router
 })
 .use('/browser', Browse.routes(), Browse.allowedMethods())
 .use('/store', Store.routes(), Store.allowedMethods())
+.use('/detail', Detail.routes(), Detail.allowedMethods())
 
 module.exports = router

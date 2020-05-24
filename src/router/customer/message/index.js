@@ -163,6 +163,7 @@ router
 .post('/', async (ctx) => {
   let res
   let errMsg
+  let templateMessage = { ...TEMPLATE_MESSAGE }
   const { body: {  
     content,
     type,
@@ -181,7 +182,7 @@ router
   }))
   .then(data => {
     const { _id } = data
-    const { content:template } = TEMPLATE_MESSAGE
+    const { content:template } = templateMessage
     let newContent = { ...template }
     switch(type) {
       case "image":
@@ -210,18 +211,24 @@ router
         }
         break 
     }
-    return mongo.connect("message")
-    .then(db => db.insertOne({
-      ...TEMPLATE_MESSAGE,
+    templateMessage = {
+      ...templateMessage,
       user_info: {
         type: 'user',
-        id: _id
+        id: _id,
       },
       send_to,
-      content: {...newContent},
-      readed:false,
+      content: { ...newContent },
+      readed: false,
       create_time: Date.now()
-    }))
+    }
+  })
+  .then(_ => mongo.connect("message"))
+  .then(db => db.insertOne({
+    ...templateMessage
+  }))
+  .then(_ => {
+    //消息传递
   })
   .catch(err => {
     console.log(err)

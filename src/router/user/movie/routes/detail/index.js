@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Simple = require('./routes/simple')
-const { MongoDB, withTry } = require("@src/utils")
+const { MongoDB } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
@@ -24,6 +24,11 @@ router
   }))
   .then(data => {
     const {
+      rest={},
+      ...nextData
+    } = data
+    result = { ...nextData, store: false }
+    const {
       info: {
         actor,
         director,
@@ -35,8 +40,7 @@ router
       comment,
       author,
       same_film,
-    } = data
-    result = { ...data }
+    } = result
     return Promise.all([
       mongo.connect("actor")
       .then(db => db.find({
@@ -44,11 +48,22 @@ router
       }, {
         projection: {
           name: 1,
-          other: 1,
+          "other.avatar": 1,
           _id: 0
         }
       }))
-      .then(data => data.toArray()),
+      .then(data => data.toArray())
+      .then(data => [
+        ...data,
+        ...(
+          (rest.actor || []).map(r => ({
+            name: r,
+            other: {
+              avatar: null
+            }
+          }))
+        )
+      ]),
       mongo.connect("director")
       .then(db => db.find({
         _id: { $in: [...director] }
@@ -58,7 +73,15 @@ router
           _id: 0
         }
       }))
-      .then(data => data.toArray()),
+      .then(data => data.toArray())
+      .then(data => [
+        ...data,
+        ...(
+          (rest.director || []).map(r => ({
+            name: r
+          }))
+        )
+      ]),
       mongo.connect("district")
       .then(db => db.find({
         _id: { $in: [...district] }
@@ -68,7 +91,15 @@ router
           _id: 0
         }
       }))
-      .then(data => data.toArray()),
+      .then(data => data.toArray())
+      .then(data => [
+        ...data,
+        ...(
+          (rest.district || []).map(r => ({
+            name: r
+          }))
+        )
+      ]),
       mongo.connect("classify")
       .then(db => db.find({
         _id: { $in: [...classify] }
@@ -78,7 +109,15 @@ router
           _id: 0
         }
       }))
-      .then(data => data.toArray()),
+      .then(data => data.toArray())
+      .then(data => [
+        ...data,
+        ...(
+          (rest.classify || []).map(r => ({
+            name: r
+          }))
+        )
+      ]),
       mongo.connect("language")
       .then(db => db.find({
         _id: { $in: [...language] }
@@ -88,7 +127,15 @@ router
           name: 1
         }
       }))
-      .then(data => data.toArray()),
+      .then(data => data.toArray())
+      .then(data => [
+        ...data,
+        ...(
+          (rest.language || []).map(r => ({
+            name: r
+          }))
+        )
+      ]),
       mongo.connect("tag")
       .then(db => db.find({
         _id: { $in: [...tag] }
@@ -194,7 +241,7 @@ router
           film,
           name: name.name
         }
-      })
+      }).filter(f => !!f)
     }
   })
   .catch(err => {

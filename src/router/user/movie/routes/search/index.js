@@ -8,33 +8,6 @@ const { MongoDB } = require('@src/utils')
 // 没有找到则遍历电影数据库一一查找字段进行匹配，匹配则记录，并添加至match_movies
 // 返回
 
-// const text = ''
-// const [, data] = await withTry(mongo.find)("_search_", {
-// 	key_word: /\/i
-// }, {
-// 	key_word: 1,
-// 	match_texts: 1,
-// 	match_movies: 1
-// })
-// //无匹配关键词
-// if(!data.length) {
-// 	const [, movie_list] = await withTry(mongo.find)("_movie_")
-// 	movie_list.
-// }else {
-// 	let movies = data.map(d => d.match_movies).flat(Infinity).reduce((acc, item) => {
-// 		if(!acc.includes(item)) {
-// 			acc.push(item)
-// 		}
-// 		return acc
-// 	}, [])
-// 	mongo.find("_movie_", {
-// 		$or: data.map(d => {
-// 			const { match_movies } = d
-// 			return {_id: }
-// 		})
-// 	})
-// }
-
 const router = new Router()
 const mongo = MongoDB()
 
@@ -42,7 +15,6 @@ const mongo = MongoDB()
 
 router
 .get('/', async(ctx) => {
-  ctx.body = '关键词搜索'
   const { 
     content, 
     area, 
@@ -53,8 +25,8 @@ router
     sort, 
     time, 
     fee, 
-    currPage, 
-    pageSize 
+    currPage=0, 
+    pageSize=30 
   } = ctx.query
   
 })

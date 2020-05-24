@@ -78,9 +78,43 @@ const withTry = (callback) => {
   }
 }
 
+//媒体内容上传处理
+const dealMedia = () => {
+
+}
+
+//错误处理
+const dealErr = (ctx) => {
+  return (err) => {
+    let res = { success: false }
+    if(err && err.errMsg) {
+      const { status=500, ...nextErr } = err
+      res = {
+        ...res,
+        res: {
+          ...nextErr
+        }
+      }
+    }else {
+      res = {
+        ...res,
+        res: {
+          errMsg: err
+        }
+      }
+    }
+    return {
+      err: true,
+      res
+    }
+  }
+}
+
 module.exports = {
   isType,
   isEmpty,
   flat,
-  withTry
+  withTry,
+  dealMedia,
+  dealErr
 }

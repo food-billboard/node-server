@@ -44,7 +44,11 @@ router
     }))
   })
   .then(data => {
-    result = {...data, store}
+    const {
+      rest={},
+      ...nextData
+    } = data
+    result = {...nextData, store}
     const {
       info: {
         actor,
@@ -69,7 +73,18 @@ router
           "other.avatar": 1
         }
       }))
-      .then(data => data.toArray()),
+      .then(data => data.toArray())
+      .then(data => [
+        ...data,
+        ...(
+          (rest.actor || []).map(r => ({
+            name: r,
+            other: {
+              avatar: null
+            }
+          }))
+        )
+      ]),
       mongo.connect("director")
       .then(db => db.find({
         _id: { $in: [...director] }
@@ -79,7 +94,15 @@ router
           _id: 0
         }
       }))
-      .then(data => data.toArray()),
+      .then(data => data.toArray())
+      .then(data => [
+        ...data,
+        ...(
+          (rest.director || []).map(r => ({
+            name: r
+          }))
+        )
+      ]),
       mongo.connect("district")
       .then(db => db.find({
         _id: { $in: [...district] }
@@ -89,7 +112,15 @@ router
           _id: 0
         }
       }))
-      .then(data => data.toArray()),
+      .then(data => data.toArray())
+      .then(data => [
+        ...data,
+        ...(
+          (rest.district || []).map(r => ({
+            name: r
+          }))
+        )
+      ]),
       mongo.connect("classify")
       .then(db => db.find({
         _id: { $in: [...classify] }
@@ -99,7 +130,15 @@ router
           _id: 0
         }
       }))
-      .then(data => data.toArray()),
+      .then(data => data.toArray())
+      .then(data => [
+        ...data,
+        ...(
+          (rest.classify || []).map(r => ({
+            name: r
+          }))
+        )
+      ]),
       mongo.connect("language")
       .then(db => db.find({
         _id: { $in: [...language] }
@@ -109,7 +148,15 @@ router
           _id: 0
         }
       }))
-      .then(data => data.toArray()),
+      .then(data => data.toArray())
+      .then(data => [
+          ...data,
+          ...(
+            (rest.language || []).map(r => ({
+              name: r
+            }))
+          )
+        ]),
       mongo.connect("tag")
       .then(db => db.find({
         _id: { $in: [...tag] }
@@ -187,10 +234,10 @@ router
     const [ actor, director, district, classify, language, tag, comment, author, same_film ] = data
     const { 
       info,
-      same_film: _same_film,
       total_rate,
       rate_person,
-      nextResult
+      nextResult,
+      same_film: originSameFilm
     } = result
     result = {
       ...nextResult,
@@ -206,7 +253,17 @@ router
       rate: total_rate / rate_person,
       comment,
       author,
-      same_film
+      same_film: originSameFilm.map(origin => {
+        const { film, ...nextO } = origin
+        const [name] = same_film.filter(s => {
+          return mongo.equalId(s._id, film)
+        })
+        if(name) return {
+          ...nextO,
+          film,
+          name: name.name
+        }
+      }).filter(f => !!f)
     }
     return result
   })
