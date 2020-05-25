@@ -71,6 +71,18 @@ const verifyTokenToData = (ctx) => {
   const token = authorization.split(' ')[1]
   try { 
     const { middel, ...nextToken } = verifyToken(token)
+    if(middel !== MIDDEL) return ['401', null]
+    return [null, nextToken]
+  }catch(err) {
+    return [err, null]
+  }
+}
+
+//socket验证token
+const verifySocketIoToken = token => {
+  try {
+    const { middel, ...nextToken } = verifyToken(token)
+    if(middel !== MIDDEL) return ['401', null]
     return [null, nextToken]
   }catch(err) {
     return [err, null]
@@ -81,5 +93,6 @@ module.exports = {
   encoded,
   signToken,
   middlewareVerifyToken,
-  verifyTokenToData
+  verifyTokenToData,
+  verifySocketIoToken
 }
