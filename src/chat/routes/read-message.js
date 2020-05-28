@@ -2,16 +2,46 @@ const { MongoDB } = require("@src/utils")
 
 const mongo = MongoDB()
 
-const readMessage = async (data) => {
+const readMessage = socket => async (data) => {
   const { _id } = data
+  const [, token] = verifyTokenToData(data)
+  const { mobile } = token
   let errMsg
   let res
-  await mongo.connect("message")
-    .then(db => db.updateOne({
-      _id: mongo.dealId(_id)
-    }, {
-      $set: { readed: true }
-    }))
+  let mine
+  await mongo.connect("user")
+  .then(db => db.findOne({
+    mobile: Number(mobile)
+  }, {
+    projection: {
+      _id: 1 
+    }
+  }))
+  .then(data => {
+    const { _id } = data
+    mine = _id
+  })
+  .then(_ => mongo.connect("room"))
+  .then(db => db.updateOne({
+    _id: mongo.dealId(_id)
+  }, {
+    $set: { "member.$[message].message.$[user].readed": true }
+  }, {
+    arrayFilters: [
+      {
+        message: {
+          $type: 'object'
+        },
+        "message.user": mine
+      },
+      {
+        user: {
+          $type: 'object'
+        },
+        "user.readed": false
+      }
+    ]
+  }))
   .catch(err => {
     console.log(err)
     errMsg = err
@@ -32,7 +62,7 @@ const readMessage = async (data) => {
     }
   }
 
-  return res
+  socket.emit("put", JSON.stringify(res))
 }
 
 module.exports = readMessage

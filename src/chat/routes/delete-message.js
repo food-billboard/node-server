@@ -2,17 +2,30 @@ const { MongoDB } = require("@src/utils")
 
 const mongo = MongoDB()
 
-const deleteMessage = async(data) => {
+const deleteMessage = socket => async(data) => {
   const { _id } = data
+  const [, token] = verifyTokenToData(data)
+  const { mobile } = token
   let res
   let errMsg
-  await mongo.connect("message")
-  .then(db => db.deleteOne({
-    _id: mongo.dealId(_id)
+  await mongo.connect("user")
+  .then(db => db.findOne({
+    mobile: Number(mobile)
+  }, {
+    _id: 1
   }))
+  .then(data => {
+    const { _id:userId } = data
+    mongo.connect("room")
+    .then(db => db.updateOne({
+      _id: mongo.dealId(_id),
+      "member.user": userId
+    }, {
+      $set: { "member.$.message": [] }
+    }))
+  })
   .catch(err => {
     errMsg = err
-    console.log(err)
     return false
   })
 
@@ -30,7 +43,7 @@ const deleteMessage = async(data) => {
     }
   }
 
-  return res
+  socket.emit("delete", JSON.stringify(res))
 }
 
 module.exports = deleteMessage

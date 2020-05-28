@@ -39,48 +39,70 @@ const verifyToken = token => jwt.verify(token, SECRET)
 //中间件验证token
 const middlewareVerifyToken = async (ctx, next) => {
   const { header: {authorization} } = ctx.request
-  if(!authorization) return ['过期', null]
-  const token = authorization.split(' ')[1]
-  try{
-    const { middel } = verifyToken(token)
-    if(MIDDEL === middel) {
-      ctx.status = 200
-      await next()
-    }else {
-      ctx.status = 401
-      ctx.body = JSON.stringify({
-        success: false,
-        res: null
-      })
+  const [err,] = getToken(authorization)
+  if(!err) {
+    ctx.status = 200
+    await next()
+  }else {
+    switch(err) {
+      case '400':
+        ctx.status = 400
+        ctx.body = JSON.stringify({
+          success: false,
+          res: {
+            errMsg: '参数错误'
+          }
+        })
+        break
+      case '401':
+        ctx.status = 401
+        ctx.body = JSON.stringify({
+          success: false,
+          res: {
+            errMsg: '未登录'
+          }
+        })
+        break
+      default:
+        ctx.status = 500
+        ctx.body = JSON.stringify({
+          success: false,
+          res: {
+            errMsg: '服务端错误'
+          }
+        })
     }
-  }catch(err) {
-    ctx.status = 401
-    ctx.body = JSON.stringify({
-      success: false,
-      res: {
-        data: '请求失败'
-      }
-    })
+  }
+}
+
+//socket.io中间件验证token
+const middlewareVerifyTokenForSocketIo = async(socket, next) => {
+  const { request: { header: { authorization } } } = socket
+  const [err, token] = getToken(authorization)
+  if(!err) {
+    next()
+  }else {
+    
   }
 }
 
 //token验证并返回内容
 const verifyTokenToData = (ctx) => {
   const { header: {authorization} } = ctx.request
-  if(!authorization) return ['过期', null]
-  const token = authorization.split(' ')[1]
-  try { 
-    const { middel, ...nextToken } = verifyToken(token)
-    if(middel !== MIDDEL) return ['401', null]
-    return [null, nextToken]
-  }catch(err) {
-    return [err, null]
-  }
+  return getToken(authorization)
 }
 
 //socket验证token
-const verifySocketIoToken = token => {
-  try {
+const verifySocketIoToken = socket => {
+  // const { handshake: { header: { authorization } } } = socket
+  const { request: { headers: { authorization } } } = socket
+  return getToken(authorization)
+}
+
+const getToken = (authorization) => {
+  if(!authorization) return ['400', null]
+  const token = authorization.split(' ')[1]
+  try { 
     const { middel, ...nextToken } = verifyToken(token)
     if(middel !== MIDDEL) return ['401', null]
     return [null, nextToken]
@@ -93,6 +115,7 @@ module.exports = {
   encoded,
   signToken,
   middlewareVerifyToken,
+  middlewareVerifyTokenForSocketIo,
   verifyTokenToData,
   verifySocketIoToken
 }

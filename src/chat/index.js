@@ -1,8 +1,10 @@
 const Koa = require("koa")
+require('module-alias/register')
 const Ws = require('socket.io')
 const Cors = require("koa-cors")
 const Compress = require('koa-compress')
 const http = require('http')
+const { middlewareVerifyTokenForSocketIo } = require("@src/utils")
 const Router = require("./routes")
 
 const app = new Koa()
@@ -13,4 +15,6 @@ server.listen(3000)
 
 const io = new Ws(server, {/**config */})
 
-io.on("connection", Router)
+io
+.use(middlewareVerifyTokenForSocketIo)
+.on("connection", Router)
