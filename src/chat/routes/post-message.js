@@ -43,6 +43,7 @@ const sendMessage = socket => async (data) => {
     })),
     mongo.connect("room")
     .then(db => db.findOne({
+      origin: false,
       _id: objectRoomId
     }, {
       type,
@@ -105,10 +106,11 @@ const sendMessage = socket => async (data) => {
     const { _id:messageId } = ops[0]
     return messageId
   })
-  .then(data => {
-    mongo.connect("room")
+  .then(async (data) => {
+    const memberData = await mongo.connect("room")
     .then(db => db.updateOne({
       _id: objectRoomId,
+      origin: false,
       "member.user": { $ne: mine }
     }, {
       $push: { 
@@ -119,34 +121,72 @@ const sendMessage = socket => async (data) => {
       }
     }))
     .then(_ => mongo.connect("room"))
-    .then(db => db.updateOne({
+    .then(db => db.findAndUpdateOne({
       _id: objectRoomId,
+      origin: false,
       "member.user": mine
     }, {
       $push: { "member.$.message": { 
         id: data,
         readed: true
       } }
+    }, {
+      projection: {
+        member: 1
+      }
     }))
     return {
-      ...templateMessage,
-      _id: data
+      message: {
+        ...templateMessage,
+        _id: data
+      },
+      roomData: {
+        ...memberData
+      }
     }
   })
-  .then(async (message) => {
-    //用户在线
-    if('判断接收方是否在线') {
-      const res = {
-        _id,
-        type,
-        content,
-        create_time
-      } = message
-      socket.emit('message', JSON.stringify({success: true, data: res}))
-    }else {
-      //刷新获取所有数据
-      getMessage(socket)({})
-    }
+  .then(async (data) => {
+    const { message, memberData: { member } } = data
+    let online = []
+    let offline = []
+    //将在线和非在线归类
+    member.forEach(m => {
+      const { 
+        user,
+        status,
+      } = m
+      //用户在线
+      if(status === 'online') {
+        online.push(user)
+      }else {
+        offline.push(user)
+      }
+    })
+
+    //对在线的直接进行广播
+    const res = {
+      _id,
+      type,
+      content,
+      create_time
+    } = message
+    //io.to()
+    //对不在线的进行id查找并查找其socketid
+    return mongo.connect("user")
+    .then(db => db.find({
+      _id: { $in: [ ...offline ] }
+    }, {
+      projection: {
+        socket: 1
+      }
+    }))
+    .then(data => data.toArray())
+    .then(data => {
+      //外层查找相应的socketid
+    })
+  })
+  .then(_ => {
+    //通知发送方发送完成
     socket.emit("post", JSON.stringify({ success: true, res: null }))
   })
   .catch(err => {

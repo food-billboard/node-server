@@ -21,7 +21,7 @@ function createInitialUserInfo({mobile, password}) {
     allow_many: false,
     create_time: Date.now(),
     modified_time: Date.now(),
-    status: 'SIGNIN'
+    status: 'SIGNIN',
   }
 }
 

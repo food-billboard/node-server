@@ -77,7 +77,7 @@ const middlewareVerifyToken = async (ctx, next) => {
 
 //socket.io中间件验证token
 const middlewareVerifyTokenForSocketIo = async(socket, next) => {
-  const { request: { header: { authorization } } } = socket
+  const { request: { headers: { authorization } } } = socket
   const [err, token] = getToken(authorization)
   if(!err) {
     next()
@@ -94,7 +94,6 @@ const verifyTokenToData = (ctx) => {
 
 //socket验证token
 const verifySocketIoToken = socket => {
-  // const { handshake: { header: { authorization } } } = socket
   const { request: { headers: { authorization } } } = socket
   return getToken(authorization)
 }
@@ -111,11 +110,22 @@ const getToken = (authorization) => {
   }
 }
 
+const otherToken = (token) => {
+  try { 
+    const { middel, ...nextToken } = verifyToken(token)
+    if(middel !== MIDDEL) return ['401', null]
+    return [null, nextToken]
+  }catch(err) {
+    return [err, null]
+  }
+}
+
 module.exports = {
   encoded,
   signToken,
   middlewareVerifyToken,
   middlewareVerifyTokenForSocketIo,
   verifyTokenToData,
-  verifySocketIoToken
+  verifySocketIoToken,
+  otherToken
 }

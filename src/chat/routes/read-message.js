@@ -1,10 +1,10 @@
-const { MongoDB } = require("@src/utils")
+const { MongoDB, verifySocketIoToken } = require("@src/utils")
 
 const mongo = MongoDB()
 
 const readMessage = socket => async (data) => {
   const { _id } = data
-  const [, token] = verifyTokenToData(data)
+  const [, token] = verifySocketIoToken(data)
   const { mobile } = token
   let errMsg
   let res
@@ -23,6 +23,7 @@ const readMessage = socket => async (data) => {
   })
   .then(_ => mongo.connect("room"))
   .then(db => db.updateOne({
+    origin: false,
     _id: mongo.dealId(_id)
   }, {
     $set: { "member.$[message].message.$[user].readed": true }

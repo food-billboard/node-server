@@ -38,3 +38,5 @@ router.get('/', async (ctx) => {
   
   ctx.body = JSON.stringify(res)
 })
+
+module.exports = router

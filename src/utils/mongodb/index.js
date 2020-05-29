@@ -512,7 +512,6 @@ class MongoDB {
   isValid = (id) => ObjectID.isValid(id) 
 
   equalId = (targetA, targetB) => {
-    console.log(targetA, targetB)
     if(targetA.equals) return targetA.equals(targetB)
     if(targetB.equals) return targetB.equals(targetA)
     return targetA == targetB

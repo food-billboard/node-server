@@ -1,10 +1,10 @@
-const { MongoDB } = require("@src/utils")
+const { MongoDB, otherToken, verifySocketIoToken } = require("@src/utils")
 
 const mongo = MongoDB()
 
 const deleteMessage = socket => async(data) => {
   const { _id } = data
-  const [, token] = verifyTokenToData(data)
+  const [, token] = verifySocketIoToken(data)
   const { mobile } = token
   let res
   let errMsg
@@ -19,7 +19,8 @@ const deleteMessage = socket => async(data) => {
     mongo.connect("room")
     .then(db => db.updateOne({
       _id: mongo.dealId(_id),
-      "member.user": userId
+      "member.user": userId,
+      origin: false,
     }, {
       $set: { "member.$.message": [] }
     }))

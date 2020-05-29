@@ -1,8 +1,8 @@
-const { MongoDB } = require("@src/utils")
+const { MongoDB, verifySocketIoToken } = require("@src/utils")
 const mongo = MongoDB()
 
 const getMessageList = socket => async (data) => {
-  const [, token] = verifyTokenToData(data)
+  const [, token] = verifySocketIoToken(data)
   const { mobile } = token
   let res
   let errMsg
@@ -22,6 +22,7 @@ const getMessageList = socket => async (data) => {
   })
   .then(_ => mongo.connect("room"))
   .then(db => db.find({
+    origin: false,
     "member.user": mine
   }))
   .then(data => data.toArray())
@@ -30,7 +31,7 @@ const getMessageList = socket => async (data) => {
   })
   .then(_ => {
     const userList = []
-    const messageList = []
+    let messageList = []
     result.forEach(re => {
       const { member, type } = re
       let message
@@ -41,7 +42,7 @@ const getMessageList = socket => async (data) => {
       if(type === 'chat') {
         member.forEach(m => {
           const { user } = m
-          if(!userList.some(u => mongo.equalId(u, user)) && !mongo.equalId(u, mine)) {
+          if(!userList.some(u => mongo.equalId(u, user) && !mongo.equalId(u, mine))) {
             userList.push(user)
           } 
         })
@@ -52,7 +53,7 @@ const getMessageList = socket => async (data) => {
     return Promise.all([
       mongo.connect("user")
       .then(db => db.find({
-        _id: { $in: [...userlist] }
+        _id: { $in: [...userList] }
       }, {
         projection: {
           avatar: 1,
@@ -77,7 +78,13 @@ const getMessageList = socket => async (data) => {
   })
   .then(data => {
     const [ userList, messageList ] = data
-    return result.map(re => {
+    return result.filter(re => {
+      const { member, type, info, ...nextRe } = re
+      const index = member.findIndex(val => mongo.equalId(val.user, mine))
+      let message = member[index].message
+      return !!message.length
+    })
+    .map(re => {
       const { member, type, info, ...nextRe } = re
       const index = member.findIndex(val => mongo.equalId(val.user, mine))
       let message = member[index].message
@@ -87,7 +94,7 @@ const getMessageList = socket => async (data) => {
       let lastData = ''
       if(type === 'chat') {
         member.forEach(mem => {
-          const index = userlist.findIndex(val => {
+          const index = userList.findIndex(val => {
             const { _id } = val
             return mongo.equalId(_id, mem)
           })
@@ -101,7 +108,7 @@ const getMessageList = socket => async (data) => {
         })
       }
       message.forEach(mes => {
-        const index = messagelist.findIndex(val => mongo.equalId(mes.id, val._id))
+        const index = messageList.findIndex(val => mongo.equalId(mes.id, val._id))
         if(~index) {
           const { content: {text}, create_time }  = messageList[index]
           if(create_time > time) {
@@ -133,7 +140,6 @@ const getMessageList = socket => async (data) => {
   })
   
   if(errMsg) {
-    ctx.status = 500
     res = {
       success: false,
       res: {

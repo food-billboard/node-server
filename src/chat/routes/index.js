@@ -3,7 +3,8 @@ const getMessage = require('./get-message')
 const readMessage = require('./read-message')
 const sendMessage = require('./post-message')
 const getDetail = require('./get-detail')
-const joinRoom = require('./join-room')
+const disconnection = require('./disconnection')
+const { joinRoom, leaveRoom } = require('./join-room')
 
 //对用户发送的媒体资源进行单独存储（对文件命名添加特殊标识前缀，在静态资源访问时做判断）
 //对存在访问权限的文件的用户访问做权限判断。
@@ -21,4 +22,8 @@ module.exports = (socket) => {
   socket.on("message", getDetail(socket))
   //加入聊天室
   socket.on("join", joinRoom(socket))
+  //离开聊天室
+  socket.on('leave', leaveRoom(socket))
+  //断开连接
+  socket.on("disconnecting", disconnection(socket))
 }

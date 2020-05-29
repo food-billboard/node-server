@@ -5,9 +5,10 @@ const mongo = MongoDB()
 const getDetail = socket => async (data) => {
   const [, token] = verifySocketIoToken(data)
   const { mobile } = token
-  const { _id:roomId, startTime, pageSize=30, messageId } = data
+  const { _id:roomId, startTime=Date.now(), pageSize=30, messageId } = data
   let res
   let errMsg
+  let mine
   const result = await mongo.connect("user")
   .then(db => db.findOne({
     mobile: Number(mobile)
@@ -18,8 +19,10 @@ const getDetail = socket => async (data) => {
   }))
   .then(data => {
     const { _id } = data
+    mine = _id
     return mongo.connect("room")
     .then(db => db.findOne({
+      origin: false,
       _id: mongo.dealId(roomId),
       "member.user": { $in: [_id] }
     }))
@@ -30,16 +33,18 @@ const getDetail = socket => async (data) => {
   })
   .then(data => {
     const {
-      message
+      member
     } = data
+    let message = []
+    const userMessage = member.filter(m => mongo.equalId(m.user, mine))
+    if(userMessage.length) message = [...userMessage[0].message]
     let messageIdList = []
     //单条数据
     if(messageId) {
       messageIdList.push(mongo.dealId(messageId))
     }else {
-      messageIdList.push(message.map(m => m.id))
+      messageIdList = [...messageIdList, ...message.map(m => m.id)]
     }
-
     return mongo.connect("message")
     .then(db => db.find({
       _id: { $in: [...messageIdList] },
@@ -87,7 +92,6 @@ const getDetail = socket => async (data) => {
   })
 
   if(errMsg) {
-    ctx.status = 500
     res = {
       success: false,
       res: {
@@ -103,7 +107,7 @@ const getDetail = socket => async (data) => {
     }
   }
 
-  socket.emit("detail", JSON.stringify(res))
+  socket.emit("message", JSON.stringify(res))
   
 }
 
