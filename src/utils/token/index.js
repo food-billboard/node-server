@@ -1,10 +1,12 @@
 const jwt = require('jsonwebtoken')
+const MongoDB = require("../mongodb")
 let crypto;
 try {
   crypto = require('crypto');
 } catch (err) {
   console.log('不支持 crypto');
 }
+const mongo = MongoDB()
 
 //秘钥
 const SECRET = "________SE__C_R__E_T"
@@ -76,14 +78,37 @@ const middlewareVerifyToken = async (ctx, next) => {
 }
 
 //socket.io中间件验证token
-const middlewareVerifyTokenForSocketIo = async(socket, next) => {
-  const { request: { headers: { authorization } } } = socket
-  const [err, token] = getToken(authorization)
-  if(!err) {
-    next()
-  }else {
-    
+const middlewareVerifyTokenForSocketIo = socket => async (packet, next) => {
+  const whiteList = ['disconnecting', 'get']
+  const midList = ['message', 'delete', 'leave', 'put', 'join']
+  const [name, data] = packet
+  const [, token] = verifySocketIoToken(socket)
+  if(token) return next()
+  if(whiteList.includes(name)) return next()
+  if(midList.includes(name)) {
+    const { _id } = data
+    if(_id) {
+      const data = await mongo.connect("room")
+      .then(db => db.findOne({
+        _id: mongo.dealId(_id),
+        type: 'system'
+      }, {
+        projection: {
+          _id: 1
+        }
+      }))
+      if(data) {
+        return next()
+      }
+    }
   }
+  // next(new Error('401 unAuthorized'))
+  socket.emit(name, JSON.stringify({
+    success: false,
+    res: {
+      errMsg: 401
+    }
+  }))
 }
 
 //token验证并返回内容
@@ -94,8 +119,10 @@ const verifyTokenToData = (ctx) => {
 
 //socket验证token
 const verifySocketIoToken = socket => {
-  const { request: { headers: { authorization } } } = socket
-  return getToken(authorization)
+  // const { handshake: { headers: { authorization } } } = socket
+  // return getToken(authorization)
+  const { handshake: { query: { token } } } = socket
+  return otherToken(token)
 }
 
 const getToken = (authorization) => {

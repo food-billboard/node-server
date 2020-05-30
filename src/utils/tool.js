@@ -89,6 +89,7 @@ const dealErr = (ctx) => {
     let res = { success: false }
     if(err && err.errMsg) {
       const { status=500, ...nextErr } = err
+      ctx.status = status
       res = {
         ...res,
         res: {
@@ -96,6 +97,7 @@ const dealErr = (ctx) => {
         }
       }
     }else {
+      ctx.status = 500
       res = {
         ...res,
         res: {
@@ -103,6 +105,7 @@ const dealErr = (ctx) => {
         }
       }
     }
+    console.log(err)
     return {
       err: true,
       res

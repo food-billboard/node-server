@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MongoDB, encoded, signToken, withTry } = require('@src/utils')
+const { MongoDB, encoded, signToken, dealErr } = require('@src/utils')
 
 const router = new Router()
 const mongo = MongoDB()
@@ -27,63 +27,64 @@ function createInitialUserInfo({mobile, password}) {
 
 router
 .post('/', async(ctx) => {
-  const { body: { mobile, password } } = ctx.request
+  const { body: { mobile, password, uid } } = ctx.request
   let res
-  let errMsg
   //判断账号是否存在
   const data = await mongo.connect("user")
   .then(db => db.findOne({mobile}, {projection: {mobile: 1}}))
-  .catch(err => {
-    errMsg = err
+  .then(data => data && data.mobile)
+  .then(mobile => {
+    if(mobile) return Promise.reject({errMsg: '账号已存在', status: 403})
   })
-  if(errMsg) {
-    ctx.status = 500
-    res = {
-      success: false,
-      res: {
-        errMsg
-      }
+  .then(_ => mongo.connect("user"))
+  .then(db => db.insertOne(createInitialUserInfo({ mobile, password })))
+  .then(data => {
+    const { ops } = data
+    const { _id } = ops[0]
+    const token = signToken({mobile, password})
+    return {
+      avatar: '默认头像',
+      fans:0,
+      attention:0,
+      hot: 0,
+      _id,
+      token
     }
+  })
+  .then(async (data) => {
+    if(uid) {
+      const { _id } = data
+      await mongo.connect("room")
+      .then(db => db.updateOne({
+        origin: true,
+        "member.sid": uid
+      }, {
+        $set: { "member.$.user": _id }
+      }))
+    }
+    return data
+  })
+  .then(async (data) => {
+    const { _id } = data
+    await mongo.connect("room")
+    .then(db => db.updateOne({
+      origin: false,
+      type: 'system',
+      "member.user": { $nin: [ _id ] }
+    }, {
+      $push: { member: { message: [], user: _id, status: 'offline', create_time: Date.now(), modified_time: Date.now() } }
+    }))
+    return data
+  })
+  .catch(dealErr(ctx))
+
+  if(data && data.err) {
+    res = data.res
   }else {
-    if(data) {
-      ctx.status = 403
-      res = {
-        success: false,
-        res: {
-          errMsg: '账号已存在'
-        }
-      }
-    }else {
-      const data = await mongo.connect("user")
-      .then(db => db.insertOne(createInitialUserInfo({mobile, password})))
-      .catch(err => {
-        console.log(err)
-        errMsg = err
-        return false
-      })
-      if(errMsg) {
-        console.log(err)
-        ctx.status = 500
-        res = {
-          success: false,
-          res: {
-            errMsg
-          }
-        }
-      }else {
-        const { ops } = data
-        const { _id } = ops[0]
-        res = {
-          success: true,
-          res: {
-            avatar: '默认头像',
-            fans:0,
-            attention:0,
-            hot: 0,
-            _id,
-            token: signToken({mobile, password})
-          }
-        }
+    res = {
+      success: true,
+      res: {
+        data
       }
     }
   }

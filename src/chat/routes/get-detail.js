@@ -1,9 +1,10 @@
-const { MongoDB, verifySocketIoToken } = require("@src/utils")
+const { MongoDB, verifySocketIoToken, otherToken } = require("@src/utils")
 
 const mongo = MongoDB()
 
 const getDetail = socket => async (data) => {
-  const [, token] = verifySocketIoToken(data)
+  // const [, token] = verifySocketIoToken(data)
+  const [, token] = otherToken(data.token)
   const { mobile } = token
   const { _id:roomId, startTime=Date.now(), pageSize=30, messageId } = data
   let res
@@ -22,13 +23,12 @@ const getDetail = socket => async (data) => {
     mine = _id
     return mongo.connect("room")
     .then(db => db.findOne({
-      origin: false,
       _id: mongo.dealId(roomId),
       "member.user": { $in: [_id] }
     }))
   })
   .then(data => {
-    if(!data) return Promise.reject({ errMsg: '无权限', status: 403 })
+    if(!data) return Promise.reject({ errMsg: '无权限或不存在', status: 403 })
     return data
   })
   .then(data => {

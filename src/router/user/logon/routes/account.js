@@ -1,13 +1,12 @@
 const Router = require('@koa/router')
-const { MongoDB, signToken, encoded } = require("@src/utils")
+const { MongoDB, signToken, encoded, dealErr } = require("@src/utils")
 
 const router = new Router()
 const mongo = MongoDB()
 
 router.post('/', async(ctx) => {
-  const { body: {mobile, password} } = ctx.request
+  const { body: { mobile, password, uid } } = ctx.request
   let res
-  let errMsg
   const data = await mongo.connect("user")
   .then(db => db.findOneAndUpdate({
     mobile: Number(mobile),
@@ -26,42 +25,52 @@ router.post('/', async(ctx) => {
       attention:1
     }
   }))
-  .catch(err => {
-    errMsg = err
-    console.log(err)
-    return false
-  })
-
-  if(errMsg) {
-    ctx.status = 500
-    res = {
-      success: false,
-      res: {
-        errMsg
-      }
+  .then(data => {
+    if(data && !data.ok) return Promise.reject({errMsg: '账号或密码错误', status: 401})
+    const { value: { fans=[], attentions=[], password:_, ...nextData } } = data
+    const token = signToken({mobile, password})
+    return {
+      fans: fans.length,
+      attentions: attentions.length,
+      token,
+      ...nextData
     }
+  })
+  .then(async (data) => {
+    if(uid) {
+      const { _id } = data
+      await mongo.connect("room")
+      .then(db => db.updateOne({
+        origin: false,
+        "member.sid": uid,
+        "member.user": null
+      }, {
+        $set: { "member.$.user": _id }
+      }))
+    }
+    return data
+  })
+  .then(async (data) => {
+    const { _id } = data
+    await mongo.connect("room")
+    .then(db => db.updateOne({
+      origin: false,
+      type: 'system',
+      "member.user": { $ne: _id }
+    }, {
+      $push: { member: { message: [], user: _id, status: 'offline', create_time: Date.now(), modified_time: Date.now() } }
+    }))
+    return data
+  })
+  .catch(dealErr(ctx))
+
+  if(data && data.err) {
+    res = data.res
   }else {
-    if(data && data.ok) {
-      const { value: { fans=[], attentions=[], password:_, ...nextData } } = data
-      const token = signToken({mobile, password})
-      res = {
-        success: true,
-        res: {
-          data: {
-            fans: fans.length,
-            attentions: attentions.length,
-            token,
-            ...nextData
-          }
-        }
-      }
-    }else {
-      ctx.status = 401
-      res = {
-        success: false,
-        res: {
-          errMsg: '账号或密码错误'
-        }
+    res = {
+      success: true,
+      res: {
+        data
       }
     }
   }

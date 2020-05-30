@@ -1,8 +1,9 @@
-const { MongoDB, verifySocketIoToken } = require("@src/utils")
+const { MongoDB, verifySocketIoToken, otherToken } = require("@src/utils")
 const mongo = MongoDB()
 
 const getMessageList = socket => async (data) => {
-  const [, token] = verifySocketIoToken(data)
+  // const [, token] = verifySocketIoToken(data)
+  const [, token] = otherToken(data.token)
   const { mobile } = token
   let res
   let errMsg
@@ -22,7 +23,6 @@ const getMessageList = socket => async (data) => {
   })
   .then(_ => mongo.connect("room"))
   .then(db => db.find({
-    origin: false,
     "member.user": mine
   }))
   .then(data => data.toArray())
@@ -79,7 +79,7 @@ const getMessageList = socket => async (data) => {
   .then(data => {
     const [ userList, messageList ] = data
     return result.filter(re => {
-      const { member, type, info, ...nextRe } = re
+      const { member } = re
       const index = member.findIndex(val => mongo.equalId(val.user, mine))
       let message = member[index].message
       return !!message.length

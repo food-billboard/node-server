@@ -519,5 +519,7 @@ class MongoDB {
   
 }
 
-module.exports = MongoDB
+module.exports = (url="mongodb://localhost:27017/__movie__", name="__movie__") => {
+  return new MongoDB(url, name)
+}
 

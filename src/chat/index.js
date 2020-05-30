@@ -2,7 +2,6 @@ const Koa = require("koa")
 require('module-alias/register')
 const Ws = require('socket.io')
 const http = require('http')
-const { middlewareVerifyTokenForSocketIo } = require("@src/utils")
 const { connection } = require('./utils')
 const Router = require("./routes")
 
@@ -15,6 +14,5 @@ server.listen(3001)
 const io = new Ws(server, {/**config */})
 
 io
-// .use(middlewareVerifyTokenForSocketIo)
 .use(connection)
-.on("connection", Router)
+.on("connection", Router) 
