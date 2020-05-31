@@ -3,54 +3,40 @@ const mongo = MongoDB()
 
 const disconnection = socket => async (_) => {
   const { id } = socket
-  const [, token] = verifySocketIoToken(socket)
-  if(token) {
-    const { mobile } = token
-    await mongo.connect("user")
-    .then(db => db.findOne({
-      mobile: Number(mobile)
-    }, {
-      projection: {
-        _id: 1
-      }
-    }))
-    .then(data => data && data._id)
-    .then(id => {
-      return mongo.connect("room")
+
+  await mongo.connect("room")
+  .then(db => db.findOneAndUpdate({
+    origin: true,
+    type: 'system',
+    "member.sid": id
+  }, {
+    $set: { 
+      "member.$.status": "offline",
+      "member.$.sid": null
+    }
+  }, {
+    projection: {
+      "member.user": 1,
+      "member.sid": 1
+    }
+  }))
+  .then(data => {
+    if(data && data.value) {
+      const { value: { member } } = data
+      const [ mine ] = member.filter(m => m.sid === id)
+      const { user } = mine
+      mongo.connect("room")
       .then(db => db.updateMany({
-        origin: true,
-        "member.user": id,
+        "member.user": user,
         "member.status": 'online'
       }, {
-        $set: { 
-          "member.$.status": "offline",
-          "member.$.sid": null
-        }
+        $set: { "member.$.status": 'offline' }
       }))
-    })
-    .catch(err => {
-      console.log(err)
-      return false
-    })
-  }else {
-    await mongo.connect("room")
-    .then(db => db.findOneAndUpdate({
-      origin: true,
-      "member.sid": id
-    }, {
-      $pull: { "member.sid": id  }
-    }, {
-      projection: {
-        _id: 1
-      }
-    }))
-    .then(async (data) => {
-      if(!data) return Promise.reject({errMsg: '断连失败', status: 500})
-    })
-    .catch(err => {
-      console.log(err)
-      return false
-    })
-  }
+    }
+    
+  })
+  .catch(err => {
+    console.log(err)
+  })
 }
 module.exports = disconnection

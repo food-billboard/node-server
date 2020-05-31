@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Api</title>
+  <link rel="stylesheet" type="text/css" href="./index.css" />
+</head>
+<body>
+  <header>
+    <h1>小程序Api文档</h1>
+  </header>
+  <section>
+    <h2>聊天相关</h2>
+    <ul>
+      <li>
+        <h4>delete 删除消息</h4>
+      </li>
+      <li>
+        <h4>disconnecting 断开连接</h4>
+      </li>
+      <li>
+        <h4>message 消息详情</h4>
+      </li>
+      <li>  
+        <h4>get 消息列表</h4>
+      </li>
+      <li>
+        <h4>join 加入房间</h4>
+      </li> 
+      <li>
+        <h4>leave 离开房间</h4>
+      </li>
+      <li>
+        <h4>post 发送消息</h4>
+      </li>
+      <li>
+        <h4>read 阅读消息</h4>
+      </li>
+    </ul>
+    <h2>小程序相关</h2>
+    <div>
+      <h4>Customer</h4>
+      <div>
+        <h5>manage</h5>
+        <ul>
+          <li>
+            <h6>/api/customer/manage/attention 用户关注</h6>
+            get
+          </li>
+          <li>
+            <h6>/api/customer/manage/attention 用户关注</h6>
+            put
+          </li>
+          <li>
+            <h6>/api/customer/manage/attention 取消关注</h6>
+            delete
+          </li>
+          <li>
+            <h6>/api/customer/manage/fans 粉丝 get</h6>
+          </li>
+          <li>
+            <h6>/api/customer/manage/comment 评论 get</h6>
+          </li>
+          <li>
+            <h6>/api/customer/manage/movie 发布电影 post</h6>
+          </li>
+          <li>
+            <h6>/api/customer/manage/movie 修改电影 put</h6>
+          </li>
+          <li>
+            <h6>/api/customer/manage/movie 获取发布的电影 get</h6>
+          </li>
+          <li>
+            <h6>/api/customer/manage/movie/store 获取发布的电影 get</h6>
+          </li>
+          <li>
+            <h6>/api/customer/manage/movie/detail 发布的电影信息(修改用) get</h6>
+          </li>
+          <li>
+            <h6>/api/customer/manage/movie/browser 浏览记录 get</h6>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h5>movie</h5>
+        <ul>
+          <li>
+            <h6>/api/customer/movie/detail 电影详情</h6>
+          </li>
+          <li>
+            <h6>/api/customer/movie/detail/store 收藏 put</h6>
+          </li>
+          <li>
+            <h6>/api/customer/movie/detail/store 取消收藏 delete</h6>
+          </li>
+          <li>
+            <h6>/api/customer/movie/detail/rate 评分 put</h6>
+          </li>
+          <li>
+            <h6>/api/customer/movie/detail/comment 评论用户 post</h6>
+          </li>
+          <li>
+            <h6>/api/customer/movie/detail/comment/movie 评论电影 post</h6>
+          </li>
+          <li>
+            <h6>/api/customer/movie/detail/comment/like 点赞 put</h6>
+          </li>
+          <li>
+            <h6>/api/customer/movie/detail/comment/like 取消点赞 delete</h6>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h5>user</h5>
+        <ul>
+          <li>
+            <h6>/api/customer/user 用户信息 get</h6>
+          </li>
+          <li>
+            <h6>/api/customer/user/comment 评论信息 get</h6>
+          </li>
+          <li>
+            <h6>/api/customer/user/comment 评论信息 get</h6>
+          </li>
+        </ul>
+      </div>
+      <h4>User</h4>
+      <div>
+        <h5>customer</h5>
+        <ul>
+          <li>
+            <h6>/api/user/customer 用户信息 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/customer/fans 用户粉丝 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/customer/fans 用户评论 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/customer/attention 用户关注 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/customer/movie 用户发布的电影 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/customer/movie/borwser 用户浏览记录 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/customer/movie 用户收藏的电影 get</h6>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h5>home</h5>
+        <ul>
+          <li>
+            <h6>/api/user/home/daily 每日上新 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/home/hot 热搜 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/home/notice 跑马灯 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/home/rank 排行榜 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/home/special 专题 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/home/swiper 轮播图 get</h6>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h5>logon</h5>
+        <ul>
+          <li>
+            <h6>/api/user/logon/signout 登录 post</h6>
+          </li>
+          <li>
+            <h6>/api/user/logon/register 注册 post</h6>
+          </li>
+          <li>
+            <h6>/api/user/logon/signout 登出 post</h6>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h5>movie</h5>
+        <ul>
+          <li>
+            <h6>/api/user/movie/classify 分类 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/movie/classify/specDropList 分类列表 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/movie/detail 电影详情 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/movie/detail/comment 电影评论 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/movie/detail/simple 电影详情简易 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/movie/detail/comment/list 电影评论列表 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/movie/detail/comment/detail 评论详情 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/movie/classify 排行榜 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/movie/classify/specDropList 排行榜列表 get</h6>
+          </li>
+          <li>
+            <h6>/api/user/movie/search</h6>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h5>setting</h5>
+        <ul>
+          <li>
+            <h6>/api/user/setting/info 小程序信息 get</h6>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  <footer>
+
+  </footer>
+</body>
+</html>

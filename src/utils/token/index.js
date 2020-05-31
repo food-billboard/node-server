@@ -80,7 +80,7 @@ const middlewareVerifyToken = async (ctx, next) => {
 //socket.io中间件验证token
 const middlewareVerifyTokenForSocketIo = socket => async (packet, next) => {
   const whiteList = ['disconnecting', 'get']
-  const midList = ['message', 'delete', 'leave', 'put', 'join']
+  const midList = ['message', 'leave', 'join']
   const [name, data] = packet
   const [, token] = verifySocketIoToken(socket)
   if(token) return next()

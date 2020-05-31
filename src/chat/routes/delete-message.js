@@ -8,7 +8,6 @@ const deleteMessage = socket => async(data) => {
   const [, token] = otherToken(data.token)
   const { mobile } = token
   let res
-  let errMsg
   await mongo.connect("user")
   .then(db => db.findOne({
     mobile: Number(mobile)
@@ -17,7 +16,7 @@ const deleteMessage = socket => async(data) => {
   }))
   .then(data => {
     const { _id:userId } = data
-    mongo.connect("room")
+    return mongo.connect("room")
     .then(db => db.updateOne({
       _id: mongo.dealId(_id),
       "member.user": userId,
@@ -25,24 +24,32 @@ const deleteMessage = socket => async(data) => {
       $set: { "member.$.message": [] }
     }))
   })
-  .catch(err => {
-    errMsg = err
-    return false
-  })
-
-  if(errMsg) {
-    res = {
-      success: false,
-      res: {
-        errMsg
-      }
-    }
-  }else {
+  .then(data => {
+    if(data && data.result && !data.result.nModified) return Promise.reject({ errMsg: '房间不存在或无内容可删除' })
     res = {
       success: true,
       res: null
     }
-  }
+  })
+  .catch(err => {
+    console.log(err)
+    if(err && err.errMsg) {
+      res = {
+        success: false,
+        res: {
+          ...err
+        }
+      }
+    }else {
+      res = {
+        success: false,
+        res: {
+          errMsg: err
+        }
+      }
+    }
+    return false
+  })
 
   socket.emit("delete", JSON.stringify(res))
 }

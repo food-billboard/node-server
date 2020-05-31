@@ -19,7 +19,7 @@ const TEMPLATE_MESSAGE = {
 }
 
 const sendMessage = socket => async (data) => {
-  let mine
+  let userInfo = {}
   let templateMessage = { ...TEMPLATE_MESSAGE }
   let originRoomId
   let originRoomMember
@@ -40,7 +40,9 @@ const sendMessage = socket => async (data) => {
       mobile: Number(mobile)
     }, {
       projection: {
-        _id: 1
+        _id: 1,
+        username: 1,
+        avatar: 1
       }
     })),
     mongo.connect("room")
@@ -63,9 +65,8 @@ const sendMessage = socket => async (data) => {
     }))
     .then(data => data.toArray())
   ])
-  .then(([userInfo, roomMember]) => {
-    const { _id } = userInfo
-    mine = _id
+  .then(([info, roomMember]) => {
+    userInfo = { ...info }
     let member
     let roomType
     let auth = true
@@ -82,7 +83,7 @@ const sendMessage = socket => async (data) => {
     })
 
     if(!auth) return Promise.reject({errMsg: '无法与系统建立聊天', status: 403})
-    if(!member.some(m => m.user && mongo.equalId(m.user, _id))) return Promise.reject({errMsg: '无权限', status: 403})
+    if(!member.some(m => m.user && mongo.equalId(m.user, userInfo._id) && m.status === 'online' )) return Promise.reject({errMsg: '无权限', status: 403})
 
     const { content:template } = templateMessage
     let newContent = { ...template }
@@ -117,7 +118,7 @@ const sendMessage = socket => async (data) => {
       ...templateMessage,
       user_info: {
         type: 'user',
-        id: _id,
+        id: userInfo._id,
       },
       room: objectRoomId,
       point_to: point_to ? point_to : null,
@@ -136,31 +137,40 @@ const sendMessage = socket => async (data) => {
   })
   .then(async (data) => {
     const memberData = await mongo.connect("room")
-    .then(db => db.updateMany({
+    .then(db => db.updateOne({
       _id: objectRoomId,
       origin: false,
+      "member.user": { $in: [ userInfo._id ] },
     }, {
       $push: { 
-        "member.message": {
+        "member.$[message].message": {
           id: data,
           readed: false 
         }
       }
+    }, {
+      arrayFilters: [
+        {
+          message: {
+            $type: 3
+          }
+        }
+      ]
     }))
     .then(_ => mongo.connect("room"))
     .then(db => db.findOneAndUpdate({
       _id: objectRoomId,
       origin: false,
-      "member.user": mine
+      "member.user": userInfo._id
     }, {
       $set: { "member.$[message].message.$[user].readed": true }
     }, {
-      arrayFilsters: [
+      arrayFilters: [
         {
           message: {
             $type: 'object'
           },
-          "message.user": mine
+          "message.user": userInfo._id
         },
         {
           user: {
@@ -197,23 +207,45 @@ const sendMessage = socket => async (data) => {
     } = message
     socket.to(roomId).emit("message", JSON.stringify(res))
     //对在线不在房间的用户发送消息
-    // let offlineUsersSocketId = offline.map(o => {
-    //   const index = originRoomMember.findIndex((val) => mongo.equalId(o, val.user))
-    //   if(~index) return originRoomMember[index].user
-    //   return false
-    // }).filter(user => user).forEach(user => socket.to(user).emit("get", {
-
-    // }))
+    offline.map(o => {
+      const index = originRoomMember.findIndex((val) => mongo.equalId(o, val.user) && !!val.sid)
+      if(~index) return originRoomMember[index].sid
+      return false
+    }).filter(sid => sid).forEach(sid => {
+        socket.to(sid).emit("new", {
+        ...res, 
+        username: userInfo.username
+      })
+    })
     
   })
   .then(_ => {
     //通知发送方发送完成
-    socket.emit("post", JSON.stringify({ success: true, res: null }))
+    res = {
+      success: true, 
+      res: null
+    }
   })
   .catch(err => {
     console.log(err)
-    socket.emit("post", JSON.stringify({ success: false, res: {err} }))
+    if(err && err.errMsg) {
+      res = {
+        success: false,
+        res: {
+          ...err
+        }
+      }
+    }else {
+      res = {
+        success: false,
+        res: {
+          errMsg: err
+        }
+      }
+    }
   })  
+
+  socket.emit("post", JSON.stringify(res))
 }
 
 module.exports = sendMessage
