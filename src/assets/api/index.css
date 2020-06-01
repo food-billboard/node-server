@@ -1,13 +1,354 @@
 html,
-body {
+body,
+ul {
   padding: 0;
   margin: 0;
 }
+body{
+  padding: 20px;
+}
+li {
+  list-style: none;
+}
 html{
-  background: radial-gradient(red, yellow, black);
-  background-repeat: no-repeat;
+  /* background: radial-gradient(red, yellow, black);
+  background-repeat: no-repeat; */
   height: 100%;
+}
+h6 {
+  margin: 0;
 }
 header {
   text-align: center;
+}
+
+.method{
+  padding: 5px 10px;
+  border-radius: 5px;
+  vertical-align: center;
+  color:white;
+}
+.show {
+  display:block;
+}
+.hide {
+  display: none;
+}
+.item {
+  height:30px;
+  border-bottom: 2px solid gray;
+  cursor: pointer;
+  margin:0;
+  margin-bottom: 10px;
+  line-height:30px;
+  text-indent: 5px;
+}
+.item:hover{
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.params,
+.response {
+  display:flex;
+  justify-content: flex-start;
+}
+.params-name,
+.res-code{
+  margin-right: 30px;
+}
+.params-name::before,
+.res-code::before,
+.params-description::before,
+.res-description::before {
+  color:black;
+  font-weight: bold;
+  display:block
+}
+.params-name::before{
+  content: 'Name';
+}
+.res-code::before {
+  content: 'Code'
+}
+.params-description::before,
+.res-description::before{
+  content: 'Description';
+}
+.params-name ul,
+.params-description ul{
+  width: 100%;
+}
+.params-name ul li,
+.params-description ul li{
+  width: 100%;
+  font-weight:normal;
+  min-height:40px;
+  font-size: 15px;
+  color:rgba(0, 0, 0, 0.8);
+  margin: 5px 0;
+}
+.params-name ul li .params-name-item {
+
+}
+.params-name ul li .required::after {
+  content: " * required";
+  color:red;
+  font-size: 80%;
+  vertical-align: super;
+}
+.params-name ul li .typeof-string::before {
+  font-size: 14px;
+  color:gray;
+  content: 'string'
+}
+.params-name ul li .typeof-int::before {
+  font-size: 14px;
+  color:gray;
+  content: "integer"
+}
+.params-name ul li .typeof-date::before{
+  font-size: 14px;
+  color:gray;
+  content: "date"
+}
+.params-name ul li .type {
+  font-size: 14px;
+  color:gray;
+}
+.params-name ul li .type::before{
+  content: "("
+}
+.params-name ul li .type::after{
+  content: ")"
+}
+.res-description {
+  flex: 1;
+}
+.res-description-detail{
+
+}
+.res-description-detail-title {
+  color:gray;
+}
+.res-description-detail-title span{
+  color:black;
+  font-size: 13px;
+  cursor: pointer;
+}
+.res-description-detail-title span.active {
+  font-weight:bold;
+}
+.res-description-detail>.example {
+  width: 100%;
+  min-height:50px;
+  color:white;
+  border-radius:5px;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding:0 10px;
+  box-sizing: border-box;
+  max-height:500px;
+  overflow-x: hidden;
+  overflow-y:scroll;
+}
+.res-description-detail>.modal {
+  min-width: 40%;
+  color:black;
+  min-height:50px;
+  border-radius:5px;
+  background-color:gray;
+  padding:0 10px;
+  max-height: 500px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y:scroll;
+}
+.res-code ul,
+.res-description ul {
+  width: 100%;
+}
+.res-code ul li,
+.res-description ul li {
+  min-height: 40px;
+  margin: 5px 0;
+}
+.main-title-post,
+.main-title-get,
+.main-title-put,
+.main-title-delete{
+  height: 30px;
+  line-height: 30px;
+}
+.main-title-post {
+  background-color: rgba(0, 255, 100, 0.1);
+}
+.main-title-get {
+  background-color:rgba(0, 150, 255, 0.1);
+}
+.main-title-put {
+  background-color: rgba(255, 200, 0, 0.1);
+}
+.main-title-delete {
+  background-color: rgba(255, 47, 77, 0.1);
+}
+.main-post,
+.main-get,
+.main-put,
+.main-delete {
+  margin-top:5px;
+  padding:5px;
+  box-sizing: border-box;
+}
+.main-post {
+  border-top: 1px solid green;
+}
+.main-get {
+  border-top: 1px solid blue;
+}
+.main-put {
+  border-top: 1px solid yellow;
+}
+.main-delete {
+  border-top: 1px solid red;
+}
+.content-delete,
+.content-post,
+.content-get,
+.content-put {
+  padding:5px;
+  box-sizing: border-box;
+  border-radius: 3px;
+  margin: 10px 0;
+}
+.content-post {
+  border: 1px solid green;
+  background-color: rgba(0, 255, 100, 0.3);
+}
+.content-get {
+  border: 1px solid blue;
+  background-color:rgba(0, 150, 255, 0.3);
+}
+.content-put {
+  border: 1px solid yellow;
+  background-color: rgba(255, 200, 0, 0.3);
+}
+.contnet-delete {
+  border: 1px solid red;
+  background-color: rgba(255, 47, 77, 0.3);
+}
+.code-detail{
+  cursor: pointer;
+}
+.code-show.code-detail::before {
+  content: "∨";
+  padding:0 8px;
+  font-weight: bolder;
+}
+.code-hide.code-detail::before {
+  content: ">";
+  font-weight: bolder;
+}
+.code-hide.code-detail.object::after {
+  content: "{...}"
+}
+.code-hide.code-detail.array::after {
+  content: "[...]"
+}
+.modal-item-container {
+
+}
+.modal-item-container .modal-item {
+  display: flex;
+}
+.method-title-delete,
+.method-title-post,
+.method-title-get,
+.method-title-put {
+  height:30px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  padding:5px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+.post,
+.get,
+.put,
+.delete{
+  margin-right:10px;
+}
+.post{
+  background-color: rgb(0, 255, 100);
+}
+.get {
+  background-color:rgb(0, 150, 255);
+}
+.put{
+  background-color: rgb(255, 200, 0);
+}
+.delete {
+  background-color:rgb(255, 47, 77);
+}
+
+.res-description-title{
+  width: 100%;
+  min-height:30px;
+  border-radius:5px;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding:0 10px;
+  box-sizing: border-box;
+}
+.status-200::before {
+  content: "Ok";
+  color:white;
+  vertical-align: middle;
+}
+.status-204::before {
+  content: "No Content";
+  color:white;
+  vertical-align: middle;
+}
+.status-206::before {
+  content: "Partial Content";
+  color:white;
+  vertical-align: middle;
+}
+.status-301::before {
+  content: "Moved Permanently";
+  color:white;
+  vertical-align: middle;
+}
+.status-302::before {
+  content: "Move Temporarily";
+  color:white;
+  vertical-align: middle;
+}
+.status-304::before {
+  content: "Not Modified";
+  color:white;
+  vertical-align: middle;
+}
+.status-400::before {
+  content: "Bad Request";
+  color:white;
+  vertical-align: middle;
+}
+.status-401::before {
+  content: "Unauthorized";
+  color:white;
+  vertical-align: middle;
+}
+.status-403::before {
+  content: "Forbidden";
+  color:white;
+  vertical-align: middle;
+}
+.status-404::before {
+  content: "Not Found";
+  color:white;
+  vertical-align: middle;
+}
+.status-500::before {
+  content: "Internal Server Error";
+  color:white;
+  vertical-align: middle;
 }

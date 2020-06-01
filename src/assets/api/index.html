@@ -42,11 +42,103 @@
     <div>
       <h4>Customer</h4>
       <div>
-        <h5>manage</h5>
-        <ul>
-          <li>
-            <h6>/api/customer/manage/attention 用户关注</h6>
-            get
+        <h5 class="item">manage</h5>
+        <ul class="customer-manage hide">
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/manage/attention 用户关注
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item required">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item required">paegSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>每页数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "username": "string",
+        "avatar": "string"
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  success: boolean,
+  Response<<用户关注>> {
+    data: [
+      "username": "string"
+                  "用户名"
+      "avatar": "string"
+                "头像"
+      "_id": "string"
+             "主键id" 
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          
           </li>
           <li>
             <h6>/api/customer/manage/attention 用户关注</h6>
@@ -84,7 +176,7 @@
       </div>
       <div>
         <h5>movie</h5>
-        <ul>
+        <ul class="customer-movie">
           <li>
             <h6>/api/customer/movie/detail 电影详情</h6>
           </li>
@@ -113,7 +205,7 @@
       </div>
       <div>
         <h5>user</h5>
-        <ul>
+        <ul class="customer-user">
           <li>
             <h6>/api/customer/user 用户信息 get</h6>
           </li>
@@ -128,7 +220,7 @@
       <h4>User</h4>
       <div>
         <h5>customer</h5>
-        <ul>
+        <ul class="user-customer">
           <li>
             <h6>/api/user/customer 用户信息 get</h6>
           </li>
@@ -154,7 +246,7 @@
       </div>
       <div>
         <h5>home</h5>
-        <ul>
+        <ul class="user-home">
           <li>
             <h6>/api/user/home/daily 每日上新 get</h6>
           </li>
@@ -177,7 +269,7 @@
       </div>
       <div>
         <h5>logon</h5>
-        <ul>
+        <ul class="user-logon">
           <li>
             <h6>/api/user/logon/signout 登录 post</h6>
           </li>
@@ -191,7 +283,7 @@
       </div>
       <div>
         <h5>movie</h5>
-        <ul>
+        <ul class="user-movie">
           <li>
             <h6>/api/user/movie/classify 分类 get</h6>
           </li>
@@ -226,7 +318,7 @@
       </div>
       <div>
         <h5>setting</h5>
-        <ul>
+        <ul class="user-setting">
           <li>
             <h6>/api/user/setting/info 小程序信息 get</h6>
           </li>
@@ -237,5 +329,6 @@
   <footer>
 
   </footer>
+  <script src="./index.js"></script>
 </body>
 </html>
