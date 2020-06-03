@@ -17,7 +17,7 @@ exampleList.forEach(e => {
 })
 
 modalList.forEach(m => {
-  m.addEventListener("click", controlModalItemsHOW, false)
+  m.addEventListener("click", controlModalItemShow, false)
 })
 
 codeDetailList.forEach(c => {
@@ -26,7 +26,7 @@ codeDetailList.forEach(c => {
 
 function controlItemListShow() {
   const bro = this.nextElementSibling
-  if(bro.classList.contains('customer-manage')) {
+  if(bro && bro.classList) {
     bro.classList.toggle("hide")
   }
 }
@@ -46,7 +46,7 @@ function controlExampleItemShow() {
   if(target && target.classList.contains("hide")) target.classList.remove("hide")
 }
 
-function controlModalItemsHOW() {
+function controlModalItemShow() {
   const bro = this.previousElementSibling
   const targetBro = this.parentNode && this.parentNode.nextElementSibling
   const target = targetBro && targetBro.nextElementSibling
@@ -54,6 +54,7 @@ function controlModalItemsHOW() {
   bro.classList.contains("active") && bro.classList.remove("active")
   if(targetBro && targetBro.classList && !targetBro.classList.contains("hide")) targetBro.classList.add("hide")
   if(target && target.classList.contains("hide")) target.classList.remove("hide")
+  if(target) target.classList.toggle("all")
 }
 
 function controlCodeShow() {

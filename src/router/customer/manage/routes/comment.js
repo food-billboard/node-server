@@ -29,7 +29,7 @@ router.get('/', async (ctx) => {
       projection: {
         source: 1,
         create_time: 1,
-        toal_like: 1,
+        total_like: 1,
         content: 1,
         like_person: 1
       },
