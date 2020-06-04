@@ -113,11 +113,50 @@ const dealErr = (ctx) => {
   }
 }
 
+//参数预检查
+const paramsCheck = {
+  put: (params) => {
+    return async (ctx, next) => {
+      if(!Array.isArray(params)) return await next()
+      const { body } = ctx.request
+      return this.check(body, params)
+    }
+  },
+  post: (params) => {
+    return async (ctx, next) => {
+      if(!Array.isArray(params)) return await next()
+      const { body } = ctx.request
+      return this.check(body, params)
+    }
+  },
+  get: (params) => {
+    return async (ctx, next) => {
+      if(!Array.isArray(params)) return await next()
+      const { query } = ctx
+      return this.check(query, params)
+    }
+  },
+  delete: (params) => {
+    return async (ctx, next) => {
+      if(!Array.isArray(params)) return await next()
+      const { query } = ctx
+      return this.check(query, params)
+    }
+  },
+  check: (origin, target) => {
+    return Object.keys(origin).every(key => {
+      if(!target.includes(key)) return true
+      return origin[key] !== undefined
+    })
+  }
+}
+
 module.exports = {
   isType,
   isEmpty,
   flat,
   withTry,
   dealMedia,
-  dealErr
+  dealErr,
+  paramsCheck
 }

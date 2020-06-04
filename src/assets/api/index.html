@@ -52,36 +52,32 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">paegSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>每页数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -106,9 +102,9 @@
   "res": {
     "data": [
       {
-        "_id": "string",
+        "avatar": "string",
         "username": "string",
-        "avatar": "string"
+        "_id": "string",
       }
     ]
   }
@@ -118,15 +114,14 @@
                           <div class="modal hide">
                             <pre>
 {
-  success: boolean,
-  Response<<用户关注>> {
-    data: [
-      "username": "string"
-                  "用户名"
-      "avatar": "string"
-                "头像"
-      "_id": "string"
-             "主键id" 
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "avatar": "string" 头像,
+        "username": "string" 用户名,
+        "_id": "string" id,
+      }
     ]
   }
 }
@@ -149,26 +144,20 @@
 			      <div class="main-put hide">
               <div class="main-put-content">
                 <h6 class="main-title-put">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item required">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>用户id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>用户id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -197,8 +186,8 @@
                           <div class="modal hide">
                             <pre>
 {
-  success: boolean,
-  Response<<用户关注>> null
+  "success": true,
+  "res": null
 }
                             </pre>
                           </div>
@@ -218,26 +207,20 @@
             <div class="main-delete hide">
               <div class="main-delete-content">
                 <h6 class="main-title-delete">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>用户id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>用户id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -266,8 +249,8 @@
                           <div class="modal hide">
                             <pre>
 {
-  success: boolean,
-  Response<<用户关注>> null
+  "success": "boolean",
+  "res": null
 }
                             </pre>
                           </div>
@@ -287,36 +270,32 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">paegSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>每页数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -341,9 +320,9 @@
   "res": {
     "data": [
       {
-        "_id": "string"
+        "avatar": "string",
         "username": "string",
-        "avatar": "string"
+        "_id": "string",
       }
     ]
   }
@@ -353,15 +332,14 @@
                           <div class="modal hide">
                             <pre>
 {
-  success: boolean,
-  Response<<粉丝>> {
-    data: [
-      "username": "string"
-                  "用户名"
-      "avatar": "string"
-                "头像"
-      "_id": "string"
-             "主键id" 
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "avatar": "string" 头像,
+        "username": "string" 用户名,
+        "_id": "string" id,
+      }
     ]
   }
 }
@@ -383,36 +361,32 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">paegSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>每页数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -433,30 +407,24 @@
                           <div class="example">
                             <pre>
 {
-  "success": boolean,
+  "success": true,
   "res": {
     "data": [
-    {
-      "_id": "string",
-      "source": {
-        "type": "user",
-        "comment": "string"
-      },
-      "create_time": 1234567890,
-      "toal_like": 0,
-      "content": {
-        "text": "string",
-        "image": ["string"],
-        "video": ["string"]
-      },
-      "like_person": [
-        {
-          "_id": "string",
-          "avatar": "string"
+      {
+        "content": {
+          "text": "string",
+          "image": ["string"],
+          "video": ["string"]
+        },
+        "create_time": 1234567890,
+        "like": true,
+        "_id": "string",
+        "source": {
+          "type": "MOVIE",
+          "comment": "string"
         }
-      ]
-    }
-  ]
+      }
+    ]
   }
 }
                             </pre>
@@ -464,40 +432,23 @@
                           <div class="modal hide">
                             <pre>
 {
-  "success": true,
-  Response<<用户评论>>: {
+  "success": "boolean",
+  "res": {
     "data": [
       {
-        "_id": "string",
-                "主键id"
-        "source": {
-                  "评论对象"
-          "type": "string",
-                  "评论对象"["USER", "MOVIE"]
-          "comment": "string"
-                      "id"
+        "content": { 评论内容
+          "text": "string" 文字,
+          "image": ["string"] 图片,
+          "video": ["string"] 视频
         },
-        "create_time": integer,
-        "total_like": "integer",
-                      "点赞总数"
-        "content": {
-                    "评论内容"
-          "text": "string",
-                  "文字内容"
-          "image": ["string"],
-                    ["图片"]
-          "video": ["string"]
-                    ["视频"]
-        },
-        "like_person": [
-                      "点赞用户"
-          {
-            "_id": "string",
-                    "id"
-            "avatar": "string"
-                      "点赞人头像"
-          }
-        ]
+        "create_time": "date_time",
+        "like": "boolean" 是否点赞,
+        "_id": "string" id,
+        "source": { 源内容
+          "type": "string" 类型["MOVIE", "USER"],
+          "comment": "string" 原内容id,
+          "content": "内容" type为USER时返回,否则为null 
+        }
       }
     ]
   }
@@ -520,56 +471,57 @@
             <div class="main-post hide">
               <div class="main-post-content">
                 <h6 class="main-title-post">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">video</span>
-                        <br/>
-                        <span class="typeof-object"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">info</span>
-                        <br/>
-                        <span class="typeof-object"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">images</span>
-                        <br/>
-                        <span class="typeof-object"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>视频信息</p>
-                        <p class="required">src 视频地址</p>
-                        <p class="required">poster 海报</p>
-                      </li>
-                      <li>
-                        <p class="required">电影信息</p>
-                        <p class="required">name 电影名称</p>
-                        <p class="required">district 地区</p>
-                        <p class="required">director 导演</p>
-                        <p class="required">actor 演员</p>
-                        <p class="required">classify 类型</p>
-                        <p class="required">screen_time 时间</p>
-                        <p class="required">description 描述</p>
-                        <p class="required">language 语言</p>
-                        <p class="required">author_rate 作者评分</p>
-                        <p>alias 别名</p>
-                        <p>author_description 电影自我描述</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">video</span>
+                      <br/>
+                      <span class="typeof-object"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>视频信息</p>
+                      <p class="required">src 视频地址</p>
+                      <p class="required">poster 海报</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">info</span>
+                      <br/>
+                      <span class="typeof-object"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p class="required">电影信息</p>
+                      <p class="required">name 电影名称</p>
+                      <p class="required">district 地区</p>
+                      <p class="required">director 导演</p>
+                      <p class="required">actor 演员</p>
+                      <p class="required">classify 类型</p>
+                      <p class="required">screen_time 时间</p>
+                      <p class="required">description 描述</p>
+                      <p class="required">language 语言</p>
+                      <p class="required">author_rate 作者评分</p>
+                      <p>alias 别名</p>
+                      <p>author_description 电影自我描述</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">images</span>
+                      <br/>
+                      <span class="typeof-array"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>图片数组</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -591,15 +543,19 @@
                             <pre>
 {
   "success": true,
-  "res": null
+  "res": {
+    "data": "string"
+  }
 }
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
 {
-  success: boolean,
-  Response<<发布电影>> null
+  "success": "boolean",
+  "res": {
+    "data": "string" 反馈文字
+  }
 }
                             </pre>
                           </div>
@@ -619,66 +575,69 @@
             <div class="main-put hide">
               <div class="main-put-content">
                 <h6 class="main-title-put">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">video</span>
-                        <br/>
-                        <span class="typeof-object"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">info</span>
-                        <br/>
-                        <span class="typeof-object"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">images</span>
-                        <br/>
-                        <span class="typeof-object"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>视频信息</p>
-                        <p class="required">src 视频地址</p>
-                        <p class="required">poster 海报</p>
-                      </li>
-                      <li>
-                        <p class="required">电影信息</p>
-                        <p class="required">name 电影名称</p>
-                        <p class="required">district 地区</p>
-                        <p class="required">director 导演</p>
-                        <p class="required">actor 演员</p>
-                        <p class="required">classify 类型</p>
-                        <p class="required">screen_time 时间</p>
-                        <p class="required">description 描述</p>
-                        <p class="required">language 语言</p>
-                        <p class="required">author_rate 作者评分</p>
-                        <p>alias 别名</p>
-                        <p>author_description 电影自我描述</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>电影id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">video</span>
+                      <br/>
+                      <span class="typeof-object"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>视频信息</p>
+                      <p class="required">src 视频地址</p>
+                      <p class="required">poster 海报</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">info</span>
+                      <br/>
+                      <span class="typeof-object"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p class="required">电影信息</p>
+                      <p class="required">name 电影名称</p>
+                      <p class="required">district 地区</p>
+                      <p class="required">director 导演</p>
+                      <p class="required">actor 演员</p>
+                      <p class="required">classify 类型</p>
+                      <p class="required">screen_time 时间</p>
+                      <p class="required">description 描述</p>
+                      <p class="required">language 语言</p>
+                      <p class="required">author_rate 作者评分</p>
+                      <p>alias 别名</p>
+                      <p>author_description 电影自我描述</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">images</span>
+                      <br/>
+                      <span class="typeof-array"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>图片数组</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -707,8 +666,8 @@
                           <div class="modal hide">
                             <pre>
 {
-  success: boolean,
-  Response<<用户关注>> null
+  "success": "boolean",
+  "res": null
 }
                             </pre>
                           </div>
@@ -728,36 +687,32 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">paegSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>每页数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -782,10 +737,10 @@
   "res": {
     "data": [
       {
-        "_id": "string"
+        "hot": 0,
         "name": "string",
         "poster": "string",
-        "hot": 0
+        "_id": "string"
       }
     ]
   }
@@ -795,17 +750,15 @@
                           <div class="modal hide">
                             <pre>
 {
-  success: boolean,
-  Response<<用户发布电影列表>> {
-    data: [
-      "_id": "string",
-             "id"
-      "name": "string",
-              "电影名称"
-      "poster": "string",
-                "电影海报"
-      "hot": "integer"
-             "人气" 
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "hot": "integer" 人气,
+        "name": "string" 名称,
+        "poster": "string" 海报,
+        "_id": "string" id
+      }
     ]
   }
 }
@@ -827,36 +780,32 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">paegSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>每页数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -881,10 +830,10 @@
   "res": {
     "data": [
       {
-        "_id": "id",
         "description": "string",
-        "name" "string",
+        "name": "string",
         "poster": "string",
+        "_id": "string"
       }
     ]
   }
@@ -894,17 +843,14 @@
                           <div class="modal hide">
                             <pre>
 {
-  success: boolean,
-  Response<<用户收藏电影>> {
-    data: [
+  "success": "boolean",
+  "res": {
+    "data": [
       {
-        "_id": "id",
-        "description": "string",
-                       "描述"
-        "name" "string",
-               "电影名称"
-        "poster": "string",
-                  "海报"
+        "description": "string" 描述,
+        "name": "string" 名称,
+        "poster": "string" 海报,
+        "_id": "string" id
       }
     ]
   }
@@ -927,26 +873,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>电影id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -970,41 +910,39 @@
   "success": true,
   "res": {
     "data": {
-      "_id": "string",
-      "name": "string",
+      "author_description": "string",
+      "author_rate": 0,
+      "images": ["string"],
       "info": {
-        "name": "string",
-        "alias": [ "string" ],
-        "description": "string",
-        "screen_time": 1234567890,
-        "director": {
-          "direcotr": ["string"],
-          "rest": ["string"]
-        },
         "actor": {
           "actor": ["string"],
           "rest": ["string"]
         },
-        "area": {
-          "area": ["string"],
-          "rest": ["string"]
-        }
+        "alias": ["string"],
         "classify": {
           "classify": ["string"],
           "rest": ["string"]
-        }
+        },
+        "description": "string",
+        "director": {
+          "director": ["string"],
+          "rest": ["string"]
+        },
+        "district": {
+          "district": ["string"],
+          "rest": ["string"]
+        },
         "language": {
           "language": ["string"],
           "rest": ["string"]
-        }
+        },
+        "name": "string",
+        "screen_time": 1234567890,
       },
+      "name": "string",
       "video": "string",
-      "images": [
-        "string"
-      ],
       "poster": "string",
-      "author_description": "string",
-      "author_rate": 0,
+      "_id": "string"
     }
   }
 }
@@ -1013,44 +951,42 @@
                           <div class="modal hide">
                             <pre>
 {
-  success: boolean,
-  Response<<发布电影的信息>> {
-    data: {
-      "_id": "string",
-      "name": "string",
-      "info": {
-        "name": "string",
-        "alias": [ "string" ],
-        "description": "string",
-        "screen_time": "date",
-        "director": {
-          "direcotr": ["string"],
-          "rest": ["string"]
+  "success": "boolean",
+  "res": {
+    "data": {
+      "author_description": "string" 作者描述,
+      "author_rate": "integer" 作者评分,
+      "images": ["string"] 截图,
+      "info": { 信息
+        "actor": { 演员
+          "actor": ["string"] id,
+          "rest": ["string"] 用户自定义字段
         },
-        "actor": {
-          "actor": ["string"],
-          "rest": ["string"]
+        "alias": ["string"] 别名,
+        "classify": {分类
+          "classify": ["string"] id,
+          "rest": ["string"]用户自定义字段
         },
-        "area": {
-          "area": ["string"],
-          "rest": ["string"]
-        }
-        "classify": {
-          "classify": ["string"],
-          "rest": ["string"]
-        }
-        "language": {
-          "language": ["string"],
-          "rest": ["string"]
-        }
+        "description": "string" 描述,
+        "director": { 导演
+          "director": ["string"] id,
+          "rest": ["string"]用户自定义字段
+        },
+        "district": { 地区
+          "district": ["string"] id,
+          "rest": ["string"]用户自定义字段
+        },
+        "language": { 语言
+          "language": ["string" id],
+          "rest": ["string"]用户自定义字段
+        },
+        "name": "string" 名称,
+        "screen_time": "date_time" 上映时间,
       },
-      "video": "string",
-      "images": [
-        "string"
-      ],
-      "poster": "string",
-      "author_description": "string",
-      "author_rate": integer,
+      "name": "string" 名称,
+      "video": "string" 视频,
+      "poster": "string" 海报,
+      "_id": "string" id
     }
   }
 }
@@ -1072,36 +1008,32 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">paegSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>每页数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1126,10 +1058,10 @@
   "res": {
     "data": [
       {
-        "_id": "string",
         "description": "string",
-        "poster": "string"
-        "name": "string"
+        "name": "string",
+        "poster": "string",
+        "_id": "string"
       }
     ]
   }
@@ -1139,14 +1071,14 @@
                           <div class="modal hide">
                             <pre>
 {
-  success: boolean,
-  Response<<用户关注>> {
-    data: [
+  "success": "boolean",
+  "res": {
+    "data": [
       {
-        "_id": "string",
-        "description": "string",
-        "poster": "string"
-        "name": "string"
+        "description": "string" 描述,
+        "name": "string" 名称,
+        "poster": "string" 海报,
+        "_id": "string" id
       }
     ]
   }
@@ -1174,26 +1106,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1213,12 +1139,167 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "author": {
+        "username": "string"
+      },
+      "author_description": "string",
+      "author_rate": 0,
+      "comment": [
+        {
+          "user_info": {
+            "avatar": "string",
+          },
+          "content": {
+            "text": "string"
+          }
+        }
+      ],
+      "create_time": 1234567890,
+      "glance": 0,
+      "hot": 0,
+      "images": [ "string" ],
+      "info": {
+        "actor": [
+          {
+            "name": "string",
+            "other": {
+              "avatar": "string"
+            }
+          }
+        ],
+        "alias": ["string"],
+        "classify": [
+          {
+            "name": "string"
+          }
+        ],
+        "description": "string",
+        "director": [
+          {
+            "name": "string"
+          }
+        ],
+        "district": [
+          {
+            "name": "string"
+          }
+        ],
+        "language": [
+          {
+            "name": "string"
+          }
+        ],
+        "name": "string",
+        "screen_time": 1234567890,
 
+      },
+      "name": "string",
+      "poster": "string",
+      "rate": "string",
+      "same_film": [
+        {
+          "film": "string",
+          "name": "string",
+          "type": "NAMESAKE"
+        }
+      ],
+      "status": "COMPLETE",
+      "store": false,
+      "tag": [
+        {
+          "text": "string"
+        }
+      ],
+      "video": "string",
+      "_id": "string"
+    }
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "author": { 作者
+        "user": "string" 名称
+      },
+      "author_description": "string" 作者描述,
+      "author_rate": "integer" 作者评分,
+      "comment": [ 评论
+        {
+          "avatar": "string" 头像,
+          "content": {
+            "text": "string" 文字内容
+          }
+        }
+      ],
+      "create_time": "date_time",
+      "glance": "integer" 浏览次数,
+      "hot": "integer" 收藏,
+      "images": [ "string" ] 截图,
+      "info": { 信息
+        "actor": [ 演员
+          {
+            "name": "string" 名称,
+            "other": {
+              "avatar": "string" 头像
+            }
+          }
+        ],
+        "alias": ["string"] 别名,
+        "classify": [ 分类
+          {
+            "name": "string" 名称
+          }
+        ],
+        "description": "string" 描述,
+        "director": [ 导演
+          {
+            "name": "string" 名称
+          }
+        ],
+        "district": [ 地区
+          {
+            "name": "string" 名称
+          }
+        ],
+        "language": [ 语言
+          {
+            "name": "string" 名称
+          }
+        ],
+        "name": "string" 名称,
+        "screen_time": "date_time" 上映时间,
 
+      },
+      "name": "string" 名称,
+      "poster": "string" 海报,
+      "rate": "string" 评分,
+      "same_film": [ 类似电影
+        {
+          "film": "string" id,
+          "name": "string" 名称,
+          "type": "string" 类型["NAMESAKE", "SERIES"]
+        }
+      ],
+      "store": "boolean" 是否收藏,
+      "tag": [ 标签
+        {
+          "text": "string" 内容
+        }
+      ],
+      "video": "string" 视频,
+      "_id": "string" id
+    }
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -1237,26 +1318,20 @@
             <div class="main-put hide">
               <div class="main-put-content">
                 <h6 class="main-title-put">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1276,12 +1351,18 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": null
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": true,
+  "res": null
+}
                             </pre>
                           </div>
                         </div>
@@ -1300,26 +1381,20 @@
             <div class="main-delete hide">
               <div class="main-delete-content">
                 <h6 class="main-title-delete">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1339,12 +1414,18 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": null
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": null
+}
                             </pre>
                           </div>
                         </div>
@@ -1363,36 +1444,32 @@
             <div class="main-put hide">
               <div class="main-put-content">
                 <h6 class="main-title-put">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">value</span>
-                        <br/>
-                        <span class="typeof-integer"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>评分</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">value</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>评分</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1412,12 +1489,18 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": null
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": null
+}
                             </pre>
                           </div>
                         </div>
@@ -1436,39 +1519,35 @@
             <div class="main-post hide">
               <div class="main-post-content">
                 <h6 class="main-title-post">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">content</span>
-                        <br/>
-                        <span class="typeof-integer"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>内容</p>
-                        <p>text 文字内容</p>
-                        <p>image 图片内容</p>
-                        <p>video 视频内容</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">content</span>
+                      <br/>
+                      <span class="typeof-object"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>内容</p>
+                      <p class="required">text 文字内容</p>
+                      <p class="required">image 图片内容</p>
+                      <p class="required">video 视频内容</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1488,12 +1567,18 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": null
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": null
+}
                             </pre>
                           </div>
                         </div>
@@ -1512,39 +1597,35 @@
             <div class="main-post hide">
               <div class="main-post-content">
                 <h6 class="main-title-post">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">content</span>
-                        <br/>
-                        <span class="typeof-integer"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>内容</p>
-                        <p>text 文字内容</p>
-                        <p>image 图片内容</p>
-                        <p>video 视频内容</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">content</span>
+                      <br/>
+                      <span class="typeof-object"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>内容</p>
+                      <p class="required">text 文字内容</p>
+                      <p class="required">image 图片内容</p>
+                      <p class="required">video 视频内容</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1564,12 +1645,18 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": null
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": null
+}
                             </pre>
                           </div>
                         </div>
@@ -1588,26 +1675,20 @@
             <div class="main-put hide">
               <div class="main-put-content">
                 <h6 class="main-title-put">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1627,12 +1708,18 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": null
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": null
+}
                             </pre>
                           </div>
                         </div>
@@ -1651,26 +1738,20 @@
             <div class="main-delete hide">
               <div class="main-delete-content">
                 <h6 class="main-title-delete">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1690,12 +1771,18 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": null
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": null
+}
                             </pre>
                           </div>
                         </div>
@@ -1719,26 +1806,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1758,12 +1839,38 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": {
+      "attentions": 0,
+      "avatar": "string",
+      "create_time": 1234567890,
+      "fans": 0,
+      "hot": 0,
+      "username": "string",
+      "_id": "string",
+    }
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "attentions": "integer" 关注人数,
+      "avatar": "string" 头像,
+      "create_time": "date_time" ,
+      "fans": integer 粉丝,
+      "hot": ingeter 人气,
+      "username": "string" 用户名,
+      "_id": "string" id
+    }
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -1782,46 +1889,44 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">pageSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>页面数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1841,12 +1946,68 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": {
+      "user_info": {
+        "_id": "string",
+        "avatar": "string",
+        "username": "string"
+      },
+      "data": [
+        {
+          "content": {
+            "text": "string",
+            "image": ["string"],
+            "video": ["string"]
+          },
+          "create_time": 1234567890,
+          "source": {
+            "type": "MOVIE",
+            "comment": "string",
+            "content": "string"
+          },
+          "total_like": 0,
+          "like": true
+        }
+      ] 
+    }
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "user_info": {
+        "_id": "string" id,
+        "avatar": "string" 头像,
+        "username": "string" 用户名
+      },
+      "data": [
+        {
+          "content": {
+            "text": "string" 文字评论,
+            "image": ["string"] 图片评论,
+            "video": ["string"] 视频评论
+          },
+          "create_time": "date_time",
+          "source": {
+            "type": "string" 源评论["MOVIE", "USER"],
+            "comment": "string" 源内容id,
+            "content": "string" 源内容
+          },
+          "total_like": "integer" 点赞数,
+          "like": "boolean" 是否点赞
+        }
+      ] 
+    }
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -1871,26 +2032,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1910,12 +2065,38 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": {
+      "attentions": 0,
+      "avatar": "string",
+      "create_time": 1234567890,
+      "fans": 0,
+      "hot": 0,
+      "username": "string",
+      "_id": "string",
+    }
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "attentions": "integer" 关注人数,
+      "avatar": "string" 头像,
+      "create_time": "date_time" ,
+      "fans": integer 粉丝,
+      "hot": ingeter 人气,
+      "username": "string" 用户名,
+      "_id": "string" id
+    }
+  }
+                              }
                             </pre>
                           </div>
                         </div>
@@ -1934,46 +2115,44 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">pageSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>页面数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -1993,12 +2172,34 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "avatar": "string",
+        "username": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "avatar": "string" 头像,
+        "username": "string" 用户名,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2017,46 +2218,44 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">pageSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>页面数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2076,12 +2275,66 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": {
+      "user_info": { 用户信息
+        "_id": "string",
+        "avatar": "string",
+        "username": "string"
+      },
+      "data": [
+        {
+          "content": {
+            "text": "string",
+            "image": ["string"],
+            "video": ["string"]
+          },
+          "create_time": 1234567890,
+          "source": {
+            "type": "MOVIE",
+            "comment": "string",
+            "content": "string"
+          },
+          "total_like": 0
+        }
+      ]
+    }
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "user_info": {
+        "_id": "string" id,
+        "avatar": "string" 头像,
+        "username": "string" 用户名
+      },
+      "data": [
+        {
+          "content": {
+            "text": "string" 文字评论,
+            "image": ["string"] 图片评论,
+            "video": ["string"] 视频评论
+          },
+          "create_time": "date_time",
+          "source": {
+            "type": "string" 源评论["MOVIE", "USER"],
+            "comment": "string" 源内容id,
+            "content": "string" 源内容 type为MOVIE时为null
+          },
+          "total_like": "integer" 点赞数
+        }
+      ]
+    }
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2100,46 +2353,44 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">pageSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>页面数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2159,12 +2410,34 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "avatar": "string",
+        "username": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "avatar": "string" 头像,
+        "username": "string" 用户名,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2183,46 +2456,44 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">pageSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>页面数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2242,12 +2513,36 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "hot": 0,
+        "name": "string",
+        "poster": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "hot": "integer" 人气,
+        "name": "string" 名称,
+        "poster": "string" 海报,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2266,46 +2561,44 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">pageSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>页面数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2325,12 +2618,36 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "description": "string",
+        "name": "string",
+        "poster": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "description": "string" 描述,
+        "name": "string" 名称,
+        "poster": "string" 海报,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2349,46 +2666,44 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">pageSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>页面数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2408,12 +2723,36 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "description": "string",
+        "name": "string",
+        "poster": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "description": "string" 描述,
+        "name": "string" 名称,
+        "poster": "string" 海报,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2437,26 +2776,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">count</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">count</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2476,12 +2809,34 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "name": "string",
+        "poster": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "name": "string" 名称,
+        "poster": "string" 海报,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2500,26 +2855,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">count</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">count</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2539,12 +2888,32 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "key_word": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "key_word": "string" 关键字,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2582,12 +2951,28 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": {
+      "notice": "string",
+      "_id": "string"
+    }
+  }
+                              }
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "notice": "string" 内容,
+      "_id": "string" id
+    }
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2606,26 +2991,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">count</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">count</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2645,12 +3024,48 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "icon": "string",
+        "match": [
+          {
+            "name": "string",
+            "poster": "string",
+            "_id": "string"
+          }
+        ],
+        "name": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "icon": "string" 图标,
+        "match": [ 排行榜内容
+          {
+            "name": "string" 名称,
+            "poster": "string" 海报,
+            "_id": "string" id
+          }
+        ],
+        "name": "string" 排行榜名称,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2669,26 +3084,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2708,12 +3117,48 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "icon": "string",
+        "match": [
+          {
+            "name": "string",
+            "poster": "string",
+            "_id": "string"
+          }
+        ],
+        "name": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "icon": "string" 图标,
+        "match": [ 匹配排行榜的内容
+          {
+            "name": "string" 名称,
+            "poster": "string" 海报,
+            "_id": "string" id
+          }
+        ],
+        "name": "string" 名称,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2732,26 +3177,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">count</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">count</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2771,12 +3210,34 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "poster": "string",
+        "_id": "string",
+        "type": "MOVIE"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "poster": "string" 海报,
+        "_id": "string" id,
+        "type": "MOVIE" 类型["MOVIE", "SPEICAL", "COMMENT"]
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2800,46 +3261,44 @@
             <div class="main-post hide">
               <div class="main-post-content">
                 <h6 class="main-title-post">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">mobile</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">password</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">uid</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">body</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>手机号</p>
-                      </li>
-                      <li>
-                        <p>密码</p>
-                      </li>
-                      <li>
-                        <p>socketid</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">mobile</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>手机号</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">password</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>密码</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">uid</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>socketid</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2859,12 +3318,44 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": {
+      "allow_many": false,
+      "attentions": 0,
+      "avatar": "string",
+      "create_time": 1589784595389,
+      "fans": 0,
+      "hot": 0,
+      "modified_time": 1589784595389,
+      "token": "string",
+      "username": "string",
+      "_id": "string"
+    }
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "allow_many": "boolean" 是否允许多端登录,
+      "attentions": "integer" 关注人数,
+      "avatar": "string" 头像,
+      "create_time": "date_time",
+      "fans": "integer" 粉丝人数,
+      "hot": "integer" 人气,
+      "modified_time": "date_time",
+      "token": "string" token,
+      "username": "string" 用户名,
+      "_id": "string" id
+    }
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2883,46 +3374,44 @@
             <div class="main-post hide">
               <div class="main-post-content">
                 <h6 class="main-title-post">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">uid</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">mobile</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">password</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>socketid</p>
-                      </li>
-                      <li>
-                        <p>手机号</p>
-                      </li>
-                      <li>
-                        <p>密码</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">mobile</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>手机号</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">password</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>密码</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">uid</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>socketid</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -2942,12 +3431,36 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": {
+      attention: 0,
+      avatar: "string",
+      fans: 0,
+      hot: 0,
+      token: "string",
+      _id: "string"
+    }
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      attention: "integer" 关注人数,
+      avatar: "string" 头像,
+      fans: "integer" 粉丝人数,
+      hot: "integer" 人气,
+      token: "string" token,
+      _id: "string" id
+    }
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -2985,12 +3498,18 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": null
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": null
+}
                             </pre>
                           </div>
                         </div>
@@ -3014,56 +3533,56 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">pageSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">sort</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>页面数量</p>
-                      </li>
-                      <li>
-                        <p>排序</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">sort</span>
+                      <br/>
+                      <span class="typeof-object"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>排序</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -3083,12 +3602,48 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "hot": 0,
+        "info": [
+          {
+            "name": "string"
+          }
+        ],
+        "name": "string",
+        "poster": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "hot": "integer" 人气,
+        "info": {
+          "classify": [ 分类
+            {
+              "name": "string" 名称
+            },
+          ]
+        },
+        "name": "string" 名称,
+        "poster": "string" 海报,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -3107,26 +3662,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">count</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">count</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -3146,12 +3695,32 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "name": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "name": "string" 名称,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -3170,26 +3739,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -3209,12 +3772,168 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "author": {
+        "username": "string"
+      },
+      "author_description": "string",
+      "author_rate": 0,
+      "comment": [
+        {
+          "user_info": {
+            "avatar": "string",
+          },
+          "content": {
+            "text": "string"
+          }
+        }
+      ],
+      "create_time": 1234567890,
+      "glance": 0,
+      "hot": 0,
+      "images": [ "string" ],
+      "info": {
+        "actor": [
+          {
+            "name": "string",
+            "other": {
+              "avatar": "string"
+            }
+          }
+        ],
+        "alias": ["string"],
+        "classify": [
+          {
+            "name": "string"
+          }
+        ],
+        "description": "string",
+        "director": [
+          {
+            "name": "string"
+          }
+        ],
+        "district": [
+          {
+            "name": "string"
+          }
+        ],
+        "language": [
+          {
+            "name": "string"
+          }
+        ],
+        "name": "string",
+        "screen_time": 1234567890,
 
+      },
+      "name": "string",
+      "poster": "string",
+      "rate": "string",
+      "same_film": [
+        {
+          "film": "string",
+          "name": "string",
+          "type": "NAMESAKE"
+        }
+      ],
+      "store": false,
+      "tag": [
+        {
+          "text": "string"
+        }
+      ],
+      "video": "string",
+      "_id": "string"
+    }
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "author": { 作者
+        "username": "string" 名称
+      },
+      "author_description": "string" 作者描述,
+      "author_rate": "integer" 作者评分,
+      "comment": [ 评论
+        {
+          "user_info": {
+            "avatar": "string" 头像,
+          },
+          "content": {
+            "text": "string" 文字内容
+          }
+        }
+      ],
+      "create_time": "date_time",
+      "glance": "integer" 浏览次数,
+      "hot": "integer" 收藏,
+      "images": [ "string" ] 截图,
+      "info": { 信息
+        "actor": [ 演员
+          {
+            "name": "string" 名称,
+            "other": {
+              "avatar": "string" 头像
+            }
+          }
+        ],
+        "alias": ["string"] 别名,
+        "classify": [ 分类
+          {
+            "name": "string" 名称
+          }
+        ],
+        "description": "string" 描述,
+        "director": [ 导演
+          {
+            "name": "string" 名称
+          }
+        ],
+        "district": [ 地区
+          {
+            "name": "string" 名称
+          }
+        ],
+        "language": [ 语言
+          {
+            "name": "string" 名称
+          }
+        ],
+        "name": "string" 名称,
+        "screen_time": "date_time" 上映时间,
 
+      },
+      "name": "string" 名称,
+      "poster": "string" 海报,
+      "rate": "string" 评分,
+      "same_film": [ 类似电影
+        {
+          "film": "string" id,
+          "name": "string" 名称,
+          "type": "string" 类型["NAMESAKE", "SERIES"]
+        }
+      ],
+      "store": "boolean" 是否收藏,
+      "tag": [ 标签
+        {
+          "text": "string" 内容
+        }
+      ],
+      "video": "string" 视频,
+      "_id": "string" id
+    }
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -3233,36 +3952,32 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">count</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">count</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -3282,12 +3997,40 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "content": {
+          "text": "string"
+        },
+        "user_info": {
+          "avatar": "string"
+        }
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "content": {评论内容
+          "text": "string" 文字内容
+        },
+        "user_info": { 用户信息
+          "avatar": "string" 头像
+        }
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -3306,26 +4049,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -3345,12 +4082,36 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": {
+      "info": {
+        "description": "string"
+      },
+      "name": "string",
+      "poster": "string",
+      "_id": "string"
+    }
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "info": { 电影信息
+        "description": "string" 描述
+      },
+      "name": "string" 名称,
+      "poster": "string" 海报,
+      "_id": "string" id
+    }
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -3369,46 +4130,44 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">pageSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>页面数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -3428,12 +4187,64 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "comment_users": [
+          {
+            "_id": "string",
+            "avatar": "string"
+          }
+        ],
+        "content": {
+          "image": ["string"],
+          "video": ["string"],
+          "text": "string"
+        },
+        "create_time": 1234567890,
+        "total_like": 0,
+        "user_info": {
+          "avatar": "string",
+          "username": "string",
+          "_id": "string"
+        }
+      }
+    ]
+  }
+                              }
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "comment_users": [ 评论用户
+          {
+            "_id": "string" id,
+            "avatar": "string" 头像
+          }
+        ],
+        "content": { 内容
+          "image": ["string"] 图片,
+          "video": ["string"] 视频,
+          "text": "string" 文字
+        },
+        "create_time": "date_time",
+        "total_like": "integer" 点赞人数,
+        "user_info": { 用户信息
+          "avatar": "string" 头像,
+          "username": "string" 用户名,
+          "_id": "string" id
+        }
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -3452,46 +4263,44 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">pageSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>页面数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -3511,11 +4320,101 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": {
+      "comment": {
+        "comment": "string",
+        "comment_users": 0,
+        "content": {
+          "image": ["string"],
+          "video": ["string"],
+          "text": "string"
+        },
+        "create_time": 1234567890,
+        "total_like": 0,
+        "user_info": {
+          "avatar": "string",
+          "username": "string",
+          "_id": "string"
+        },
+        "_id": "string"
+      },
+      "sub": [
+        {
+          "comment_users": [
+            {
+              
+            }
+          ],
+          "content": {
+            "image": ["string"],
+            "video": ["string"],
+            "text": "string"
+          },
+          "create_time": 1234567890,
+          "total_like": 0,
+          "user_info": {
+            "avatar": "string",
+            "username": "string",
+            "_id": "string"
+          },
+          "_id": "string"
+        }
+      ]
+    }
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "comment": { 主评论
+        "comment_users": "integer" 子评论数量,
+        "content": { 内容
+          "image": ["string"] 图片,
+          "video": ["string"] 视频,
+          "text": "string" 文字
+        },
+        "create_time": "date_time",
+        "total_like": "integer" 点赞人数,
+        "user_info": { 用户信息
+          "avatar": "string" 头像,
+          "username": "string" 用户名,
+          "_id": "string" id
+        },
+        "_id": "string" 评论id
+      },
+      "sub": [ 子评论
+        {
+          "comment_users": [
+            {
+              
+            }
+          ],
+          "content": { 内容
+            "image": ["string"] 图片,
+            "video": ["string"] 视频,
+            "text": "string" 文字
+          },
+          "create_time": "date_time",
+          "total_like": "integer" 点赞人数,
+          "user_info": { 用户信息
+            "avatar": "string" 头像,
+            "username": "string" 用户名,
+            "_id": "string" id
+          },
+          "_id": "string" 评论id
+        }
+      ]
+    }
+  }
+}
 
                             </pre>
                           </div>
@@ -3535,46 +4434,44 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">_id</span>
-                        <br/>
-                        <span class="typeof-string"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">currPage</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                      <li>
-                        <span class="params-name-item">pageSize</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>id</p>
-                      </li>
-                      <li>
-                        <p>当前页</p>
-                      </li>
-                      <li>
-                        <p>页面数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -3594,12 +4491,50 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "hot": 0,
+        "info": {
+          "classify": [
+            {
+              "name": "string"
+            }
+          ]
+        },
+        "name": "string",
+        "poster": "string",
+        "_id": "string"
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "hot": "integer" 人气,
+        "info": { 信息
+          "classify": [ 分类
+            {
+              "name": "string" 名称
+            }
+          ]
+        },
+        "name": "string" 电影名称,
+        "poster": "string" 海报,
+        "_id": "string" id
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -3618,26 +4553,20 @@
             <div class="main-get hide">
               <div class="main-get-content">
                 <h6 class="main-title-get">Parameters</h6>
-                <ul class="params">
-                  <li class="params-name">
-                    <ul>
-                      <li>
-                        <span class="params-name-item">count</span>
-                        <br/>
-                        <span class="typeof-int"></span>
-                        <br/>
-                        <span class="type">query</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="params-description">
-                    <ul>
-                      <li>
-                        <p>数量</p>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">count</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                </table>
               </div>
               <div>
                 <h6 class="main-title-get">Responses</h6>
@@ -3657,12 +4586,32 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        name: "string",
+        _id: "string"       
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        name: "string" 名称,
+        _id: "string" id     
+      }
+    ]
+  }
+}
                             </pre>
                           </div>
                         </div>
@@ -3708,12 +4657,28 @@
                           <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
                           <div class="example">
                             <pre>
-
+{
+  "success": true,
+  "res": {
+    "data": {
+      "info": "string",
+      "_id": "string"
+    }
+  }
+}
                             </pre>
                           </div>
                           <div class="modal hide">
                             <pre>
-
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "info": "string" 信息内容,
+      "_id": "string" id
+    }
+  }
+}
                             </pre>
                           </div>
                         </div>

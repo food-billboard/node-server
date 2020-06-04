@@ -54,7 +54,7 @@ function controlModalItemShow() {
   bro.classList.contains("active") && bro.classList.remove("active")
   if(targetBro && targetBro.classList && !targetBro.classList.contains("hide")) targetBro.classList.add("hide")
   if(target && target.classList.contains("hide")) target.classList.remove("hide")
-  if(target) target.classList.toggle("all")
+  if(target) target.classList.toggle("scroll")
 }
 
 function controlCodeShow() {

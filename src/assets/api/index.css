@@ -46,79 +46,83 @@ header {
 .item:hover{
   background-color: rgba(0, 0, 0, 0.1);
 }
-.params,
-.response {
-  display:flex;
-  justify-content: flex-start;
+.params {
+  margin-top:20px;
 }
-.params-name,
-.res-code{
-  margin-right: 30px;
-}
-.params-name::before,
-.res-code::before,
-.params-description::before,
-.res-description::before {
-  color:black;
-  font-weight: bold;
-  display:block
-}
-.params-name::before{
+.params tr:nth-of-type(1) td:nth-of-type(1)::before {
+  display: block;
   content: 'Name';
+  position:absolute;
+  top:-20px;
+  line-height:1;
+  font-size:20px;
 }
-.res-code::before {
-  content: 'Code'
-}
-.params-description::before,
-.res-description::before{
+.params tr:nth-of-type(1) td:nth-of-type(2)::before {
+  display: block;
   content: 'Description';
+  position:absolute;
+  top:-20px;
+  line-height:1;
+  font-size:20px;
 }
-.params-name ul,
-.params-description ul{
-  width: 100%;
+.params tr td {
+  position: relative;
+  padding: 10px;
 }
-.params-name ul li,
-.params-description ul li{
-  width: 100%;
-  font-weight:normal;
-  min-height:40px;
-  font-size: 15px;
-  color:rgba(0, 0, 0, 0.8);
-  margin: 5px 0;
-}
-.params-name ul li .params-name-item {
-
-}
-.params-name ul li .required::after {
+.params .required::after {
   content: " * required";
   color:red;
   font-size: 80%;
   vertical-align: super;
 }
-.params-name ul li .typeof-string::before {
+.params .typeof-string::before {
   font-size: 14px;
   color:gray;
   content: 'string'
 }
-.params-name ul li .typeof-int::before {
+.params .typeof-int::before {
   font-size: 14px;
   color:gray;
   content: "integer"
 }
-.params-name ul li .typeof-date::before{
+.params .typeof-date::before{
   font-size: 14px;
   color:gray;
   content: "date"
 }
-.params-name ul li .type {
+.params .typeof-object::before{
+  font-size: 14px;
+  color:gray;
+  content: "object"
+}
+.params .type {
   font-size: 14px;
   color:gray;
 }
-.params-name ul li .type::before{
+.params .type::before{
   content: "("
 }
-.params-name ul li .type::after{
+.params .type::after{
   content: ")"
+}
+.response {
+  display:flex;
+  justify-content: flex-start;
+}
+.res-code::before {
+  content: 'Code'
+}
+.res-code::before,
+.res-description::before {
+  color:black;
+  font-weight: bold;
+  display:block
+}
+.res-description::before{
+  content: 'Description';
+}
+.res-code{
+  margin-right: 30px;
 }
 .res-description {
   flex: 1;
@@ -156,13 +160,14 @@ header {
   border-radius:5px;
   background-color:gray;
   padding:0 10px;
-  max-height: 500px;
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y:scroll;
+  overflow-y:visible;
 }
-.res-description-detail>.modal.all {
-	overflow-y:visible;
+.res-description-detail>.modal.scroll {
+  overflow-y:scroll;
+  max-height: 500px;
 }
 .res-code ul,
 .res-description ul {
