@@ -151,7 +151,7 @@ header {
 }
 .res-description-detail>.modal {
   min-width: 40%;
-  color:black;
+  color:white;
   min-height:50px;
   border-radius:5px;
   background-color:gray;
@@ -160,6 +160,9 @@ header {
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y:scroll;
+}
+.res-description-detail>.modal.all {
+	overflow-y:visible;
 }
 .res-code ul,
 .res-description ul {
@@ -230,7 +233,7 @@ header {
   border: 1px solid yellow;
   background-color: rgba(255, 200, 0, 0.3);
 }
-.contnet-delete {
+.content-delete {
   border: 1px solid red;
   background-color: rgba(255, 47, 77, 0.3);
 }
@@ -251,12 +254,6 @@ header {
 }
 .code-hide.code-detail.array::after {
   content: "[...]"
-}
-.modal-item-container {
-
-}
-.modal-item-container .modal-item {
-  display: flex;
 }
 .method-title-delete,
 .method-title-post,

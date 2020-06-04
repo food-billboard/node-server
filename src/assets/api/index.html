@@ -56,14 +56,14 @@
                   <li class="params-name">
                     <ul>
                       <li>
-                        <span class="params-name-item required">currPage</span>
+                        <span class="params-name-item">currPage</span>
                         <br/>
                         <span class="typeof-int"></span>
                         <br/>
                         <span class="type">query</span>
                       </li>
                       <li>
-                        <span class="params-name-item required">paegSize</span>
+                        <span class="params-name-item">paegSize</span>
                         <br/>
                         <span class="typeof-int"></span>
                         <br/>
@@ -106,6 +106,7 @@
   "res": {
     "data": [
       {
+        "_id": "string",
         "username": "string",
         "avatar": "string"
       }
@@ -140,187 +141,3588 @@
             </div>
           
           </li>
-          <li>
-            <h6>/api/customer/manage/attention 用户关注</h6>
-            put
+          <li class="content-put">
+            <h6 class="method-backgound-put method-title-put">
+              <span class="method put">put</span>
+              /api/customer/manage/attention 用户关注
+            </h6>
+			      <div class="main-put hide">
+              <div class="main-put-content">
+                <h6 class="main-title-put">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item required">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>用户id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": null
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  success: boolean,
+  Response<<用户关注>> null
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/manage/attention 取消关注</h6>
-            delete
+          <li class="content-delete">
+            <h6 class="method-backgound-delete method-title-delete">
+              <span class="method delete">delete</span>
+              /api/customer/manage/attention 取消关注
+            </h6>
+            <div class="main-delete hide">
+              <div class="main-delete-content">
+                <h6 class="main-title-delete">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>用户id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": null
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  success: boolean,
+  Response<<用户关注>> null
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/manage/fans 粉丝 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/manage/fans 粉丝
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">paegSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>每页数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "_id": "string"
+        "username": "string",
+        "avatar": "string"
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  success: boolean,
+  Response<<粉丝>> {
+    data: [
+      "username": "string"
+                  "用户名"
+      "avatar": "string"
+                "头像"
+      "_id": "string"
+             "主键id" 
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/manage/comment 评论 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/manage/comment 评论列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">paegSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>每页数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": boolean,
+  "res": {
+    "data": [
+    {
+      "_id": "string",
+      "source": {
+        "type": "user",
+        "comment": "string"
+      },
+      "create_time": 1234567890,
+      "toal_like": 0,
+      "content": {
+        "text": "string",
+        "image": ["string"],
+        "video": ["string"]
+      },
+      "like_person": [
+        {
+          "_id": "string",
+          "avatar": "string"
+        }
+      ]
+    }
+  ]
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": true,
+  Response<<用户评论>>: {
+    "data": [
+      {
+        "_id": "string",
+                "主键id"
+        "source": {
+                  "评论对象"
+          "type": "string",
+                  "评论对象"["USER", "MOVIE"]
+          "comment": "string"
+                      "id"
+        },
+        "create_time": integer,
+        "total_like": "integer",
+                      "点赞总数"
+        "content": {
+                    "评论内容"
+          "text": "string",
+                  "文字内容"
+          "image": ["string"],
+                    ["图片"]
+          "video": ["string"]
+                    ["视频"]
+        },
+        "like_person": [
+                      "点赞用户"
+          {
+            "_id": "string",
+                    "id"
+            "avatar": "string"
+                      "点赞人头像"
+          }
+        ]
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/manage/movie 发布电影 post</h6>
+          <li class="content-post">
+            <h6 class="method-backgound-post method-title-post">
+              <span class="method post">post</span>
+              /api/customer/manage/movie 发布电影
+            </h6>
+            <div class="main-post hide">
+              <div class="main-post-content">
+                <h6 class="main-title-post">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">video</span>
+                        <br/>
+                        <span class="typeof-object"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">info</span>
+                        <br/>
+                        <span class="typeof-object"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">images</span>
+                        <br/>
+                        <span class="typeof-object"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>视频信息</p>
+                        <p class="required">src 视频地址</p>
+                        <p class="required">poster 海报</p>
+                      </li>
+                      <li>
+                        <p class="required">电影信息</p>
+                        <p class="required">name 电影名称</p>
+                        <p class="required">district 地区</p>
+                        <p class="required">director 导演</p>
+                        <p class="required">actor 演员</p>
+                        <p class="required">classify 类型</p>
+                        <p class="required">screen_time 时间</p>
+                        <p class="required">description 描述</p>
+                        <p class="required">language 语言</p>
+                        <p class="required">author_rate 作者评分</p>
+                        <p>alias 别名</p>
+                        <p>author_description 电影自我描述</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": null
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  success: boolean,
+  Response<<发布电影>> null
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/manage/movie 修改电影 put</h6>
+          <li class="content-put">
+            <h6 class="method-backgound-put method-title-put">
+              <span class="method put">put</span>
+              /api/customer/manage/movie 修改电影
+            </h6>
+            <div class="main-put hide">
+              <div class="main-put-content">
+                <h6 class="main-title-put">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">video</span>
+                        <br/>
+                        <span class="typeof-object"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">info</span>
+                        <br/>
+                        <span class="typeof-object"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">images</span>
+                        <br/>
+                        <span class="typeof-object"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>视频信息</p>
+                        <p class="required">src 视频地址</p>
+                        <p class="required">poster 海报</p>
+                      </li>
+                      <li>
+                        <p class="required">电影信息</p>
+                        <p class="required">name 电影名称</p>
+                        <p class="required">district 地区</p>
+                        <p class="required">director 导演</p>
+                        <p class="required">actor 演员</p>
+                        <p class="required">classify 类型</p>
+                        <p class="required">screen_time 时间</p>
+                        <p class="required">description 描述</p>
+                        <p class="required">language 语言</p>
+                        <p class="required">author_rate 作者评分</p>
+                        <p>alias 别名</p>
+                        <p>author_description 电影自我描述</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": null
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  success: boolean,
+  Response<<用户关注>> null
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/manage/movie 获取发布的电影 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/manage/movie 发布的电影列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">paegSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>每页数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "_id": "string"
+        "name": "string",
+        "poster": "string",
+        "hot": 0
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  success: boolean,
+  Response<<用户发布电影列表>> {
+    data: [
+      "_id": "string",
+             "id"
+      "name": "string",
+              "电影名称"
+      "poster": "string",
+                "电影海报"
+      "hot": "integer"
+             "人气" 
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/manage/movie/store 获取发布的电影 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/manage/movie/store 获取收藏的电影
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">paegSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>每页数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "_id": "id",
+        "description": "string",
+        "name" "string",
+        "poster": "string",
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  success: boolean,
+  Response<<用户收藏电影>> {
+    data: [
+      {
+        "_id": "id",
+        "description": "string",
+                       "描述"
+        "name" "string",
+               "电影名称"
+        "poster": "string",
+                  "海报"
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/manage/movie/detail 发布的电影信息(修改用) get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/manage/movie/detail 发布的电影信息(修改用)
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "_id": "string",
+      "name": "string",
+      "info": {
+        "name": "string",
+        "alias": [ "string" ],
+        "description": "string",
+        "screen_time": 1234567890,
+        "director": {
+          "direcotr": ["string"],
+          "rest": ["string"]
+        },
+        "actor": {
+          "actor": ["string"],
+          "rest": ["string"]
+        },
+        "area": {
+          "area": ["string"],
+          "rest": ["string"]
+        }
+        "classify": {
+          "classify": ["string"],
+          "rest": ["string"]
+        }
+        "language": {
+          "language": ["string"],
+          "rest": ["string"]
+        }
+      },
+      "video": "string",
+      "images": [
+        "string"
+      ],
+      "poster": "string",
+      "author_description": "string",
+      "author_rate": 0,
+    }
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  success: boolean,
+  Response<<发布电影的信息>> {
+    data: {
+      "_id": "string",
+      "name": "string",
+      "info": {
+        "name": "string",
+        "alias": [ "string" ],
+        "description": "string",
+        "screen_time": "date",
+        "director": {
+          "direcotr": ["string"],
+          "rest": ["string"]
+        },
+        "actor": {
+          "actor": ["string"],
+          "rest": ["string"]
+        },
+        "area": {
+          "area": ["string"],
+          "rest": ["string"]
+        }
+        "classify": {
+          "classify": ["string"],
+          "rest": ["string"]
+        }
+        "language": {
+          "language": ["string"],
+          "rest": ["string"]
+        }
+      },
+      "video": "string",
+      "images": [
+        "string"
+      ],
+      "poster": "string",
+      "author_description": "string",
+      "author_rate": integer,
+    }
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/manage/movie/browser 浏览记录 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/manage/movie/browser 浏览记录
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">paegSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>每页数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "_id": "string",
+        "description": "string",
+        "poster": "string"
+        "name": "string"
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  success: boolean,
+  Response<<用户关注>> {
+    data: [
+      {
+        "_id": "string",
+        "description": "string",
+        "poster": "string"
+        "name": "string"
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
         </ul>
       </div>
       <div>
-        <h5>movie</h5>
-        <ul class="customer-movie">
-          <li>
-            <h6>/api/customer/movie/detail 电影详情</h6>
+        <h5 class="item">movie</h5>
+        <ul class="customer-movie hide">
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/movie/detail 电影详情
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/movie/detail/store 收藏 put</h6>
+          <li class="content-put">
+            <h6 class="method-backgound-put method-title-put">
+              <span class="method put">put</span>
+              /api/customer/movie/detail/store 收藏
+            </h6>
+            <div class="main-put hide">
+              <div class="main-put-content">
+                <h6 class="main-title-put">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/movie/detail/store 取消收藏 delete</h6>
+          <li class="content-delete">
+            <h6 class="method-backgound-delete method-title-delete">
+              <span class="method delete">delete</span>
+              /api/customer/movie/detail/store 取消收藏
+            </h6>
+            <div class="main-delete hide">
+              <div class="main-delete-content">
+                <h6 class="main-title-delete">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/movie/detail/rate 评分 put</h6>
+          <li class="content-put">
+            <h6 class="method-backgound-put method-title-put">
+              <span class="method put">put</span>
+              /api/customer/movie/detail/rate 评分
+            </h6>
+            <div class="main-put hide">
+              <div class="main-put-content">
+                <h6 class="main-title-put">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">value</span>
+                        <br/>
+                        <span class="typeof-integer"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>评分</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/movie/detail/comment 评论用户 post</h6>
+          <li class="content-post">
+            <h6 class="method-backgound-post method-title-post">
+              <span class="method post">post</span>
+              /api/customer/movie/detail/comment 评论用户
+            </h6>
+            <div class="main-post hide">
+              <div class="main-post-content">
+                <h6 class="main-title-post">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">content</span>
+                        <br/>
+                        <span class="typeof-integer"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>内容</p>
+                        <p>text 文字内容</p>
+                        <p>image 图片内容</p>
+                        <p>video 视频内容</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/movie/detail/comment/movie 评论电影 post</h6>
+          <li class="content-post">
+            <h6 class="method-backgound-post method-title-post">
+              <span class="method post">post</span>
+              /api/customer/movie/detail/comment/movie 评论电影
+            </h6>
+            <div class="main-post hide">
+              <div class="main-post-content">
+                <h6 class="main-title-post">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">content</span>
+                        <br/>
+                        <span class="typeof-integer"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>内容</p>
+                        <p>text 文字内容</p>
+                        <p>image 图片内容</p>
+                        <p>video 视频内容</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/movie/detail/comment/like 点赞 put</h6>
+          <li class="content-put">
+            <h6 class="method-backgound-put method-title-put">
+              <span class="method put">put</span>
+              /api/customer/movie/detail/comment/like 点赞
+            </h6>
+            <div class="main-put hide">
+              <div class="main-put-content">
+                <h6 class="main-title-put">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/movie/detail/comment/like 取消点赞 delete</h6>
+          <li class="content-delete">
+            <h6 class="method-backgound-delete method-title-delete">
+              <span class="method delete">delete</span>
+              /api/customer/movie/detail/comment/like 取消点赞
+            </h6>
+            <div class="main-delete hide">
+              <div class="main-delete-content">
+                <h6 class="main-title-delete">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
         </ul>
       </div>
       <div>
-        <h5>user</h5>
-        <ul class="customer-user">
-          <li>
-            <h6>/api/customer/user 用户信息 get</h6>
+        <h5 class="item">user</h5>
+        <ul class="customer-user hide">
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/user 用户信息
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/customer/user/comment 评论信息 get</h6>
-          </li>
-          <li>
-            <h6>/api/customer/user/comment 评论信息 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/user/comment 评论信息
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">pageSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>页面数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
         </ul>
       </div>
       <h4>User</h4>
       <div>
-        <h5>customer</h5>
-        <ul class="user-customer">
-          <li>
-            <h6>/api/user/customer 用户信息 get</h6>
+        <h5 class="item">customer</h5>
+        <ul class="user-customer hide">
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/customer 用户信息
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/customer/fans 用户粉丝 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/customer/fans 用户粉丝
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">pageSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>页面数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/customer/fans 用户评论 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/customer/fans 用户评论
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">pageSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>页面数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/customer/attention 用户关注 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/customer/attention 用户关注
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">pageSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>页面数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/customer/movie 用户发布的电影 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/customer/movie 用户发布的电影
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">pageSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>页面数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/customer/movie/borwser 用户浏览记录 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/customer/movie/borwser 用户浏览记录
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">pageSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>页面数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/customer/movie 用户收藏的电影 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/customer/movie 用户收藏的电影
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">pageSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>页面数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
         </ul>
       </div>
       <div>
-        <h5>home</h5>
-        <ul class="user-home">
-          <li>
-            <h6>/api/user/home/daily 每日上新 get</h6>
+        <h5 class="item">home</h5>
+        <ul class="user-home hide">
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/home/daily 每日上新 
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">count</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/home/hot 热搜 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/home/hot 热搜
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">count</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/home/notice 跑马灯 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/home/notice 跑马灯
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/home/rank 排行榜 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/home/rank 排行榜
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">count</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/home/special 专题 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/home/special 专题
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/home/swiper 轮播图 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/home/swiper 轮播图
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">count</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
         </ul>
       </div>
       <div>
-        <h5>logon</h5>
-        <ul class="user-logon">
-          <li>
-            <h6>/api/user/logon/signout 登录 post</h6>
+        <h5 class="item">logon</h5>
+        <ul class="user-logon hide">
+          <li class="content-post">
+            <h6 class="method-backgound-post method-title-post">
+              <span class="method post">post</span>
+              /api/user/logon/signout 登录
+            </h6>
+            <div class="main-post hide">
+              <div class="main-post-content">
+                <h6 class="main-title-post">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">mobile</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">password</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">uid</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">body</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>手机号</p>
+                      </li>
+                      <li>
+                        <p>密码</p>
+                      </li>
+                      <li>
+                        <p>socketid</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/logon/register 注册 post</h6>
+          <li class="content-post">
+            <h6 class="method-backgound-post method-title-post">
+              <span class="method post">post</span>
+              /api/user/logon/register 注册
+            </h6>
+            <div class="main-post hide">
+              <div class="main-post-content">
+                <h6 class="main-title-post">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">uid</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">mobile</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">password</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>socketid</p>
+                      </li>
+                      <li>
+                        <p>手机号</p>
+                      </li>
+                      <li>
+                        <p>密码</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/logon/signout 登出 post</h6>
+          <li class="content-post">
+            <h6 class="method-backgound-post method-title-post">
+              <span class="method post">post</span>
+              /api/user/logon/signout 登出
+            </h6>
+            <div class="main-post hide">
+              <div class="main-post-content">
+                <h6 class="main-title-post">Parameters</h6>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
         </ul>
       </div>
       <div>
-        <h5>movie</h5>
-        <ul class="user-movie">
-          <li>
-            <h6>/api/user/movie/classify 分类 get</h6>
+        <h5 class="item">movie</h5>
+        <ul class="user-movie hide">
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/classify 分类
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">pageSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">sort</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>页面数量</p>
+                      </li>
+                      <li>
+                        <p>排序</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/movie/classify/specDropList 分类列表 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/classify/specDropList 分类列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">count</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/movie/detail 电影详情 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/detail 电影详情
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/movie/detail/comment 电影评论 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/detail/comment 电影评论
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">count</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/movie/detail/simple 电影详情简易 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/detail/simple 电影详情简易
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/movie/detail/comment/list 电影评论列表 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/detail/comment/list 电影评论列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">pageSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>页面数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/movie/detail/comment/detail 评论详情 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/detail/comment/detail 评论详情
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">pageSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>页面数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/movie/classify 排行榜 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/classify 排行榜
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">_id</span>
+                        <br/>
+                        <span class="typeof-string"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">currPage</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                      <li>
+                        <span class="params-name-item">pageSize</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>id</p>
+                      </li>
+                      <li>
+                        <p>当前页</p>
+                      </li>
+                      <li>
+                        <p>页面数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
-            <h6>/api/user/movie/classify/specDropList 排行榜列表 get</h6>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/classify/specDropList 排行榜列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <ul class="params">
+                  <li class="params-name">
+                    <ul>
+                      <li>
+                        <span class="params-name-item">count</span>
+                        <br/>
+                        <span class="typeof-int"></span>
+                        <br/>
+                        <span class="type">query</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="params-description">
+                    <ul>
+                      <li>
+                        <p>数量</p>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
-          <li>
+          <li class="content-get">
             <h6>/api/user/movie/search</h6>
           </li>
         </ul>
       </div>
       <div>
-        <h5>setting</h5>
-        <ul class="user-setting">
-          <li>
-            <h6>/api/user/setting/info 小程序信息 get</h6>
+        <h5 class="item">setting</h5>
+        <ul class="user-setting hide">
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/setting/info 小程序信息
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
         </ul>
       </div>

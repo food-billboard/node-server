@@ -34,8 +34,9 @@ router.get('/', async (ctx) => {
   })
   .then(data => {
     return data.map(d => {
-      const { info: { description, name }, poster } = d
+      const { info: { description, name }, poster, _id } = d
       return {
+        _id: _id,
         description,
         name,
         poster
