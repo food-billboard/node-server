@@ -123,7 +123,6 @@ const getDetail = socket => async (data) => {
       await mongo.connect("message")
       .then(db => db.find({
         _id: { $in: [...messageList] },
-        //这里
           create_time: { $lt: mine ? startTime : Date.now() }
         }, {
           limit: pageSize,
@@ -139,16 +138,16 @@ const getDetail = socket => async (data) => {
           const { type, content: { text, video, image, audio }, ...nextData } = d
           let newContent
           switch(type) {
-            case "image": 
+            case "IMAGE": 
               newContent = image
               break
-            case "video":
+            case "VIDEO":
               newContent = video
               break
-            case "audio":
+            case "AUDIO":
               newContent = audio
               break
-            case "text":
+            case "TEXT":
             default:
               newContent = text
               break

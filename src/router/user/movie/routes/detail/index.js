@@ -213,7 +213,7 @@ router
       author,
       same_film,
     ] = data
-    const { info, same_film: originList, total_rate, rate_person, ...nextResult  } = result
+    const { info, same_film: originList, total_rate, rate_person, status, ...nextResult  } = result
     const { username } = author
     return {
       ...nextResult,
@@ -226,7 +226,15 @@ router
         language
       },
       tag,
-      comment,
+      comment: comment.map(c => {
+        const { avatar, ...nextC } = c
+        return {
+          ...nextC,
+          user_info: {
+            avatar
+          }
+        }
+      }),
       author: {
         username
       },

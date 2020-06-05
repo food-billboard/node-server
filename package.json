@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@koa/router": "^9.0.0",
+    "dayjs": "^1.8.28",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.11.0",
     "koa-body": "^4.1.1",

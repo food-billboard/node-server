@@ -24,7 +24,8 @@ router.get('/', async (ctx) => {
       _id: { $in: [...store] }
     }, {
       projection: {
-        info: 1,
+        "info.description": 1,
+        "info.name": 1,
         poster: 1
       },
       limit: pageSize,
@@ -34,12 +35,11 @@ router.get('/', async (ctx) => {
   })
   .then(data => {
     return data.map(d => {
-      const { info: { description, name }, poster, _id } = d
+      const { info: { description, name }, ...nextD } = d
       return {
-        _id: _id,
+        ...nextD,
         description,
         name,
-        poster
       }
     })
   })

@@ -20,37 +20,35 @@ const handle = {
           )
         ) return Reflect.get(target, prop)
       //为空或过时
-      const movieData = await mongo.connect('movie')
-      .then(db => db.find({}, {
-        sort: {
-          create_time: -1
-        },
-        limit: 3,
-        projection: {
-          poster: 1 
-        }
-      }))
-      .then(data => data.toArray())
+      const [ movieData, specialData ] = await Promise.all([
+        mongo.connect('movie')
+        .then(db => db.find({}, {
+          sort: {
+            create_time: -1
+          },
+          limit: 3,
+          projection: {
+            poster: 1 
+          }
+        }))
+        .then(data => data.toArray()),
+        mongo.connect('special')
+        .then(db => db.find({}, {
+          sort: {
+            create_time: -1
+          },
+          limit: 3,
+          projection: {
+            poster: 1 
+          }
+        }))
+        .then(data => data.toArray())
+      ])
       .catch(err => {
         console.log(err)
         return false
       })
-      const specialData = await mongo.connect('special')
-      .then(db => db.find({}, {
-        sort: {
-          create_time: -1
-        },
-        limit: 3,
-        projection: {
-          poster: 1 
-        }
-      }))
-      .then(data => data.toArray())
-      .catch(err => {
-        console.log(err)
-        return false
-      })
-      const result = [ ...(movieData ? movieData : [] ), ...(specialData ? specialData : []) ]
+      const result = [ ...(movieData ? movieData.map(m => ({ ...m, type: "MOVIE" })) : [] ), ...(specialData ? specialData.map(s => ({ ...s, type: "SPECIAL" })) : []) ]
       Reflect.set(target, 'data', result)
       Reflect.set(target, 'expire', Date.now())
       Reflect.set(target, 'max-age', 1000 * 60 * 60 * 24)

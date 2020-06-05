@@ -27,19 +27,20 @@ router.get('/', async (ctx) => {
       limit: pageSize,
       skip: pageSize * currPage,
       projection: {
-        info: 1,
+        "info.description": 1,
+        "info.name": 1,
         poster: 1
       }
     }))
-    .then(data => data.toArray())
   })
+  .then(data => data.toArray())
   .then(data => {
     return data.map(d => {
-      const { info: { description, name }, poster } = d
+      const { info: { description, name }, ...nextD} = d
       return {
+        ...nextD,
         description,
         name,
-        poster
       }
     })
   })

@@ -52,22 +52,53 @@ router
   const [, token] = verifyTokenToData(ctx)
   let res
   let errMsg
+  const { _id } = ctx.query
   const { mobile } = token
   const data = await mongo.connect("user")
-  .then(db => db.findOne({
-    mobile: Number(mobile)
+  .then(db => db.find({
+    $or: [
+      {
+        mobile: Number(mobile),
+      },
+      {
+        _id: mongo.dealId(_id)
+      }
+    ]
   }, {
     projection: {
-      mobile: 1,
       username: 1,
       avatar: 1,
       hot: 1,
       fans:1,
       attentions: 1,
       create_time: 1,
-      status: 1
     }
   }))
+  .then(data => data.toArray())
+  .then(data => {
+    let result = []
+    let mine
+    let fans
+    data.forEach(d => {
+      const { _id:id, ...nextD } = d 
+      if(mongo.equalId(_id, id)) {
+        const { fans, attentions,  } = nextD
+        result = {
+          ...result,
+          ...nextD,
+          fans: fans.length,
+          attentions: attentions.length,
+          like: false,
+        }
+        fans = [...fans]
+      }else {
+        mine = id
+      }
+    })
+
+    if(mine && fans.some(f => mongo.equalId(f, mine))) result.like = true
+    return result
+  })
   .catch(err => {
     errMsg = err
     return false

@@ -51,6 +51,7 @@ router.get('/', async (ctx) => {
       const { user_info, comment_users } = d
       return [user_info, ...comment_users]
     })
+    listId.push(result.comment.user_info)
     listId.flat(Infinity).forEach(id => {
       if(!newListId.some(i => mongo.equalId(i, id))) newListId.push(id)
     })
@@ -68,7 +69,7 @@ router.get('/', async (ctx) => {
     : []
   })
   .then(data => {
-    const { sub } = result
+    const { sub, comment: { user_info:originUser } } = result
     let _sub = [...sub]
     sub.forEach((r, i) => {
       const { comment_users, user_info } = r
@@ -94,6 +95,11 @@ router.get('/', async (ctx) => {
       })
       _sub[i] = { ..._sub[i], user_info: _user_info, comment_users: _comment_users }
     })
+    //楼主信息
+    const index = data.findIndex(d => mongo.equalId(originUser, d._id))
+    if(~index) result.comment.user_info = {
+      ...data[index]
+    }
     result = {
       ...result,
       sub: [..._sub]

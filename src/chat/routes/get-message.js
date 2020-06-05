@@ -83,7 +83,7 @@ const getMessageList = socket => async (data) => {
     .then(([ userList, messageList ]) => {
       return result
       .map(re => {
-        const { member, type, info, ...nextRe } = re
+        const { member, type, info: { description }, origin, ...nextRe } = re
         const index = member.findIndex(val => mongo.equalId(val.user, mine))
         let message = member[index].message
         let newInfo = {}
@@ -120,8 +120,8 @@ const getMessageList = socket => async (data) => {
         return {
           ...nextRe,
           info: {
-            ...info,
-            ...newInfo
+            ...newInfo,
+            description
           },
           message: {
             count: messageCount,
@@ -241,7 +241,7 @@ const getMessageList = socket => async (data) => {
       return false
     })
   }
-  
+  console.log(res)
   socket.emit("get", JSON.stringify(res))
 }
 

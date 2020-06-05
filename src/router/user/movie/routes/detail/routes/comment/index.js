@@ -42,7 +42,7 @@ router
     }, {
       projection: {
         avatar: 1,
-        _id: 0
+        _id: 1
       }
     }))
     .then(data => data.toArray())
@@ -56,7 +56,16 @@ router
         ...nextData
       }
     })
-    return result
+    return result.map(r => {
+      const { _id, user_info, ...nextR } = r
+      const { _id:userId, ...nextUserInfo } = user_info
+      return {
+        ...nextR,
+        user_info: {
+          ...nextUserInfo
+        }
+      }
+    })
   })
   .catch(err => {
     console.log(err)

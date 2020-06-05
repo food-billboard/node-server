@@ -12,30 +12,682 @@
   </header>
   <section>
     <h2>聊天相关</h2>
-    <ul>
-      <li>
-        <h4>delete 删除消息</h4>
+    <h5 class="item">Socket</h5>
+    <ul class="hide">
+      <li class="content-delete">
+        <h6 class="method-backgound-delete method-title-delete">
+          <span class="method delete">delete</span>
+          删除消息
+        </h6>
+        <div class="main-delete hide">
+          <div class="main-delete-content">
+            <h6 class="main-title-delete">Parameters</h6>
+            <table class="params">
+              <tr>
+                <td>
+                  <span class="params-name-item required">_id</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>id</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item required">token</span>
+                  <br/>
+                  <span class="typeof-object"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>token</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <h6 class="main-title-delete">Responses</h6>
+            <ul class="response">
+              <li class="res-code">
+                <ul>
+                  <li>
+                    200
+                  </li>
+                </ul>
+              </li>
+              <li class="res-description">
+                <ul>
+                  <li>
+                    <div class="res-description-title status-200"></div>
+                    <div class="res-description-detail">
+                      <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                      <div class="example">
+                        <pre>
+{
+  "success": true,
+  "res": null
+}
+                        </pre>
+                      </div>
+                      <div class="modal hide">
+                        <pre>
+{
+  "success": "boolean",
+  "res": null
+}
+                        </pre>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
       </li>
-      <li>
-        <h4>disconnecting 断开连接</h4>
+      <li class="content-post">
+        <h6 class="method-backgound-post method-title-post">
+          <span class="method post">disconnecting</span>
+          断开连接
+        </h6>
+        <div class="main-post hide">
+          <div class="main-post-content">
+            <h6 class="main-title-post">Parameters</h6>
+          </div>
+          <div>
+            <h6 class="main-title-post">Responses</h6>
+          </div>
+        </div>
       </li>
-      <li>
-        <h4>message 消息详情</h4>
+      <li class="content-get">
+        <h6 class="method-backgound-get method-title-get">
+          <span class="method get">message</span>
+          消息详情
+        </h6>
+        <div class="main-get hide">
+          <div class="main-get-content">
+            <h6 class="main-title-get">Parameters</h6>
+            <table class="params">
+              <tr>
+                <td>
+                  <span class="params-name-item required">_id</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>房间id</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item">token</span>
+                  <br/>
+                  <span class="typeof-object"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>token</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item">startTime</span>
+                  <br/>
+                  <span class="typeof-int"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>查询起始时间</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item">pageSize</span>
+                  <br/>
+                  <span class="typeof-int"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>每页数量</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item">messageId</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>查询的具体消息id(传递则只查询该消息)</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <h6 class="main-title-get">Responses</h6>
+            <ul class="response">
+              <li class="res-code">
+                <ul>
+                  <li>
+                    200
+                  </li>
+                </ul>
+              </li>
+              <li class="res-description">
+                <ul>
+                  <li>
+                    <div class="res-description-title status-200"></div>
+                    <div class="res-description-detail">
+                      <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                      <div class="example">
+                        <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "type": "TEXT",
+        "content": "string",
+        "create_time": 1234567890
+      }
+    ]
+  }
+}
+                        </pre>
+                      </div>
+                      <div class="modal hide">
+                        <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "type": "string" 内容类型["IMAGE", "TEXT", "AUDIO", "VIDEO"],
+        "content": "string" 内容,
+        "create_time": "date_time" 
+      }
+    ]
+  }
+}
+                        </pre>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
       </li>
-      <li>  
-        <h4>get 消息列表</h4>
+      <li class="content-get">  
+        <h6 class="method-backgound-get method-title-get">
+          <span class="method get">get</span>
+          消息列表
+        </h6>
+        <div class="main-get hide">
+          <div class="main-get-content">
+            <h6 class="main-title-get">Parameters</h6>
+            <table class="params">
+              <tr>
+                <td>
+                  <span class="params-name-item">token</span>
+                  <br/>
+                  <span class="typeof-object"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>token</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <h6 class="main-title-get">Responses</h6>
+            <ul class="response">
+              <li class="res-code">
+                <ul>
+                  <li>
+                    200
+                  </li>
+                </ul>
+              </li>
+              <li class="res-description">
+                <ul>
+                  <li>
+                    <div class="res-description-title status-200"></div>
+                    <div class="res-description-detail">
+                      <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                      <div class="example">
+                        <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "_id": "string",
+        "type": "CHAT",
+        "info": {
+          "avatar": "string",
+          "name": "string",
+          "description": 'string'
+        },
+        "message": {
+          "count": 0,
+          "lastData": "string",
+          "time": 1234567890
+        }
+      }
+    ]
+  }
+}
+                        </pre>
+                      </div>
+                      <div class="modal hide">
+                        <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "_id": "string" id,
+        "type": "string" 聊天类型[CHAT, GROUP_CHAT, SYSTEM],
+        "info": { 相关信息
+          "avatar": "string" 头像,
+          "name": "string" 名称,
+          "description": 'string' 描述
+        },
+        "message": { 消息信息
+          "count": "integer" 消息条数,
+          "lastData": "string" 最后一条消息内容,
+          "time": "date_time" 时间
+        }
+      }
+    ]
+  }
+}
+                        </pre>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
       </li>
-      <li>
-        <h4>join 加入房间</h4>
+      <li class="content-post">
+        <h6 class="method-backgound-post method-title-post">
+          <span class="method post">join</span>
+          加入房间 || 创建房间
+        </h6>
+        <div class="main-post hide">
+          <div class="main-post-content">
+            <h6 class="main-title-post">Parameters</h6>
+            <table class="params">
+              <tr>
+                <td>
+                  <span class="params-name-item">type</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>房间类型(CHAT, GROUP_CHAT, SYSTEM)</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item">token</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>token</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item">_id</span>
+                  <br/>
+                  <span class="typeof-object"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>id</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item">members</span>
+                  <br/>
+                  <span class="typeof-object"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>token</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <h6 class="main-title-post">Responses</h6>
+            <ul class="response">
+              <li class="res-code">
+                <ul>
+                  <li>
+                    200
+                  </li>
+                </ul>
+              </li>
+              <li class="res-description">
+                <ul>
+                  <li>
+                    <div class="res-description-title status-200"></div>
+                    <div class="res-description-detail">
+                      <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                      <div class="example">
+                        <pre>
+{
+  "success": true,
+  "res": {
+    "_id": "string"
+  }
+}
+                        </pre>
+                      </div>
+                      <div class="modal hide">
+                        <pre>
+{
+  "success": "boolean",
+  "res": {
+    "_id": "string" 房间id
+  }
+}
+                        </pre>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
       </li> 
-      <li>
-        <h4>leave 离开房间</h4>
+      <li class="content-delete">
+        <h6 class="method-backgound-delete method-title-delete">
+          <span class="method delete">delete</span>
+          删除消息
+        </h6>
+        <div class="main-delete hide">
+          <div class="main-delete-content">
+            <h6 class="main-title-delete">Parameters</h6>
+            <table class="params">
+              <tr>
+                <td>
+                  <span class="params-name-item required">_id</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>id</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item">token</span>
+                  <br/>
+                  <span class="typeof-object"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>token</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <h6 class="main-title-delete">Responses</h6>
+            <ul class="response">
+              <li class="res-code">
+                <ul>
+                  <li>
+                    200
+                  </li>
+                </ul>
+              </li>
+              <li class="res-description">
+                <ul>
+                  <li>
+                    <div class="res-description-title status-200"></div>
+                    <div class="res-description-detail">
+                      <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                      <div class="example">
+                        <pre>
+{
+  "success": true,
+  "res": null
+}
+                        </pre>
+                      </div>
+                      <div class="modal hide">
+                        <pre>
+{
+  "success": "boolean",
+  "res": null
+}
+                        </pre>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
       </li>
-      <li>
-        <h4>post 发送消息</h4>
+      <li class="content-post">
+        <h6 class="method-backgound-post method-title-post">
+          <span class="method post">post</span>
+          发送消息
+        </h6>
+        <div class="main-post hide">
+          <div class="main-post-content">
+            <h6 class="main-title-post">Parameters</h6>
+            <table class="params">
+              <tr>
+                <td>
+                  <span class="params-name-item required">_id</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>id</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item required">token</span>
+                  <br/>
+                  <span class="typeof-object"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>token</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item required">content</span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>内容</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item required">type</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>类型(IMAGE, TEXT, VIDEO, AUDIO)</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item required">pint_to</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>特殊指向用户id</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <h6 class="main-title-post">Responses</h6>
+            <ul class="response">
+              <li class="res-code">
+                <ul>
+                  <li>
+                    200
+                  </li>
+                </ul>
+              </li>
+              <li class="res-description">
+                <ul>
+                  <li>
+                    <div class="res-description-title status-200"></div>
+                    <div class="res-description-detail">
+                      <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                      <div class="example">
+                        <pre>
+{
+  "success": true,
+  "res": null
+}
+                        </pre>
+                      </div>
+                      <div class="modal hide">
+                        <pre>
+{
+  "success": "boolean",
+  "res": null
+}
+                        </pre>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
       </li>
-      <li>
-        <h4>read 阅读消息</h4>
+      <li class="content-put">
+        <h6 class="method-backgound-put method-title-put">
+          <span class="method put">read</span>
+          阅读消息
+        </h6>
+        <div class="main-put hide">
+          <div class="main-put-content">
+            <h6 class="main-title-put">Parameters</h6>
+            <table class="params">
+              <tr>
+                <td>
+                  <span class="params-name-item required">_id</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>id</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item required">token</span>
+                  <br/>
+                  <span class="typeof-object"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>token</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <h6 class="main-title-put">Responses</h6>
+            <ul class="response">
+              <li class="res-code">
+                <ul>
+                  <li>
+                    200
+                  </li>
+                </ul>
+              </li>
+              <li class="res-description">
+                <ul>
+                  <li>
+                    <div class="res-description-title status-200"></div>
+                    <div class="res-description-detail">
+                      <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                      <div class="example">
+                        <pre>
+{
+  "success": true,
+  "res": null
+}
+                        </pre>
+                      </div>
+                      <div class="modal hide">
+                        <pre>
+{
+  "success": "boolean",
+  "res": null
+}
+                        </pre>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
       </li>
     </ul>
     <h2>小程序相关</h2>
@@ -160,7 +812,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-put">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -223,7 +875,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-delete">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -524,7 +1176,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-post">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -640,7 +1292,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-put">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -1334,7 +1986,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-put">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -1397,7 +2049,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-delete">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -1472,7 +2124,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-put">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -1550,7 +2202,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-post">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -1628,7 +2280,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-post">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -1691,7 +2343,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-put">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -1754,7 +2406,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-delete">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -1850,6 +2502,7 @@
       "hot": 0,
       "username": "string",
       "_id": "string",
+      "like": true
     }
   }
 }
@@ -1867,7 +2520,8 @@
       "fans": integer 粉丝,
       "hot": ingeter 人气,
       "username": "string" 用户名,
-      "_id": "string" id
+      "_id": "string" id,
+      "like": "boolean" 是否关注
     }
   }
 }
@@ -3301,7 +3955,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-post">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -3414,7 +4068,7 @@
                 </table>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-post">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>
@@ -3481,7 +4135,7 @@
                 <h6 class="main-title-post">Parameters</h6>
               </div>
               <div>
-                <h6 class="main-title-get">Responses</h6>
+                <h6 class="main-title-post">Responses</h6>
                 <ul class="response">
                   <li class="res-code">
                     <ul>

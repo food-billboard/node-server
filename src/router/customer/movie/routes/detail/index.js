@@ -236,8 +236,8 @@ router
       info,
       total_rate,
       rate_person,
-      nextResult,
-      same_film: originSameFilm
+      same_film: originSameFilm,
+      ...nextResult
     } = result
     result = {
       ...nextResult,

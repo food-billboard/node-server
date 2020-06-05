@@ -38,7 +38,6 @@ router
     _id: mongo.dealId(_id)
   }, {
     projection: {
-      _id: 0,
       name: 1,
       info: 1,
       rest: 1,

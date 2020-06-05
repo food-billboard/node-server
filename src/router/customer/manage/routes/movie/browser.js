@@ -28,7 +28,8 @@ router.get('/', async (ctx) => {
       limit: pageSize,
       skip: pageSize * currPage,
       projection: {
-        info: 1,
+        "info.description": 1,
+        "info.name": 1,
         poster: 1
       }
     }))
@@ -36,12 +37,11 @@ router.get('/', async (ctx) => {
   })
   .then(data => {
     return data.map(d => {
-      const { info: { description, name }, poster, _id } = d
+      const { info: { description, name }, ...nextD } = d
       return {
-        _id,
+        ...nextD,
         description,
         name,
-        poster
       }
     })
   })

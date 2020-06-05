@@ -40,24 +40,39 @@ router.get('/', async (ctx) => {
   })
   .then(data => {
     result = [...data]
-    let comments = []
+    let movies = []
+    let users = []
     data.forEach(d => {
       const { source: { type, comment } } = d
-      if(type === 'user'){
-        comments.push(comment)
+      if(type === 'USER'){
+        users.push(comment)
+      }
+      if(type === 'MOVIE') {
+        movies.push(comment)
       }
     })
-    return mongo.connect("comment")
-    .then(db => db.find({
-      _id: { $in: [...comments] }
-    }, {
-      projection: {
-        content: 1
-      }
-    }))
-    .then(data => data.toArray())
+    return Promise.all([
+      mongo.connect("comment")
+      .then(db => db.find({
+        _id: { $in: [...comments] }
+      }, {
+        projection: {
+          content: 1
+        }
+      }))
+      .then(data => data.toArray()),
+      mongo.connect("movie")
+      .then(db => db.find({
+        _id: { $in: [ ...movies ] }
+      }, {
+        projection : {
+          name: 1
+        }
+      }))
+      .then(data => data.toArray())
+    ])
   })
-  .then(data => {
+  .then(([ users, movies ]) => {
     let newData = []
     result.forEach(re => {
       const { source: { type, comment }, like_person, ...nextRe } = re
@@ -65,12 +80,13 @@ router.get('/', async (ctx) => {
       if(like_person.some(l => mongo.equalId(l, customerId))) {
         like = true
       }
-      if(type === 'user') {
+      if(type === 'USER') {
         let newRe = {
           ...nextRe,
           source: {
             type,
-            comment: data.filter(d => d._id == comment)[0].content
+            comment,
+            content: users.filter(d => mongo.equalId(d._id, comment))[0].content
           },
           like
         }
@@ -78,6 +94,11 @@ router.get('/', async (ctx) => {
       }else if(type === 'movie') {
         newData.push({
           ...nextRe,
+          source: {
+            type,
+            comment,
+            content: movies.filter(d => mongo.equalId(d._id, comment))[0].name
+          },
           like
         })
       }

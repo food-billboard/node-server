@@ -3,7 +3,7 @@ const { MongoDB, verifySocketIoToken, isType, otherToken } = require("@src/utils
 const mongo = MongoDB()
 
 const joinRoom = socket => async (data) => {
-  const { type='chat', _id, members } = data
+  const { type='CHAT', _id, members } = data
   const [, token] = otherToken(data.token)
   let res 
   let hasRoom = false

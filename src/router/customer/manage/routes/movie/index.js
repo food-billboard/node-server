@@ -7,29 +7,6 @@ const { MongoDB, verifyTokenToData, isType, isEmpty, dealMedia } = require("@src
 const router = new Router()
 const mongo = MongoDB()
 
-// 发布电影data: { 
-  // video: {
-  //   src: 视频地址
-  //   poster: 海报地址
-  // } 
-  // info: {
-  //   name: 电影名称
-  //   district: 地区
-  //   director: 导演
-  //   actor: 演员
-  //   classify: 类型
-  //   screen_time: 时间
-  //   description: 描述
-  //   language: 语言,
-  //   author_rate: 作者评分
-  //   alias: ['别名'] 选填
-  //   author_description: 电影自我描述(选填)
-  // }
-  // images: {
-  //   image: 截图地址,
-  // }
-// }
-
 const TEMPLATE_MOVIE = {
   name: '',
   info: {
@@ -307,6 +284,23 @@ function aboutFind(template) {
   }
 }
 
+// function dealObject2Mongo(target) {
+//   let obj = {}
+//   Object.keys(target).forEach(key => {
+//     if(Array.isArray(target[key])) {
+//       if(!obj.$addToSet) obj.$addToSet = {}
+//       obj.$addToSet = { ...obj.$addToSet, key: [ ...target[key] ] }
+//     }
+//     else if(isType(target[key], 'object')) {
+
+//     }
+//     else {
+//       if(!obj.$set) obj.$set = {}
+//       obj.$set = { ...obj.$set, key: target[key] }
+//     }
+//   })
+// }
+
 router
 .use(async(ctx, next) => {
   const { method, body } = ctx.request
@@ -507,7 +501,7 @@ router
     res = {
       success: true,
       res: {
-        errMsg: '审核中'
+        data: '审核中'
       }
     }
   }
@@ -634,7 +628,11 @@ router
   .then(db => db.updateOne({
     _id: mongo.dealId(_id)  
   }, {
-    ...templateUpdateData
+    ...Object.keys(templateUpdateData).reduce((acc, key) => {
+      if(!acc.$set) acc.$set = {}
+      acc.$set = { ...acc.$set, key: templateUpdateData[key] }
+      return acc
+    }, {})
   }))
   .then(data => {
     if(data && data.result && data.result.nModified == 0) return Promise.reject({errMsg: '更新错误', status: 500})
