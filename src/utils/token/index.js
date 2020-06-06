@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken')
-const MongoDB = require("../mongodb")
 let crypto;
 try {
   crypto = require('crypto');
 } catch (err) {
   console.log('不支持 crypto');
 }
-const mongo = MongoDB()
+const { Types: { ObjectId } } = require('mongoose')
+const {RoomSchema } = require('@src/utils')
 
 //秘钥
 const SECRET = "________SE__C_R__E_T"
@@ -88,15 +88,22 @@ const middlewareVerifyTokenForSocketIo = socket => async (packet, next) => {
   if(midList.includes(name)) {
     const { _id } = data
     if(_id) {
-      const data = await mongo.connect("room")
-      .then(db => db.findOne({
-        _id: mongo.dealId(_id),
-        type: 'system'
-      }, {
-        projection: {
-          _id: 1
-        }
-      }))
+      const data = RoomSchema.findOne({
+        _id: ObjectId(_id),
+        type: 'SYSTEM'
+      })
+      .select({ _id: 1 })
+      .exec()
+      .then(data => data)
+      // const data = await mongo.connect("room")
+      // .then(db => db.findOne({
+      //   _id: mongo.dealId(_id),
+      //   type: 'system'
+      // }, {
+      //   projection: {
+      //     _id: 1
+      //   }
+      // }))
       if(data) {
         return next()
       }

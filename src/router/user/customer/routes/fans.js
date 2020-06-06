@@ -1,60 +1,43 @@
 const Router = require('@koa/router')
-const { MongoDB, isType } = require("@src/utils")
+const { UserModel, dealErr } = require("@src/utils")
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
-const mongo = MongoDB()
 
 router
 .get('/', async (ctx) => {
   const { currPage=0, pageSize=30, _id } = ctx.query
   let res
   let errMsg
-  const data = await mongo.connect("user")
-  .then(db => db.findOne({
-    _id: mongo.dealId(_id)
-  }, {
-    projection: {
-      fans: 1
-    }
-  }))
-  .then(data => {
-    if(data && data.fans && !data.fans.length) return Promise.reject({err: null, data: []})
-    const { fans } = data
-    return mongo.connect("user")
-    .then(db => db.find({
-      _id: { $in: [...fans] }
-    }, {
-      limit: pageSize,
-      skip: pageSize * currPage,
-      projection: {
-        username: 1,
-        avatar: 1
-      },
-    }))
-    .then(data => data.toArray())
+  const data = await UserModel.findOne({
+    _id: ObjectId(_id)
   })
-  .catch(err => {
-    if(isType(err, 'object') && err.data) return err.data
-    errMsg = err
-    console.log(err)
-    return false
+  .select({
+    fans: 1,
+    _id: 0
   })
+  .populate({
+    path: 'fans',
+    select: {
+      username: 1,
+      avatar: 1
+    },
+    options: { limit: pageSize, skip: pageSize * currPage }
+  })
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
 
-
-  if(errMsg) {
-    ctx.status = 500
-    res = {
-      success: false,
-      res: {
-        errMsg
-      }
-    }
-  }else {
+  if(data && !data.err) {
     res = {
       success: true,
       res: {
         data
       }
+    }
+  }else {
+    res = {
+      ...data.res
     }
   }
   ctx.body = JSON.stringify(res)

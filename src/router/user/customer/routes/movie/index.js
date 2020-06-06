@@ -1,58 +1,47 @@
 const Router = require('@koa/router')
 const Browse = require('./browser')
 const Store = require('./store')
-const { MongoDB, verifyTokenToData, withTry, isType } = require("@src/utils")
+const { UserModel, dealErr } = require("@src/utils")
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
-const mongo = MongoDB()
 
 router
 .get('/', async (ctx) => {
   const { currPage=0, pageSize=30, _id } = ctx.query
-  const mongoId = mongo.dealId(_id)
-  const data = await mongo.connect("user")
-  .then(db => db.findOne({
-    _id: mongoId
-  }, {
-    projection: {
-      issue: 1
-    }
-  }))
-  .then(data => {
-    if(data && data.issue && !data.issue.length) return Promise.reject({err: null, data: []})
-    const { issue } = data
-    return mongo.connect("movie")
-    .then(db => db.find({
-      _id: { $in: [...issue] }
-    }, {
+  const data = await UserModel.findOne({
+    _id: ObjectId(_id)
+  })
+  .select({
+    issue: 1,
+    _id: 0
+  })
+  .populate({
+    path: 'issue',
+    select: {
+      name: 1,
+      poster: 1,
+      hot: 1
+    },
+    options: {
       skip: pageSize * currPage,
       limit: pageSize,
-      projection: {
-        name: 1,
-        poster: 1,
-        hot: 1
-      }
-    }))
-    .then(data => data.toArray()) 
-  })
-  .catch(err => {
-    if(isType(err, 'object') && err.data) return err.data
-    console.log(err)
-    return false
-  })
-
-  if(!data) {
-    console.log(data)
-    res = {
-      success: false,
-      res: null
     }
-  }else {
+  })
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
+
+  if(data && !data.err) {
     res = {
       success: true,
       res: {
         data
       }
+    }
+  }else {
+    res = {
+      ...data.res
     }
   }
   ctx.body = JSON.stringify(res)

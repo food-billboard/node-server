@@ -3,48 +3,34 @@ const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
-const { MongoDB } = require('@src/utils')
+const { Types: { ObjectId } } = require("mongoose")
+const { UserModel, dealErr } = require("@src/utils")
+
 
 const router = new Router()
-const mongo = MongoDB()
 
 router
 .get('/', async (ctx) => {
-  let res
-  let errMsg
+  let res = {}
   const { _id } = ctx.query
-  const objectId = mongo.dealId(_id)
-  const data = await mongo.connect("user")
-  .then(db => db.findOne({
+  const objectId = ObjectId(_id)
+  const data = await UserModel.findOne({
     _id: objectId
-  }, {
-    projection: {
-      mobile: 1,
-      username: 1,
-      avatar: 1,
-      hot: 1,
-      fans:1,
-      attentions: 1,
-      create_time: 1,
-      status: 1
-    }
-  }))
-  .catch(err => {
-    errMsg = err
-    console.log(err)
-    return false
   })
+  .select({
+    username: 1,
+    avatar: 1,
+    hot: 1,
+    fans:1,
+    attentions: 1,
+    createAt: 1,
+  })
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
 
-  if(errMsg) {
-    ctx.status = 500
-    res = {
-      success: false,
-      res: {
-        errMsg
-      }
-    }
-  }else {
-    const { fans, attentions, ...nextData } = data
+  if(data && !data.err) {
+    const { _doc: { fans, attentions, ...nextData } } = data
     res = {
       success: true,
       res: {
@@ -54,6 +40,10 @@ router
           ...nextData
         }
       }
+    }
+  }else {
+    res = {
+      ...data.res
     }
   }
   ctx.body = JSON.stringify(res)

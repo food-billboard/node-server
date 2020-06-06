@@ -1,6 +1,6 @@
 const Day = require('dayjs')
 const mongoose = require("mongoose")
-const Schema = mongoose.Schema
+const { Schema, model } = mongoose
 const ObjectId = mongoose.Types.ObjectId
 const Mixed = mongoose.Types.Mixed
 
@@ -22,27 +22,24 @@ const defaultConfig = {
 
 //user
 const UserSchema = new Schema({
-	mob: {
+	mobile: {
     type: Number,
     unique: true,
     set: (v) => Number(v),
     required: function() {
       return /^1[3456789]\d{9}$/g.test(this.mob)
     },
-    alias: "mobile"
   },
-	pwd: {
+	password: {
     type: String,
-    alias: "password",
     required: true
   },
-	uname: {
+	username: {
     type: String,
-    alias: 'username',
     default: '默认名称'
   },
 	avatar: {
-    default: "默认图片id",
+    default: ObjectId('5edb3c7b4f88da14ca419e61'),
     type: ObjectId,
     ref: 'image'
   },
@@ -59,10 +56,9 @@ const UserSchema = new Schema({
     type: ObjectId,
     ref: 'user',
   }],
-  ations: [{
+  attentions: [{
     type: ObjectId,
     ref: 'user',
-    alias: 'attentions'
   }],
   issue: [{
     type: ObjectId,
@@ -72,10 +68,9 @@ const UserSchema = new Schema({
     type: ObjectId,
     ref: 'movie'
   }],
-  cmt: [{
+  comment: [{
     type: ObjectId,
     ref: 'comment',
-    alias: 'comment'
   }],
   store: [{
     type: ObjectId,
@@ -99,10 +94,9 @@ const UserSchema = new Schema({
       }
     }
   }],
-  awmy: {
+  allow_many: {
     type: Boolean,
     default: false,
-    alias: 'allow_many' 
   },
   status: {
     type: String,
@@ -116,7 +110,7 @@ const UserSchema = new Schema({
 })
 
 //global
-const globalSchema = new Schema({
+const GlobalSchema = new Schema({
   notice: {
     type: String,
     required: true
@@ -130,7 +124,7 @@ const globalSchema = new Schema({
 })
 
 //room
-const roomSchema = new Schema({
+const RoomSchema = new Schema({
   type:  {
     type: String,
     required: true,
@@ -148,29 +142,27 @@ const roomSchema = new Schema({
     avatar: {
       type: ObjectId,
       ref: 'image',
-      default: '默认图片id'
+      default: ObjectId('5edb3c7b4f88da14ca419e61')
     },
     name: {
       type: String,
       default: '默认名称'
     },
-    desc: {
+    description: {
       type: String,
-      alias: 'description',
       default: '默认介绍'
     }
   },
-  mber: [
+  members: [
     {
-      alias: 'member',
       user: {
         type: ObjectId,
         required: true,
         ref: 'user'
       },
       sid: {
-        type: Mixed,
-        default: null
+        type: String,
+        // default: null
       },
       status: {
         enum: [ "ONLINE", "OFFLINE" ],
@@ -179,8 +171,7 @@ const roomSchema = new Schema({
         trim: true,
         required: true
       },
-      msg: [{
-        alias: 'message',
+      message: [{
         _id: {
           type: ObjectId,
           ref: 'message',
@@ -193,8 +184,7 @@ const roomSchema = new Schema({
       }]
     }
   ],
-  msg: [{
-    alias: 'message',
+  message: [{
     _id: {
       type: ObjectId,
       ref: 'message',
@@ -212,10 +202,10 @@ const roomSchema = new Schema({
   ...defaultConfig
 })
 
-const messageSchema = new Schema({
-  uinfo: {
-    required: true,
+const MessageSchema = new Schema({
+  user_info: {
     type: {
+      required: true,
       enum: [ "__ADMIN__", "USER" ],
       type: String,
       default: 'USER',
@@ -227,12 +217,10 @@ const messageSchema = new Schema({
       ref: 'user',
       required: true,
     },
-    alias: 'user_info'
   },
-  pto: {
+  point_to: {
     type: ObjectId,
     ref: 'user',
-    alias: 'point_to'
   },
   type: {
     type: String,
@@ -246,8 +234,7 @@ const messageSchema = new Schema({
     ref: 'room',
     required: true
   },
-  cont: {
-    alias: 'content',
+  content: {
     text: {
       type: String
     },
@@ -264,7 +251,7 @@ const messageSchema = new Schema({
   ...defaultConfig
 })
 
-const movieSchema = new Schema({
+const MovieSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -282,13 +269,11 @@ const movieSchema = new Schema({
         return v
       }
     },
-    othname: [{
+    another_name: [{
       type: String,
-      alias: 'another_name'
     }],
-    desc: {
+    description: {
       type: String,
-      alias: "description",
       default: '默认介绍'
     },
     actor: [{
@@ -307,12 +292,11 @@ const movieSchema = new Schema({
       type: ObjectId,
       ref: 'classify'
     }],
-    scrtime: {
+    screen_time: {
       type: Date,
       default: Date.now(),
       get: getMill,
       set: setMill,
-      alias: 'screen_time'
     },
     language: [{
       type: ObjectId,
@@ -355,10 +339,9 @@ const movieSchema = new Schema({
     type:Number,
     default: 0
   },
-  author_desc: {
+  author_description: {
     type: String,
     default: '默认描述',
-    alias: 'author_description'
   },
   author_rate: {
     type: Number,
@@ -368,23 +351,20 @@ const movieSchema = new Schema({
     type: Number,
     default: 0,
   },
-  rates: {
+  rate_person: {
     type: Number,
     default: 0,
-    alias: 'rate_person'
   },
-	sum_rate: {
+	total_rate: {
     type: Number,
     default: 0,
-    alias: 'total_rate'
   },
-  sourcet: {
+  source_type: {
     type: String,
     required: true,
     enum: [ 'ORIGIN', 'USER' ],
     trim: true,
     uppercase: true,
-    alias: 'source_type'
   },
   stauts: 
   {
@@ -394,8 +374,7 @@ const movieSchema = new Schema({
     trim: true,
     uppercase: true,
   },
-	relato: [{
-    alias: 'related_to',
+	related_to: [{
     film: {
       type: ObjectId,
       ref: 'movie',
@@ -409,8 +388,7 @@ const movieSchema = new Schema({
       required: true
     }
   }],
-	samem: [{
-    alias: 'same_film',
+	same_film: [{
     film: {
       type: ObjectId,
       ref: 'movie',
@@ -428,7 +406,7 @@ const movieSchema = new Schema({
   ...defaultConfig
 })
 
-const tagSchema = new Schema({
+const TagSchema = new Schema({
   text: {
     type: String,
     unique: true,
@@ -440,7 +418,7 @@ const tagSchema = new Schema({
   minimize: false
 })
 
-const specialSchema = new Schema({
+const SpecialSchema = new Schema({
   movie: [{
     required: true,
     type: ObjectId,
@@ -450,14 +428,12 @@ const specialSchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
-  desc: {
+  description: {
     type: String,
-    alias: 'description',
     default: '默认介绍'
   },
   name: {
     type: String,
-    alias: 'description',
     required: true,
     unique: true,
   },
@@ -465,7 +441,7 @@ const specialSchema = new Schema({
   ...defaultConfig
 })
 
-const actorSchema = new Schema({
+const ActorSchema = new Schema({
   name: {
     type: String,
     required: true
@@ -475,9 +451,8 @@ const actorSchema = new Schema({
     ref: 'movie'
   }],
   other: {
-    othname: {
+    another_name: {
       type: String,
-      alias: 'another_name'
     },
     avatar: {
       type: ObjectId,
@@ -489,7 +464,7 @@ const actorSchema = new Schema({
   minimize: false
 })
 
-const directorSchema = new Schema({
+const DirectorSchema = new Schema({
   name: {
     type: String,
     required: true
@@ -499,9 +474,8 @@ const directorSchema = new Schema({
     ref: 'movie'
   }],
   other: {
-    othname: {
+    another_name: {
       type: String,
-      alias: 'another_name'
     },
     avatar: {
       type: ObjectId,
@@ -513,7 +487,7 @@ const directorSchema = new Schema({
   minimize: false
 })
 
-const districtSchema = new Schema({
+const DistrictSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -525,7 +499,7 @@ const districtSchema = new Schema({
   minimize: false
 })
 
-const searchSchema = new Schema({
+const SearchSchema = new Schema({
   key_word: {
     type: String,
     required: true,
@@ -550,61 +524,64 @@ const searchSchema = new Schema({
   minimize: false
 })
 
-const commentSchema = new Schema({
-  source: {
-    type: {
-      type: String,
-      enum: ['MOVIE', 'USER'],
-      required: true,
-      trim: true,
-      uppercase: true
-    },
-    comment: ObjectId
+const CommentSchema = new Schema({
+  source_type: {
+    type: String,
+    enum: ['MOVIE', 'USER'],
+    required: true,
+    trim: true,
+    uppercase: true
   },
-  uinfo: {
-    alias: 'user_info',
+  source_movie: {
+    type: ObjectId,
+    ref: 'movie'
+  },
+  source_user: {
+    type: ObjectId,
+    ref: 'comment'
+  },
+  user_info: {
     type: ObjectId,
     ref: 'user'
   },
-	subcoms: [{
+	sub_comments: [{
     type: ObjectId,
     ref: 'comment',
-    alias: 'sub_comments'
   }],
-  sulike: {
+  total_like: {
     type: Number,
-    alias: 'total_like',
     default: 0
   },
-  likep: [{
-    alias: 'like_person',
+  like_person: [{
     type: ObjectId,
     ref: 'user'
   }],
-  cont: {
-    alias: 'content',
+  content: {
     text: {
       type: String
     },
-    video: {
-      type: ObjectId,
-      ref: 'video'
-    },
-    image: {
-      type: ObjectId,
-      ref: 'image'
-    }
+    video: [
+      {
+        type: ObjectId,
+        ref: 'video'
+      } 
+    ],
+    image: [
+      {
+        type: ObjectId,
+        ref: 'image'
+      } 
+    ]
   },
-  com_users: [{
+  comment_users: [{
     type: ObjectId,
     ref: 'user',
-    alias: 'comment_users'
   }]
 }, {
   ...defaultConfig
 })
 
-const rankSchema = new Schema({
+const RankSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -617,7 +594,7 @@ const rankSchema = new Schema({
   },
   match: [{
     type: String,
-    enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'RATES', 'SUM_RATE' ],
+    enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'RATES', 'SUM_RATE', 'CLASSIFY' ],
     uppercase: true,
     get: function(v) {
       return v.toLowerCase()
@@ -628,7 +605,7 @@ const rankSchema = new Schema({
   minimize: false
 })
 
-const classifySchema = new Schema({
+const ClassifySchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -644,7 +621,7 @@ const classifySchema = new Schema({
   minimize: false
 })
 
-const languageSchema = new Schema({
+const LanguageSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -656,7 +633,7 @@ const languageSchema = new Schema({
   minimize: false
 })
 
-const videoSchema = new Schema({
+const VideoSchema = new Schema({
   name: String,
   src: {
     type: String,
@@ -670,7 +647,7 @@ const videoSchema = new Schema({
   ...defaultConfig
 })
 
-const imageSchema = new Schema({
+const ImageSchema = new Schema({
   name: String,
   src: {
     type: String,
@@ -680,22 +657,57 @@ const imageSchema = new Schema({
   ...defaultConfig
 })
 
+const UserModel = model('user', UserSchema)
+const GlobalModel = model('global', GlobalSchema)
+const RoomModel = model("room", RoomSchema)
+const MessageModel = model('message', MessageSchema)
+const MovieModel = model('movie', MovieSchema)
+const TagModel = model('tag', TagSchema)
+const SpecialModel = model('special', SpecialSchema)
+const ActorModel = model('actor', ActorSchema)
+const DirectorModel = model('director', DirectorSchema)
+const DistrictModel = model('district', DistrictSchema)
+const SearchModel = model('search', SearchSchema)
+const CommentModel = model('comment', CommentSchema)
+const RankModel = model('rank', RankSchema)
+const ClassifyModel = model('classify', ClassifySchema)
+const LanguageModel = model('language', LanguageSchema)
+const VideoModel = model('video', VideoSchema)
+const ImageModel = model('image', ImageSchema)
+
 module.exports = {
+  UserModel,
+  GlobalModel,
+  RoomModel,
+  MessageModel,
+  MovieModel,
+  TagModel,
+  SpecialModel,
+  ActorModel,
+  DirectorModel,
+  DistrictModel,
+  SearchModel,
+  CommentModel,
+  RankModel,
+  ClassifyModel,
+  LanguageModel,
+  VideoModel,
+  ImageModel,
   UserSchema,
-  globalSchema,
-  roomSchema,
-  messageSchema,
-  movieSchema,
-  tagSchema,
-  specialSchema,
-  actorSchema,
-  directorSchema,
-  districtSchema,
-  searchSchema,
-  commentSchema,
-  rankSchema,
-  classifySchema,
-  languageSchema,
-  videoSchema,
-  imageSchema
+  GlobalSchema,
+  RoomSchema,
+  MessageSchema,
+  MovieSchema,
+  TagSchema,
+  SpecialSchema,
+  ActorSchema,
+  DirectorSchema,
+  DistrictSchema,
+  SearchSchema,
+  CommentSchema,
+  RankSchema,
+  ClassifySchema,
+  LanguageSchema,
+  VideoSchema,
+  ImageSchema
 }

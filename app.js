@@ -5,10 +5,15 @@ const Cors = require('koa-cors')
 // const bodyParser = require('koa-bodyparser')
 const KoaBody = require('koa-body')
 const app = new Koa()
+const { MongoDB } = require("@src/utils")
+
+MongoDB()
+
+
 
 app.use(Cors())
 // app.use(bodyParser())
-app.use(KoaBody({
+.use(KoaBody({
   multipart:true, // 支持文件上传
   // encoding:'gzip',
   // formidable:{
@@ -21,7 +26,7 @@ app.use(KoaBody({
   //   },
   // }
 }))
-app.use(Router.routes()).use(Router.allowedMethods())
+.use(Router.routes()).use(Router.allowedMethods())
 
 app.listen(3000, () => {
   console.log('Server is run in port 3000')

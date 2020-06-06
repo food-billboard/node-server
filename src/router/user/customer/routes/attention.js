@@ -1,60 +1,48 @@
 const Router = require('@koa/router')
-const { MongoDB } = require("@src/utils")
+const { UserModel, dealErr } = require("@src/utils")
+const { Types: { ObjectId } } = require("mongoose")
 
 const router = new Router()
-const mongo = MongoDB()
 
 router
 .get('/', async (ctx) => {
   const { currPage=0, pageSize=30, _id } = ctx.query
   let res
-  let errMsg
-  let mongoId = mongo.dealId(_id)
-  const data = await mongo.connect("user")
-  .then(db => db.findOne({
-    _id: mongoId
-  }, {
-    projection: {
-      attentions: 1
+  const data = await UserModel.findOne({
+    _id: ObjectId(_id)
+  })
+  .select({
+    attentions: 1,
+    _id: 0,
+  })
+  .populate({
+    path: 'attentions',
+    options: {
+      limit: pageSize,
+      skip: pageSize * currPage
     },
-    limit: pageSize,
-    skip: pageSize * currPage
-  }))
-  .then(data => {
-    const { attentions } = data
-    return mongo.connect("user")
-    .then(db => db.find({
-      _id: { $in: [...attentions.map(a => typeof a == 'object' ? a : mongo.dealId(a))] }
-    }, {
-      projection: {
-        username: 1,
-        avatar: 1
-      }
-    }))
-    .then(data => data.toArray())
-  })
-  .catch(err => {
-    errMsg = err
-    console.log(err)
-    return false
-  })
-
-  if(errMsg) {
-    ctx.status = 500
-    res = {
-      success: false,
-      res: {
-        errMsg
-      }
+    select: {
+      username: 1,
+      avatar: 1
     }
-  }else {
+  })
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
+
+  if(data && !data.err) {
     res = {
       success: true,
       res: {
         data
       }
     }
+  }else {
+    res = {
+      ...data.err
+    }
   }
+
   ctx.body = JSON.stringify(res)
 })
 
