@@ -2,10 +2,10 @@ const Router = require('@koa/router')
 const Browse = require('./browser')
 const Store = require('./store')
 const Detail = require('./detail')
-const { MongoDB, verifyTokenToData, isType, isEmpty, dealMedia } = require("@src/utils")
+const { verifyTokenToData, isType, isEmpty, dealMedia, UserModel, MovieModel, dealErr } = require("@src/utils")
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
-const mongo = MongoDB()
 
 const TEMPLATE_MOVIE = {
   name: '',
@@ -33,17 +33,12 @@ const TEMPLATE_MOVIE = {
   tag: [],
   comment: [],
   author: '',
-	glance: 0,
   author_description: '',
   author_rate: '',
-  create_time: Date.now(),
-  modified_time: Date.now(),
 	store: [],
-	hot: 0,
 	rate: [],
-	total_rate: 0,
-  source_type: 'user',
-	stauts: 'verify',
+  source_type: 'USER',
+	stauts: 'VERIFY',
 	related_to: [],
 	same_film: []
 }
@@ -73,7 +68,7 @@ function fieldDefine(valid, unValid, target) {
     if(valid[key] && unValid[key]) {
       if(isType(target[key], 'array')) {
         target[key].forEach(k => {
-          if(mongo.isValid(k)) {
+          if(ObjectId.isValid(k)) {
             _valid.push(k)
           }else {
             _unValid.push(k)
@@ -86,8 +81,8 @@ function fieldDefine(valid, unValid, target) {
         newValid[key] = __valid
         newUnValid = __unValid
       }else {
-        if(mongo.isValid(target[key])) {
-          newValid[key] = mongo.dealId(target[key])
+        if(ObjectId.isValid(target[key])) {
+          newValid[key] = ObjectId(target[key])
         }else {
           newUnValid[key] = target[key]
         }
@@ -100,30 +95,51 @@ function fieldDefine(valid, unValid, target) {
 function aboutFind(template) {
   return (_) => {
     let _template = { ...template }
-    return mongo.connect("movie")
-    .then(db => {
-      let reg
-      const {
-        name
-      } = _template
-      const isReg = str => /\d/g.test(str) ? `[${str}]?` : str
-      if(name.length == 1) {
-        reg = name
-      }else if(name.length == 2) {
-        reg = `${name.slice(0, name.length - 1)}${isReg(name.slice(name.length - 1))}`
-      }else {
-        reg = `${name.slice(0, name.length - 2)}${isReg(name.slice(name.length - 2, name.length - 1))}${isReg(name.slice(name.length - 1))}`
-      }
-      return db.find({
-        name: { $regex: reg, $options: 'i' }
-      }, {
-        projection: {
-          _id: 1,
-          name: 1
-        }
-      })
+    let reg
+    const {
+      name
+    } = _template
+    const isReg = str => /\d/g.test(str) ? `[${str}]?` : str
+    if(name.length == 1) {
+      reg = name
+    }else if(name.length == 2) {
+      reg = `${name.slice(0, name.length - 1)}${isReg(name.slice(name.length - 1))}`
+    }else {
+      reg = `${name.slice(0, name.length - 2)}${isReg(name.slice(name.length - 2, name.length - 1))}${isReg(name.slice(name.length - 1))}`
+    }
+
+    return MovieModel.find({
+      name: { $regex: reg, $options: 'i' }
     })
-    .then(data => data.toArray())
+    .select({
+      _id: 1,
+      name: 1
+    })
+    .exec()
+    // return mongo.connect("movie")
+    // .then(db => {
+    //   let reg
+    //   const {
+    //     name
+    //   } = _template
+    //   const isReg = str => /\d/g.test(str) ? `[${str}]?` : str
+    //   if(name.length == 1) {
+    //     reg = name
+    //   }else if(name.length == 2) {
+    //     reg = `${name.slice(0, name.length - 1)}${isReg(name.slice(name.length - 1))}`
+    //   }else {
+    //     reg = `${name.slice(0, name.length - 2)}${isReg(name.slice(name.length - 2, name.length - 1))}${isReg(name.slice(name.length - 1))}`
+    //   }
+    //   return db.find({
+    //     name: { $regex: reg, $options: 'i' }
+    //   }, {
+    //     projection: {
+    //       _id: 1,
+    //       name: 1
+    //     }
+    //   })
+    // })
+    // .then(data => data.toArray())
     .then(data => {
       let newSameFilm = []
       let series = []
@@ -133,10 +149,10 @@ function aboutFind(template) {
         const { name: same_film, _id } = d
         let film = {
           film: _id,
-          type: 'series'
+          type: 'SERIES'
         }
         if(name == same_film) {
-          film.type = 'namesake'
+          film.type = 'NAMESAKE'
           namesake.push(film)
         }else {
           series.push(film)
@@ -159,18 +175,28 @@ function aboutFind(template) {
       } = _template
       if(!_id) return
       return Promise.all([
-        mongo.connect("movie")
-        .then(db => db.updateMany({
-          _id: { $in: [...series.map(s => s.film)] }
+        MovieModel.updateMany({
+          _id: { $in: [ ...series.map(s => s.film) ] }
         }, {
-          $push: { same_film: { film: _id, type: 'series' } }
-        })),
-        mongo.connect("movie")
-        .then(db => db.updateMany({
+          $push: { same_film: { film: _id, type: 'SERIES' } }
+        }),
+        MovieModel.updateMany({
           _id: { $in: [...namesake.map(n => n.film)] }
         }, {
-          $push: { same_film: { film: _id, type: 'namesake' } }
-        }))
+          $push: { same_film: { film: _id, type: 'NAMESAKE' } }
+        })
+        // mongo.connect("movie")
+        // .then(db => db.updateMany({
+        //   _id: { $in: [...series.map(s => s.film)] }
+        // }, {
+        //   $push: { same_film: { film: _id, type: 'series' } }
+        // })),
+        // mongo.connect("movie")
+        // .then(db => db.updateMany({
+        //   _id: { $in: [...namesake.map(n => n.film)] }
+        // }, {
+        //   $push: { same_film: { film: _id, type: 'namesake' } }
+        // }))
       ])
       //日志上传
       .catch(_=> {
@@ -178,8 +204,8 @@ function aboutFind(template) {
       })
     })
     //相关电影关联( 导演 演员 作者 分类 )
-    .then(_ => mongo.connect("movie"))
-    .then(db => {
+    // .then(_ => mongo.connect("movie"))
+    .then(_ => {
       const {
         info: {
           director,
@@ -188,23 +214,24 @@ function aboutFind(template) {
         },
         author
       } = _template
-      return db.find({
+      return MovieModel.find({
         $or: [
           { "info.director": { $in: [...director] } },
           { "info.classify": { $in: [...classify] } },
           { "info.actor": { $in: [...actor] } },
           {author}
         ]
-      }, {
-      projection: {
+      })
+      .select({
         _id: 1,
         "info.director": 1,
         "info.actor": 1,
         "info.classify": 1,
         author: 1
-      }
-    })})
-    .then(data => data.toArray())
+      })
+      .exec()
+    })
+    // .then(data => data.toArray())
     .then(data => {
       let newRelatedTo = []
       const { author: originAuthor, info: {
@@ -224,21 +251,27 @@ function aboutFind(template) {
         } = d
         let result = { film: _id, type: [] }
         if(director.length && director.some(d => {
-          return originDirector.some(o => mongo.equalId(o, d))
+          // return originDirector.some(o => mongo.equalId(o, d))
+          return originDirector.some(o => o.equals(d))
         })) {
           result.type.push('director')
         }
         if(actor.length && actor.some(a => {
-          return originActor.some(o => mongo.equalId(o, a))
+          // return originActor.some(o => mongo.equalId(o, a))
+          return originActor.some(o => o.equals(a))
         })) {
           result.type.push('actor')
         }
         if(classify.length && classify.some(c => {
-          return originClassify.some(o => mongo.equalId(o, c))
+          // return originClassify.some(o => mongo.equalId(o, c))
+          return originClassify.some(o => o.equals(c))
         })) { 
           result.type.push('classify')
         }
-        if(originAuthor && author &&  mongo.equalId(originAuthor, author)) {
+        // if(originAuthor && author &&  mongo.equalId(originAuthor, author)) {
+        //   result.type.push('author')
+        // }
+        if(originAuthor && author &&  originAuthor.equals(author)) {
           result.type.push('author')
         }
         newRelatedTo.push(result)
@@ -258,12 +291,17 @@ function aboutFind(template) {
       if(!_id) return
       return Promise.all(data.map(d => {
         const { film, type } = d
-        return mongo.connect("movie")
-        .then(db => db.updateOne({
+        return MovieModel.updateOne({
           _id: film
         }, {
           $push: { related_to: { film, type } }
-        }))
+        })
+        // return mongo.connect("movie")
+        // .then(db => db.updateOne({
+        //   _id: film
+        // }, {
+        //   $push: { related_to: { film, type } }
+        // }))
       }))
       //日志记录
       .catch(_ => {
@@ -337,9 +375,9 @@ router
     director,
     actor
   } = nextInfo
+
   //判断是否已经存在
-  const data = await mongo.connect("movie")
-  .then(db => db.findOne({
+  const data = await MovieModel.findOne({
     //名字类似
     $or: [
       { name },
@@ -349,45 +387,73 @@ router
     //上映时间类似
     $and: [ { "info.screen_time": { $gte: screen_time - 24 * 60 * 60 * 1000 } }, { "info.screen_time": { $lte: screen_time + 24 * 60 * 60 * 1000 } } ], 
     //导演类似
-    "info.director": { $in: [...director.filter(r => mongo.isValid(r)).map(d => mongo.dealId(d))] },
+    "info.director": { $in: [...director.filter(r => ObjectId.isValid(r)).map(d => ObjectId.dealId(d))] },
     //演员类似
-    "info.actor": { $in: [...actor.filter(d => mongo.isValid(d)).map(d => mongo.dealId(d))] }
-  }, {
-    projection: {
-      _id: 1,
-      name: 1
-    }
-  }))
+    "info.actor": { $in: [...actor.filter(d => ObjectId.isValid(d)).map(d => ObjectId.dealId(d))] }
+  })
+  .select({
+    _id: 1,
+    name: 1
+  })
+  .exec()
   .then(data => {
     if(data) {
       return Promise.reject({errMsg: '存在相似内容', status: 400, data: {...data}}) 
     }
     return true
   })
-  .catch(err => {
-    if(err && err.status) {
-      const { status, ...nextErr } = err
-      ctx.status = status
-      res = {
-        success: false,
-        res: {
-          ...nextErr
-        }
-      }
-    }else {
-      ctx.status = 500
-      res = {
-        success: false,
-        res: {
-          errMsg: err
-        }
-      }
-    }
-    console.log(err)
-    return false
-  })
+  .catch(dealErr(ctx))
 
-  if(data) {
+  // const data = await mongo.connect("movie")
+  // .then(db => db.findOne({
+  //   //名字类似
+  //   $or: [
+  //     { name },
+  //     { name: { $in: [...alias] } },
+  //     { "info.alias": { $in: [name] } }
+  //   ],
+  //   //上映时间类似
+  //   $and: [ { "info.screen_time": { $gte: screen_time - 24 * 60 * 60 * 1000 } }, { "info.screen_time": { $lte: screen_time + 24 * 60 * 60 * 1000 } } ], 
+  //   //导演类似
+  //   "info.director": { $in: [...director.filter(r => mongo.isValid(r)).map(d => mongo.dealId(d))] },
+  //   //演员类似
+  //   "info.actor": { $in: [...actor.filter(d => mongo.isValid(d)).map(d => mongo.dealId(d))] }
+  // }, {
+  //   projection: {
+  //     _id: 1,
+  //     name: 1
+  //   }
+  // }))
+  // .then(data => {
+  //   if(data) {
+  //     return Promise.reject({errMsg: '存在相似内容', status: 400, data: {...data}}) 
+  //   }
+  //   return true
+  // })
+  // .catch(err => {
+  //   if(err && err.status) {
+  //     const { status, ...nextErr } = err
+  //     ctx.status = status
+  //     res = {
+  //       success: false,
+  //       res: {
+  //         ...nextErr
+  //       }
+  //     }
+  //   }else {
+  //     ctx.status = 500
+  //     res = {
+  //       success: false,
+  //       res: {
+  //         errMsg: err
+  //       }
+  //     }
+  //   }
+  //   console.log(err)
+  //   return false
+  // })
+
+  if(data && !data.err) {
     return await next()
   }
   ctx.body = JSON.stringify(res)
@@ -445,14 +511,22 @@ router
     modified_time: Date.now(),
   }
 
-  const data = await  mongo.connect("user")
-  .then(db => db.findOne({
-    mobile: Number(mobile)
-  }, {
-    projection: {
-      _id: 1
-    }   
-  }))
+  const data = await UserModel.findOne({
+    mobile: ~~mobile
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+
+  // const data = await  mongo.connect("user")
+  // .then(db => db.findOne({
+  //   mobile: Number(mobile)
+  // }, {
+  //   projection: {
+  //     _id: 1
+  //   }   
+  // }))
   .then(data => {
     if(!data) return Promise.reject({errMsg: '登录过期', status: 401}) 
     const { _id } = data
@@ -468,36 +542,47 @@ router
       ...data
     }
   })
+  // .then(_ => {
+  //   //将完整数据存入数据库
+  //   return mongo.connect("movie")
+  // })
+  // .then(db => db.insertOne({...templateInsertData}))
   .then(_ => {
-    //将完整数据存入数据库
-    return mongo.connect("movie")
+    const movie = new MovieModel({
+      ...templateInsertData
+    })
+    movie.save()
   })
-  .then(db => db.insertOne({...templateInsertData}))
-  .catch(err => {
-    if(err && err.status) {
-      const { status=400, ...nextErr } = err
-      ctx.status = status
-      res = {
-        success: false,
-        res: {
-          ...nextErr
-        }
-      }
-    }else {
-      ctx.status = 500
-      res = {
-        success: false,
-        res: {
-          errMsg: err
-        }
-      }
+  .catch(dealErr(ctx))
+  // .catch(err => {
+  //   if(err && err.status) {
+  //     const { status=400, ...nextErr } = err
+  //     ctx.status = status
+  //     res = {
+  //       success: false,
+  //       res: {
+  //         ...nextErr
+  //       }
+  //     }
+  //   }else {
+  //     ctx.status = 500
+  //     res = {
+  //       success: false,
+  //       res: {
+  //         errMsg: err
+  //       }
+  //     }
+  //   }
+  //   console.log(err)
+
+  //   return false
+  // })
+
+  if(data && data.err) {
+    res = {
+      ...data.res
     }
-    console.log(err)
-
-    return false
-  })
-
-  if(data) {
+  }else {
     res = {
       success: true,
       res: {
@@ -528,26 +613,41 @@ router
     },
     images
   } } = ctx.request
-  const mongoId = mongo.dealId(_id)
+  // const mongoId = mongo.dealId(_id)
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
-  const data = await mongo.connect("user")
-  .then(db => db.findOne({
-    mobile: Number(mobile),
-    issue: { $in: [mongoId] }
-  }, {
-    projection: {
-      _id: 1
-    }
-  }))
+  const data = await UserModel.findOne({
+    mobile: ~~mobile,
+    issue: { $in: [ ObjectId(_id) ] }
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+
+  // const data = await mongo.connect("user")
+  // .then(db => db.findOne({
+  //   mobile: Number(mobile),
+  //   issue: { $in: [mongoId] }
+  // }, {
+  //   projection: {
+  //     _id: 1
+  //   }
+  // }))
   .then(data => {
     if(!data) return Promise.reject({statsu: 403, errMsg: '非本人发布电影'})
   })
-  .then(_ => mongo.connect("movie"))
-  .then(db => db.findOne({
-    _id:mongoId
-  }))
+  // .then(_ => mongo.connect("movie"))
+  // .then(db => db.findOne({
+  //   _id:mongoId
+  // }))
+  .then(_ => {
+    return MovieModel.findOne({
+      _id: ObjectId(_id)
+    })
+    .exec()
+  })
   .then(async (data) => {
     if(!data) return Promise.reject({errMsg: '电影不存在', status: 400})
 
@@ -590,27 +690,37 @@ router
     } = templateUpdateData
     //取消之前的电影关联
     if(related_to.length) {
-      await Promise.all(related_to.filter(r => mongo.isValid(r.film))
+      await Promise.all(related_to.filter(r => ObjectId.isValid(r.film))
       .map(relate => {
         const { film } = relate
-        return mongo.connect("movie")
-        .then(db => db.updateOne({
-          _id: typeof film === 'string' ? mongo.dealId(film) : film
+        return MovieModel.updateOne({
+          _id: typeof film === 'string' ? ObjectId(film) : film
         }, {
-          $pull: { related_to: {film: mongoId} }
-        }))
+          $pull: { related_to: {film: ObjectId(_id)} }
+        })
+        // return mongo.connect("movie")
+        // .then(db => db.updateOne({
+        //   _id: typeof film === 'string' ? mongo.dealId(film) : film
+        // }, {
+        //   $pull: { related_to: {film: mongoId} }
+        // }))
       }))
     }
     if(same_film.length) {
-      await Promise.all(same_film.filter(r => mongo.isValid(r.film)))
+      await Promise.all(same_film.filter(r => ObjectId.isValid(r.film)))
       .map(same => {
         const { film } = same
-        return mongo.connect("movie")
-        .then(db => db.updateOne({
-          _id: typeof film === 'string' ? mongo.dealId(film) : film
+        return MovieModel.updateOne({
+          _id: typeof film === 'string' ? ObjectId(film) : film
         }, {
-          $pull: { same_film: {film: mongoId} }
-        }))
+          $pull: { same_film: {film: ObjectId(_id)} }
+        })
+        // return mongo.connect("movie")
+        // .then(db => db.updateOne({
+        //   _id: typeof film === 'string' ? mongo.dealId(film) : film
+        // }, {
+        //   $pull: { same_film: {film: mongoId} }
+        // }))
       })
     }
   })
@@ -624,44 +734,60 @@ router
     }
     return Promise.reject()
   }) 
-  .then(_ => mongo.connect("movie"))
-  .then(db => db.updateOne({
-    _id: mongo.dealId(_id)  
-  }, {
-    ...Object.keys(templateUpdateData).reduce((acc, key) => {
-      if(!acc.$set) acc.$set = {}
-      acc.$set = { ...acc.$set, key: templateUpdateData[key] }
-      return acc
-    }, {})
-  }))
+  // .then(_ => mongo.connect("movie"))
+  // .then(db => db.updateOne({
+  //   _id: mongo.dealId(_id)  
+  // }, {
+  //   ...Object.keys(templateUpdateData).reduce((acc, key) => {
+  //     if(!acc.$set) acc.$set = {}
+  //     acc.$set = { ...acc.$set, key: templateUpdateData[key] }
+  //     return acc
+  //   }, {})
+  // }))
+  .then(_ => {
+    MovieModel.updateOne({
+      _id: ObjectId(_id) 
+    }, {
+      ...Object.keys(templateUpdateData).reduce((acc, key) => {
+        if(!acc.$set) acc.$set = {}
+        acc.$set = { ...acc.$set, key: templateUpdateData[key] }
+        return acc
+      }, {})
+    })
+  })
   .then(data => {
     if(data && data.result && data.result.nModified == 0) return Promise.reject({errMsg: '更新错误', status: 500})
     return true
   })
-  .catch(err => {
-    if(err && err.status) {
-      const { status, ...nextErr } = err
-      ctx.status = status
-      res = {
-        success: false,
-        res: {
-          ...nextErr
-        }
-      }
-    }else {
-      ctx.status = 500
-      res = {
-        success: false,
-        res: {
-          errMsg: err
-        }
-      }
-    }
-    console.log(err)
-    return false
-  })
+  .catch(dealErr(ctx))
+  // .catch(err => {
+  //   if(err && err.status) {
+  //     const { status, ...nextErr } = err
+  //     ctx.status = status
+  //     res = {
+  //       success: false,
+  //       res: {
+  //         ...nextErr
+  //       }
+  //     }
+  //   }else {
+  //     ctx.status = 500
+  //     res = {
+  //       success: false,
+  //       res: {
+  //         errMsg: err
+  //       }
+  //     }
+  //   }
+  //   console.log(err)
+  //   return false
+  // })
 
-  if(data) {
+  if(data && data.err) {
+    res = {
+      ...data.res
+    }
+  }else {
     res = {
       success: true,
       res: null
@@ -675,41 +801,64 @@ router
   const { mobile } = token
   const { currPage=0, pageSize=30 } = ctx.query
 
-  const data = await mongo.connect("user")
-  .then(db => db.findOne({
-    mobile: Number(mobile)
-  }, {
-    projection: {
-      issue: 1
-    }
-  }))
-  .then(data => {
-    if(data && data.issue && !data.issue.length) return Promise.reject({err: null, data: []})
-    const { issue } = data
-    return mongo.connect("movie")
-    .then(db => db.find({
-      _id: { $in: [...issue] }
-    }, {
+  let res 
+
+  const data = await UserModel.findOne({
+    mobile: ~~mobile
+  })
+  .select({
+    issue: 1
+  })
+  .populate({
+    path: 'issue',
+    select: {
+      name: 1,
+      poster: 1,
+      hot: 1
+    },
+    options: {
       skip: pageSize * currPage,
       limit: pageSize,
-      projection: {
-        name: 1,
-        poster: 1,
-        hot: 1
-      }
-    }))
-    .then(data => data.toArray()) 
+    }
   })
-  .catch(err => {
-    if(isType(err, 'object') && err.data) return err.data
-    console.log(err)
-    return false
-  })
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
+  
+  // const data = await mongo.connect("user")
+  // .then(db => db.findOne({
+  //   mobile: Number(mobile)
+  // }, {
+  //   projection: {
+  //     issue: 1
+  //   }
+  // }))
+  // .then(data => {
+  //   if(data && data.issue && !data.issue.length) return Promise.reject({err: null, data: []})
+  //   const { issue } = data
+  //   return mongo.connect("movie")
+  //   .then(db => db.find({
+  //     _id: { $in: [...issue] }
+  //   }, {
+  //     skip: pageSize * currPage,
+  //     limit: pageSize,
+  //     projection: {
+  //       name: 1,
+  //       poster: 1,
+  //       hot: 1
+  //     }
+  //   }))
+  //   .then(data => data.toArray()) 
+  // })
+  // .catch(err => {
+  //   if(isType(err, 'object') && err.data) return err.data
+  //   console.log(err)
+  //   return false
+  // })
 
-  if(!data) {
+  if(data && data.dealErr) {
     res = {
-      success: false,
-      res: null
+      ...data.res
     }
   }else {
     res = {

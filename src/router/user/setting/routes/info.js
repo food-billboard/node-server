@@ -1,31 +1,40 @@
 const Router = require('@koa/router')
-const { MongoDB } = require("@src/utils")
+const { GlobalModel, dealErr } = require("@src/utils")
 
 const router = new Router()
-const mongo = MongoDB()
 
 router.get('/', async (ctx) => {
   let res
-  let errMsg
-  const data = await mongo.connect("global")
-  .then(db => db.findOne({}, {
-    sort: {
-      create_time: -1
-    },
-    limit: 1,
-    projection: {
-      info: 1
-    }
-  }))
-  .catch(err => {
-    errMsg = err
+  const data = await GlobalModel.findOne({})
+  .sort({
+    createdAt: -1
   })
-  if(errMsg) {
+  .select({
+    info: 1
+  })
+  .limit(1)
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
+
+  // let errMsg
+  // const data = await mongo.connect("global")
+  // .then(db => db.findOne({}, {
+  //   sort: {
+  //     create_time: -1
+  //   },
+  //   limit: 1,
+  //   projection: {
+  //     info: 1
+  //   }
+  // }))
+  // .catch(err => {
+  //   errMsg = err
+  // })
+
+  if(data && data.err) {
     res = {
-      success: false,
-      res: {
-        errMsg
-      }
+      ...data.res
     }
   }else {
     res = {

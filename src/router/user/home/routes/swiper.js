@@ -1,8 +1,7 @@
 const Router = require('@koa/router')
-const { MongoDB, isEmpty } = require('@src/utils')
+const { MovieModel, SpecialModel, isEmpty } = require('@src/utils')
 const router = new Router()
 
-const mongo = MongoDB()
 const cache = {}
 const handle = {
   get(target, prop) {
@@ -21,28 +20,49 @@ const handle = {
         ) return Reflect.get(target, prop)
       //为空或过时
       const [ movieData, specialData ] = await Promise.all([
-        mongo.connect('movie')
-        .then(db => db.find({}, {
-          sort: {
-            create_time: -1
-          },
-          limit: 3,
-          projection: {
-            poster: 1 
-          }
-        }))
-        .then(data => data.toArray()),
-        mongo.connect('special')
-        .then(db => db.find({}, {
-          sort: {
-            create_time: -1
-          },
-          limit: 3,
-          projection: {
-            poster: 1 
-          }
-        }))
-        .then(data => data.toArray())
+        MovieModel.find({})
+        .sort({
+          createdAt: -1
+        })
+        .select({
+          poster: 1 
+        })
+        .limit(3)
+        .exec()
+        .then(data => data),
+
+        SpecialModel.find()
+        .sort({
+          createdAt: -1
+        })
+        .select({
+          poster: 1 
+        })
+        .limit(3)
+        .exec()
+        .then(data => data),
+        // mongo.connect('movie')
+        // .then(db => db.find({}, {
+        //   sort: {
+        //     create_time: -1
+        //   },
+        //   limit: 3,
+        //   projection: {
+        //     poster: 1 
+        //   }
+        // }))
+        // .then(data => data.toArray()),
+        // mongo.connect('special')
+        // .then(db => db.find({}, {
+        //   sort: {
+        //     create_time: -1
+        //   },
+        //   limit: 3,
+        //   projection: {
+        //     poster: 1 
+        //   }
+        // }))
+        // .then(data => data.toArray())
       ])
       .catch(err => {
         console.log(err)

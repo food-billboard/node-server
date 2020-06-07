@@ -1,8 +1,8 @@
 const Router = require('@koa/router')
-const { MongoDB, verifyTokenToData } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr } = require("@src/utils")
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
-const mongo = MongoDB()
 
 router
 .get('/', async (ctx) => {
@@ -10,44 +10,62 @@ router
   const { currPage=0, pageSize=30 } = ctx.query
   const { mobile } = token
   let res
-  let errMsg
-  let numMobile = Number(mobile)
-  const data = await mongo.connect("user")
-  .then(db => db.findOne({
-    mobile: numMobile,
-  }, {
-    projection: {
-      attentions: 1
-    },
-    limit: pageSize,
-    skip: pageSize * currPage
-  }))
-  .then(data => {
-    const { attentions } = data
-    return mongo.connect("user")
-    .then(db => db.find({
-      _id: { $in: [...attentions.map(a => typeof a == 'object' ? a : mongo.dealId(a))] }
-    }, {
-      projection: {
-        username: 1,
-        avatar: 1
-      }
-    }))
-    .then(data => data.toArray())
-  })
-  .catch(err => {
-    errMsg = err
-    console.log(err)
-    return false
-  })
 
-  if(errMsg) {
-    ctx.status = 500
+  const data = await UserModel.findOne({
+    mobile: ~~mobile
+  })
+  .select({
+    attentions: 1
+  })
+  .populate({
+    path: 'attentions',
+    select: {
+      username: 1,
+      avatar: 1
+    },
+    options: {
+      limit: pageSize,
+      skip: pageSize * currPage
+    }
+  })
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
+
+  // let errMsg
+  // let numMobile = Number(mobile)
+  // const data = await mongo.connect("user")
+  // .then(db => db.findOne({
+  //   mobile: numMobile,
+  // }, {
+  //   projection: {
+  //     attentions: 1
+  //   },
+  //   limit: pageSize,
+  //   skip: pageSize * currPage
+  // }))
+  // .then(data => {
+  //   const { attentions } = data
+  //   return mongo.connect("user")
+  //   .then(db => db.find({
+  //     _id: { $in: [...attentions.map(a => typeof a == 'object' ? a : mongo.dealId(a))] }
+  //   }, {
+  //     projection: {
+  //       username: 1,
+  //       avatar: 1
+  //     }
+  //   }))
+  //   .then(data => data.toArray())
+  // })
+  // .catch(err => {
+  //   errMsg = err
+  //   console.log(err)
+  //   return false
+  // })
+
+  if(data && data.err) {
     res = {
-      success: false,
-      res: {
-        errMsg
-      }
+      ...data.res
     }
   }else {
     res = {
@@ -63,49 +81,68 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { body: { _id } } = ctx.request
   const { mobile } = token
-  const numMobile = Number(mobile)
   let res
-  const mineRes = await mongo.connect("user")
-  .then(db => db.updateOne({
-    mobile: numMobile
-  }, {
-    $push: { attentions: mongo.dealId(_id) }
-  }))
-  .catch(err => {
-    console.log(err)
-    return false
-  })
-  const userRes = await mongo.connect("user")
-  .then(db => db.findOne({
-    mobile: numMobile
-  }, {
-    projection: {
-      _id: 1
-    }
-  }))
-  .then(data => {
-    const { _id:userId } = data
-    return mongo.connect("user")
-    .then(db => db.updateOne({
-      _id: mongo.dealId(_id)
-    }, {
-      $push: { fans: userId }
-    }))
-  })
-  .catch(err => {
-    console.log(err)
-    return false
-  })
 
-  if(mineRes && userRes) {
+  const data = await UserModel.findOneAndUpdate({
+    mobile: ~~mobile
+  }, {
+    $push: { attentions: ObjectId(_id) }
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data._id)
+  .then(id => {
+    if(!id) return Promise.reject({ errMsg: '有问题', status: 403 })
+    return UserModel.updateOne({
+      _id: ObjectId(_id)
+    }, {
+      $push: { fans: id }
+    })
+    .then(_ => true)
+  })
+  .catch(dealErr(ctx))
+
+  // const mineRes = await mongo.connect("user")
+  // .then(db => db.updateOne({
+  //   mobile: numMobile
+  // }, {
+  //   $push: { attentions: mongo.dealId(_id) }
+  // }))
+  // .catch(err => {
+  //   console.log(err)
+  //   return false
+  // })
+  // const userRes = await mongo.connect("user")
+  // .then(db => db.findOne({
+  //   mobile: numMobile
+  // }, {
+  //   projection: {
+  //     _id: 1
+  //   }
+  // }))
+  // .then(data => {
+  //   const { _id:userId } = data
+  //   return mongo.connect("user")
+  //   .then(db => db.updateOne({
+  //     _id: mongo.dealId(_id)
+  //   }, {
+  //     $push: { fans: userId }
+  //   }))
+  // })
+  // .catch(err => {
+  //   console.log(err)
+  //   return false
+  // })
+
+  if(data && data.err) {
     res = {
-      success: true,
-      res:null
+      ...data.res
     }
   }else {
-    ctx.status = 500
     res = {
-      success: false,
+      success: true,
       res: null
     }
   }
@@ -115,50 +152,69 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { _id  } = ctx.query
   const { mobile } = token
-  let numMobile = Number(mobile)
   let res
-  let errMsg
-  const mineRes = await mongo.connect("user")
-  .then(db => db.updateOne({
-    mobile: numMobile
+  const data = await UserModel.findOneAndUpdate({
+    mobile: ~~mobile
   }, {
-    $pull: { attentions: mongo.dealId(_id) }
-  }))
-  .catch(err => {
-    console.log(err)
-    errMsg = err
-    return false
+    $pull: { attentions: ObjectId(_id) }
   })
-  const userRes = await mongo.connect("user")
-  .then(db => db.findOne({
-    mobile: numMobile
-  }, {
-    projection: {
-      _id: 1
-    }
-  }))
-  .then(data => {
-    const { _id:userId } = data
-    return mongo.connect("user")
-    .then(db => db.updateOne({
-      _id: mongo.dealId(_id)
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data._id)
+  .then(id => {
+    if(!id) return Promise.reject({ status: 403, errMsg: '有问题' })
+    return UserModel.updateOne({
+      _id: ObjectId(_id)
     }, {
-      $pull: { fans: userId }
-    }))
+      $pull: { fans: id }
+    })
+    .then(_ => true)
   })
-  .catch(err => {
-    console.log(err)
-    errMsg = err
-    return false
-  })
+  .catch(dealErr(ctx))
 
-  if(mineRes && userRes) {
+  // let numMobile = Number(mobile)
+  // let errMsg
+  // const mineRes = await mongo.connect("user")
+  // .then(db => db.updateOne({
+  //   mobile: numMobile
+  // }, {
+  //   $pull: { attentions: mongo.dealId(_id) }
+  // }))
+  // .catch(err => {
+  //   console.log(err)
+  //   errMsg = err
+  //   return false
+  // })
+  // const userRes = await mongo.connect("user")
+  // .then(db => db.findOne({
+  //   mobile: numMobile
+  // }, {
+  //   projection: {
+  //     _id: 1
+  //   }
+  // }))
+  // .then(data => {
+  //   const { _id:userId } = data
+  //   return mongo.connect("user")
+  //   .then(db => db.updateOne({
+  //     _id: mongo.dealId(_id)
+  //   }, {
+  //     $pull: { fans: userId }
+  //   }))
+  // })
+  // .catch(err => {
+  //   console.log(err)
+  //   errMsg = err
+  //   return false
+  // })
+
+  if(data && data.err) {
     res = {
-      success: true,
-      res:null
+      ...data.res
     }
   }else {
-    ctx.status = 500
     res = {
       success: false,
       res: null

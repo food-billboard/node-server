@@ -1,45 +1,53 @@
 const Router = require('@koa/router')
-const { MongoDB } = require('@src/utils')
+const { MovieModel, dealErr } = require('@src/utils')
 
 const router = new Router()
-const mongo = MongoDB()
 
 router.get('/', async(ctx) => {
   const { count=12 } = ctx.query
   let res
-  const dataList = await mongo.connect("movie")
-  .then(db => {
-    return db.find({}, {
-      sort: {
-        create_time: -1
-      },
-      limit: count,
-      projection: {
-        name: 1, 
-        poster: 1
-      }
-    })
+  const data = await MovieModel.find({})
+  .select({
+    name: 1, 
+    poster: 1
   })
-  .then(data => data.toArray())
-  .catch(err => {
-    console.log(err)
-    return false
+  .sort({
+    createdAt: -1
   })
+  .limit(count)
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
 
-  if(!dataList) {
-    ctx.status = 500
+  // const dataList = await mongo.connect("movie")
+  // .then(db => {
+  //   return db.find({}, {
+  //     sort: {
+  //       create_time: -1
+  //     },
+  //     limit: count,
+  //     projection: {
+  //       name: 1, 
+  //       poster: 1
+  //     }
+  //   })
+  // })
+  // .then(data => data.toArray())
+  // .catch(err => {
+  //   console.log(err)
+  //   return false
+  // })
+
+  if(data && !data.err) {
     res = {
-      success: false,
+      success: true,
       res: {
-        errMsg: '服务器错误'
+        data
       }
     }
   }else {
     res = {
-      success: true,
-      res: {
-        data: dataList
-      }
+      ...data.res
     }
   }
 

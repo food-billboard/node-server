@@ -1,34 +1,43 @@
 const Router = require('@koa/router')
-const { MongoDB } = require("@src/utils")
+const { MovieModel, dealErr } = require("@src/utils")
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
-const mongo = MongoDB()
 
 router.get('/', async (ctx) => {
   const { _id } = ctx.query
   let res
-  let errMsg
-  const data = await mongo.connect("movie")
-  .then(db => db.findOne({
-    _id: mongo.dealId(_id)
-  }, {
-    projection: {
-      poster: 1,
-      name: 1,
-      "info.description": 1
-    }
-  }))
-  .catch(err => {
-    errMsg = err
-    return false
+  const data = await MovieModel.findOne({
+    _id: ObjectId(_id)
   })
+  .select({
+    poster: 1,
+    name: 1,
+    "info.description": 1
+  })
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
 
-  if(errMsg) {
+  // let errMsg
+  // const data = await mongo.connect("movie")
+  // .then(db => db.findOne({
+  //   _id: mongo.dealId(_id)
+  // }, {
+  //   projection: {
+  //     poster: 1,
+  //     name: 1,
+  //     "info.description": 1
+  //   }
+  // }))
+  // .catch(err => {
+  //   errMsg = err
+  //   return false
+  // })
+
+  if(data && data.err) {
     res = {
-      success: false,
-      res: {
-        errMsg
-      }
+      ...data.res
     }
   }else {
     res = {

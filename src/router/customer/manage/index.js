@@ -3,10 +3,9 @@ const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
-const { MongoDB, verifyTokenToData } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr } = require('@src/utils')
 
 const router = new Router()
-const mongo = MongoDB()
 
 router
 .use(async (ctx, next) => {
@@ -31,36 +30,49 @@ router
 //个人信息
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  let res
-  let errMsg
   const { mobile } = token
-  const data = await mongo.connect("user")
-  .then(db => db.findOne({
-    mobile: Number(mobile)
-  }, {
-    projection: {
-      mobile: 1,
-      username: 1,
-      avatar: 1,
-      hot: 1,
-      fans:1,
-      attentions: 1,
-      create_time: 1,
-      status: 1
-    }
-  }))
-  .catch(err => {
-    errMsg = err
-    return false
+  let res
+  const data = await UserModel.findOne({
+    mobile: ~~mobile
   })
+  .select({
+    mobile: 1,
+    username: 1,
+    avatar: 1,
+    hot: 1,
+    fans:1,
+    attentions: 1,
+    create_time: 1,
+    status: 1
+  })
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
 
-  if(errMsg) {
-    ctx.status = 500
+  // let errMsg
+  // const data = await mongo.connect("user")
+  // .then(db => db.findOne({
+  //   mobile: Number(mobile)
+  // }, {
+  //   projection: {
+  //     mobile: 1,
+  //     username: 1,
+  //     avatar: 1,
+  //     hot: 1,
+  //     fans:1,
+  //     attentions: 1,
+  //     create_time: 1,
+  //     status: 1
+  //   }
+  // }))
+  // .catch(err => {
+  //   errMsg = err
+  //   return false
+  // })
+
+  if(data && data.err) {
     res = {
-      success: false,
-      res: {
-        errMsg
-      }
+      ...data.res
     }
   }else {
     if(!data) {
@@ -73,7 +85,6 @@ router
       }
     }else {
       const { fans, attentions, ...nextData } = data
-      console.log(fans, attentions, nextData)
       res = {
         success: true,
         res: {

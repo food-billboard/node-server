@@ -1,8 +1,7 @@
 const Router = require('@koa/router')
-const { MongoDB, verifyTokenToData, isType } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr } = require("@src/utils")
 
 const router = new Router()
-const mongo = MongoDB()
 
 router
 .get('/', async (ctx) => {
@@ -10,46 +9,64 @@ router
   const { mobile } = token
   const { currPage=0, pageSize=30 } = ctx.query
   let res
-  let errMsg
-  const data = await mongo.connect("user")
-  .then(db => db.findOne({
-    mobile: Number(mobile)
-  }, {
-    projection: {
-      fans: 1
-    }
-  }))
-  .then(data => {
-    if(data && data.fans && !data.fans.length) return Promise.reject({err: null, data: []})
-    const { fans } = data
-    return mongo.connect("user")
-    .then(db => db.find({
-      _id: { $in: [...fans] }
-    }, {
+
+  const data = await UserModel.findOne({
+    mobile: ~~mobile
+  })
+  .select({
+    fans
+  })
+  .populate({
+    path: 'fans',
+    options: {
       limit: pageSize,
-      skip: pageSize * currPage,
-      projection: {
-        username: 1,
-        avatar: 1
-      },
-    }))
-    .then(data => data.toArray())
+      skip: currPage * pageSize
+    },
+    select: {
+      username: 1,
+      avatar: 1
+    }
   })
-  .catch(err => {
-    if(isType(err, 'object') && err.data) return err.data
-    errMsg = err
-    console.log(err)
-    return false
-  })
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
+
+  // let errMsg
+  // const data = await mongo.connect("user")
+  // .then(db => db.findOne({
+  //   mobile: Number(mobile)
+  // }, {
+  //   projection: {
+  //     fans: 1
+  //   }
+  // }))
+  // .then(data => {
+  //   if(data && data.fans && !data.fans.length) return Promise.reject({err: null, data: []})
+  //   const { fans } = data
+  //   return mongo.connect("user")
+  //   .then(db => db.find({
+  //     _id: { $in: [...fans] }
+  //   }, {
+  //     limit: pageSize,
+  //     skip: pageSize * currPage,
+  //     projection: {
+  //       username: 1,
+  //       avatar: 1
+  //     },
+  //   }))
+  //   .then(data => data.toArray())
+  // })
+  // .catch(err => {
+  //   if(isType(err, 'object') && err.data) return err.data
+  //   errMsg = err
+  //   console.log(err)
+  //   return false
+  // })
 
 
-  if(errMsg) {
-    ctx.status = 500
+  if(data && data.err) {
     res = {
-      success: false,
-      res: {
-        errMsg
-      }
+      ...data.res
     }
   }else {
     res = {

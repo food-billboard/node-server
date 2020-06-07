@@ -1,4 +1,4 @@
-const { MongoDB, verifySocketIoToken, otherToken } = require("@src/utils")
+const { MongoDB, verifySocketIoToken, otherToken, UserModel, RoomModel } = require("@src/utils")
 const mongo = MongoDB()
 
 const getMessageList = socket => async (data) => {
@@ -10,26 +10,72 @@ const getMessageList = socket => async (data) => {
   if(token) {
     const { mobile } = token
     let mine
-    await mongo.connect("user")
-    .then(db => db.findOne({
-      mobile: Number(mobile)
-    }, {
-      projection: {
-        _id: 1
-      }
-    }))
-    .then(data => {
-      const { _id } = data
-      mine = _id
+
+    await UserModel.findOne({
+      mobile: ~~mobile
     })
-    .then(_ => mongo.connect("room"))
-    .then(db => db.find({
-      "member.user": mine
-    }))
-    .then(data => data.toArray())
-    .then(data => {
-      result = [...data]
+    .select({
+      _id: 1
     })
+    .exec()
+    .then(data => !!data && data._id)
+    .then(id => {
+      return RoomModel.find({
+        "members.user": { $in: [ id ] },
+      })
+      .select({
+        "memebers.$.message": 1,
+        info: 1
+      })
+      .populate({
+        path: 'members.message._id',
+        select: {
+          "content.text": 1,
+          createdAt: 1,
+          user_info: 1
+        },
+        options: {
+          sort: {
+            createdAt: -1
+          }
+        },
+        populate: {
+          path: 'user_info',
+          select: {
+            avatar: 1,
+            username: 1
+          }
+        }
+      })
+      .exec()
+    })
+    .then(data => {
+      return data.map(d => {
+        const { members, info } = d
+        
+      })
+    })
+
+    // await mongo.connect("user")
+    // .then(db => db.findOne({
+    //   mobile: Number(mobile)
+    // }, {
+    //   projection: {
+    //     _id: 1
+    //   }
+    // }))
+    // .then(data => {
+    //   const { _id } = data
+    //   mine = _id
+    // })
+    // .then(_ => mongo.connect("room"))
+    // .then(db => db.find({
+    //   "member.user": mine
+    // }))
+    // .then(data => data.toArray())
+    // .then(data => {
+    //   result = [...data]
+    // })
     .then(_ => {
       const userList = []
       let messageList = []
@@ -241,7 +287,7 @@ const getMessageList = socket => async (data) => {
       return false
     })
   }
-  console.log(res)
+
   socket.emit("get", JSON.stringify(res))
 }
 

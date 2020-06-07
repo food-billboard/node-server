@@ -592,14 +592,22 @@ const RankSchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
-  match: [{
+  match_field: {
     type: String,
     enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'RATES', 'SUM_RATE', 'CLASSIFY' ],
     uppercase: true,
     get: function(v) {
       return v.toLowerCase()
     }
-  }]
+  },
+  match: [{
+    type: ObjectId,
+    ref: 'movie'
+  }],
+  glance: {
+    type: Number,
+    default: 0
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -615,6 +623,16 @@ const ClassifySchema = new Schema({
   icon: {
     type: ObjectId,
     ref: 'image'
+  },
+  match: [
+    {
+      type: ObjectId,
+      ref: 'movie'
+    }
+  ],
+  glance: {
+    type: Number,
+    default: 0
   }
 }, {
   ...defaultConfig,

@@ -1,33 +1,39 @@
 const Router = require('@koa/router')
-const { MongoDB, withTry } = require("@src/utils")
+const { RankModel, dealErr } = require("@src/utils")
 
 const router = new Router()
-const mongo = MongoDB()
 
 router.get('/', async (ctx) => {
   const { count=8 } = ctx.query
   let res
-  let errMsg
-  const data = await mongo.connect("rank")
-  .then(db => db.find({}, {
-	  limit: count,
-	  projection: {
-      name: 1,
-      icon: 1
-	  }
-  }))
-  .then(data => data.toArray())
-  .catch(err => {
-	errMsg = err
-	return false
+  const data = await RankModel.find({})
+  .select({
+    name: 1,
+    icon: 1
   })
+  .limit(count)
+  .exec()
+  .then(data => data)
+  .catch(dealErr(ctx))
+
+  // let errMsg
+  // const data = await mongo.connect("rank")
+  // .then(db => db.find({}, {
+	//   limit: count,
+	//   projection: {
+  //     name: 1,
+  //     icon: 1
+	//   }
+  // }))
+  // .then(data => data.toArray())
+  // .catch(err => {
+	// errMsg = err
+	// return false
+  // })
   
-  if(errMsg) {
+  if(data && data.err) {
     res = {
-      success: false,
-      res: {
-        errMsg
-      }
+      ...data.res
     }
   }else {
     res = {
