@@ -4,12 +4,13 @@ const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const { Types: { ObjectId } } = require("mongoose")
-const { UserModel, dealErr } = require("@src/utils")
+const { UserModel, dealErr, paramsCheck } = require("@src/utils")
 
 
 const router = new Router()
 
 router
+.use(paramsCheck.get(['_id']))
 .get('/', async (ctx) => {
   let res = {}
   const { _id } = ctx.query
@@ -23,27 +24,40 @@ router
     hot: 1,
     fans:1,
     attentions: 1,
-    createAt: 1,
+    createdAt: 1,
+    updatedAt: 1
+  })
+  .populate({
+    path: 'avatar',
+    select: {
+      _id: 0,
+      src: 1
+    }
   })
   .exec()
-  .then(data => data)
+  .then(data => !!data && data._doc)
+  .then(data => {
+    if(!data) return Promise.reject({ errMsg: 'not found', status: 404 })
+    const { avatar: { src }, attentions, fans, ...nextData } = data
+    return {
+      ...nextData,
+      attentions: attentions.length,
+      fans: fans.length,
+      avatar: src
+    }
+  })
   .catch(dealErr(ctx))
 
-  if(data && !data.err) {
-    const { _doc: { fans, attentions, ...nextData } } = data
-    res = {
-      success: true,
-      res: {
-        data: {
-          fans: fans.length,
-          attentions: attentions.length,
-          ...nextData
-        }
-      }
+  if(data && data.err) {
+    res ={
+      ...data.res
     }
   }else {
     res = {
-      ...data.res
+      success: true,
+      res: {
+        data
+      }
     }
   }
   ctx.body = JSON.stringify(res)

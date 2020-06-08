@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { GlobalModel, dealErr } = require("@src/utils")
+const { GlobalModel, dealErr, notFound } = require("@src/utils")
 
 const router = new Router()
 
@@ -10,27 +10,14 @@ router.get('/', async (ctx) => {
     createdAt: -1
   })
   .select({
-    info: 1
+    info: 1,
+    _id: 0
   })
   .limit(1)
   .exec()
-  .then(data => data)
+  .then(data => !!data && data._doc)
+  .then(notFound)
   .catch(dealErr(ctx))
-
-  // let errMsg
-  // const data = await mongo.connect("global")
-  // .then(db => db.findOne({}, {
-  //   sort: {
-  //     create_time: -1
-  //   },
-  //   limit: 1,
-  //   projection: {
-  //     info: 1
-  //   }
-  // }))
-  // .catch(err => {
-  //   errMsg = err
-  // })
 
   if(data && data.err) {
     res = {

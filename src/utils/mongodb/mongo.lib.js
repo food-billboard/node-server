@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const ObjectId = mongoose.Types.ObjectId
 const Mixed = mongoose.Types.Mixed
+const autoPopulate = require('mongoose-autopopulate')
 
 function getMill(time) {
   return Day(time).get('millisecond')
@@ -527,18 +528,14 @@ const SearchSchema = new Schema({
 const CommentSchema = new Schema({
   source_type: {
     type: String,
-    enum: ['MOVIE', 'USER'],
+    enum: ['movie', 'user'],
     required: true,
     trim: true,
-    uppercase: true
   },
-  source_movie: {
+  source: {
+    required: true,
     type: ObjectId,
-    ref: 'movie'
-  },
-  source_user: {
-    type: ObjectId,
-    ref: 'comment'
+    refPath: 'source_type'
   },
   user_info: {
     type: ObjectId,
@@ -563,7 +560,7 @@ const CommentSchema = new Schema({
     video: [
       {
         type: ObjectId,
-        ref: 'video'
+        ref: 'video',
       } 
     ],
     image: [
@@ -594,10 +591,11 @@ const RankSchema = new Schema({
   },
   match_field: {
     type: String,
-    enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'RATES', 'SUM_RATE', 'CLASSIFY' ],
+    enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'TOTAL_RATE', 'CLASSIFY' ],
     uppercase: true,
     get: function(v) {
-      return v.toLowerCase()
+      // return v.toUpperCase()
+      return v
     }
   },
   match: [{
@@ -673,6 +671,129 @@ const ImageSchema = new Schema({
   },
 }, {
   ...defaultConfig
+})
+
+SpecialSchema.pre("findOne", function() {
+  if(this._fields.poster) {
+    this.populate({
+      path: 'poster',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+  }
+})
+
+RankSchema.pre("find", function() {
+  if(this._fields.icon) {
+    this.populate({
+      path: 'icon',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+  }
+})
+
+MovieSchema.pre('findOne', function() {
+  if(this._fields.poster) {
+    this.populate({
+      path: 'poster',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+  }
+})
+
+MovieSchema.pre('find', function() {
+  if(this._fields.poster) {
+    this.populate({
+      path: 'poster',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+  }
+})
+
+UserSchema.pre('find', function() {
+  if(this._fields.avatar) {
+    this.populate({
+      path: 'avatar',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+  }
+})
+UserSchema.pre('findOne', function() {
+  if(this._fields.avatar) {
+    this.populate({
+      path: 'avatar',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+  }
+})
+
+CommentSchema.pre('find', function() {
+  // if(this._fields.content) {
+    this.populate({
+      path: 'content.image',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+    .populate({
+      path: 'content.video',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+    .populate({
+      path: 'user_info',
+      select: {
+        avatar: 1,
+        username: 1
+      }
+    })
+  // }
+})
+
+CommentSchema.pre('findOne', function() {
+  // if(this._fields.content) {
+    this.populate({
+      path: 'content.image',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+    .populate({
+      path: 'content.video',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+    .populate({
+      path: 'user_info',
+      select: {
+        avatar: 1,
+        username: 1
+      }
+    })
+  // }
 })
 
 const UserModel = model('user', UserSchema)

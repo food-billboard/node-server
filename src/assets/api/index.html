@@ -199,7 +199,7 @@
       {
         "type": "TEXT",
         "content": "string",
-        "create_time": 1234567890
+        "createdAt": 1234567890
       }
     ]
   }
@@ -215,7 +215,7 @@
       {
         "type": "string" 内容类型["IMAGE", "TEXT", "AUDIO", "VIDEO"],
         "content": "string" 内容,
-        "create_time": "date_time" 
+        "createdAt": "date_time" 
       }
     ]
   }
@@ -1068,7 +1068,7 @@
           "image": ["string"],
           "video": ["string"]
         },
-        "create_time": 1234567890,
+        "createdAt": 1234567890,
         "like": true,
         "_id": "string",
         "source": {
@@ -1093,7 +1093,7 @@
           "image": ["string"] 图片,
           "video": ["string"] 视频
         },
-        "create_time": "date_time",
+        "createdAt": "date_time",
         "like": "boolean" 是否点赞,
         "_id": "string" id,
         "source": { 源内容
@@ -1810,7 +1810,7 @@
           }
         }
       ],
-      "create_time": 1234567890,
+      "createdAt": 1234567890,
       "glance": 0,
       "hot": 0,
       "images": [ "string" ],
@@ -1892,7 +1892,7 @@
           }
         }
       ],
-      "create_time": "date_time",
+      "createdAt": "date_time",
       "glance": "integer" 浏览次数,
       "hot": "integer" 收藏,
       "images": [ "string" ] 截图,
@@ -2497,7 +2497,8 @@
     "data": {
       "attentions": 0,
       "avatar": "string",
-      "create_time": 1234567890,
+      "createdAt": 1234567890,
+      "updatedAt": 1234567890,
       "fans": 0,
       "hot": 0,
       "username": "string",
@@ -2516,7 +2517,8 @@
     "data": {
       "attentions": "integer" 关注人数,
       "avatar": "string" 头像,
-      "create_time": "date_time" ,
+      "createdAt": "date_time" ,
+      "updatedAt": "date_time",
       "fans": integer 粉丝,
       "hot": ingeter 人气,
       "username": "string" 用户名,
@@ -2616,7 +2618,7 @@
             "image": ["string"],
             "video": ["string"]
           },
-          "create_time": 1234567890,
+          "createdAt": 1234567890,
           "source": {
             "type": "MOVIE",
             "comment": "string",
@@ -2649,7 +2651,7 @@
             "image": ["string"] 图片评论,
             "video": ["string"] 视频评论
           },
-          "create_time": "date_time",
+          "createdAt": "date_time",
           "source": {
             "type": "string" 源评论["MOVIE", "USER"],
             "comment": "string" 源内容id,
@@ -2725,7 +2727,8 @@
     "data": {
       "attentions": 0,
       "avatar": "string",
-      "create_time": 1234567890,
+      "createdAt": 1234567890,
+      "updatedAt": 123456789,
       "fans": 0,
       "hot": 0,
       "username": "string",
@@ -2743,7 +2746,8 @@
     "data": {
       "attentions": "integer" 关注人数,
       "avatar": "string" 头像,
-      "create_time": "date_time" ,
+      "createdAt": "date_time" ,
+      "updatedAt": "date_time",
       "fans": integer 粉丝,
       "hot": ingeter 人气,
       "username": "string" 用户名,
@@ -2945,13 +2949,14 @@
             "image": ["string"],
             "video": ["string"]
           },
-          "create_time": 1234567890,
+          "createdAt": 1234567890,
           "source": {
             "type": "MOVIE",
             "comment": "string",
             "content": "string"
           },
-          "total_like": 0
+          "total_like": 0,
+          "_id": "string"
         }
       ]
     }
@@ -2977,13 +2982,14 @@
             "image": ["string"] 图片评论,
             "video": ["string"] 视频评论
           },
-          "create_time": "date_time",
+          "createdAt": "date_time",
           "source": {
             "type": "string" 源评论["MOVIE", "USER"],
             "comment": "string" 源内容id,
             "content": "string" 源内容 type为MOVIE时为null
           },
-          "total_like": "integer" 点赞数
+          "total_like": "integer" 点赞数,
+          "_id": "string"
         }
       ]
     }
@@ -3684,6 +3690,7 @@
     "data": [
       {
         "icon": "string",
+        "match_field": "CLASSIFY"
         "match": [
           {
             "name": "string",
@@ -3707,6 +3714,7 @@
     "data": [
       {
         "icon": "string" 图标,
+        "match_field": "string"[ "GLANCE", 'AUTHOR_RATE', 'HOT', 'TOTAL_RATE', 'CLASSIFY' ] ,
         "match": [ 排行榜内容
           {
             "name": "string" 名称,
@@ -3776,8 +3784,8 @@
   "res": {
     "data": [
       {
-        "icon": "string",
-        "match": [
+        "poster": "string",
+        "movie": [
           {
             "name": "string",
             "poster": "string",
@@ -3799,8 +3807,8 @@
   "res": {
     "data": [
       {
-        "icon": "string" 图标,
-        "match": [ 匹配排行榜的内容
+        "poster": "string" 图标,
+        "movie": [ 匹配专题的内容
           {
             "name": "string" 名称,
             "poster": "string" 海报,
@@ -3976,13 +3984,12 @@
   "success": true,
   "res": {
     "data": {
-      "allow_many": false,
       "attentions": 0,
       "avatar": "string",
-      "create_time": 1589784595389,
+      "createdAt": 1589784595389,
       "fans": 0,
       "hot": 0,
-      "modified_time": 1589784595389,
+      "updatedAt": 1589784595389,
       "token": "string",
       "username": "string",
       "_id": "string"
@@ -3997,13 +4004,12 @@
   "success": "boolean",
   "res": {
     "data": {
-      "allow_many": "boolean" 是否允许多端登录,
       "attentions": "integer" 关注人数,
       "avatar": "string" 头像,
-      "create_time": "date_time",
+      "createdAt": "date_time",
       "fans": "integer" 粉丝人数,
       "hot": "integer" 人气,
-      "modified_time": "date_time",
+      "updatedAt": "date_time",
       "token": "string" token,
       "username": "string" 用户名,
       "_id": "string" id
@@ -4262,11 +4268,13 @@
     "data": [
       {
         "hot": 0,
-        "info": [
-          {
-            "name": "string"
-          }
-        ],
+        "info": {
+          classify: [
+            {
+              "name": "string"
+            }
+          ]
+        },
         "name": "string",
         "poster": "string",
         "_id": "string"
@@ -4355,6 +4363,7 @@
     "data": [
       {
         "name": "string",
+        "poster": "string",
         "_id": "string"
       }
     ]
@@ -4370,6 +4379,7 @@
     "data": [
       {
         "name": "string" 名称,
+        "poster": "string" 图片,
         "_id": "string" id
       }
     ]
@@ -4445,7 +4455,7 @@
           }
         }
       ],
-      "create_time": 1234567890,
+      "createdAt": 1234567890,
       "glance": 0,
       "hot": 0,
       "images": [ "string" ],
@@ -4458,7 +4468,7 @@
             }
           }
         ],
-        "alias": ["string"],
+        "another_name": ["string"],
         "classify": [
           {
             "name": "string"
@@ -4489,8 +4499,8 @@
       "rate": "string",
       "same_film": [
         {
-          "film": "string",
           "name": "string",
+          "_id": "string",
           "type": "NAMESAKE"
         }
       ],
@@ -4528,7 +4538,7 @@
           }
         }
       ],
-      "create_time": "date_time",
+      "createdAt": "date_time",
       "glance": "integer" 浏览次数,
       "hot": "integer" 收藏,
       "images": [ "string" ] 截图,
@@ -4541,7 +4551,7 @@
             }
           }
         ],
-        "alias": ["string"] 别名,
+        "another_name": ["string"] 别名,
         "classify": [ 分类
           {
             "name": "string" 名称
@@ -4572,7 +4582,7 @@
       "rate": "string" 评分,
       "same_film": [ 类似电影
         {
-          "film": "string" id,
+          "_id": "string" id,
           "name": "string" 名称,
           "type": "string" 类型["NAMESAKE", "SERIES"]
         }
@@ -4740,9 +4750,7 @@
   "success": true,
   "res": {
     "data": {
-      "info": {
-        "description": "string"
-      },
+      "description": "string"
       "name": "string",
       "poster": "string",
       "_id": "string"
@@ -4757,9 +4765,7 @@
   "success": "boolean",
   "res": {
     "data": {
-      "info": { 电影信息
-        "description": "string" 描述
-      },
+      "description": "string" 描述
       "name": "string" 名称,
       "poster": "string" 海报,
       "_id": "string" id
@@ -4857,7 +4863,8 @@
           "video": ["string"],
           "text": "string"
         },
-        "create_time": 1234567890,
+        "createdAt": 1234567890,
+        "updatedAt": 1234567890,
         "total_like": 0,
         "user_info": {
           "avatar": "string",
@@ -4888,7 +4895,8 @@
           "video": ["string"] 视频,
           "text": "string" 文字
         },
-        "create_time": "date_time",
+        "createdAt": "date_time",
+        "updatedAt": "date_time"
         "total_like": "integer" 点赞人数,
         "user_info": { 用户信息
           "avatar": "string" 头像,
@@ -4979,14 +4987,14 @@
   "res": {
     "data": {
       "comment": {
-        "comment": "string",
         "comment_users": 0,
         "content": {
           "image": ["string"],
           "video": ["string"],
           "text": "string"
         },
-        "create_time": 1234567890,
+        "createdAt": 1234567890,
+        "updatedAt": 1234567890,
         "total_like": 0,
         "user_info": {
           "avatar": "string",
@@ -4999,7 +5007,9 @@
         {
           "comment_users": [
             {
-              
+              "avatar": "string",
+              "username": "string",
+              "_id": "string"
             }
           ],
           "content": {
@@ -5007,7 +5017,8 @@
             "video": ["string"],
             "text": "string"
           },
-          "create_time": 1234567890,
+          "createdAt": 1234567890,
+          "updatedAt": 1234567890,
           "total_like": 0,
           "user_info": {
             "avatar": "string",
@@ -5035,7 +5046,8 @@
           "video": ["string"] 视频,
           "text": "string" 文字
         },
-        "create_time": "date_time",
+        "createdAt": "date_time",
+        "updatedAt": "date_time",
         "total_like": "integer" 点赞人数,
         "user_info": { 用户信息
           "avatar": "string" 头像,
@@ -5048,7 +5060,8 @@
         {
           "comment_users": [
             {
-              
+              "avatar": "string" 头像,
+              "_id": "string" id
             }
           ],
           "content": { 内容
@@ -5056,11 +5069,11 @@
             "video": ["string"] 视频,
             "text": "string" 文字
           },
-          "create_time": "date_time",
+          "createdAt": "date_time",
+          "updatedAt": "date_time",
           "total_like": "integer" 点赞人数,
           "user_info": { 用户信息
             "avatar": "string" 头像,
-            "username": "string" 用户名,
             "_id": "string" id
           },
           "_id": "string" 评论id
@@ -5245,8 +5258,9 @@
   "res": {
     "data": [
       {
-        name: "string",
-        _id: "string"       
+        "name": "string",
+        "icon": "string",
+        "_id": "string"       
       }
     ]
   }
@@ -5260,8 +5274,9 @@
   "res": {
     "data": [
       {
-        name: "string" 名称,
-        _id: "string" id     
+        "name": "string" 名称,
+        "icon": "string" 图标,
+        "_id": "string" id     
       }
     ]
   }
@@ -5316,7 +5331,6 @@
   "res": {
     "data": {
       "info": "string",
-      "_id": "string"
     }
   }
 }
@@ -5329,7 +5343,6 @@
   "res": {
     "data": {
       "info": "string" 信息内容,
-      "_id": "string" id
     }
   }
 }

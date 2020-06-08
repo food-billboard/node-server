@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { RankModel, dealErr } = require("@src/utils")
+const { RankModel, dealErr, notFound } = require("@src/utils")
 
 const router = new Router()
 
@@ -13,23 +13,18 @@ router.get('/', async (ctx) => {
   })
   .limit(count)
   .exec()
-  .then(data => data)
+  .then(data => !!data && data)
+  .then(notFound)
+  .then(data => {
+    return data.map(d => {
+      const { _doc: { icon: { src }={}, ...nextD } } = d
+      return {
+        ...nextD,
+        icon: src || null
+      }
+    })
+  })
   .catch(dealErr(ctx))
-
-  // let errMsg
-  // const data = await mongo.connect("rank")
-  // .then(db => db.find({}, {
-	//   limit: count,
-	//   projection: {
-  //     name: 1,
-  //     icon: 1
-	//   }
-  // }))
-  // .then(data => data.toArray())
-  // .catch(err => {
-	// errMsg = err
-	// return false
-  // })
   
   if(data && data.err) {
     res = {

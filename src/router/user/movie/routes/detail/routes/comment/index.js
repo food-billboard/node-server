@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const List = require('./list')
 const Detail = require('./detail')
-const { MovieModel, dealErr } = require('@src/utils')
+const { MovieModel, dealErr, notFound } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -14,13 +14,15 @@ router
     _id: ObjectId(_id)
   })
   .select({
-    comment: 1
+    comment: 1,
+    _id: 0
   })
   .populate({
     path: 'comment',
     select: {
       "content.text": 1,
       user_info: 1,
+      _id: 0
     },
     options: {
       limit: count
@@ -29,74 +31,29 @@ router
       path: 'user_info',
       select: {
         avatar: 1,
-        _id: 1
+        _id: 0
       }
     }
   })
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => {
+    const { comment } = data
+    return {
+      comment: comment.map(c => {
+        const { _doc: { user_info, ...nextC } } = c
+        const { _doc: { avatar: { src }, ...nextInfo } } = user_info
+        return {
+          ...nextC,
+          user_info: {
+            ...nextInfo,
+            avatar: src
+          }
+        }
+      })
+    }
+  })
   .catch(dealErr(ctx))
-
-  // let result
-  // let errMsg
-  // const data = await mongo.connect("movie")
-  // .then(db => db.findOne({
-  //   _id: mongo.dealId(_id)
-  // }, {
-  //   projection: {
-  //     comment: 1
-  //   }
-  // }))
-  // .then(data => {
-  //   const { comment } = data
-  //   return mongo.connect("comment")
-  //   .then(db => db.find({
-  //     _id: { $in: [...comment] }
-  //   }, {
-  //     projection: {
-  //       "content.text": 1,
-  //       user_info: 1,
-  //     },
-  //     limit: count
-  //   }))
-  // })
-  // .then(data => data.toArray())
-  // .then(data => {
-  //   result = [...data]
-  //   return mongo.connect("user")
-  //   .then(db => db.find({
-  //     _id: { $in: data.map(d => d.user_info) }
-  //   }, {
-  //     projection: {
-  //       avatar: 1,
-  //       _id: 1
-  //     }
-  //   }))
-  //   .then(data => data.toArray())
-  // })
-  // .then(data => {
-  //   result.forEach((r, i) => {
-  //     let [avatar] = data.filter(d => mongo.equalId(d._id, r.user_info))
-  //     const { _id, ...nextData } = avatar
-  //     result[i]['user_info'] = {
-  //       _id: r.user_info,
-  //       ...nextData
-  //     }
-  //   })
-  //   return result.map(r => {
-  //     const { _id, user_info, ...nextR } = r
-  //     const { _id:userId, ...nextUserInfo } = user_info
-  //     return {
-  //       ...nextR,
-  //       user_info: {
-  //         ...nextUserInfo
-  //       }
-  //     }
-  //   })
-  // })
-  // .catch(err => {
-  //   console.log(err)
-  //   errMsg = err
-  //   return false
-  // })
   
   if(data & data.err) {
     res = {

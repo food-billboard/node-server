@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MovieModel, dealErr } = require('@src/utils')
+const { MovieModel, dealErr, notFound } = require('@src/utils')
 
 const router = new Router()
 
@@ -16,38 +16,29 @@ router.get('/', async(ctx) => {
   })
   .limit(count)
   .exec()
-  .then(data => data)
+  .then(data => !!data && data)
+  .then(notFound)
+  .then(data => {
+    return data.map(d => {
+      const { _doc: { poster: { src }, ...nextD } } = d
+      return {
+        ...nextD,
+        poster: src
+      }
+    })
+  })
   .catch(dealErr(ctx))
 
-  // const dataList = await mongo.connect("movie")
-  // .then(db => {
-  //   return db.find({}, {
-  //     sort: {
-  //       create_time: -1
-  //     },
-  //     limit: count,
-  //     projection: {
-  //       name: 1, 
-  //       poster: 1
-  //     }
-  //   })
-  // })
-  // .then(data => data.toArray())
-  // .catch(err => {
-  //   console.log(err)
-  //   return false
-  // })
-
-  if(data && !data.err) {
+  if(data && data.err) {
+    res = {
+      ...data.res
+    }
+  }else {
     res = {
       success: true,
       res: {
         data
       }
-    }
-  }else {
-    res = {
-      ...data.res
     }
   }
 

@@ -1,42 +1,40 @@
 const Router = require('@koa/router')
-const { MongoDB, verifyTokenToData, dealErr } = require("@src/utils")
+const { verifyTokenToData, dealErr, UserModel, RoomModel, notFound } = require("@src/utils")
 
 const router = new Router()
-const mongo = MongoDB()
 
 router
 .post('/', async(ctx) => {
   const [, token] = verifyTokenToData(ctx)
   let res
   const { mobile } = token
-  const data = await mongo.connect("user")
-  .then(db => db.findOneAndUpdate({
+
+  const data = await UserModel.findOneAndUpdate({
     mobile: Number(mobile)
   }, {
-    $set: { status: "SIGNOUT" }
-  }, {
-    projection: {
-      _id: 1
-    }
-  }))
-  .then(data => {
-    if(!data.ok) return Promise.reject({ errMsg: '权限不足', status: 401 })
-    return data.value._id
+    $set: { status: 'SIGNOUT' }
   })
-  .then(id => {
-    return mongo.connect("room")
-    .then(db => db.findOneAndUpdate({
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data._id)
+  .then(notFound)
+  .then(userId => {
+    return RoomModel.findOneAndUpdate({
       origin: true,
-      "member.user": id
+      "members.user": userId
     }, {
-      $set: { "member.$.user": null }
-    }, {
-      projection: {
-        _id: 1
-      }
-    }))
+      $set: { "members.$.user": null }
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
   })
+  .then(data => !!data && data._id)
   .then(data => {
+    console.log(data)
     if(!data) return Promise.reject({errMsg: '服务器错误', status: 500})
   })
   .catch(dealErr(ctx))

@@ -1,10 +1,11 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr } = require("@src/utils")
+const { UserModel, dealErr, paramsCheck, notFound } = require("@src/utils")
 const { Types: { ObjectId } } = require("mongoose")
 
 const router = new Router()
 
 router
+.use(paramsCheck.get(['_id']))
 .get('/', async (ctx) => {
   const { currPage=0, pageSize=30, _id } = ctx.query
   let res
@@ -27,19 +28,32 @@ router
     }
   })
   .exec()
-  .then(data => data)
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => {
+    const { attentions } = data
+    return {
+      attentions: attentions.map(a => {
+        const { _doc: { avatar: { src }, ...nextA } } = a
+        return {
+          ...nextA,
+          avatar: src
+        }
+      })
+    }
+  })
   .catch(dealErr(ctx))
 
-  if(data && !data.err) {
+  if(data && data.err) {
+    res = {
+      ...data.err
+    }
+  }else {
     res = {
       success: true,
       res: {
         data
       }
-    }
-  }else {
-    res = {
-      ...data.err
     }
   }
 

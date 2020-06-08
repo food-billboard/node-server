@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { SearchModel, dealErr } = require('@src/utils')
+const { SearchModel, dealErr, notFound } = require('@src/utils')
 
 const router = new Router()
 
@@ -15,37 +15,20 @@ router.get('/', async(ctx) => {
   })
   .limit(count)
   .exec()
-  .then(data => data)
+  .then(data => !!data && data)
+  .then(notFound)
   .catch(dealErr(ctx))
 
-  // const data = await mongo.connect("search")
-  // .then(db => db.find({}, 
-  //   {
-  //     sort: {
-  //       hot: -1
-  //     },
-  //     limit: count,
-  //     projection: {
-  //       key_word: 1
-  //     }
-  //   })
-  // )
-  // .then(data => data.toArray())
-  // .catch(err => {
-  //   console.log(err)
-  //   return false
-  // })
-
-  if(data && !data.err) {
+  if(data && data.err) {
+    res = {
+      ...data.res
+    }
+  }else {
     res = {
       success: true,
       res: {
         data
       }
-    }
-  }else {
-    res = {
-      ...data.res
     }
   }
 

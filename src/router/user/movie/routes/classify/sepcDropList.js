@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { ClassifyModel, dealErr } = require('@src/utils')
+const { ClassifyModel, dealErr, notFound } = require('@src/utils')
 
 const router = new Router()
 
@@ -13,24 +13,18 @@ router.get('/', async (ctx) => {
   })
   .limit(count)
   .exec()
-  .then(data => data)
+  .then(data => !!data && data)
+  .then(notFound)
+  .then(data => {
+    return data.map(d => {
+      const { _doc: { poster: { src }={}, ...nextD } } = d
+      return {
+        ...nextD,
+        poster: src || null
+      }
+    })
+  })
   .catch(dealErr(ctx))
-
-
-  // const data = await mongo.connect("classify")
-  // .then(db => db.find({}, {
-	//   limit: count,
-	//   projection: {
-	// 	  name: 1,
-	// 	  poster: 1
-	//   }
-  // }))
-  // .then(data => data.toArray())
-  // .catch(err => {
-  //   console.log(err)
-  //   errMsg = err
-  //   return false
-  // })
 
   if(data && data.err) {
     res = {

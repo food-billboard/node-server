@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MovieModel, dealErr } = require("@src/utils")
+const { MovieModel, dealErr, notFound } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -16,24 +16,17 @@ router.get('/', async (ctx) => {
     "info.description": 1
   })
   .exec()
-  .then(data => data)
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => {
+    const { poster: { src }, info: { description }, ...nextData } = data
+    return {
+      ...nextData,
+      poster: src,
+      description
+    }
+  })
   .catch(dealErr(ctx))
-
-  // let errMsg
-  // const data = await mongo.connect("movie")
-  // .then(db => db.findOne({
-  //   _id: mongo.dealId(_id)
-  // }, {
-  //   projection: {
-  //     poster: 1,
-  //     name: 1,
-  //     "info.description": 1
-  //   }
-  // }))
-  // .catch(err => {
-  //   errMsg = err
-  //   return false
-  // })
 
   if(data && data.err) {
     res = {

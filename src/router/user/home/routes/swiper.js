@@ -29,7 +29,7 @@ const handle = {
         })
         .limit(3)
         .exec()
-        .then(data => data),
+        .then(data => !!data && data),
 
         SpecialModel.find()
         .sort({
@@ -40,35 +40,29 @@ const handle = {
         })
         .limit(3)
         .exec()
-        .then(data => data),
-        // mongo.connect('movie')
-        // .then(db => db.find({}, {
-        //   sort: {
-        //     create_time: -1
-        //   },
-        //   limit: 3,
-        //   projection: {
-        //     poster: 1 
-        //   }
-        // }))
-        // .then(data => data.toArray()),
-        // mongo.connect('special')
-        // .then(db => db.find({}, {
-        //   sort: {
-        //     create_time: -1
-        //   },
-        //   limit: 3,
-        //   projection: {
-        //     poster: 1 
-        //   }
-        // }))
-        // .then(data => data.toArray())
+        .then(data => !!data && data),
       ])
       .catch(err => {
         console.log(err)
         return false
       })
-      const result = [ ...(movieData ? movieData.map(m => ({ ...m, type: "MOVIE" })) : [] ), ...(specialData ? specialData.map(s => ({ ...s, type: "SPECIAL" })) : []) ]
+      const result = [ 
+        ...(movieData ? movieData.map(m => {
+          const { _doc: { poster: { src }, ...nextM } } = m
+          return {
+            ...nextM,
+            type: "MOVIE",
+            poster: src
+          }
+        }) : [] ), 
+        ...(specialData ? specialData.map(s => {
+          const { _doc: { poster: { src }, ...nextS } } = s
+          return {
+            ...nextS,
+            type: "SPECIAL",
+            poster: src
+          }
+        }) : []) ]
       Reflect.set(target, 'data', result)
       Reflect.set(target, 'expire', Date.now())
       Reflect.set(target, 'max-age', 1000 * 60 * 60 * 24)

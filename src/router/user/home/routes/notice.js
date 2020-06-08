@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { GlobalModel, dealErr } = require('@src/utils')
+const { GlobalModel, dealErr, notFound } = require('@src/utils')
 
 const router = new Router()
 
@@ -13,33 +13,20 @@ router.get('/', async(ctx) => {
     notice: 1
   })
   .exec()
-  .then(data => data)
+  .then(data => !!data && data._doc)
+  .then(notFound)
   .catch(dealErr(ctx))
-
-  // const data = await mongo.connect("global")
-  // .then(db => db.findOne({}, {
-  //   sort: {
-  //     create_time: -1
-  //   },
-  //   projection: {
-  //     notice: 1
-  //   }
-  // }))
-  // .catch(err => {
-  //   console.log(err)
-  //   return false
-  // } )
   
-  if(data && !data.err) {
+  if(data && data.err) {
+    res = {
+      ...data.res
+    }
+  }else {
     res = {
       success: true,
       res: {
         data
       }
-    }
-  }else {
-    res = {
-      ...data.res
     }
   }
   ctx.body = JSON.stringify(res)
