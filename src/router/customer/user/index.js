@@ -3,7 +3,7 @@ const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
-const { verifyTokenToData, UserModel, dealErr } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound } = require('@src/utils')
 
 const router = new Router()
 
@@ -72,17 +72,20 @@ router
     create_time: 1,
   })
   .exec()
+  .then(data => !!data && data)
+  .then(notFound)
   .then(data => {
     let result = []
     let mine
     let fans
     data.forEach(d => {
-      const { _id:id, ...nextD } = d 
+      const { _doc: { _id:id, avatar: { src }, ...nextD } } = d 
       if(id.equals(_id)) {
         const { fans, attentions,  } = nextD
         result = {
           ...result,
           ...nextD,
+          avatar: src,
           fans: fans.length,
           attentions: attentions.length,
           like: false,
@@ -97,56 +100,6 @@ router
     return result
   })
   .catch(dealErr(ctx))
-
-  // const data = await mongo.connect("user")
-  // .then(db => db.find({
-  //   $or: [
-  //     {
-  //       mobile: Number(mobile),
-  //     },
-  //     {
-  //       _id: mongo.dealId(_id)
-  //     }
-  //   ]
-  // }, {
-  //   projection: {
-  //     username: 1,
-  //     avatar: 1,
-  //     hot: 1,
-  //     fans:1,
-  //     attentions: 1,
-  //     create_time: 1,
-  //   }
-  // }))
-  // .then(data => data.toArray())
-  // .then(data => {
-  //   let result = []
-  //   let mine
-  //   let fans
-  //   data.forEach(d => {
-  //     const { _id:id, ...nextD } = d 
-  //     if(mongo.equalId(_id, id)) {
-  //       const { fans, attentions,  } = nextD
-  //       result = {
-  //         ...result,
-  //         ...nextD,
-  //         fans: fans.length,
-  //         attentions: attentions.length,
-  //         like: false,
-  //       }
-  //       fans = [...fans]
-  //     }else {
-  //       mine = id
-  //     }
-  //   })
-
-  //   if(mine && fans.some(f => mongo.equalId(f, mine))) result.like = true
-  //   return result
-  // })
-  // .catch(err => {
-  //   errMsg = err
-  //   return false
-  // })
 
   if(data && data.err) {
     res = {

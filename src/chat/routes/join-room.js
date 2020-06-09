@@ -1,6 +1,5 @@
-const { MongoDB, verifySocketIoToken, isType, otherToken } = require("@src/utils")
-
-const mongo = MongoDB()
+const { verifySocketIoToken, isType, otherToken, notFound, UserModel, RoomModel } = require("@src/utils")
+const { Types: { ObjectId } } = require('mongoose')
 
 const joinRoom = socket => async (data) => {
   const { type='CHAT', _id, members } = data
@@ -9,55 +8,56 @@ const joinRoom = socket => async (data) => {
   let hasRoom = false
   let roomId
   //成员整合
-  let newMembers = isType(members, 'array') ? members.map(m => mongo.dealId(m)) : [mongo.dealId(members)]
+  let newMembers = isType(members, 'array') ? members.map(m => ObjectId(m)) : [ObjectId(members)]
 
   //已登录
   if(token) {
     let mineId
     const { mobile } = token
     //获取用户id
-    await mongo.connect("user")
-    .then(db => db.findOne({
+    await UserModel.findOne({
       mobile: Number(mobile),
       status: 'SIGNIN'
-    }, {
-      projection: {
-        _id: 1
-      }
-    }))
-    .then(data => data && data._id)
+    })
+    .select({
+      _id: 1
+    })
+    .then(data => !!data && data._doc)
+    .then(notFound)
     .then(data => {
-      mineId = data
-      if(data && !newMembers.some(m => mongo.equalId(m, mineId))) newMembers.push(data)
+      const { _id } = data
+      mineId = _id
+      if(data && !newMembers.some(m => mineId.equals(m))) newMembers.push(data)
     })
     .then(_ => {
-      if(_id || ( !_id && type === 'chat' )) {
+      if(_id || ( !_id && type === 'CHAT' )) {
         let query = {}
         if(!_id) {
           query = {
             type,
-            "member.user": { $in: [ ...newMembers ] },
-            "member.user": mineId
+            "members.user": { $in: [ ...newMembers ] },
+            "members.user": mineId
           }
         }else {
           query = {
             _id: mongo.dealId(_id),
-            "member.user": mineId
+            "members.user": mineId
           }
         }
 
-        return mongo.connect("room")
-        .then(db => db.findOneAndUpdate({
+        return RoomModel.findOneAndUpdate({
           ...query
         }, {
-          $set: { "member.$.status": 'online' }
-        }, {
-          projection: {
-            _id: 1
-          }
-        }))
+          $set: { "members.$.status": 'ONELINE' }
+        })
+        .select({
+          _id: 1
+        })
+        .exec()
+        .then(data => !data && data._doc)
         .then(data => {
-          if(data && data.value && data.value._id) {
+          const { _id } = data
+          if(data) {
             hasRoom = true
             const { value: { _id } } = data
             roomId = _id.toString()
@@ -69,10 +69,9 @@ const joinRoom = socket => async (data) => {
             }
             socket.join(roomId)
             return hasRoom
-          }else if(!_id){
+          }else if(!_id) {
             return hasRoom
-          }
-          else {
+          }else {
             return Promise.reject({errMsg: '权限不足或参数错误或已在房间中'})
           }
         })
@@ -83,19 +82,16 @@ const joinRoom = socket => async (data) => {
     })
     .then(async (status) => {
       //创建房间
-      if(!status && type !== 'system') {
-        let info = {
-          create_time: Date.now(),
-          modified_time: Date.now()
-        }
-        if(type === 'chat') {
+      if(!status && type !== 'SYSTEM') {
+        let info = {}
+        if(type === 'CHAT') {
           info = {
             ...info,
             avatar: null,
             name: null,
             description: null
           }
-        }else if(type === 'group_chat'){
+        }else if(type === 'GROUP_CHAT'){
           info = {
             ...info,
             avatar: '这里添加一个静态图片作为默认的群聊图片',
@@ -103,8 +99,7 @@ const joinRoom = socket => async (data) => {
             description: '群主什么都没有留下'
           }
         }
-        return mongo.connect("room")
-        .then(db => db.insertOne({
+        const room = new RoomModel({
           type,
           info,
           origin: false,
@@ -115,10 +110,10 @@ const joinRoom = socket => async (data) => {
               message: []
             }
           })
-        }))
+        })
+        room.save()
         .then(data => {
-          const { ops } = data
-          const { _id } = ops[0]
+          const { _id } = data
           roomId = _id.toString()
           res = {
             success: true,
@@ -143,7 +138,7 @@ const joinRoom = socket => async (data) => {
   }
   //未登录
   else {
-    if(type !== 'system') {
+    if(type !== 'SYSTEM') {
       res = {
         success: false,
         res: {
@@ -159,22 +154,24 @@ const joinRoom = socket => async (data) => {
         }
       }
     }else {
-      await mongo.connect("room")
-      .then(db => db.findOne({
-        _id: mongo.dealId(_id),
+      await RoomModel.findOne({
+        _id: ObjectId(_id),
         origin: true
-      }, {
+      })
+      .select({
         _id: 1
-      }))
-      .then(data => !!data && data._id)
+      })
+      .exec()
+      .then(data => !!data && data._doc)
       .then(data => {
+        const { _id } = data
         if(data) {
-          socket.join(data.toString())
+          socket.join(_id.toString())
           res = {
             success: true,
             res: {
               data: {
-                _id: data
+                _id
               }
             }
           }
@@ -202,27 +199,26 @@ const leaveRoom = socket => async (data) => {
   let res
   if(token) {
     const { mobile } = token
-    mineId = await mongo.connect("user")
-    .then(db => db.findOne({
+    await UserModel.findOne({
       mobile: Number(mobile)
-    }, {
-      projection: {
-        _id: 1
-      }
-    }))
-    .then(data => data && data._id)
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(data => !!data && data.doc)
     .then(data => {
-      return mongo.connect("room")
-      .then(db => db.updateOne({
-        _id: mongo.dealId(_id),
-        "member.status": 'online',
-        "member.user": data
+      const { _id:userId } = data
+      return RoomModel.updateOne({
+        _id: ObjectId(_id),
+        "member.status": 'ONLINE',
+        "member.user": userId
       }, {
-        $set: { "member.$.status": 'offline' }
-      }))
+        $set: { "member.$.status": 'OFFLINE' }
+      })
     })
     .then(data => {
-      if(data && data.result && !data.result.nModified) return Promise.reject({ errMsg: '权限不足' })
+      if(!data) return Promise.reject({ errMsg: '权限不足' })
       res = {
         success: true,
         res: null

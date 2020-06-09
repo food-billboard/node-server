@@ -3,7 +3,6 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const ObjectId = mongoose.Types.ObjectId
 const Mixed = mongoose.Types.Mixed
-const autoPopulate = require('mongoose-autopopulate')
 
 function getMill(time) {
   return Day(time).get('millisecond')
@@ -710,6 +709,7 @@ MovieSchema.pre('findOne', function() {
 })
 
 MovieSchema.pre('find', function() {
+  const { _fields, paths } = this
   if(this._fields.poster) {
     this.populate({
       path: 'poster',

@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { UserModel, MovieModel, verifyTokenToData, dealErr } = require("@src/utils")
+const { UserModel, MovieModel, verifyTokenToData, dealErr, notFound } = require("@src/utils")
 const { Types: { ObjectId } } = require("mongoose")
 
 const router = new Router()
@@ -12,7 +12,7 @@ router
   let res
 
   const data = await UserModel.updateOne({
-    mobile: ~~mobile,
+    mobile: Number(mobile),
     store: { $ne: ObjectId(_id) }
   }, {
     $push: { store: ObjectId(_id) }
@@ -26,18 +26,6 @@ router
     .then(_ => true)
   })
   .catch(dealErr(ctx))
-  
-  // await mongo.connect("user")
-  // .then(db => db.updateOne({
-  //   mobile: Number(mobile),
-  //   store: { $ne: mongo.dealId(_id) }
-  // }, {
-  //   $push: { store: mongo.dealId(_id) }
-  // }))
-  // .catch(err => {
-  //   errMsg = err
-  //   return false
-  // })
 
   if(data && data.err) {
     res = {
@@ -59,7 +47,7 @@ router
   let res
 
   const data = await UserModel.updateOne({
-    mobile: ~~mobile,
+    mobile: Number(mobile),
     store: { $in: [ObjectId(_id)] }
   }, {
     $pull: { store: ObjectId(_id) }
@@ -85,36 +73,6 @@ router
       res: null
     }
   }
-
-  // let errMsg
-
-  // await mongo.connect("user")
-  // .then(db => db.updateOne({
-  //   mobile: Number(mobile),
-  //   store: { $in: [mongo.dealId(_id)] }
-  // }, {
-  //   $pull: { store: mongo.dealId(_id) }
-  // }))
-  // .catch(err => {
-  //   console.log(err)
-  //   errMsg = err
-  //   return false
-  // })
-
-  // if(errMsg) {
-  //   ctx.status = 500
-  //   res = {
-  //     success: false,
-  //     res: {
-  //       errMsg
-  //     }
-  //   }
-  // }else {
-  //   res = {
-  //     success: true,
-  //     res: null
-  //   }
-  // }
 
   ctx.body = JSON.stringify(res)
 })

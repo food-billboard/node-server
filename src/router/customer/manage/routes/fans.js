@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr, notFound } = require("@src/utils")
 
 const router = new Router()
 
@@ -28,41 +28,21 @@ router
     }
   })
   .exec()
-  .then(data => data)
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => {
+    const { fans } = data
+    return {
+      fans: fans.map(f => {
+        const { _doc: { avatar: { src }, ...nextF } } = f
+        return {
+          avatar: src,
+          ...nextF
+        }
+      })
+    }
+  })
   .catch(dealErr(ctx))
-
-  // let errMsg
-  // const data = await mongo.connect("user")
-  // .then(db => db.findOne({
-  //   mobile: Number(mobile)
-  // }, {
-  //   projection: {
-  //     fans: 1
-  //   }
-  // }))
-  // .then(data => {
-  //   if(data && data.fans && !data.fans.length) return Promise.reject({err: null, data: []})
-  //   const { fans } = data
-  //   return mongo.connect("user")
-  //   .then(db => db.find({
-  //     _id: { $in: [...fans] }
-  //   }, {
-  //     limit: pageSize,
-  //     skip: pageSize * currPage,
-  //     projection: {
-  //       username: 1,
-  //       avatar: 1
-  //     },
-  //   }))
-  //   .then(data => data.toArray())
-  // })
-  // .catch(err => {
-  //   if(isType(err, 'object') && err.data) return err.data
-  //   errMsg = err
-  //   console.log(err)
-  //   return false
-  // })
-
 
   if(data && data.err) {
     res = {

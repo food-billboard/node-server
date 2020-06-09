@@ -3,7 +3,7 @@ const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
-const { verifyTokenToData, UserModel, dealErr } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound } = require('@src/utils')
 
 const router = new Router()
 
@@ -33,7 +33,7 @@ router
   const { mobile } = token
   let res
   const data = await UserModel.findOne({
-    mobile: ~~mobile
+    mobile: Number(mobile)
   })
   .select({
     mobile: 1,
@@ -46,29 +46,9 @@ router
     status: 1
   })
   .exec()
-  .then(data => data)
+  .then(data => !!data && data._doc)
+  .then(notFound)
   .catch(dealErr(ctx))
-
-  // let errMsg
-  // const data = await mongo.connect("user")
-  // .then(db => db.findOne({
-  //   mobile: Number(mobile)
-  // }, {
-  //   projection: {
-  //     mobile: 1,
-  //     username: 1,
-  //     avatar: 1,
-  //     hot: 1,
-  //     fans:1,
-  //     attentions: 1,
-  //     create_time: 1,
-  //     status: 1
-  //   }
-  // }))
-  // .catch(err => {
-  //   errMsg = err
-  //   return false
-  // })
 
   if(data && data.err) {
     res = {
@@ -84,13 +64,14 @@ router
         }
       }
     }else {
-      const { fans, attentions, ...nextData } = data
+      const { fans, attentions, avatar: { src }, ...nextData } = data
       res = {
         success: true,
         res: {
           data: {
             fans: fans.length,
             attentions: attentions.length,
+            avatar: src,
             ...nextData
           }
         }
