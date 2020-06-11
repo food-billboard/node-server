@@ -2,7 +2,7 @@ const Router = require('@koa/router')
 const Browse = require('./browser')
 const Store = require('./store')
 const Detail = require('./detail')
-const { verifyTokenToData, isType, isEmpty, dealMedia, UserModel, MovieModel, dealErr, notFound } = require("@src/utils")
+const { verifyTokenToData, isType, isEmpty, dealMedia, UserModel, MovieModel, DirectorModel, ActorModel, dealErr, notFound } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -152,12 +152,12 @@ function aboutFind(template) {
         MovieModel.updateMany({
           _id: { $in: [ ...series.map(s => s.film) ] }
         }, {
-          $push: { same_film: { film: _id, type: 'SERIES' } }
+          $push: { same_film: { film: _id, same_type: 'SERIES' } }
         }),
         MovieModel.updateMany({
           _id: { $in: [...namesake.map(n => n.film)] }
         }, {
-          $push: { same_film: { film: _id, type: 'NAMESAKE' } }
+          $push: { same_film: { film: _id, same_type: 'NAMESAKE' } }
         })
       ])
       //日志上传
@@ -211,24 +211,24 @@ function aboutFind(template) {
           },
           author
         } = d
-        let result = { film: _id, type: [] }
+        let result = { film: _id, related_type: [] }
         if(director.length && director.some(d => {
           return originDirector.some(o => o.equals(d))
         })) {
-          result.type.push('director')
+          result.related_type.push('director')
         }
         if(actor.length && actor.some(a => {
           return originActor.some(o => o.equals(a))
         })) {
-          result.type.push('actor')
+          result.related_type.push('actor')
         }
         if(classify.length && classify.some(c => {
           return originClassify.some(o => o.equals(c))
         })) { 
-          result.type.push('classify')
+          result.related_type.push('classify')
         }
         if(originAuthor && author &&  originAuthor.equals(author)) {
-          result.type.push('author')
+          result.related_type.push('author')
         }
         newRelatedTo.push(result)
       })  
@@ -250,7 +250,7 @@ function aboutFind(template) {
         return MovieModel.updateOne({
           _id: film
         }, {
-          $push: { related_to: { film, type } }
+          $push: { related_to: { film, related_type: type } }
         })
       }))
       //日志记录
@@ -259,15 +259,22 @@ function aboutFind(template) {
       })
     })
     //媒体内容处理
-    // .then(_ => {
-    //   const {
-    //     images:mediaImages,
-    //     video:mediaVideo,
-    //     poster:mediaPoster,
-    //   } = templateInsertData
-  
-    //   dealMedia()
-    // })
+    .then(_ => {
+      const {
+        images:mediaImages,
+        video:mediaVideo,
+        poster:mediaPoster,
+      } = _template
+      
+      _template = {
+        ..._template,
+        poster: ObjectId(mediaPoster),
+        images: mediaImages.map(m => ObjectId(m)),
+        video: ObjectId(mediaVideo),
+      }
+      
+      dealMedia()
+    })
     .then(_ => _template)
   }
 }
@@ -309,6 +316,33 @@ router
     actor
   } = nextInfo
 
+  const validDirectorList = await DirectorModel.find({
+    _id: { $in: [ director.filter(r => ObjectId.isValid(r)).map(d => ObjectId(d)) ] }
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data)
+  .then(data => data.map(d => d._id))
+  .catch(err => {
+    console.log(err)
+    return []
+  })
+  const validActorList = await ActorModel.find({
+    _id: { $in: [ actor.filter(a => ObjectId.isValid(a)).map(a => ObjectId(a)) ] }
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data)
+  .then(data => data.map(d => d._id))
+  .catch(err => {
+    console.log(err)
+    return []
+  })
+
   //判断是否已经存在
   const data = await MovieModel.findOne({
     //名字类似
@@ -320,9 +354,9 @@ router
     //上映时间类似
     $and: [ { "info.screen_time": { $gte: screen_time - 24 * 60 * 60 * 1000 } }, { "info.screen_time": { $lte: screen_time + 24 * 60 * 60 * 1000 } } ], 
     //导演类似
-    "info.director": { $in: [...director.filter(r => ObjectId.isValid(r)).map(d => ObjectId.dealId(d))] },
+    ...(validDirectorList.length ? { "info.director": { $in: [ ...validDirectorList ] } } : {}),
     //演员类似
-    "info.actor": { $in: [...actor.filter(d => ObjectId.isValid(d)).map(d => ObjectId.dealId(d))] }
+    ...(validActorList.length ? { "info.actor": { $in: [ ...validActorList ] } } : {}),
   })
   .select({
     _id: 1,
@@ -330,13 +364,18 @@ router
   })
   .exec()
   .then(data => !!data && data._doc)
-  .then(notFound)
+  .then(data => {
+    if(data) return Promise.reject({ errMsg: '存在相类似的作品', status: 403 })
+    return true
+  })
   .catch(dealErr(ctx))
 
   if(data && !data.err) {
     return await next()
   }
-  ctx.body = JSON.stringify(res)
+  ctx.body = JSON.stringify({
+    ...data.res
+  })
 
 })
 .post('/', async (ctx) => {
@@ -416,7 +455,18 @@ router
     const movie = new MovieModel({
       ...templateInsertData
     })
-    movie.save()
+    return movie.save()
+  })
+  .then(data => {
+    const { _id } = data
+    if(_id) {
+      return UserModel.updateOne({
+        mobile: Number(mobile),
+      }, {
+        $addToSet: { issue: data._id }
+      })
+    }
+    return Promise.reject({ errMsg: 'something error', status: 500 })
   })
   .catch(dealErr(ctx))
 
@@ -482,9 +532,9 @@ router
 
     const {
       info,
-      author_description: origin_author_description,
       rest: originRest,
-      ...nextData
+      related_to,
+      same_film,
     } = data
 
     //对用户自定义和系统自带字段进行区分
@@ -498,18 +548,19 @@ router
     }, {
       ...originRest
     }, { ...Object.values(nextInfo).map(info => isType(info, 'array') ? info : [info]) })
+
     //合成最终字段
     templateUpdateData = {
-      ...nextData,
+      related_to,
+      same_film,
       name,
       video: src,
       poster,
       info: {...valid},
       rest: { ...unValid },
       images,
-      author_rate,
-      author_description: author_description ? author_description : origin_author_description,
-      modified_time: Date.now()
+      ...(author_rate ? { author_rate } : {}),
+      ...( author_description ? { author_description } : {} )
     }
   })
   .then(async(_) => {
@@ -549,21 +600,21 @@ router
       ...templateUpdateData,
       ...data
     }
-    return Promise.reject()
   }) 
   .then(_ => {
-    MovieModel.updateOne({
+    return MovieModel.updateOne({
       _id: ObjectId(_id) 
     }, {
-      ...Object.keys(templateUpdateData).reduce((acc, key) => {
-        if(!acc.$set) acc.$set = {}
-        acc.$set = { ...acc.$set, key: templateUpdateData[key] }
-        return acc
-      }, {})
+      $set: {
+        ...Object.keys(templateUpdateData).reduce((acc, key) => {
+          acc = { ...acc, [key]: templateUpdateData[key] }
+          return acc
+        }, {})
+      }
     })
   })
   .then(data => {
-    if(data && data.result && data.result.nModified == 0) return Promise.reject({errMsg: '更新错误', status: 500})
+    if(data && data.nModified != 1) return Promise.reject({errMsg: '更新错误', status: 500})
     return true
   })
   .catch(dealErr(ctx))
@@ -611,19 +662,17 @@ router
   .then(notFound)
   .then(data => {
     const { issue } = data
-    return {
-      issue: issue.map(is => {
-        const { _doc: { poster: { src }, ...nextIs } } = is
-        return {
-          ...nextIs,
-          poster: src,
-        }
-      })
-    }
+    return issue.map(is => {
+      const { _doc: { poster: { src }, ...nextIs } } = is
+      return {
+        ...nextIs,
+        poster: src,
+      }
+    })
   })
   .catch(dealErr(ctx))
 
-  if(data && data.dealErr) {
+  if(data && data.err) {
     res = {
       ...data.res
     }

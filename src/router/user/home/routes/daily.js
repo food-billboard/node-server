@@ -3,7 +3,8 @@ const { MovieModel, dealErr, notFound } = require('@src/utils')
 
 const router = new Router()
 
-router.get('/', async(ctx) => {
+router
+.get('/', async(ctx) => {
   const { count=12 } = ctx.query
   let res
   const data = await MovieModel.find({})

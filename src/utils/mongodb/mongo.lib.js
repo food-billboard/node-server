@@ -2,14 +2,13 @@ const Day = require('dayjs')
 const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const ObjectId = mongoose.Types.ObjectId
-const Mixed = mongoose.Types.Mixed
 
 function getMill(time) {
-  return Day(time).get('millisecond')
+  return Day(time).valueOf()
 }
 
 function setMill(time) {
-  return Day(time).get('millisecond')
+  return Day(time).toISOString('millisecond')
 }
 
 const defaultConfig = {
@@ -47,10 +46,6 @@ const UserSchema = new Schema({
     type: Number,
     default: 0,
     min: 0,
-    set: function(v) {
-      if(v < 0) return 0
-      return v
-    }
   },
   fans: [{
     type: ObjectId,
@@ -87,10 +82,10 @@ const UserSchema = new Schema({
       min: 0,
       max: 10,
       required: true,
-      set: function() {
-        if(this.rate < 0) return 0
-        if(this.rate > 10) return 10
-        return this.rate
+      set: function(rate) {
+        if(rate < 0) return 0
+        if(rate > 10) return 10
+        return rate
       }
     }
   }],
@@ -162,7 +157,6 @@ const RoomSchema = new Schema({
       },
       sid: {
         type: String,
-        // default: null
       },
       status: {
         enum: [ "ONLINE", "OFFLINE" ],
@@ -255,19 +249,11 @@ const MovieSchema = new Schema({
   name: {
     type: String,
     required: true,
-    set: function(v) {
-      this.info.name = v
-      return v
-    }
   },
   info: {
     name: {
       type: String,
       required: true,
-      set: function(v) {
-        this.name = v
-        return v
-      }
     },
     another_name: [{
       type: String,
@@ -380,13 +366,13 @@ const MovieSchema = new Schema({
       ref: 'movie',
       required: true
     },
-    type: {
+    related_type: [{
       type: String,
       enum: [ "DIRECTOR", "ACTOR", "AUTHOR", "CLASSIFY" ],
       trim: true,
       uppercase: true,
-      required: true
-    }
+      required: true,
+    }]
   }],
 	same_film: [{
     film: {
@@ -394,7 +380,7 @@ const MovieSchema = new Schema({
       ref: 'movie',
       required: true
     },
-    type: {
+    same_type: {
       type: String,
       enum: [ "SERIES", "NAMESAKE" ],
       trim: true,
@@ -593,7 +579,6 @@ const RankSchema = new Schema({
     enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'TOTAL_RATE', 'CLASSIFY' ],
     uppercase: true,
     get: function(v) {
-      // return v.toUpperCase()
       return v
     }
   },
@@ -658,6 +643,15 @@ const VideoSchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
+  origin_type: {
+    required: true,
+    type: String,
+    enum: [ "USER", "SYSTEM" ]
+  },
+  origin: {
+    type: ObjectId,
+    ref: 'user'
+  } 
 }, {
   ...defaultConfig
 })
@@ -668,6 +662,15 @@ const ImageSchema = new Schema({
     type: String,
     required: true
   },
+  origin_type: {
+    required: true,
+    type: String,
+    enum: [ "USER", "SYSTEM" ]
+  },
+  origin: {
+    type: ObjectId,
+    ref: 'user'
+  } 
 }, {
   ...defaultConfig
 })
@@ -697,7 +700,7 @@ RankSchema.pre("find", function() {
 })
 
 MovieSchema.pre('findOne', function() {
-  if(this._fields.poster) {
+  // if(this._fields.poster) {
     this.populate({
       path: 'poster',
       select: {
@@ -705,7 +708,21 @@ MovieSchema.pre('findOne', function() {
         _id: 0
       }
     })
-  }
+    .populate({
+      path: 'images',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+    .populate({
+      path: 'video',
+      select: {
+        src: 1,
+        _id: 0
+      }
+    })
+  // }
 })
 
 MovieSchema.pre('find', function() {

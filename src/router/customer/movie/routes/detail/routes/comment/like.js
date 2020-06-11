@@ -95,7 +95,7 @@ router
     return UserModel.updateOne({
       _id: userId
     }, {
-      $inc: { hot: -1 }
+      $inc: { hot: - 1 }
     })
     .then(_ => true)
   })

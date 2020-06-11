@@ -32,17 +32,15 @@ router.get('/', async (ctx) => {
   .then(notFound)
   .then(data => {
     const { glance } = data
-    return {
-      glance: glance.map(g => {
-        const { info: { description, name }, poster: { src }, ...nextD } = g
-        return {
-          ...nextD,
-          poster: src,
-          description,
-          name,
-        }
-      })
-    }
+    return glance.map(g => {
+      const { _doc: { info: { description, name }, poster: { src }, ...nextD } } = g
+      return {
+        ...nextD,
+        poster: src,
+        description,
+        name,
+      }
+    })
   })
   .catch(dealErr(ctx))
 

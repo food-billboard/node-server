@@ -1,11 +1,10 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr, paramsCheck, notFound } = require("@src/utils")
+const { UserModel, dealErr, notFound } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
-.use(paramsCheck.get(['_id']))
 .get('/', async (ctx) => {
   const { currPage=0, pageSize=30, _id } = ctx.query
   let res

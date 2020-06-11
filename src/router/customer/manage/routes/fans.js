@@ -11,10 +11,10 @@ router
   let res
 
   const data = await UserModel.findOne({
-    mobile: ~~mobile
+    mobile: Number(mobile)
   })
   .select({
-    fans
+    fans: 1
   })
   .populate({
     path: 'fans',
@@ -32,15 +32,13 @@ router
   .then(notFound)
   .then(data => {
     const { fans } = data
-    return {
-      fans: fans.map(f => {
-        const { _doc: { avatar: { src }, ...nextF } } = f
-        return {
-          avatar: src,
-          ...nextF
-        }
-      })
-    }
+    return fans.map(f => {
+      const { _doc: { avatar: { src }, ...nextF } } = f
+      return {
+        avatar: src,
+        ...nextF
+      }
+    })
   })
   .catch(dealErr(ctx))
 

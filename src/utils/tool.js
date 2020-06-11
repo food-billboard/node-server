@@ -1,3 +1,8 @@
+const fs = require('fs')
+const path = require('path')
+const { ImageModel, VideoModel, UserModel } = require('./mongodb/mongo.lib')
+const { Types: { ObjectId } } = require('mongoose')
+
 const typeProto = arg => Object.prototype.toString.call(arg)
 
 const isNumber = arg => !Number.isNaN(arg) && typeProto(arg) === '[object Number]'
@@ -78,8 +83,50 @@ const withTry = (callback) => {
   }
 }
 
-//媒体内容上传处理
-const dealMedia = () => {
+//图片内容上传处理
+/**
+ * 
+ * @param  {...any} files { file: 文件, auth: 权限类型[ PUBLIC, PRIVATE ], origin: 来源作者 | ORIGIN }
+ */
+const dealMedia4Image = async (...files) => {
+  const realFiles = files.filter(f => isType(f.file, 'file') || istType(f.file, 'blob'))
+  realFiles.forEach(async (obj) => {
+    const { file, auth, origin } = obj
+    const { type } = file
+    if(/^image/.test(type)) return
+    const fileReader = new FileReader()
+    fileReader.onload = function(e) {
+      const data = fileReader.result
+
+      let path = '/media/database/'
+      if(auth === 'PRIVATE') {
+        path += 'private'
+      }else {
+        path += 'public'
+      }
+
+      path += '/image'
+      const imageModel = new ImageModel({
+        name: '',
+        src: ''
+      })
+      UserModel.findOne({
+        _id: ObjectId(origin)
+      })
+      imageModel.save().then(data => {
+        const { _id } = data
+        fs.writeFileSync(`${_id.toString()}.`)
+      })
+      await 
+      fs.writeFileSync()
+    }
+
+    fileReader.readAsArrayBuffer(file)
+  })
+}
+
+//大文件分片上传
+const chunkLoad = async () => {
 
 }
 
@@ -118,88 +165,88 @@ const notFound = (data) => {
   return data
 }
 
-function check(origin, target) {
-  if(isEmpty(origin) && !isEmpty(target)) return false
-  return Object.keys(origin).every(key => {
-    if(!target.includes(key)) return true
-    console.log(origin[key])
-    return origin[key] !== undefined
-  })
-}
+// function check(origin, target) {
+//   if(isEmpty(origin) && !isEmpty(target)) return false
+//   return Object.keys(origin).every(key => {
+//     if(!target.includes(key)) return true
+//     console.log(origin[key])
+//     return origin[key] !== undefined
+//   })
+// }
 
-//参数预检查
-const paramsCheck = {
-  put: (params) => {
-    return async (ctx, next) => {
-      return await next()
-      if(!Array.isArray(params)) return await next()
-      const { body } = ctx.request
-      if(check(body, params)) return await next()
-      ctx.status = 404
-      ctx.body = JSON.stringify({
-        success: false,
-        res: {
-          errMsg: 'not Found'
-        }
-      })
-    }
-  },
-  post: (params) => {
-    return async (ctx, next) => {
-      return await next()
-      if(!Array.isArray(params)) return await next()
-      const { body } = ctx.request
-      if(check(body, params)) return await next()
-      ctx.status = 404
-      ctx.body = JSON.stringify({
-        success: false,
-        res: {
-          errMsg: 'not Found'
-        }
-      })
-    }
-  },
-  get: (params) => {
-    return async (ctx, next) => {
-      return await next()
-      if(!Array.isArray(params)) return await next()
-      const { query } = ctx
-      if(check(query, params)) {
-        return await next()
-      }
-      ctx.status = 404
-      ctx.body = JSON.stringify({
-        success: false,
-        res: {
-          errMsg: 'not Found'
-        }
-      })
-    }
-  },
-  delete: (params) => {
-    return async (ctx, next) => {
-      return await next()
-      if(!Array.isArray(params)) return await next()
-      const { query } = ctx
-      if(check(query, params)) return await next()
-      ctx.status = 404
-      ctx.body = JSON.stringify({
-        success: false,
-        res: {
-          errMsg: 'not Found'
-        }
-      })
-    }
-  },
-}
+// //参数预检查
+// const paramsCheck = {
+//   put: (params) => {
+//     return async (ctx, next) => {
+//       const { method } = ctx
+//       if(!Array.isArray(params) || method.toLowerCase() !== 'put') return await next()
+//       const { body } = ctx.request
+//       if(check(body, params)) return await next()
+//       ctx.status = 404
+//       ctx.body = JSON.stringify({
+//         success: false,
+//         res: {
+//           errMsg: 'not Found'
+//         }
+//       })
+//     }
+//   },
+//   post: (params) => {
+//     return async (ctx, next) => {
+//       const { method } = ctx
+//       if(!Array.isArray(params) || method.toLowerCase() !== 'post') return await next()
+//       const { body } = ctx.request
+//       if(check(body, params)) return await next()
+//       ctx.status = 404
+//       ctx.body = JSON.stringify({
+//         success: false,
+//         res: {
+//           errMsg: 'not Found'
+//         }
+//       })
+//     }
+//   },
+//   get: (params) => {
+//     return async (ctx, next) => {
+//       const { method } = ctx
+//       if(!Array.isArray(params) || method.toLowerCase() !== 'get') return await next()
+//       const { query } = ctx
+//       if(check(query, params)) {
+//         return await next()
+//       }
+//       ctx.status = 404
+//       ctx.body = JSON.stringify({
+//         success: false,
+//         res: {
+//           errMsg: 'not Found'
+//         }
+//       })
+//     }
+//   },
+//   delete: (params) => {
+//     return async (ctx, next) => {
+//       const { method } = ctx
+//       if(!Array.isArray(params) || method.toLowerCase() !== 'delete') return await next()
+//       const { query } = ctx
+//       if(check(query, params)) return await next()
+//       ctx.status = 404
+//       ctx.body = JSON.stringify({
+//         success: false,
+//         res: {
+//           errMsg: 'not Found'
+//         }
+//       })
+//     }
+//   },
+// }
 
 module.exports = {
   isType,
   isEmpty,
   flat,
   withTry,
-  dealMedia,
+  dealMedia4Image,
   dealErr,
-  paramsCheck,
+  // paramsCheck,
   notFound
 }

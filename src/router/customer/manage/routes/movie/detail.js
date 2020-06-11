@@ -55,11 +55,17 @@ router
         screen_time,
         ...nextInfo  
       },
+      images,
+      poster: { src: posterSrc },
+      video: { src: videoSrc },
       rest,
       ...nextData
     } = data
     return {
       ... nextData,
+      video: videoSrc,
+      images: images.filter(i => !!i.src).map(i => i.src),
+      poster: posterSrc,
       info: {
         name,
         alias,

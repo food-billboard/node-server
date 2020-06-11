@@ -1069,11 +1069,19 @@
           "video": ["string"]
         },
         "createdAt": 1234567890,
+        "updatedAt": 1234567890,
         "like": true,
+        "total_like": 0,
         "_id": "string",
         "source": {
-          "type": "MOVIE",
-          "comment": "string"
+          "_id": "string",
+          "content": "string"
+        },
+        "source_type": "MOVIE",
+        "user_info": {
+          "avatar": "string",
+          "username": "string",
+          "_id": "string"
         }
       }
     ]
@@ -1094,12 +1102,19 @@
           "video": ["string"] 视频
         },
         "createdAt": "date_time",
+        "updatedAt": "date_time",
         "like": "boolean" 是否点赞,
+        "total_like": "number" 总点赞数,
         "_id": "string" id,
+        "source_type": "string" 源类型["MOVIE", "USER"]
         "source": { 源内容
-          "type": "string" 类型["MOVIE", "USER"],
-          "comment": "string" 原内容id,
+          "_id": "string" 原内容id,
           "content": "内容" type为USER时返回,否则为null 
+        },
+        "user_info": { 用户信息
+          "avatar": "string" 头像,
+          "username": "string" 用户名,
+          "_id": "string" id
         }
       }
     ]
@@ -1570,7 +1585,7 @@
           "actor": ["string"],
           "rest": ["string"]
         },
-        "alias": ["string"],
+        "another_name": ["string"],
         "classify": {
           "classify": ["string"],
           "rest": ["string"]
@@ -1614,7 +1629,7 @@
           "actor": ["string"] id,
           "rest": ["string"] 用户自定义字段
         },
-        "alias": ["string"] 别名,
+        "another_name": ["string"] 别名,
         "classify": {分类
           "classify": ["string"] id,
           "rest": ["string"]用户自定义字段
@@ -1804,13 +1819,17 @@
         {
           "user_info": {
             "avatar": "string",
+            "_id": "string",
+            "username": "string"
           },
           "content": {
             "text": "string"
-          }
+          },
+          "_id": "string"
         }
       ],
       "createdAt": 1234567890,
+      "updatedAt": 1234567890,
       "glance": 0,
       "hot": 0,
       "images": [ "string" ],
@@ -1823,7 +1842,7 @@
             }
           }
         ],
-        "alias": ["string"],
+        "another_name": ["string"],
         "classify": [
           {
             "name": "string"
@@ -1854,12 +1873,11 @@
       "rate": "string",
       "same_film": [
         {
-          "film": "string",
+          "_id": "string",
           "name": "string",
-          "type": "NAMESAKE"
+          "same_type": "NAMESAKE"
         }
       ],
-      "status": "COMPLETE",
       "store": false,
       "tag": [
         {
@@ -1886,13 +1904,19 @@
       "author_rate": "integer" 作者评分,
       "comment": [ 评论
         {
-          "avatar": "string" 头像,
+          "user_info": {
+            "avatar": "string" 头像,
+            "_id": "string" id,
+            "username": "string" 用户名
+          },
           "content": {
             "text": "string" 文字内容
-          }
+          },
+          "_id": "string"
         }
       ],
       "createdAt": "date_time",
+      "updatedAt": "date_time",
       "glance": "integer" 浏览次数,
       "hot": "integer" 收藏,
       "images": [ "string" ] 截图,
@@ -1905,7 +1929,7 @@
             }
           }
         ],
-        "alias": ["string"] 别名,
+        "another_name": ["string"] 别名,
         "classify": [ 分类
           {
             "name": "string" 名称
@@ -1936,8 +1960,8 @@
       "rate": "string" 评分,
       "same_film": [ 类似电影
         {
-          "film": "string" id,
-          "name": "string" 名称,
+          "_id": "string" id,
+          "same_name": "string" 名称,
           "type": "string" 类型["NAMESAKE", "SERIES"]
         }
       ],
@@ -2605,30 +2629,24 @@
 {
   "success": true,
   "res": {
-    "data": {
-      "user_info": {
-        "_id": "string",
-        "avatar": "string",
-        "username": "string"
-      },
-      "data": [
-        {
-          "content": {
-            "text": "string",
-            "image": ["string"],
-            "video": ["string"]
-          },
-          "createdAt": 1234567890,
-          "source": {
-            "type": "MOVIE",
-            "comment": "string",
-            "content": "string"
-          },
-          "total_like": 0,
-          "like": true
-        }
-      ] 
-    }
+    "data": [
+      {
+        "content": {
+          "text": "string",
+          "image": ["string"],
+          "video": ["string"]
+        },
+        "createdAt": 1234567890,
+        "updatedAt": 1234567890,
+        "source_type": "movie",
+        "source": {
+          "_id": "string",
+          "content": "string"
+        },
+        "total_like": 0,
+        "like": true
+      }
+    ] 
   }
 }
                             </pre>
@@ -2638,30 +2656,24 @@
 {
   "success": "boolean",
   "res": {
-    "data": {
-      "user_info": {
-        "_id": "string" id,
-        "avatar": "string" 头像,
-        "username": "string" 用户名
-      },
-      "data": [
-        {
-          "content": {
-            "text": "string" 文字评论,
-            "image": ["string"] 图片评论,
-            "video": ["string"] 视频评论
-          },
-          "createdAt": "date_time",
-          "source": {
-            "type": "string" 源评论["MOVIE", "USER"],
-            "comment": "string" 源内容id,
-            "content": "string" 源内容
-          },
-          "total_like": "integer" 点赞数,
-          "like": "boolean" 是否点赞
-        }
-      ] 
-    }
+    "data": [
+      {
+        "content": {
+          "text": "string" 文字评论,
+          "image": ["string"] 图片评论,
+          "video": ["string"] 视频评论
+        },
+        "createdAt": "date_time",
+        "updatedAt": "date_time",
+        "source_type": "string" 源类型[ "movie", 'user' ],
+        "source": {
+          "_id": "string" 源内容id,
+          "content": "string" 源内容
+        },
+        "total_like": "integer" 点赞数,
+        "like": "boolean" 是否点赞
+      }
+    ] 
   }
 }
                             </pre>
@@ -4501,7 +4513,7 @@
         {
           "name": "string",
           "_id": "string",
-          "type": "NAMESAKE"
+          "same_type": "NAMESAKE"
         }
       ],
       "store": false,
@@ -4584,7 +4596,7 @@
         {
           "_id": "string" id,
           "name": "string" 名称,
-          "type": "string" 类型["NAMESAKE", "SERIES"]
+          "same_type": "string" 类型["NAMESAKE", "SERIES"]
         }
       ],
       "store": "boolean" 是否收藏,

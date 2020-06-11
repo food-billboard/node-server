@@ -31,17 +31,15 @@ router.get('/', async (ctx) => {
   .then(notFound)
   .then(data => {
     const { store } = data
-    return {
-      store: store.map(s => {
-        const { info: { description, name }, poster: { src }, ...nextD } = s
-        return {
-          ...nextD,
-          poster: src,
-          description,
-          name,
-        }
-      })
-    }
+    return store.map(s => {
+      const { _doc: { info: { description, name }, poster: { src }, ...nextD } } = s
+      return {
+        ...nextD,
+        poster: src,
+        description,
+        name,
+      }
+    })
   })
   .catch(dealErr(ctx))
 

@@ -1,12 +1,11 @@
 const Router = require('@koa/router')
 const SpecDropList = require('./sepcDropList')
-const { ClassifyModel, dealErr, paramsCheck, notFound } = require('@src/utils')
+const { ClassifyModel, dealErr, notFound } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
-.use(paramsCheck.get(['_id']))
 .get('/', async(ctx) => {
   const { currPage=0, pageSize=30, _id, sort={} } = ctx.query
   let res

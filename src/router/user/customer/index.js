@@ -4,13 +4,11 @@ const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const { Types: { ObjectId } } = require("mongoose")
-const { UserModel, dealErr, paramsCheck } = require("@src/utils")
-
+const { UserModel, dealErr } = require("@src/utils")
 
 const router = new Router()
 
 router
-.use(paramsCheck.get(['_id']))
 .get('/', async (ctx) => {
   let res = {}
   const { _id } = ctx.query

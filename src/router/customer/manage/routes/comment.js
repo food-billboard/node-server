@@ -41,30 +41,40 @@ router.get('/', async (ctx) => {
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { comment } = data
+    const { comment, _id: userId } = data
     let like = false
-    return {
-      comment: comment.map(c => {
-        like = false
-        const { _doc: { like_person, content: { _doc: { image, video, ...nextContent } }, source: { _doc: { name, content, ...nextSoruce } }, ...nextC } } = c
-        if(like_person.some(l => mongo.equalId(l, customerId))) {
-          like = true
+    return comment.map(c => {
+      like = false
+      const { 
+        _doc: { 
+          like_person, 
+          content: { image, video, ...nextContent }, 
+          source: { name, content, ...nextSoruce }={}, 
+          user_info: { _doc: { avatar: { src }, ...nextUserInfo } }, 
+          ...nextC 
+        } 
+      } = c
+      if(like_person.some(l => l.equals(userId))) {
+        like = true
+      }
+      return {
+        ...nextC,
+        content: {
+          ...nextContent,
+          image: image.filter(i => !!i.src).map(i => i.src),
+          video: video.filter(v => !!v.src).map(v => v.src)
+        },
+        source: {
+          ...nextSoruce,
+          content: name ? name : ( content ? content : null )
+        },
+        like,
+        user_info: {
+          ...nextUserInfo,
+          avatar: src
         }
-        return {
-          ...nextC,
-          content: {
-            ...nextContent,
-            image: image.filter(i => !!i.src).map(i => i.src),
-            video: video.filter(v => !!v.src).map(v => v.src)
-          },
-          source: {
-            ...nextSoruce,
-            content: name ? name : ( content ? content : null )
-          },
-          like
-        }
-      })
-    }
+      }
+    })
   })
   .catch(dealErr(ctx))
 

@@ -102,7 +102,7 @@ router
       }
     })
     .populate({
-      path: 'same_film',
+      path: 'same_film.film',
       select: {
         name: 1
       }
@@ -112,19 +112,23 @@ router
     .then(notFound)
   })
   .then(data => {
-    const { _doc: { info, rest, poster: { src }={}, images, comment, total_rate, rate_person, same_film, ...nextData } } = data
+    const { info, rest, poster: { src: posterSrc }={}, video: { src: videoSrc }, images, comment, total_rate, rate_person, same_film, ...nextData } = data
     const { actor, director, district, language, classify, ...nextInfo } = info
     return {
       ...nextData,
       store,
+      video: videoSrc,
       rate: total_rate / rate_person,
-      poster: src,
+      poster: posterSrc,
       images: images.filter(i => !!i.src).map(i => i.src),
       comment: comment.map(com => {
-        const { _doc: { user_info, ...nextC } } = c
+        const { _doc: { user_info, content: { text }, ...nextC } } = com
         const { _doc: { avatar: { src }, ...nextUserInfo } } = user_info
         return {
           ...nextC,
+          content: {
+            text: text || null
+          },
           user_info: {
             ...nextUserInfo,
             avatar: src
@@ -132,9 +136,10 @@ router
         }
       }),
       same_film: same_film.map(same => {
-        const { _doc: { film: { name }, ...nextS } } = s
+        const { _doc: { film: { name, _id }, ...nextS } } = same
         return {
           name,
+          _id,
           ...nextS
         }
       }),

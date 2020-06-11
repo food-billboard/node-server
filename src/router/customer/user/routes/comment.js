@@ -25,7 +25,7 @@ router.get('/', async (ctx) => {
       source: 1,
       createdAt: 1,
       updatedAt: 1,
-      toal_like: 1,
+      total_like: 1,
       content: 1,
       like_person: 1
     },
@@ -42,42 +42,50 @@ router.get('/', async (ctx) => {
     },
   })
   .exec()
-  .then(data => !!data && data._doc)
+  .then(data => !!data && data)
   .then(notFound)
   .then(data => {
     let result = {}
     let mine = {}
-    const index = data.findIndex(d => d.user_info.equals(_id))
+    const index = data.findIndex(d => d._id.equals(_id))
     if(!~index) return Promise.reject({err: null, data: []})
     result = {
-      ...data[index]
+      ...data[index]._doc
     } 
     mine = {
-      ...data[(index + 1) % 2]
+      ...data[(index + 1) % 2]._doc
     }
     const { _id:mineId } = mine
-    const { _id, comment } = result
+    const { comment } = result
     let like = false
-    return {
-      comment: comment.map(c => {
-        const { _doc: { like_person, source: { name, content, ...nextSource }, content: { image, video, ...nextContent }, ...nextC } } = c
-        like = false
-        if(like_person.some(l => l.equals(mineId))) like = true
-        return {
-          ...nextC,
-          content: {
-            ...nextContent,
-            image: image.filter(i => !!i.src).map(i => i.src),
-            video: video.filter(v => !!v.src).map(v => v.src)
-          },
-          source: {
-            ...nextSource,
-            content: name ? name : ( content || null )
-          },
-          like
-        }
-      })
-    }
+    return comment.map(c => {
+      const { _doc: { 
+        like_person, 
+        source: { name, content, ...nextSource }={}, 
+        content: { image, video, ...nextContent }, 
+        user_info: { _doc: { avatar: { src }, ...nextUserInfo } },
+        ...nextC 
+      } } = c
+      like = false
+      if(like_person.some(l => l.equals(mineId))) like = true
+      return {
+        ...nextC,
+        user_info: {
+          ...nextUserInfo,
+          avatar: src
+        },
+        content: {
+          ...nextContent,
+          image: image.filter(i => !!i.src).map(i => i.src),
+          video: video.filter(v => !!v.src).map(v => v.src)
+        },
+        source: {
+          ...nextSource,
+          content: name ? name : ( content || null )
+        },
+        like
+      }
+    })
   })
   .catch(dealErr(ctx))
 

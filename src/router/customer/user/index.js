@@ -4,6 +4,7 @@ const Fans = require('./routes/fans')
 const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
 const { verifyTokenToData, UserModel, dealErr, notFound } = require('@src/utils')
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
@@ -59,7 +60,7 @@ router
         mobile: Number(mobile),
       },
       {
-        _id: mongo.dealId(_id)
+        _id: ObjectId(_id)
       }
     ]
   })
@@ -69,28 +70,30 @@ router
     hot: 1,
     fans:1,
     attentions: 1,
-    create_time: 1,
+    createdAt: 1,
+    updatedAt: 1,
   })
   .exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {
-    let result = []
+    let result = {}
     let mine
     let fans
     data.forEach(d => {
       const { _doc: { _id:id, avatar: { src }, ...nextD } } = d 
       if(id.equals(_id)) {
-        const { fans, attentions,  } = nextD
+        const { fans:userFans, attentions } = nextD
         result = {
           ...result,
           ...nextD,
+          _id: id,
           avatar: src,
-          fans: fans.length,
+          fans: userFans.length,
           attentions: attentions.length,
           like: false,
         }
-        fans = [...fans]
+        fans = [...userFans]
       }else {
         mine = id
       }
@@ -115,15 +118,10 @@ router
         }
       }
     }else {
-      const { fans, attentions, ...nextData } = data
       res = {
         success: true,
         res: {
-          data: {
-            fans: fans.length,
-            attentions: attentions.length,
-            ...nextData
-          }
+          data
         }
       }
     }

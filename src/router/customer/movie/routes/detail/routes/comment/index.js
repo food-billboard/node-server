@@ -27,20 +27,31 @@ router
   const { mobile } = token
   let res
 
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then(id => {
+  const data = await Promise.all([
+    UserModel.findOne({
+      mobile: Number(mobile)
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(data => !!data && data._id)
+    .then(notFound),
+    MovieModel.findOne({
+      _id: ObjectId(_id)
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(data => !!data && data._id)
+    .then(notFound),
+  ])
+  .then(([userId, _]) => {
     dealMedia()
     //图片视频处理
     return {
-      id,
+      id: userId,
       video: [],
       image: []
     }
@@ -48,10 +59,8 @@ router
   .then(({id, video, image}) => {
     const comment = new CommentModel({
       ...TEMPLATE_COMMENT,
-      source: {
-        type: 'MOVIE',
-        comment: ObjectId(_id)
-      },
+      source_type: 'movie',
+      source: ObjectId(_id),
       user_info: id,
       content: {
         text,
@@ -107,20 +116,31 @@ router
   const { mobile } = token
   let res
 
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then(id => {
+  const data = await Promise.all([
+    UserModel.findOne({
+      mobile: Number(mobile)
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(data => !!data && data._id)
+    .then(notFound),
+    CommentModel.findOne({
+      _id: ObjectId(_id)
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(data => !!data && data._id)
+    .then(notFound),
+  ])
+  .then(([userId, _]) => {
     dealMedia()
     //图片视频处理
     return {
-      id,
+      id: userId,
       video: [],
       image: []
     }
@@ -128,10 +148,8 @@ router
   .then(({id, video, image}) => {
     const comment = new CommentModel({
       ...TEMPLATE_COMMENT,
-      source: {
-        type: 'USER',
-        comment: ObjectId(_id)
-      },
+      source_type: "user",
+      source: ObjectId(_id),
       user_info: id,
       content: {
         text,

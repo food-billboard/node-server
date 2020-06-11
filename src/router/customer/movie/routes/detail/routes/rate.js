@@ -20,13 +20,13 @@ router.put('/', async (ctx) => {
   .then(notFound)
   .then(data => {
     const { rate } = data
-    const [rateValue] = rate.filter(r => ObjectId.isValid(r.id) ? r.id.equals(_id) : ObjectId(r.id).equals(_id))
+    const [rateValue] = rate.filter(r => ObjectId.isValid(r._id) ? r._id.equals(_id) : ObjectId(r._id).equals(_id))
     //修改评分
     if(rateValue) {
       return Promise.all([
         UserModel.updateOne({
           mobile: Number(mobile),
-          "rate.$._id": ObjectId(_id) 
+          "rate._id": ObjectId(_id) 
         }, {
           $set: { "rate.$.rate": ~~value }
         }),

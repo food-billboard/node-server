@@ -1,11 +1,10 @@
 const Router = require('@koa/router')
-const { SpecialModel, dealErr, paramsCheck, notFound } = require('@src/utils')
+const { SpecialModel, dealErr, notFound } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
-.use(paramsCheck.get(['_id']))
 .get('/', async(ctx) => {
   const { _id } = ctx.query
   let res
@@ -58,5 +57,4 @@ router
 
   ctx.body = JSON.stringify(res)
 })
-
 module.exports = router
