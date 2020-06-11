@@ -1,4 +1,4 @@
-const { MongoDB, verifySocketIoToken, otherToken, UserModel, RoomModel } = require("@src/utils")
+const { MongoDB, verifySocketIoToken, otherToken, UserModel, RoomModel, notFound } = require("@src/utils")
 const mongo = MongoDB()
 
 const getMessageList = socket => async (data) => {
@@ -12,13 +12,14 @@ const getMessageList = socket => async (data) => {
     let mine
 
     await UserModel.findOne({
-      mobile: ~~mobile
+      mobile: Number(mobile)
     })
     .select({
       _id: 1
     })
     .exec()
     .then(data => !!data && data._id)
+    .then(notFound)
     .then(id => {
       return RoomModel.find({
         "members.user": { $in: [ id ] },

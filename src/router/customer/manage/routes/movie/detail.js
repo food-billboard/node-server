@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, MovieModel, dealErr } = require("@src/utils")
+const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -10,33 +10,16 @@ router
   const { mobile } = token
   const { _id } = ctx.query
   const data = UserModel.findOne({
-    mobile: ~~mobile,
+    mobile: Number(mobile),
     issue: { $in: [ ObjectId(_id) ] }
   })
   .select({
     _id: 1
   })
   .exec()
-  .then(data => {
-    if(!data) return Promise.reject({errMsg: '非本人发布电影无权访问', status: 403})
-    return true
-  })
+  .then(data => !!data)
+  .then(notFound)
   .catch(dealErr(ctx))
-
-  // const data = mongo.connect("user")
-  // .then(db => db.findOne({
-  //   mobile: Number(mobile),
-  //   issue: { $in: [mongo.dealId(_id)] }
-  // }, {
-  //   projection: {
-  //     _id: 1
-  //   }
-  // }))
-  // .then(data => {
-  //   if(!data) return Promise.reject({errMsg: '非本人发布电影无权访问', status: 403})
-  //   return true
-  // })
-  // .catch(dealErr(ctx))
   
   if(data && !data.err) {
     return await next()
@@ -61,8 +44,9 @@ router
     author_rate: 1,
   })
   .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
   .then(data => {
-    if(!data) return Promise.reject({errMsg: '电影不存在', status: 404})
     const {
       info: {
         name,
@@ -92,54 +76,6 @@ router
     }
   })
   .catch(dealErr(ctx))
-
-  // const data = await mongo.connect("movie")
-  // .then(db => db.findOne({
-  //   _id: mongo.dealId(_id)
-  // }, {
-  //   projection: {
-  //     name: 1,
-  //     info: 1,
-  //     rest: 1,
-  //     video: 1,
-  //     images: 1,
-  //     poster: 1,
-  //     author_description: 1,
-  //     author_rate: 1,
-  //   }
-  // }))
-  // .then(data => {
-  //   if(!data) return Promise.reject({errMsg: '电影不存在', status: 404})
-  //   const {
-  //     info: {
-  //       name,
-  //       alias,
-  //       description,
-  //       screen_time,
-  //       ...nextInfo  
-  //     },
-  //     rest,
-  //     ...nextData
-  //   } = data
-  //   return {
-  //     ... nextData,
-  //     info: {
-  //       name,
-  //       alias,
-  //       description,
-  //       screen_time,
-  //       ...Object.keys(nextInfo).reduce((acc, n) => {
-  //         acc[n] = {
-  //           [n]: nextInfo[n],
-  //           rest: rest[n] || []
-  //         }
-  //         return acc
-  //       }, {})
-  //     }
-  //   }
-    
-  // })
-  // .catch(dealErr(ctx))
 
   if(data && data.err) {
     res = data.res

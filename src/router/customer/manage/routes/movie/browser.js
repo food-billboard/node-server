@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr, notFound } = require("@src/utils")
 
 const router = new Router()
 
@@ -10,7 +10,7 @@ router.get('/', async (ctx) => {
   let res 
 
   const data = await UserModel.findOne({
-    mobile: ~~mobile
+    mobile: Number(mobile)
   })
   .select({
     glance: 1
@@ -28,13 +28,16 @@ router.get('/', async (ctx) => {
     }
   })
   .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
   .then(data => {
     const { glance } = data
     return {
       glance: glance.map(g => {
-        const { info: { description, name }, ...nextD } = g
+        const { info: { description, name }, poster: { src }, ...nextD } = g
         return {
           ...nextD,
+          poster: src,
           description,
           name,
         }
@@ -42,50 +45,6 @@ router.get('/', async (ctx) => {
     }
   })
   .catch(dealErr(ctx))
-
-  // let errMsg
-  // const data = await mongo.connect("user")
-  // .then(db => db.findOne({
-  //   mobile: Number(mobile)
-  // }, {
-  //   projection: {
-  //     glance: 1
-  //   }
-  // }))
-  // //查找电影详情
-  // .then(data => {
-  //   if(data && data.glance && !data.glance.length) return Promise.reject({err: null, data: []})
-  //   const { glance } = data
-  //   return mongo.connect("movie")
-  //   .then(db => db.find({
-  //     _id: { $in: [...glance] }
-  //   }, {
-  //     limit: pageSize,
-  //     skip: pageSize * currPage,
-  //     projection: {
-  //       "info.description": 1,
-  //       "info.name": 1,
-  //       poster: 1
-  //     }
-  //   }))
-  //   .then(data => data.toArray())
-  // })
-  // .then(data => {
-  //   return data.map(d => {
-  //     const { info: { description, name }, ...nextD } = d
-  //     return {
-  //       ...nextD,
-  //       description,
-  //       name,
-  //     }
-  //   })
-  // })
-  // .catch(err => {
-  //   if(isType(err, "object") && err.data) return err.data
-  //   console.log(err)
-  //   errMsg = err
-  //   return false
-  // })
 
   if(data && data.err) {
     res = {

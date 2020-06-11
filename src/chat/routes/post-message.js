@@ -1,6 +1,5 @@
-const { MongoDB, otherToken } = require("@src/utils")
-
-const mongo = MongoDB()
+const { otherToken, UserModel, RoomModel, notFound } = require("@src/utils")
+const { Types: { ObjectId } } = require('mongoose')
 
 const TEMPLATE_MESSAGE = {
   user_info: {
@@ -29,24 +28,23 @@ const sendMessage = socket => async (data) => {
     _id:roomId,
     point_to
   } = data
-  const objectRoomId = mongo.dealId(roomId)
+  const objectRoomId = ObjectId(roomId)
   // const [, token] = verifyTokenToData(data)
   const [, token] = otherToken(data.token)
   const { mobile } = token
 
   await Promise.all([
-    mongo.connect("user")
-    .then(db => db.findOne({
+    UserModel.findOne({
       mobile: Number(mobile)
-    }, {
-      projection: {
-        _id: 1,
-        username: 1,
-        avatar: 1
-      }
-    })),
-    mongo.connect("room")
-    .then(db => db.find({
+    })
+    .select({
+      _id: 1,
+      username: 1,
+      avatar: 1
+    })
+    .exec()
+    .then(data => !!data && data._doc),
+    RoomModel.find({
       $or: [
         {
           origin: false,
@@ -56,15 +54,17 @@ const sendMessage = socket => async (data) => {
           origin: true
         }
       ]
-    }, {
-      projection: {
-        origin: 1,
-        type: 1,
-        member: 1
-      }
-    }))
-    .then(data => data.toArray())
+    })
+    .select({
+      origin: 1,
+      type: 1,
+      member: 1
+    })
+    .exec()
+    .then(data => !!data && data)
   ])
+  .then(data => data.filter(d => !!d).length == 2 && data)
+  .then(notFound)
   .then(([info, roomMember]) => {
     userInfo = { ...info }
     let member
@@ -83,10 +83,11 @@ const sendMessage = socket => async (data) => {
     })
 
     if(!auth) return Promise.reject({errMsg: '无法与系统建立聊天', status: 403})
-    if(!member.some(m => m.user && mongo.equalId(m.user, userInfo._id) && m.status === 'online' )) return Promise.reject({errMsg: '无权限', status: 403})
+    if(!member.some(m => m.user && m.user.equals(userInfo._id) && m.status === 'ONLINE' )) return Promise.reject({errMsg: '无权限', status: 403})
 
     const { content:template } = templateMessage
     let newContent = { ...template }
+    //存储图片内容
     switch(type) {
       case "image":
         newContent = {
@@ -117,7 +118,7 @@ const sendMessage = socket => async (data) => {
     templateMessage = {
       ...templateMessage,
       user_info: {
-        type: 'user',
+        type: 'USER',
         id: userInfo._id,
       },
       room: objectRoomId,
