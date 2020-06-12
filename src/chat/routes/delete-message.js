@@ -18,7 +18,7 @@ const deleteMessage = socket => async(data) => {
   .then(data => !!data && data._id)
   .then(notFound)
   .then(userId => {
-    RoomModel.updateOne({
+    return RoomModel.updateOne({
       _id: ObjectId(_id),
       "members.user": userId
     }, {

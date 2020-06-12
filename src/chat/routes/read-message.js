@@ -10,7 +10,7 @@ const readMessage = socket => async (data) => {
   let res
 
   await UserModel.findOne({
-    mobile: ~~mobile
+    mobile: Number(mobile)
   })
   .select({
     _id: 1
@@ -18,73 +18,35 @@ const readMessage = socket => async (data) => {
   .exec()
   .then(data => !!data && data._id)
   .then(userId => {
-    RoomModel.updateOne({
-      _id: ObjectId(_id)
+    return RoomModel.updateOne({
+      _id: ObjectId(_id),
     }, {
-      $set: { "member.$[message].message.$[user].readed": true }
+      $set: { "members.$[message].message.$[user].readed": true }
     }, {
       arrayFilters: [
         {
           message: {
-            $type: 'object'
+            $type: 3
           },
           "message.user": userId
         },
         {
           user: {
-            $type: 'object'
+            $type: 3
           },
           "user.readed": false
         }
       ]
     })
   })
+  .then(data => {
+    console.log(data)
+  })
   .catch(err => {
     console.log(err)
     errMsg = err
     return false
   })
-
-
-
-  // await mongo.connect("user")
-  // .then(db => db.findOne({
-  //   mobile: Number(mobile)
-  // }, {
-  //   projection: {
-  //     _id: 1 
-  //   }
-  // }))
-  // .then(data => {
-  //   const { _id } = data
-  //   mine = _id
-  // })
-  // .then(_ => mongo.connect("room"))
-  // .then(db => db.updateOne({
-  //   _id: mongo.dealId(_id)
-  // }, {
-  //   $set: { "member.$[message].message.$[user].readed": true }
-  // }, {
-  //   arrayFilters: [
-  //     {
-  //       message: {
-  //         $type: 'object'
-  //       },
-  //       "message.user": mine
-  //     },
-  //     {
-  //       user: {
-  //         $type: 'object'
-  //       },
-  //       "user.readed": false
-  //     }
-  //   ]
-  // }))
-  // .catch(err => {
-  //   console.log(err)
-  //   errMsg = err
-  //   return false
-  // })
 
   if(errMsg) {
     res = {

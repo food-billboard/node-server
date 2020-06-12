@@ -1,25 +1,9 @@
-const { otherToken, UserModel, RoomModel, notFound } = require("@src/utils")
+const { otherToken, UserModel, RoomModel, MessageModel, notFound } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
-
-const TEMPLATE_MESSAGE = {
-  user_info: {
-    type: '',
-    id: ''
-  },
-  point_to: null,
-  type: '',
-  content: {
-    text: '',
-    video: '',
-    image: ''
-  },
-  room: null,
-  create_time: Date.now()
-}
 
 const sendMessage = socket => async (data) => {
   let userInfo = {}
-  let templateMessage = { ...TEMPLATE_MESSAGE }
+  let templateMessage = {}
   let originRoomId
   let originRoomMember
   const {  
@@ -32,6 +16,8 @@ const sendMessage = socket => async (data) => {
   // const [, token] = verifyTokenToData(data)
   const [, token] = otherToken(data.token)
   const { mobile } = token
+
+  templateMessage = { ...(point_to ? { point_to } : {}) }
 
   await Promise.all([
     UserModel.findOne({
@@ -58,7 +44,7 @@ const sendMessage = socket => async (data) => {
     .select({
       origin: 1,
       type: 1,
-      member: 1
+      members: 1
     })
     .exec()
     .then(data => !!data && data)
@@ -71,7 +57,7 @@ const sendMessage = socket => async (data) => {
     let roomType
     let auth = true
     roomMember.forEach(r => {
-      const { type, origin, _id, member:_member } = r
+      const { type, origin, _id, members:_member } = r
       if(origin) {
         originRoomId = _id
         originRoomMember = [..._member]
@@ -79,14 +65,15 @@ const sendMessage = socket => async (data) => {
         roomType = type
         member = [..._member]
       }
-      if(origin && mongo.equalId(_id, objectRoomId)) auth = false
+      if(origin && _id.equals(objectRoomId)) auth = false
     })
-
     if(!auth) return Promise.reject({errMsg: '无法与系统建立聊天', status: 403})
     if(!member.some(m => m.user && m.user.equals(userInfo._id) && m.status === 'ONLINE' )) return Promise.reject({errMsg: '无权限', status: 403})
 
-    const { content:template } = templateMessage
-    let newContent = { ...template }
+    let newContent = {}
+
+    //对媒体内容进行存储233
+
     //存储图片内容
     switch(type) {
       case "image":
@@ -119,34 +106,29 @@ const sendMessage = socket => async (data) => {
       ...templateMessage,
       user_info: {
         type: 'USER',
-        id: userInfo._id,
+        _id: userInfo._id,
       },
+      type,
       room: objectRoomId,
-      point_to: point_to ? point_to : null,
       content: { ...newContent },
-      create_time: Date.now()
     }
+    const messageItem = new MessageModel({
+      ...templateMessage
+    })
+    return messageItem.save()
   })
-  .then(_ => mongo.connect("message"))
-  .then(db => db.insertOne({
-    ...templateMessage
-  }))
-  .then(data => {
-    const { ops } = data
-    const { _id:messageId } = ops[0]
-    return messageId
-  })
+  .then(data => !!data && data._id)
+  .then(notFound)
   .then(async (data) => {
-    const memberData = await mongo.connect("room")
-    .then(db => db.updateOne({
+    const memberData = await RoomModel.updateOne({
       _id: objectRoomId,
       origin: false,
-      "member.user": { $in: [ userInfo._id ] },
+      "members.user": { $in: [ userInfo._id ] }
     }, {
-      $push: { 
-        "member.$[message].message": {
-          id: data,
-          readed: false 
+      $push: {
+        "members.$[message].message": {
+          _id: data,
+          readed: false
         }
       }
     }, {
@@ -157,48 +139,56 @@ const sendMessage = socket => async (data) => {
           }
         }
       ]
-    }))
-    .then(_ => mongo.connect("room"))
-    .then(db => db.findOneAndUpdate({
+    })
+    .then(_ => RoomModel.findOneAndUpdate({
       _id: objectRoomId,
       origin: false,
-      "member.user": userInfo._id
+      "members.user": userInfo._id
     }, {
-      $set: { "member.$[message].message.$[user].readed": true }
+      $set: { "members.$[message].message.$[user].readed": true }
     }, {
       arrayFilters: [
         {
           message: {
-            $type: 'object'
+            $type: 3
           },
           "message.user": userInfo._id
         },
         {
           user: {
-            $type: 'object'
+            $type: 3
           },
           "user.readed": false
         }
       ],
-      projection: {
-        member: 1
-      }
+    })
+    .select({
+      members: 1
     }))
-    const { value } = memberData
+    .then(data => !!data && data)
+    .then(notFound)
+    .catch(err => {
+      console.log(err)
+      return false
+    })
+
+    if(!memberData) return Promise.reject({errMsg: 'error', status: 404})
+    const { members } = memberData
     return {
       message: {
         ...templateMessage,
         _id: data
       },
       roomData: {
-        ...value
+        members
       }
     }
   })
   .then(async (data) => {
-    const { message, roomData: { member } } = data
+    const { message, roomData: { members } } = data
+
     //记录不在线用户
-    const offline = member.filter(m => m.status !== 'online').map(m => m.user)
+    const offline = members.filter(m => m.status !== 'online').map(m => m.user)
     //对在线的直接进行广播
     const res = {
       _id,
@@ -209,7 +199,7 @@ const sendMessage = socket => async (data) => {
     socket.to(roomId).emit("message", JSON.stringify(res))
     //对在线不在房间的用户发送消息
     offline.map(o => {
-      const index = originRoomMember.findIndex((val) => mongo.equalId(o, val.user) && !!val.sid)
+      const index = originRoomMember.findIndex((val) => o.equals(val.user) && !!val.sid)
       if(~index) return originRoomMember[index].sid
       return false
     }).filter(sid => sid).forEach(sid => {

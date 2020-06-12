@@ -25,7 +25,7 @@ router
       origin: true,
       "members.user": userId
     }, {
-      $set: { "members.$.user": null }
+      $set: { "members.$.sid": null }
     })
     .select({
       _id: 1

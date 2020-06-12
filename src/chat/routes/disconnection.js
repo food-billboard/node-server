@@ -18,13 +18,13 @@ const disconnection = socket => async (_) => {
     "members.sid": 1
   })
   .exec()
-  .then(data => !!data && data.doc)
-  .then(notFound)
+  .then(data => !!data && data._doc)
   .then(data => {
+    if(!data) return
     const { members } = data
     const [ mine ] = members.filter(m => m.sid === id)
     const { user } = mine
-    RoomModel.updateMany({
+    return RoomModel.updateMany({
       "members.user": user,
       "members.status": "ONLINE"
     }, {

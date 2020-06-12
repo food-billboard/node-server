@@ -1,5 +1,6 @@
 const { verifySocketIoToken, otherToken, RoomModel, UserModel, notFound } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
+const Day = require('dayjs')
 
 const getDetail = socket => async (data) => {
   // const [, token] = verifySocketIoToken(data)
@@ -10,7 +11,7 @@ const getDetail = socket => async (data) => {
   if(token) {
     const { mobile } = token
 
-    messageList = UserModel.findOne({
+    messageList = await UserModel.findOne({
       mobile: Number(mobile)
     })
     .select({
@@ -20,17 +21,18 @@ const getDetail = socket => async (data) => {
     .then(data => !!data && data._id)
     .then(notFound)
     .then(userId => {
-      RoomModel.findOne({
+      return RoomModel.findOne({
         _id: ObjectId(roomId),
-        members: { $elemMatch: { user: userId, status: 'ONLINE' } }
+        "members.user": userId,
+        "members.status": "ONLINE"
       })
       .select({
-        members: 1
+        "members.$": 1
       })
       .populate({
-        path: 'members.message',
+        path: 'members.message._id',
         match: {
-          $lt: startTime,
+          createdAt: { $lt: Day(startTime).toISOString() },
           ...(messageId ? { _id :ObjectId(messageId) } : {})
         },  
         options: {
@@ -39,7 +41,8 @@ const getDetail = socket => async (data) => {
         select: {
           type: 1,
           content: 1,
-          createdAt:1
+          createdAt:1,
+          "user_info._id": 1
         }
       })
       .exec()
@@ -47,32 +50,35 @@ const getDetail = socket => async (data) => {
       .then(notFound)
       .then(data => {
         const { members } = data
-        return {
-          members: members.map(m => {
-            const { _doc: { type, content: { text, video: { src:videoSrc }, image: { src: imageSrc }, audio }, ...nextData } } = m
-            let newContent
-            switch(type) {
-              case "IMAGE": 
-                newContent = imageSrc
-                break
-              case "VIDEO":
-                newContent = videoSrc
-                break
-              case "AUDIO":
-                newContent = audio
-                break
-              case "TEXT":
-              default:
-                newContent = text
-                break
-            }
-            return {
-              ...nextData,
-              type,
-              content: newContent
-            }
-          })
-        }
+        const [member] = members
+        const { message } = member
+        console.log(message)
+        return message.map(m => {
+          const { _doc: { _id: { type, content: { text, video: { src:videoSrc }={}, image: { src: imageSrc }={}, audio }={}, createdAt, user_info: { _id: userId }={}, _id } } } = m
+          let newContent
+          switch(type) {
+            case "IMAGE": 
+              newContent = imageSrc
+              break
+            case "VIDEO":
+              newContent = videoSrc
+              break
+            case "AUDIO":
+              newContent = audio
+              break
+            case "TEXT":
+            default:
+              newContent = text
+              break
+          }
+          return {
+            _id,
+            origin: userId,
+            createdAt,
+            type,
+            content: newContent
+          }
+        })
       })
     })
     .then(data => {
@@ -117,7 +123,7 @@ const getDetail = socket => async (data) => {
     .populate({
       path: 'message',
       match: {
-        $lt: startTime,
+        createdAt: { $lt: Day(startTime).toISOString() },
         ...(messageId ? { _id :ObjectId(messageId) } : {})
       },
       options: {
@@ -126,7 +132,8 @@ const getDetail = socket => async (data) => {
       select: {
         type: 1,
         content: 1,
-        createdAt:1
+        createdAt:1,
+        "user_info._id": 1
       }
     })
     .exec()
@@ -134,32 +141,32 @@ const getDetail = socket => async (data) => {
     .then(notFound)
     .then(data => {
       const { message } = data
-      return {
-        members: message.map(m => {
-          const { _doc: { type, content: { text, video: { src: videoSrc }, image: { src: imageSrc }, audio }, ...nextData } } = m
-          let newContent
-          switch(type) {
-            case "IMAGE": 
-              newContent = imageSrc
-              break
-            case "VIDEO":
-              newContent = videoSrc
-              break
-            case "AUDIO":
-              newContent = audio
-              break
-            case "TEXT":
-            default:
-              newContent = text
-              break
-          }
-          return {
-            ...nextData,
-            type,
-            content: newContent
-          }
-        })
-      }
+      return message.map(m => {
+        const { _doc: { type, content: { text, video: { src: videoSrc }, image: { src: imageSrc }, audio }, createdAt, user_info: { _id: userId }, _id } } = m
+        let newContent
+        switch(type) {
+          case "IMAGE": 
+            newContent = imageSrc
+            break
+          case "VIDEO":
+            newContent = videoSrc
+            break
+          case "AUDIO":
+            newContent = audio
+            break
+          case "TEXT":
+          default:
+            newContent = text
+            break
+        }
+        return {
+          origin: userId,
+          _id,
+          createdAt,
+          type,
+          content: newContent
+        }
+      })
     })
     .then(data => {
       res = {

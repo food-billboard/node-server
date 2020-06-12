@@ -40,13 +40,13 @@ router.post('/', async(ctx) => {
     await Promise.all([
       ...(uid ? [RoomModel.updateOne({
         origin: false,
-        "member.sid": uid,
-        "member.user": null
+        "members.sid": uid,
+        "members.user": null
       }, {
-        $set: { "member.$.user": _id }
+        $set: { "members.$.user": _id }
       })] : []),
       RoomModel.updateOne({
-        origin: false,
+        origin: true,
         type: 'SYSTEM',
         "members.user": { $ne: _id }
       }, {

@@ -16,11 +16,11 @@ const connection = async (socket, next) => {
     .then(data => !!data && data._id)
     .then(notFound)
     .then(userId => {
-      RoomModel.updateOne({
+      return RoomModel.updateOne({
         origin: true,
         "members.user": userId
       }, {
-        $set: { "members.$sid": id }
+        $set: { "members.$.sid": id }
       })
     })
     .catch(err => {

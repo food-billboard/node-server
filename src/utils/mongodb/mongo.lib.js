@@ -675,6 +675,16 @@ const ImageSchema = new Schema({
   ...defaultConfig
 })
 
+RoomSchema.pre("find", function() {
+  this.populate({
+    path: "info.avatar",
+    select: {
+      src: 1,
+      _id: 0
+    }
+  })
+})
+
 SpecialSchema.pre("findOne", function() {
   if(this._fields.poster) {
     this.populate({

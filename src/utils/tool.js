@@ -25,7 +25,11 @@ const isNull = arg => typeProto(arg) === "[object Null]"
 
 const isUndefined = arg => typeof arg === undefined
 
-//symbol function regexp array number string object null undefined NaN
+const isFile = arg => typeProto(arg) === '[object File]'
+
+const isBlob = arg => typeProto(arg) === '[object Blob]'
+
+//symbol function regexp array number string object null undefined NaN blob file
 const __type = {
   symbol: isSymbol,
   number: isNumber,
@@ -36,7 +40,9 @@ const __type = {
   array: isArray,
   object: isObject,
   null: isNull,
-  undefined: isUndefined
+  undefined: isUndefined,
+  file: isFile,
+  blob: isBlob
 }
 
 function isType(data, type) {

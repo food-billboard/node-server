@@ -2,13 +2,24 @@ const { verifySocketIoToken, isType, otherToken, notFound, UserModel, RoomModel 
 const { Types: { ObjectId } } = require('mongoose')
 
 const joinRoom = socket => async (data) => {
-  const { type='CHAT', _id, members } = data
+  const { type='CHAT', _id, members=[] } = data
   const [, token] = otherToken(data.token)
   let res 
   let hasRoom = false
   let roomId
+
+  if(!_id && type === 'CHAT' && !members.length) {
+    socket.emit("join", JSON.stringify({
+      success: false,
+      res: {
+        errMsg: '单聊需要添加聊天对象'
+      }
+    }))
+    return 
+  }
+
   //成员整合
-  let newMembers = isType(members, 'array') ? members.map(m => ObjectId(m)) : [ObjectId(members)]
+  let newMembers = isType(members, 'array') ? members.map(m => ObjectId(m)) : ( ObjectId.isValid(members) ? [ObjectId(members)] : [] )
 
   //已登录
   if(token) {
@@ -27,12 +38,18 @@ const joinRoom = socket => async (data) => {
     .then(data => {
       const { _id } = data
       mineId = _id
-      if(data && !newMembers.some(m => mineId.equals(m))) newMembers.push(data)
+      if(!newMembers.some(m => mineId.equals(m))) newMembers.push(_id)
     })
     .then(_ => {
-      if(_id || ( !_id && type === 'CHAT' )) {
+      if(_id || ( !_id && type === 'CHAT' ) || type === 'SYSTEM') {
         let query = {}
-        if(!_id) {
+        if(type === 'SYSTEM') {
+          query = {
+            type,
+            origin: true,
+            "members.user": mineId
+          }
+        }else if(!_id) {
           query = {
             type,
             "members.user": { $in: [ ...newMembers ] },
@@ -40,7 +57,7 @@ const joinRoom = socket => async (data) => {
           }
         }else {
           query = {
-            _id: mongo.dealId(_id),
+            _id: ObjectId(_id),
             "members.user": mineId
           }
         }
@@ -48,18 +65,17 @@ const joinRoom = socket => async (data) => {
         return RoomModel.findOneAndUpdate({
           ...query
         }, {
-          $set: { "members.$.status": 'ONELINE' }
+          $set: { "members.$.status": 'ONLINE' }
         })
         .select({
           _id: 1
         })
         .exec()
-        .then(data => !data && data._doc)
+        .then(data => !!data && data._doc)
         .then(data => {
-          const { _id } = data
           if(data) {
+            const { _id } = data
             hasRoom = true
-            const { value: { _id } } = data
             roomId = _id.toString()
             res = {
               success: true,
@@ -94,7 +110,7 @@ const joinRoom = socket => async (data) => {
         }else if(type === 'GROUP_CHAT'){
           info = {
             ...info,
-            avatar: '这里添加一个静态图片作为默认的群聊图片',
+            avatar: ObjectId('5edb3c7b4f88da14ca419e61'),
             name: '这是一个默认的名字',
             description: '群主什么都没有留下'
           }
@@ -103,15 +119,15 @@ const joinRoom = socket => async (data) => {
           type,
           info,
           origin: false,
-          member: newMembers.map(m => {
+          members: newMembers.map(m => {
             return {
               user: m,
-              status: mongo.equalId(m, mineId) ? 'online' : 'offline',
+              status: mineId.equals(m) ? 'ONLINE' : 'OFFLINE',
               message: []
             }
           })
         })
-        room.save()
+        return room.save()
         .then(data => {
           const { _id } = data
           roomId = _id.toString()
@@ -146,16 +162,8 @@ const joinRoom = socket => async (data) => {
         }
       }
     }
-    else if(!_id) {
-      res = {
-        success: false,
-        res: {
-          errMsg: '参数错误'
-        }
-      }
-    }else {
+    else {
       await RoomModel.findOne({
-        _id: ObjectId(_id),
         origin: true
       })
       .select({
@@ -184,6 +192,15 @@ const joinRoom = socket => async (data) => {
           }
         }
       })
+      .catch(err => {
+        console.log(err)
+        res = {
+          success: false,
+          res: {
+            errMsg: '未知错误'
+          }
+        }
+      })
     }
   }
 
@@ -195,7 +212,6 @@ const leaveRoom = socket => async (data) => {
   const { _id } = data
   // const [, token] = verifySocketIoToken(data)
   const [, token] = otherToken(data.token)
-  let mineId = null
   let res
   if(token) {
     const { mobile } = token
@@ -206,25 +222,26 @@ const leaveRoom = socket => async (data) => {
       _id: 1
     })
     .exec()
-    .then(data => !!data && data.doc)
+    .then(data => !!data && data._doc)
     .then(data => {
       const { _id:userId } = data
       return RoomModel.updateOne({
         _id: ObjectId(_id),
-        "member.status": 'ONLINE',
-        "member.user": userId
+        "members.status": 'ONLINE',
+        "members.user": userId
       }, {
-        $set: { "member.$.status": 'OFFLINE' }
+        $set: { "members.$.status": 'OFFLINE' }
       })
     })
     .then(data => {
-      if(!data) return Promise.reject({ errMsg: '权限不足' })
+      if(data && data.nModified == 0) return Promise.reject({ errMsg: '权限不足' })
       res = {
         success: true,
         res: null
       }
     })
     .catch(err => {
+      console.log(err)
       res = {
         success: false,
         res: {

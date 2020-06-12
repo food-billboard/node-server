@@ -1,11 +1,11 @@
 const { MongoDB, verifySocketIoToken, otherToken, UserModel, RoomModel, notFound } = require("@src/utils")
 const mongo = MongoDB()
+const Day = require('dayjs')
 
 const getMessageList = socket => async (data) => {
   // const [, token] = verifySocketIoToken(data)
   const [, token] = otherToken(data.token)
   let res
-  let result
   //已登录
   if(token) {
     const { mobile } = token
@@ -21,27 +21,34 @@ const getMessageList = socket => async (data) => {
     .then(data => !!data && data._id)
     .then(notFound)
     .then(id => {
+      mine = id
       return RoomModel.find({
-        "members.user": { $in: [ id ] },
+        "members.user": { $in: [id] },
       })
       .select({
-        "memebers.$.message": 1,
-        info: 1
+        "members.message": 1,
+        info: 1,
+        type: 1
+      })
+      .sort({
+        createdAt: -1
+      })
+      .populate({
+        path: "members.user",
+        select: {
+          avatar: 1,
+          username: 1,
+        }
       })
       .populate({
         path: 'members.message._id',
         select: {
           "content.text": 1,
           createdAt: 1,
-          user_info: 1
-        },
-        options: {
-          sort: {
-            createdAt: -1
-          }
+          "user_info._id": 1
         },
         populate: {
-          path: 'user_info',
+          path: 'user_info._id',
           select: {
             avatar: 1,
             username: 1
@@ -50,135 +57,87 @@ const getMessageList = socket => async (data) => {
       })
       .exec()
     })
-    .then(data => {
-      return data.map(d => {
-        const { members, info } = d
-        
+    .then((data) => {
+      return data.filter(d => {
+        const { members } = d
+        return members.some(mem => mem.user._id.equals(mine) && !!mem.message.length)
       })
-    })
+      .map(d => {
+        const { members, info: { _doc: { avatar: { src }={}, ...nextInfo } }, type, _id } = d
+        const [ memberSelf ] = members.filter(mem => mem.user._id.equals(mine))
+        const { message } = memberSelf
 
-    // await mongo.connect("user")
-    // .then(db => db.findOne({
-    //   mobile: Number(mobile)
-    // }, {
-    //   projection: {
-    //     _id: 1
-    //   }
-    // }))
-    // .then(data => {
-    //   const { _id } = data
-    //   mine = _id
-    // })
-    // .then(_ => mongo.connect("room"))
-    // .then(db => db.find({
-    //   "member.user": mine
-    // }))
-    // .then(data => data.toArray())
-    // .then(data => {
-    //   result = [...data]
-    // })
-    .then(_ => {
-      const userList = []
-      let messageList = []
-      result.forEach(re => {
-        const { member, type } = re
-        let message
-        //找到自己的消息记录
-        const index = member.findIndex(val => mongo.equalId(val.user, mine))
-        message = member[index].message.filter(m => !m.readed)
-        //只有在普通聊天的情况下需要额外获取聊天对方信息
-        if(type === 'chat') {
-          member.forEach(m => {
-            const { user } = m
-            if(!userList.some(u => mongo.equalId(u, user) && !mongo.equalId(u, mine))) {
-              userList.push(user)
-            } 
-          })
-        }
-  
-        messageList = [ ...messageList, ...message ]
-      })
-      return [ messageList, userList ]
-    })
-    .then(([ messageList, userList ]) => {
-      return Promise.all([
-        mongo.connect("user")
-        .then(db => db.find({
-          _id: { $in: [...userList] }
-        }, {
-          projection: {
-            avatar: 1,
-            username: 1
-          }
-        }))
-        .then(data => data.toArray()),
-        mongo.connect("message")
-        .then(db => db.find({
-          _id: { $in: [...messageList.map(m => m.id)] },
-        }, {
-          sort: {
-            create_time: -1
-          },
-          projection: {
-            "content.text": 1,
-            create_time: 1
-          }
-        }))
-        .then(data => data.toArray())
-      ])
-    })
-    .then(([ userList, messageList ]) => {
-      return result
-      .map(re => {
-        const { member, type, info: { description }, origin, ...nextRe } = re
-        const index = member.findIndex(val => mongo.equalId(val.user, mine))
-        let message = member[index].message
-        let newInfo = {}
-        let messageCount = 0
-        let time = -1
-        let lastData = ''
-        if(type === 'chat') {
-          member.forEach(mem => {
-            const index = userList.findIndex(val => {
-              const { _id } = val
-              return mongo.equalId(_id, mem)
-            })
-            if(~index) {
-              const { avatar, username } = userList[index]
-              newInfo = { 
-                avatar,
-                name: username
-              }
-            }
-          })
-        }
-        message.forEach(mes => {
-          const index = messageList.findIndex(val => mongo.equalId(mes.id, val._id))
-          if(~index) {
-            const { content: {text}, create_time }  = messageList[index]
-            if(create_time > time) {
-              lastData = text
-              time = create_time
-            }
-            messageCount ++
-          }
+        let itemInfo = {}
+
+        const [ nearlyMessage ] = message.sort((now, next) => {
+          const { _id: { createdAt: nowTime } } = now
+          const { _id: { createdAt: nextTime } } = next
+          return Day(nextTime).valueOf() - Day(nowTime).valueOf() 
         })
-  
-        return {
-          ...nextRe,
-          info: {
-            ...newInfo,
-            description
-          },
-          message: {
-            count: messageCount,
-            lastData: !messageCount ? '暂无新消息' : lastData,
-            time: !messageCount ? Date.now() : time
+
+        //全部为已读消息时
+        if(!message.some(mes => !mes.readed)) {
+          const { _id: { createdAt } } = nearlyMessage
+          if(type === 'CHAT') {
+            //选取头像
+            const index = members.findIndex(val => !val.user.equals(mine))
+            const memberOther = members[index]
+            const { user: { username, avatar: { src } } } = memberOther
+            itemInfo = {
+              name: username,
+              avatar: src,
+              description: '暂时没有'
+            }
+          }else {
+            itemInfo = {
+              ...nextInfo,
+              avatar: src
+            }
+          }
+
+          return {
+            _id,
+            type,
+            info: { ...itemInfo },
+            message: {
+              lastData: "暂无新消息",
+              time: createdAt,
+              count: 0
+            }
+          }
+
+        }else {
+          //有新消息
+          const { _id: { content: { text }, createdAt, user_info: { avatar: { src:userAvatar }={}, username } } } = nearlyMessage
+
+          if(type === 'CHAT') {
+            itemInfo = {
+              description: '暂时没有',
+              name: username,
+              avatar: userAvatar
+            }
+          }else {
+            itemInfo = {
+              ...nextInfo,
+              avatar: src
+            }
+          }
+          return {
+            info: {
+              ...itemInfo
+            },
+            type,
+            _id,
+            message: {
+              lastData: text || '[媒体消息]',
+              time: createdAt,
+              count: message.filter(mes => !mes.readed).length
+            }
           }
         }
       })
     })
-    .then(data => {
+    .then((data) => {
       res = {
         success: true,
         res: {
@@ -208,47 +167,54 @@ const getMessageList = socket => async (data) => {
   }
   //未登录
   else {
-    await mongo.connect("room")
-    .then(db => db.findOne({
+    await RoomModel.findOne({
       origin: true,
-      type: 'system',
-    }, {
-      projection: {
-        message: 1
-      }
-    }))
-    .then(data => !!data && data.message)
-    .then(data => {
-      if(data) {
-        return mongo.connect("message")
-        .then(db => db.find({
-          _id: { $in: [ ...data ] },
-          //这里
-          create_time: { $lt: Date.now() }
-        }, {
-          sort: {
-            create_time: -1
-          },
-          projection: {
-            "content.text": 1,
-            create_time: 1
-          }
-        }))
-      }
-      return Promise.reject({ errMsg: '服务器或数据库错误' })
+      type: 'SYSTEM'
     })
-    .then(data => data.toArray())
+    .select({
+      message: 1,
+      info: 1,
+    })
+    .populate({
+      path: 'message',
+      match: {
+        createdAt: { $lt: Day(Date.now() - 24 * 60 * 60 * 1000).toISOString() }
+      },
+      select: {
+        "content.text": 1,
+        createdAt: 1
+      }
+    })
+    .exec()
+    .then(data => !!data && data._doc)
     .then(data => {
-      if(data.length) {
-        const { create_time, content: { text } } = data[0]
+      const { _id, info: { avatar: { src }, ...nextInfo }, message } = data
+      const commonRes = {
+        _id,
+        type: 'SYSTEM',
+        info: {
+          ...nextInfo,
+          avatar: src
+        }
+      }
+      if(message.length) {
+        const [ nearlyMessage ] = message.sort((now, next) => {
+          const { createdAt: nowTime } = now
+          const { createdAt: nextTime } = next
+          return Day(nextTime).valueOf() - Day(nowTime).valueOf() 
+        })
+        const { createdAt, content: { text } } = nearlyMessage
         res = {
           success: true,
           res: {
             data: [
               {
-                count: data.length,
-                lastData: text,
-                time: create_time,
+                ...commonRes,
+                message: {
+                  count: message.length,
+                  lastData: text,
+                  time: createdAt
+                }
               }
             ]
           }
@@ -259,9 +225,12 @@ const getMessageList = socket => async (data) => {
           res: {
             data: [
               {
-                count: 0,
-                lastDate: null,
-                time: Date.now()
+                ...commonRes,
+                message: {
+                  count: 0,
+                  lastDate: '暂无新消息',
+                  time: Date.now()
+                }
               }
             ]
           }

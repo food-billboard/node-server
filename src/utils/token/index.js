@@ -6,7 +6,7 @@ try {
   console.log('不支持 crypto');
 }
 const { Types: { ObjectId } } = require('mongoose')
-const {RoomSchema } = require('@src/utils')
+const { RoomModel } = require('../mongodb/mongo.lib');
 
 //秘钥
 const SECRET = "________SE__C_R__E_T"
@@ -83,39 +83,36 @@ const middlewareVerifyTokenForSocketIo = socket => async (packet, next) => {
   const midList = ['message', 'leave', 'join']
   const [name, data] = packet
   const [, token] = verifySocketIoToken(socket)
-  if(token) return next()
-  if(whiteList.includes(name)) return next()
+  if(token) return await next()
+  if(whiteList.includes(name)) return await next()
   if(midList.includes(name)) {
     const { _id } = data
-    if(_id) {
-      const data = RoomSchema.findOne({
-        _id: ObjectId(_id),
+      const roomData = await RoomModel.findOne({
+        ...(_id ? { _id: ObjectId(_id) } : {}),
         type: 'SYSTEM'
       })
       .select({ _id: 1 })
       .exec()
       .then(data => data)
-      // const data = await mongo.connect("room")
-      // .then(db => db.findOne({
-      //   _id: mongo.dealId(_id),
-      //   type: 'system'
-      // }, {
-      //   projection: {
-      //     _id: 1
-      //   }
-      // }))
-      if(data) {
-        return next()
+      if(roomData) {
+        return await next()
+      }else {
+        socket.emit(name, JSON.stringify({
+          success: false,
+          res: {
+            errMsg: 401
+          }
+        }))
       }
-    }
-  }
-  // next(new Error('401 unAuthorized'))
-  socket.emit(name, JSON.stringify({
-    success: false,
-    res: {
-      errMsg: 401
-    }
-  }))
+  }else {
+    // next(new Error('401 unAuthorized'))
+    socket.emit(name, JSON.stringify({
+      success: false,
+      res: {
+        errMsg: 401
+      }
+    }))
+  } 
 }
 
 //token验证并返回内容
