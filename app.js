@@ -2,14 +2,13 @@ const Koa = require('koa')
 require('module-alias/register')
 const Router = require('./src/index')
 const Cors = require('koa-cors')
-// const bodyParser = require('koa-bodyparser')
+const KoaStatic = require('koa-static')
 const KoaBody = require('koa-body')
 const app = new Koa()
+const path = require('path')
 const { MongoDB } = require("@src/utils")
 
 MongoDB()
-
-
 
 app.use(Cors())
 // app.use(bodyParser())
@@ -26,6 +25,9 @@ app.use(Cors())
   //   },
   // }
 }))
+// 访问权限
+// .use()
+.use(KoaStatic(path.resolve(__dirname, 'static'), {}))
 .use(Router.routes()).use(Router.allowedMethods())
 
 app.listen(3000, () => {

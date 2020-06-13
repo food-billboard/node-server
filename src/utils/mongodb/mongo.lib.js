@@ -634,7 +634,10 @@ const LanguageSchema = new Schema({
 })
 
 const VideoSchema = new Schema({
-  name: String,
+  name: {
+    type: String,
+    required: true
+  },
   src: {
     type: String,
     required: true
@@ -646,12 +649,30 @@ const VideoSchema = new Schema({
   origin_type: {
     required: true,
     type: String,
+    uppercase: true,
     enum: [ "USER", "SYSTEM" ]
   },
   origin: {
     type: ObjectId,
     ref: 'user'
-  } 
+  },
+  info: {
+    complete: [{
+      type: Number,
+      min: 0
+    }],
+    chunk_size: {
+      type: Number,
+      min: 1
+    },
+    status: {
+      type: String,
+      enum: ['ERROR', 'COMPLETE', 'UPLOADING'],
+      uppercase: true,
+      required: true
+    }
+  },
+  complete
 }, {
   ...defaultConfig
 })
@@ -665,6 +686,7 @@ const ImageSchema = new Schema({
   origin_type: {
     required: true,
     type: String,
+    uppercase: true,
     enum: [ "USER", "SYSTEM" ]
   },
   origin: {
@@ -673,6 +695,24 @@ const ImageSchema = new Schema({
   } 
 }, {
   ...defaultConfig
+})
+
+const OtherMediaSchema = new Schema({
+  name: String,
+  src: {
+    type: String,
+    required: true
+  },
+  origin_type: {
+    required: true,
+    type: String,
+    uppercase: true,
+    enum: [ "USER", 'SYSTEM' ]
+  },
+  origin: {
+    type: ObjectId,
+    ref: 'user'
+  }
 })
 
 RoomSchema.pre("find", function() {
@@ -840,6 +880,7 @@ const ClassifyModel = model('classify', ClassifySchema)
 const LanguageModel = model('language', LanguageSchema)
 const VideoModel = model('video', VideoSchema)
 const ImageModel = model('image', ImageSchema)
+const OtherMediaModel = model('other_media', OtherMediaSchema)
 
 module.exports = {
   UserModel,
@@ -859,6 +900,7 @@ module.exports = {
   LanguageModel,
   VideoModel,
   ImageModel,
+  OtherMediaModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -875,5 +917,6 @@ module.exports = {
   ClassifySchema,
   LanguageSchema,
   VideoSchema,
-  ImageSchema
+  ImageSchema,
+  OtherMediaSchema
 }

@@ -1,8 +1,3 @@
-const fs = require('fs')
-const path = require('path')
-const { ImageModel, VideoModel, UserModel } = require('./mongodb/mongo.lib')
-const { Types: { ObjectId } } = require('mongoose')
-
 const typeProto = arg => Object.prototype.toString.call(arg)
 
 const isNumber = arg => !Number.isNaN(arg) && typeProto(arg) === '[object Number]'
@@ -76,99 +71,6 @@ function flat(array) {
     }
   })
   return newArray
-}
-
-const withTry = (callback) => {
-  return async (...args) => {
-    try {
-      const data = await callback(...args)
-      return [null, data]
-    }catch(err) {
-      return [err, null]
-    }
-  }
-}
-
-//图片内容上传处理
-/**
- * 
- * @param  {...any} files { file: 文件, auth: 权限类型[ PUBLIC, PRIVATE ], origin: 来源作者 | ORIGIN }
- */
-const dealMedia4Image = async (...files) => {
-  const realFiles = files.filter(f => isType(f.file, 'file') || istType(f.file, 'blob'))
-  realFiles.forEach(async (obj) => {
-    const { file, auth, origin } = obj
-    const { type } = file
-    if(/^image/.test(type)) return
-    const fileReader = new FileReader()
-    fileReader.onload = function(e) {
-      const data = fileReader.result
-
-      let path = '/media/database/'
-      if(auth === 'PRIVATE') {
-        path += 'private'
-      }else {
-        path += 'public'
-      }
-
-      path += '/image'
-      const imageModel = new ImageModel({
-        name: '',
-        src: ''
-      })
-      UserModel.findOne({
-        _id: ObjectId(origin)
-      })
-      imageModel.save().then(data => {
-        const { _id } = data
-        fs.writeFileSync(`${_id.toString()}.`)
-      })
-      await 
-      fs.writeFileSync()
-    }
-
-    fileReader.readAsArrayBuffer(file)
-  })
-}
-
-//大文件分片上传
-const chunkLoad = async () => {
-
-}
-
-//错误处理
-const dealErr = (ctx) => {
-  return (err) => {
-    let res = { success: false }
-    if(err && err.errMsg) {
-      const { status=500, ...nextErr } = err
-      ctx.status = status
-      res = {
-        ...res,
-        res: {
-          ...nextErr
-        }
-      }
-    }else {
-      ctx.status = 500
-      res = {
-        ...res,
-        res: {
-          errMsg: err
-        }
-      }
-    }
-    console.log(err)
-    return {
-      err: true,
-      res
-    }
-  }
-}
-
-const notFound = (data) => {
-  if(!data) return Promise.reject({ errMsg: 'not Found', status: 404 })
-  return data
 }
 
 // function check(origin, target) {
@@ -250,9 +152,5 @@ module.exports = {
   isType,
   isEmpty,
   flat,
-  withTry,
-  dealMedia4Image,
-  dealErr,
   // paramsCheck,
-  notFound
 }
