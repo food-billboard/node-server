@@ -1,3 +1,7 @@
+const path = require('path')
+//静态资源目录
+const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
+
 const typeProto = arg => Object.prototype.toString.call(arg)
 
 const isNumber = arg => !Number.isNaN(arg) && typeProto(arg) === '[object Number]'
@@ -82,75 +86,46 @@ function flat(array) {
 //   })
 // }
 
-// //参数预检查
-// const paramsCheck = {
-//   put: (params) => {
-//     return async (ctx, next) => {
-//       const { method } = ctx
-//       if(!Array.isArray(params) || method.toLowerCase() !== 'put') return await next()
-//       const { body } = ctx.request
-//       if(check(body, params)) return await next()
-//       ctx.status = 404
-//       ctx.body = JSON.stringify({
-//         success: false,
-//         res: {
-//           errMsg: 'not Found'
-//         }
-//       })
-//     }
-//   },
-//   post: (params) => {
-//     return async (ctx, next) => {
-//       const { method } = ctx
-//       if(!Array.isArray(params) || method.toLowerCase() !== 'post') return await next()
-//       const { body } = ctx.request
-//       if(check(body, params)) return await next()
-//       ctx.status = 404
-//       ctx.body = JSON.stringify({
-//         success: false,
-//         res: {
-//           errMsg: 'not Found'
-//         }
-//       })
-//     }
-//   },
-//   get: (params) => {
-//     return async (ctx, next) => {
-//       const { method } = ctx
-//       if(!Array.isArray(params) || method.toLowerCase() !== 'get') return await next()
-//       const { query } = ctx
-//       if(check(query, params)) {
-//         return await next()
-//       }
-//       ctx.status = 404
-//       ctx.body = JSON.stringify({
-//         success: false,
-//         res: {
-//           errMsg: 'not Found'
-//         }
-//       })
-//     }
-//   },
-//   delete: (params) => {
-//     return async (ctx, next) => {
-//       const { method } = ctx
-//       if(!Array.isArray(params) || method.toLowerCase() !== 'delete') return await next()
-//       const { query } = ctx
-//       if(check(query, params)) return await next()
-//       ctx.status = 404
-//       ctx.body = JSON.stringify({
-//         success: false,
-//         res: {
-//           errMsg: 'not Found'
-//         }
-//       })
-//     }
-//   },
-// }
+//参数预检查
+const paramsCheck = {
+  body: (params) => {
+    return async (ctx, next) => {
+      const { method } = ctx
+      if(!Array.isArray(params) || method.toLowerCase() !== 'put') return await next()
+      const { body } = ctx.request
+      if(check(body, params)) return await next()
+      ctx.status = 404
+      ctx.body = JSON.stringify({
+        success: false,
+        res: {
+          errMsg: 'not Found'
+        }
+      })
+    }
+  },
+  query: (params) => {
+    return async (ctx, next) => {
+      const { method } = ctx
+      if(!Array.isArray(params) || method.toLowerCase() !== 'get') return await next()
+      const { query } = ctx
+      if(check(query, params)) {
+        return await next()
+      }
+      ctx.status = 404
+      ctx.body = JSON.stringify({
+        success: false,
+        res: {
+          errMsg: 'not Found'
+        }
+      })
+    }
+  },
+}
 
 module.exports = {
   isType,
   isEmpty,
   flat,
+  STATIC_FILE_PATH
   // paramsCheck,
 }

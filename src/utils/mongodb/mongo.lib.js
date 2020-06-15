@@ -656,14 +656,33 @@ const VideoSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   },
+  auth: {
+    required: true,
+    type: String,
+    enum: [ 'PUBLIC', 'PRIVATE' ],
+    uppercase: true,
+    get: function(v) { return v ? v.toLowerCase() : v }
+  },
   info: {
     complete: [{
       type: Number,
+      required: true,
       min: 0
     }],
     chunk_size: {
       type: Number,
       min: 1
+    },
+    size: {
+      type: Number,
+      min: 1
+    },
+    mime: {
+      type: String,
+      enum: [],
+      uppercase: true,
+      required: true,
+      get: function(v) { return v ? v.toLowerCase() : v }
     },
     status: {
       type: String,
@@ -672,7 +691,6 @@ const VideoSchema = new Schema({
       required: true
     }
   },
-  complete
 }, {
   ...defaultConfig
 })
@@ -692,7 +710,40 @@ const ImageSchema = new Schema({
   origin: {
     type: ObjectId,
     ref: 'user'
-  } 
+  },
+  auth: {
+    required: true,
+    type: String,
+    enum: [ 'PUBLIC', 'PRIVATE' ],
+    uppercase: true,
+    get: function(v) { return v ? v.toLowerCase() : v }
+  },
+  info: {
+    complete: [{
+      type: Number,
+      min: 0
+    }],
+    chunk_size: {
+      type: Number,
+      min: 1
+    },
+    size: {
+      type: Number,
+      min: 1
+    },
+    mime: {
+      type: String,
+      enum: [],
+      uppercase: true,
+      get: function(v) { return v ? v.toLowerCase() : v }
+    },
+    status: {
+      type: String,
+      enum: ['ERROR', 'COMPLETE', 'UPLOADING'],
+      uppercase: true,
+      required: true
+    }
+  },
 }, {
   ...defaultConfig
 })
@@ -712,7 +763,40 @@ const OtherMediaSchema = new Schema({
   origin: {
     type: ObjectId,
     ref: 'user'
-  }
+  },
+  auth: {
+    required: true,
+    type: String,
+    enum: [ 'PUBLIC', 'PRIVATE' ],
+    uppercase: true,
+    get: function(v) { return v ? v.toLowerCase() : v }
+  },
+  info: {
+    complete: [{
+      type: Number,
+      min: 0
+    }],
+    chunk_size: {
+      type: Number,
+      min: 1
+    },
+    size: {
+      type: Number,
+      min: 1
+    },
+    mime: {
+      type: String,
+      enum: [],
+      uppercase: true,
+      get: function(v) { return v ? v.toLowerCase() : v }
+    },
+    status: {
+      type: String,
+      enum: ['ERROR', 'COMPLETE', 'UPLOADING'],
+      uppercase: true,
+      required: true
+    }
+  },
 })
 
 RoomSchema.pre("find", function() {

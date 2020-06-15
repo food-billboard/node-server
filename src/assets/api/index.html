@@ -2692,6 +2692,381 @@
           </li>
         </ul>
       </div>
+      <div>
+        <h5 class="item">upload</h5>
+        <ul class="customer-user hide">
+          <li class="content-post">
+            <h6 class="method-backgound-post method-title-post">
+              <span class="method post">post</span>
+              /api/customer/upload 普通文件上传
+            </h6>
+            <div class="main-post hide">
+              <div class="main-post-content">
+                <h6 class="main-title-post">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">auth</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>权限(PUBLIC | PRIVATE)</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_(formData)</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>文件(key任意)</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">files</span>
+                      <br/>
+                      <span class="typeof-object"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>文件(base64)多个文件以对象形式传递,key任意</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-post">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": ["string"]
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": ["string"] 未完成的文件名字集合
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/upload/chunk 分片上传预查
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">name</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>文件名称</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">suffix</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>文件后缀名</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">chunksLength</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>分片块数</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">size</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>文件大小</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">auth</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>访问权限(PUBLIC | PRIVATE)</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": [0, 1, 2] 
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": ["integer"] 完成的分片索引(上传完成则为false)
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-post">
+            <h6 class="method-backgound-post method-title-post">
+              <span class="method post">post</span>
+              /api/customer/upload/chunk 分片上传
+            </h6>
+            <div class="main-post hide">
+              <div class="main-post-content">
+                <h6 class="main-title-post">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">name</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>文件名称</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">index</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>分片索引</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">file</span>
+                      <br/>
+                      <span class="typeof-file"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>blob分片</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-post">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "name": "string",
+      "index": 0
+    }
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "name": "string" 文件名称,
+      "index": "integer" 分片索引
+    }
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-put">
+            <h6 class="method-backgound-put method-title-put">
+              <span class="method put">put</span>
+              /api/customer/upload/chunk 分片上传完成
+            </h6>
+            <div class="main-put hide">
+              <div class="main-put-content">
+                <h6 class="main-title-put">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">name</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>文件名称</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-put">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": null
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": null (上传完成为null，若有未上传完成的则返回上传完成的索引数组)
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
       <h4>User</h4>
       <div>
         <h5 class="item">customer</h5>

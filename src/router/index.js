@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const User = require('./user')
 const Customer = require('./customer')
-const ObjectID = require('mongodb').ObjectID
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
@@ -14,8 +14,8 @@ router
     res: null
   }
 
-  const isValidData = ObjectID.isValid(dataId)
-  const isValidQuery = ObjectID.isValid(queryId)
+  const isValidData = ObjectId.isValid(dataId)
+  const isValidQuery = ObjectId.isValid(queryId)
 
   if(dataId || queryId) {
     if(dataId && queryId) {

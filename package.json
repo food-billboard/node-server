@@ -2,7 +2,7 @@
   "name": "movie-server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon app.js"
@@ -12,21 +12,15 @@
   "dependencies": {
     "@koa/router": "^9.0.0",
     "dayjs": "^1.8.28",
-    "fs-extra": "^9.0.1",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.11.0",
     "koa-body": "^4.1.1",
-    "koa-bodyparser": "^4.3.0",
     "koa-compress": "^4.0.1",
     "koa-cors": "0.0.16",
-    "koa-session": "^5.13.1",
     "koa-static": "^5.0.0",
-    "koa2-multiparty": "^1.0.1",
     "module-alias": "^2.2.2",
-    "mongodb": "^3.5.6",
     "mongoose": "^5.9.17",
-    "socket.io": "^2.3.0",
-    "spark-md5": "^3.0.1"
+    "socket.io": "^2.3.0"
   },
   "_moduleAliases": {
     "@src": "src"

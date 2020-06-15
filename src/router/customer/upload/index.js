@@ -1,150 +1,84 @@
 const Router = require('@koa/router')
-const { dealMedia, VideoModel, ImageModel, OtherMediaModel, notFound, dealErr } = require('@src/utils')
-const { Types: { ObjectId } } = require('mongoose')
+const Chunk = require('./routes')
+const { 
+  verifyTokenToData
+} = require('@src/utils')
+const { dealMedia, base64Size } = require('./util')
 
 const router = new Router()
 
+const MAX_FILE_SIZE = 1024 * 1024 * 5
+
 router
-//预查
-.get('/', async(ctx) => {
-  const { md5 } = ctx.query
-  let res
-  //查找文件是否存在于数据库
-  const data = await Promise.all([
-    VideoModel.findOne({
-      name: md5
+//对于大文件拒绝接收请求
+.use(async(ctx, next) => {
+  const { method } = ctx.request
+  const { body: { files: base64Files={} }, files={} } = ctx.request
+  try{
+    if(
+      method.toLowerCase() !== 'post' 
+      || 
+      Object.values(base64Files).reduce((acc, file) => { acc + base64Size(file) }, 0) <= MAX_FILE_SIZE 
+      || 
+      Object.values(files).reduce((acc, file) => { acc + file.size }, 0) <= MAX_FILE_SIZE) return await next()
+  }catch(err) {
+    console.log(err)
+    ctx.status = 500
+    ctx.body = JSON.stringify({
+      success: false,
+      res: {
+        errMsg: 'server error'
+      }
     })
-    .select({
-      _id: 0,
-      info: 1
-    })
-    .exec(),
-    ImageMode.findOne({
-      name: md5
-    })
-    .select({
-      _id: 0,
-      info: 1
-    })
-    .exec(),
-    OtherMediaModel.findOne({
-      name: md5
-    })
-    .select({
-      _id: 0,
-      info: 1
-    })
-    .exec()
-  ])
-  .then(data => !!data && data)
-  .then(notFound)
-  .then(data => {
-    const index = data.findIndex(val => !!val)
-    //文件不存在
-    if(!~index) return []
-
-    const { info:{ complete, status } } = data[index]
-    //文件存在且已全部完成
-    if(status === 'COMPLETE') {
-      return false
-    }
-    //上传中
-    else if(status === 'UPLOADING'){
-      return [
-        ...complete
-      ]
-    }
-    //上传出错提示重新上传
-    else {
-      return []
+    return 
+  }
+  
+  ctx.status = 413
+  ctx.body = JSON.stringify({
+    success: false,
+    res: {
+      errMsg: 'body to large'
     }
   })
-  .catch(dealErr(ctx))
-
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
 })
-//上传
+//文件上传
 .post('/', async(ctx) => {
-  const { files } = ctx.request
-  //查看是否传入了文件的类型，不然无法知晓到底存储至哪一个服务器集合
-})
-//完成
-.put('/', async(ctx) => {
-  const { body: { md5 } } = ctx.request
+  const [, token] = verifyTokenToData(ctx)
+  const { mobile } = token
   let res
+  const { body: { auth="PUBLIC", files: base64Files={} }, files={} } = ctx.request
 
-  const data = await Promise.all([
-    VideoModel.findOne({
-      name: md5
-    })
-    .select({
-      info: 1,
-      _id: 0
-    })
-    .exec(),
-    ImageModel.findone({
-      name: md5
-    })
-    .select({
-      info: 1,
-      _id: 0
-    })
-    .exec(),
-    OtherMediaModel.findOne({
-      name: md5
-    })
-    .select({
-      info: 1,
-      _id: 0
-    })
-    .exec()
-  ])
-  .then(data => !!data && data)
-  .then(notFound)
-  .then(data => {
-    const index = data.findIndex(val => !!val)
-    if(!~index) return Promise.reject({ errMsg: 'fail', status: 500 })
-    const { info: { chunkSize, complete } } = data[index]
-    if(chunkSize === complete.length) {
-      return null
-    }else {
-      return [...complete]
-    }
-  })
-  .then(data => {
-    if(data) return data
+  const fileList = [...Object.values(files), ...Object.values(base64Files)]
 
-  })
-  .catch(dealErr(ctx))
-  if(data && data.err) {
+  const data = await dealMedia(mobile, auth, ...fileList)
+
+  let unComplete = data.filter(d => d.reason === 'rejected').map(d => d.value.name)
+
+  if(unComplete.length === fileList.length) {
+    ctx.status = 500
     res = {
-      ...data.res
+      success: false,
+      res: {
+        errMsg: 'unknown error',
+        data: [
+          ...unComplete
+        ]
+      }
     }
   }else {
     res = {
       success: true,
       res: {
-        data
+        data: [
+          ...unComplete
+        ]
       }
     }
   }
 
   ctx.body = JSON.stringify(res)
+
 })
-
-
+.use('/chunk', Chunk.routes(), Chunk.allowedMethods())
 
 module.exports = router

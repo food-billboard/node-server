@@ -22,6 +22,15 @@ const encoded = (password) => {
   return password
 }
 
+const fileEncoded = (str) => {
+  if(crypto) {
+    const hmac = crypto.createHmac('md5', SECRET)
+    hmac.update(str)
+    return hmac.digest('hex')
+  }
+  return str
+}
+
 //创建token
 const signToken = ({mobile, password}, options={expiresIn: '1d'}, callback=(err, token)=>{}) => {
   let newOptions = options, newCallback = callback
@@ -158,5 +167,6 @@ module.exports = {
   middlewareVerifyTokenForSocketIo,
   verifyTokenToData,
   verifySocketIoToken,
-  otherToken
+  otherToken,
+  fileEncoded
 }
