@@ -1,9 +1,17 @@
 const Router = require('@koa/router')
-const { signToken, encoded, dealErr, UserModel, RoomModel, notFound } = require("@src/utils")
+const { signToken, encoded, dealErr, UserModel, RoomModel, notFound, Params } = require("@src/utils")
 
 const router = new Router()
 
 router.post('/', async(ctx) => {
+  Params.body(ctx, {
+    name: 'mobile',
+    type: ['isMobilePhone']
+  }, {
+    name: 'password',
+    validator: data => typeof data === 'string'
+  })
+
   const { body: { mobile, password, uid } } = ctx.request
   let res
   const data = await UserModel.findOneAndUpdate({

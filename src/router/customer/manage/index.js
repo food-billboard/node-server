@@ -3,7 +3,7 @@ const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
-const { verifyTokenToData, UserModel, dealErr, notFound } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, Params } = require('@src/utils')
 
 const router = new Router()
 

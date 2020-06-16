@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -60,6 +60,11 @@ router
   ctx.body = JSON.stringify(res)
 })
 .put('/', async (ctx) => {
+  Params.body(ctx, {
+    name: '_id',
+    type: ['isMongoId']
+  })
+  
   const [, token] = verifyTokenToData(ctx)
   const { body: { _id } } = ctx.request
   const { mobile } = token

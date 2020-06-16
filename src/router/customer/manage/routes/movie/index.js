@@ -2,7 +2,7 @@ const Router = require('@koa/router')
 const Browse = require('./browser')
 const Store = require('./store')
 const Detail = require('./detail')
-const { verifyTokenToData, isType, isEmpty, dealMedia, UserModel, MovieModel, DirectorModel, ActorModel, dealErr, notFound } = require("@src/utils")
+const { verifyTokenToData, isType, isEmpty, dealMedia, UserModel, MovieModel, DirectorModel, ActorModel, dealErr, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -379,6 +379,12 @@ router
 
 })
 .post('/', async (ctx) => {
+
+  Params.body(ctx, {
+    name: "video.src",
+    type: []
+  })
+
   const [, token] = verifyTokenToData(ctx)
   const { mobile }  = token
   let res

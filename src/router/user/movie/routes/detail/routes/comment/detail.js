@@ -1,10 +1,15 @@
 const Router = require('@koa/router')
-const { CommentModel, dealErr, notFound } = require('@src/utils')
+const { CommentModel, dealErr, notFound, Params } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router.get('/', async (ctx) => {
+  Params.query(ctx, {
+    name: "_id",
+    type: ['isMongoId']
+  })
+
   const { currPage=0, pageSize=30, _id } = ctx.query
   let res 
   const data = await CommentModel.findOne({
