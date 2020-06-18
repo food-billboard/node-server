@@ -1,13 +1,18 @@
 const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Simple = require('./routes/simple')
-const { MovieModel, dealErr, notFound } = require("@src/utils")
+const { MovieModel, dealErr, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
 .get('/', async (ctx) => {
+  Params.query(ctx, {
+    name: "_id",
+    type: ['isMongoId']
+  })
+
   const { _id } = ctx.query
   let res
   const data = await MovieModel.findOneAndUpdate({

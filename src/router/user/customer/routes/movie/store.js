@@ -1,11 +1,16 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr, notFound } = require("@src/utils")
+const { UserModel, dealErr, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
 .get('/', async (ctx) => {
+  Params.query(ctx, {
+    name: '_id',
+    type: ['isMongoId']
+  })
+
   const { currPage=0, pageSize=30, _id } = ctx.query
   const data = await UserModel.findOne({
     _id: ObjectId(_id)

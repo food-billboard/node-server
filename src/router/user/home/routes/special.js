@@ -1,11 +1,16 @@
 const Router = require('@koa/router')
-const { SpecialModel, dealErr, notFound } = require('@src/utils')
+const { SpecialModel, dealErr, notFound, Params } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
 .get('/', async(ctx) => {
+  Params.get(ctx, {
+    name: '_id',
+    type: ['isMongoId']
+  })
+
   const { _id } = ctx.query
   let res
   const data = await SpecialModel.findOne({

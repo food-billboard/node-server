@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { encoded, signToken, dealErr, UserModel, RoomModel } = require('@src/utils')
+const { encoded, signToken, Params, UserModel, RoomModel } = require('@src/utils')
 
 const router = new Router()
 
@@ -22,6 +22,14 @@ function createInitialUserInfo({mobile, password}) {
 
 router
 .post('/', async(ctx) => {
+  Params.body(ctx, {
+    name: 'mobile',
+    type: ['isMobilePhone']
+  }, {
+    name: 'password',
+    validator: data => typeof data === 'string'
+  })
+
   const { body: { mobile, password, uid } } = ctx.request
   let res
   //判断账号是否存在

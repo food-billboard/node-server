@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound } = require("@src/utils")
+const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -28,6 +28,11 @@ router
   ctx.body = JSON.stringify(data.res)
 })
 .get('/', async(ctx) => {
+  Params.query(ctx, {
+    name: '_id',
+    type: ['isMongoId']
+  })
+
   const { _id } = ctx.query
   let res
   const data = await MovieModel.findOne({
