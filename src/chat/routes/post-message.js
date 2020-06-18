@@ -1,4 +1,4 @@
-const { otherToken, UserModel, RoomModel, MessageModel, notFound } = require("@src/utils")
+const { UserModel, RoomModel, MessageModel, notFound, Params, verifyTokenToData } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const sendMessage = socket => async (data) => {
@@ -6,16 +6,48 @@ const sendMessage = socket => async (data) => {
   let templateMessage = {}
   let originRoomId
   let originRoomMember
+  const check = Params.bodyUnStatsu(data, {
+    name: 'content',
+    validator: [
+      data => typeof data === 'string'
+    ]
+  }, {
+    name: 'type',
+    validator: [
+      data => !!data && ['IMAGE', 'TEXT', 'VIDEO', 'AUDIO'].includes(data)
+    ]
+  }, {
+    name: '_id',
+    type: [ 'isMongoId' ]
+  })
+
+  const [, token] = verifyTokenToData(data.token)
+  if(check || !token) {
+    socket.emit("post", JSON.stringify({
+      success: false,
+      res: {
+        errMsg: 'bad request'
+      }
+    }))
+    return
+  }
+
+  const { mobile } = token
+  const [ roomId, type ] = Params.sanitizers(data, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  }, {
+    name: 'type',
+    sanitizers: [
+      data => data.toUpperCase()
+    ]
+  })
   const {  
     content,
-    type,
-    _id:roomId,
     point_to
   } = data
-  const objectRoomId = ObjectId(roomId)
-  // const [, token] = verifyTokenToData(data)
-  const [, token] = otherToken(data.token)
-  const { mobile } = token
 
   templateMessage = { ...(point_to ? { point_to } : {}) }
 
@@ -34,7 +66,7 @@ const sendMessage = socket => async (data) => {
       $or: [
         {
           origin: false,
-          _id: objectRoomId
+          _id: roomId
         },
         {
           origin: true
@@ -65,7 +97,7 @@ const sendMessage = socket => async (data) => {
         roomType = type
         member = [..._member]
       }
-      if(origin && _id.equals(objectRoomId)) auth = false
+      if(origin && _id.equals(roomId)) auth = false
     })
     if(!auth) return Promise.reject({errMsg: '无法与系统建立聊天', status: 403})
     if(!member.some(m => m.user && m.user.equals(userInfo._id) && m.status === 'ONLINE' )) return Promise.reject({errMsg: '无权限', status: 403})
@@ -76,25 +108,25 @@ const sendMessage = socket => async (data) => {
 
     //存储图片内容
     switch(type) {
-      case "image":
+      case "IMAGE":
         newContent = {
           ...newContent,
           image: content
         }
         break
-      case "video":
+      case "VIDEO":
         newContent = {
           ...newContent,
           video: content
         }
         break
-      case "audio":
+      case "AUDIO":
         newContent = {
           ...newContent,
           autio: content
         }
         break
-      case "text":
+      case "TEXT":
       default:
         newContent = {
           ...newContent,
@@ -109,7 +141,7 @@ const sendMessage = socket => async (data) => {
         _id: userInfo._id,
       },
       type,
-      room: objectRoomId,
+      room: roomId,
       content: { ...newContent },
     }
     const messageItem = new MessageModel({
@@ -121,7 +153,7 @@ const sendMessage = socket => async (data) => {
   .then(notFound)
   .then(async (data) => {
     const memberData = await RoomModel.updateOne({
-      _id: objectRoomId,
+      _id: roomId,
       origin: false,
       "members.user": { $in: [ userInfo._id ] }
     }, {
@@ -141,7 +173,7 @@ const sendMessage = socket => async (data) => {
       ]
     })
     .then(_ => RoomModel.findOneAndUpdate({
-      _id: objectRoomId,
+      _id: roomId,
       origin: false,
       "members.user": userInfo._id
     }, {

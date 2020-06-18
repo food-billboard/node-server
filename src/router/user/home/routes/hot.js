@@ -1,20 +1,27 @@
 const Router = require('@koa/router')
-const { SearchModel, dealErr, notFound } = require('@src/utils')
+const { SearchModel, dealErr, notFound, Params } = require('@src/utils')
 
 const router = new Router()
 
 router.get('/', async(ctx) => {
-  const { count=3 } = ctx.query
+  const [ count ] = Params.sanitizers(ctx.query, {
+    name: 'count',
+    _default: 3,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  })
   let res
-  const data = await SearchModel.find({})
+  let data = await SearchModel.find({})
   .select({
     key_word: 1
   })
   .sort({
     hot: -1
   })
-  .limit(count)
-  .exec()
+  data = count >= 0 ? data.limit(count) : data
+  data = data.exec()
   .then(data => !!data && data)
   .then(notFound)
   .catch(dealErr(ctx))

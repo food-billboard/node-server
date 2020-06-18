@@ -1,11 +1,50 @@
-const { verifySocketIoToken, otherToken, RoomModel, UserModel, notFound } = require("@src/utils")
+const { verifySocketIoToken, RoomModel, UserModel, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
 
 const getDetail = socket => async (data) => {
-  // const [, token] = verifySocketIoToken(data)
-  const [, token] = otherToken(data.token)
-  const { _id:roomId, startTime=Date.now(), pageSize=30, messageId } = data
+  const [, token] = verifySocketIoToken(data.token)
+  const check = Params.bodyUnStatsu(data, {
+    name: '_id',
+    type: [ 'isMongoId' ]
+  }, {
+    name: 'messageId',
+    validator: [
+      data => !!data ? ObjectId.isValid(data) : true
+    ]
+  })
+  if(check && !token) {
+    socket.emit("message", JSON.stringify({
+      success: false,
+      res: {
+        errMsg: 'bad request'
+      }
+    }))
+    return
+  }
+  const [ roomId, startTime, pageSize, messageId ] = Params.sanitizers(data, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  }, {
+    name: 'startTime',
+    _default: Day(Date.now()).toISOString(),
+    sanitizers: [
+      data => Day(data).toISOString(),
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  }, {
+    name: 'messageId',
+    sanitizers: [
+      data => !!data ? ObjectId(data) : data
+    ]
+  })
   let res
   //已登录
   if(token) {
@@ -22,7 +61,7 @@ const getDetail = socket => async (data) => {
     .then(notFound)
     .then(userId => {
       return RoomModel.findOne({
-        _id: ObjectId(roomId),
+        _id: roomId,
         "members.user": userId,
         "members.status": "ONLINE"
       })
@@ -32,11 +71,11 @@ const getDetail = socket => async (data) => {
       .populate({
         path: 'members.message._id',
         match: {
-          createdAt: { $lt: Day(startTime).toISOString() },
-          ...(messageId ? { _id :ObjectId(messageId) } : {})
+          createdAt: { $lt: startTime },
+          ...(messageId ? { _id : messageId } : {})
         },  
         options: {
-          limit: pageSize,
+          ...(pageSize >= 0 ? { limit: pageSize } : {})
         },
         select: {
           type: 1,
@@ -113,7 +152,7 @@ const getDetail = socket => async (data) => {
   else {
 
     await RoomModel.findOne({
-      _id: ObjectId(roomId),
+      _id: roomId,
       origin: true,
       type: 'SYSTEM'
     })
@@ -123,11 +162,11 @@ const getDetail = socket => async (data) => {
     .populate({
       path: 'message',
       match: {
-        createdAt: { $lt: Day(startTime).toISOString() },
-        ...(messageId ? { _id :ObjectId(messageId) } : {})
+        createdAt: { $lt: startTime },
+        ...(messageId ? { _id : messageId } : {})
       },
       options: {
-        limit: pageSize,
+        ...(pageSize >= 0 ? { limit: pageSize } : {})
       },
       select: {
         type: 1,

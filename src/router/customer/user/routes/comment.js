@@ -7,11 +7,40 @@ const router = new Router()
 router.get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const { currPage=0, pageSize=30, _id } = ctx.query
+  const check = Params.query(ctx, {
+    name: '_id',
+    type: ['isMongoId']
+  })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
+  const [ _id, currPage, pageSize ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  }, {
+    name: 'currPage',
+    _default: 0,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  })
   let res
 
   const data = await UserModel.find({
-    $or: [ { mobile: Number(mobile) }, { _id: ObjectId(_id) } ]
+    $or: [ { mobile: Number(mobile) }, { _id } ]
   })
   .select({
     comment: 1
@@ -19,7 +48,7 @@ router.get('/', async (ctx) => {
   .populate({
     path: 'comment',
     match: {
-      user_info: ObjectId(_id)
+      user_info: _id
     },
     select: {
       source: 1,
@@ -30,8 +59,8 @@ router.get('/', async (ctx) => {
       like_person: 1
     },
     options: {
-      limit: pageSize,
-      skip: currPage * pageSize
+      ...(pageSize >= 0 ? { limit: pageSize } : {}),
+      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
     },
     populate: {
       path: 'source',

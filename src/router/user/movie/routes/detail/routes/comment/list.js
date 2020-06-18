@@ -5,15 +5,41 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router.get('/', async (ctx) => {
-  Params.query(ctx, {
+  const check = Params.query(ctx, {
     name: "_id",
     type: ['isMongoId']
   })
-
-  const { currPage=0, pageSize=30, _id } = ctx.query
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+  }
+  
+  const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
+		name: 'currPage',
+		_default: 0,
+    type: [ 'toInt' ],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+	}, {
+		name: 'pageSize',
+		_default: 30,
+    type: [ 'toInt' ],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+	}, {
+		name: '_id',
+		sanitizers: [
+			function(data) {
+				return ObjectId(data)
+			}
+		]
+	})
   let res
   const data = await MovieModel.findOne({
-    _id: ObjectId(_id)
+    _id
   })
   .select({
     comment: 1,
@@ -28,8 +54,8 @@ router.get('/', async (ctx) => {
       _id: 0
     },
     options: {
-      limit: pageSize,
-      skip: pageSize * currPage,
+      ...(pageSize >= 0 ? { limit: pageSize } : {}),
+      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
     },
     populate: {
       path: 'comment_users',

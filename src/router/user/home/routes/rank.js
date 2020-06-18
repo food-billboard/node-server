@@ -1,11 +1,17 @@
 const Router = require('@koa/router')
-const { RankModel, dealErr, notFound } = require('@src/utils')
+const { RankModel, dealErr, notFound, Params } = require('@src/utils')
 
 const router = new Router()
 
 router.get('/', async(ctx) => {
-  const { count=3 } = ctx.query
-
+  const [ count ] = Params.sanitizers(ctx.query, {
+    name: 'count',
+    _default: 3,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  })
   let res
   const data = await RankModel.find({})
   .select({
@@ -25,7 +31,7 @@ router.get('/', async(ctx) => {
       name: 1
     },
     options: {
-      limit: count
+      ...(count >= 0 ? {limit: count} : {})
     }
   })
   .exec()
@@ -38,10 +44,10 @@ router.get('/', async(ctx) => {
         ...nextD,
         icon: icon ? icon.src : null,
         match: match.map(m => {
-          const { _doc: { poster: { src }, ...nextM } } = m
+          const { _doc: { poster, ...nextM } } = m
           return {
             ...nextM,
-            poster: src,
+            poster: poster ? poster.src : null,
           }
         })
       }

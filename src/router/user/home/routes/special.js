@@ -6,15 +6,28 @@ const router = new Router()
 
 router
 .get('/', async(ctx) => {
-  Params.get(ctx, {
+  const check = Params.get(ctx, {
     name: '_id',
     type: ['isMongoId']
   })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
 
-  const { _id } = ctx.query
+  const [ _id ] = Params.sanitizers(ctx.query, {
+		name: '_id',
+		sanitizers: [
+			function(data) {
+				return ObjectId(data)
+			}
+		]
+	})
   let res
   const data = await SpecialModel.findOne({
-    _id: ObjectId(_id)
+    _id
   })
   .select({
     movie: 1,

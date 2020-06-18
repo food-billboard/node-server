@@ -4,18 +4,33 @@ const { signToken, encoded, dealErr, UserModel, RoomModel, notFound, Params } = 
 const router = new Router()
 
 router.post('/', async(ctx) => {
-  Params.body(ctx, {
+  const check = Params.body(ctx, {
     name: 'mobile',
     type: ['isMobilePhone']
   }, {
     name: 'password',
     validator: data => typeof data === 'string'
   })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
 
-  const { body: { mobile, password, uid } } = ctx.request
+  const [ password, uid, mobile ] = Params.sanitizers(ctx.request.body, {
+    name: 'password',
+    type: ['trim']
+  }, {
+    name: 'uid',
+    type: ['trim']
+  }, {
+    name: 'mobile',
+    type: ['toInt']
+  })
   let res
   const data = await UserModel.findOneAndUpdate({
-    mobile: Number(mobile),
+    mobile,
     password: encoded(password)
   }, {
     $set: { status: 'SIGNIN' }

@@ -10,15 +10,28 @@ const router = new Router()
 
 router
 .get('/', async (ctx) => {
-  Params.query(ctx, {
+  const check = Params.query(ctx, {
     name: '_id',
     type: ['isMongoId']
   })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
+
   let res = {}
-  const { _id } = ctx.query
-  const objectId = ObjectId(_id)
+  const [ _id ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      function(data) {
+        return ObjectId(data)
+      }
+    ]
+  })
   const data = await UserModel.findOne({
-    _id: objectId
+    _id
   })
   .select({
     username: 1,

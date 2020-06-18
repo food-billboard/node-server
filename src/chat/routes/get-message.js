@@ -3,8 +3,8 @@ const mongo = MongoDB()
 const Day = require('dayjs')
 
 const getMessageList = socket => async (data) => {
-  // const [, token] = verifySocketIoToken(data)
-  const [, token] = otherToken(data.token)
+  const [, token] = verifySocketIoToken(data.token)
+  
   let res
   //已登录
   if(token) {

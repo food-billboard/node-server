@@ -2,7 +2,19 @@ const Router = require('@koa/router')
 const Browse = require('./browser')
 const Store = require('./store')
 const Detail = require('./detail')
-const { verifyTokenToData, isType, isEmpty, dealMedia, UserModel, MovieModel, DirectorModel, ActorModel, dealErr, notFound, Params } = require("@src/utils")
+const { 
+  verifyTokenToData, 
+  isType, 
+  isEmpty, 
+  dealMedia, 
+  UserModel, 
+  MovieModel, 
+  DirectorModel, 
+  ActorModel, 
+  dealErr, 
+  notFound, 
+  Params 
+} = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -40,20 +52,20 @@ const TEMPLATE_MOVIE = {
 	same_film: []
 }
 
-//空内容判断
-function emptyCheck(target) {
-  if(isEmpty(target)) return true
-  if(isType(target, 'object')) {
-    return Object.keys(target).some(key => {
-      return emptyCheck(target[key])
-    })
-  }else if(isType(target, 'array')) {
-    return target.some(t => emptyCheck(t))
-  }else if(isType(target, 'number')) {
-    return target < 0
-  }
-  return false
-}
+// //空内容判断
+// function emptyCheck(target) {
+//   if(isEmpty(target)) return true
+//   if(isType(target, 'object')) {
+//     return Object.keys(target).some(key => {
+//       return emptyCheck(target[key])
+//     })
+//   }else if(isType(target, 'array')) {
+//     return target.some(t => emptyCheck(t))
+//   }else if(isType(target, 'number')) {
+//     return target < 0
+//   }
+//   return false
+// }
 
 //自定义与系统字段内容区分
 function fieldDefine(valid, unValid, target) {
@@ -290,21 +302,76 @@ router
       alias,
       ...nextInfo
     },
-    ...nextBody
   } = body 
   let res
 
-  //空数据判断
-  if(emptyCheck({
-    ...nextBody,
-    info: { ...nextInfo }
-  })) {
-    ctx.status = 400
+  const check = Params.body(ctx, {
+    name: 'info.name',
+    validator: [
+      data => typeof data === 'string'
+    ]
+  }, {
+    name: 'info.district',
+    validator: [
+      data => Array.isArray(data)
+    ]
+  }, {
+    name: 'info.director',
+    validator: [
+      data => Array.isArray(data)
+    ]
+  }, {
+    name: 'info.actor',
+    validator: [
+      data => Array.isArray(data)
+    ]
+  },
+  {
+    name: 'info.classify',
+    validator: [
+      data => Array.isArray(data)
+    ]
+  },
+  {
+    name: 'info.language',
+    validator: [
+      data => Array.isArray(data)
+    ]
+  }, {
+    name: 'info.screen_time',
+    validator: [
+      data => !!data
+    ]
+  }, {
+    name: 'info.description',
+    validator: [
+      data => !!data
+    ]
+  }, {
+    name: 'info.author_rate',
+    validator: [
+      data => typeof +data === 'number' && +data >= 0 && +data <= 10
+    ]
+  }, {
+    name: 'images',
+    validator: [
+      data => Array.isArray(data) && data.length >= 6
+    ]
+  }, {
+    name: 'video.src',
+    validator: [
+      data => !!data
+    ]
+  }, {
+    name: 'video.poster',
+    validator: [
+      data => !!data
+    ]
+  })
+
+  if(check) {
     ctx.body = JSON.stringify({
-      success: false,
-      res: {
-        errMsg: '请求参数错误'
-      }
+      ...check.res
     })
     return
   }
@@ -379,11 +446,6 @@ router
 
 })
 .post('/', async (ctx) => {
-
-  Params.body(ctx, {
-    name: "video.src",
-    type: []
-  })
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile }  = token
@@ -492,10 +554,27 @@ router
   ctx.body = JSON.stringify(res)
 })
 .put('/', async (ctx) => {
+  const check = Params.body(ctx, {
+    name: '_id',
+    type: [ 'isMongoId' ]
+  })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
+
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
+
   let res
   let templateUpdateData
   const { body: { 
-    _id,
     video: {
       src,
       poster,
@@ -516,7 +595,7 @@ router
 
   const data = await UserModel.findOne({
     mobile: Number(mobile),
-    issue: { $in: [ ObjectId(_id) ] }
+    issue: { $in: [ _id ] }
   })
   .select({
     _id: 1
@@ -528,7 +607,7 @@ router
   })
   .then(_ => {
     return MovieModel.findOne({
-      _id: ObjectId(_id)
+      _id
     })
     .exec()
     .then(data => !!data && data._doc)
@@ -582,7 +661,7 @@ router
         return MovieModel.updateOne({
           _id: typeof film === 'string' ? ObjectId(film) : film
         }, {
-          $pull: { related_to: {film: ObjectId(_id)} }
+          $pull: { related_to: {film: _id} }
         })
       }))
     }
@@ -593,7 +672,7 @@ router
         return MovieModel.updateOne({
           _id: typeof film === 'string' ? ObjectId(film) : film
         }, {
-          $pull: { same_film: {film: ObjectId(_id)} }
+          $pull: { same_film: {film: _id} }
         })
       })
     }
@@ -609,7 +688,7 @@ router
   }) 
   .then(_ => {
     return MovieModel.updateOne({
-      _id: ObjectId(_id) 
+      _id 
     }, {
       $set: {
         ...Object.keys(templateUpdateData).reduce((acc, key) => {
@@ -641,7 +720,21 @@ router
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const { currPage=0, pageSize=30 } = ctx.query
+  const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
+    name: 'currPage',
+    type: ['toInt'],
+    _default: 0,
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  }, {
+    name: 'pageSize',
+    type: ['toInt'],
+    _default: 30,
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  })
 
   let res 
 
@@ -659,8 +752,8 @@ router
       hot: 1
     },
     options: {
-      skip: pageSize * currPage,
-      limit: pageSize,
+      ...((pageSize >= 0 && currPage >= 0) ? { skip: pageSize * currPage, } : {}),
+      ...(pageSize >= 0 ? { limit: pageSize, } : {})
     }
   })
   .exec()

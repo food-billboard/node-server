@@ -4,15 +4,19 @@ const { RankModel, dealErr, notFound } = require("@src/utils")
 const router = new Router()
 
 router.get('/', async (ctx) => {
-  const { count=8 } = ctx.query
+  const [ count ] = Params.sanitizers(ctx.query, {
+		name: 'count',
+		_default: 8,
+		type: [ 'toInt' ]
+	})
   let res
-  const data = await RankModel.find({})
+  let data = await RankModel.find({})
   .select({
     name: 1,
     icon: 1
   })
-  .limit(count)
-  .exec()
+  data = count >= 0 ? data.limit(count) : data
+  data = data.exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {

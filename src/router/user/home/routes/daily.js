@@ -1,13 +1,20 @@
 const Router = require('@koa/router')
-const { MovieModel, dealErr, notFound } = require('@src/utils')
+const { MovieModel, dealErr, notFound, Params } = require('@src/utils')
 
 const router = new Router()
 
 router
 .get('/', async(ctx) => {
-  const { count=12 } = ctx.query
+  const [ count ] = Params.sanitizers(ctx.query, {
+    name: 'count',
+    _default: 12,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  })
   let res
-  const data = await MovieModel.find({})
+  let data = await MovieModel.find({})
   .select({
     name: 1, 
     poster: 1
@@ -15,8 +22,8 @@ router
   .sort({
     createdAt: -1
   })
-  .limit(count)
-  .exec()
+  data = count >= 0 ? data.limit(count) : data
+  data = data.exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {

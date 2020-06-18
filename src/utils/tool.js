@@ -77,55 +77,9 @@ function flat(array) {
   return newArray
 }
 
-// function check(origin, target) {
-//   if(isEmpty(origin) && !isEmpty(target)) return false
-//   return Object.keys(origin).every(key => {
-//     if(!target.includes(key)) return true
-//     console.log(origin[key])
-//     return origin[key] !== undefined
-//   })
-// }
-
-//参数预检查
-const paramsCheck = {
-  body: (params) => {
-    return async (ctx, next) => {
-      const { method } = ctx
-      if(!Array.isArray(params) || method.toLowerCase() !== 'put') return await next()
-      const { body } = ctx.request
-      if(check(body, params)) return await next()
-      ctx.status = 404
-      ctx.body = JSON.stringify({
-        success: false,
-        res: {
-          errMsg: 'not Found'
-        }
-      })
-    }
-  },
-  query: (params) => {
-    return async (ctx, next) => {
-      const { method } = ctx
-      if(!Array.isArray(params) || method.toLowerCase() !== 'get') return await next()
-      const { query } = ctx
-      if(check(query, params)) {
-        return await next()
-      }
-      ctx.status = 404
-      ctx.body = JSON.stringify({
-        success: false,
-        res: {
-          errMsg: 'not Found'
-        }
-      })
-    }
-  },
-}
-
 module.exports = {
   isType,
   isEmpty,
   flat,
   STATIC_FILE_PATH
-  // paramsCheck,
 }

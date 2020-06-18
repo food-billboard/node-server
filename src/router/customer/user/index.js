@@ -3,7 +3,7 @@ const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
-const { verifyTokenToData, UserModel, dealErr, notFound } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, Params } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -51,8 +51,23 @@ router
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   let res
-  const { _id } = ctx.query
   const { mobile } = token
+  const check = Params.query(ctx, {
+    name: '_id',
+    type: ['isMongoId']
+  })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
+  const [ _id ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
 
   const data = await UserModel.find({
     $or: [

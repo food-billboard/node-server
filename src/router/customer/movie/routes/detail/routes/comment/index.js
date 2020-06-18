@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const Like = require('./like')
-const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, dealMedia, notFound } = require("@src/utils")
+const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, dealMedia, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -17,12 +17,51 @@ const TEMPLATE_COMMENT = {
 }
 
 router
+.use(async(ctx, next) => {
+  const { url, method } = ctx
+  let _method
+  let validate = [
+    {
+      name: '_id',
+      type: [ 'isMongoId' ]
+    }
+  ]
+  if(/.+\/comment(\/movie)?$/g.test(url)) {
+    validate = [
+      ...validate,
+      {
+        name: "content",
+        validator: [
+          data => !!Object.keys(data).length
+        ]
+      }
+    ]
+  }
+  if(method.toLowerCase() === 'get' || method.toLowerCase() === 'delete') _method = 'query'
+  if(method.toLowerCase() === 'put' || method.toLowerCase() === 'post') _method = 'body' 
+  
+  const check = Params[_method](ctx, ...validate)
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
+
+  return await next()
+})
 .post('/movie', async (ctx) => {
   const { body: { content: {
     text='',
     video=[],
     image=[]
-  }, _id } } = ctx.request
+  } } } = ctx.request
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
@@ -38,7 +77,7 @@ router
     .then(data => !!data && data._id)
     .then(notFound),
     MovieModel.findOne({
-      _id: ObjectId(_id)
+      _id
     })
     .select({
       _id: 1
@@ -60,7 +99,7 @@ router
     const comment = new CommentModel({
       ...TEMPLATE_COMMENT,
       source_type: 'movie',
-      source: ObjectId(_id),
+      source: _id,
       user_info: id,
       content: {
         text,
@@ -77,7 +116,7 @@ router
       const { _id: commentId } = data
       return Promise.all([
         MovieModel.updateOne({
-          _id: ObjectId(_id)
+          _id
         }, {
           $push: { comment: commentId }
         }),
@@ -111,7 +150,13 @@ router
     text='',
     video=[],
     image=[]
-  }, _id } } = ctx.request
+  } } } = ctx.request
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
@@ -127,7 +172,7 @@ router
     .then(data => !!data && data._id)
     .then(notFound),
     CommentModel.findOne({
-      _id: ObjectId(_id)
+      _id
     })
     .select({
       _id: 1
@@ -149,7 +194,7 @@ router
     const comment = new CommentModel({
       ...TEMPLATE_COMMENT,
       source_type: "user",
-      source: ObjectId(_id),
+      source: _id,
       user_info: id,
       content: {
         text,
@@ -169,14 +214,14 @@ router
       const { _id: commentId } = data
       return Promise.all([
         CommentModel.updateOne({
-          _id: ObjectId(_id)
+          _id
         }, {
           $push: { sub_comments: commentId },
           $addToSet: { comment_users: [userId] }
         }),
         UserModel.updateOne({
           mobile: Number(mobile),
-          _id: ObjectId(_id)
+          _id
         }, {
           $push: { comment: commentId },
         })

@@ -8,15 +8,28 @@ const router = new Router()
 
 router
 .get('/', async (ctx) => {
-  Params.query(ctx, {
+  const check = Params.query(ctx, {
     name: "_id",
     type: ['isMongoId']
   })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
 
-  const { _id } = ctx.query
+  const [ _id ] = Params.sanitizers(ctx.query, {
+		name: '_id',
+		sanitizers: [
+			function(data) {
+				return ObjectId(data)
+			}
+		]
+	})
   let res
   const data = await MovieModel.findOneAndUpdate({
-    _id: ObjectId(_id)
+    _id
   }, {
     $inc: { glance: 1 }
   })

@@ -8,14 +8,41 @@ const router = new Router()
 
 router
 .get('/', async (ctx) => {
-  Params.query(ctx, {
+  const check = Params.query(ctx, {
     name: '_id',
     type: ['isMongoId']
   })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
 
-  const { currPage=0, pageSize=30, _id } = ctx.query
+  const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
+    name: 'currPage',
+    _default: 0,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  }, {
+    name: '_id',
+    sanitizers: [
+      function(data) {
+        return ObjectId(data)
+      }
+    ]
+  })
   const data = await UserModel.findOne({
-    _id: ObjectId(_id)
+    _id
   })
   .select({
     issue: 1,
@@ -29,8 +56,8 @@ router
       hot: 1
     },
     options: {
-      skip: pageSize * currPage,
-      limit: pageSize,
+      ...(pageSize >= 0 ? { limit: pageSize } : {}),
+      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
     }
   })
   .exec()

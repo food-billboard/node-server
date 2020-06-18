@@ -131,11 +131,16 @@ const verifyTokenToData = (ctx) => {
 }
 
 //socket验证token
-const verifySocketIoToken = socket => {
+const verifySocketIoToken = token => {
   // const { handshake: { headers: { authorization } } } = socket
   // return getToken(authorization)
-  const { handshake: { query: { token } } } = socket
-  return otherToken(token)
+  try { 
+    const { middel, ...nextToken } = verifyToken(token)
+    if(middel !== MIDDEL) return ['401', null]
+    return [null, nextToken]
+  }catch(err) {
+    return [err, null]
+  }
 }
 
 const getToken = (authorization) => {

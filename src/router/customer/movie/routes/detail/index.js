@@ -2,14 +2,30 @@ const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Rate = require('./routes/rate')
 const Store = require('./routes/store')
-const { verifyTokenToData, middlewareVerifyToken, UserModel, MovieModel, dealErr, notFound } = require("@src/utils")
+const { verifyTokenToData, middlewareVerifyToken, UserModel, MovieModel, dealErr, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
 .get('/', async (ctx) => {
-  const { _id } = ctx.query
+  const check = Params.query(ctx, {
+    name: "_id",
+    type: [ 'isMongoId' ]
+  })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
+
+  const [ _id ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
   const [, token] = verifyTokenToData(ctx)
   if(!token) {
     ctx.status = 401
@@ -21,7 +37,7 @@ router
 
   const data = await UserModel.findOne({
     mobile: Number(mobile),
-    store: { $in: [ObjectId(_id)] }
+    store: { $in: [_id] }
   })
   .select({
     _id: 1
@@ -31,7 +47,7 @@ router
   .then(data => {
     if(!data) store = false
     return MovieModel.findOneAndUpdate({
-      _id: ObjectId(_id)
+      _id
     }, { $inc: { glance: 1 } })
     .select({
       modified_time: 0,

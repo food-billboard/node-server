@@ -8,10 +8,23 @@ router
 .use(async(ctx, next) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const { _id } = ctx.query
+  const check = Params.query(ctx, {
+    name: '_id',
+    type: ['isMongoId']
+  })
+  if(check) {
+    ctx.body = JSON.stringify({ ...check.res })
+    return
+  }
+  const [ _id ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
   const data = UserModel.findOne({
     mobile: Number(mobile),
-    issue: { $in: [ ObjectId(_id) ] }
+    issue: { $in: [ _id ] }
   })
   .select({
     _id: 1
@@ -28,15 +41,17 @@ router
   ctx.body = JSON.stringify(data.res)
 })
 .get('/', async(ctx) => {
-  Params.query(ctx, {
+
+  const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
-    type: ['isMongoId']
+    sanitizers: [
+      data => ObjectId(data)
+    ]
   })
 
-  const { _id } = ctx.query
   let res
   const data = await MovieModel.findOne({
-    _id: ObjectId(_id)
+    _id: _id
   })
   .select({
     name: 1,

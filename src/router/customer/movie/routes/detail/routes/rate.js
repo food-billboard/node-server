@@ -1,11 +1,28 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound } = require("@src/utils")
+const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params, isType } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router.put('/', async (ctx) => {
-  const { body: { _id, value } } = ctx.request
+  const check = Params.body(ctx, {
+    name: '_id',
+    type: [ 'isMongoId' ]
+  }, {
+    name: 'value',
+    validator: [
+      data => isType(data, 'number') || isType(data, 'string')
+    ]
+  })
+  const [ _id, value ] = Params.sanitizers(ctx.request.body, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  }, {
+    name: 'value',
+    type: [ 'toInt' ]
+  })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
@@ -26,14 +43,14 @@ router.put('/', async (ctx) => {
       return Promise.all([
         UserModel.updateOne({
           mobile: Number(mobile),
-          "rate._id": ObjectId(_id) 
+          "rate._id": _id
         }, {
-          $set: { "rate.$.rate": ~~value }
+          $set: { "rate.$.rate": value }
         }),
         MovieModel.updateOne({
-          _id: ObjectId(_id),
+          _id,
         }, {
-          $inc: { total_rate: -rateValue.rate + ~~value }
+          $inc: { total_rate: -rateValue.rate + value }
         })
       ])
     }else {
@@ -41,13 +58,13 @@ router.put('/', async (ctx) => {
         UserModel.updateOne({
           mobile: Number(mobile)
         }, {
-          $push: { rate: { _id: ObjectId(_id), rate: ~~value } }
+          $push: { rate: { _id, rate:value } }
         }),
         MovieModel.updateOne({
-          _id: ObjectId(_id)
+          _id
         }, {
           $inc: {
-            total_rate: ~~value,
+            total_rate: value,
             rate_person: 1 
           }
         })

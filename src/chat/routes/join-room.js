@@ -1,14 +1,10 @@
-const { verifySocketIoToken, isType, otherToken, notFound, UserModel, RoomModel } = require("@src/utils")
+const { verifySocketIoToken, isType, notFound, UserModel, RoomModel, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const joinRoom = socket => async (data) => {
-  const { type='CHAT', _id, members=[] } = data
-  const [, token] = otherToken(data.token)
-  let res 
-  let hasRoom = false
-  let roomId
-
-  if(!_id && type === 'CHAT' && !members.length) {
+  const {  _id, members=[] } = data
+  const [, token] = verifySocketIoToken(data.token)
+  if(!_id && ( type.toUpperCase() === 'CHAT' ) && !members.length) {
     socket.emit("join", JSON.stringify({
       success: false,
       res: {
@@ -17,6 +13,18 @@ const joinRoom = socket => async (data) => {
     }))
     return 
   }
+
+  const [ type ] = Params.sanitizers(data, {
+    name: 'type',
+    _default: 'CHAT',
+    sanitizers: [
+      data => data.toUpperCase()
+    ]
+  })
+
+  let res 
+  let hasRoom = false
+  let roomId
 
   //成员整合
   let newMembers = isType(members, 'array') ? members.map(m => ObjectId(m)) : ( ObjectId.isValid(members) ? [ObjectId(members)] : [] )
@@ -209,9 +217,28 @@ const joinRoom = socket => async (data) => {
 
 //离开房间
 const leaveRoom = socket => async (data) => {
-  const { _id } = data
-  // const [, token] = verifySocketIoToken(data)
-  const [, token] = otherToken(data.token)
+  const [, token] = verifySocketIoToken(data.token)
+  const check = Params.bodyUnStatsu(data, {
+    name: '_id',
+    type: [ 'isMongoId' ]
+  })
+  if(check) {
+    socket.emit("leave", JSON.stringify({
+      success: false,
+      res: {
+        errMsg: 'bad request'
+      }
+    }))
+    return
+  }
+
+  const [ _id ] = Params.sanitizers(data, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
+
   let res
   if(token) {
     const { mobile } = token
@@ -226,7 +253,7 @@ const leaveRoom = socket => async (data) => {
     .then(data => {
       const { _id:userId } = data
       return RoomModel.updateOne({
-        _id: ObjectId(_id),
+        _id,
         "members.status": 'ONLINE',
         "members.user": userId
       }, {
@@ -256,7 +283,7 @@ const leaveRoom = socket => async (data) => {
     }
   }
 
-  socket.leave(_id)
+  socket.leave(_id.toString())
   socket.emit("leave", JSON.stringify(res))
 }
 

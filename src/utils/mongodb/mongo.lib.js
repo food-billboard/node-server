@@ -19,6 +19,89 @@ const defaultConfig = {
   },
 }
 
+const isZero = fields => {
+  const { _id, ...nextFields } = fields
+  return Object.values(nextFields).some(field => field == 0)
+}
+const isOne = fields => {
+  const { _id, ...nextFields } = fields
+  return Object.values(nextFields).some(field => field == 1)
+}
+
+function prePopulate(populate) {
+  return function() {
+    let activePopulate = []
+    const { _fields: fields } = this
+    const zero = isZero(fields)
+    const fieldArr = Object.keys(fields)
+    activePopulate = populate.filter(pop => {
+      const { path } = pop
+      return zero ? !fieldArr.includes(path) : fieldArr.includes(path)
+    })
+
+    activePopulate.forEach(active => {
+      this.populate(active)
+    })
+  }
+}
+
+//预设
+const PRE_USER_FIND = [
+
+]
+const PRE_GLOBAL_FIND = [
+  
+]
+const PRE_ROOM_FIND = [
+
+]
+const PRE_MESSAGE_FIND = [
+
+]
+const PRE_MOVIE_FIND = [
+
+]
+const PRE_TAG_FIND = [
+
+]
+const PRE_SPECIAL_FIND = [
+
+]
+const PRE_ACTOR_FIND = [
+
+]
+const PRE_DIRECTOR_FIND = [
+
+]
+const PRE_DISTRICT_FIND = [
+
+]
+const PRE_SEARCH_FIND = [
+
+]
+const PRE_COMMENT_FIND = [
+
+]
+const PRE_RANK_FIND = [
+
+]
+const PRE_CLASSIFY_FIND = [
+
+]
+const PRE_LANGUAGE_FIND = [
+
+]
+const PRE_VIDEO_FIND = [
+
+]
+const PRE_IMAGE_FIND = [
+
+]
+const PRE_OTHER_FIND = [
+
+]
+
+
 //user
 const UserSchema = new Schema({
 	mobile: {
@@ -799,6 +882,25 @@ const OtherMediaSchema = new Schema({
   },
 })
 
+//预处理
+UserSchema.pre('find', prePopulate(PRE_USER_FIND))
+GlobalSchema.pre('find', prePopulate(PRE_GLOBAL_FIND))
+RoomSchema.pre('find', prePopulate(PRE_ROOM_FIND))
+MessageSchema.pre('find', prePopulate(PRE_MESSAGE_FIND))
+MovieSchema.pre('find', prePopulate(PRE_MOVIE_FIND))
+TagSchema.pre('find', prePopulate(PRE_TAG_FIND))
+SpecialSchema.pre('find', prePopulate(PRE_SPECIAL_FIND))
+ActorSchema.pre('find', prePopulate(PRE_ACTOR_FIND))
+DirectorSchema.pre('find', prePopulate(PRE_DIRECTOR_FIND))
+DistrictSchema.pre('find', prePopulate(PRE_DISTRICT_FIND))
+SearchSchema.pre('find', prePopulate(PRE_SEARCH_FIND))
+CommentSchema.pre('find', prePopulate(PRE_COMMENT_FIND))
+RankSchema.pre('find', prePopulate(PRE_RANK_FIND))
+ClassifySchema.pre('find', prePopulate(PRE_CLASSIFY_FIND))
+LanguageSchema.pre('find', prePopulate(PRE_LANGUAGE_FIND))
+VideoSchema.pre('find', prePopulate(PRE_VIDEO_FIND))
+ImageSchema.pre('find', prePopulate(PRE_IMAGE_FIND))
+
 RoomSchema.pre("find", function() {
   this.populate({
     path: "info.avatar",
@@ -821,16 +923,27 @@ SpecialSchema.pre("findOne", function() {
   }
 })
 
+//字段为空时，返回所有
 RankSchema.pre("find", function() {
-  if(this._fields.icon) {
-    this.populate({
-      path: 'icon',
-      select: {
-        src: 1,
-        _id: 0
-      }
+  let activePopulate = []
+  const { _fields: fields } = this
+  const zero = isZero(fields)
+  const fieldArr = Object.keys(fields)
+  if(zero) {
+    activePopulate = populate.filter(pop => {
+      const { path } = pop
+      return !fieldArr.includes(path)
+    })
+  }else {
+    activePopulate = populate.filter(pop => {
+      const { path } = pop
+      return fieldArr.includes(path)
     })
   }
+
+  activePopulate.forEach(active => {
+    this.populate(active)
+  })
 })
 
 MovieSchema.pre('findOne', function() {

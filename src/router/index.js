@@ -1,6 +1,7 @@
 const Router = require('@koa/router')
 const User = require('./user')
 const Customer = require('./customer')
+const Swagger = require('./swagger')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -44,5 +45,6 @@ router
 })
 .use('/user', User.routes(), User.allowedMethods())
 .use('/customer', Customer.routes(), Customer.allowedMethods())
+.use('/swagger', Swagger.routes(), Swagger.allowedMethods())
 
 module.exports = router

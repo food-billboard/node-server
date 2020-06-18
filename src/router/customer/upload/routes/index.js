@@ -6,7 +6,8 @@ const {
   UserModel, 
   notFound, 
   dealErr, 
-  verifyTokenToData
+  verifyTokenToData,
+  Params
 } = require('@src/utils')
 const {   mergeChunkFile, finalFilePath, conserveBlob, isFileExistsAndComplete  } = require('../util')
 const path = require('path')
@@ -17,19 +18,75 @@ const ACCEPT_IMAGE_MIME = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp']
 const ACCEPT_VIDEO_MIME = ['avi', 'mp4', 'rmvb', 'mkv', 'f4v', 'wmv']
 
 router
-//预查
-.get('/', async(ctx) => {
-  const { name: md5, suffix, chunkSize, chunksLength, size, filename, auth='PUBLIC' } = ctx.query
-  if(!md5 || !suffix || !chunksLength || !size) {
-    ctx.status = 400
+.use(async(ctx, next) => {
+  const { method } = ctx
+  let _method
+  if(method.toLowerCase() === 'get' || method.toLowerCase() === 'delete') _method = 'query'
+  if(method.toLowerCase() === 'post' || method.toLowerCase() === 'put') _method = 'body'
+  const check = Params[_method](ctx, {
+    name: 'name',
+    type: ['isMd5']
+  })
+  if(check) {
     ctx.body = JSON.stringify({
-      success: false,
-      res: {
-        errMsg: 'bad request'
-      }
+      ...check.res
     })
     return 
   }
+
+  return await next()
+})
+//预查
+.get('/', async(ctx) => {
+  const check = Params.query(ctx, {
+    name: 'suffix',
+    validator: [
+      data => !!data
+    ]
+  }, {
+    name: 'chunksLength',
+    type: [ 'isInt' ],
+    validator: [
+      data => data > 0
+    ]
+  }, {
+    name: 'size',
+    type: [ 'isInt' ],
+    validator: [
+      data => data > 0
+    ]
+  })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
+
+  const { name: md5, chunksLength, size } = ctx.query
+  const [ suffix, chunkSize, filename, auth ] = Params.sanitizers(ctx.query, {
+    name: 'suffix',
+    type: [ 'trim'],
+    sanitizers: [
+      data => data.toLowerCase()
+    ]
+  }, {
+    name: 'chunkSize',
+    type: [ 'toInt' ]
+  }, {
+    name: filename,
+    _default: md5,
+    sanitizers: [
+      data => data.toString()
+    ]
+  }, {
+    name: 'auth',
+    _default: 'public',
+    sanitizers: [
+      data => data.toLowerCase()
+    ]
+  })
+
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
@@ -144,19 +201,24 @@ router
 })
 //上传
 .post('/', async(ctx) => {
+  const check = Params.body(ctx, {
+    name: 'index',
+    type: ['isInt'],
+    validator: [
+      data => data >= 0
+    ]
+  })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
+
   const { files } = ctx.request
   const { body: { index, name: md5 } } = ctx.request
   const file = files.file
-  if(!file || !index || !md5) {
-    ctx.status = 400
-    ctx.body = JSON.stringify({
-      success: false,
-      res: {
-        errMsg: 'file not found'
-      }
-    })
-    return 
-  }
+
   let res
   const data = await conserveBlob(file.path, md5, index)
   .then(_ => Promise.all([

@@ -1,12 +1,17 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, CommentModel, dealErr, notFound } = require("@src/utils")
+const { verifyTokenToData, UserModel, CommentModel, dealErr, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
 .put('/', async (ctx) => {
-  const { body: { _id } } = ctx.request
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
@@ -22,7 +27,7 @@ router
   .then(notFound)
   .then(id => {
     return CommentModel.findOneAndUpdate({
-      _id: ObjectId(_id),
+      _id,
       like_person: { $nin: [id] } 
     }, {
       $inc: { total_like: 1 },
@@ -61,7 +66,12 @@ router
 
 })
 .delete('/', async(ctx) => {
-  const { _id } = ctx.query
+  const [ _id ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res
@@ -77,7 +87,7 @@ router
   .then(notFound)
   .then(id => {
     return CommentModel.findOneAndUpdate({
-      _id: ObjectId(_id),
+      _id,
       like_person: { $in: [id] } 
     }, {
       $inc: { total_like: -1 },

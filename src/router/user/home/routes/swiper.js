@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MovieModel, SpecialModel, isEmpty } = require('@src/utils')
+const { MovieModel, SpecialModel, isEmpty, Params } = require('@src/utils')
 const router = new Router()
 
 const cache = {}
@@ -73,8 +73,15 @@ const handle = {
 let cacheProxy = new Proxy( cache, handle )
 
 router.get('/', async(ctx) => {
-  const { count=6 } = ctx.query
-  let res = await cacheProxy.data(~~count)
+  const [ count ] = Params.sanitizers(ctx.query, {
+    name: 'count',
+    _default: 6,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : 6
+    ]
+  })
+  let res = await cacheProxy.data(count)
   ctx.body = JSON.stringify({
     success: true,
     res: {

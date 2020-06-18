@@ -1,12 +1,26 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, Params } = require('@src/utils')
 
 const router = new Router()
 
 router.get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const { currPage=0, pageSize=30 } = ctx.query
+  const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
+    name: 'currPage',
+    _default: 0,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  })
   let res
 
   const data = await UserModel.findOne({
@@ -18,8 +32,8 @@ router.get('/', async (ctx) => {
   .populate({
     path: 'comment',
     options: {
-      limit: pageSize,
-      skip: currPage * pageSize
+      ...(pageSize >= 0 ? { limit: pageSize } : {}),
+      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
     },
     select: {
       source: 1,

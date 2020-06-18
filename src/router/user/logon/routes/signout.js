@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, dealErr, UserModel, RoomModel, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, dealErr, UserModel, RoomModel, notFound } = require("@src/utils")
 
 const router = new Router()
 

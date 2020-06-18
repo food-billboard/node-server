@@ -1,10 +1,24 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr, notFound, Params } = require("@src/utils")
 
 const router = new Router()
 
 router.get('/', async (ctx) => {
-  const { currPage=0, pageSize=30 } = ctx.query
+  const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
+    name: 'currPage',
+    _default: 0,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   let res 
@@ -23,8 +37,8 @@ router.get('/', async (ctx) => {
       poster: 1
     },
     options: {
-      limit: pageSize,
-      skip: pageSize * currPage,
+      ...(pageSize >= 0 ? { limit: pageSize } : {}),
+      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
     }
   })
   .exec()

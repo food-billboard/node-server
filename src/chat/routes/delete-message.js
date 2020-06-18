@@ -1,11 +1,29 @@
-const { verifySocketIoToken, otherToken, UserModel, RoomModel, notFound } = require("@src/utils")
+const { verifySocketIoToken, UserModel, RoomModel, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const deleteMessage = socket => async(data) => {
-  const { _id } = data
-  // const [, token] = verifySocketIoToken(data)
-  const [, token] = otherToken(data.token)
+  const [, token] = verifySocketIoToken(data.token)
+  const check = Params.bodyUnStatus(data, {
+    name: '_id',
+    type: [ 'isMongoId' ]
+  })
+  if(check && !token) {
+    socket.emit("delete", JSON.stringify({
+      success: false,
+      res: {
+        errMsg: 'bad request'
+      }
+    }))
+    return
+  }
+
   const { mobile } = token
+  const [ _id ] = Params.sanitizers(data, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
   let res
 
   await UserModel.findOne({
@@ -19,7 +37,7 @@ const deleteMessage = socket => async(data) => {
   .then(notFound)
   .then(userId => {
     return RoomModel.updateOne({
-      _id: ObjectId(_id),
+      _id,
       "members.user": userId
     }, {
       $set: { "members.$.message": [] }

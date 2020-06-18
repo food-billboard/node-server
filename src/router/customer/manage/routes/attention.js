@@ -5,9 +5,46 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router
+.use(async(ctx, next) => {
+  const { method } = ctx
+  if(method.toLowerCase() === 'get') return await next()
+  let _method 
+  if(method.toLowerCase() === 'put') {
+    _method = 'body'
+  }else if(method.toLowerCase() === 'delete') {
+    _method = 'query'
+  }
+
+  const check = Params[_method](ctx, {
+    name: '_id',
+    type: ['isMongoId']
+  })
+  if(check) {
+    ctx.body = JSON.stringify({
+      ...check.res
+    })
+    return
+  }
+
+  return await next()
+})
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  const { currPage=0, pageSize=30 } = ctx.query
+  const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
+    name: 'currPage',
+    _default: 0,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    type: ['toInt'],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+  })
   const { mobile } = token
   let res
 
@@ -24,8 +61,8 @@ router
       avatar: 1
     },
     options: {
-      limit: pageSize,
-      skip: pageSize * currPage
+      ...(pageSize >= 0 ? { limit: pageSize } : {}),
+      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
     }
   })
   .exec()
@@ -60,13 +97,14 @@ router
   ctx.body = JSON.stringify(res)
 })
 .put('/', async (ctx) => {
-  Params.body(ctx, {
-    name: '_id',
-    type: ['isMongoId']
-  })
-  
   const [, token] = verifyTokenToData(ctx)
-  const { body: { _id } } = ctx.request
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
+
   const { mobile } = token
   let res
 
@@ -105,7 +143,13 @@ router
 })
 .delete('/', async(ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  const { _id  } = ctx.query
+  const [ _id ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
+
   const { mobile } = token
   let res
   const data = await UserModel.findOneAndUpdate({

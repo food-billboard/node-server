@@ -1,10 +1,27 @@
-const { verifySocketIoToken, otherToken, UserModel, RoomModel } = require("@src/utils")
+const { verifySocketIoToken, UserModel, RoomModel, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const readMessage = socket => async (data) => {
-  const { _id } = data
-  // const [, token] = verifySocketIoToken(data)
-  const [, token] = otherToken(data.token)
+  const check = Params.bodyUnStatus(data, {
+    name: '_id',
+    type: [ 'isMongoId' ]
+  })
+  const [, token] = verifySocketIoToken(data.token)
+  if(check || !data) {
+    socket.emit("put", JSON.stringify({
+      success: false,
+      res: {
+        errMsg: 'bad Request'
+      }
+    }))
+    return
+  }
+  const [ _id ] = Param.sanitizers(data, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
   const { mobile } = token
   let errMsg
   let res
@@ -19,7 +36,7 @@ const readMessage = socket => async (data) => {
   .then(data => !!data && data._id)
   .then(userId => {
     return RoomModel.updateOne({
-      _id: ObjectId(_id),
+      _id
     }, {
       $set: { "members.$[message].message.$[user].readed": true }
     }, {
@@ -38,9 +55,6 @@ const readMessage = socket => async (data) => {
         }
       ]
     })
-  })
-  .then(data => {
-    console.log(data)
   })
   .catch(err => {
     console.log(err)

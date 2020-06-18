@@ -1,18 +1,25 @@
 const Router = require('@koa/router')
-const { ClassifyModel, dealErr, notFound } = require('@src/utils')
+const { ClassifyModel, dealErr, notFound, Params } = require('@src/utils')
 
 const router = new Router()
 
 router.get('/', async (ctx) => {
-  const { count=12 } = ctx.query
+  const [ count ] = Params.sanitizers(ctx.query, {
+		name: 'currPage',
+		_default: 12,
+    type: [ 'toInt' ],
+    sanitizers: [
+      data => data >= 0 ? data : -1
+    ]
+	})
   let res
-  const data = await ClassifyModel.find({})
+  let data = await ClassifyModel.find({})
   .select({
     name: 1,
 		poster: 1
   })
-  .limit(count)
-  .exec()
+  data = count >= 0 ? data.limit(count) : data
+  data = data.exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {
