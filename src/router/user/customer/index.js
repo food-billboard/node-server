@@ -42,23 +42,16 @@ router
     createdAt: 1,
     updatedAt: 1
   })
-  .populate({
-    path: 'avatar',
-    select: {
-      _id: 0,
-      src: 1
-    }
-  })
   .exec()
   .then(data => !!data && data._doc)
   .then(data => {
     if(!data) return Promise.reject({ errMsg: 'not found', status: 404 })
-    const { avatar: { src }, attentions, fans, ...nextData } = data
+    const { avatar, attentions, fans, ...nextData } = data
     return {
       ...nextData,
       attentions: attentions.length,
       fans: fans.length,
-      avatar: src
+      avatar: avatar ? avatar.src : null
     }
   })
   .catch(dealErr(ctx))

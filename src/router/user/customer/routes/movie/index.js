@@ -67,11 +67,11 @@ router
     const { issue } = data
     return {
       issue: issue.map(i => {
-        const { _doc: { poster: { src }, ...nextI } } = i
+        const { _doc: { poster, ...nextI } } = i
         console.log(i)
         return {
           ...nextI,
-          poster: src
+          poster: poster ? poster.src : null
         }
       })
     }

@@ -54,12 +54,12 @@ const Params = {
     })
   },
   bodyUnStatus(origin, ...validators) {
-    const data = this.validate(origin, validators)
+    const data = this.validate(origin, ...validators)
     return data
   },
   query(ctx, ...validators) {
     const { query } = ctx
-    const data = this.validate(query, validators)
+    const data = this.validate(query, ...validators)
     if(data) {
       const res = TEMPLATE_ERROR(ctx)
       return {
@@ -71,7 +71,7 @@ const Params = {
   },
   body(ctx) {
     const { body } = ctx.request
-    const data = this.validate(body, validators)
+    const data = this.validate(body, ...validators)
     if(data) {
       const res = TEMPLATE_ERROR(ctx)
       return {
@@ -93,7 +93,7 @@ const Params = {
     }
     return null
   },
-  validate(origin, validators) {
+  validate(origin, ...validators) {
     let errs = []
     let response = validators.every(validate => {
       const { name, validator=[], type=[] } = validate

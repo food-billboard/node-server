@@ -33,11 +33,51 @@ function prePopulate(populate) {
     let activePopulate = []
     const { _fields: fields } = this
     const zero = isZero(fields)
-    const fieldArr = Object.keys(fields)
+    let fieldArr = []
+    //筛选同字段不同层
+    Object.keys(fields).forEach(field => {
+      const index = fieldArr.findIndex(f => {
+        field.includes(f)
+      })
+      if(!!~index) {
+        fieldArr.splice(index, 1, field)
+      }else {
+        fieldArr.push(field)
+      }
+    })
+
     activePopulate = populate.filter(pop => {
       const { path } = pop
-      return zero ? !fieldArr.includes(path) : fieldArr.includes(path)
+      const pathArr = path.split('.')
+      return zero ? ( 
+        !fieldArr.some(field => {
+          let fArr = field.split('.')
+          let clipArr
+          if(fArr.length > pathArr.length) {
+            clipArr = fArr.slice(0, pathArr.length)
+            return pathArr.every((p, i) => p === clipArr[i])
+          }else {
+            clipArr = pathArr.slice(0, fArr.length)
+            return fArr.every((f, i) => f === clipArr[i])
+          }
+        })
+      )
+        : 
+        fieldArr.some(field => {
+          let fArr = field.split('.')
+          let clipArr
+          if(fArr.length <= pathArr.length){
+            clipArr = pathArr.slice(0, fArr.length)
+            return fArr.every((f, i) => f === clipArr[i])
+          }
+          // else {
+          //   clipArr = fArr.slice(0, pathArr.length)
+          //   return pathArr.every((p, i) => p === clipArr[i])
+          // }
+          return false
+        })
     })
+
 
     activePopulate.forEach(active => {
       this.populate(active)
@@ -47,60 +87,189 @@ function prePopulate(populate) {
 
 //预设
 const PRE_USER_FIND = [
-
+ {
+   path: 'avatar',
+   select: {
+    src: 1,
+    _id: 0
+   }
+ }, 
 ]
-const PRE_GLOBAL_FIND = [
-  
-]
+const PRE_GLOBAL_FIND = []
 const PRE_ROOM_FIND = [
-
+  {
+    path: 'info.avatar',
+    select: {
+      src: 1,
+      _id: 0
+    }
+  }
 ]
 const PRE_MESSAGE_FIND = [
-
+  {
+    path: 'content.image',
+    select: {
+      _id: 0,
+      src: 1
+    }
+  },
+  {
+    path: 'content.video',
+    select: {
+      _id: 0,
+      src: 1
+    }
+  }
 ]
 const PRE_MOVIE_FIND = [
-
+  {
+    path: 'video',
+    select: {
+      _id: 0,
+      src: 1,
+      poster: 1
+    }
+  },
+  {
+    path: 'images',
+    select: {
+      _id: 0,
+      src: 1
+    }
+  },
+  {
+    path: 'poster',
+    select: {
+      _id: 0,
+      src: 1
+    }
+  },
+  {
+    path: 'info.actor',
+    select: {
+      name: 1,
+      "other.avatar": 1,
+      _id: 0
+    }
+  },
+  {
+    path: 'info.director',
+    select: {
+      name: 1,
+      _id: 0
+    }
+  },
+  {
+    path: 'info.district',
+    select: {
+      name: 1,
+      _id: 0
+    }
+  },
+  {
+    path: 'info.classify',
+    select: {
+      name: 1,
+      _id: 0
+    }
+  },
+  {
+    path: 'info.language',
+    select: {
+      _id: 0,
+      name: 1
+    }
+  },
+  {
+    path: 'tag',
+    select: {
+      text: 1,
+      _id: 0
+    }
+  }
 ]
-const PRE_TAG_FIND = [
-
-]
+const PRE_TAG_FIND = []
 const PRE_SPECIAL_FIND = [
-
+  {
+    path: 'poster',
+    select: {
+      _id: 0,
+      src: 1
+    }
+  }
 ]
 const PRE_ACTOR_FIND = [
-
+  {
+    path: 'other.avatar',
+    select: {
+      _id: 0,
+      src: 1
+    }
+  }
 ]
 const PRE_DIRECTOR_FIND = [
-
+  {
+    path: 'other.avatar',
+    select: {
+      _id: 0,
+      src: 1
+    }
+  }
 ]
-const PRE_DISTRICT_FIND = [
-
-]
-const PRE_SEARCH_FIND = [
-
-]
+const PRE_DISTRICT_FIND = []
+const PRE_SEARCH_FIND = []
 const PRE_COMMENT_FIND = [
-
+  {
+    path: 'content.image',
+    select: {
+      src: 1,
+      _id: 0
+    }
+  }, 
+  {
+    path: 'content.video',
+    select: {
+      src: 1,
+      _id: 0
+    }
+  },
+  {
+    path: 'user_info',
+    select: {
+      avatar: 1,
+      username: 1
+    }
+  },
+  {
+    path: 'comment_users',
+    select: {
+      avatar: 1,
+      username: 1
+    }
+  }
 ]
 const PRE_RANK_FIND = [
-
+  {
+    path: 'icon',
+    select: {
+      _id: 0,
+      src: 1
+    }
+  }
 ]
 const PRE_CLASSIFY_FIND = [
-
+  {
+    path: 'icon',
+    select: {
+      _id: 0,
+      src: 1
+    }
+  }
 ]
-const PRE_LANGUAGE_FIND = [
-
-]
-const PRE_VIDEO_FIND = [
-
-]
-const PRE_IMAGE_FIND = [
-
-]
-const PRE_OTHER_FIND = [
-
-]
-
+const PRE_LANGUAGE_FIND = []
+const PRE_VIDEO_FIND = []
+const PRE_IMAGE_FIND = []
+const PRE_OTHER_FIND = []
 
 //user
 const UserSchema = new Schema({
@@ -884,181 +1053,59 @@ const OtherMediaSchema = new Schema({
 
 //预处理
 UserSchema.pre('find', prePopulate(PRE_USER_FIND))
+UserSchema.pre('findOne', prePopulate(PRE_USER_FIND))
+UserSchema.pre('findOneAndUpdate', prePopulate(PRE_USER_FIND))
 GlobalSchema.pre('find', prePopulate(PRE_GLOBAL_FIND))
+GlobalSchema.pre('findOne', prePopulate(PRE_GLOBAL_FIND))
+GlobalSchema.pre('findOneAndUpdate', prePopulate(PRE_GLOBAL_FIND))
 RoomSchema.pre('find', prePopulate(PRE_ROOM_FIND))
+RoomSchema.pre('findOne', prePopulate(PRE_ROOM_FIND))
+RoomSchema.pre('findOneAndUpdate', prePopulate(PRE_ROOM_FIND))
 MessageSchema.pre('find', prePopulate(PRE_MESSAGE_FIND))
+MessageSchema.pre('findOne', prePopulate(PRE_MESSAGE_FIND))
+MessageSchema.pre('findOneAndUpdate', prePopulate(PRE_MESSAGE_FIND))
 MovieSchema.pre('find', prePopulate(PRE_MOVIE_FIND))
+MovieSchema.pre('findOne', prePopulate(PRE_MOVIE_FIND))
+MovieSchema.pre('findOneAndUpdate', prePopulate(PRE_MOVIE_FIND))
 TagSchema.pre('find', prePopulate(PRE_TAG_FIND))
+TagSchema.pre('findOne', prePopulate(PRE_TAG_FIND))
+TagSchema.pre('findOneAndUpdate', prePopulate(PRE_TAG_FIND))
 SpecialSchema.pre('find', prePopulate(PRE_SPECIAL_FIND))
+SpecialSchema.pre('findOne', prePopulate(PRE_SPECIAL_FIND))
+SpecialSchema.pre('findOneAndUpdate', prePopulate(PRE_SPECIAL_FIND))
 ActorSchema.pre('find', prePopulate(PRE_ACTOR_FIND))
+ActorSchema.pre('findOne', prePopulate(PRE_ACTOR_FIND))
+ActorSchema.pre('findOneAndUpdate', prePopulate(PRE_ACTOR_FIND))
 DirectorSchema.pre('find', prePopulate(PRE_DIRECTOR_FIND))
+DirectorSchema.pre('findOne', prePopulate(PRE_DIRECTOR_FIND))
+DirectorSchema.pre('findOneAndUpdate', prePopulate(PRE_DIRECTOR_FIND))
 DistrictSchema.pre('find', prePopulate(PRE_DISTRICT_FIND))
+DistrictSchema.pre('findOne', prePopulate(PRE_DISTRICT_FIND))
+DistrictSchema.pre('findOneAndUpdate', prePopulate(PRE_DISTRICT_FIND))
 SearchSchema.pre('find', prePopulate(PRE_SEARCH_FIND))
+SearchSchema.pre('findOne', prePopulate(PRE_SEARCH_FIND))
+SearchSchema.pre('findOneAndUpdate', prePopulate(PRE_SEARCH_FIND))
 CommentSchema.pre('find', prePopulate(PRE_COMMENT_FIND))
+CommentSchema.pre('findOne', prePopulate(PRE_COMMENT_FIND))
+CommentSchema.pre('findOneAndUpdate', prePopulate(PRE_COMMENT_FIND))
 RankSchema.pre('find', prePopulate(PRE_RANK_FIND))
+RankSchema.pre('findOne', prePopulate(PRE_RANK_FIND))
+RankSchema.pre('findOneAndUpdate', prePopulate(PRE_RANK_FIND))
 ClassifySchema.pre('find', prePopulate(PRE_CLASSIFY_FIND))
+ClassifySchema.pre('findOne', prePopulate(PRE_CLASSIFY_FIND))
+ClassifySchema.pre('findOneAndUpdate', prePopulate(PRE_CLASSIFY_FIND))
 LanguageSchema.pre('find', prePopulate(PRE_LANGUAGE_FIND))
+LanguageSchema.pre('findOne', prePopulate(PRE_LANGUAGE_FIND))
+LanguageSchema.pre('findOneAndUpdate', prePopulate(PRE_LANGUAGE_FIND))
 VideoSchema.pre('find', prePopulate(PRE_VIDEO_FIND))
+VideoSchema.pre('findOne', prePopulate(PRE_VIDEO_FIND))
+VideoSchema.pre('findOneAndUpdate', prePopulate(PRE_VIDEO_FIND))
 ImageSchema.pre('find', prePopulate(PRE_IMAGE_FIND))
-
-RoomSchema.pre("find", function() {
-  this.populate({
-    path: "info.avatar",
-    select: {
-      src: 1,
-      _id: 0
-    }
-  })
-})
-
-SpecialSchema.pre("findOne", function() {
-  if(this._fields.poster) {
-    this.populate({
-      path: 'poster',
-      select: {
-        src: 1,
-        _id: 0
-      }
-    })
-  }
-})
-
-//字段为空时，返回所有
-RankSchema.pre("find", function() {
-  let activePopulate = []
-  const { _fields: fields } = this
-  const zero = isZero(fields)
-  const fieldArr = Object.keys(fields)
-  if(zero) {
-    activePopulate = populate.filter(pop => {
-      const { path } = pop
-      return !fieldArr.includes(path)
-    })
-  }else {
-    activePopulate = populate.filter(pop => {
-      const { path } = pop
-      return fieldArr.includes(path)
-    })
-  }
-
-  activePopulate.forEach(active => {
-    this.populate(active)
-  })
-})
-
-MovieSchema.pre('findOne', function() {
-  // if(this._fields.poster) {
-    this.populate({
-      path: 'poster',
-      select: {
-        src: 1,
-        _id: 0
-      }
-    })
-    .populate({
-      path: 'images',
-      select: {
-        src: 1,
-        _id: 0
-      }
-    })
-    .populate({
-      path: 'video',
-      select: {
-        src: 1,
-        _id: 0
-      }
-    })
-  // }
-})
-
-MovieSchema.pre('find', function() {
-  const { _fields, paths } = this
-  if(this._fields.poster) {
-    this.populate({
-      path: 'poster',
-      select: {
-        src: 1,
-        _id: 0
-      }
-    })
-  }
-})
-
-UserSchema.pre('find', function() {
-  if(this._fields.avatar) {
-    this.populate({
-      path: 'avatar',
-      select: {
-        src: 1,
-        _id: 0
-      }
-    })
-  }
-})
-UserSchema.pre('findOne', function() {
-  if(this._fields.avatar) {
-    this.populate({
-      path: 'avatar',
-      select: {
-        src: 1,
-        _id: 0
-      }
-    })
-  }
-})
-
-CommentSchema.pre('find', function() {
-  // if(this._fields.content) {
-    this.populate({
-      path: 'content.image',
-      select: {
-        src: 1,
-        _id: 0
-      }
-    })
-    .populate({
-      path: 'content.video',
-      select: {
-        src: 1,
-        _id: 0
-      }
-    })
-    .populate({
-      path: 'user_info',
-      select: {
-        avatar: 1,
-        username: 1
-      }
-    })
-  // }
-})
-
-CommentSchema.pre('findOne', function() {
-  // if(this._fields.content) {
-    this.populate({
-      path: 'content.image',
-      select: {
-        src: 1,
-        _id: 0
-      }
-    })
-    .populate({
-      path: 'content.video',
-      select: {
-        src: 1,
-        _id: 0
-      }
-    })
-    .populate({
-      path: 'user_info',
-      select: {
-        avatar: 1,
-        username: 1
-      }
-    })
-  // }
-})
+ImageSchema.pre('findOne', prePopulate(PRE_IMAGE_FIND))
+ImageSchema.pre('findOneAndUpdate', prePopulate(PRE_IMAGE_FIND))
+OtherMediaSchema.pre('find', prePopulate(PRE_OTHER_FIND))
+OtherMediaSchema.pre('findOne', prePopulate(PRE_OTHER_FIND))
+OtherMediaSchema.pre('findOneAndUpdate', prePopulate(PRE_OTHER_FIND))
 
 const UserModel = model('user', UserSchema)
 const GlobalModel = model('global', GlobalSchema)

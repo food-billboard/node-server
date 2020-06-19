@@ -48,19 +48,19 @@ const handle = {
       })
       const result = [ 
         ...(movieData ? movieData.map(m => {
-          const { _doc: { poster: { src }, ...nextM } } = m
+          const { _doc: { poster, ...nextM } } = m
           return {
             ...nextM,
             type: "MOVIE",
-            poster: src
+            poster: poster? poster.src : null
           }
         }) : [] ), 
         ...(specialData ? specialData.map(s => {
-          const { _doc: { poster: { src }, ...nextS } } = s
+          const { _doc: { poster, ...nextS } } = s
           return {
             ...nextS,
             type: "SPECIAL",
-            poster: src
+            poster: poster? poster.src : null
           }
         }) : []) ]
       Reflect.set(target, 'data', result)

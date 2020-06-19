@@ -47,9 +47,9 @@ router
   .then(data => {
     const { fans } = data
     return fans.map(f => {
-      const { _doc: { avatar: { src }, ...nextF } } = f
+      const { _doc: { avatar, ...nextF } } = f
       return {
-        avatar: src,
+        avatar: avatar ? avatar.src : null,
         ...nextF
       }
     })

@@ -40,49 +40,6 @@ router
     related_to: 0,
   })
   .populate({
-    path: 'info.actor',
-    select: {
-      name: 1,
-      "other.avatar": 1,
-      _id: 0
-    }
-  })
-  .populate({
-    path: 'info.director',
-    select: {
-      name: 1,
-      _id: 0
-    }
-  })
-  .populate({
-    path: 'info.district',
-    select: {
-      name: 1,
-      _id: 0
-    }
-  })
-  .populate({
-    path: 'info.classify',
-    select: {
-      name: 1,
-      _id: 0
-    }
-  })
-  .populate({
-    path: 'info.language',
-    select: {
-      _id: 0,
-      name: 1
-    }
-  })
-  .populate({
-    path: 'tag',
-    select: {
-      text: 1,
-      _id: 0
-    }
-  })
-  .populate({
     path: 'comment',
     select: {
       "content.text": 1,
@@ -113,28 +70,6 @@ router
     path: 'same_film.film',
     select: {
       name: 1,
-      _id: 0
-    }
-  })
-  .populate({
-    path: 'images',
-    select: {
-      src: 1,
-      _id: 0
-    }
-  })
-  .populate({
-    path: 'video',
-    select: {
-      src: 1,
-      _id: 0,
-      posetr: 1,
-    }
-  })
-  .populate({
-    path: 'poster',
-    select: {
-      src: 1,
       _id: 0
     }
   })
@@ -217,21 +152,21 @@ router
       },
       comment: comment.map(c => {
         const { _doc: { user_info, ...nextC } } = c
-        const { _doc: { avatar: { src }, ...nextUserInfo } } = user_info
+        const { _doc: { avatar, ...nextUserInfo } } = user_info
         return {
           ...nextC,
           user_info: {
             ...nextUserInfo,
-            avatar: src
+            avatar: avatar ? avatar.src : null
           }
         }
       }),
-      images: images.map(i => i.src),
-      poster: poster.src || null,
+      images: images.map(i => i && i.src),
+      poster: poster ? poster.src : null,
       same_film: same_film.map(s => {
-        const { _doc: { film: { name }, ...nextS } } = s
+        const { _doc: { film, ...nextS } } = s
         return {
-          name,
+          name: film ? film.name : null,
           ...nextS
         }
       })

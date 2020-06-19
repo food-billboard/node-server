@@ -56,42 +56,6 @@ router
       related_to: 0
     })
     .populate({
-      path: 'info.actor',
-      select: {
-        _id: 0,
-        name: 1,
-        "other.avatar": 1
-      }
-    })
-    .populate({
-      path: 'info.director',
-      select: {
-        name: 1,
-        _id: 0
-      }
-    })
-    .populate({
-      path: 'info.district',
-      select: {
-        name: 1,
-        _id: 0
-      }
-    })
-    .populate({
-      path: 'info.language',
-      select: {
-        name: 1,
-        _id: 0
-      }
-    })
-    .populate({
-      path: 'tag',
-      select: {
-        text: 1,
-        _id: 0
-      }
-    })
-    .populate({
       path: 'comment',
       select: {
         user_info: 1,
@@ -128,18 +92,18 @@ router
     .then(notFound)
   })
   .then(data => {
-    const { info, rest, poster: { src: posterSrc }={}, video: { src: videoSrc }, images, comment, total_rate, rate_person, same_film, ...nextData } = data
+    const { info, rest, poster, video, images, comment, total_rate, rate_person, same_film, ...nextData } = data
     const { actor, director, district, language, classify, ...nextInfo } = info
     return {
       ...nextData,
       store,
-      video: videoSrc,
+      video: video ? src : null,
       rate: total_rate / rate_person,
-      poster: posterSrc,
-      images: images.filter(i => !!i.src).map(i => i.src),
+      poster: poster ? poster.src : null,
+      images: images.filter(i => i && !!i.src).map(i => i.src),
       comment: comment.map(com => {
         const { _doc: { user_info, content: { text }, ...nextC } } = com
-        const { _doc: { avatar: { src }, ...nextUserInfo } } = user_info
+        const { _doc: { avatar, ...nextUserInfo } } = user_info
         return {
           ...nextC,
           content: {
@@ -147,7 +111,7 @@ router
           },
           user_info: {
             ...nextUserInfo,
-            avatar: src
+            avatar: avatar ? avatar.src : null
           }
         }
       }),

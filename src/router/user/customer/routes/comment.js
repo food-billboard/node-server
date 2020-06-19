@@ -6,12 +6,12 @@ const router = new Router()
 
 router
 .get('/', async (ctx) => {
-  const check = Params.query(ctx, [
+  const check = Params.query(ctx,
     {
       name: "_id",
       type: ['isMongoId']
     }
-  ])
+  )
   if(check) {
     ctx.body = JSON.stringify({
       ...check.res
@@ -77,11 +77,11 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { comment, avatar: { src }, ...nextData } = data
+    const { comment, avatar, ...nextData } = data
     return {
       user_info: {
         ...nextData,
-        avatar: src
+        avatar: avatar ? avatar.src : null
       },
       data: comment.map(c => {
         const { _doc: { content: { image, video, ...nextContent }, source_type, source={}, ...nextC } } = c

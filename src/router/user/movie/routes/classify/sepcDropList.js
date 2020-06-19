@@ -24,10 +24,10 @@ router.get('/', async (ctx) => {
   .then(notFound)
   .then(data => {
     return data.map(d => {
-      const { _doc: { poster: { src }={}, ...nextD } } = d
+      const { _doc: { poster, ...nextD } } = d
       return {
         ...nextD,
-        poster: src || null
+        poster: poster ? poster.src : null
       }
     })
   })

@@ -65,10 +65,10 @@ router
     const { glance } = data
     return {
       glance: glance.map(g => {
-        const { _doc: { poster: { src }, info: { description, name }, ...nextG } } = g
+        const { _doc: { poster, info: { description, name }={}, ...nextG } } = g
         return {
           ...nextG,
-          poster: src,
+          poster: poster ? poster.src : null,
           description,
           name
         }

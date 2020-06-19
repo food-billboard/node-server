@@ -65,10 +65,10 @@ router
     const { attentions } = data
     return {
       attentions: attentions.map(a => {
-        const { _doc: { avatar: { src }, ...nextA } } = a
+        const { _doc: { avatar, ...nextA } } = a
         return {
           ...nextA,
-          avatar: src
+          avatar: avatar ? avatar.src : null
         }
       })
     }

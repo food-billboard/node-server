@@ -62,13 +62,6 @@ router
 			...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
 		},
-		populate: {
-			path: 'info.classify',
-			select: {
-				name: 1,
-				_id: 0
-			}
-		}
 	})
 	.exec()
 	.then(data => !!data && data._doc)
@@ -77,10 +70,10 @@ router
 		const { match } = data
 		return {
 			match: match.map(m => {
-				const { _doc: { poster: { src }, ...nextM } } = m
+				const { _doc: { poster, ...nextM } } = m
 				return {
 					...nextM,
-					poster: src
+					poster: poster ? poster.src : null
 				}
 			})
 		}

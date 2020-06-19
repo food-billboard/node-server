@@ -76,16 +76,16 @@ router
         ...nextInfo  
       },
       images,
-      poster: { src: posterSrc },
-      video: { src: videoSrc },
+      poster,
+      video,
       rest,
       ...nextData
     } = data
     return {
       ... nextData,
-      video: videoSrc,
-      images: images.filter(i => !!i.src).map(i => i.src),
-      poster: posterSrc,
+      video: video ? video.src : null,
+      images: images.filter(i => i && !!i.src).map(i => i.src),
+      poster: poster ? poster.src : null,
       info: {
         name,
         alias,

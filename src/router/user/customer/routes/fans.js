@@ -57,12 +57,6 @@ router
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
     },
-    populate: {
-      path: 'avatar',
-      select: {
-        src: 1
-      }
-    }
   })
   .exec()
   .then(data => !!data && data._doc)
@@ -71,10 +65,10 @@ router
     const { fans } = data
     return {
       fans: fans.map(d => {
-        const { _doc: { avatar: { src }, ...nextD } } = d
+        const { _doc: { avatar, ...nextD } } = d
         return {
           ...nextD,
-          avatar: src,
+          avatar: avatar ? avatar.src : null,
         }
       })
     }

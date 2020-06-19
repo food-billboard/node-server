@@ -50,7 +50,7 @@ router.get('/', async (ctx) => {
       const { _doc: { info: { description, name }, poster: { src }, ...nextD } } = g
       return {
         ...nextD,
-        poster: src,
+        poster: poster ? poster.src : null,
         description,
         name,
       }

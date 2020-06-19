@@ -92,7 +92,7 @@ router.get('/', async (ctx) => {
         like_person, 
         source: { name, content, ...nextSource }={}, 
         content: { image, video, ...nextContent }, 
-        user_info: { _doc: { avatar: { src }, ...nextUserInfo } },
+        user_info: { _doc: { avatar, ...nextUserInfo } },
         ...nextC 
       } } = c
       like = false
@@ -101,12 +101,12 @@ router.get('/', async (ctx) => {
         ...nextC,
         user_info: {
           ...nextUserInfo,
-          avatar: src
+          avatar: avatar ? avatar.src : null
         },
         content: {
           ...nextContent,
-          image: image.filter(i => !!i.src).map(i => i.src),
-          video: video.filter(v => !!v.src).map(v => v.src)
+          image: image.filter(i => i && !!i.src).map(i => i.src),
+          video: video.filter(v => v && !!v.src).map(v => v.src)
         },
         source: {
           ...nextSource,

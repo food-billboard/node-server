@@ -70,30 +70,28 @@ router.get('/', async (ctx) => {
   .then(notFound)
   .then(data => {
     const { comment } = data
-    return {
-      comment: comment.map(c => {
-        const { _doc: { comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar: { src }, ...nextInfo } }, ...nextC } } = c
-        return {
-          ...nextC,
-          comment_users: comment_users.map(com => {
-            const { _doc: { avatar: { src }, ...nextCom } } = com
-            return {
-              ...nextCom,
-              avatar: src
-            }
-          }),
-          content: {
-            ...nextContent,
-            image: image.filter(i => !!i.src).map(i => i.src),
-            video: video.filter(v => !!v.src).map(v => v.src),
-          },
-          user_info: {
-            ...nextInfo,
-            avatar: src
+    return comment.map(c => {
+      const { _doc: { comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextC } } = c
+      return {
+        ...nextC,
+        comment_users: comment_users.map(com => {
+          const { _doc: { avatar, ...nextCom } } = com
+          return {
+            ...nextCom,
+            avatar: avatar ? avatar.src : null
           }
+        }),
+        content: {
+          ...nextContent,
+          image: image.filter(i => i && !!i.src).map(i => i.src),
+          video: video.filter(v => v &&!!v.src).map(v => v.src),
+        },
+        user_info: {
+          ...nextInfo,
+          avatar: avatar ? avatar.src : null
         }
-      }),
-    }
+      }
+    })
   })
   .catch(dealErr(ctx))
 

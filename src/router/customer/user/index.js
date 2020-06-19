@@ -96,14 +96,14 @@ router
     let mine
     let fans
     data.forEach(d => {
-      const { _doc: { _id:id, avatar: { src }, ...nextD } } = d 
+      const { _doc: { _id:id, avatar, ...nextD } } = d 
       if(id.equals(_id)) {
         const { fans:userFans, attentions } = nextD
         result = {
           ...result,
           ...nextD,
           _id: id,
-          avatar: src,
+          avatar: avatar ? avatar.src : null,
           fans: userFans.length,
           attentions: attentions.length,
           like: false,

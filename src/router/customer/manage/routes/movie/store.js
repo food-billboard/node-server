@@ -47,10 +47,10 @@ router.get('/', async (ctx) => {
   .then(data => {
     const { store } = data
     return store.map(s => {
-      const { _doc: { info: { description, name }, poster: { src }, ...nextD } } = s
+      const { _doc: { info: { description, name }, poster, ...nextD } } = s
       return {
         ...nextD,
-        poster: src,
+        poster: poster ? poster.src : null,
         description,
         name,
       }

@@ -45,15 +45,15 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { poster: { src }, movie, ...nextData } = data
+    const { poster, movie, ...nextData } = data
     return {
       ...nextData,
-      poster: src,
+      poster: poster ? poster.src : null,
       movie: movie.map(m => {
-        const { _doc: { poster: { src: icon }, ...nextM } } = m
+        const { _doc: { poster, ...nextM } } = m
         return {
           ...nextM,
-          poster: icon
+          poster: poster ? poster.src : null,
         }
       })
     }

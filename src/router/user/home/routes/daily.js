@@ -28,10 +28,10 @@ router
   .then(notFound)
   .then(data => {
     return data.map(d => {
-      const { _doc: { poster: { src }, ...nextD } } = d
+      const { _doc: { poster, ...nextD } } = d
       return {
         ...nextD,
-        poster: src
+        poster: poster ? poster.src : null
       }
     })
   })

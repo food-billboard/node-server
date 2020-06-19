@@ -63,7 +63,7 @@ const getMessageList = socket => async (data) => {
         return members.some(mem => mem.user._id.equals(mine) && !!mem.message.length)
       })
       .map(d => {
-        const { members, info: { _doc: { avatar: { src }={}, ...nextInfo } }, type, _id } = d
+        const { members, info: { _doc: { avatar, ...nextInfo } }, type, _id } = d
         const [ memberSelf ] = members.filter(mem => mem.user._id.equals(mine))
         const { message } = memberSelf
 
@@ -82,16 +82,16 @@ const getMessageList = socket => async (data) => {
             //选取头像
             const index = members.findIndex(val => !val.user.equals(mine))
             const memberOther = members[index]
-            const { user: { username, avatar: { src } } } = memberOther
+            const { user: { username, avatar } } = memberOther
             itemInfo = {
               name: username,
-              avatar: src,
+              avatar: avatar ? avatar.src : null,
               description: '暂时没有'
             }
           }else {
             itemInfo = {
               ...nextInfo,
-              avatar: src
+              avatar: avatar ? avatar.src : null,
             }
           }
 
@@ -108,7 +108,7 @@ const getMessageList = socket => async (data) => {
 
         }else {
           //有新消息
-          const { _id: { content: { text }, createdAt, user_info: { avatar: { src:userAvatar }={}, username } } } = nearlyMessage
+          const { _id: { content: { text }, createdAt, user_info: { avatar, username } } } = nearlyMessage
 
           if(type === 'CHAT') {
             itemInfo = {
@@ -119,7 +119,7 @@ const getMessageList = socket => async (data) => {
           }else {
             itemInfo = {
               ...nextInfo,
-              avatar: src
+              avatar: avatar ? avatar.src : null,
             }
           }
           return {
@@ -188,13 +188,13 @@ const getMessageList = socket => async (data) => {
     .exec()
     .then(data => !!data && data._doc)
     .then(data => {
-      const { _id, info: { avatar: { src }, ...nextInfo }, message } = data
+      const { _id, info: { avatar, ...nextInfo }, message } = data
       const commonRes = {
         _id,
         type: 'SYSTEM',
         info: {
           ...nextInfo,
-          avatar: src
+          avatar: avatar ? avatar.src : null,
         }
       }
       if(message.length) {

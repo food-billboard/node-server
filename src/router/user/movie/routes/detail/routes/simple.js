@@ -37,10 +37,10 @@ router.get('/', async (ctx) => {
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { poster: { src }, info: { description }, ...nextData } = data
+    const { poster, info: { description }, ...nextData } = data
     return {
       ...nextData,
-      poster: src,
+      poster: poster ? poster.src : null,
       description
     }
   })

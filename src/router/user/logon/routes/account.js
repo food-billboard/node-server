@@ -49,12 +49,13 @@ router.post('/', async(ctx) => {
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { fans=[], attentions=[], password:_, ...nextData } = data
+    const { fans=[], attentions=[], password:_, avatar, ...nextData } = data
     const token = signToken({mobile, password})
     return {
       fans: fans.length,
       attentions: attentions.length,
       token,
+      avatar: avatar ? avatar.src : null,
       ...nextData
     }
   })

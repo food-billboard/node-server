@@ -52,21 +52,6 @@ const TEMPLATE_MOVIE = {
 	same_film: []
 }
 
-// //空内容判断
-// function emptyCheck(target) {
-//   if(isEmpty(target)) return true
-//   if(isType(target, 'object')) {
-//     return Object.keys(target).some(key => {
-//       return emptyCheck(target[key])
-//     })
-//   }else if(isType(target, 'array')) {
-//     return target.some(t => emptyCheck(t))
-//   }else if(isType(target, 'number')) {
-//     return target < 0
-//   }
-//   return false
-// }
-
 //自定义与系统字段内容区分
 function fieldDefine(valid, unValid, target) {
   let newValid = { ...valid }
@@ -762,10 +747,10 @@ router
   .then(data => {
     const { issue } = data
     return issue.map(is => {
-      const { _doc: { poster: { src }, ...nextIs } } = is
+      const { _doc: { poster, ...nextIs } } = is
       return {
         ...nextIs,
-        poster: src,
+        poster: poster ? poster.src : null,
       }
     })
   })

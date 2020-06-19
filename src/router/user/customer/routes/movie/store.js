@@ -65,10 +65,10 @@ router
     const { store } = data
     return {
       store: store.map(s => {
-        const { _doc: { poster: { src }, info: { description, name }, ...nextS } } = s
+        const { _doc: { poster, info: { description, name }={}, ...nextS } } = s
         return {
           ...nextS,
-          poster: src,
+          poster: poster ? poster.src : null,
           description,
           name
         }

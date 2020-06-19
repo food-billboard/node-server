@@ -21,10 +21,10 @@ router.get('/', async (ctx) => {
   .then(notFound)
   .then(data => {
     return data.map(d => {
-      const { _doc: { icon: { src }={}, ...nextD } } = d
+      const { _doc: { icon, ...nextD } } = d
       return {
         ...nextD,
-        icon: src || null
+        icon: icon ? icon.src : null
       }
     })
   })

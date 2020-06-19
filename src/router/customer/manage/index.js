@@ -64,14 +64,14 @@ router
         }
       }
     }else {
-      const { fans, attentions, avatar: { src }, ...nextData } = data
+      const { fans, attentions, avatar, ...nextData } = data
       res = {
         success: true,
         res: {
           data: {
             fans: fans.length,
             attentions: attentions.length,
-            avatar: src,
+            avatar: avatar ? avatar.src : null,
             ...nextData
           }
         }
