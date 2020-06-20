@@ -1,6 +1,4 @@
-const { MongoDB, verifySocketIoToken, otherToken, UserModel, RoomModel, notFound } = require("@src/utils")
-const mongo = MongoDB()
-const Day = require('dayjs')
+const { MongoDB, verifySocketIoToken, UserModel, RoomModel, notFound, formatISO, formatMill, NUM_DAY } = require("@src/utils")
 
 const getMessageList = socket => async (data) => {
   const [, token] = verifySocketIoToken(data.token)
@@ -72,7 +70,7 @@ const getMessageList = socket => async (data) => {
         const [ nearlyMessage ] = message.sort((now, next) => {
           const { _id: { createdAt: nowTime } } = now
           const { _id: { createdAt: nextTime } } = next
-          return Day(nextTime).valueOf() - Day(nowTime).valueOf() 
+          return formatMill(nextTime) - formatMill(nowTime)
         })
 
         //全部为已读消息时
@@ -178,7 +176,7 @@ const getMessageList = socket => async (data) => {
     .populate({
       path: 'message',
       match: {
-        createdAt: { $lt: Day(Date.now() - 24 * 60 * 60 * 1000).toISOString() }
+        createdAt: { $lt: formatISO(Date.now() - NUM_DAY(1)) }
       },
       select: {
         "content.text": 1,
@@ -201,7 +199,7 @@ const getMessageList = socket => async (data) => {
         const [ nearlyMessage ] = message.sort((now, next) => {
           const { createdAt: nowTime } = now
           const { createdAt: nextTime } = next
-          return Day(nextTime).valueOf() - Day(nowTime).valueOf() 
+          return formatMill(nextTime) - formatMill(nowTime)
         })
         const { createdAt, content: { text } } = nearlyMessage
         res = {

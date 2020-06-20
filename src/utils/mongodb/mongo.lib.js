@@ -144,42 +144,42 @@ const PRE_MOVIE_FIND = [
       src: 1
     }
   },
-  {
-    path: 'info.actor',
-    select: {
-      name: 1,
-      "other.avatar": 1,
-      _id: 0
-    }
-  },
-  {
-    path: 'info.director',
-    select: {
-      name: 1,
-      _id: 0
-    }
-  },
-  {
-    path: 'info.district',
-    select: {
-      name: 1,
-      _id: 0
-    }
-  },
-  {
-    path: 'info.classify',
-    select: {
-      name: 1,
-      _id: 0
-    }
-  },
-  {
-    path: 'info.language',
-    select: {
-      _id: 0,
-      name: 1
-    }
-  },
+  // {
+  //   path: 'info.actor',
+  //   select: {
+  //     name: 1,
+  //     "other.avatar": 1,
+  //     _id: 0
+  //   }
+  // },
+  // {
+  //   path: 'info.director',
+  //   select: {
+  //     name: 1,
+  //     _id: 0
+  //   }
+  // },
+  // {
+  //   path: 'info.district',
+  //   select: {
+  //     name: 1,
+  //     _id: 0
+  //   }
+  // },
+  // {
+  //   path: 'info.classify',
+  //   select: {
+  //     name: 1,
+  //     _id: 0
+  //   }
+  // },
+  // {
+  //   path: 'info.language',
+  //   select: {
+  //     _id: 0,
+  //     name: 1
+  //   }
+  // },
   {
     path: 'tag',
     select: {
@@ -384,6 +384,10 @@ const RoomSchema = new Schema({
     type: Boolean,
     default: false,
     required: true,
+  },
+  create_user: {
+    type: ObjectId,
+    ref: 'user'
   },
   info: {
     avatar: {
@@ -1051,6 +1055,26 @@ const OtherMediaSchema = new Schema({
   },
 })
 
+const FeedbackSchema = new Schema({
+  user_info: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  content: {
+    text: String,
+    image: [{
+      type: ObjectId,
+      ref: 'image'
+    }],
+    video: [{
+      type: ObjectId,
+      ref: 'video'
+    }]
+  }
+}, {
+  ...defaultConfig
+})
+
 //预处理
 UserSchema.pre('find', prePopulate(PRE_USER_FIND))
 UserSchema.pre('findOne', prePopulate(PRE_USER_FIND))
@@ -1125,6 +1149,7 @@ const LanguageModel = model('language', LanguageSchema)
 const VideoModel = model('video', VideoSchema)
 const ImageModel = model('image', ImageSchema)
 const OtherMediaModel = model('other_media', OtherMediaSchema)
+const FeedbackModel = model('feedback', FeedbackSchema)
 
 module.exports = {
   UserModel,
@@ -1145,6 +1170,7 @@ module.exports = {
   VideoModel,
   ImageModel,
   OtherMediaModel,
+  FeedbackModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1162,5 +1188,6 @@ module.exports = {
   LanguageSchema,
   VideoSchema,
   ImageSchema,
-  OtherMediaSchema
+  OtherMediaSchema,
+  FeedbackSchema
 }

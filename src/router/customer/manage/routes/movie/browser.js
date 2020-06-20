@@ -47,7 +47,7 @@ router.get('/', async (ctx) => {
   .then(data => {
     const { glance } = data
     return glance.map(g => {
-      const { _doc: { info: { description, name }, poster: { src }, ...nextD } } = g
+      const { _doc: { info: { description, name }, poster, ...nextD } } = g
       return {
         ...nextD,
         poster: poster ? poster.src : null,

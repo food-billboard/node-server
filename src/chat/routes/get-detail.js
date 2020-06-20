@@ -1,6 +1,5 @@
-const { verifySocketIoToken, RoomModel, UserModel, notFound, Params } = require("@src/utils")
+const { verifySocketIoToken, RoomModel, UserModel, notFound, Params, formatISO } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
-const Day = require('dayjs')
 
 const getDetail = socket => async (data) => {
   const [, token] = verifySocketIoToken(data.token)
@@ -29,9 +28,9 @@ const getDetail = socket => async (data) => {
     ]
   }, {
     name: 'startTime',
-    _default: Day(Date.now()).toISOString(),
+    _default: formatISO(Date.now()),
     sanitizers: [
-      data => Day(data).toISOString(),
+      data => formatISO(data),
     ]
   }, {
     name: 'pageSize',

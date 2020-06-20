@@ -33,7 +33,7 @@ const sendMessage = socket => async (data) => {
   }
 
   const { mobile } = token
-  const [ roomId, type ] = Params.sanitizers(data, {
+  const [ roomId, type, content, point_to ] = Params.sanitizers(data, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
@@ -43,11 +43,17 @@ const sendMessage = socket => async (data) => {
     sanitizers: [
       data => data.toUpperCase()
     ]
+  }, {
+    name: 'content',
+    sanitizers: [
+      data => ObjectId.isValid(data) ? ObjectId(data) : data
+    ]
+  }, {
+    name: 'point_to',
+    sanitizers: [
+      data => ObjectId.isValid(data) ? ObjectId(data) : data
+    ]
   })
-  const {  
-    content,
-    point_to
-  } = data
 
   templateMessage = { ...(point_to ? { point_to } : {}) }
 

@@ -1,4 +1,5 @@
 const path = require('path')
+const Day = require('dayjs')
 //静态资源目录
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
 
@@ -77,9 +78,18 @@ function flat(array) {
   return newArray
 }
 
+function formatISO(date) { return Day(date).toISOString() }
+function formatMill(date) { return Day(date).valueOf() }
+
+function NUM_DAY(num) { return num * 24 * 60 * 60 * 1000 }
+
+
 module.exports = {
   isType,
   isEmpty,
   flat,
-  STATIC_FILE_PATH
+  STATIC_FILE_PATH,
+  formatISO,
+  formatMill,
+  NUM_DAY
 }

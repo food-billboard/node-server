@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const Like = require('./like')
-const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, dealMedia, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -32,7 +32,13 @@ router
       {
         name: "content",
         validator: [
-          data => !!Object.keys(data).length
+          data => !!Object.keys(data).length && ( 
+            !!data.text
+            &&
+            ( data.video ? data.video.every(d => ObjectId.isValid(d)) : true )
+            &&
+            ( data.image ? data.image.every(d => ObjectId.isValid(d)) : true )
+          )
         ]
       }
     ]
@@ -53,13 +59,23 @@ router
 .post('/movie', async (ctx) => {
   const { body: { content: {
     text='',
-    video=[],
-    image=[]
   } } } = ctx.request
-  const [ _id ] = Params.sanitizers(ctx.request.body, {
+  const [ _id, image, video ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
+    ]
+  },
+  {
+    name: 'content.image',
+    sanitizers: [
+      data => data ? data.map(d => ObjectId(d)) : []
+    ]
+  },
+  {
+    name: 'content.video',
+    sanitizers: [
+      data => data ? data.map(d => ObjectId(d)) : []
     ]
   })
   const [, token] = verifyTokenToData(ctx)
@@ -87,20 +103,11 @@ router
     .then(notFound),
   ])
   .then(([userId, _]) => {
-    dealMedia()
-    //图片视频处理
-    return {
-      id: userId,
-      video: [],
-      image: []
-    }
-  })
-  .then(({id, video, image}) => {
     const comment = new CommentModel({
       ...TEMPLATE_COMMENT,
       source_type: 'movie',
       source: _id,
-      user_info: id,
+      user_info: userId,
       content: {
         text,
         video,
@@ -148,13 +155,23 @@ router
 .post('/', async(ctx) => {
   const { body: { content: {
     text='',
-    video=[],
-    image=[]
   } } } = ctx.request
-  const [ _id ] = Params.sanitizers(ctx.request.body, {
+  const [ _id, image, video ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
+    ]
+  },
+  {
+    name: 'content.image',
+    sanitizers: [
+      data => data ? data.map(d => ObjectId(d)) : []
+    ]
+  },
+  {
+    name: 'content.video',
+    sanitizers: [
+      data => data ? data.map(d => ObjectId(d)) : []
     ]
   })
   const [, token] = verifyTokenToData(ctx)
@@ -182,20 +199,11 @@ router
     .then(notFound),
   ])
   .then(([userId, _]) => {
-    dealMedia()
-    //图片视频处理
-    return {
-      id: userId,
-      video: [],
-      image: []
-    }
-  })
-  .then(({id, video, image}) => {
     const comment = new CommentModel({
       ...TEMPLATE_COMMENT,
       source_type: "user",
       source: _id,
-      user_info: id,
+      user_info: userId,
       content: {
         text,
         video,

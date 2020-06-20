@@ -5,15 +5,14 @@ const Detail = require('./detail')
 const { 
   verifyTokenToData, 
   isType, 
-  isEmpty, 
-  dealMedia, 
   UserModel, 
   MovieModel, 
   DirectorModel, 
   ActorModel, 
   dealErr, 
   notFound, 
-  Params 
+  Params,
+  NUM_DAY
 } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -255,23 +254,6 @@ function aboutFind(template) {
         console.log(_)
       })
     })
-    //媒体内容处理
-    .then(_ => {
-      const {
-        images:mediaImages,
-        video:mediaVideo,
-        poster:mediaPoster,
-      } = _template
-      
-      _template = {
-        ..._template,
-        poster: ObjectId(mediaPoster),
-        images: mediaImages.map(m => ObjectId(m)),
-        video: ObjectId(mediaVideo),
-      }
-      
-      dealMedia()
-    })
     .then(_ => _template)
   }
 }
@@ -281,14 +263,12 @@ router
   const { method, body } = ctx.request
   if(method.toLowerCase() === 'get') return await next()
   const {
-    _id,
     info: {
       author_description,
       alias,
       ...nextInfo
     },
   } = body 
-  let res
 
   const check = Params.body(ctx, {
     name: 'info.name',
@@ -340,18 +320,14 @@ router
   }, {
     name: 'images',
     validator: [
-      data => Array.isArray(data) && data.length >= 6
+      data => Array.isArray(data) && data.length >= 6 && data.every(d => ObjectId.isValid(d)),
     ]
   }, {
     name: 'video.src',
-    validator: [
-      data => !!data
-    ]
+    type: [ 'isMongoId' ]
   }, {
     name: 'video.poster',
-    validator: [
-      data => !!data
-    ]
+    type: [ 'isMongoId' ]
   })
 
   if(check) {
@@ -404,7 +380,7 @@ router
       { "info.another_name": { $in: [name] } }
     ],
     //上映时间类似
-    $and: [ { "info.screen_time": { $gte: screen_time - 24 * 60 * 60 * 1000 } }, { "info.screen_time": { $lte: screen_time + 24 * 60 * 60 * 1000 } } ], 
+    $and: [ { "info.screen_time": { $gte: screen_time - NUM_DAY(1) } }, { "info.screen_time": { $lte: screen_time + NUM_DAY(1) } } ], 
     //导演类似
     ...(validDirectorList.length ? { "info.director": { $in: [ ...validDirectorList ] } } : {}),
     //演员类似
@@ -438,10 +414,6 @@ router
   let templateInsertData
   const { body } = ctx.request
   const { 
-    video: {
-      src,
-      poster,
-    },
     info: {
       name,
       author_rate,
@@ -451,8 +423,22 @@ router
       screen_time,
       ...nextData
     },
-    images
   } = body
+  const [ images, video ] = Params.sanitizers(ctx.request.body, {
+    name: 'images',
+    sanitizers: [
+      data => data.map(d => ObjectId(d))
+    ]
+  }, 
+  {
+    name: 'video',
+    sanitizers: [
+      data => Object.keys(data).reduce((acc, key) => {
+        acc[key] = ObjectId(data[key])
+        return acc
+      }, {})
+    ]
+  })
   const {
     info,
     rest:originRest,
@@ -474,8 +460,8 @@ router
     info: {...valid},
     rest: { ...unValid },
     name,
-    video: src,
-    poster,
+    video: video.src,
+    poster: video.poster,
     images,
     author_rate,
     author_description: author_description ? author_description : description,
@@ -550,20 +536,9 @@ router
     return
   }
 
-  const [ _id ] = Params.sanitizers(ctx.request.body, {
-    name: '_id',
-    sanitizers: [
-      data => ObjectId(data)
-    ]
-  })
-
   let res
   let templateUpdateData
   const { body: { 
-    video: {
-      src,
-      poster,
-    }, 
     info: {
       name,
       author_description,
@@ -573,10 +548,29 @@ router
       alias,
       ...nextInfo
     },
-    images
   } } = ctx.request
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
+
+  const [ _id, images, video ] = Params.sanitizers(ctx.request.body, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  }, {
+    name: 'images',
+    sanitizers: [
+      data => data.map(d => ObjectId(d))
+    ]
+  }, {
+    name: 'video',
+    sanitizers: [
+      data => Object.keys(data).reduce((acc, key) => {
+        acc[key] = ObjectId(data[key])
+        return acc
+      }, {})
+    ]
+  })
 
   const data = await UserModel.findOne({
     mobile: Number(mobile),
@@ -593,6 +587,12 @@ router
   .then(_ => {
     return MovieModel.findOne({
       _id
+    })
+    .select({
+      info: 1,
+      rest: 1,
+      related_to: 1,
+      same_film: 1
     })
     .exec()
     .then(data => !!data && data._doc)
@@ -624,8 +624,8 @@ router
       related_to,
       same_film,
       name,
-      video: src,
-      poster,
+      video: video.src,
+      poster: video.poster,
       info: {...valid},
       rest: { ...unValid },
       images,

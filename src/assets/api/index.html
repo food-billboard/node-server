@@ -693,6 +693,156 @@
           </div>
         </div>
       </li>
+      <li class="content-delete">
+        <h6 class="method-backgound-delete method-title-delete">
+          <span class="method delete">delete</span>
+          删除聊天室(仅多人聊天)
+        </h6>
+        <div class="main-delete hide">
+          <div class="main-delete-content">
+            <h6 class="main-title-delete">Parameters</h6>
+            <table class="params">
+              <tr>
+                <td>
+                  <span class="params-name-item required">_id</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>id</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item">token</span>
+                  <br/>
+                  <span class="typeof-object"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>token</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <h6 class="main-title-delete">Responses</h6>
+            <ul class="response">
+              <li class="res-code">
+                <ul>
+                  <li>
+                    200
+                  </li>
+                </ul>
+              </li>
+              <li class="res-description">
+                <ul>
+                  <li>
+                    <div class="res-description-title status-200"></div>
+                    <div class="res-description-detail">
+                      <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                      <div class="example">
+                        <pre>
+{
+  "success": true,
+  "res": null
+}
+                        </pre>
+                      </div>
+                      <div class="modal hide">
+                        <pre>
+{
+  "success": "boolean",
+  "res": null
+}
+                        </pre>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </li>
+      <li class="content-delete">
+        <h6 class="method-backgound-delete method-title-delete">
+          <span class="method delete">delete</span>
+          退出聊天室(仅多人聊天)
+        </h6>
+        <div class="main-delete hide">
+          <div class="main-delete-content">
+            <h6 class="main-title-delete">Parameters</h6>
+            <table class="params">
+              <tr>
+                <td>
+                  <span class="params-name-item required">_id</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>id</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item">token</span>
+                  <br/>
+                  <span class="typeof-object"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>token</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <h6 class="main-title-delete">Responses</h6>
+            <ul class="response">
+              <li class="res-code">
+                <ul>
+                  <li>
+                    200
+                  </li>
+                </ul>
+              </li>
+              <li class="res-description">
+                <ul>
+                  <li>
+                    <div class="res-description-title status-200"></div>
+                    <div class="res-description-detail">
+                      <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                      <div class="example">
+                        <pre>
+{
+  "success": true,
+  "res": "string"
+}
+                        </pre>
+                      </div>
+                      <div class="modal hide">
+                        <pre>
+{
+  "success": "boolean",
+  "res": "string" 聊天室id
+}
+                        </pre>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </li>
     </ul>
     <h2>小程序相关</h2>
     <div>
@@ -1753,6 +1903,251 @@
       }
     ]
   }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-post">
+            <h6 class="method-backgound-post method-title-post">
+              <span class="method post">post</span>
+              /api/customer/movie/manage/feedback 用户反馈
+            </h6>
+            <div class="main-post hide">
+              <div class="main-post-content">
+                <h6 class="main-title-post">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">content</span>
+                      <br/>
+                      <span class="typeof-object"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>内容</p>
+                      <p class="required">text 文字内容</p>
+                      <p class="required">image 图片内容</p>
+                      <p class="required">video 视频内容</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-post">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": null
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": null
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/movie/manage/feedback/precheck 用户反馈发送预查
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": true
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": "boolean" 用于判断是否可以发送数据
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-put">
+            <h6 class="method-backgound-put method-title-put">
+              <span class="method put">put</span>
+              /api/customer/manage/info/name 修改用户名
+            </h6>
+            <div class="main-put hide">
+              <div class="main-put-content">
+                <h6 class="main-title-put">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">name</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>用户名</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-put">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": "string"
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": "string" 新用户名
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-put">
+            <h6 class="method-backgound-put method-title-put">
+              <span class="method put">put</span>
+              /api/customer/manage/info/avatar 修改头像
+            </h6>
+            <div class="main-put hide">
+              <div class="main-put-content">
+                <h6 class="main-title-put">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>图片id</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-put">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": null
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": null
 }
                             </pre>
                           </div>

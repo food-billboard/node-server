@@ -3,6 +3,8 @@ const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
+const Feedback = require('./routes/feedback')
+const Info = require('./routes/info')
 const { verifyTokenToData, UserModel, dealErr, notFound, Params } = require('@src/utils')
 
 const router = new Router()
@@ -84,6 +86,8 @@ router
 .use('/movie', Movie.routes(), Movie.allowedMethods())
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 .use('/fans', Fans.routes(), Fans.allowedMethods())
+.use('/feedback', Feedback.routes(), Feedback.allowedMethods())
+.use('/info', Info.routes(), Info.allowedMethods())
 
 
 module.exports = router

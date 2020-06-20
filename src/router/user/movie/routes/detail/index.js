@@ -73,6 +73,42 @@ router
       _id: 0
     }
   })
+  .populate({
+    path: 'info.actor',
+    select: {
+      name: 1,
+      "other.avatar": 1,
+      _id: 0
+    }
+  })
+  .pupulate({
+    path: 'info.director',
+    select: {
+      name: 1,
+      _id: 0
+    }
+  })
+  .populate({
+    path: 'info.district',
+    select: {
+      name: 1,
+      _id: 0
+    }
+  })
+  .populate({
+    path: 'info.classify',
+    select: {
+      name: 1,
+      _id: 0
+    }
+  })
+  .populate({
+    path: 'info.language',
+    select: {
+      _id: 0,
+      name: 1
+    }
+  })
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)

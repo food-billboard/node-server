@@ -62,6 +62,13 @@ router
 			...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
 		},
+		populate: {
+			path: 'info.classify',
+			select: {
+				_id: 0,
+				name: 1
+			}
+		}
 	})
 	.exec()
 	.then(data => !!data && data._doc)
