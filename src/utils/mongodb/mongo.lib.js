@@ -70,10 +70,6 @@ function prePopulate(populate) {
             clipArr = pathArr.slice(0, fArr.length)
             return fArr.every((f, i) => f === clipArr[i])
           }
-          // else {
-          //   clipArr = fArr.slice(0, pathArr.length)
-          //   return pathArr.every((p, i) => p === clipArr[i])
-          // }
           return false
         })
     })
@@ -144,42 +140,6 @@ const PRE_MOVIE_FIND = [
       src: 1
     }
   },
-  // {
-  //   path: 'info.actor',
-  //   select: {
-  //     name: 1,
-  //     "other.avatar": 1,
-  //     _id: 0
-  //   }
-  // },
-  // {
-  //   path: 'info.director',
-  //   select: {
-  //     name: 1,
-  //     _id: 0
-  //   }
-  // },
-  // {
-  //   path: 'info.district',
-  //   select: {
-  //     name: 1,
-  //     _id: 0
-  //   }
-  // },
-  // {
-  //   path: 'info.classify',
-  //   select: {
-  //     name: 1,
-  //     _id: 0
-  //   }
-  // },
-  // {
-  //   path: 'info.language',
-  //   select: {
-  //     _id: 0,
-  //     name: 1
-  //   }
-  // },
   {
     path: 'tag',
     select: {
