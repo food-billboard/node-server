@@ -1,6 +1,8 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+const path = require('path')
+
 module.exports = {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
@@ -79,7 +81,9 @@ module.exports = {
   // ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
+  moduleNameMapper: {
+    '@src/(.*)$': '<rootDir>/src/$1',
+  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
@@ -112,7 +116,7 @@ module.exports = {
   // restoreMocks: false,
 
   // The root directory that Jest should scan for tests and modules within
-  // rootDir: undefined,
+  rootDir: __dirname,
 
   // A list of paths to directories that Jest should use to search for files in
   // roots: [
