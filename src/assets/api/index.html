@@ -14,81 +14,6 @@
     <h2>聊天相关</h2>
     <h5 class="item">Socket</h5>
     <ul class="hide">
-      <li class="content-delete">
-        <h6 class="method-backgound-delete method-title-delete">
-          <span class="method delete">delete</span>
-          删除消息
-        </h6>
-        <div class="main-delete hide">
-          <div class="main-delete-content">
-            <h6 class="main-title-delete">Parameters</h6>
-            <table class="params">
-              <tr>
-                <td>
-                  <span class="params-name-item required">_id</span>
-                  <br/>
-                  <span class="typeof-string"></span>
-                  <br/>
-                  <span class="type">body</span>
-                </td>
-                <td style="position: relative;">
-                  <p>id</p>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <span class="params-name-item required">token</span>
-                  <br/>
-                  <span class="typeof-object"></span>
-                  <br/>
-                  <span class="type">body</span>
-                </td>
-                <td style="position: relative;">
-                  <p>token</p>
-                </td>
-              </tr>
-            </table>
-          </div>
-          <div>
-            <h6 class="main-title-delete">Responses</h6>
-            <ul class="response">
-              <li class="res-code">
-                <ul>
-                  <li>
-                    200
-                  </li>
-                </ul>
-              </li>
-              <li class="res-description">
-                <ul>
-                  <li>
-                    <div class="res-description-title status-200"></div>
-                    <div class="res-description-detail">
-                      <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
-                      <div class="example">
-                        <pre>
-{
-  "success": true,
-  "res": null
-}
-                        </pre>
-                      </div>
-                      <div class="modal hide">
-                        <pre>
-{
-  "success": "boolean",
-  "res": null
-}
-                        </pre>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </li>
       <li class="content-post">
         <h6 class="method-backgound-post method-title-post">
           <span class="method post">disconnecting</span>
@@ -2753,7 +2678,7 @@
                 <table class="params">
                   <tr>
                     <td>
-                      <span class="params-name-item">_id</span>
+                      <span class="params-name-item required">_id</span>
                       <br/>
                       <span class="typeof-string"></span>
                       <br/>
@@ -2816,7 +2741,7 @@
                 <table class="params">
                   <tr>
                     <td>
-                      <span class="params-name-item">_id</span>
+                      <span class="params-name-item required">_id</span>
                       <br/>
                       <span class="typeof-string"></span>
                       <br/>
@@ -2884,7 +2809,7 @@
                 <table class="params">
                   <tr>
                     <td>
-                      <span class="params-name-item">_id</span>
+                      <span class="params-name-item required">_id</span>
                       <br/>
                       <span class="typeof-string"></span>
                       <br/>
@@ -3307,7 +3232,7 @@
                 <table class="params">
                   <tr>
                     <td>
-                      <span class="params-name-item">name</span>
+                      <span class="params-name-item required">name</span>
                       <br/>
                       <span class="typeof-string"></span>
                       <br/>
@@ -3319,7 +3244,7 @@
                   </tr>
                   <tr>
                     <td>
-                      <span class="params-name-item">index</span>
+                      <span class="params-name-item required">index</span>
                       <br/>
                       <span class="typeof-int"></span>
                       <br/>
@@ -3331,7 +3256,7 @@
                   </tr>
                   <tr>
                     <td>
-                      <span class="params-name-item">file</span>
+                      <span class="params-name-item required">file</span>
                       <br/>
                       <span class="typeof-file"></span>
                       <br/>
@@ -3404,7 +3329,7 @@
                 <table class="params">
                   <tr>
                     <td>
-                      <span class="params-name-item">name</span>
+                      <span class="params-name-item required">name</span>
                       <br/>
                       <span class="typeof-string"></span>
                       <br/>
@@ -3477,7 +3402,7 @@
                 <table class="params">
                   <tr>
                     <td>
-                      <span class="params-name-item">_id</span>
+                      <span class="params-name-item required">_id</span>
                       <br/>
                       <span class="typeof-string"></span>
                       <br/>
@@ -3657,7 +3582,7 @@
           <li class="content-get">
             <h6 class="method-backgound-get method-title-get">
               <span class="method get">get</span>
-              /api/user/customer/fans 用户评论
+              /api/user/customer/comment 用户评论
             </h6>
             <div class="main-get hide">
               <div class="main-get-content">
@@ -4107,7 +4032,7 @@
           <li class="content-get">
             <h6 class="method-backgound-get method-title-get">
               <span class="method get">get</span>
-              /api/user/customer/movie 用户收藏的电影
+              /api/user/customer/movie/store 用户收藏的电影
             </h6>
             <div class="main-get hide">
               <div class="main-get-content">
@@ -4704,7 +4629,7 @@
           <li class="content-post">
             <h6 class="method-backgound-post method-title-post">
               <span class="method post">post</span>
-              /api/user/logon/signout 登录
+              /api/user/logon/signin 登录
             </h6>
             <div class="main-post hide">
               <div class="main-post-content">
@@ -5192,7 +5117,7 @@
                 <table class="params">
                   <tr>
                     <td>
-                      <span class="params-name-item">_id</span>
+                      <span class="params-name-item required">_id</span>
                       <br/>
                       <span class="typeof-string"></span>
                       <br/>
@@ -5502,7 +5427,7 @@
                 <table class="params">
                   <tr>
                     <td>
-                      <span class="params-name-item">_id</span>
+                      <span class="params-name-item required">_id</span>
                       <br/>
                       <span class="typeof-string"></span>
                       <br/>
@@ -5882,7 +5807,7 @@
           <li class="content-get">
             <h6 class="method-backgound-get method-title-get">
               <span class="method get">get</span>
-              /api/user/movie/classify 排行榜
+              /api/user/movie/rank 排行榜
             </h6>
             <div class="main-get hide">
               <div class="main-get-content">

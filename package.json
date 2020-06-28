@@ -4,32 +4,30 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --forceExit --runInBand --detectOpenHandles",
     "dev": "nodemon app.js"
   },
   "author": "GLF",
   "license": "ISC",
   "dependencies": {
+    "@koa/router": "^9.0.1",
     "dayjs": "^1.8.28",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.11.0",
     "koa-body": "^4.1.1",
     "koa-compress": "^4.0.1",
     "koa-cors": "0.0.16",
-    "koa-router": "^9.0.1",
     "koa-static": "^5.0.0",
     "module-alias": "^2.2.2",
     "mongoose": "^5.9.17",
     "socket.io": "^2.3.0",
     "validator": "^13.1.1"
   },
-  "jest": {
-    "testEnvironment": "node"
-  },
   "_moduleAliases": {
     "@src": "src"
   },
   "devDependencies": {
-    "jest": "^26.1.0"
+    "jest": "^26.1.0",
+    "supertest": "^4.0.2"
   }
 }
