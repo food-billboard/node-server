@@ -74,6 +74,7 @@ router.get('/', async (ctx) => {
       const { _doc: { comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextC } } = c
       return {
         ...nextC,
+        like: false,
         comment_users: comment_users.map(com => {
           const { _doc: { avatar, ...nextCom } } = com
           return {

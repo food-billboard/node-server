@@ -2511,6 +2511,323 @@
               </div>
             </div>
           </li>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/movie/detail/comment 电影评论列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "comment_users": [
+          {
+            "_id": "string",
+            "avatar": "string"
+          }
+        ],
+        "content": {
+          "image": ["string"],
+          "video": ["string"],
+          "text": "string"
+        },
+        "createdAt": 1234567890,
+        "updatedAt": 1234567890,
+        "total_like": 0,
+        "like": false,
+        "user_info": {
+          "avatar": "string",
+          "username": "string",
+          "_id": "string"
+        }
+      }
+    ]
+  }
+                              }
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "comment_users": [ 评论用户
+          {
+            "_id": "string" id,
+            "avatar": "string" 头像
+          }
+        ],
+        "content": { 内容
+          "image": ["string"] 图片,
+          "video": ["string"] 视频,
+          "text": "string" 文字
+        },
+        "createdAt": "date_time",
+        "updatedAt": "date_time"
+        "total_like": "integer" 点赞人数,
+        "like": "boolean" 是否点赞, 
+        "user_info": { 用户信息
+          "avatar": "string" 头像,
+          "username": "string" 用户名,
+          "_id": "string" id
+        }
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/customer/movie/detail/comment/detail 评论详情
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>每页数量</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "comment": {
+        "comment_users": 0,
+        "content": {
+          "image": ["string"],
+          "video": ["string"],
+          "text": "string"
+        },
+        "createdAt": 1234567890,
+        "updatedAt": 1234567890,
+        "total_like": 0,
+        "like": false,
+        "user_info": {
+          "avatar": "string",
+          "username": "string",
+          "_id": "string"
+        },
+        "_id": "string"
+      },
+      "sub": [
+        {
+          "comment_users": [
+            {
+              "avatar": "string",
+              "username": "string",
+              "_id": "string"
+            }
+          ],
+          "content": {
+            "image": ["string"],
+            "video": ["string"],
+            "text": "string"
+          },
+          "createdAt": 1234567890,
+          "updatedAt": 1234567890,
+          "total_like": 0,
+          "like": false,
+          "user_info": {
+            "avatar": "string",
+            "username": "string",
+            "_id": "string"
+          },
+          "_id": "string"
+        }
+      ]
+    }
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "comment": { 主评论
+        "comment_users": "integer" 子评论数量,
+        "content": { 内容
+          "image": ["string"] 图片,
+          "video": ["string"] 视频,
+          "text": "string" 文字
+        },
+        "createdAt": "date_time",
+        "updatedAt": "date_time",
+        "total_like": "integer" 点赞人数,
+        "like": "boolean" 是否点赞,
+        "user_info": { 用户信息
+          "avatar": "string" 头像,
+          "username": "string" 用户名,
+          "_id": "string" id
+        },
+        "_id": "string" 评论id
+      },
+      "sub": [ 子评论
+        {
+          "comment_users": [
+            {
+              "avatar": "string" 头像,
+              "_id": "string" id
+            }
+          ],
+          "content": { 内容
+            "image": ["string"] 图片,
+            "video": ["string"] 视频,
+            "text": "string" 文字
+          },
+          "createdAt": "date_time",
+          "updatedAt": "date_time",
+          "total_like": "integer" 点赞人数,
+          "like": "boolean" 是否点赞,
+          "user_info": { 用户信息
+            "avatar": "string" 头像,
+            "_id": "string" id
+          },
+          "_id": "string" 评论id
+        }
+      ]
+    }
+  }
+}
+
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
           <li class="content-post">
             <h6 class="method-backgound-post method-title-post">
               <span class="method post">post</span>
@@ -4500,7 +4817,8 @@
           {
             "name": "string",
             "poster": "string",
-            "_id": "string"
+            "_id": "string",
+            "hot": 0
           }
         ],
         "name": "string",
@@ -4523,7 +4841,8 @@
           {
             "name": "string" 名称,
             "poster": "string" 海报,
-            "_id": "string" id
+            "_id": "string" id,
+            "hot": "integer" 人气
           }
         ],
         "name": "string" 名称,
@@ -5577,6 +5896,7 @@
         "createdAt": 1234567890,
         "updatedAt": 1234567890,
         "total_like": 0,
+        "like": false,
         "user_info": {
           "avatar": "string",
           "username": "string",
@@ -5609,6 +5929,7 @@
         "createdAt": "date_time",
         "updatedAt": "date_time"
         "total_like": "integer" 点赞人数,
+        "like": "boolean" 是否点赞, 
         "user_info": { 用户信息
           "avatar": "string" 头像,
           "username": "string" 用户名,
@@ -5707,6 +6028,7 @@
         "createdAt": 1234567890,
         "updatedAt": 1234567890,
         "total_like": 0,
+        "like": false,
         "user_info": {
           "avatar": "string",
           "username": "string",
@@ -5731,6 +6053,7 @@
           "createdAt": 1234567890,
           "updatedAt": 1234567890,
           "total_like": 0,
+          "like": false,
           "user_info": {
             "avatar": "string",
             "username": "string",
@@ -5760,6 +6083,7 @@
         "createdAt": "date_time",
         "updatedAt": "date_time",
         "total_like": "integer" 点赞人数,
+        "like": "boolean" 是否点赞,
         "user_info": { 用户信息
           "avatar": "string" 头像,
           "username": "string" 用户名,
@@ -5783,6 +6107,7 @@
           "createdAt": "date_time",
           "updatedAt": "date_time",
           "total_like": "integer" 点赞人数,
+          "like": "boolean" 是否点赞,
           "user_info": { 用户信息
             "avatar": "string" 头像,
             "_id": "string" id

@@ -1,7 +1,13 @@
 const Router = require('@koa/router') 
 const About = require('./routes/about')
 const Query = require('./routes/query')
-const { MongoDB } = require('@src/utils')
+
+const elasticsearch = require('elasticsearch')
+
+// const esClient = new elasticsearch.Client({
+//   host:'127.0.0.1:9200',
+//   log: 'error'
+// })
 
 
 // 关键字数据库查找，找到了则直接通过match_movies找到相关电影id以及是否与之前匹配的字段仍然匹配，匹配则记录，否则删除
@@ -9,7 +15,6 @@ const { MongoDB } = require('@src/utils')
 // 返回
 
 const router = new Router()
-const mongo = MongoDB()
 
 // { content: 搜索内容, area: 地区, director: 导演, actor: 演员, lang: 语言, price: 价格, sort: 排序, time: 时间, fee: 免付费, currPage: 当前页, pageSize: 数量 }
 
@@ -28,8 +33,6 @@ router
     currPage=0, 
     pageSize=30 
   } = ctx.query
-  
-  
   
 })
 .use('./about', About.routes(), About.allowedMethods())
