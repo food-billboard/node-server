@@ -108,7 +108,6 @@ router
     select: {
       sub_comments: 0,
       source: 0,
-      _id: 0
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),

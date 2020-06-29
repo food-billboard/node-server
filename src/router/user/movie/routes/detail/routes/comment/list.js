@@ -51,7 +51,6 @@ router.get('/', async (ctx) => {
       sub_comments: 0,
       source: 0,
       like_person: 0,
-      _id: 0
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),

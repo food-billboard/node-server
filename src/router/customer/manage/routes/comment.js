@@ -41,7 +41,8 @@ router.get('/', async (ctx) => {
       updatedAt: 1,
       total_like: 1,
       content: 1,
-      like_person: 1
+      like_person: 1,
+      comment_users: 1
     },
     populate: {
       path: 'source',
@@ -65,6 +66,7 @@ router.get('/', async (ctx) => {
           content: { image, video, ...nextContent }, 
           source: { name, content, ...nextSoruce }={}, 
           user_info: { _doc: { avatar, ...nextUserInfo } }, 
+          comment_users,
           ...nextC 
         } 
       } = c
@@ -73,6 +75,7 @@ router.get('/', async (ctx) => {
       }
       return {
         ...nextC,
+        comment_users: comment_users.length,
         content: {
           ...nextContent,
           image: image.filter(i => i && !!i.src).map(i => i.src),

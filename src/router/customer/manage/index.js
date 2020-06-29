@@ -38,14 +38,13 @@ router
     mobile: Number(mobile)
   })
   .select({
-    mobile: 1,
     username: 1,
     avatar: 1,
     hot: 1,
     fans:1,
     attentions: 1,
-    create_time: 1,
-    status: 1
+    createdAt: 1,
+    updatedAt: 1
   })
   .exec()
   .then(data => !!data && data._doc)

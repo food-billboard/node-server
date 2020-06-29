@@ -778,6 +778,75 @@
           <li class="content-get">
             <h6 class="method-backgound-get method-title-get">
               <span class="method get">get</span>
+              /api/customer/manage 用户信息
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "fans": 0,
+      "attentions": 0,
+      "avatar": "string",
+      "username": "string",
+      "hot": 1,
+      "createdAt": 1234567890,
+      "updatedAt": 1234567890,
+    }
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "fans": "integer" 粉丝,
+      "attentions": "integer" 关注,
+      "avatar": "string" 头像,
+      "username": "string" 用户名,
+      "hot": "integer" 人气,
+      "createdAt": "date_time" 创建时间,
+      "updatedAt": "date_time" 修改时间,
+    }
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
               /api/customer/manage/attention 用户关注
             </h6>
             <div class="main-get hide">
@@ -865,7 +934,6 @@
                 </ul>
               </div>
             </div>
-          
           </li>
           <li class="content-put">
             <h6 class="method-backgound-put method-title-put">
@@ -1142,6 +1210,7 @@
   "res": {
     "data": [
       {
+        "comment_users": 0,
         "content": {
           "text": "string",
           "image": ["string"],
@@ -1175,6 +1244,7 @@
   "res": {
     "data": [
       {
+        "comment_users": "integer" 评论人数,
         "content": { 评论内容
           "text": "string" 文字,
           "image": ["string"] 图片,
@@ -2600,7 +2670,8 @@
           "avatar": "string",
           "username": "string",
           "_id": "string"
-        }
+        },
+        "_id": "string"
       }
     ]
   }
@@ -2634,7 +2705,8 @@
           "username": "string" 用户名,
           "_id": "string" id
         }
-      }
+      },
+      "_id": "string" id
     ]
   }
 }
@@ -5902,7 +5974,8 @@
           "username": "string",
           "_id": "string"
         }
-      }
+      },
+      "_id": "string"
     ]
   }
                               }
@@ -5935,7 +6008,8 @@
           "username": "string" 用户名,
           "_id": "string" id
         }
-      }
+      },
+      "_id": "string" id
     ]
   }
 }
