@@ -21,16 +21,16 @@ const getDetail = socket => async (data) => {
     }))
     return
   }
-  const [ roomId, startTime, pageSize, messageId ] = Params.sanitizers(data, {
+  const [ roomId, currPage, pageSize, messageId ] = Params.sanitizers(data, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
     ]
   }, {
-    name: 'startTime',
-    _default: formatISO(Date.now()),
+    name: 'currPage',
+    _default: 0,
     sanitizers: [
-      data => formatISO(data),
+      data => data >= 0 ? data : -1,
     ]
   }, {
     name: 'pageSize',
@@ -45,6 +45,7 @@ const getDetail = socket => async (data) => {
     ]
   })
   let res
+  let mineId
   //已登录
   if(token) {
     const { mobile } = token
@@ -59,6 +60,7 @@ const getDetail = socket => async (data) => {
     .then(data => !!data && data._id)
     .then(notFound)
     .then(userId => {
+      mineId = userId
       return RoomModel.findOne({
         _id: roomId,
         "members.user": userId,
@@ -70,17 +72,24 @@ const getDetail = socket => async (data) => {
       .populate({
         path: 'members.message._id',
         match: {
-          createdAt: { $lt: startTime },
           ...(messageId ? { _id : messageId } : {})
         },  
         options: {
-          ...(pageSize >= 0 ? { limit: pageSize } : {})
+          ...(pageSize >= 0 ? { limit: pageSize } : {}),
+          ...(currPage >= 0 ? { limit: currPage } : {})
         },
         select: {
           type: 1,
           content: 1,
           createdAt:1,
           "user_info._id": 1
+        },
+        populate: {
+          path: 'user_info._id',
+          select: {
+            username: 1,
+            avatar: 1,       
+          }
         }
       })
       .exec()
@@ -90,9 +99,8 @@ const getDetail = socket => async (data) => {
         const { members } = data
         const [member] = members
         const { message } = member
-        console.log(message)
         return message.map(m => {
-          const { _doc: { _id: { type, content: { text, video: { src:videoSrc }={}, image: { src: imageSrc }={}, audio }={}, createdAt, user_info: { _id: userId }={}, _id } } } = m
+          const { _doc: { _id: { type, content: { text, video: { src:videoSrc }={}, image: { src: imageSrc }={}, audio }={}, createdAt, user_info: { _id: userId, avatar, username }={}, _id } } } = m
           let newContent
           switch(type) {
             case "IMAGE": 
@@ -111,7 +119,11 @@ const getDetail = socket => async (data) => {
           }
           return {
             _id,
-            origin: userId,
+            origin: {
+              _id: userId,
+              avatar: avatar ? avatar.src : null,
+              username
+            },
             createdAt,
             type,
             content: newContent
@@ -123,7 +135,17 @@ const getDetail = socket => async (data) => {
       res = {
         success: true,
         res: {
-          data
+          data: data.map(item => {
+            const { origin } = item
+            const { _id } = origin
+            return {
+              ...item,
+              origin: {
+                ...origin,
+                isMine: _id.equals(mineId)
+              }
+            }
+          })
         }
       }
     })
@@ -161,17 +183,24 @@ const getDetail = socket => async (data) => {
     .populate({
       path: 'message',
       match: {
-        createdAt: { $lt: startTime },
         ...(messageId ? { _id : messageId } : {})
       },
       options: {
-        ...(pageSize >= 0 ? { limit: pageSize } : {})
+        ...(pageSize >= 0 ? { limit: pageSize } : {}),
+        ...(currPage >= 0 ? { limit: currPaged } : {})
       },
       select: {
         type: 1,
         content: 1,
         createdAt:1,
         "user_info._id": 1
+      },
+      populate: {
+        path: 'user_info._id',
+        select: {
+          username: 1,
+          avatar: 1
+        }
       }
     })
     .exec()
@@ -180,7 +209,7 @@ const getDetail = socket => async (data) => {
     .then(data => {
       const { message } = data
       return message.map(m => {
-        const { _doc: { type, content: { text, video: { src: videoSrc }, image: { src: imageSrc }, audio }, createdAt, user_info: { _id: userId }, _id } } = m
+        const { _doc: { type, content: { text, video: { src: videoSrc }, image: { src: imageSrc }, audio }, createdAt, user_info: { _id: userId, username, avatar }, _id } } = m
         let newContent
         switch(type) {
           case "IMAGE": 
@@ -198,7 +227,12 @@ const getDetail = socket => async (data) => {
             break
         }
         return {
-          origin: userId,
+          origin: {
+            _id: userId,
+            username,
+            avatar: avatar ? avatar.src : null,
+            isMine: false
+          },
           _id,
           createdAt,
           type,

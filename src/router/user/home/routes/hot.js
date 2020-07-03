@@ -9,7 +9,7 @@ router.get('/', async(ctx) => {
     _default: 3,
     type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data > 0 ? data : 0
     ]
   })
   let res
@@ -20,8 +20,8 @@ router.get('/', async(ctx) => {
   .sort({
     hot: -1
   })
-  data = count >= 0 ? data.limit(count) : data
-  data = data.exec()
+  .limit(count)
+  .exec()
   .then(data => !!data && data)
   .then(notFound)
   .catch(dealErr(ctx))

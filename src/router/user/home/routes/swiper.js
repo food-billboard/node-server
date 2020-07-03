@@ -78,7 +78,7 @@ router.get('/', async(ctx) => {
     _default: 6,
     type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : 6
+      data => data > 0 ? data : 6
     ]
   })
   let res = await cacheProxy.data(count)

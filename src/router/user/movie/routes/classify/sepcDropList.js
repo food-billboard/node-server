@@ -9,17 +9,17 @@ router.get('/', async (ctx) => {
 		_default: 12,
     type: [ 'toInt' ],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data > 0 ? data : 0
     ]
 	})
   let res
-  let data = await ClassifyModel.find({})
+  const data = await ClassifyModel.find({})
   .select({
     name: 1,
 		poster: 1
   })
-  data = count >= 0 ? data.limit(count) : data
-  data = data.exec()
+  .limit(count)
+  .exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {

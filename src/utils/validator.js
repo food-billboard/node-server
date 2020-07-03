@@ -37,11 +37,12 @@ const Params = {
         type.forEach(t => {
           let method = t.match(/.+(?=\()/)
           let params = t.match(/(?<=\().+(?=\))/)
-          method = method && method[0]
+          method = method ? method[0] : t
           params = params && params[0]
           result = isType(Validator[method], 'function') ? 
             Validator[method](...(params ? [ result, ...params.split(',').map(p => p.trim()) ] : [result])) : 
             result
+
         })
         realSan.forEach(san => {
           result = san(result)

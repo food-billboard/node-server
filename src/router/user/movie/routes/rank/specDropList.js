@@ -15,8 +15,8 @@ router.get('/', async (ctx) => {
     name: 1,
     icon: 1
   })
-  data = count >= 0 ? data.limit(count) : data
-  data = data.exec()
+  .limit(count)
+  .exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {

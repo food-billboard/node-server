@@ -10,11 +10,11 @@ router
     _default: 12,
     type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data > 0 ? data : 0
     ]
   })
   let res
-  let data = await MovieModel.find({})
+  const data = await MovieModel.find({})
   .select({
     name: 1, 
     poster: 1
@@ -22,8 +22,8 @@ router
   .sort({
     createdAt: -1
   })
-  data = count >= 0 ? data.limit(count) : data
-  data = data.exec()
+  .limit(count)
+  .exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {

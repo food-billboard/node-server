@@ -63,14 +63,14 @@
               </tr>
               <tr>
                 <td>
-                  <span class="params-name-item">startTime</span>
+                  <span class="params-name-item">currPage</span>
                   <br/>
                   <span class="typeof-int"></span>
                   <br/>
                   <span class="type">body</span>
                 </td>
                 <td style="position: relative;">
-                  <p>查询起始时间</p>
+                  <p>当前页</p>
                 </td>
               </tr>
               <tr>
@@ -126,7 +126,12 @@
         "content": "string",
         "createdAt": 1234567890,
         "_id": "string",
-        "origin": "string"
+        "origin": {
+          "_id": "string",
+          "avatar": "string",
+          "username": "string",
+          "isMine": false
+        }
       }
     ]
   }
@@ -144,7 +149,12 @@
         "content": "string" 内容,
         "createdAt": "date_time",
         "_id": "string" 消息id,
-        "origin": "string" 发送用户id
+        "origin": { 用户信息
+          "_id": "string",
+          "avatar": "string",
+          "username": "string",
+          "isMine": "boolean" 是否本人发送
+        }
       }
     ]
   }
@@ -310,7 +320,7 @@
                   <span class="type">body</span>
                 </td>
                 <td style="position: relative;">
-                  <p>token</p>
+                  <p>房间成员</p>
                 </td>
               </tr>
             </table>
@@ -491,7 +501,7 @@
               </tr>
               <tr>
                 <td>
-                  <span class="params-name-item required">pint_to</span>
+                  <span class="params-name-item">point_to</span>
                   <br/>
                   <span class="typeof-string"></span>
                   <br/>
@@ -580,6 +590,81 @@
           </div>
           <div>
             <h6 class="main-title-put">Responses</h6>
+            <ul class="response">
+              <li class="res-code">
+                <ul>
+                  <li>
+                    200
+                  </li>
+                </ul>
+              </li>
+              <li class="res-description">
+                <ul>
+                  <li>
+                    <div class="res-description-title status-200"></div>
+                    <div class="res-description-detail">
+                      <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                      <div class="example">
+                        <pre>
+{
+  "success": true,
+  "res": null
+}
+                        </pre>
+                      </div>
+                      <div class="modal hide">
+                        <pre>
+{
+  "success": "boolean",
+  "res": null
+}
+                        </pre>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </li>
+      <li class="content-delete">
+        <h6 class="method-backgound-delete method-title-delete">
+          <span class="method delete">leave</span>
+          离开房间
+        </h6>
+        <div class="main-delete hide">
+          <div class="main-delete-content">
+            <h6 class="main-title-delete">Parameters</h6>
+            <table class="params">
+              <tr>
+                <td>
+                  <span class="params-name-item required">_id</span>
+                  <br/>
+                  <span class="typeof-string"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>id</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="params-name-item required">token</span>
+                  <br/>
+                  <span class="typeof-object"></span>
+                  <br/>
+                  <span class="type">body</span>
+                </td>
+                <td style="position: relative;">
+                  <p>token</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <h6 class="main-title-delete">Responses</h6>
             <ul class="response">
               <li class="res-code">
                 <ul>

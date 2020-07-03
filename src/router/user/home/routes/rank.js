@@ -9,7 +9,7 @@ router.get('/', async(ctx) => {
     _default: 3,
     type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data > 0 ? data : 0
     ]
   })
   let res
@@ -31,7 +31,7 @@ router.get('/', async(ctx) => {
       name: 1
     },
     options: {
-      ...(count >= 0 ? {limit: count} : {})
+      limit: count
     }
   })
   .exec()
