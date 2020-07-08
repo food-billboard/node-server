@@ -68,13 +68,7 @@ router
   .then(notFound)
   .then(data => {
     const {
-      info: {
-        name,
-        alias,
-        description,
-        screen_time,
-        ...nextInfo  
-      },
+      info,
       images,
       poster,
       video,
@@ -86,19 +80,7 @@ router
       video: video ? video.src : null,
       images: images.filter(i => i && !!i.src).map(i => i.src),
       poster: poster ? poster.src : null,
-      info: {
-        name,
-        alias,
-        description,
-        screen_time,
-        ...Object.keys(nextInfo).reduce((acc, n) => {
-          acc[n] = {
-            [n]: nextInfo[n],
-            rest: rest[n] || []
-          }
-          return acc
-        }, {})
-      }
+      info
     }
   })
   .catch(dealErr(ctx))

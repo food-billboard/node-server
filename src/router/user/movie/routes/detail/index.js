@@ -81,7 +81,7 @@ router
       _id: 0
     }
   })
-  .pupulate({
+  .populate({
     path: 'info.director',
     select: {
       name: 1,
@@ -113,7 +113,7 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { rest={}, ...nextData } = data
+    const { ...nextData } = data
     let newDate = {  
       ...nextData,
       store: false
@@ -142,49 +142,11 @@ router
       rate: total_rate/ rate_person,
       info: {
         ...nextInfo,
-        actor: {
-          ...actor,
-          ...(
-            (rest.actor || []).map(r => ({
-              name: r,
-              other: {
-                avatar: null
-              }
-            }))
-          )
-        },
-        director: {
-          ...director,
-          ...(
-            (rest.director || []).map(r => ({
-              name: r
-            }))
-          )
-        },
-        district: {
-          ...district,
-          ...(
-            (rest.district || []).map(r => ({
-              name: r
-            }))
-          )
-        },
-        classify: {
-          ...classify,
-          ...(
-            (rest.classify || []).map(r => ({
-              name: r
-            }))
-          )
-        },
-        language: {
-          ...language,
-          ...(
-            (rest.language || []).map(r => ({
-              name: r
-            }))
-          )
-        }
+        actor,
+        director,
+        district,
+        classify,
+        language
       },
       comment: comment.map(c => {
         const { _doc: { user_info, ...nextC } } = c

@@ -95,7 +95,7 @@ router
         _id: 0
       }
     })
-    .pupulate({
+    .populate({
       path: 'info.director',
       select: {
         name: 1,
@@ -128,7 +128,7 @@ router
     .then(notFound)
   })
   .then(data => {
-    const { info, rest, poster, video, images, comment, total_rate, rate_person, same_film, ...nextData } = data
+    const { info, poster, video, images, comment, total_rate, rate_person, same_film, ...nextData } = data
     const { actor, director, district, language, classify, ...nextInfo } = info
     return {
       ...nextData,
@@ -161,49 +161,11 @@ router
       }),
       info: {
         ...nextInfo,
-        actor: {
-          ...actor,
-          ...(
-            (rest.actor || []).map(r => ({
-              name: r,
-              other: {
-                avatar: null
-              }
-            }))
-          )
-        },
-        director: {
-          ...director,
-          ...(
-            (rest.director || []).map(r => ({
-              name: r
-            }))
-          )
-        },
-        district: {
-          ...district,
-          ...(
-            (rest.district || []).map(r => ({
-              name: r
-            }))
-          )
-        },
-        classify: {
-          ...classify,
-          ...(
-            (rest.classify || []).map(r => ({
-              name: r
-            }))
-          )
-        },
-        language: {
-          ...language,
-          ...(
-            (rest.language || []).map(r => ({
-              name: r
-            }))
-          )
-        }
+        actor,
+        director,
+        district,
+        classify,
+        language
       }
     }
   })

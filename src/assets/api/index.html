@@ -1815,28 +1815,13 @@
       "author_rate": 0,
       "images": ["string"],
       "info": {
-        "actor": {
-          "actor": ["string"],
-          "rest": ["string"]
-        },
+        "actor": ["string"],
         "another_name": ["string"],
-        "classify": {
-          "classify": ["string"],
-          "rest": ["string"]
-        },
+        "classify": ["string"],
         "description": "string",
-        "director": {
-          "director": ["string"],
-          "rest": ["string"]
-        },
-        "district": {
-          "district": ["string"],
-          "rest": ["string"]
-        },
-        "language": {
-          "language": ["string"],
-          "rest": ["string"]
-        },
+        "director": ["string"],
+        "district": ["string"],
+        "language": ["string"],
         "name": "string",
         "screen_time": 1234567890,
       },
@@ -1859,28 +1844,13 @@
       "author_rate": "integer" 作者评分,
       "images": ["string"] 截图,
       "info": { 信息
-        "actor": { 演员
-          "actor": ["string"] id,
-          "rest": ["string"] 用户自定义字段
-        },
+        "actor": ["string"] 演员,
         "another_name": ["string"] 别名,
-        "classify": {分类
-          "classify": ["string"] id,
-          "rest": ["string"]用户自定义字段
-        },
+        "classify": ["string"] 分类,
         "description": "string" 描述,
-        "director": { 导演
-          "director": ["string"] id,
-          "rest": ["string"]用户自定义字段
-        },
-        "district": { 地区
-          "district": ["string"] id,
-          "rest": ["string"]用户自定义字段
-        },
-        "language": { 语言
-          "language": ["string" id],
-          "rest": ["string"]用户自定义字段
-        },
+        "director": ["string"] 导演,
+        "district": ["string"] 地区,
+        "language": ["string"] 语言,
         "name": "string" 名称,
         "screen_time": "date_time" 上映时间,
       },
@@ -6471,6 +6441,314 @@
       {
         "name": "string" 名称,
         "icon": "string" 图标,
+        "_id": "string" id     
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/language 语言列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">count</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "name": "string",
+        "_id": "string"       
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "name": "string" 名称,
+        "_id": "string" id     
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/actor 演员列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">count</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "name": "string",
+        "_id": "string"       
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "name": "string" 名称,
+        "_id": "string" id     
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/director 导演列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">count</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "name": "string",
+        "_id": "string"       
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "name": "string" 名称,
+        "_id": "string" id     
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/district 地区列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">count</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": [
+      {
+        "name": "string",
+        "_id": "string"       
+      }
+    ]
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": [
+      {
+        "name": "string" 名称,
         "_id": "string" id     
       }
     ]

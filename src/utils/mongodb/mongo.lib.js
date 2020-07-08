@@ -505,13 +505,6 @@ const MovieSchema = new Schema({
       ref: 'language'
     }]
   },
-  rest: {
-    actor: [String],
-    director: [String],
-    district: [String],
-    classify: [String],
-    language: [String]
-  },
   video: {
     type: ObjectId,
     ref: 'video'
