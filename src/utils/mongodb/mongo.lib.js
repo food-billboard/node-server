@@ -230,6 +230,20 @@ const PRE_LANGUAGE_FIND = []
 const PRE_VIDEO_FIND = []
 const PRE_IMAGE_FIND = []
 const PRE_OTHER_FIND = []
+const PRE_BARRAGE_FIND = [
+  {
+    path: 'user',
+    select: {
+      _id: 1
+    }
+  },
+  {
+    path: 'like_users',
+    select: {
+      _id: 1
+    }
+  }
+]
 
 //user
 const UserSchema = new Schema({
@@ -461,6 +475,28 @@ const MessageSchema = new Schema({
   ...defaultConfig
 })
 
+const BarrageSchema = new Schema({
+  user: {
+    type: ObjectId,
+    ref: 'user',
+    required: true
+  },
+  hot: {
+    type: Number,
+    required: true,
+  },
+  like_users: [{
+    type: ObjectId,
+    ref: 'user'
+  }],
+  time_line: {
+    type: Date,
+    required: true
+  }
+}, {
+  ...defaultConfig
+})
+
 const MovieSchema = new Schema({
   name: {
     type: String,
@@ -517,6 +553,10 @@ const MovieSchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
+  barrage: {
+    type: ObjectId,
+    ref: 'barrage'
+  },
   tag: [{
     type: ObjectId,
     ref: 'tag'
@@ -561,8 +601,7 @@ const MovieSchema = new Schema({
     trim: true,
     uppercase: true,
   },
-  stauts: 
-  {
+  stauts: {
     type: String,
     required: true,
     enum: [ 'VERIFY', 'COMPLETE' ],
@@ -1083,6 +1122,9 @@ ImageSchema.pre('findOneAndUpdate', prePopulate(PRE_IMAGE_FIND))
 OtherMediaSchema.pre('find', prePopulate(PRE_OTHER_FIND))
 OtherMediaSchema.pre('findOne', prePopulate(PRE_OTHER_FIND))
 OtherMediaSchema.pre('findOneAndUpdate', prePopulate(PRE_OTHER_FIND))
+BarrageSchema.pre('find', prePopulate(PRE_BARRAGE_FIND))
+BarrageSchema.pre('findOne', prePopulate(PRE_BARRAGE_FIND))
+BarrageSchema.pre('findOneAndUpdate', prePopulate(PRE_BARRAGE_FIND))
 
 const UserModel = model('user', UserSchema)
 const GlobalModel = model('global', GlobalSchema)
@@ -1103,6 +1145,7 @@ const VideoModel = model('video', VideoSchema)
 const ImageModel = model('image', ImageSchema)
 const OtherMediaModel = model('other_media', OtherMediaSchema)
 const FeedbackModel = model('feedback', FeedbackSchema)
+const BarrageModel = model('barrage', BarrageSchema)
 
 module.exports = {
   UserModel,
@@ -1124,6 +1167,7 @@ module.exports = {
   ImageModel,
   OtherMediaModel,
   FeedbackModel,
+  BarrageModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1142,5 +1186,6 @@ module.exports = {
   VideoSchema,
   ImageSchema,
   OtherMediaSchema,
-  FeedbackSchema
+  FeedbackSchema,
+  BarrageSchema
 }

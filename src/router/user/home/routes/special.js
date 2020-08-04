@@ -33,7 +33,8 @@ router
     movie: 1,
     poster: 1,
     name: 1,
-    hot: 1
+    hot: 1,
+    author_rate: 1,
   })
   .populate({
     path: 'movie',

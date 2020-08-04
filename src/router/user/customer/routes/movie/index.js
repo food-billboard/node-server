@@ -53,7 +53,8 @@ router
     select: {
       name: 1,
       poster: 1,
-      hot: 1
+      hot: 1,
+      author_rate: 1,
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
