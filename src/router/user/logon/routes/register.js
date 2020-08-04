@@ -55,10 +55,13 @@ router
   const data = await account.save()
   .then(data => {
     if(!data) return Promise.reject({errMsg: '账号已存在', status: 403})
-    const { avatar, _id } = data
+    const { avatar, _id, username, createdAt, updatedAt } = data
     const token = signToken({mobile, password})
     return {
       avatar,
+      username,
+      updatedAt,
+      createdAt,
       fans:0,
       attention:0,
       hot: 0,

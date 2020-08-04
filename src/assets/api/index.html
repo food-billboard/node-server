@@ -705,7 +705,7 @@
       </li>
       <li class="content-delete">
         <h6 class="method-backgound-delete method-title-delete">
-          <span class="method delete">delete</span>
+          <span class="method delete">remove_room</span>
           删除聊天室(仅多人聊天)
         </h6>
         <div class="main-delete hide">
@@ -780,7 +780,7 @@
       </li>
       <li class="content-delete">
         <h6 class="method-backgound-delete method-title-delete">
-          <span class="method delete">delete</span>
+          <span class="method delete">quit_room</span>
           退出聊天室(仅多人聊天)
         </h6>
         <div class="main-delete hide">
@@ -1967,7 +1967,7 @@
           <li class="content-post">
             <h6 class="method-backgound-post method-title-post">
               <span class="method post">post</span>
-              /api/customer/movie/manage/feedback 用户反馈
+              /api/customer/manage/feedback 用户反馈
             </h6>
             <div class="main-post hide">
               <div class="main-post-content">
@@ -2033,7 +2033,7 @@
           <li class="content-get">
             <h6 class="method-backgound-get method-title-get">
               <span class="method get">get</span>
-              /api/customer/movie/manage/feedback/precheck 用户反馈发送预查
+              /api/customer/manage/feedback/precheck 用户反馈发送预查
             </h6>
             <div class="main-get hide">
               <div class="main-get-content">
@@ -3652,7 +3652,7 @@
 {
   "success": "boolean",
   "res": {
-    "data": ["integer"] 完成的分片索引(上传完成则为false)
+    "data": ["integer"] 完成的分片索引(上传完成则为id)
   }
 }
                             </pre>
@@ -3816,7 +3816,7 @@
 {
   "success": "boolean",
   "res": {
-    "data": null (上传完成为null，若有未上传完成的则返回上传完成的索引数组)
+    "data": null (上传完成为id，若有未上传完成的则返回上传完成的索引数组)
   }
 }
                             </pre>
@@ -5252,12 +5252,15 @@
   "success": true,
   "res": {
     "data": {
-      attention: 0,
-      avatar: "string",
-      fans: 0,
-      hot: 0,
-      token: "string",
-      _id: "string"
+      "attentions": 0,
+      "avatar": "string",
+      "createdAt": 1589784595389,
+      "fans": 0,
+      "hot": 0,
+      "updatedAt": 1589784595389,
+      "token": "string",
+      "username": "string",
+      "_id": "string"
     }
   }
 }
@@ -5269,12 +5272,15 @@
   "success": "boolean",
   "res": {
     "data": {
-      attention: "integer" 关注人数,
-      avatar: "string" 头像,
-      fans: "integer" 粉丝人数,
-      hot: "integer" 人气,
-      token: "string" token,
-      _id: "string" id
+      "attentions": "integer" 关注人数,
+      "avatar": "string" 头像,
+      "createdAt": "date_time",
+      "fans": "integer" 粉丝人数,
+      "hot": "integer" 人气,
+      "updatedAt": "date_time",
+      "token": "string" token,
+      "username": "string" 用户名,
+      "_id": "string" id
     }
   }
 }

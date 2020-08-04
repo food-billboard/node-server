@@ -26,11 +26,11 @@ router
       user_info: id,
       createdAt: { $lt: formatISO(Date.now() - NUM_DAY(1)) }
     })
+    .select({
+      _id: 1
+    })
+    .exec()
   })
-  .select({
-    _id: 1
-  })
-  .exec()
   .then(data => !!data && data._id)
   .catch(dealErr(ctx))
 
@@ -51,6 +51,7 @@ router
   }
 
   if(!/.+\/feedback$/g.test(url)) return await next()
+  console.log(ctx.request.body)
   const check = Params.body(ctx, {
     name: "content",
     validator: [

@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "jest --forceExit --runInBand --detectOpenHandles",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "socket": "nodemon ./src/chat/index.js"
   },
   "author": "GLF",
   "license": "ISC",

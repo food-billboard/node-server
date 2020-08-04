@@ -9,13 +9,10 @@ const {
   verifyTokenToData,
   Params
 } = require('@src/utils')
-const {   mergeChunkFile, finalFilePath, conserveBlob, isFileExistsAndComplete  } = require('../util')
+const { mergeChunkFile, finalFilePath, conserveBlob, isFileExistsAndComplete, ACCEPT_IMAGE_MIME, ACCEPT_VIDEO_MIME } = require('../util')
 const path = require('path')
 
 const router = new Router()
-
-const ACCEPT_IMAGE_MIME = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp']
-const ACCEPT_VIDEO_MIME = ['avi', 'mp4', 'rmvb', 'mkv', 'f4v', 'wmv']
 
 router
 .use(async(ctx, next) => {
@@ -110,7 +107,6 @@ router
     name: md5
   })
   .select({
-    _id: 0,
     info: 1,
   })
   .exec()
@@ -148,7 +144,7 @@ router
       return await newModel.save() && (isExits ? false : [])
     }
 
-    const { info:{ complete, status } } = data
+    const { info:{ complete, status }, _id } = data
     //文件存在且已全部完成
     if(status === 'COMPLETE') {
       //文件存在且数据库与本地全部完整
@@ -164,7 +160,7 @@ router
       })
       .then(data => !!data && data.nModified === 1)
       .then(notFound)
-      .then(_ => [])
+      .then(_ => _id)
     }
     //上传中
     else if(status === 'UPLOADING'){
@@ -215,12 +211,13 @@ router
     return
   }
 
-  const { files } = ctx.request
-  const { body: { index, name: md5 } } = ctx.request
-  const file = files.file
+  // const { files } = ctx.request
+  const { body: { index, name: md5, file } } = ctx.request
+  // const file = files.file
 
   let res
-  const data = await conserveBlob(file.path, md5, index)
+  // const data = await conserveBlob(file.path, md5, index)
+  const data = await conserveBlob(file, md5, index)
   .then(_ => Promise.all([
     ImageModel.updateOne({
       name: md5
@@ -277,7 +274,6 @@ router
     .select({
       info: 1,
       auth: 1,
-      _id: 0
     })
     .exec(),
     ImageModel.findOne({
@@ -286,7 +282,6 @@ router
     .select({
       info: 1,
       auth: 1,
-      _id: 0
     })
     .exec(),
     OtherMediaModel.findOne({
@@ -295,7 +290,6 @@ router
     .select({
       info: 1,
       auth: 1,
-      _id: 0
     })
     .exec()
   ])
@@ -306,7 +300,7 @@ router
     //合并失败
     if(!~index) return Promise.reject({ errMsg: 'fail', status: 500 })
     //合并文件
-    const { info: { chunk_size, complete, mime }, auth } = data[index]
+    const { info: { chunk_size, complete, mime }, auth, _id } = data[index]
     if(chunk_size === complete.length) {
       let type
       let Model
@@ -337,7 +331,7 @@ router
       .then(notFound)
       .then(_ => {
         Model = null
-        return null
+        return _id
       })
 
     }else {

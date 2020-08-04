@@ -70,7 +70,7 @@ const Params = {
     }
     return data
   },
-  body(ctx) {
+  body(ctx, ...validators) {
     const { body } = ctx.request
     const data = this.validate(body, ...validators)
     if(data) {

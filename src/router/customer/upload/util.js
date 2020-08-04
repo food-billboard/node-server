@@ -3,6 +3,9 @@ const fs = require('fs')
 const { ImageModel, VideoModel, UserModel, OtherMediaModel, STATIC_FILE_PATH, isType, fileEncoded } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
+const ACCEPT_IMAGE_MIME = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp']
+const ACCEPT_VIDEO_MIME = ['avi', 'mp4', 'rmvb', 'mkv', 'f4v', 'wmv']
+
 //检查是否存在文件夹
 const checkDir = path => !fs.existsSync(path) || !fs.statSync(path).isDirectory()
 
@@ -17,7 +20,7 @@ const isFileExistsAndComplete = (name, type, size, auth="public") => {
   try {
     let dirPath = path.resolve(STATIC_FILE_PATH, auth.toLowerCase(), type.toLowerCase())
     let stat = fs.statSync(path.resolve(dirPath, name))
-    if(fs.existsSync(path.resolve(dirPath, name)) && stat.isFile() && Number(stat.size) === Number(size)) {
+    if(fs.existsSync(path.resolve(dirPath, name)) && stat.isFile() && (size ? Number(stat.size) === Number(size) : true)) {
       return true
     }
     return false
@@ -46,12 +49,19 @@ const randomName = () => `${Date.now()}${new Array(Math.ceil(Math.random() * 10)
  * 
  * @param  {...any} files { file: 文件, auth: 权限类型[ PUBLIC, PRIVATE ]}
  */
-const dealMedia = async (origin, auth='PUBLIC', ...files) => {
+const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
   //判断静态资源目录是否存在
   let staticPath = path.resolve(STATIC_FILE_PATH)
   checkAndCreateDir(staticPath)
-
-  const realFiles = files.filter(file => isType(file, 'object') || (isType(file, 'string') && /^data:.+\/.+;base64,.+/g.test(file)))
+  const realFiles = files.filter(task => {
+    const { file } = task
+    return isType(file, 'object') || 
+    (
+      isType(file, 'string') 
+      // && 
+      // /^data:.+\/.+;base64,.+/g.test(file)
+    )
+  })
   let originType
   let originId
 
@@ -59,7 +69,7 @@ const dealMedia = async (origin, auth='PUBLIC', ...files) => {
   if(origin.toLowerCase && origin.toLowerCase() === 'system') {
     originType = origin.toUpperCase()
     originId = await UserModel.findOne({
-      mobile: 18368003193,
+      mobile,
     })
     .select({
       _id: 1
@@ -112,7 +122,8 @@ const dealMedia = async (origin, auth='PUBLIC', ...files) => {
   staticPath = path.resolve(staticPath, authPath)
   checkAndCreateDir(staticPath)
   
-  return await Promise.allSettled(realFiles.map(async (file) => {
+  return await Promise.allSettled(realFiles.map(async (task) => {
+    const { file, name, mime } = task
     let realType
     let typeArr
     let fileSize
@@ -123,15 +134,26 @@ const dealMedia = async (origin, auth='PUBLIC', ...files) => {
     const templateName = randomName()
 
     //文件类型目录
-    if(isType(file, 'string')) {
-      const [ type ] = file.match(/(?<=:).+(?=;)/)
-      typeArr = type.split('/')
+    if(mime) {
+      realType = mime
+      if(ACCEPT_IMAGE_MIME.includes(mime.toLowerCase())) {
+        typePath = 'image' 
+      }else if(ACCEPT_VIDEO_MIME.includes(mime.toLowerCase())) {
+        typePath = 'video'
+      }else {
+        typePath = 'other'
+      }
     }else {
-      const { type } = file
-      typeArr = type.split('/')
-    }
-    typePath = typeArr[0]
-    realType = typeArr[1]  
+      if(isType(file, 'string')) {
+        const [ type ] = file.match(/(?<=:).+(?=;)/)
+        typeArr = type ? type.split('/') : ['', '']
+      }else {
+        const { type } = file
+        typeArr = type ? type.split('/') : ['', '']
+      }
+      typePath = typeArr[0]
+      realType = typeArr[1] 
+    } 
 
     if(typePath.toLowerCase() !== 'image' && typePath.toLowerCase() !== 'video') typePath = 'other'
     
@@ -171,14 +193,18 @@ const dealMedia = async (origin, auth='PUBLIC', ...files) => {
       if(!filePath) return target 
 
       //加密文件并重命名
-      try {
-        const data = fs.readFileSync(filePath)
-        realName = fileEncoded(data)
-      }catch(err) {
-        realName = templateName
-        console.log(err)
-      }finally{
-        staticPath = path.resolve(staticPath, `${realName}.${realType}`)
+      if(name) {
+        realName = name
+      }else {
+        try {
+          const data = fs.readFileSync(filePath)
+          realName = fileEncoded(data)
+        }catch(err) {
+          realName = templateName
+          console.log(err)
+        }finally{
+          staticPath = path.resolve(staticPath, `${realName}.${realType}`)
+        }
       }
 
       realFilePath = staticPath.match(/\/static\/.+/)[0]
@@ -205,24 +231,26 @@ const dealMedia = async (origin, auth='PUBLIC', ...files) => {
       }
     }else {
       try{
-        const templateFilePath = path.resolve(staticPath, `${templateName}.${realType}`)
-        //文件写入
-        const content = new Buffer.from(file.replace(/^data.+\/.+;base64,/g, ''), 'base64')
-        fs.writeFileSync(templateFilePath, content)
+        const templateFilePath = path.resolve(staticPath, `${name ? name : templateName}.${realType}`)
         //加密文件
-        const data = fs.readFileSync(templateFilePath)
-        const { size } = fs.statSync(templateFilePath)
-        fileSize = size
-        realName = fileEncoded(data)
+        if(name) {
+          realName = name
+        }else {
+          const data = fs.readFileSync(templateFilePath)
+          realName = fileEncoded(data)
+        }
         staticPath = path.resolve(staticPath, `${realName}.${realType}`)
         realFilePath = staticPath.match(/\/static\/.+/)[0]
+
         //判断文件是否存在
         const exist = await existCheck(`${realName}.${realType}`)
-        if(exist) {
-          console.log(exist)
-          //删除刚刚写入的文件
-          if(~exist) return null
-        }else {
+        if(!exist) {
+          //文件写入
+          const base64Data = /^data.+\/.+;base64,/g.test(file) ? file.replace(/^data.+\/.+;base64,/g, '') : file
+          const buffer = new Buffer.from(base64Data, 'base64')
+          fs.writeFileSync(templateFilePath, buffer)
+          const { size } = fs.statSync(templateFilePath)
+          fileSize = size
           //重命名
           fs.renameSync(templateFilePath, staticPath)
         }
@@ -261,10 +289,10 @@ const dealMedia = async (origin, auth='PUBLIC', ...files) => {
       _id: 1
     })
     .exec()
-    .then(data => !!data)
+    .then(data => !!data && data)
     .then(data => {
       if(data) {
-        return null
+        return data._id
       }else {
         const model = new Model({
           ...objModel,
@@ -277,11 +305,15 @@ const dealMedia = async (origin, auth='PUBLIC', ...files) => {
           }
         })  
         return model.save()
+        .then(data => !!data && data._id)
       }
     })
     .then(data => {
       Model = null
-      return data
+      return {
+        name: realName,
+        _id: data
+      }
     })
     .catch(err => {
       console.log('更改路径错误', err)
@@ -330,7 +362,6 @@ const mergeChunkFile = ( { name, extname, mime, auth } ) => {
 
 //blob文件保存
 const conserveBlob = (prevFilePath, name, index) => {
-  console.log(name)
   checkAndCreateDir(STATIC_FILE_PATH)
   let templatePath = path.resolve(STATIC_FILE_PATH, 'template')
   checkAndCreateDir(templatePath)
@@ -338,22 +369,35 @@ const conserveBlob = (prevFilePath, name, index) => {
   checkAndCreateDir(templatePath)
 
   const filename = path.resolve(templatePath, `${name}-${index}`)
-  //分片存在则直接删除临时文件并返回success
-  if(fs.existsSync(filename)) {
-    fs.unlinkSync(prevFilePath)
-    return Promise.resolve({ name, index })
-  }
-
-  const readStream = fs.createReadStream(prevFilePath)
-  const writeStream = fs.createWriteStream(filename)
-  readStream.pipe(writeStream)
-  return new Promise((resolve, reject) => {
-    readStream.on('end', function(err, _) {
-      fs.unlinkSync(prevFilePath)
-      if(err) return reject({ errMsg: 'write blob error', status: 500 })
-      resolve({ name, index })
+  if(true) {
+    const base64Data = /^data:.+\/.+;base64,/.test(prevFilePath) ? prevFilePath.replace(/^data:.+\/.+;base64,/, '') : prevFilePath
+    const buffer = Buffer.from(base64Data, 'base64')
+    return new Promise((resolve, reject) => {
+      fs.writeFile(filename, buffer, function(err) {
+        if(err) return reject({ errMsg: 'write file error', status: 500 })
+        return resolve({ name, index })
+      })
     })
-  })
+  }
+  //先放着
+  else {
+    //分片存在则直接删除临时文件并返回success
+    if(fs.existsSync(filename)) {
+      fs.unlinkSync(prevFilePath)
+      return Promise.resolve({ name, index })
+    }
+
+    const readStream = fs.createReadStream(prevFilePath)
+    const writeStream = fs.createWriteStream(filename)
+    readStream.pipe(writeStream)
+    return new Promise((resolve, reject) => {
+      readStream.on('end', function(err, _) {
+        fs.unlinkSync(prevFilePath)
+        if(err) return reject({ errMsg: 'write blob error', status: 500 })
+        resolve({ name, index })
+      })
+    })
+  }
 }
 
 module.exports = {
@@ -363,5 +407,7 @@ module.exports = {
   finalFilePath,
   conserveBlob,
   isFileExistsAndComplete,
-  base64Size
+  base64Size,
+  ACCEPT_IMAGE_MIME,
+  ACCEPT_VIDEO_MIME
 }
