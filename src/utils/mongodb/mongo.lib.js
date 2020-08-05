@@ -476,21 +476,22 @@ const MessageSchema = new Schema({
 })
 
 const BarrageSchema = new Schema({
+  origin: {
+    type: ObjectId,
+    ref: 'movie',
+    required: true
+  },
   user: {
     type: ObjectId,
     ref: 'user',
     required: true
-  },
-  hot: {
-    type: Number,
-    required: true,
   },
   like_users: [{
     type: ObjectId,
     ref: 'user'
   }],
   time_line: {
-    type: Date,
+    type: Number,
     required: true
   }
 }, {

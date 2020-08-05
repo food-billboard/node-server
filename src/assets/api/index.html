@@ -858,6 +858,361 @@
     <div>
       <h4>Customer</h4>
       <div>
+        <h5 class="item">barrage</h5>
+        <ul class="customer-manage hide">
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/barrage 弹幕列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">timeStart</span>
+                      <br/>
+                      <span class="typeof-Date"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>起始时间</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">process</span>
+                      <br/>
+                      <span class="typeof-Date"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>时长</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "hot": 0,
+      "like": false,
+      "createdAt": 1234567890,
+      "updatedAt": 1234567890,
+      "time_line": 1234567890,
+      "content": "string",
+      "_id": "string",
+    }
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "hot": "integer" 点赞人数,
+      "like": "boolean" 是否点过赞,
+      "createdAt": "date_time",
+      "updatedAt": "date_time",
+      "time_line": "date_time" 视频中出现时间,
+      "_id": "string" id,
+      "content": "string" 文字内容,
+    }
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-post">
+            <h6 class="method-backgound-post method-title-post">
+              <span class="method post">post</span>
+              /api/barrage 弹幕发送
+            </h6>
+            <div class="main-post hide">
+              <div class="main-post-content">
+                <h6 class="main-title-post">Parameters</h6>
+              </div>
+              <div>
+                <h6 class="main-title-post">Responses</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>电影id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">content</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>文本内容</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">time</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>视频出现时间</p>
+                    </td>
+                  </tr>
+                </table>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "success": true,
+      "res": null
+    }
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "success": true,
+      "res": null
+    }
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-post">
+            <h6 class="method-backgound-post method-title-post">
+              <span class="method post">post</span>
+              /api/barrage 弹幕点赞
+            </h6>
+            <div class="main-post hide">
+              <div class="main-post-content">
+                <h6 class="main-title-post">Parameters</h6>
+              </div>
+              <div>
+                <h6 class="main-title-post">Responses</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>弹幕id</p>
+                    </td>
+                  </tr>
+                </table>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "success": true,
+      "res": null
+    }
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "success": true,
+      "res": null
+    }
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="content-delete">
+            <h6 class="method-backgound-delete method-title-delete">
+              <span class="method delete">delete</span>
+              /api/barrage 弹幕取消点赞
+            </h6>
+            <div class="main-delete hide">
+              <div class="main-delete-content">
+                <h6 class="main-title-delete">Parameters</h6>
+              </div>
+              <div>
+                <h6 class="main-title-delete">Responses</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">body</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>弹幕id</p>
+                    </td>
+                  </tr>
+                </table>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "success": true,
+      "res": null
+    }
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "success": true,
+      "res": null
+    }
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div>
         <h5 class="item">manage</h5>
         <ul class="customer-manage hide">
           <li class="content-get">
@@ -3832,6 +4187,117 @@
         </ul>
       </div>
       <h4>User</h4>
+      <div>
+        <h5 class="item">barrage</h5>
+        <ul class="customer-manage hide">
+          <li class="content-get">
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/barrage 弹幕列表
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item required">_id</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>id</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">timeStart</span>
+                      <br/>
+                      <span class="typeof-number"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>起始时间</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">process</span>
+                      <br/>
+                      <span class="typeof-number"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>时长</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "hot": 0,
+      "like": false,
+      "createdAt": 1234567890,
+      "updatedAt": 123456789,
+      "time_line": 1234567890,
+      "_id": "string",
+      "content": "string"
+    }
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "hot": "integer" 点赞人数,
+      "like": "boolean" 是否点过赞,
+      "createdAt": "date_time",
+      "updatedAt": "date_time",
+      "time_line": "date_time" 视频中出现时间,
+      "_id": "string" id,
+      "content": "string" 内容
+    }
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+        </ul>
       <div>
         <h5 class="item">customer</h5>
         <ul class="user-customer hide">

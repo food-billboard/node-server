@@ -11,9 +11,8 @@ const router = new Router()
 router
 .use(async (ctx, next) => {
   const [, token] = verifyTokenToData(ctx)
-  const { method } = ctx.request
+  const { method, url } = ctx.request
   const { _id } = ctx.query
-  const { url } = ctx.request
   const pathUrl = url.split("user")[1].split('?')[0]
   const newUrl = `/api/user/customer${url.split('user')[1]}`
   if(method.toLocaleLowerCase() == 'get') {
