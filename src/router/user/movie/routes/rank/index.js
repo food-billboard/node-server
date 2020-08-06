@@ -54,10 +54,13 @@ router
 		path: 'match',
 		select: {
 			"info.classify": 1,
+			"info.description": 1,
+			"info.name": 1,
 			poster: 1,
 			publish_time: 1,
 			hot: 1,
-			author_rate: 1
+			author_rate: 1,
+			rate: 1,
 		},
 		options: {
 			...(pageSize >= 0 ? { limit: pageSize } : {}),
@@ -78,10 +81,14 @@ router
 		const { match } = data
 		return {
 			match: match.map(m => {
-				const { _doc: { poster, ...nextM } } = m
+				const { _doc: { poster, info: { classify, description, name }, ...nextM } } = m
 				return {
 					...nextM,
-					poster: poster ? poster.src : null
+					store: false,
+					poster: poster ? poster.src : null,
+					classify,
+					name,
+					description
 				}
 			})
 		}

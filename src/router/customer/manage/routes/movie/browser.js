@@ -32,9 +32,14 @@ router.get('/', async (ctx) => {
   .populate({
     path: 'glance',
     select: {
-      "info.description": 1,
-      "info.name": 1,
-      poster: 1
+      "info.classify": 1,
+			"info.description": 1,
+			"info.name": 1,
+			poster: 1,
+			publish_time: 1,
+			hot: 1,
+			// author_rate: 1,
+			rate: 1,
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
@@ -47,12 +52,14 @@ router.get('/', async (ctx) => {
   .then(data => {
     const { glance } = data
     return glance.map(g => {
-      const { _doc: { info: { description, name }, poster, ...nextD } } = g
+      const { _doc: { info: { description, name, classify }, poster, ...nextD } } = g
       return {
         ...nextD,
         poster: poster ? poster.src : null,
         description,
         name,
+        classify,
+        store:false
       }
     })
   })

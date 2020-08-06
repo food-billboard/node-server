@@ -1996,7 +1996,16 @@
         "hot": 0,
         "name": "string",
         "poster": "string",
-        "_id": "string"
+        "_id": "string",
+        "descirption": "string",
+        "classify": [
+          {
+            name: "string"
+          }
+        ],
+        "rate": 0,
+        "store": false,
+        "publish_time": 1234567890,
       }
     ]
   }
@@ -2013,7 +2022,16 @@
         "hot": "integer" 人气,
         "name": "string" 名称,
         "poster": "string" 海报,
-        "_id": "string" id
+        "_id": "string" id,
+        "classify": [
+          {
+            "name": "string"
+          }
+        ]
+        "description": "string" 描述,
+        "rate": "integer" 评分,
+        "store": "boolean" 是否收藏,
+        "publish_time": "date_time" 发布时间
       }
     ]
   }
@@ -2089,7 +2107,17 @@
         "description": "string",
         "name": "string",
         "poster": "string",
-        "_id": "string"
+        "_id": "string",
+        "classify": [
+          {
+            "name": "string"
+          }
+        ],
+        "publish_time": 1234567890,
+        "hot": 0,
+        "rate": 0,
+        "store": true,
+
       }
     ]
   }
@@ -2106,7 +2134,15 @@
         "description": "string" 描述,
         "name": "string" 名称,
         "poster": "string" 海报,
-        "_id": "string" id
+        "_id": "string" id,
+        "classify": [ 分类
+        {
+          "name": "string"
+        }],
+        "store": "boolean" 是否收藏,
+        "rate": "integet" 评分,
+        "hot": "integer" 人气,
+        "publish_time": "date_time",
       }
     ]
   }
@@ -2287,7 +2323,16 @@
         "description": "string",
         "name": "string",
         "poster": "string",
-        "_id": "string"
+        "_id": "string",
+        "clasisfy": [ 分类
+          {
+            "name": "string"
+          }
+        ],
+        "rate": 0,
+        "store": false,
+        "hot": 0,
+        "publish_time": 1234567890
       }
     ]
   }
@@ -2304,7 +2349,16 @@
         "description": "string" 描述,
         "name": "string" 名称,
         "poster": "string" 海报,
-        "_id": "string" id
+        "_id": "string" id,
+        "store": "boolean" 是否收藏,
+        "rate": "integer" 评分,
+        "classify": [ 分类
+          {
+            "name": "string"
+          }
+        ],
+        "publish_time": "date_time" 发布时间,
+        "hot": "integer" 人气
       }
     ]
   }
@@ -4802,7 +4856,16 @@
         "hot": 0,
         "name": "string",
         "poster": "string",
-        "_id": "string"
+        "_id": "string",
+        "publish_time": 1234567890,
+        "rate": 0,
+        "store": false,
+        "classify": [
+          {
+            "name": "string"
+          }
+        ],
+        "description": "string"
       }
     ]
   }
@@ -4819,7 +4882,16 @@
         "hot": "integer" 人气,
         "name": "string" 名称,
         "poster": "string" 海报,
-        "_id": "string" id
+        "_id": "string" id,
+        "publish_time": "date_time" 发布时间,
+        "rate": "integer" 评分,
+        "store": "boolean" 是否收藏,
+        "classify": [ 分类
+          {
+            "name": "string"
+          }
+        ],
+        "description": "string" 描述
       }
     ]
   }
@@ -4907,7 +4979,16 @@
         "description": "string",
         "name": "string",
         "poster": "string",
-        "_id": "string"
+        "_id": "string",
+        "clasisfy": [
+          {
+            name: "string"
+          }
+        ],
+        "store": fa;se,
+        "rate": 0,
+        "hot": 0,
+        "publish_time": 1234567890
       }
     ]
   }
@@ -4924,7 +5005,16 @@
         "description": "string" 描述,
         "name": "string" 名称,
         "poster": "string" 海报,
-        "_id": "string" id
+        "_id": "string" id,
+        "store": "boolean" 是否收藏,
+        "rate": "integer" 评分,
+        "classify": [ 分类
+          {
+            "name": "string"
+          }
+        ],
+        "publish_time": "date_time" 发布时间,
+        "hot": "integer" 人气
       }
     ]
   }
@@ -5005,17 +5095,19 @@
                           <div class="example">
                             <pre>
 {
-  "success": true,
-  "res": {
-    "data": [
-      {
-        "description": "string",
-        "name": "string",
-        "poster": "string",
-        "_id": "string"
-      }
-    ]
-  }
+  "hot": 0,
+  "classify": [
+    {
+      "name": "string"
+    }
+  ],
+  "descirption": "string",
+  "name": "string",
+  "store": false,
+  "poster": "string",
+  "_id": "string",
+  "rate": 0,
+  "publish_time": 1234567890,
 }
                             </pre>
                           </div>
@@ -5029,7 +5121,15 @@
         "description": "string" 描述,
         "name": "string" 名称,
         "poster": "string" 海报,
-        "_id": "string" id
+        "_id": "string" id,
+        "classify": [ 分类
+        {
+          "name": "string"
+        }],
+        "store": "boolean" 是否收藏,
+        "rate": "integet" 评分,
+        "hot": "integer" 人气,
+        "publish_time": "date_time",
       }
     ]
   }
@@ -5411,7 +5511,16 @@
             "name": "string",
             "poster": "string",
             "_id": "string",
-            "hot": 0
+            "hot": 0,
+            "description": "string",
+            "store": false,
+            "rate": 0,
+            "publish_time": 123456789,
+            "classify": [
+              {
+                "name": "string"
+              }
+            ]
           }
         ],
         "name": "string",
@@ -5435,7 +5544,16 @@
             "name": "string" 名称,
             "poster": "string" 海报,
             "_id": "string" id,
-            "hot": "integer" 人气
+            "hot": "integer" 人气,
+            "description": "string" 描述,
+            "store": "boolean" 是否收藏,
+            "rate": "integer" 评分,
+            "publish_time": "date_time" 发布时间,
+            "classify": [ 分类
+              {
+                "name": "string"
+              }
+            ]
           }
         ],
         "name": "string" 名称,
@@ -6801,16 +6919,18 @@
     "data": [
       {
         "hot": 0,
-        "info": {
-          "classify": [
-            {
-              "name": "string"
-            }
-          ]
-        },
+        "classify": [
+          {
+            "name": "string"
+          }
+        ],
+        "descirption": "string",
         "name": "string",
+        "store": false,
         "poster": "string",
-        "_id": "string"
+        "_id": "string",
+        "rate": 0,
+        "publish_time": 1234567890,
       }
     ]
   }
@@ -6825,16 +6945,18 @@
     "data": [
       {
         "hot": "integer" 人气,
-        "info": { 信息
-          "classify": [ 分类
-            {
-              "name": "string" 名称
-            }
-          ]
-        },
+        "classify": [ 分类
+          {
+            "name": "string" 名称
+          }
+        ],
+        "descirption": "string" 描述,
         "name": "string" 电影名称,
+        "store": "boolean" 是否收藏,
         "poster": "string" 海报,
-        "_id": "string" id
+        "_id": "string" id,
+        "rate": "integer" 评分,
+        "publish_time": "date_time" 发布时间
       }
     ]
   }

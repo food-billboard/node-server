@@ -32,9 +32,14 @@ router.get('/', async (ctx) => {
   .populate({
     path: 'store',
     select: {
-      "info.description": 1,
-      "info.name": 1,
-      poster: 1
+      "info.classify": 1,
+			"info.description": 1,
+			"info.name": 1,
+			poster: 1,
+			publish_time: 1,
+			hot: 1,
+			// author_rate: 1,
+			rate: 1,
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
@@ -46,15 +51,19 @@ router.get('/', async (ctx) => {
   .then(notFound)
   .then(data => {
     const { store } = data
-    return store.map(s => {
-      const { _doc: { info: { description, name }, poster, ...nextD } } = s
-      return {
-        ...nextD,
-        poster: poster ? poster.src : null,
-        description,
-        name,
-      }
-    })
+    return {
+      store: store.map(s => {
+        const { _doc: { poster, info: { description, name, classify }={}, ...nextS } } = s
+        return {
+          ...nextS,
+          poster: poster ? poster.src : null,
+          description,
+          name,
+          classify,
+          store: true,
+        }
+      })
+    }
   })
   .catch(dealErr(ctx))
 

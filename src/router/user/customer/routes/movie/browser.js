@@ -53,9 +53,14 @@ router
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
     },
     select: {
-      "info.description": 1,
-      "info.name": 1,
-      poster: 1
+      "info.classify": 1,
+			"info.description": 1,
+			"info.name": 1,
+			poster: 1,
+			publish_time: 1,
+			hot: 1,
+			// author_rate: 1,
+			rate: 1,
     }
   })
   .exec()
@@ -65,12 +70,14 @@ router
     const { glance } = data
     return {
       glance: glance.map(g => {
-        const { _doc: { poster, info: { description, name }={}, ...nextG } } = g
+        const { _doc: { info: { description, name, classify }, poster, ...nextD } } = g
         return {
-          ...nextG,
+          ...nextD,
           poster: poster ? poster.src : null,
           description,
-          name
+          name,
+          classify,
+          store:false
         }
       })
     }

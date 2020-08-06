@@ -33,14 +33,20 @@ router
     movie: 1,
     poster: 1,
     name: 1,
-    hot: 1,
-    author_rate: 1,
+    // hot: 1,
+    // author_rate: 1,
   })
   .populate({
     path: 'movie',
     select: {
-      name: 1, 
-      poster: 1, 
+      "info.classify": 1,
+			"info.description": 1,
+			"info.name": 1,
+			poster: 1,
+			publish_time: 1,
+			hot: 1,
+			// author_rate: 1,
+			rate: 1,
     }
   })
   .exec()
@@ -52,9 +58,13 @@ router
       ...nextData,
       poster: poster ? poster.src : null,
       movie: movie.map(m => {
-        const { _doc: { poster, ...nextM } } = m
+        const { _doc: { poster, info: { classify, description, name }, ...nextM } } = m
         return {
           ...nextM,
+          description,
+          name,
+          classify,
+          store: false,
           poster: poster ? poster.src : null,
         }
       })

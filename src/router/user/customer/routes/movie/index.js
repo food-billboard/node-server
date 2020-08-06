@@ -51,10 +51,14 @@ router
   .populate({
     path: 'issue',
     select: {
-      name: 1,
-      poster: 1,
-      hot: 1,
-      author_rate: 1,
+      "info.classify": 1,
+			"info.description": 1,
+			"info.name": 1,
+			poster: 1,
+			publish_time: 1,
+			hot: 1,
+			// author_rate: 1,
+			rate: 1,
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
@@ -67,12 +71,15 @@ router
   .then(data => {
     const { issue } = data
     return {
-      issue: issue.map(i => {
-        const { _doc: { poster, ...nextI } } = i
-        console.log(i)
+      issue: issue.map(s => {
+        const { _doc: { poster, info: { description, name, classify }={}, ...nextS } } = s
         return {
-          ...nextI,
-          poster: poster ? poster.src : null
+          ...nextS,
+          poster: poster ? poster.src : null,
+          description,
+          name,
+          classify,
+          store: false,
         }
       })
     }
