@@ -831,10 +831,10 @@ const RankSchema = new Schema({
       return v
     }
   },
-  match: [{
-    type: ObjectId,
-    ref: 'movie'
-  }],
+  // match: [{
+  //   type: ObjectId,
+  //   ref: 'movie'
+  // }],
   glance: {
     type: Number,
     default: 0

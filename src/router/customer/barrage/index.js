@@ -72,7 +72,7 @@ router
       },
       ...(timeStart >= 0 ? { 
         $gt: { time_line: timeStart },
-        ...(time >= 0 ? { $lt: { time_line: time + timeStart } } : {})
+        ...(process >= 0 ? { $lt: { time_line: process + timeStart } } : {})
       } : {})
     })
   })
