@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "jest --forceExit --runInBand --detectOpenHandles",
+    "test": "mocha --harmony --require co-mocha",
     "dev": "nodemon app.js",
     "socket": "nodemon ./src/chat/index.js"
   },
@@ -29,7 +29,11 @@
     "@src": "src"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "co-mocha": "^1.2.2",
+    "co-supertest": "0.0.10",
     "jest": "^26.1.0",
+    "mocha": "^8.1.1",
     "supertest": "^4.0.2"
   }
 }
