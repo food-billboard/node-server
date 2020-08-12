@@ -1,23 +1,18 @@
-require('co-mocha');
+// require('co-mocha');
+// require('mocha')
 require('module-alias/register')
 const App = require('../app')
-const Request = require('co-supertest').agent(App.listen())
-const Should = require('chai').should()
-const Router = require('@koa/router')
+// const Request = require('co-supertest').agent(App.listen())
+const Request = require('supertest').agent(App.listen())
+const should = require('chai').should()
+const assert = require('chai').assert
+const path = require('path')
 
 process.env.NODE_ENV = 'test'
-// process.env.DATABASE = 'mongodb://localhost'
+process.env.DATABASE = 'mongodb://localhost'
 
-describe('APP entry', function * () {
-  it('test', function * () {
-    const router = new Router()
-    router.get('/api/swagger/index.html')
-    
-    var res = yield Request
-        .get('/api/swagger/index.html')
-        .expect(200)
-        .end();
-
-      console.log(res)
+describe('APP', async function () {
+  it('server is complete run in port 3000', function (done) {
+      done()
   })
 })

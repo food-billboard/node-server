@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "mocha --harmony --require co-mocha",
+    "test": "mocha",
     "dev": "nodemon app.js",
     "socket": "nodemon ./src/chat/index.js"
   },
