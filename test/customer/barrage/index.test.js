@@ -2,8 +2,10 @@ const App = require('../app')
 const path = require('path')
 const Request = require('supertest').agent(App.listen())
 const { assert } = require('chai')
+import { UserModel, BarrageModel, encoded } from '@src/utils'
+import { mockCreateUser } from '@test/utils'
 
-const COMMON_API = '/api/customer'
+const COMMON_API = '/api/customer/barrage'
 
 describe(`${COMMON_API} test`, function() {
 
@@ -11,9 +13,22 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`success test`, function() {
 
-      it(`complete the token verify test`, function(done) {
+      const {
+        beforeEach:_beforeEach,
+        afterEach:_afterEach,
+        token
+      } = mockCreateUser()
 
+      beforeEach(_beforeEach)
+
+      it(`complete the token verify test`, function(done) {
+        Request
+        .get(COMMON_API)
+        .expect('Authorization', `Basic ${token}`)
+        .expect(200)
       })
+
+      afterEach(_afterEach)
 
     })
 

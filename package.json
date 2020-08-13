@@ -26,7 +26,8 @@
     "validator": "^13.1.1"
   },
   "_moduleAliases": {
-    "@src": "src"
+    "@src": "src",
+    "@test": "test"
   },
   "devDependencies": {
     "chai": "^4.2.0",
