@@ -96,11 +96,25 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`post like the barrage test -> ${COMMON_API}`, function() {
 
-    
+    it(`like the barrage fail because of the movie id is not fuound`, function() {
+
+    })
+
+    it(`like the barrage fail because of the the params have not the movie id`, function() {
+
+    })
 
   })
 
   describe(`cancel like the barrage test -> ${COMMON_API}`, function() {
+
+    it(`cancel like the barrage fail because of the movie id is not fuound`, function() {
+
+    })
+
+    it(`cancel like the barrage fail because of the the params have not the movie id`, function() {
+      
+    })
 
   })
 

@@ -915,7 +915,7 @@ const VideoSchema = new Schema({
   info: {
     complete: [{
       type: Number,
-      required: true,
+      // required: true,
       min: 0
     }],
     chunk_size: {
