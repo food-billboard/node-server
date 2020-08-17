@@ -9,6 +9,26 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`put the new avatar test -> ${COMMON_API}`, function() {
 
+    describe(`put the new avatar success test -> ${COMMON_API}`, function() {
+
+      it(`put the new avatar success`, function() {
+
+      })
+
+    })
+
+    describe(`put the new avatar fail test -> ${COMMON_API}`, function() {
+
+      it(`put the new avatar fail because the image is not found`, function() {
+
+      })
+
+      it(`put the new avatar fail because the image is not allow use or unauth`, function() {
+
+      })
+
+    })
+
   })
 
 }) 

@@ -9,6 +9,23 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`put the new name test -> ${COMMON_API}`, function() {
 
+    describe(`put the new name success test -> ${COMMON_API}`, function() {
+
+      it(`put the new name success`, function() {
+
+      })
+
+    })
+
+    describe(`put the new name fail test -> ${COMMON_API}`, function() {
+
+      it(`put the new name fail because the name is exists`, function() {
+
+      })
+
+
+    })
+
   })
 
 }) 

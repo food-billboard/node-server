@@ -21,6 +21,25 @@ const {
   BarrageModel, 
 } = require('@src/utils')
 
+const is = (value, type) => Object.prototype.toString.call(value) === `[object ${type.toUpperCase().slice(0, 1)}${type.toLowerCase().slice(1)}]`
+
+
+
+function mergeConfig(origin, target) {
+  if(typeof target !== 'object') return origin
+  Object.keys(target).forEach(item => {
+    if(origin[item]) {
+      if(!is(origin[item], 'object') && !is(origin[item], 'array')) {
+        origin[item] = target[item]
+      }else if(is(origin[item], 'array')){
+
+      }else {
+        
+      }
+    }
+  })
+}
+
 //用户创建
 function mockCreateUser() {
   const password = '1234567890'
