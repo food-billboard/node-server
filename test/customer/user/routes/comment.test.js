@@ -9,6 +9,18 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get the user comment list and not self and with self info test -> ${COMMON_API}`, function() {
 
+    describe(`get the user comment list and not self and with self info success test -> ${COMMON_API}`, function() {
+
+      it(`get the user comment list and not self and with self info success`, function() {
+
+      })
+
+      it(`get the user comment list and not self and with self info success but the list'length is 0`, function() {
+        
+      })
+
+    })
+
   })
 
 })
