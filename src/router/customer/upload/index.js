@@ -10,6 +10,21 @@ const router = new Router()
 const MAX_FILE_SIZE = 1024 * 1024 * 5
 
 router
+.use(async (ctx, next) => {
+  const [, token] = verifyTokenToData(ctx)
+  if(!token) {
+    ctx.status = 401
+    ctx.body = JSON.stringify({
+      success: false,
+      res: {
+        errMsg: '未登录或登录过期'
+      }
+    })
+    return 
+  }
+
+  return await next()
+})
 //对于大文件拒绝接收请求
 // .use(async(ctx, next) => {
 //   const { method } = ctx.request

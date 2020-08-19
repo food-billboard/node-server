@@ -18,7 +18,7 @@ router.get('/', async (ctx) => {
 
   const [ , token ] = verifyTokenToData(ctx)
   const { mobile } = token
-  const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
+  const [ currPage, pageSize, commentId ] = Params.sanitizers(ctx.query, {
 		name: 'currPage',
 		_default: 0,
     type: [ 'toInt' ],
@@ -56,7 +56,7 @@ router.get('/', async (ctx) => {
     const { _id } = data
     mineId = _id
     return CommentModel.findOne({
-      _id
+      _id: commentId
     })
   })
   .select({

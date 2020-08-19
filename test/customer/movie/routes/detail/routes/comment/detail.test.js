@@ -9,6 +9,14 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get the comment detail with self info test -> ${COMMON_API}`, function() {
 
+    describe(`get the comment detail with self info success test -> ${COMMON_API}`, function() {
+
+      it(`get the comment detail with self info success`, function() {
+        
+      })
+
+    })
+
   })
 
 })
