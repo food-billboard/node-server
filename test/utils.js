@@ -49,21 +49,13 @@ function mockCreateUser(values={}) {
   }
   mergeConfig(baseModel, values)
 
+  const model = new UserModel(baseModel)
+
   return {
-    password,
-    mobile,
-    token,
-    beforeEach: function(done) {
-      const model = new UserModel(baseModel)
-      model
-      .save()
-      .then(done)
-    },
-    afterEach: function(done) {
-      UserModel.remove(...baseModel)
-      done()
+      ...model,
+      decodePassword: password,
+      token
     }
-  }
 }
 
 //电影创建
@@ -102,9 +94,7 @@ function mockCreateMovie(values={}) {
 
   const model = new MovieModel(baseModel)
 
-  return {
-
-  }
+  return model
 }
 
 //创建评论
@@ -126,9 +116,7 @@ function mockCreateComment(values={}) {
   mergeConfig(baseModel, vlaues)
   const model = new CommentModel(baseModel)
 
-  return {
-
-  }
+  return model
 }
 
 //创建标签
@@ -140,9 +128,7 @@ function mockCreateTag(values={}) {
 
   const model = new TagModel(baseModel)
 
-  return {
-
-  }
+  return model
 }
 
 //创建专题
@@ -157,9 +143,7 @@ function mockCreateSpecial(values={}) {
 
   const model = new SpecialModel(baseModel)
 
-  return {
-
-  }
+  return model
 }
 
 //创建演员
@@ -176,9 +160,7 @@ function mockCreateActor(values={}) {
 
   const model = new ActorModel(baseModel)
 
-  return {
-
-  }
+  return model
 }
 
 //创建导演
@@ -195,9 +177,7 @@ function mockCreateDirector(values={}) {
 
   const model = new DirectorModel(baseModel)
 
-  return {
-
-  }
+  return model
 }
 
 //创建语言
@@ -209,9 +189,7 @@ function mockCreateLanguage(values={}) {
 
   const model = new LanguageModel(baseModel)
 
-  return {
-
-  }
+  return model
 }
 
 //创建地区
@@ -223,9 +201,7 @@ function mockCreateDistrict(values={}) {
 
   const model = new DistrictModel(baseModel)
   
-  return {
-
-  }
+  return model
 }
 
 //创建图片
@@ -245,9 +221,7 @@ function mockCreateImage(values={}) {
 
   const model = new ImageModel(baseModel)
 
-  return {
-
-  }
+  return model
 }
 
 //创建视频
@@ -268,9 +242,7 @@ function mockCreateVideo(values={}) {
 
   const model = new VideoModel(baseModel)
 
-  return {
-
-  }
+  return model
 }
 
 //创建分类
@@ -285,9 +257,7 @@ function mockCreateClassify(values={}) {
 
   const model = new ClassifyModel(baseModel)
 
-  return {
-
-  }
+  return model
 }
 
 //创建全局信息
@@ -300,9 +270,7 @@ function mockCreateGlobal(values={}) {
 
   const model = new GlobalModel()
 
-  return {
-
-  }
+  return model
 }
 
 //创建弹幕
@@ -317,9 +285,7 @@ function mockCreateBarrage(values) {
 
   const model = new BarrageModel(baseModel)
 
-  return {
-
-  }
+  return model
 }
 
 module.exports = {
