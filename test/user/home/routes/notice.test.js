@@ -9,6 +9,14 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get home notice info test -> ${COMMON_API}`, function() {
 
+    describe(`get home notice info success test -> ${COMMON_API}`, function() {
+
+      it(`get home notice info success`, function() {
+
+      })
+
+    })
+
   })
 
 })

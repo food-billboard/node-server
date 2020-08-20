@@ -9,6 +9,34 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get rank list test -> ${COMMON_API}`, function() {
     
+    describe(`get rank list success test -> ${COMMON_API}`, function() {
+
+      it(`get rank list success`, function() {
+
+      })
+
+      it(`get rank list success but the list's length is 0`, function() {
+        
+      })
+
+    })
+
+    describe(`get rank list fail test -> ${COMMON_API}`, function() {
+
+      it(`get rank list fail because the rank id is not found`, function() {
+
+      })
+
+      it(`get rank list fail because the rank id is not verify`, function() {
+
+      })
+
+      it(`get rank list fail because lack of the params of rank id`, function() {
+
+      })
+
+    })
+
   })
 
 })

@@ -9,6 +9,18 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get language list test -> ${COMMON_API}`, function() {
     
+    describe(`get language list success test -> ${COMMON_API}`, function() {
+
+      it(`get language list success`, function() {
+
+      })
+
+      it(`get language list success but the list's length is 0`, function() {
+        
+      })
+
+    })
+
   })
 
 })

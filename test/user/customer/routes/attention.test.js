@@ -23,7 +23,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get another user attention fail test -> ${COMMON_API}`, function() {
       
-      describe(`get another user attention fail because the user id is not found`, function() {
+      it(`get another user attention fail because the user id is not found`, function() {
         
       })
 

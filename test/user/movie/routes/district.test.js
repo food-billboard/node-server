@@ -9,6 +9,18 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get district list test -> ${COMMON_API}`, function() {
     
+    describe(`get district list success test -> ${COMMON_API}`, function() {
+
+      it(`get district list success`, function() {
+
+      })
+
+      it(`get district list success but the list's length is 0`, function() {
+        
+      })
+
+    })
+
   })
 
 })

@@ -9,6 +9,18 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get director list test -> ${COMMON_API}`, function() {
     
+    describe(`get director list success test -> ${COMMON_API}`, function() {
+
+      it(`get director list success`, function() {
+
+      })
+
+      it(`get director list success but the list's length is 0`, function() {
+        
+      })
+
+    })
+
   })
 
 })

@@ -9,6 +9,14 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get the mini app info test -> ${COMMON_API}`, function() {
     
+    describe(`get the mini app info success test -> ${COMMON_API}`, function() {
+
+      it(`get the mini app info succcess`, function() {
+        
+      })
+
+    })
+
   })
 
 })

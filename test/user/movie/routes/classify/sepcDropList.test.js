@@ -9,6 +9,18 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get classify type list test -> ${COMMON_API}`, function() {
     
+    describe(`get classify type list success test -> ${COMMON_API}`, function() {
+
+      it(`get classify type list success`, function() {
+
+      })
+
+      it(`get classify type list success but the list's length is 0`, function() {
+
+      })
+
+    })
+
   })
 
 })

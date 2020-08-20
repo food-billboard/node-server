@@ -9,6 +9,18 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get actor list test -> ${COMMON_API}`, function() {
     
+    describe(`get actor list success test -> ${COMMON_API}`, function() {
+
+      it(`get acotr list success`, function() {
+
+      })
+
+      it(`get actor list success but the list's length is 0`, function() {
+        
+      })
+
+    })
+
   })
 
 })
