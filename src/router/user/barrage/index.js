@@ -79,7 +79,8 @@ router
       }
     }
   }
-  ctx.body = JSON.stringify(res)
+
+  ctx.body = res
 })
 
 module.exports = router

@@ -20,20 +20,24 @@ const {
   ImageModel,
   BarrageModel, 
 } = require('@src/utils')
+const App = require('../app')
+const Request = require('supertest').agent(App.listen())
 
 const is = (value, type) => Object.prototype.toString.call(value) === `[object ${type.toUpperCase().slice(0, 1)}${type.toLowerCase().slice(1)}]`
 
 function mergeConfig(origin, target) {
-  if(typeof target !== 'object') return origin
-  Object.keys(target).forEach(item => {
-    if(origin[item]) {
-      if(!is(origin[item], 'object')) {
-        origin[item] = target[item]
+  let _obj = {...origin}
+  if(typeof _obj !== 'object') return _obj
+  Object.keys(_obj).forEach(item => {
+    if(_obj[item] != undefined && target[item] != undefined) {
+      if(!is(_obj[item], 'object')) {
+        _obj[item] = target[item]
       }else {
-        mergeConfig(origin[item], target[item])
+        _obj[item] = mergeConfig(_obj[item], target[item])
       }
     }
   })
+  return _obj
 }
 
 //用户创建
@@ -275,15 +279,16 @@ function mockCreateGlobal(values={}) {
 
 //创建弹幕
 function mockCreateBarrage(values) {
-  const baseModel = {
+  let baseModel = {
     origin: '',
     user: '',
     like_users: [],
     time_line: 100
   }
-  mergeConfig(baseModel, values)
 
-  const model = new BarrageModel(baseModel)
+  const newModel = mergeConfig(baseModel, values)
+
+  const model = new BarrageModel(newModel)
 
   return model
 }
@@ -302,5 +307,6 @@ module.exports = {
   mockCreateVideo,
   mockCreateClassify,
   mockCreateGlobal,
-  mockCreateBarrage
+  mockCreateBarrage,
+  Request
 }
