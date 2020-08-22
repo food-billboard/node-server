@@ -15,10 +15,6 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the movie detail simply without self info success but the list's length is 0`, function() {
-
-      })
-
     })
 
     describe(`get the movie detail simply without self info fail test -> ${COMMON_API}`, function() {
