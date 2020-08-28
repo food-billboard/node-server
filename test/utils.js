@@ -56,7 +56,7 @@ function mockCreateUser(values={}) {
   const model = new UserModel(baseModel)
 
   return {
-      ...model,
+      model,
       decodePassword: password,
       token
     }
