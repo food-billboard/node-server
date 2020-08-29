@@ -1,3 +1,4 @@
+const Day = requier('dayjs')
 
 //错误处理
 const dealErr = (ctx) => {
@@ -45,8 +46,26 @@ const withTry = (callback) => {
   }
 }
 
+// //强缓存
+// Cache-Control max-age no-cache public private no-cache no-store must-revalidate
+// Pragma no-cache
+// Expires Http日期
+
+// //协商缓存
+// Etag/If-None-Match
+// Last-Modified/If-Modified-Since
+
+//缓存处理
+const judgeCache = (ctx, modifiedTime, etagValidate) => {
+  const { request: { headers } } = ctx
+  const modified = headers['if-modified-since'] || headers['If-Modified-Since']
+  const etag = headers['if-none-match'] || headers['If-None-Match']
+  return Day(modified).valueOf() === Day(modifiedTime).valueOf() && ( typeof etagValidate == 'function' ? etagValidate(etag) : true )
+}
+
 module.exports = {
   notFound,
   dealErr,
-  withTry
+  withTry,
+  judgeCache
 }

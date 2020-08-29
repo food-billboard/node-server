@@ -4,7 +4,7 @@ const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const { Types: { ObjectId } } = require("mongoose")
-const { UserModel, dealErr, Params } = require("@src/utils")
+const { UserModel, dealErr, Params, judgeCache } = require("@src/utils")
 
 const router = new Router()
 
@@ -61,10 +61,22 @@ router
       ...data.res
     }
   }else {
+    const { updatedAt } = data
     res = {
-      success: true,
-      res: {
-        data
+      success: true
+    }
+    if(judgeCache(ctx, updatedAt)) {
+      ctx.status = 304
+      res = {
+        ...res,
+        res: {}
+      }
+    }else {
+      res = {
+        ...res,
+        res: {
+          data
+        }
       }
     }
   }
