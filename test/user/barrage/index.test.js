@@ -8,14 +8,14 @@ const { Types: { ObjectId } } = mongoose
 const COMMON_API = '/api/user/barrage'
 
 function responseExpect(res, validate=[]) {
-  const { target } = res
+  const { res: { data: target } } = res
          
-  expect(target).to.be.a('object').and.include.all.keys('hot', 'like', 'time_line', '_id', 'content')
-  expect(target).to.be.have.a.property('hot').and.that.a('number')
-  expect(target).to.be.have.a.property('like').and.that.a('boolean')
-  expect(target).to.be.have.a.property('time_line').and.that.a('number')
-  expect(target).to.be.have.a.property('_id').and.that.a('string')
-  expect(target).to.be.have.a.property('content').and.that.a('string')
+  expect(target).to.be.a('array').and.have.a.property('0').that.includes.all.keys('hot', 'like', 'time_line', '_id', 'content')
+  expect(target).to.be.have.a.property('0').have.a.property('hot').and.that.a('number')
+  expect(target).to.be.have.a.property('0').have.a.property('like').and.that.a('boolean')
+  expect(target).to.be.have.a.property('0').have.a.property('time_line').and.that.a('number')
+  expect(target).to.be.have.a.property('0').have.a.property('_id').and.that.a('string')
+  expect(target).to.be.have.a.property('0').have.a.property('content').and.that.a('string')
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
       typeof valid == 'function' && valid(target)
@@ -55,7 +55,7 @@ describe(`${COMMON_API} test`, function() {
     describe(`get movie barrage list without self info success test -> ${COMMON_API}`, function() {
 
       it(`get movie barrage list without self info success`, function(done) {
-
+        console.log(values.origin.toString())
         Request
         .get(COMMON_API)
         .query({ _id: values.origin.toString() })
@@ -64,7 +64,14 @@ describe(`${COMMON_API} test`, function() {
         .expect(200)  
         .end(function(err, res) {
           if(err) return done(err)
-          responseExpect(res)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj)
           done()
         })
       })

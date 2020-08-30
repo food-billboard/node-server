@@ -490,6 +490,10 @@ const BarrageSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   }],
+  content: {
+    type: String,
+    default: ''
+  },
   time_line: {
     type: Number,
     required: true
