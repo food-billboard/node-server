@@ -1,21 +1,19 @@
 require('module-alias/register')
-const App = require('../app')
 const { expect } = require('chai')
 const { mockCreateUser, Request } = require('@test/utils')
-const mongoose = require("mongoose")
-const { Types: { ObjectId } } = mongoose
 
 const COMMON_API = '/api/user/customer'
 
 function responseExpect(res, validate=[]) {
 
-  const { target } = res
+  const { res: { data: target } } = res
+
   expect(target).to.be.a('object').and.include.all.keys('attentions', 'avatar', 'fans', 'hot', 'username', '_id')
-  expect(target).to.have.property('attentions').and.is.a('number').and.that.above(0)
-  expect(target).to.have.property('avatar').and.is.a('string')
-  expect(target).to.have.property('fans').and.is.a('number').and.that.above(0)
-  expect(target).to.have.property('username').and.is.a('string')
-  expect(target).to.have.property('_id').and.is.a('string')
+  expect(target).to.have.a.property('attentions').and.is.a('number').and.that.above(0)
+  expect(target).to.have.a.property('avatar').and.is.a('string')
+  expect(target).to.have.a.property('fans').and.is.a('number').and.that.above(0)
+  expect(target).to.have.a.property('username').and.is.a('string')
+  expect(target).to.have.a.property('_id').and.is.a('string')
   
 
   if(Array.isArray(validate)) {
@@ -60,7 +58,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get another userinfo and not self and without self info success test -> ${COMMON_API}`, function() {
 
-      it(`get another userinfo and not self and without self info success`, function() {
+      it(`get another userinfo and not self and without self info success`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -70,7 +68,30 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
-          responseExpect(res)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj)
+          done()
+        })
+
+      })
+
+      it(`get another userinfo and not self and without self info success and return status of 304`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .query({ _id: result._id.toStrng() })
+        .set('Accept', 'application/json')
+        .set('If-Modified-Since', result.updatedAt)
+        .expect(304)
+        .expect('Content-Type', /json/)
+        .end(function(err, _) {
+          if(err) return done(err)
           done()
         })
 
