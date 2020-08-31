@@ -1,12 +1,11 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, dealErr, UserModel, RoomModel, notFound } = require("@src/utils")
+const { verifyTokenToData, dealErr, UserModel, RoomModel, notFound, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
 
 router
 .post('/', async(ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  let res
   const { mobile } = token
 
   const data = await UserModel.findOneAndUpdate({
@@ -39,17 +38,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = data.res
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 })
 
 module.exports = router

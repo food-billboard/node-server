@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { SpecialModel, dealErr, notFound, Params } = require('@src/utils')
+const { SpecialModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -10,12 +10,7 @@ router
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ _id ] = Params.sanitizers(ctx.query, {
 		name: '_id',
@@ -25,7 +20,7 @@ router
 			}
 		]
 	})
-  let res
+
   const data = await SpecialModel.findOne({
     _id
   })
@@ -33,6 +28,7 @@ router
     movie: 1,
     poster: 1,
     name: 1,
+    updatedAt: 1,
     // hot: 1,
     // author_rate: 1,
   })
@@ -72,19 +68,10 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 module.exports = router

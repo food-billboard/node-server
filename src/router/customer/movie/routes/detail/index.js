@@ -2,7 +2,7 @@ const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Rate = require('./routes/rate')
 const Store = require('./routes/store')
-const { verifyTokenToData, middlewareVerifyToken, UserModel, MovieModel, dealErr, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, middlewareVerifyToken, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -13,12 +13,7 @@ router
     name: "_id",
     type: [ 'isMongoId' ]
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
@@ -40,7 +35,7 @@ router
     store: { $in: [_id] }
   })
   .select({
-    _id: 1
+    _id: 1,
   })
   .exec()
   .then(data => !!data && data._doc)
@@ -171,20 +166,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      scuccess: true,
-      res: {
-        data
-      }
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 .use(middlewareVerifyToken)
 .use('/comment', Comment.routes(), Comment.allowedMethods())

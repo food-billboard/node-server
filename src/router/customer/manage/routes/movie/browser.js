@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
 
@@ -21,13 +21,13 @@ router.get('/', async (ctx) => {
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res 
 
   const data = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
-    glance: 1
+    glance: 1,
+    updatedAt: 1
   })
   .populate({
     path: 'glance',
@@ -50,34 +50,28 @@ router.get('/', async (ctx) => {
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { glance } = data
-    return glance.map(g => {
-      const { _doc: { info: { description, name, classify }, poster, ...nextD } } = g
-      return {
-        ...nextD,
-        poster: poster ? poster.src : null,
-        description,
-        name,
-        classify,
-        store:false
-      }
-    })
+    const { glance, ...nextData } = data
+    return {
+      ...nextData,
+      glance: glance.map(g => {
+        const { _doc: { info: { description, name, classify }, poster, ...nextD } } = g
+        return {
+          ...nextD,
+          poster: poster ? poster.src : null,
+          description,
+          name,
+          classify,
+          store:false
+        }
+      })
+    }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.ers
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+  })
 })
 
 module.exports = router

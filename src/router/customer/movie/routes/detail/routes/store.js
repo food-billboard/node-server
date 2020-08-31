@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { UserModel, MovieModel, verifyTokenToData, dealErr, notFound, Params } = require("@src/utils")
+const { UserModel, MovieModel, verifyTokenToData, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require("mongoose")
 
 const router = new Router()
@@ -17,12 +17,7 @@ router
     name: '_id',
     type: [ 'isMongoId' ]
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
   return await next()
 })
 .put('/', async (ctx) => {
@@ -35,7 +30,6 @@ router
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
 
   const data = await UserModel.updateOne({
     mobile: Number(mobile),
@@ -53,18 +47,12 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 .delete('/', async(ctx) => {
   const [ _id ] = Params.sanitizers(ctx.query, {
@@ -75,7 +63,6 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
 
   const data = await UserModel.updateOne({
     mobile: Number(mobile),
@@ -94,18 +81,12 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 
 module.exports = router

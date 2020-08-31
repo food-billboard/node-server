@@ -3,23 +3,17 @@ const Day = requier('dayjs')
 //错误处理
 const dealErr = (ctx) => {
   return (err) => {
-    let res = { success: false }
+    let res = {}
     if(err && err.errMsg) {
       const { status=500, ...nextErr } = err
       ctx.status = status
       res = {
-        ...res,
-        res: {
-          ...nextErr
-        }
+        ...nextErr
       }
     }else {
       ctx.status = 500
       res = {
-        ...res,
-        res: {
-          errMsg: err
-        }
+        errMsg: err
       }
     }
     console.log(err)
@@ -63,9 +57,73 @@ const judgeCache = (ctx, modifiedTime, etagValidate) => {
   return Day(modified).valueOf() === Day(modifiedTime).valueOf() && ( typeof etagValidate == 'function' ? etagValidate(etag) : true )
 }
 
+//响应数据处理
+const responseDataDeal = ({
+  ctx,
+  data={},
+  needCache=true,
+  anotherResponse,
+  afterDeal
+}) => {
+  let response = {}
+
+  //error
+  if(data && data.err) {
+    response = {
+      success: false,
+      res: {
+        ...data.res
+      }
+    }
+  }
+  //success
+  else {
+    response = {
+      success: true,
+      res: {
+        ...data
+      }
+    }
+
+    //another status
+    if(!!anotherResponse && typeof anotherResponse === 'function') {
+      response = anotherResponse({...response})
+    }
+    //304 | 200
+    else {
+      // ctx.status = 200
+      if(!Array.isArray(data) && needCache) {
+        const { updatedAt } = data
+        if(updatedAt && judgeCache(ctx, updatedAt)) {
+          ctx.status = 304
+          response = {
+            ...response,
+            res: {}
+          }
+        }
+      }
+    }
+
+    const { res: { updatedAt, ...nextRes }  } = response
+    response = {
+      ...response,
+      res: {
+        ...nextRes
+      }
+    }
+
+    if(afterDeal && typeof afterDeal === 'function') response = afterDeal({...response})
+
+    ctx.body = JSON.stringify(response)
+
+  }
+
+}
+
 module.exports = {
   notFound,
   dealErr,
   withTry,
-  judgeCache
+  judgeCache,
+  responseDataDeal
 }

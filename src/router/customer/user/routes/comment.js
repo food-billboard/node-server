@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -11,12 +11,8 @@ router.get('/', async (ctx) => {
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
+
   const [ _id, currPage, pageSize ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
@@ -37,13 +33,13 @@ router.get('/', async (ctx) => {
       data => data >= 0 ? data : -1
     ]
   })
-  let res
 
   const data = await UserModel.find({
     $or: [ { mobile: Number(mobile) }, { _id } ]
   })
   .select({
-    comment: 1
+    comment: 1,
+    updatedAt: 1
   })
   .populate({
     path: 'comment',
@@ -85,53 +81,46 @@ router.get('/', async (ctx) => {
       ...data[(index + 1) % 2]._doc
     }
     const { _id:mineId } = mine
-    const { comment } = result
+    const { comment, updatedAt } = result
     let like = false
-    return comment.map(c => {
-      const { _doc: { 
-        like_person, 
-        source: { name, content, ...nextSource }={}, 
-        content: { image, video, ...nextContent }, 
-        user_info: { _doc: { avatar, ...nextUserInfo } },
-        ...nextC 
-      } } = c
-      like = false
-      if(like_person.some(l => l.equals(mineId))) like = true
-      return {
-        ...nextC,
-        user_info: {
-          ...nextUserInfo,
-          avatar: avatar ? avatar.src : null
-        },
-        content: {
-          ...nextContent,
-          image: image.filter(i => i && !!i.src).map(i => i.src),
-          video: video.filter(v => v && !!v.src).map(v => v.src)
-        },
-        source: {
-          ...nextSource,
-          content: name ? name : ( content || null )
-        },
-        like
-      }
-    })
+    return {
+      ...result,
+      comment: comment.map(c => {
+        const { _doc: { 
+          like_person, 
+          source: { name, content, ...nextSource }={}, 
+          content: { image, video, ...nextContent }, 
+          user_info: { _doc: { avatar, ...nextUserInfo } },
+          ...nextC 
+        } } = c
+        like = false
+        if(like_person.some(l => l.equals(mineId))) like = true
+        return {
+          ...nextC,
+          user_info: {
+            ...nextUserInfo,
+            avatar: avatar ? avatar.src : null
+          },
+          content: {
+            ...nextContent,
+            image: image.filter(i => i && !!i.src).map(i => i.src),
+            video: video.filter(v => v && !!v.src).map(v => v.src)
+          },
+          source: {
+            ...nextSource,
+            content: name ? name : ( content || null )
+          },
+          like
+        }
+      })
+    }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
 
 })
 

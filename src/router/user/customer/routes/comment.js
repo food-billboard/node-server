@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { dealErr, UserModel, notFound, Params } = require('@src/utils')
+const { dealErr, UserModel, notFound, Params, responseDataDeal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -12,12 +12,7 @@ router
       type: ['isMongoId']
     }
   )
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
@@ -41,7 +36,7 @@ router
       }
     ]
   })
-  let res
+
   //查找评论id
   const data = await UserModel.findOne({
     _id
@@ -104,20 +99,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
 })
 

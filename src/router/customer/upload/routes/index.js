@@ -7,7 +7,8 @@ const {
   notFound, 
   dealErr, 
   verifyTokenToData,
-  Params
+  Params,
+  responseDataDeal
 } = require('@src/utils')
 const { mergeChunkFile, finalFilePath, conserveBlob, isFileExistsAndComplete, ACCEPT_IMAGE_MIME, ACCEPT_VIDEO_MIME } = require('../util')
 const path = require('path')
@@ -24,12 +25,7 @@ router
     name: 'name',
     type: ['isMd5']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return 
-  }
+  if(check) return
 
   return await next()
 })
@@ -53,12 +49,7 @@ router
       data => data > 0
     ]
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const { name: md5, chunksLength, size } = ctx.query
   const [ suffix, chunkSize, filename, auth ] = Params.sanitizers(ctx.query, {
@@ -86,7 +77,6 @@ router
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
   let model
   let Model
   
@@ -175,25 +165,14 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    if(data) {
-      ctx.status = 206
-      //设置分片上传请求头条
-      // ctx.set()
-    }
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
+  if(data && !data.err) ctx.status = 206
 
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data: data,
+    needCache: false
+  })
+
 })
 //上传
 .post('/', async(ctx) => {
@@ -204,18 +183,12 @@ router
       data => data >= 0
     ]
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   // const { files } = ctx.request
   const { body: { index, name: md5, file } } = ctx.request
   // const file = files.file
 
-  let res
   // const data = await conserveBlob(file.path, md5, index)
   const data = await conserveBlob(file, md5, index)
   .then(_ => Promise.all([
@@ -244,28 +217,18 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    ctx.status = 206
-    //设置分片上传请求头条
-    // ctx.set()
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
 
-  ctx.body = JSON.stringify(res)
+  if(data && !data.err) ctx.status = 206
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
+
 })
 //完成
 .put('/', async(ctx) => {
   const { body: { name: md5 } } = ctx.request
-  let res
 
   const data = await Promise.all([
     VideoModel.findOne({
@@ -340,25 +303,13 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    if(data) {
-      ctx.status = 206
-      //设置分片上传请求头条
-      // ctx.set()
-    }
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
+  if(data && !data.err) ctx.status = 206
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  }) 
 
-  ctx.body = JSON.stringify(res)
 })
 
 module.exports = router

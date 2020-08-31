@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const SpecDropList = require('./specDropList')
-const { RankModel, dealErr, notFound, Params, MovieModel } = require("@src/utils")
+const { RankModel, dealErr, notFound, Params, MovieModel, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -45,12 +45,7 @@ router
     name: "_id",
     type: ['isMongoId']
 	})
-	if(check) {
-		ctx.body = JSON.stringify({
-			...check.res
-		})
-		return
-	}	
+	if(check) return
 
 	const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
 		name: 'currPage',
@@ -74,7 +69,7 @@ router
 			}
 		]
 	})
-	let res
+
 	const data = await RankModel.findOneAndUpdate({
 		_id
 	}, {
@@ -82,6 +77,7 @@ router
 	})
 	.select({
 		match_fields:1,
+		updatedAt: 1,
 		_id: 0
 	})
 	.exec()
@@ -120,6 +116,7 @@ router
 	.then(data => {
 		const { match } = data
 		return {
+			...data,
 			match: match.map(m => {
 				const { _doc: { poster, info: { classify, description, name }, ...nextM } } = m
 				return {
@@ -135,19 +132,10 @@ router
 	})
 	.catch(dealErr(ctx))
   
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+	responseDataDeal({
+		ctx,
+		data
+	})
 })
 .use('/specDropList', SpecDropList.routes(), SpecDropList.allowedMethods())
 
