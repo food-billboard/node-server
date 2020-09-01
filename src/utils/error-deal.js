@@ -1,4 +1,5 @@
 const Day = requier('dayjs')
+const { isType } = require('./tool')
 
 //错误处理
 const dealErr = (ctx) => {
@@ -57,6 +58,35 @@ const judgeCache = (ctx, modifiedTime, etagValidate) => {
   return Day(modified).valueOf() === Day(modifiedTime).valueOf() && ( typeof etagValidate == 'function' ? etagValidate(etag) : true )
 }
 
+//去除updatedAt
+const filterField = (data, field='updatedAt', compare=null) => {
+
+  let origin
+
+  function filter(data) {
+    if(Array.isArray(data)) {
+      data.forEach(item => {
+        filter(item)
+      })
+    }else if(isType(data, 'object')) {
+      Object.keys(data).forEach(key => {
+        if(Array.isArray(data[key]) || isType(data[key], 'object')) {
+          filter(data[key])
+        }else if(key === field){
+          const target = data[key]
+          if(typeof origin === 'undefined') origin = target
+          if(typeof target !== 'undefined' && (!!compare ? compare(origin, target) : target > origin)) origin = target
+        }
+      })
+    }
+  }
+
+  filter(data)
+
+  return origin
+
+}
+
 //响应数据处理
 const responseDataDeal = ({
   ctx,
@@ -78,6 +108,7 @@ const responseDataDeal = ({
   }
   //success
   else {
+
     response = {
       success: true,
       res: {
@@ -92,8 +123,12 @@ const responseDataDeal = ({
     //304 | 200
     else {
       // ctx.status = 200
-      if(!Array.isArray(data) && needCache) {
-        const { updatedAt } = data
+
+      //304
+      if(needCache) {
+
+        const updatedAt = filterField(data)
+        
         if(updatedAt && judgeCache(ctx, updatedAt)) {
           ctx.status = 304
           response = {
@@ -104,13 +139,13 @@ const responseDataDeal = ({
       }
     }
 
-    const { res: { updatedAt, ...nextRes }  } = response
-    response = {
-      ...response,
-      res: {
-        ...nextRes
-      }
-    }
+    // const { res: { updatedAt, ...nextRes }  } = response
+    // response = {
+    //   ...response,
+    //   res: {
+    //     ...nextRes
+    //   }
+    // }
 
     if(afterDeal && typeof afterDeal === 'function') response = afterDeal({...response})
 
