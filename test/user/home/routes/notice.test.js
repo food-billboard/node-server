@@ -3,7 +3,7 @@ const App = require('../app')
 const Request = require('supertest').agent(App.listen())
 const { assert } = require('chai')
 
-const COMMON_API = '/api/user/customer/movie/notice'
+const COMMON_API = '/api/user/movie/notice'
 
 describe(`${COMMON_API} test`, function() {
 

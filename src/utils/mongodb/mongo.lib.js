@@ -1,7 +1,7 @@
 const Day = require('dayjs')
 const mongoose = require("mongoose")
 const { Schema, model } = mongoose
-const ObjectId = mongoose.Types.ObjectId
+const { Types: { ObjectId } } = mongoose
 
 function getMill(time) {
   return Day(time).valueOf()

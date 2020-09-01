@@ -77,12 +77,9 @@ function mockCreateMovie(values={}) {
       screen_time: new Date(),
       language: []
     },
-    video: '',
     images: [],
-    poster: '',
     tag: [],
     comment: [],
-    author: '',
     glance: 0,
     author_description: '作者描述',
     author_rate: 0,
@@ -139,7 +136,6 @@ function mockCreateTag(values={}) {
 function mockCreateSpecial(values={}) {
   const baseModel = {
     movie: [],
-    poster: '',
     description: '关于测试专题的内容介绍',
     name: '测试专题名称',
   }
@@ -157,7 +153,6 @@ function mockCreateActor(values={}) {
     works: [],
     other: {
       another_name: '测试演员的其他名字',
-      avatar: ''
     },
   }
   mergeConfig(baseModel, values)
@@ -174,7 +169,6 @@ function mockCreateDirector(values={}) {
     works: [],
     other: {
       another_name: '导演的其他名称',
-      avatar: ''
     },
   }
   mergeConfig(baseModel, values)
@@ -233,7 +227,6 @@ function mockCreateVideo(values={}) {
   const baseModel = {
     name: '测试视频名称',
     src: '',
-    poster: '',
     origin_type: 'SYSTEM',
     origin: '',
     auth: 'PUBLIC',
@@ -253,7 +246,6 @@ function mockCreateVideo(values={}) {
 function mockCreateClassify(values={}) {
   const baseModel = {
     name: '测试分类名称',
-    icon: '',
     match: [],
     glance: 0
   }
