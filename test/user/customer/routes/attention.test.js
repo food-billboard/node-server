@@ -1,6 +1,6 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, Request } = require('@test/utils')
+const { mockCreateUser, Request, createEtag } = require('@test/utils')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
 
@@ -106,13 +106,20 @@ describe(`${COMMON_API} test`, function() {
 
       it(`get another user attention success and return the status of 304`, function(done) {
 
+        const query = {
+          _id: result._id.toStrng()
+        }
+
         Request
         .get(COMMON_API)
-        .query({ _id: result._id.toString() })
-        .set('Accept', 'Appication/json')
+        .query(query)
+        .set('Accept', 'application/json')
         .set('If-Modified-Since', result.updatedAt)
+        .set('If-None-Match', createEtag(query))
         .expect(304)
         .expect('Content-Type', /json/)
+        .expect('Last-Modidifed', result.updatedAt)
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()

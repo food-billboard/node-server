@@ -1,6 +1,6 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, Request } = require('@test/utils')
+const { mockCreateUser, Request, createEtag } = require('@test/utils')
 
 const COMMON_API = '/api/user/customer'
 
@@ -14,7 +14,6 @@ function responseExpect(res, validate=[]) {
   expect(target).to.have.a.property('fans').and.is.a('number').and.that.above(0)
   expect(target).to.have.a.property('username').and.is.a('string')
   expect(target).to.have.a.property('_id').and.is.a('string')
-  
 
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
@@ -83,13 +82,20 @@ describe(`${COMMON_API} test`, function() {
 
       it(`get another userinfo and not self and without self info success and return status of 304`, function(done) {
 
+        const query = {
+          _id: result._id.toStrng()
+        }
+
         Request
         .get(COMMON_API)
-        .query({ _id: result._id.toStrng() })
+        .query(query)
         .set('Accept', 'application/json')
         .set('If-Modified-Since', result.updatedAt)
+        .set('If-None-Match', createEtag(query))
         .expect(304)
         .expect('Content-Type', /json/)
+        .expect('Last-Modidifed', result.updatedAt)
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()

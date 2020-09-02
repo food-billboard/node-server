@@ -6,6 +6,16 @@ const router = new Router()
 router
 .post('/', async(ctx) => {
   const [, token] = verifyTokenToData(ctx)
+  if(!token) {
+    ctx.status = 401
+    ctx.body = {
+      success: false,
+      res: {
+        errMsg: '未登录或信息错误'
+      }
+    }
+    return
+  }
   let res
   const { mobile } = token
 

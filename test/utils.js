@@ -19,9 +19,13 @@ const {
   VideoModel,
   ImageModel,
   BarrageModel, 
+  encoded
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
+const { expect } = require('chai')
+const mongoose = require('mongoose')
+const { Types: { ObjectId } } = mongoose
 
 const is = (value, type) => Object.prototype.toString.call(value) === `[object ${type.toUpperCase().slice(0, 1)}${type.toLowerCase().slice(1)}]`
 
@@ -285,6 +289,39 @@ function mockCreateBarrage(values) {
   return model
 }
 
+//创建查询参数etag
+function createEtag(query={}) {
+  Object.keys(query).reduce((acc, cur) => {
+    const str = `${cur}=${query[cur]}`
+    const encode = encoded(str)
+    acc += `,${encode}`
+    return acc
+  }, ',')
+  .slice(1)
+}
+
+const _satisfies_ = Symbol('satisfies')
+
+//常规通用的断言方法
+const commonValidate = {
+  [_satisfies_]: (valid, satisfies) => !!satisfies && typeof satisfies === 'function' ? satisfies(target) : valid,
+  string: (target, satisfies) => expect(target).to.be.a('string').and.to.satisfies(function(target) {
+    return this[_satisfies_](target.length > 0, satisfies)
+  }),
+  objectId: (target, satisfies) => expect(target).to.be.satisfies(function(target) {
+    return this[_satisfies_](ObjectId.isValid(target), satisfies)
+  }),
+  number: (target, satisfies) => expect(target).to.be.a('number').and.that.satisfies(function() {
+    return this[_satisfies_](target >= 0, satisfies)
+  }),
+  date: (target, satisfies) => expect(target).to.be.satisfies(function(target) {
+    return this[_satisfies_](typeof target == 'number' ? target > 0 : Object.prototype.toString.call(target) === '[object Date]', satisfies)
+  }),
+  poster: (target, satisfies) => expect(target).to.be.satisfies(function(target) {
+    return this[_satisfies_](target == null ? true : ( typeof target === 'string' && !!target.length ), satisfies)
+  })
+}
+
 module.exports = {
   mockCreateUser,
   mockCreateMovie,
@@ -300,5 +337,7 @@ module.exports = {
   mockCreateClassify,
   mockCreateGlobal,
   mockCreateBarrage,
-  Request
+  Request,
+  createEtag,
+  commmonValidate
 }

@@ -1,6 +1,6 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, mockCreateMovie, mockCreateClassify, Request } = require('@test/utils')
+const { mockCreateUser, mockCreateMovie, mockCreateClassify, Request, createEtag } = require('@test/utils')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
 
@@ -133,17 +133,23 @@ describe(`${COMMON_API} test`, function() {
 
       it(`get another user issue movie list without self info success and return the status of 304`, function(done) {
         
+        const query = {
+          _id: userDatabase._id.toString()
+        }
+
         Request
         .get(COMMON_API)
-        .query('_id', userDatabase._id.toString())
+        .query(query)
         .set({
           Accept: 'Application/json',
           'If-Modified-Since': userDatabase.updatedAt,
+          'If-None-Match': createEtag(query)
         })
         .expect(304)
         .expect({
           'Content-Type': /json/,
-          'Last-Modified': userDatabase.updatedAt
+          'Last-Modified': userDatabase.updatedAt,
+          'ETag': createEtag(query)
         })
         .end(function(err, _) {
           if(err) return done(err)

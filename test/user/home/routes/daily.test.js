@@ -22,9 +22,6 @@ function responseExpect(res, validate=[]) {
     })
   })
 
-  expect(target).to.be.a('array')
-  
-
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
       typeof valid == 'function' && valid(target)
@@ -84,14 +81,27 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get home daily list success test -> ${COMMON_API}`, function() {
 
-      it(`get home daily list success`, function() {
+      it(`get home daily list success`, function(done) {
 
-        
+        Request
+        .get(COMMON_API)
+        .query({ count: 12 })
+        .set('Accept', 'Application/json')
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj)
+          done()
+        })
 
-      })
-
-      it(`get home daily list success but the list's length is 0`, function() {
-        
       })
 
     })

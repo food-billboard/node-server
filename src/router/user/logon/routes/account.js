@@ -47,7 +47,10 @@ router.post('/', async(ctx) => {
   })
   .exec()
   .then(data => !!data && data._doc)
-  .then(notFound)
+  .then(data => {
+    if(!data) return Promise.reject({ errMsg: '账号或密码错误', status: 403 })
+    return data
+  })
   .then(data => {
     const { fans=[], attentions=[], password:_, avatar, ...nextData } = data
     const token = signToken({mobile, password})
