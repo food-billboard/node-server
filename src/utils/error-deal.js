@@ -1,5 +1,6 @@
 const Day = requier('dayjs')
 const { isType } = require('./tool')
+const { encoded } = require('./token')
 
 //错误处理
 const dealErr = (ctx) => {
@@ -55,7 +56,40 @@ const judgeCache = (ctx, modifiedTime, etagValidate) => {
   const { request: { headers } } = ctx
   const modified = headers['if-modified-since'] || headers['If-Modified-Since']
   const etag = headers['if-none-match'] || headers['If-None-Match']
-  return Day(modified).valueOf() === Day(modifiedTime).valueOf() && ( typeof etagValidate == 'function' ? etagValidate(etag) : true )
+
+  //设置last-modified
+  !!modified && ctx.set({ 'Last-Modified': modifiedTime })
+
+  return !!modified && Day(modified).valueOf() === Day(modifiedTime).valueOf() && ( !!etag && typeof etagValidate == 'function' ? etagValidate(ctx, etag) : true )
+}
+
+//将请求参数加密成etag用于缓存处理
+const _etagValidate = (ctx, etag) => {
+  const { request: { method, query } } = ctx
+
+  //只对get进行缓存
+  if( 'get' != method.toLowerCase()) return false
+  if(typeof etag !== 'string') return false
+  
+  //以,分割的加密查询参数
+  const queryArray = etag.split(',')
+  let keys = Object.keys(query)
+
+  if(keys.length != queryArray.length) return false
+
+  //判断是否所有查询参数与之前相同
+  let isSameEtag = true
+  const newEtag = keys.reduce((acc, cur) => {
+    let str = `${cur}=${query[cur]}`
+    const encode = encoded(str)
+    acc += `,${cur}`
+    isSameEtag = !!~queryArray.indexOf(encode)
+  }, ',')
+
+  if(newEtag.length > 1) ctx.set({ etag: newEtag.slice(1) })
+
+  return isSameEtag
+
 }
 
 //去除updatedAt
@@ -91,9 +125,14 @@ const filterField = (data, field='updatedAt', compare=null) => {
 const responseDataDeal = ({
   ctx,
   data={},
+  //是否需要缓存
   needCache=true,
+  //额外的响应处理
   anotherResponse,
-  afterDeal
+  //数据响应前的最后处理
+  afterDeal,
+  //etag 或用于普通参数请求，或用于静态资源请求
+  etagValidate=_etagValidate
 }) => {
   let response = {}
 
@@ -118,7 +157,7 @@ const responseDataDeal = ({
 
     //another status
     if(!!anotherResponse && typeof anotherResponse === 'function') {
-      response = anotherResponse({...response})
+      response = anotherResponse(ctx, {...response})
     }
     //304 | 200
     else {
@@ -129,7 +168,7 @@ const responseDataDeal = ({
 
         const updatedAt = filterField(data)
         
-        if(updatedAt && judgeCache(ctx, updatedAt)) {
+        if(updatedAt && judgeCache(ctx, updatedAt, etagValidate)) {
           ctx.status = 304
           response = {
             ...response,
