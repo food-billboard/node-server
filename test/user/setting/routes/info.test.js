@@ -80,23 +80,23 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    // describe(`get the mini app info success test -> ${COMMON_API}`, function() {
+    describe(`get the mini app info success test -> ${COMMON_API}`, function() {
 
-    //   it(`get the mini app info fail because the database is not found the data`, function(done) {
+      it(`get the mini app info fail because the database is not found the data`, function(done) {
 
-    //     Request
-    //     .get(COMMON_API)
-    //     .set('Accept', 'Application/json')
-    //     .expect(200)
-    //     .expect('Content-Type', /json/)
-    //     .end(function(err, _) {
-    //       if(err) return done(err)
-    //       done()
-    //     })
+        Request
+        .get(COMMON_API)
+        .set('Accept', 'Application/json')
+        .expect(404)
+        .expect('Content-Type', /json/)
+        .end(function(err, _) {
+          if(err) return done(err)
+          done()
+        })
 
-    //   })
+      })
 
-    // })
+    })
 
   })
 

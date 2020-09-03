@@ -53,7 +53,8 @@ router
       modified_time: 0,
       source_type: 0,
       stauts: 0,
-      related_to: 0
+      related_to: 0,
+      barrage: 0
     })
     .populate({
       path: 'comment',
