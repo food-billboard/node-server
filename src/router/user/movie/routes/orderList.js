@@ -9,7 +9,6 @@ router.get('/', async(ctx) => {
   responseDataDeal({
     ctx,
     data: orderList,
-    needCache: false
   })
 
 })

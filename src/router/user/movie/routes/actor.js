@@ -25,8 +25,7 @@ router.get('/', async(ctx) => {
 
   responseDataDeal({
     ctx,
-    data,
-    needCache: false
+    data
   })
 
 })

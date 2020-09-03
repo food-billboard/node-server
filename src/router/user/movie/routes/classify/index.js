@@ -90,7 +90,6 @@ router
 	responseDataDeal({
 		ctx,
 		data,
-		needCache: false
 	})
 
 })
