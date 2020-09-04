@@ -1,9 +1,9 @@
-const App = require('../app')
-const path = require('path')
-const Request = require('supertest').agent(App.listen())
-const { assert } = require('chai')
-import { UserModel, BarrageModel, encoded } from '@src/utils'
-import { mockCreateUser } from '@test/utils'
+require('module-alias/register')
+const { expect } = require('chai')
+const { 
+  Request, 
+  mockCreateUser,
+} = require('@test/utils')
 
 const COMMON_API = '/api/customer/barrage'
 

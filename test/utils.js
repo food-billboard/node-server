@@ -106,7 +106,6 @@ function mockCreateMovie(values={}) {
 function mockCreateComment(values={}) {
   const baseModel = {
     source_type: 'movie',
-    source: '',
     user_info: '',
     sub_comments: [],
     total_like: 0,
