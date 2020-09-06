@@ -10,6 +10,9 @@ function MongoDB(url="mongodb://localhost:27017/movie") {
       useNewUrlParser: true,
       useUnifiedTopology: true
     })
+    .catch(err => {
+      
+    })
   }
 }
 

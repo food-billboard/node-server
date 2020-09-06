@@ -7,10 +7,12 @@ const KoaBody = require('koa-body')
 const app = new Koa()
 const path = require('path')
 const { MongoDB } = require("@src/utils")
+const { middleware } = require('@src/config/winston')
 
 MongoDB()
 
 app.use(Cors())
+.use(middleware)
 // app.use(bodyParser())
 .use(KoaBody({
   multipart:true, // 支持文件上传
