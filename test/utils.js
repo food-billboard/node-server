@@ -49,7 +49,7 @@ function mockCreateUser(values={}) {
   const password = '1234567890'
   const mobile = 18368003190
   const encodedPwd = encoded(password)
-  const token = signToken({ mobile, password: encodedPwd })
+  const token = signToken({ mobile, password: encodedPwd }, {expiresIn: '10s'})
 
   const baseModel = {
     mobile,

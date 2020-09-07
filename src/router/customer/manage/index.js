@@ -19,14 +19,10 @@ router
     await next()
   }else {
     ctx.status = 401
-    if(_id) {
-      ctx.redirect(newUrl)
-    }else {
-      ctx.body = JSON.stringify({
-        success: false,
-        res: null
-      })
-    }
+    ctx.body = JSON.stringify({
+      success: false,
+      res: null
+    })
   }
 })
 //个人信息

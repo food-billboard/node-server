@@ -66,6 +66,7 @@ describe(`${COMMON_API} test`, function() {
 
     let userDatabase
     let commentDatabase
+    let originCommentDatabase
     let userResult
 
     before(function(done) {
@@ -82,16 +83,33 @@ describe(`${COMMON_API} test`, function() {
           source: ObjectId('56aa3554e90911b64c36a424'),
           user_info: userResult._id,
         })
-        commentDatabase = model
-        return commentDatabase.save()
-        
-      })
-      .then(data => {
-        return userDatabase.updateOne({
-          username: '测试名字'
-        }, {
-          $push: { comment: data._id }
+        const { model: origin } = mockCreateComment({
+          source: ObjectId('56aa3554e90911b64c36a424'),
+          user_info: userResult._id,
+          content: {
+            text: COMMON_API
+          }
         })
+        commentDatabase = model
+        originCommentDatabase = origin
+        return Promise.all([
+          commentDatabase.save(),
+          originCommentDatabase.save()
+        ])
+      })
+      .then(([comment, origin]) => {
+        return Promise.all([
+          userDatabase.updateOne({
+            username: '测试名字'
+          }, {
+            $push: { comment: comment._id }
+          }),
+          commentDatabase.updateOne({
+            user_info: userResult._id,
+          }, {
+            source: origin._id
+          })
+        ])
       })
       .then(function(_) {
         done()
