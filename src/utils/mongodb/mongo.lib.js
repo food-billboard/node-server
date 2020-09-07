@@ -558,10 +558,10 @@ const MovieSchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
-  barrage: {
+  barrage: [{
     type: ObjectId,
     ref: 'barrage'
-  },
+  }],
   tag: [{
     type: ObjectId,
     ref: 'tag'
