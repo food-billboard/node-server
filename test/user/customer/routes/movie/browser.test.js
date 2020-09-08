@@ -22,7 +22,7 @@ function responseExpect(res, validate=[]) {
     expect(item._id).to.be.satisfies(function(target) {
       return ObjectId.isValid(target)
     })
-    expect(item._id).to.be.a('boolean')
+    expect(item.store).to.be.a('boolean')
     expect(item.rate).to.be.a('number')
     //classify
     expect(item.classify).to.be.a('array').and.that.lengthOf.above(0)

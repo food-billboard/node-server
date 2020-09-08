@@ -1,21 +1,239 @@
-const App = require('../app')
-const path = require('path')
-const Request = require('supertest').agent(App.listen())
-const { assert } = require('chai')
+require('module-alias/register')
+const { expect } = require('chai')
+const { mockCreateUser, mockCreateFeedback, mockCreateImage, Request } = require('@test/utils')
+const { FeedbackModel } = require('@src/utils')
+const mongoose = require('mongoose')
+const { Types: { ObjectId } } = mongoose
 
 const COMMON_API = '/api/customer/manage/feedback'
 
+function responseExpect(res, validate=[]) {
+
+  const { res: { data: target } } = res
+
+  expect(target).to.be.true
+
+  if(Array.isArray(validate)) {
+    validate.forEach(valid => {
+      typeof valid == 'function' && valid(target)
+    })
+  }else if(typeof validate == 'function') {
+    validate(target)
+  }
+}
+
 describe(`${COMMON_API} test`, function() {
 
-  describe(`pre check the user is feedback frequently -> ${COMMON_API}`, function() {
+  let feedbackDatabase
+  let userDatabase
+  let imageDatabase
+  let imageId
+  let userId
+  let selfToken
+  let result
 
-    describe(`pre check the user is feedback frequently success test -> ${COMMON_API}`, function() {
+  before(function(done) {
 
-      it(`pre check the user is feedback frequently success and return yes`, function() {
+    const { model, token } = mockCreateUser({
+      username: COMMON_API
+    })
+    const { model: image } = mockCreateImage({
+      src: COMMON_API
+    })
+
+    userDatabase = model
+    imageDatabase = image
+    selfToken = token
+
+    Promise.all([
+      userDatabase.save(),
+      imageDatabase.save()
+    ])
+    .then(([data, image]) => {
+      userId = data._id
+      imageId = image._id
+      result = data
+      done()
+    })
+    .catch(err => {
+      console.log('oops: ', err)
+    })
+
+  })
+
+  after(function(done) {
+
+    Promise.all([
+      userDatabase.deleteOne({
+        _id: userId,
+        username: COMMON_API
+      }),
+      FeedbackModel.deleteMany({
+        "content.video": [],
+      })
+    ])
+    .then(function() {
+      done()
+    })
+    .catch(err => {
+      console.log('oops: ', err)
+    })
+
+  })
+
+  // describe(`pre check the user is feedback frequently -> ${COMMON_API}`, function() {
+
+  //   describe(`pre check the user is feedback frequently success test -> ${COMMON_API}`, function() {
+
+  //     it(`pre check the user is feedback frequently success and return yes`, function() {
+
+  //     })
+
+  //     it(`pre check the user is feedback frequently success and return false`, function() {
+
+  //     })
+
+  //   })
+
+  // })
+
+  describe(`post the feedback test -> ${COMMON_API}`, function() {
+
+    describe(`post the feedback success test -> ${COMMON_API}`, function() {
+
+      it(`post the feedback test success`, function(done) {
+
+        Request
+        .post(COMMON_API)
+        .send({
+          content: {
+            text: COMMON_API,
+            image: [ imageId ],
+            video: []
+          }
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
 
       })
 
-      it(`pre check the user is feedback frequently success and return false`, function() {
+    })
+
+    describe(`post the feedback fail test -> ${COMMON_API}`, function() {
+
+      describe(`post the feedback fail because the feedback is frequently -> ${COMMON_API}`, function() {
+
+        before(function(done) {
+          const { model } = mockCreateFeedback({
+            user_info: userId,
+            content: {
+              text: COMMON_API,
+              image: [ ObjectId('53102b43bf1044ed8b0ba36b') ]
+            }
+          })
+          feedbackDatabase = model
+          return feedbackDatabase.save()
+          .then(function(data) {
+            result = data
+            done()
+          })
+          .catch(err => {
+            console.log('oops: ', err)
+          })
+        })
+
+        it(`post the feedback test fail because the feedback is frequently`, function(done) {
+
+          Request
+          .get(COMMON_API)
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(503)
+          .expect('Content-Type', /json/)
+          .end(function(err) {
+            if(err) return done(err)
+            done()
+          })
+
+        })
+
+      })
+
+      describe(`post the feedback test fail because of the params -> ${COMMON_API}`, function() {
+
+        before(function(done) {
+
+          FeedbackModel.deleteMany({
+            "content.text": COMMON_API
+          })
+          .then(function() {
+            done()
+          })
+          .catch(err => {
+            console.log('oops: ', err)
+          })
+
+        })
+
+        it(`post the feedback test fail because the content is empty`, function(done) {
+
+          Request
+          .post(COMMON_API)
+          .send({
+            content: {
+              text: '',
+              image: [],
+              video: []
+            }
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(400)
+          .expect('Content-Type', /json/)
+          .end(function(err) {
+            if(err) return done(err)
+            done()
+          })
+
+        })
+  
+        it(`post the feedback test fail because the content of image or video is not objectId`, function(done) {
+
+          const id = imageId.toString()
+
+          Request
+          .get(COMMON_API)
+          .send({
+            content: {
+              text: COMMON_API,
+              image: [ id.slice(1) ],
+              video: []
+            }
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(400)
+          .expect('Content-Type', /json/)
+          .end(function(err) {
+            if(err) return done(err)
+            done()
+          })
+  
+        })
 
       })
 
@@ -23,11 +241,42 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe(`post the feedback test -> ${COMMON_API}`, function() {
+  describe(`get the info of the user whether send the feedback -> ${COMMON_API}`, function() {
 
-    describe(`post the feedback test success -> ${COMMON_API}`, function() {
+    describe(`get the info of the user whether send the feedback success test -> ${COMMON_API}`, function() {
 
-      it(`post the feedback test success`, function() {
+      it(`get the info of the user whether send the feedback suuccess`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj)
+          done()
+        })
+
+      })
+
+    })
+
+    describe(`get the info of the user whether send the feedback fail test -> ${COMMON_API}`, function() {
+
+      it(`get the info of the user whether send the feedback fail`, function(done) {
+
+        done()
 
       })
 

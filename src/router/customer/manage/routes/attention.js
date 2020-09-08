@@ -108,24 +108,43 @@ router
   const { mobile } = token
   let res
 
-  const data = await UserModel.findOneAndUpdate({
-    mobile: Number(mobile)
-  }, {
-    $push: { attentions: ObjectId(_id) }
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then(id => {
-    return UserModel.updateOne({
-      _id: ObjectId(_id)
-    }, {
-      $push: { fans: id }
+  const data = await Promise.all([
+    UserModel.findOne({
+      mobile: Number(mobile)
     })
-    .then(_ => true)
+    .select({
+      _id: 1
+    })
+    .exec(),
+    UserModel.findOne({
+      _id: ObjectId(_id)
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+  ])
+  .then(([mine, user]) => {
+    return Promise.all([
+      !!mine && mine._id,
+      !!user && user._id
+    ])
+  })
+  .then(([mine, user]) => {
+    return Promise.all([
+      UserModel.updateOne({
+        mobile: Number(mobile),
+        attentions: { $nin: [ ObjectId(user) ] }
+      }, {
+        $push: { attentions: ObjectId(user) }
+      }),
+      UserModel.updateOne({
+        _id: user,
+        fans: { $nin: [ mine ] }
+      }, {
+        $push: { fans: mine }
+      }),
+    ])
   })
   .catch(dealErr(ctx))
 
@@ -152,24 +171,42 @@ router
 
   const { mobile } = token
   let res
-  const data = await UserModel.findOneAndUpdate({
-    mobile: Number(mobile)
-  }, {
-    $pull: { attentions: ObjectId(_id) }
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then(id => {
-    return UserModel.updateOne({
-      _id: ObjectId(_id)
-    }, {
-      $pull: { fans: id }
+
+  const data = await Promise.all([
+    UserModel.findOne({
+      mobile: Number(mobile)
     })
-    .then(_ => true)
+    .select({
+      _id: 1
+    })
+    .exec(),
+    UserModel.findOne({
+      _id: ObjectId(_id)
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+  ])
+  .then(([mine, user]) => {
+    return Promise.all([
+      !!mine && mine._id,
+      !!user && user._id
+    ])
+  })
+  .then(([mine, user]) => {
+    return Promise.all([
+      UserModel.updateOne({
+        mobile: Number(mobile)
+      }, {
+        $pull: { attentions: ObjectId(user) }
+      }),
+      UserModel.updateOne({
+        _id: user
+      }, {
+        $pull: { fans: mine }
+      }),
+    ])
   })
   .catch(dealErr(ctx))
 

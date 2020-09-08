@@ -23,21 +23,26 @@ router
   const { mobile } = token
   const { body: { name } } = ctx.request
   let res
-  const data = await UserModel.findOne({
+  // const data = await UserModel.findOne({
+  //   username: name
+  // })
+  // .select({
+  //   _id: 1
+  // })
+  // .exec()
+  // .then(data => !!data && data._id)
+  // .then(data => {
+  //   if(data) return Promise.reject({ errMsg: '重名', status: 403 })
+  //   return UserModel.updateOne({
+  //     mobile: Number(mobile)
+  //   }, {
+  //     username: name
+  //   })
+  // })
+  const data = await UserModel.updateOne({
+    mobile: Number(mobile)
+  }, {
     username: name
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._id)
-  .then(data => {
-    if(data) return Promise.reject({ errMsg: '重名', status: 403 })
-    return UserModel.updateOne({
-      mobile: Number(mobile)
-    }, {
-      username: name
-    })
   })
   .exec()
   .then(data => {

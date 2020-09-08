@@ -22,9 +22,21 @@ router
       data => ObjectId(data)
     ]
   })
-  const data = UserModel.findOne({
+  const data = await UserModel.findOne({
     mobile: Number(mobile),
     issue: { $in: [ _id ] }
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data)
+  .then(notFound)
+  .then(data => {
+    return MovieModel.findOne({
+      _id,
+      author: data
+    })
   })
   .select({
     _id: 1
@@ -51,7 +63,7 @@ router
 
   let res
   const data = await MovieModel.findOne({
-    _id: _id
+    _id,
   })
   .select({
     name: 1,

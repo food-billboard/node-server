@@ -51,16 +51,16 @@ router
   }
 
   if(!/.+\/feedback$/g.test(url)) return await next()
-  console.log(ctx.request.body)
+
   const check = Params.body(ctx, {
     name: "content",
     validator: [
       data => !!Object.keys(data).length && ( 
-        !!data.text
-        &&
-        ( data.video ? data.video.every(d => ObjectId.isValid(d)) : true )
-        &&
-        ( data.image ? data.image.every(d => ObjectId.isValid(d)) : true )
+        !!data.text.length
+        ||
+        ( data.video ? data.video.every(d => ObjectId.isValid(d)) && !!data.video.length : true )
+        ||
+        ( data.image ? data.image.every(d => ObjectId.isValid(d)) && !!data.image.length : true )
       )
     ]
   })

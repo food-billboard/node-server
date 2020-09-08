@@ -200,7 +200,8 @@ describe(`${COMMON_API} test`, function() {
           images: [ imageId ],
           poster: imageId,
           tag: [ tag._id ],
-          author: userId
+          author: userId,
+          source_type: 'USER'
         })
         movieDatabase = model
         return movieDatabase.save()

@@ -1,17 +1,107 @@
-const App = require('../app')
-const path = require('path')
-const Request = require('supertest').agent(App.listen())
-const { assert } = require('chai')
+require('module-alias/register')
+const { mockCreateUser, mockCreateImage, Request, commonValidate } = require('@test/utils')
+const mongoose = require('mongoose')
+const { Types: { ObjectId } } = mongoose
 
 const COMMON_API = '/api/customer/manage/info/avatar'
 
 describe(`${COMMON_API} test`, function() {
 
+  let imageDatabase
+  let userDatabase
+  let selfToken
+  let imageId
+  let result
+
+  before(function(done) {
+
+    const { model: image } = mockCreateImage({
+      src: COMMON_API
+    })
+    const { model: user, token } = mockCreateUser({
+      username: COMMON_API,
+      avatar: ObjectId('53102b43bf1044ed8b0ba36b')
+    })
+
+    imageDatabase = image
+    userDatabase = user
+    selfToken = token
+
+    Promise.all([
+      imageDatabase.save(),
+      userDatabase.save()
+    ])
+    .then(([image, user]) => {
+      result = user
+      imageId = image._id
+      done()
+    })
+    .catch(err => {
+      console.log('oops: ', err)
+    })
+
+  })
+
+  after(function(done) {
+
+    Promise.all([
+      imageDatabase.deleteOne({
+        src: COMMON_API
+      }),
+      userDatabase.deleteOne({
+        username: COMMON_API
+      })
+    ])
+    .then(_ => {
+      done()
+    })
+    .catch(err => {
+      console.log('oops: ', err)
+    })
+
+  })
+
   describe(`put the new avatar test -> ${COMMON_API}`, function() {
 
     describe(`put the new avatar success test -> ${COMMON_API}`, function() {
 
-      it(`put the new avatar success`, function() {
+      after(function(done) {
+
+        userDatabase.findOne({
+          avatar: imageId
+        })
+        .select({
+          _id: 1
+        })
+        .exec()
+        .then(data => !!data && data._id)
+        .then(data => {
+          commonValidate.objectId(data)
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+      })
+
+      it(`put the new avatar success`, function(done) {
+
+        Request
+        .put(COMMON_API)
+        .send({
+          _id: imageId.toString()
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
 
       })
 
@@ -19,13 +109,94 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`put the new avatar fail test -> ${COMMON_API}`, function() {
 
-      it(`put the new avatar fail because the image is not found`, function() {
+      describe(`put the new avatar fail because the image id has something wrong -> ${COMMON_API}`, function() {
+
+        it(`put the new avatar fail because the image is not found`, function(done) {
+
+          const id = imageId.toString()
+
+          Request
+          .put(COMMON_API)
+          .send({
+            _id: `${(parseInt(id.slice(0, 1)) + 5) % 10}${id.slice(1)}`
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(404)
+          .expect('Content-Type', /json/)
+          .end(function(err) {
+            if(err) return done(err)
+            done()
+          })
+
+        })
+
+        it(`put the new avatar fail because the image id is not verify`, function(done) {
+
+          Request
+          .put(COMMON_API)
+          .send({
+            _id: imageId.toString().slice(1)
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(400)
+          .expect('Content-Type', /json/)
+          .end(function(err) {
+            if(err) return done(err)
+            done()
+          })
+
+        })
+
+        it(`put the new avatar fail because lack the image id`, function(done) {
+
+          Request
+          .put(COMMON_API)
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(400)
+          .expect('Content-Type', /json/)
+          .end(function(err) {
+            if(err) return done(err)
+            done()
+          })
+
+        })
 
       })
 
-      it(`put the new avatar fail because the image is not allow use or unauth`, function() {
+      // describe(`put the new avatar fail because the image is not allow use or unauth test -> ${COMMON_API}`, function() {
 
-      })
+      //   before(function(done) {
+
+      //     imageDatabase.updateOne({
+      //       src: COMMON_API
+      //     }, {
+      //       auth: 'PRIVATE'
+      //     })
+      //     .then(function() {
+      //       done()
+      //     })
+      //     .catch(err => {
+      //       console.log('oops: ', err)
+      //     })
+
+      //   })
+
+      //   it(`put the new avatar fail because the image is not allow use or unauth`, function(done) {
+
+
+
+      //   })
+
+      // })
 
     })
 

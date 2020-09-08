@@ -1,7 +1,6 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, createEtag, commonValidate } = require('@test/utils')
-const { UserModel } = require('@src/utils')
 
 const COMMON_API = '/api/customer/manage'
 
