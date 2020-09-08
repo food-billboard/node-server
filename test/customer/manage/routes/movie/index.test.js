@@ -225,14 +225,41 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`pre check the uploading movie is valid fail test -> ${COMMON_API}`, function() {
 
+      const baseData = {
+        video: {
+          src: videoId.toString(),
+          poster: imageId.toString()
+        },
+        images: new Array(6).fill(ImageId.toString()),
+        info: {
+          actor: [ actorId.toString() ],
+          director: [ directorId.toString() ],
+          district: [ districtId.toString() ],
+          language: [ languageId.toString() ],
+          description: COMMON_API,
+          name: COMMON_API,
+          classify: [ classifyId.toString() ],
+          screen_time: Date.now(),
+          author_rate: 10,
+          alias: [ COMMON_API ],
+          author_description: COMMON_API
+        }
+      }
+
       describe(`pre check the uploading movie fail because missing some params -> ${COMMON_API}`, function() {
         
         it(`pre check the uploading movie fail because missing the params of info'name`, function(done) {
 
+          const { info, ...nextData } = baseData
+          const { name, ...nextInfo } = info
+
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -247,12 +274,18 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because missing the params of info'district`, function() {
+        it(`pre check the uploading movie fail because missing the params of info'district`, function(done) {
           
+          const { info, ...nextData } = baseData
+          const { district, ...nextInfo } = info
+
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -267,12 +300,18 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because missing the params of info'director`, function() {
+        it(`pre check the uploading movie fail because missing the params of info'director`, function(done) {
           
+          const { info, ...nextData } = baseData
+          const { director, ...nextInfo } = info
+
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -287,12 +326,18 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because missing the params of info'actor`, function() {
+        it(`pre check the uploading movie fail because missing the params of info'actor`, function(done) {
+
+          const { info, ...nextData } = baseData
+          const { actor, ...nextInfo } = info
           
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -307,12 +352,18 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because missing the params of info'classify`, function() {
+        it(`pre check the uploading movie fail because missing the params of info'classify`, function(done) {
           
+          const { info, ...nextData } = baseData
+          const { classify, ...nextInfo } = info
+
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -327,12 +378,18 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because missing the params of info'language`, function() {
+        it(`pre check the uploading movie fail because missing the params of info'language`, function(done) {
           
+          const { info, ...nextData } = baseData
+          const { language, ...nextInfo } = info
+
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -347,12 +404,18 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because missing the params of info'screen_time`, function() {
+        it(`pre check the uploading movie fail because missing the params of info'screen_time`, function(done) {
+
+          const { info, ...nextData } = baseData
+          const { screen_time, ...nextInfo } = info
           
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -367,12 +430,18 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because missing the params of info'description`, function() {
+        it(`pre check the uploading movie fail because missing the params of info'description`, function(done) {
+
+          const { info, ...nextData } = baseData
+          const { description, ...nextInfo } = info
           
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -387,12 +456,18 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because missing the params of info'author_rate`, function() {
+        it(`pre check the uploading movie fail because missing the params of info'author_rate`, function(done) {
+
+          const { info, ...nextData } = baseData
+          const { author_rate, ...nextInfo } = info
           
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -407,12 +482,18 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because missing the params of video.src`, function() {
+        it(`pre check the uploading movie fail because missing the params of video.src`, function(done) {
+
+          const { video, ...nextData } = baseData
+          const { src, ...nextVideo } = video
           
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            video: {
+              ...nextVideo
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -427,12 +508,40 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because missing the params of video.poster`, function() {
+        it(`pre check the uploading movie fail because missing the params of video.poster`, function(done) {
           
+          const { video, ...nextData } = baseData
+          const { poster, ...nextVideo } = video
+
           Request
           .post(COMMON_API)
           .send({
+            ...nextData,
+            video: {
+              ...nextVideo
+            }
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(400)
+          .expect('Content-Type', /json/)
+          .end(function(err) {
+            if(err) return done(err)
+            done()
+          })
 
+        })
+
+        it(`pre check the uploading movie fail because missing the params of images`, function(done) {
+          
+          const { images, ...nextData } = baseData
+
+          Request
+          .post(COMMON_API)
+          .send({
+            ...nextData,
           })
           .set({
             Accept: 'Application/json',
@@ -451,12 +560,19 @@ describe(`${COMMON_API} test`, function() {
 
       describe(`pre check uploading movie fail because the params is unverify -> ${COMMON_API}`, function() {
 
-        it(`pre check the uploading movie fail because the params of info'name is not verify`, function() {
+        it(`pre check the uploading movie fail because the params of info'name is not verify`, function(done) {
+
+          const { info, ...nextData } = baseData
+          const { name, ...nextInfo } = info
 
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo,
+              name: ''
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -471,12 +587,47 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because the params of info'district is not verify`, function() {
+        it(`pre check the uploading movie fail because the params of info'district is not verify`, function(done) {
+          
+
+          const { info, ...nextData } = baseData
+          const { district, ...nextInfo } = info
+
+          Request
+          .post(COMMON_API)
+          .send({
+            ...nextData,
+            info: {
+              ...nextInfo,
+              district: district.map(item => item.slice(1))
+            }
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(400)
+          .expect('Content-Type', /json/)
+          .end(function(err) {
+            if(err) return done(err)
+            done()
+          })
+
+        })
+
+        it(`pre check the uploading movie fail because the params of info'director is not verify`, function(done) {
+
+          const { info, ...nextData } = baseData
+          const { director, ...nextInfo } = info
           
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo,
+              director: director.map(item => item.slice(1))
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -491,12 +642,19 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because the params of info'director is not verify`, function() {
+        it(`pre check the uploading movie fail because the params of info'actor is not verify`, function(done) {
+
+          const { info, ...nextData } = baseData
+          const { actor, ...nextInfo } = info
           
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo,
+              actor: actor.map(item => item.slice(1))
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -511,12 +669,46 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because the params of info'actor is not verify`, function() {
+        it(`pre check the uploading movie fail because the params of info'classify is not verify`, function(done) {
+          
+          const { info, ...nextData } = baseData
+          const { classify, ...nextInfo } = info
+
+          Request
+          .post(COMMON_API)
+          .send({
+            ...nextData,
+            info: {
+              ...nextInfo,
+              classify: classify.map(item => item.slice(1))
+            }
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(400)
+          .expect('Content-Type', /json/)
+          .end(function(err) {
+            if(err) return done(err)
+            done()
+          })
+
+        })
+
+        it(`pre check the uploading movie fail because the params of info'language is not verify`, function(done) {
+
+          const { info, ...nextData } = baseData
+          const { language, ...nextInfo } = info
           
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo,
+              language: language.map(item => item.slice(1))
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -531,12 +723,19 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because the params of info'classify is not verify`, function() {
+        it(`pre check the uploading movie fail because the params of info'screen_time is not verify`, function(done) {
+
+          const { info, ...nextData } = baseData
+          const { screen_time, ...nextInfo } = info
           
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo,
+              screen_time: -100
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -551,12 +750,19 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because the params of info'language is not verify`, function() {
+        it(`pre check the uploading movie fail because the params of info'description is not verify`, function(done) {
           
+          const { info, ...nextData } = baseData
+          const { description, ...nextInfo } = info
+
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo,
+              description: ''
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -571,12 +777,19 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because the params of info'screen_time is not verify`, function() {
+        it(`pre check the uploading movie fail because the params of info'author_rate is not verify`, function(done) {
           
+          const { info, ...nextData } = baseData
+          const { author_rate, ...nextInfo } = info
+
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            info: {
+              ...nextInfo,
+              author_rate: -10
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -591,52 +804,19 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because the params of info'description is not verify`, function() {
-          
-          Request
-          .post(COMMON_API)
-          .send({
+        it(`pre check the uploading movie fail because the params of video.src is not verify`, function(done) {
 
-          })
-          .set({
-            Accept: 'Application/json',
-            Authorization: `Basic ${selfToken}`
-          })
-          .expect(400)
-          .expect('Content-Type', /json/)
-          .end(function(err) {
-            if(err) return done(err)
-            done()
-          })
-
-        })
-
-        it(`pre check the uploading movie fail because the params of info'author_rate is not verify`, function() {
-          
-          Request
-          .post(COMMON_API)
-          .send({
-
-          })
-          .set({
-            Accept: 'Application/json',
-            Authorization: `Basic ${selfToken}`
-          })
-          .expect(400)
-          .expect('Content-Type', /json/)
-          .end(function(err) {
-            if(err) return done(err)
-            done()
-          })
-
-        })
-
-        it(`pre check the uploading movie fail because the params of video.src is not verify`, function() {
+          const { video, ...nextData } = baseData
+          const { src, ...nextVideo } = video
             
           Request
           .post(COMMON_API)
           .send({
-
+            ...nextData,
+            video: {
+              ...nextVideo,
+              src: src.slice(1)
+            }
           })
           .set({
             Accept: 'Application/json',
@@ -651,12 +831,42 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because the params of video.poster is not verify`, function() {
+        it(`pre check the uploading movie fail because the params of video.poster is not verify`, function(done) {
           
+          const { video, ...nextData } = baseData
+          const { poster, ...nextVideo } = video
+
           Request
           .post(COMMON_API)
           .send({
+            ...nextData,
+            video: {
+              ...nextVideo,
+              poster: poster.slice(1)
+            }
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(400)
+          .expect('Content-Type', /json/)
+          .end(function(err) {
+            if(err) return done(err)
+            done()
+          })
 
+        })
+
+        it(`pre check the uploading movie fail because the params of video.poster is not verify`, function(done) {
+          
+          const { images, ...nextData } = baseData
+
+          Request
+          .post(COMMON_API)
+          .send({
+            ...nextData,
+            images: images.map(item => item.slice(1))
           })
           .set({
             Accept: 'Application/json',
