@@ -685,10 +685,10 @@ const ActorSchema = new Schema({
     type: String,
     required: true
   },
-  works: [{
-    type: ObjectId,
-    ref: 'movie'
-  }],
+  // works: [{
+  //   type: ObjectId,
+  //   ref: 'movie'
+  // }],
   other: {
     another_name: {
       type: String,
@@ -708,10 +708,10 @@ const DirectorSchema = new Schema({
     type: String,
     required: true
   },
-  works: [{
-    type: ObjectId,
-    ref: 'movie'
-  }],
+  // works: [{
+  //   type: ObjectId,
+  //   ref: 'movie'
+  // }],
   other: {
     another_name: {
       type: String,
@@ -859,12 +859,12 @@ const ClassifySchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
-  match: [
-    {
-      type: ObjectId,
-      ref: 'movie'
-    }
-  ],
+  // match: [
+  //   {
+  //     type: ObjectId,
+  //     ref: 'movie'
+  //   }
+  // ],
   glance: {
     type: Number,
     default: 0

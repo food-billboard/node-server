@@ -4,7 +4,8 @@ const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
-router.get('/', async (ctx) => {
+router
+.get('/', async (ctx) => {
   const check = Params.query(ctx, {
     name: "_id",
     type: ['isMongoId']

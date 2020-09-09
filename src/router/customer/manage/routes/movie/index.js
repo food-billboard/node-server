@@ -263,6 +263,7 @@ router
   const { method, body } = ctx.request
   if(method.toLowerCase() === 'get') return await next()
   const {
+    _id,
     info: {
       author_description,
       alias,
@@ -373,6 +374,8 @@ router
 
   //判断是否已经存在
   const data = await MovieModel.findOne({
+    //修改则需要跳过修改的电影id
+    ...(!!_id ? { _id: { $not: _id } } : {}),
     //名字类似
     $or: [
       { name },
@@ -597,8 +600,8 @@ router
     .exec()
     .then(data => !!data && data._doc)
   })
+  .then(notFound)
   .then(async (data) => {
-    if(!data) return Promise.reject({errMsg: '电影不存在', status: 400})
 
     const {
       info,
@@ -782,5 +785,7 @@ router
 .use('/browser', Browse.routes(), Browse.allowedMethods())
 .use('/store', Store.routes(), Store.allowedMethods())
 .use('/detail', Detail.routes(), Detail.allowedMethods())
+
+//可以再添加一个删除的功能
 
 module.exports = router

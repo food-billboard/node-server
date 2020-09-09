@@ -1,17 +1,206 @@
-const App = require('../app')
-const path = require('path')
-const Request = require('supertest').agent(App.listen())
-const { assert } = require('chai')
+require('module-alias/register')
+const { expect } = require('chai')
+const { 
+  Request, 
+  mockCreateUser,
+  mockCreateComment,
+  commonValidate,
+} = require('@test/utils')
+const { CommentModel } = require('@src/utils')
 
 const COMMON_API = '/api/customer/movie/detail/comment/like'
 
 describe(`${COMMON_API} test`, function() {
 
+  let commentDatabase
+  let userDatabase
+  let selfToken
+  let userId
+  let commentId
+
+  before(function(done) {
+
+    const { model, token } = mockCreateUser({
+      username: COMMON_API
+    })
+
+    userDatabase = model
+    selfToken = token
+
+    userDatabase.save()
+    .then(data => {
+      userId = data._id
+      const { model } = mockCreateComment({
+        source_type: 'user',
+        source: userId,
+        content: {
+          text: COMMON_API
+        }
+      })
+
+      commentDatabase = model
+      return commentDatabase.save()
+    })
+    .then(function(data) {
+      commentId = data._id
+      done()
+    })
+    .catch(err => {
+      console.log('oops: ', err)
+    })
+
+  })
+
+  after(function(done) {
+
+    Promise.all([
+      commentDatabase.deleteOne({
+        "content.text": COMMON_API
+      }),
+      userDatabase.deleteOne({
+        username: COMMON_API
+      })
+    ])
+    .then(function() {
+      done()
+    })
+    .catch(err => {
+      console.log('oops: ', err)
+    })
+
+  })
+
+  describe(`pre check the params of the comment id -> ${COMMON_API}`, function() {
+
+    describe(`pre check the params of the comment id fail test -> ${COMMON_API}`, function() {
+
+      it(`pre check the params of the comment id fail because the comment id is not found`, function(done) {
+
+        const id = commentId.toString()
+
+        Request
+        .put(COMMON_API)
+        .send({
+          _id: `${(parseInt(id.slice(0, 1)) + 5) % 10}${id.slice(1)}`,
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(404)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+
+      })
+
+      // it(`pre check the params of the comment id fail because the comment id is not verify`, function(done) {
+
+      //   Request
+      //   .put(COMMON_API)
+      //   .send({
+      //     _id: commentId.toString().slice(1),
+      //   })
+      //   .set({
+      //     Accept: 'Application/json',
+      //     Authorization: `Basic ${selfToken}`
+      //   })
+      //   .expect(400)
+      //   .expect('Content-Type', /json/)
+      //   .end(function(err) {
+      //     if(err) return done(err)
+      //     done()
+      //   })
+
+      // })
+
+      // it(`pre check the params of the comment id fail because lack of the params of comment id`, function(done) {
+        
+      //   Request
+      //   .put(COMMON_API)
+      //   .set({
+      //     Accept: 'Application/json',
+      //     Authorization: `Basic ${selfToken}`
+      //   })
+      //   .expect(400)
+      //   .expect('Content-Type', /json/)
+      //   .end(function(err) {
+      //     if(err) return done(err)
+      //     done()
+      //   })
+
+      // })
+
+    })
+
+  })
+
   describe(`put like the comment test -> ${COMMON_API}`, function() {
 
     describe(`put like the comment success test -> ${COMMON_API}`, function() {
 
-      it(`put like the comment success test `, function() {
+      before(function(done) {
+
+        commentDatabase.updateOne({
+          _id: commentId
+        },{
+          total_like: 0,
+          like_person: []
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+      })
+
+      after(function(done) {
+        
+        commentDatabase.findOne({
+          _id: commentId,
+        })
+        .select({
+          _id: 0,
+          total_like: 1,
+          like_person: 1
+        })
+        .exec()
+        .then(data => !!data && data._doc)
+        .then(data => {
+          expect(data).to.be.not.a('boolean')
+          return data.total_like == 1 && data.like_person.length == 1
+        })
+        .then(function(data) {
+          expect(data).to.be.true
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+      })
+
+      it(`put like the comment success test `, function(done) {
+
+        Request
+        .put(COMMON_API)
+        .send({
+          _id: commentId.toString()
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
 
       })
 
@@ -19,7 +208,66 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`put like the comment fail test -> ${COMMON_API}`, function() {
 
-      it(`put like the comment fail because the comment id is not found`, function() {
+      before(function(done) {
+
+        commentDatabase.updateOne({
+          _id: commentId
+        },{
+          total_like: 1,
+          like_person: [ userId ]
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+      })
+
+      after(function(done) {
+        
+        movieDatabase.findOne({
+          name: COMMON_API,
+        })
+        .select({
+          _id: 0,
+          total_like: 1,
+          like_person: 1
+        })
+        .exec()
+        .then(data => !!data && data._doc)
+        .then(data => {
+          expect(data).to.be.not.a('boolean')
+          return data.total_like == 1 && data.like_person.length == 1
+        })
+        .then(function(data) {
+          expect(data).to.be.true
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+      })
+
+      it(`put like the comment fail because the user had already liked this comment`, function(done) {
+
+        Request
+        .put(COMMON_API)
+        .send({
+          _id: commentId.toString()
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(403)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
 
       })
 
@@ -31,7 +279,66 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`cancel like the comment success test -> ${COMMON_API}`, function() {
 
-      it(`cancel like the comment success`, function() {
+      before(function(done) {
+
+        commentDatabase.updateOne({
+          _id: commentId
+        },{
+          like_person: [userId],
+          total_like: 1
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+      })
+
+      after(function(done) {
+        
+        commentDatabase.findOne({
+          name: COMMON_API,
+        })
+        .select({
+          _id: 0,
+          like_person: 1,
+          total_like: 1
+        })
+        .exec()
+        .then(data => !!data && data._doc)
+        .then(data => {
+          expect(data).to.be.not.a('boolean')
+          return data.like_person.length == 0 && data.total_like == 0
+        })
+        .then(function(data) {
+          expect(data).to.be.true
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+      })
+
+      it(`cancel like the comment success`, function(done) {
+
+        Request
+        .delete(COMMON_API)
+        .query({
+          _id: commentId.toString()
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
 
       })
 
@@ -39,8 +346,67 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`cancel like the comment fail test -> ${COMMON_API}`, function() {
 
-      it(`cancel like the comment fail because the comment is is not found`, function() {
+      before(function(done) {
+
+        commentDatabase.updateOne({
+          name: COMMON_API
+        },{
+          total_like: 0,
+          like_person: []
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+      })
+
+      after(function(done) {
         
+        movieDatabase.findOne({
+          name: COMMON_API,
+        })
+        .select({
+          _id: 0,
+          total_like: 1,
+          like_person: 1
+        })
+        .exec()
+        .then(data => !!data && data._doc)
+        .then(data => {
+          expect(data).to.be.not.a('boolean')
+          return data.total_like == 0 && data.like_person.length == 0
+        })
+        .then(function(data) {
+          expect(data).to.be.true
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+      })
+
+      it(`cancel like the comment fail because the user is not like this comment before`, function(done) {
+        
+        Request
+        .delete(COMMON_API)
+        .query({
+          _id: commentId.toString()
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(403)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+
       })
 
     })

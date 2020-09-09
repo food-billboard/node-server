@@ -24,7 +24,19 @@ function responseExpect(res, validate=[]) {
       'like', 'user_info', '_id'
     )
     const { comment_users, content, createdAt, updatedAt, total_like, like, user_info, _id } = item
-    commonValidate.number(comment_users)
+    expect(comment_users).to.be.satisfies(function(target) {
+      if(typeof target === 'number') {
+        commonValidate.number(target)
+      }else {
+        expect(target).to.be.a('array')
+        target.forEach(tar => {
+          expect(tar).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id')
+          commonValidate.poster(tar.avatar)
+          commonValidate.string(tar.username)
+          commonValidate.objectId(tar._id)
+        })
+      }
+    })
     expect(content).to.be.a('object').that.includes.all.keys('image', 'text', 'video')
     commonValidate.string(content.text, function(_) { return true })
     expect(content.video).to.be.a('array')

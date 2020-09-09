@@ -5,25 +5,35 @@ const { assert } = require('chai')
 
 const COMMON_API = '/api/customer/movie/detail/comment'
 
+
+
 describe(`${COMMON_API} test`, function() {
 
   describe(`pre check the params -> ${COMMON_API}`, function() {
 
-    describe(`pre check the params success test -> ${COMMON_API}`, function() {
-
-      it(`pre check the params success`, function() {
-
-      })
-
-    })
-
     describe(`pre check the params fail test -> ${COMMON_API}`, function() {
 
-      it(`pre check the params fail because the movie id or the user id is not verify or not found`, function() {
+      it(`pre check the params fail because the user id is not verify`, function() {
 
       })
 
-      it(`pre check the params fail becuase the media id is not verify or not found`, function() {
+      it(`pre check the params fail because the movie id is not verify`, function() {
+
+      })
+
+      it(`pre check the params fail becuase the image id is not verify`, function() {
+
+      })
+
+      it(`pre check the params fail becuase the image id is not found`, function() {
+
+      })
+
+      it(`pre check the params fail becuase the video id is not verify`, function() {
+
+      })
+
+      it(`pre check the params fail becuase the video id is not found`, function() {
 
       })
 
@@ -39,7 +49,21 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the movie comment list success but the list's length is 0`, function() {
+      it(`get the comment detail with self info success and return the status of 304`, function(done) {
+
+
+
+      })
+
+      it(`get the comment detail without self info success and hope return the status of 304 but the content has edited`, function(done) {
+
+
+
+      })
+
+      it(`get the comment detail with self info success and hope return the status of 304 but the params of query is change`, function(done) {
+
+
 
       })
 

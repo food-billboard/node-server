@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Like = require('./like')
 const Detail = require('./detail')
-const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, UserModel, CommentModel, MovieModel, ImageModel, VideoModel, dealErr, notFound, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -27,7 +27,10 @@ router
       type: [ 'isMongoId' ]
     }
   ]
-  if(/.+\/comment(\/movie)?$/g.test(url)) {
+
+  let isToComment = /.+\/comment(\/movie)?$/g.test(url)
+
+  if(isToComment) {
     validate = [
       ...validate,
       {
@@ -43,7 +46,9 @@ router
         ]
       }
     ]
+
   }
+
   if(method.toLowerCase() === 'get' || method.toLowerCase() === 'delete') _method = 'query'
   if(method.toLowerCase() === 'put' || method.toLowerCase() === 'post') _method = 'body' 
   
@@ -53,6 +58,64 @@ router
       ...check.res
     })
     return
+  }
+
+  //判断媒体资源是否存在
+  if(isToComment) {
+    const { request: { body: { content: { image, video } } } } = ctx
+    let imageData = true
+    let videoData = true
+
+    if(!!image) {
+      imageData = await ImageModel.find({
+        _id: { $in: [ ...image.map(item => ObjectId(item)) ] }
+      })
+      .select({
+        _id: 1
+      })
+      .exec()
+      .then(data => !!data && data)
+      .then(data => {
+        if(!data) return false
+        return data.length == image.length
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    }
+
+    if(!!video) {
+      videoData = await VideoModel.find({
+        _id: { $in: [ ...video.map(item => ObjectId(item)) ] }
+      })
+      .select({
+        _id: 1
+      })
+      .exec()
+      .then(data => !!data && data)
+      .then(data => {
+        if(!data) return false
+        return data.length == video.length
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    }
+
+    if(!imageData || !videoData ) {
+
+      ctx.status = 404
+
+      ctx.body = JSON.stringify({
+        success: false,
+        res: {
+          errMsg: 'media source is not found'
+        }
+      })
+
+      return
+    }
+
   }
 
   return await next()

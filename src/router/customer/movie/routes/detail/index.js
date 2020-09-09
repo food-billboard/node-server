@@ -28,7 +28,7 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   if(!token) {
-    ctx.status = 401
+    ctx.status = 301
     return ctx.redirect("/api/user/movie/detail")
   }
   const { mobile } = token

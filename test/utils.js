@@ -332,7 +332,8 @@ const commonValidate = {
   }),
   poster: (target, satisfies) => expect(target).to.be.satisfies(function(target) {
     return this[_satisfies_](target == null ? true : ( typeof target === 'string' && !!target.length ), satisfies)
-  })
+  }),
+  time: this.date
 }
 
 module.exports = {
