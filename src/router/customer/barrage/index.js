@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, MovieModel, BarrageModel, dealErr, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, UserModel, MovieModel, BarrageModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -12,9 +12,14 @@ router
     await next()
   }else {
     ctx.status = 401
-    ctx.body = JSON.stringify({
-      success: false,
-      res: null
+    responseDataDeal({
+      ctx,
+      data: {
+        err: true,
+        res: {
+          errMsg: 'not authentication'
+        }
+      }
     })
   }
 })
@@ -24,10 +29,7 @@ router
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({ ...check.res })
-    return
-  }
+  if(check) return
 
   const [ timeStart, process, _id ] = Params.sanitizers(ctx.query, {
     name: 'timeStart',
@@ -96,19 +98,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
 })
 //发送弹幕
@@ -129,10 +123,7 @@ router
       (data) => data >= 0
     ]
   })
-  if(check) {
-    ctx.body = JSON.stringify({ ...check.res })
-    return
-  }
+  if(check) return
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
@@ -175,17 +166,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
 })
 //点赞
@@ -195,10 +180,7 @@ router
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({ ...check.res })
-    return
-  }
+  if(check) return
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
@@ -233,17 +215,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
 })
 //取消点赞
@@ -253,10 +229,7 @@ router
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({ ...check.res })
-    return
-  }
+  if(check) return
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
@@ -291,17 +264,12 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
+
 })
 
 module.exports = router

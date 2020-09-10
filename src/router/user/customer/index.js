@@ -4,24 +4,19 @@ const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const { Types: { ObjectId } } = require("mongoose")
-const { UserModel, dealErr, Params } = require("@src/utils")
+const { UserModel, dealErr, Params, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
 
 router
 .get('/', async (ctx) => {
+  //validate params
   const check = Params.query(ctx, {
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
-  let res = {}
   const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
@@ -30,6 +25,8 @@ router
       }
     ]
   })
+
+  //database
   const data = await UserModel.findOne({
     _id
   })
@@ -56,19 +53,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res ={
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+
 })
 .use('/attention', Attention.routes(), Attention.allowedMethods())
 .use('/movie', Movie.routes(), Movie.allowedMethods())

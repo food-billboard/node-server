@@ -1,13 +1,17 @@
 const Validator = require('validator')
 const { isType } = require('./tool')
+const { responseDataDeal } = require('./error-deal')
 
 const TEMPLATE_ERROR = ctx => {
   ctx.status = 400
   return {
-    success: false,
     res: {
-      errMsg: 'bad request'
-    }
+      success: false,
+      res: {
+        errMsg: 'bad request'
+      }
+    },
+    err: true
   }
 }
 
@@ -62,11 +66,17 @@ const Params = {
     const { query } = ctx
     const data = this.validate(query, ...validators)
     if(data) {
-      const res = TEMPLATE_ERROR(ctx)
-      return {
-        errors: data,
-        res
-      }
+      // const res = TEMPLATE_ERROR(ctx)
+      // return {
+      //   errors: data,
+      //   res
+      // }
+      //fail
+      responseDataDeal({
+        ctx,
+        data: TEMPLATE_ERROR(ctx)
+      })
+      return true
     }
     return data
   },
@@ -74,11 +84,19 @@ const Params = {
     const { body } = ctx.request
     const data = this.validate(body, ...validators)
     if(data) {
-      const res = TEMPLATE_ERROR(ctx)
-      return {
-        errors: data,
-        res
-      }
+      //fail
+      // const res = TEMPLATE_ERROR(ctx)
+      // return {
+      //   errors: data,
+      //   res
+      // }
+      //fail
+      responseDataDeal({
+        ctx,
+        data: TEMPLATE_ERROR(ctx)
+      })
+      return true
+      
     }
     return data
   },
@@ -86,11 +104,16 @@ const Params = {
     const { files } = ctx.request
     const data = !!files && names.every(name => !!files[name] && !!files[name].size)
     if(!data) {
-      const res = TEMPLATE_ERROR(ctx)
-      return {
-        errors: data,
-        res
-      }
+      // const res = TEMPLATE_ERROR(ctx)
+      // return {
+      //   errors: data,
+      //   res
+      // }
+      responseDataDeal({
+        ctx,
+        data: TEMPLATE_ERROR(ctx)
+      })
+      return true
     }
     return null
   },

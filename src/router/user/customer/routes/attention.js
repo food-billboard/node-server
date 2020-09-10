@@ -1,21 +1,18 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr, notFound, Params } = require("@src/utils")
+const { UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require("mongoose")
 
 const router = new Router()
 
 router
 .get('/', async (ctx) => {
+
+  //validate
   const check = Params.query(ctx, {
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
@@ -39,12 +36,14 @@ router
       }
     ]
   })
-  let res
+
+  //database
   const data = await UserModel.findOne({
     _id
   })
   .select({
     attentions: 1,
+    updatedAt: 1,
     _id: 0,
   })
   .populate({
@@ -62,8 +61,9 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { attentions } = data
+    const { attentions, ...nextData, } = data
     return {
+      ...nextData,
       attentions: attentions.map(a => {
         const { _doc: { avatar, ...nextA } } = a
         return {
@@ -75,20 +75,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.err
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+  })
+  
 })
 
 module.exports = router

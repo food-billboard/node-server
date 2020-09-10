@@ -1,7 +1,8 @@
 const Router = require('@koa/router')
 const Chunk = require('./routes')
 const { 
-  verifyTokenToData
+  verifyTokenToData,
+  responseDataDeal
 } = require('@src/utils')
 const { dealMedia, base64Size } = require('./util')
 
@@ -45,7 +46,7 @@ router
 .post('/', async(ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
+
   const { body: { auth="PUBLIC", name, file, mime }, files={} } = ctx.request
 
   // const fileList = [...Object.values(nextFiles), ...Object.values(files)]
@@ -65,22 +66,21 @@ router
   if(fail.length) {
     ctx.status = 500
     res = {
-      success: false,
+      err: true,
       res: {
         errMsg: 'unknown error',
         data: [...complete]
       }
     }
   }else {
-    res = {
-      success: true,
-      res: {
-        data: [...complete]
-      }
-    }
+    res = [...complete]
   }
 
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data: res,
+    needCache: false
+  })
 
 })
 .use('/chunk', Chunk.routes(), Chunk.allowedMethods())

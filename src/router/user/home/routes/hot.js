@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { SearchModel, dealErr, notFound, Params } = require('@src/utils')
+const { SearchModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
@@ -12,8 +12,8 @@ router.get('/', async(ctx) => {
       data => data > 0 ? data : 0
     ]
   })
-  let res
-  let data = await SearchModel.find({})
+
+  const data = await SearchModel.find({})
   .select({
     key_word: 1
   })
@@ -26,20 +26,12 @@ router.get('/', async(ctx) => {
   .then(notFound)
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 
 module.exports = router

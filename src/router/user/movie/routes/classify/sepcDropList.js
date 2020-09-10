@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { ClassifyModel, dealErr, notFound, Params } = require('@src/utils')
+const { ClassifyModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
@@ -12,7 +12,7 @@ router.get('/', async (ctx) => {
       data => data > 0 ? data : 0
     ]
 	})
-  let res
+
   const data = await ClassifyModel.find({})
   .select({
     name: 1,
@@ -33,19 +33,11 @@ router.get('/', async (ctx) => {
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+  })
+
 })
 
 module.exports = router

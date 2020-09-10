@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Like = require('./like')
 const Detail = require('./detail')
-const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -48,12 +48,7 @@ router
   if(method.toLowerCase() === 'put' || method.toLowerCase() === 'post') _method = 'body' 
   
   const check = Params[_method](ctx, ...validate)
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   return await next()
 })
@@ -80,7 +75,7 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
+
   let mineId
 
   let data = await UserModel.findOne({
@@ -93,14 +88,15 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { _id } = data
-    mineId = _id
+    const { _id:user } = data
+    mineId = user
     return MovieModel.findOne({
       _id
     })
   })
   .select({
     comment: 1,
+    updatedAt: 1,
     _id: 0
   })
   .populate({
@@ -126,47 +122,39 @@ router
   .then(notFound)
   .then(data => {
     const { comment } = data
-    return comment.map(c => {
-      const { _doc: { comment_users, like_person, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextC } } = c
-      return {
-        ...nextC,
-        like: like_person.some(person => person.equals(mineId)),
-        comment_users: comment_users.map(com => {
-          const { _doc: { avatar, ...nextCom } } = com
-          return {
-            ...nextCom,
+    return {
+      ...data,
+      comment: comment.map(c => {
+        const { _doc: { comment_users, like_person, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextC } } = c
+        return {
+          ...nextC,
+          like: like_person.some(person => person.equals(mineId)),
+          comment_users: comment_users.map(com => {
+            const { _doc: { avatar, ...nextCom } } = com
+            return {
+              ...nextCom,
+              avatar: avatar ? avatar.src : null
+            }
+          }),
+          content: {
+            ...nextContent,
+            image: image.filter(i => i && !!i.src).map(i => i.src),
+            video: video.filter(v => v &&!!v.src).map(v => v.src),
+          },
+          user_info: {
+            ...nextInfo,
             avatar: avatar ? avatar.src : null
           }
-        }),
-        content: {
-          ...nextContent,
-          image: image.filter(i => i && !!i.src).map(i => i.src),
-          video: video.filter(v => v &&!!v.src).map(v => v.src),
-        },
-        user_info: {
-          ...nextInfo,
-          avatar: avatar ? avatar.src : null
         }
-      }
-    })
+      })
+    }
   })
   .catch(dealErr(ctx))
 
-
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
 
 })
 .post('/movie', async (ctx) => {
@@ -193,7 +181,6 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
 
   const data = await Promise.all([
     UserModel.findOne({
@@ -251,18 +238,11 @@ router
   .then(_ => true)
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
   
 })
 .post('/', async(ctx) => {
@@ -289,7 +269,6 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
 
   const data = await Promise.all([
     UserModel.findOne({
@@ -352,18 +331,12 @@ router
   .then(_ => true)
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 .use('/like', Like.routes(), Like.allowedMethods())
 .use('/detail', Detail.routes(), Detail.allowedMethods())

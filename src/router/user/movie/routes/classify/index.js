@@ -1,22 +1,18 @@
 const Router = require('@koa/router')
 const SpecDropList = require('./sepcDropList')
-const { ClassifyModel, dealErr, notFound, Params } = require('@src/utils')
+const { ClassifyModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
 .get('/', async(ctx) => {
+
   const check = Params.query(ctx, {
     name: "_id",
     type: ['isMongoId']
 	})
-	if(check) {
-		ctx.body = JSON.stringify({
-			...check.res
-		})
-		return
-	}
+	if(check) return
 
 	const { sort={} } = ctx.query
 	const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
@@ -41,7 +37,7 @@ router
 			}
 		]
 	})
-  let res
+
 	const data = await ClassifyModel.findOneAndUpdate({
 		_id
 	}, {
@@ -91,19 +87,11 @@ router
 	})
 	.catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+	responseDataDeal({
+		ctx,
+		data,
+	})
+
 })
 .use('/specDropList', SpecDropList.routes(), SpecDropList.allowedMethods())
 

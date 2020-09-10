@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const {  verifyTokenToData, UserModel, dealErr, notFound, Params } = require("@src/utils")
+const {  verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
 
@@ -27,7 +27,8 @@ router.get('/', async (ctx) => {
     mobile: Number(mobile)
   })
   .select({
-    store: 1
+    store: 1,
+    updatedAt: 1
   })
   .populate({
     path: 'store',
@@ -52,6 +53,7 @@ router.get('/', async (ctx) => {
   .then(data => {
     const { store } = data
     return {
+      ...data,
       store: store.map(s => {
         const { _doc: { poster, info: { description, name, classify }={}, ...nextS } } = s
         return {
@@ -67,19 +69,11 @@ router.get('/', async (ctx) => {
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+
 })
 
 module.exports = router

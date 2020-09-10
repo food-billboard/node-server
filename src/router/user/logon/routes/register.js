@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { encoded, signToken, Params, UserModel, RoomModel } = require('@src/utils')
+const { encoded, signToken, Params, UserModel, RoomModel, responseDataDeal, dealErr } = require('@src/utils')
 
 const router = new Router()
 
@@ -29,12 +29,7 @@ router
     name: 'password',
     validator: data => typeof data === 'string'
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ password, uid, mobile ] = Params.sanitizers(ctx.request.body, {
     name: 'password',
@@ -47,11 +42,12 @@ router
     type: ['toInt']
   })
 
-  let res
+
   //判断账号是否存在
   const account = new UserModel({
     ...createInitialUserInfo({ mobile, password })
   })
+  
   const data = await account.save()
   .then(data => {
     if(!data) return Promise.reject({errMsg: '账号已存在', status: 403})
@@ -92,25 +88,13 @@ router
     ])
     return data
   })
-  .catch(err => {
-    ctx.status = 403
-    res = {
-      success: false,
-      res: null
-    }
-    console.log(err)
+  .cache(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
   })
-
-  if(!res) {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
   
 })
 

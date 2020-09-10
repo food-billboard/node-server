@@ -74,6 +74,10 @@ function prePopulate(populate) {
         })
     })
 
+    //!! need to test
+    this.select({
+      updatedAt: 1
+    })
 
     activePopulate.forEach(active => {
       this.populate(active)

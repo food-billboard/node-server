@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Simple = require('./routes/simple')
-const { MovieModel, dealErr, notFound, Params } = require("@src/utils")
+const { MovieModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -12,12 +12,7 @@ router
     name: "_id",
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ _id ] = Params.sanitizers(ctx.query, {
 		name: '_id',
@@ -27,14 +22,14 @@ router
 			}
 		]
 	})
-  let res
+
   const data = await MovieModel.findOneAndUpdate({
     _id
   }, {
     $inc: { glance: 1 }
   })
   .select({
-    updatedAt: 0,
+    updatedAt: 1,
     source_type: 0,
     stauts: 0,
     related_to: 0,
@@ -173,19 +168,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+
 })
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 .use('/simple', Simple.routes(), Simple.allowedMethods())
