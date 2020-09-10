@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { RankModel, dealErr, notFound } = require("@src/utils")
+const { RankModel, dealErr, notFound, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
 
@@ -9,7 +9,7 @@ router.get('/', async (ctx) => {
 		_default: 8,
 		type: [ 'toInt' ]
 	})
-  let res
+
   let data = await RankModel.find({})
   .select({
     name: 1,
@@ -30,19 +30,11 @@ router.get('/', async (ctx) => {
   })
   .catch(dealErr(ctx))
   
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    res
+  })
+
 })
 
 module.exports = router

@@ -12,7 +12,8 @@ const {
   dealErr, 
   notFound, 
   Params,
-  NUM_DAY
+  NUM_DAY,
+  responseDataDeal
 } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -331,12 +332,7 @@ router
     type: [ 'isMongoId' ]
   })
 
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const {
     screen_time,
@@ -404,8 +400,9 @@ router
   if(data && !data.err) {
     return await next()
   }
-  ctx.body = JSON.stringify({
-    ...data.res
+  responseDataDeal({
+    ctx,
+    data
   })
 
 })
@@ -413,7 +410,7 @@ router
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile }  = token
-  let res
+
   let templateInsertData
   const { body } = ctx.request
   const { 
@@ -512,34 +509,20 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data: '审核中'
-      }
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 .put('/', async (ctx) => {
   const check = Params.body(ctx, {
     name: '_id',
     type: [ 'isMongoId' ]
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
-  let res
   let templateUpdateData
   const { body: { 
     info: {
@@ -692,18 +675,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 })
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
@@ -724,13 +700,12 @@ router
     ]
   })
 
-  let res 
-
   const data = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
-    issue: 1
+    issue: 1,
+    updatedAt: 1
   })
   .populate({
     path: 'issue',
@@ -754,33 +729,27 @@ router
   .then(notFound)
   .then(data => {
     const { issue } = data
-    return issue.map(s => {
-      const { _doc: { poster, info: { description, name, classify }={}, ...nextS } } = s
-      return {
-        ...nextS,
-        poster: poster ? poster.src : null,
-        description,
-        name,
-        classify,
-        store: false,
-      }
-    })
+    return {
+      ...data,
+      issue: issue.map(s => {
+        const { _doc: { poster, info: { description, name, classify }={}, ...nextS } } = s
+        return {
+          ...nextS,
+          poster: poster ? poster.src : null,
+          description,
+          name,
+          classify,
+          store: false,
+        }
+      })
+    }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
 })
 .use('/browser', Browse.routes(), Browse.allowedMethods())
 .use('/store', Store.routes(), Store.allowedMethods())

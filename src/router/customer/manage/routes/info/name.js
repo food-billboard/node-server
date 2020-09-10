@@ -1,11 +1,10 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, Params } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, Params, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
 router
 .put('/', async(ctx) => {
-  const [, token] = verifyTokenToData(ctx)
   const check = Params.body(ctx, {
     name: 'name',
     validator: [
@@ -13,35 +12,13 @@ router
     ]
   })
 
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
+  const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
   const { body: { name } } = ctx.request
-  let res
-  // const data = await UserModel.findOne({
-  //   username: name
-  // })
-  // .select({
-  //   _id: 1
-  // })
-  // .exec()
-  // .then(data => !!data && data._id)
-  // .then(data => {
-  //   if(data) return Promise.reject({ errMsg: '重名', status: 403 })
-  //   return UserModel.updateOne({
-  //     mobile: Number(mobile)
-  //   }, {
-  //     username: name
-  //   })
-  // })
-  const data = await UserModel.updateOne({
-    mobile: Number(mobile)
-  }, {
+
+  const data = await UserModel.findOne({
     username: name
   })
   .exec()
@@ -51,19 +28,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 })
 
 module.exports = router

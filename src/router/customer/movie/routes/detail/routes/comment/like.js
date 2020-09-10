@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, CommentModel, dealErr, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, UserModel, CommentModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -61,7 +61,6 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
 
   const data = await UserModel.findOne({
     mobile: Number(mobile)
@@ -104,18 +103,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
 })
 .delete('/', async(ctx) => {
@@ -127,7 +119,6 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
 
   const data = await UserModel.findOne({
     mobile: Number(mobile)
@@ -170,18 +161,12 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 
 module.exports = router

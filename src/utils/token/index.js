@@ -13,6 +13,7 @@ const SECRET = "________SE__C_R__E_T"
 
 const MIDDEL = "MIDDEL"
 
+//密码加密
 const encoded = (password) => {
   if(crypto) {
     const hmac = crypto.createHmac('sha256', SECRET)
@@ -22,6 +23,7 @@ const encoded = (password) => {
   return password
 }
 
+//文件MD5加密
 const fileEncoded = (str) => {
   if(crypto) {
     const hmac = crypto.createHmac('md5', SECRET)
@@ -173,5 +175,5 @@ module.exports = {
   verifyTokenToData,
   verifySocketIoToken,
   otherToken,
-  fileEncoded
+  fileEncoded,
 }

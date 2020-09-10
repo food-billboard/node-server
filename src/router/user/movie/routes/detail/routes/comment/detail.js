@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { CommentModel, dealErr, notFound, Params } = require('@src/utils')
+const { CommentModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -9,12 +9,7 @@ router.get('/', async (ctx) => {
     name: "_id",
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
 		name: 'currPage',
@@ -38,7 +33,7 @@ router.get('/', async (ctx) => {
 			}
 		]
 	})
-  let res 
+
   const data = await CommentModel.findOne({
     _id
   })
@@ -105,19 +100,11 @@ router.get('/', async (ctx) => {
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+
 })
 
 module.exports = router

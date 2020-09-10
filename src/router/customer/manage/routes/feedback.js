@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, FeedbackModel, dealErr, notFound, Params, formatISO, NUM_DAY } = require("@src/utils")
+const { verifyTokenToData, UserModel, FeedbackModel, dealErr, notFound, Params, formatISO, NUM_DAY, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -11,7 +11,7 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
-  const data = await UserModel.findOne({
+  let data = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
@@ -34,18 +34,20 @@ router
   .then(data => !!data && data._id)
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    ctx.body = JSON.stringify({
-      ...data.res
-    })
-    return
-  }else if(data) {
+  if(data && !data.err) {
     ctx.status = 503
-    ctx.body = JSON.stringify({
+    data = {
       success: false,
       res: {
         errMsg: 'frequent'
       }
+    }
+  }
+
+  if(data) {
+    responseDataDeal({
+      ctx,
+      data
     })
     return
   }
@@ -65,12 +67,7 @@ router
     ]
   })
 
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   return await next()
 })
@@ -93,7 +90,6 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
 
   const data = await UserModel.findOne({
     mobile: Number(mobile)
@@ -122,18 +118,10 @@ router
   .then(_ => true)
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
 })
 .get('/precheck', async(ctx) => {
   ctx.body = JSON.stringify({

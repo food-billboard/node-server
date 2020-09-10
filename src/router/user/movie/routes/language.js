@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { Params, LanguageModel, notFound, dealErr } = require('@src/utils')
+const { Params, LanguageModel, notFound, dealErr, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
@@ -12,7 +12,6 @@ router.get('/', async(ctx) => {
       data => data >= 0 ? data : -1
     ]
 	})
-  let res
 
   const data = await LanguageModel.find()
   .select({
@@ -24,20 +23,11 @@ router.get('/', async(ctx) => {
   .then(notFound)
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data,
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 
 module.exports = router

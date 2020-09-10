@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
 
@@ -22,13 +22,13 @@ router
       data => data >= 0 ? data : -1
     ]
   })
-  let res
 
   const data = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
-    fans: 1
+    fans: 1,
+    updatedAt: 1
   })
   .populate({
     path: 'fans',
@@ -45,30 +45,25 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { fans } = data
-    return fans.map(f => {
-      const { _doc: { avatar, ...nextF } } = f
-      return {
-        avatar: avatar ? avatar.src : null,
-        ...nextF
-      }
-    })
+    const { fans, _id, ...nextData } = data
+    return {
+      ...nextData,
+      fans: fans.map(f => {
+        const { _doc: { avatar, ...nextF } } = f
+        return {
+          avatar: avatar ? avatar.src : null,
+          ...nextF
+        }
+      })
+    }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+  })
+
 })
 
 module.exports = router

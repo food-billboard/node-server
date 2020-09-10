@@ -10,12 +10,7 @@ router
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
@@ -39,6 +34,7 @@ router
       }
     ]
   })
+  
   const data = await UserModel.findOne({
     _id
   })
@@ -69,6 +65,7 @@ router
   .then(data => {
     const { store } = data
     return {
+      ...data,
       store: store.map(s => {
         const { _doc: { poster, info: { description, name, classify }={}, ...nextS } } = s
         return {
@@ -84,19 +81,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+  
 })
 
 module.exports = router
