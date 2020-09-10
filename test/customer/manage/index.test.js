@@ -120,7 +120,7 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .set({
           Accept: 'application/json',
-          Authorization: `Basic ${selfToken.slice(1)}`
+          Authorization: `Basic ${selfToken}`
         })
         .expect(200)
         .expect('Content-Type', /json/)

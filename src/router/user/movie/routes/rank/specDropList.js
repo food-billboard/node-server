@@ -16,6 +16,9 @@ router.get('/', async (ctx) => {
     icon: 1
   })
   .limit(count)
+  .sort({
+    glance: 1
+  })
   .exec()
   .then(data => !!data && data)
   .then(notFound)
@@ -32,7 +35,7 @@ router.get('/', async (ctx) => {
   
   responseDataDeal({
     ctx,
-    res
+    data
   })
 
 })

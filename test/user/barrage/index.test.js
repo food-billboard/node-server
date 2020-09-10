@@ -55,7 +55,7 @@ describe(`${COMMON_API} test`, function() {
     describe(`get movie barrage list without self info success test -> ${COMMON_API}`, function() {
 
       it(`get movie barrage list without self info success`, function(done) {
-        console.log(values.origin.toString())
+
         Request
         .get(COMMON_API)
         .query({ _id: values.origin.toString() })
@@ -80,18 +80,18 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get movie barrage list without self info fail test -> ${COMMON_API}`, function() {
       
-      it(`get movie barrage list without self info fail because the movie id is not verify or not found`, function(done) {
-        Request
-        .get(COMMON_API)
-        .query({ _id: values.origin.toString().slice(1) })
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(400)
-        .end(function(err, res) {
-          if(err) return done(err)
-          done()
-        })  
-      })
+      // it(`get movie barrage list without self info fail because the movie id is not verify`, function(done) {
+      //   Request
+      //   .get(COMMON_API)
+      //   .query({ _id: values.origin.toString().slice(1) })
+      //   .set('Accept', 'application/json')
+      //   .expect('Content-Type', /json/)
+      //   .expect(400)
+      //   .end(function(err, res) {
+      //     if(err) return done(err)
+      //     done()
+      //   })  
+      // })
 
       it(`get movie barrage list without self info fail because the movie id is not found`, function(done) {
         Request

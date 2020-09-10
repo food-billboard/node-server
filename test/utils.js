@@ -302,6 +302,18 @@ function mockCreateFeedback(values) {
   return { model }
 }
 
+//创建排行榜
+function mockCreateRank(values) {
+  let baseModel = {
+    name: '111',
+    glance: 10
+  }
+
+  const newModel = mergeConfig(baseModel, values)
+  const model = new RankModel(newModel)
+  return { model }
+}
+
 //创建查询参数etag
 function createEtag(query={}) {
   Object.keys(query).reduce((acc, cur) => {
@@ -351,6 +363,7 @@ module.exports = {
   mockCreateClassify,
   mockCreateGlobal,
   mockCreateBarrage,
+  mockCreateRank,
   Request,
   createEtag,
   commonValidate

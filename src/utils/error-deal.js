@@ -18,7 +18,6 @@ const dealErr = (ctx) => {
         errMsg: err
       }
     }
-    console.log(err)
     return {
       err: true,
       res

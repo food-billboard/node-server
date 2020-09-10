@@ -46,12 +46,5 @@ router
 .use('/user', User.routes(), User.allowedMethods())
 .use('/customer', Customer.routes(), Customer.allowedMethods())
 .use('/swagger', Swagger.routes(), Swagger.allowedMethods())
-.get('/test', async (ctx) => {
-  ctx.status = 304
-  ctx.body = JSON.stringify({
-    name: '葛凌峰',
-    age: 24
-  })
-})
 
 module.exports = router

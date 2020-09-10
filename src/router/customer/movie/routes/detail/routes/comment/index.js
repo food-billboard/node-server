@@ -55,6 +55,47 @@ router
   const check = Params[_method](ctx, ...validate)
   if(check) return
 
+  //判断id是否存在
+
+  let id
+
+  if(_method == 'query') {
+    const { query: { _id } } = ctx
+    id = _id
+  }else {
+    const { request: { body: { _id } } } = ctx
+    id = _id
+  }
+
+  const isExistsId = await CommentModel.findOne({
+    _id: ObjectId(_id)
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && !!data._doc._id)
+  .then(data => {
+    if(data) return true
+    return MovieModel.findOne({
+      _id: ObjectId(_id)
+    })
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && !!data._doc._id)
+  .catch(err => {
+    console.log('oops: ', err)
+  })
+
+  if(!isExistsId) {
+    const data = dealErr(ctx)({ errMsg: 'the id is not found', status: 404 })
+    responseDataDeal(data)
+    return
+  }
+
   //判断媒体资源是否存在
   if(isToComment) {
     const { request: { body: { content: { image, video } } } } = ctx
@@ -99,13 +140,10 @@ router
 
     if(!imageData || !videoData ) {
 
-      ctx.status = 404
-
-      ctx.body = JSON.stringify({
-        success: false,
-        res: {
-          errMsg: 'media source is not found'
-        }
+      const data = dealErr(ctx)({ errMsg: 'media source is not found', status: 404 })
+      responseDataDeal({
+        ctx,
+        data
       })
 
       return

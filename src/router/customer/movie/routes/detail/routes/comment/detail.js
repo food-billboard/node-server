@@ -35,8 +35,8 @@ router
 				return ObjectId(data)
 			}
 		]
-	})
-  let res 
+  })
+  
   let mineId
 
   const data = await UserModel.findOne({

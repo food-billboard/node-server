@@ -7,12 +7,12 @@ const router = new Router()
 router
 .get('/', async (ctx) => {
 
-  //validate
-  const check = Params.query(ctx, {
-    name: '_id',
-    type: ['isMongoId']
-  })
-  if(check) return
+  // //validate
+  // const check = Params.query(ctx, {
+  //   name: '_id',
+  //   type: ['isMongoId']
+  // })
+  // if(check) return
 
   const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
     name: 'currPage',

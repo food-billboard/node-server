@@ -82,12 +82,18 @@ router.get('/', async(ctx) => {
     ]
   })
   let res = await cacheProxy.data(count)
-  ctx.body = JSON.stringify({
-    success: true,
-    res: {
-      data: res
-    }
+
+  responseDataDeal({
+    ctx,
+    data: res
   })
+
+  // ctx.body = JSON.stringify({
+  //   success: true,
+  //   res: {
+  //     data: res
+  //   }
+  // })
 })
 
 module.exports = router

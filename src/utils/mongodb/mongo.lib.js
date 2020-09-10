@@ -832,11 +832,18 @@ const RankSchema = new Schema({
     ref: 'image'
   },
   match_field: {
-    type: String,
-    enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'TOTAL_RATE', 'CLASSIFY' ],
-    uppercase: true,
-    get: function(v) {
-      return v
+    _id: {
+      type: ObjectId,
+      refPath: 'field'
+    },
+    field: {
+      type: String,
+      // enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'TOTAL_RATE', 'CLASSIFY' ],
+      enum: [ 'classify', 'district' ],
+      lowercase: true,
+      get: function(v) {
+        return v
+      }
     }
   },
   // match: [{

@@ -267,7 +267,7 @@ describe(`${COMMON_API} test`, function() {
       it(`get the comment detail with self info success and hope return the status of 304 but the params of query is change`, function(done) {
 
         const query = {
-          offset: 0,
+          currPage: 0,
           _id: result._id.toString()
         }
 

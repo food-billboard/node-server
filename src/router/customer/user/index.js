@@ -58,7 +58,7 @@ router
 //个人信息
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  let res
+
   const { mobile } = token
   const check = Params.query(ctx, {
     name: '_id',

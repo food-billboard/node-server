@@ -9,18 +9,16 @@ router
 
   const { method } = ctx
   let _method
-  let _id
+
   if(method.toLowerCase() === 'put') {
     _method = 'body'
   }else if(method.toLowerCase() === 'delete') {
     _method = 'query'
   }else {
-    ctx.status = 415
-    ctx.body = JSON.stringify({
-      success: false,
-      res: {
-        errMsg: 'request method is not allow'
-      }
+    const data = dealErr(ctx)({ errMsg: 'request method is not allow', status: 415 })
+    responseDataDeal({
+      ctx,
+      data
     })
     return
   }

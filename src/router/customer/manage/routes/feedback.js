@@ -124,11 +124,10 @@ router
   })
 })
 .get('/precheck', async(ctx) => {
-  ctx.body = JSON.stringify({
-    success: true,
-    res: {
-      data: true
-    }
+
+  responseDataDeal({
+    ctx,
+    data: true
   })
 })
 

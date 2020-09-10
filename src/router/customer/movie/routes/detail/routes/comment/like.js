@@ -15,12 +15,10 @@ router
   }else if(method.toLowerCase() === 'delete') {
     _method = 'query'
   }else {
-    ctx.status = 405
-    ctx.body = JSON.stringify({
-      success: false,
-      res: {
-        errMsg: 'request method is not allow'
-      }
+    const data = dealErr(ctx)({ errMsg: 'request method is not allow', status: 405 })
+    responseDataDeal({
+      data,
+      ctx
     })
     return
   }
@@ -42,11 +40,11 @@ router
   .then(notFound)
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    ctx.body = JSON.stringify({
-      success: false,
-      ...data.res
-    })
+  if(data && data.errMsg) {
+    responseDataDeal({
+      ctx,
+      data
+    })  
     return
   }
 
