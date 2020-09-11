@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { RankModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { RankModel, MovieModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
@@ -13,6 +13,8 @@ router.get('/', async(ctx) => {
     ]
   })
 
+  let result
+
   const data = await RankModel.find({})
   .select({
     other: 0,
@@ -23,34 +25,58 @@ router.get('/', async(ctx) => {
   .sort({
     glance: -1
   })
-  .limit(12)
-  .populate({
-    path: 'match',
-    select: {
-      poster: 1, 
-      name: 1
-    },
-    options: {
-      limit: count
-    }
+  .limit(8)
+  .exec()
+  .then(data => !!data && data)
+  .then(notFound)
+  .then(data => {
+    result = data
+
+    return MovieModel.find({
+      $or: [
+        {
+          "info.classify": { $in: [ ...result.filter(item => item.match_field && item.match_field.field === 'classify').map(item => item.match_field._id) ] }
+        },
+        {
+          "info.district": { $in: [ ...result.filter(item => item.match_field && item.match_field.field === 'district').map(item => item.match_field._id) ] }
+        }
+      ]
+    })
+  })
+  .select({
+    poster: 1, 
+    name: 1,
+    "info.classify": 1,
+    "info.district": 1
   })
   .exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {
-    return data.map(d => {
-      const { _doc: { icon, match, ...nextD } } = d
+    return result.map(item => {
+
+      const { _doc: { icon, match_field: { field, _id }, ...nextD } } = item
+
+      const filter = data.filter(item => {
+        const { info } = item
+        return info[field].some(fd => fd.equals(_id))
+      })
+      .slice(0, count)
+      .map(m => {
+        const { _doc: { poster, info, match_field:{ field }, ...nextM } } = m
+          return {
+            ...nextM,
+            match_field: field,
+            poster: poster ? poster.src : null,
+          }
+      })
+
       return {
         ...nextD,
         icon: icon ? icon.src : null,
-        match: match.map(m => {
-          const { _doc: { poster, ...nextM } } = m
-          return {
-            ...nextM,
-            poster: poster ? poster.src : null,
-          }
-        })
+        match: filter
       }
+
     })
   })
   .catch(dealErr(ctx))

@@ -9,7 +9,7 @@ const {
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
 
-const COMMON_API = '/api/user/customer/movie/rank/specDropList'
+const COMMON_API = '/api/user/movie/rank/specDropList'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
@@ -106,7 +106,7 @@ describe(`${COMMON_API} test`, function() {
         .set({
           Accept: 'Application/json',
         })
-        .expect(304)
+        .expect(200)
         .expect({
           'Content-Type': /json/,
         })

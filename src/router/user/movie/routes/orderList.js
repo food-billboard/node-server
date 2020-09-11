@@ -1,14 +1,19 @@
 const Router = require('@koa/router')
-const orderList = require('../orderList')
+const { sortList } = require('../orderList')
 const { responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
 router.get('/', async(ctx) => {
 
+  ctx.set({
+    'Cache-Control': `max-age=${24 * 60 * 60}`
+  })
+
   responseDataDeal({
     ctx,
-    data: orderList,
+    data: sortList,
+    needCache: false
   })
 
 })
