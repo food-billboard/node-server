@@ -3,7 +3,7 @@ const Day = require('dayjs')
 //静态资源目录
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
 
-const typeProto = (arg, type) => Object.prototype.toString.call(arg) === `[object ${type.slice(0, 1).toLowerCase()}${type.slice(1)}]`
+const typeProto = (arg, type) => Object.prototype.toString.call(arg) === `[object ${type.slice(0, 1).toUpperCase()}${type.slice(1)}]`
 
 const isNumber = arg => !Number.isNaN(arg) && typeProto(arg, 'number')
 
@@ -83,6 +83,20 @@ function formatMill(date) { return Day(date).valueOf() }
 
 function NUM_DAY(num) { return num * 24 * 60 * 60 * 1000 }
 
+function mergeConfig(origin, target) {
+  let _obj = {...origin}
+  if(typeof _obj !== 'object') return _obj
+  Object.keys(_obj).forEach(item => {
+    if(_obj[item] != undefined && target[item] != undefined) {
+      if(!typeProto(_obj[item], 'object')) {
+        _obj[item] = target[item]
+      }else {
+        _obj[item] = mergeConfig(_obj[item], target[item])
+      }
+    }
+  })
+  return _obj
+}
 
 module.exports = {
   isType,
@@ -91,5 +105,6 @@ module.exports = {
   STATIC_FILE_PATH,
   formatISO,
   formatMill,
-  NUM_DAY
+  NUM_DAY,
+  mergeConfig
 }

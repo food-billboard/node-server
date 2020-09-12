@@ -61,7 +61,7 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { attentions, ...nextData, } = data
+    const { attentions, ...nextData } = data
     return {
       ...nextData,
       attentions: attentions.map(a => {

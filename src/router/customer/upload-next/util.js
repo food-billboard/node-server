@@ -1,15 +1,6 @@
 const path = require('path')
 const fs = require('fs')
-const { 
-  ImageModel, 
-  VideoModel, 
-  UserModel,
-  OtherMediaModel, 
-  STATIC_FILE_PATH, 
-  isType, 
-  fileEncoded, 
-  notFound
-} = require('@src/utils')
+const { ImageModel, VideoModel, UserModel, OtherMediaModel, STATIC_FILE_PATH, isType, fileEncoded } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const ACCEPT_IMAGE_MIME = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp']
@@ -44,58 +35,83 @@ const base64Size = base64 => {
   let body = base64.split(",")[1]
   const equalIndex = body.indexOf('=')
   if(body.indexOf('=') > 0) {
-    body = body.substring(0, equalIndex)
+      body = body.substring(0, equalIndex)
   }
   const length = body.length
   return parseInt( length - ( length / 8 ) * 2 )
 }
 
-const base64Reg = /^data.+\/.+;base64,/g
-
 //临时随机名称
 const randomName = () => `${Date.now()}${new Array(Math.ceil(Math.random() * 10)).fill(Math.ceil(Math.random() * 10)).map((i, j) => Math.abs(i - j)).join('')}`
 
 //图片内容上传处理
+/**
+ * 
+ * @param  {...any} files { file: 文件, auth: 权限类型[ PUBLIC, PRIVATE ]}
+ */
 const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
   //判断静态资源目录是否存在
   let staticPath = path.resolve(STATIC_FILE_PATH)
   checkAndCreateDir(staticPath)
-
-  //资源来源判断并获取
+  const realFiles = files.filter(task => {
+    const { file } = task
+    return isType(file, 'object') || 
+    (
+      isType(file, 'string') 
+      // && 
+      // /^data:.+\/.+;base64,.+/g.test(file)
+    )
+  })
   let originType
   let originId
 
-  let originQuery
-
+  //资源来源判断
   if(origin.toLowerCase && origin.toLowerCase() === 'system') {
     originType = origin.toUpperCase()
-    originQuery = {
-      mobile
-    }
+    originId = await UserModel.findOne({
+      mobile,
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(data => !!data && data._doc)
+    .then(data => {
+      if(!data) return Promise.reject({ errMsg: 'not Found' })
+      return data._id
+    })
+    .catch(err => {
+      console.log(err)
+      return false
+    })
   }else {
     originType = 'USER'
-    originQuery = isType(origin, 'object') || (isType(origin, 'string') && origin.length > 11) ?
-    { _id: ObjectId(origin) }
-    :
-    { mobile: Number(origin) }
+    originId = await UserModel.findOne({
+      ...( 
+        isType(origin, 'object') || (isType(origin, 'string') && origin.length > 11) ?
+        { _id: ObjectId(origin) }
+        :
+        { mobile: Number(origin) }
+      )
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(data => !!data && data._doc)
+    .then(data => {
+      if(!data) return Promise.reject({ errMsg: 'not Found' })
+      return data._id
+    })
+    .catch(err => {
+      console.log(err)
+      return false
+    })
   }
-  //来源id获取
-  originId = await UserModel.findOne(originQuery)
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._doc._id)
-  .then(notFound)
-  .catch(err => {
-    console.log(err)
-    return false
-  })
 
-  //用于后面筛选失败的项目(来源不存在则失败)
+  //用于后面筛选失败的项目
   if(!originId) return [...files]
 
-  //文件格式及目录处理
   let authPath, typePath
   //权限目录
   if(auth === 'PRIVATE') {
@@ -105,39 +121,48 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
   }
   staticPath = path.resolve(staticPath, authPath)
   checkAndCreateDir(staticPath)
-
-  let databaseModels = []
   
-  return await Promise.allSettled(files.map(async (task) => {
-    const { file, name, mime, size } = task
-    //数据库模板
-    let databaseModel = {
-      name: name || randomName(),
-      info: {
-        mime,
-        size,
-      },
-      auth,
-      origin_type: originType,
-      origin: originId
-    }
+  return await Promise.allSettled(realFiles.map(async (task) => {
+    const { file, name, mime } = task
+    let realType
+    let typeArr
+    let fileSize
+    //文件真实存储路径
+    let realFilePath
+    let realName
+    //临时文件名称
+    const templateName = randomName()
 
     //文件类型目录
-    if(ACCEPT_IMAGE_MIME.some(item => !!~mime.indexOf(item))) {
-      typePath = 'image'
-    }else if(ACCEPT_VIDEO_MIME.some(item => !!mime.indexOf(item))) {
-      typePath = 'video'
+    if(mime) {
+      realType = mime
+      if(ACCEPT_IMAGE_MIME.includes(mime.toLowerCase())) {
+        typePath = 'image' 
+      }else if(ACCEPT_VIDEO_MIME.includes(mime.toLowerCase())) {
+        typePath = 'video'
+      }else {
+        typePath = 'other'
+      }
     }else {
-      typePath = 'other'
-    }
+      if(isType(file, 'string')) {
+        const [ type ] = file.match(/(?<=:).+(?=;)/)
+        typeArr = type ? type.split('/') : ['', '']
+      }else {
+        const { type } = file
+        typeArr = type ? type.split('/') : ['', '']
+      }
+      typePath = typeArr[0]
+      realType = typeArr[1] 
+    } 
+
+    if(typePath.toLowerCase() !== 'image' && typePath.toLowerCase() !== 'video') typePath = 'other'
     
     staticPath = path.resolve(staticPath, typePath)
     checkAndCreateDir(staticPath)
 
     //文件是否存在判断
     const existCheck = async (name) => {
-      if(isFileExistsAndComplete(name, typePath, size, auth.toLowerCase())) {
-        const { src } = databaseModel
+      if(isFileExistsAndComplete(name, typePath, fileSize, auth.toLowerCase())) {
         //判断数据库是否存在
        let Model
        if(typePath === 'image') {
@@ -147,8 +172,8 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
        }else {
          Model = OtherMediaModel
        }
-       return await Model.findOne({
-         src
+       return await ImageModel.findOne({
+         src: realFilePath
        })
        .select({_id: 1})
        .exec()
@@ -163,24 +188,29 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
     //文件内容写入
     if(isType(file, 'object')) {
 
-      const { path: filePath } = file
+      const { path: filePath, size } = file
+      fileSize = size
       if(!filePath) return target 
 
       //加密文件并重命名
-      try {
-        const data = fs.readFileSync(filePath)
-        databaseModel = Object.assign({}, databaseModel, { info: { md5: fileEncoded(data) } })
-      }catch(err) {
-        console.log(err)
-      }finally{
-        staticPath = path.resolve(staticPath, `${databaseModel.info.md5 || databaseModel.name}.${databaseModel.info.mime.split('/')[1]}`)
+      if(name) {
+        realName = name
+      }else {
+        try {
+          const data = fs.readFileSync(filePath)
+          realName = fileEncoded(data)
+        }catch(err) {
+          realName = templateName
+          console.log(err)
+        }finally{
+          staticPath = path.resolve(staticPath, `${realName}.${realType}`)
+        }
       }
 
-      const realFilePath = staticPath.match(/\/static\/.+/)[0]
+      realFilePath = staticPath.match(/\/static\/.+/)[0]
       if(!realFilePath) return target
-      databaseModel = Object.assign({}, databaseModel, { src: realFilePath })
 
-      const exist = await existCheck(`${databaseModel.info.md5 || databaseModel.name}.${databaseModel.info.mime.split('/')[1]}`)
+      const exist = await existCheck(`${realName}.${realType}`)
 
       //判断文件是否存在
       if(exist) {
@@ -199,36 +229,32 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
         })
         if(res) return res
       }
-    }
-    //base64
-    else {
+    }else {
       try{
-        const templateFilePath = path.resolve(staticPath, `${databaseModel.name}.${type}`)
+        const templateFilePath = path.resolve(staticPath, `${name ? name : templateName}.${realType}`)
         //加密文件
-        const data = fs.readFileSync(templateFilePath)
-        databaseModel = Object.assign({}, databaseModel, { info: { md5: fileEncoded(data) } })
-        const [, type] = databaseModel.info.mime.split('/')
-        const name = databaseModel.info.md5 || databaseModel.name
-
-        //获取文件的实际路径
-        staticPath = path.resolve(staticPath, `${name}.${type}`)
+        if(name) {
+          realName = name
+        }else {
+          const data = fs.readFileSync(templateFilePath)
+          realName = fileEncoded(data)
+        }
+        staticPath = path.resolve(staticPath, `${realName}.${realType}`)
         realFilePath = staticPath.match(/\/static\/.+/)[0]
-        if(!realFilePath) return target
-        databaseModel = Object.assign({}, databaseModel, { src: realFilePath })
 
         //判断文件是否存在
-        const exist = await existCheck(`${name}.${type}`)
+        const exist = await existCheck(`${realName}.${realType}`)
         if(!exist) {
           //文件写入
-          const base64Data = base64Reg.test(file) ? file.replace(base64Reg, '') : file
+          const base64Data = /^data.+\/.+;base64,/g.test(file) ? file.replace(/^data.+\/.+;base64,/g, '') : file
           const buffer = new Buffer.from(base64Data, 'base64')
           fs.writeFileSync(templateFilePath, buffer)
           const { size } = fs.statSync(templateFilePath)
-          databaseModel = Object.assign({}, databaseModel, { info: { size } })
+          fileSize = size
           //重命名
           fs.renameSync(templateFilePath, staticPath)
         }
-        // if(!databaseModel.info.mime.split('/')[1]) return target
+        if(!realType) return target
       }catch(err) {
         console.log(err)
         return target
@@ -248,8 +274,16 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
       Model = OtherMediaModel
     }
 
+    let objModel = {
+      name: realName,
+      src: realFilePath,
+      origin_type: originType,
+      origin: originId,
+      auth
+    }
+
     return await Model.findOne({
-      ...databaseModel
+      ...objModel
     })
     .select({
       _id: 1
@@ -261,7 +295,14 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
         return data._id
       }else {
         const model = new Model({
-          ...databaseModel,
+          ...objModel,
+          info: {
+            size: fileSize,
+            complete: [0],
+            chunk_size: 1,
+            mime: realType,
+            status: 'COMPLETE'
+          }
         })  
         return model.save()
         .then(data => !!data && data._id)
@@ -270,7 +311,7 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
     .then(data => {
       Model = null
       return {
-        name: databaseModel.name,
+        name: realName,
         _id: data
       }
     })
@@ -367,8 +408,6 @@ module.exports = {
   conserveBlob,
   isFileExistsAndComplete,
   base64Size,
-  base64Reg,
-  randomName,
   ACCEPT_IMAGE_MIME,
   ACCEPT_VIDEO_MIME
 }

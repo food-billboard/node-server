@@ -1,4 +1,4 @@
-const Day = requier('dayjs')
+const Day = require('dayjs')
 const { isType } = require('./tool')
 const { encoded } = require('./token')
 

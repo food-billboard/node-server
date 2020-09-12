@@ -20,30 +20,15 @@ const {
   ImageModel,
   BarrageModel, 
   FeedbackModel,
-  encoded
+  encoded,
+  mergeConfig
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
 const { expect } = require('chai')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
-
-const is = (value, type) => Object.prototype.toString.call(value) === `[object ${type.toUpperCase().slice(0, 1)}${type.toLowerCase().slice(1)}]`
-
-function mergeConfig(origin, target) {
-  let _obj = {...origin}
-  if(typeof _obj !== 'object') return _obj
-  Object.keys(_obj).forEach(item => {
-    if(_obj[item] != undefined && target[item] != undefined) {
-      if(!is(_obj[item], 'object')) {
-        _obj[item] = target[item]
-      }else {
-        _obj[item] = mergeConfig(_obj[item], target[item])
-      }
-    }
-  })
-  return _obj
-}
+const 
 
 //用户创建
 function mockCreateUser(values={}) {

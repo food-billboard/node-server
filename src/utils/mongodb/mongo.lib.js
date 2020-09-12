@@ -928,6 +928,7 @@ const VideoSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
+    md5: String,
     complete: [{
       type: Number,
       // required: true,
@@ -952,7 +953,8 @@ const VideoSchema = new Schema({
       type: String,
       enum: ['ERROR', 'COMPLETE', 'UPLOADING'],
       uppercase: true,
-      required: true
+      required: true,
+      default: 'COMPLETE'
     }
   },
 }, {
@@ -983,6 +985,7 @@ const ImageSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
+    md5: String,
     complete: [{
       type: Number,
       min: 0
@@ -1036,6 +1039,7 @@ const OtherMediaSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
+    md5: String,
     complete: [{
       type: Number,
       min: 0
