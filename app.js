@@ -7,12 +7,16 @@ const KoaBody = require('koa-body')
 const app = new Koa()
 const path = require('path')
 const { MongoDB } = require("@src/utils")
-const { middleware } = require('@src/config/winston')
+const { middleware, request } = require('@src/config/winston')
+const morgan = require('koa-morgan')
 
 MongoDB()
 
 app.use(Cors())
-.use(middleware)
+//请求前植入uuid来进行全链路的日志记录
+.use(morgan('combined', {
+  stream: request.stream
+}))
 // app.use(bodyParser())
 .use(KoaBody({
   multipart:true, // 支持文件上传

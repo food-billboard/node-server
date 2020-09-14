@@ -29,7 +29,7 @@ const isOne = fields => {
 }
 
 function prePopulate(populate) {
-  return function() {
+  return function(next) {
     let activePopulate = []
     const { _fields: fields } = this
     const zero = isZero(fields)
@@ -78,6 +78,9 @@ function prePopulate(populate) {
     activePopulate.forEach(active => {
       this.populate(active)
     })
+
+    next()
+
   }
 }
 

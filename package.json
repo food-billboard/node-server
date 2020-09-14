@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "jest --forceExit --runInBand --detectOpenHandles",
-    "dev": "nodemon app.js",
+    "dev": "nodemon app.js --config ./src/config/nodemon/index.dev.json",
+    "prod": "nodemon app.js --config ./src/config/nodemon/index.prod.json",
     "socket": "nodemon ./src/chat/index.js"
   },
   "author": "GLF",
@@ -20,6 +21,7 @@
     "koa-body": "^4.1.1",
     "koa-compress": "^4.0.1",
     "koa-cors": "0.0.16",
+    "koa-morgan": "^1.0.1",
     "koa-static": "^5.0.0",
     "module-alias": "^2.2.2",
     "mongoose": "^5.9.17",
@@ -31,7 +33,6 @@
     "@src": "src"
   },
   "devDependencies": {
-    "jest": "^26.1.0",
     "supertest": "^4.0.2"
   }
 }

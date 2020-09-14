@@ -1,9 +1,12 @@
 const winston = require('winston')
 const { createLogger, transports, format, config } = winston
 const { path: root } = require('app-root-path')
+const async_hooks = require('async_hooks')
+const { createHook, executionAsyncId, executionAsyncResource } = async_hooks
 const path = require('path')
 const { timestamp, label, combine, simple, splat, prettyPrint, printf, json, ms } = format
 const Day = require('dayjs')
+const fs = require('fs')
 
 // error: 0, 
 // warn: 1, 
@@ -28,11 +31,24 @@ const options = {
   }
 }
 
-//异常处理
-winston.exceptions.handle(
-  new winston.transports.File({
+const commonTransports = (fileconfig={}, consoleconfig={}) => {
+  return process.env.NODE_ENV === 'production' ?
+  new transports.File({
     ...options.file,
     level: 'error',
+    ...fileconfig
+  })
+  :
+  new transports.Console({
+    ...options.console,
+    level: 'error',
+    ...consoleconfig
+  })
+}
+
+//异常处理
+winston.exceptions.handle(
+  commonTransports({
     filename: path.resolve(root, 'src/logs/exception/logs.log')
   })
 )
@@ -58,8 +74,7 @@ const request = createLogger({
   exitOnError: false,
   silent: false,
   transports: [
-    new transports.File({
-      ...options.file,
+    commonTransports({
       level: 'info',
       filename: path.resolve(root, 'src/logs/request/logs.log')
     })
@@ -80,8 +95,7 @@ const response = createLogger({
   exitOnError: false,
   silent: false,
   transports: [
-    new transports.File({
-      ...options.file,
+    commonTransports({
       level: 'info',
       filename: path.resolve(root, 'src/logs/response/logs.log')
     })
@@ -102,12 +116,7 @@ const exception = createLogger({
   exitOnError: false,
   silent: false,
   transports: [
-    new transports.Console({
-      ...options.console
-    }),
-    new transports.File({
-      ...options.file,
-      level: 'error',
+    commonTransports({
       filename: path.resolve(root, 'src/logs/exception/logs.log')
     })
   ]
@@ -132,7 +141,7 @@ const database = createLogger({
     }),
     new transports.File({
       ...options.file,
-      level: 'error',
+      level: 'info',
       filename: path.resolve(root, 'src/logs/exception/logs.log')
     })
   ]
@@ -140,35 +149,19 @@ const database = createLogger({
 
 //处理未处理的promise reject
 request.rejections.handle(
-  new transports.File({
-    ...options.file,
-    level: 'error',
-    filename: path.resolve(root, 'src/logs/promise/logs.log')
-  })
+  commonTransports({ filename: path.resolve(root, 'src/logs/promise/logs.log') })
 )
 
 response.rejections.handle(
-  new transports.File({
-    ...options.file,
-    level: 'error',
-    filename: path.resolve(root, 'src/logs/promise/logs.log')
-  })
+  commonTransports({ filename: path.resolve(root, 'src/logs/promise/logs.log') })
 )
 
 exception.rejections.handle(
-  new transports.File({
-    ...options.file,
-    level: 'error',
-    filename: path.resolve(root, 'src/logs/promise/logs.log')
-  })
+  commonTransports({ filename: path.resolve(root, 'src/logs/promise/logs.log') })
 )
 
 database.rejections.handle(
-  new transports.File({
-    ...options.file,
-    level: 'error',
-    filename: path.resolve(root, 'src/logs/promise/logs.log')
-  })
+  commonTransports({ filename: path.resolve(root, 'src/logs/promise/logs.log') })
 )
 
 
@@ -273,11 +266,54 @@ const afterResponse4Exception = (error) => {
   return error
 }
 
+//只对生产环境进行文件日志写入
+request.stream = {
+  write: function(message, encoding) {
+    if(process.env.NODE_ENV === 'production') {
+      request.info(message)
+    }else {
+      console.info(message)
+    }
+  }
+}
+
+//数据库日志
+const log4Database = (doc={}, next=()=>{}) => {
+
+  const { name, collectionName, schema, query, childSchemas, op, options, _fields, subpaths } = this
+
+  //仅生产环境
+  if(process.env.NODE_ENV === 'production') {
+
+    database.info(JSON.stringify({
+      name, 
+      collectionName, 
+      schema, 
+      query, 
+      childSchemas, 
+      op, 
+      options, 
+      _fields, 
+      subpaths,
+      '$id': this['$id'],
+      response: doc
+    }))
+
+  }
+
+  next && next()
+
+}
+
+//全链路日志记录
+
+
 module.exports = {
   request,
   response,
   exception,
   database,
+  log4Database,
   middleware,
   beforeQueryDatabase,
   afterResponse4Log,
@@ -297,3 +333,23 @@ module.exports = {
 
 // requestId sessionId transactionId
 // X-Request-Id (X-Session-Id) 
+
+
+// const asyncHooks = createHook({
+//   init: (asyncId, type, triggerAsyncId, resource) => {
+//     // fs.writeSync(1, type)
+//   },
+//   before: (asyncId) => {
+
+//   },
+//   after: (asyncId) => {
+//     fs.writeSync(1, asyncId)
+//   },
+//   destroy: (asyncId) => {
+
+//   }
+// })
+// //开启promise asyncId分配
+// .enable()
+// //关闭asyncId分配
+// //.disabled()
