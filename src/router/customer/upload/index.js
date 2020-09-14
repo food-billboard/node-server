@@ -30,42 +30,40 @@ router
 })
 //检查参数格式是否正确
 .use(async(ctx, next) => {
-  const { body: { files:base64Files=[] }, files={} } = ctx.request
+  const { body: { files:base64Files }, files={} } = ctx.request
+  let errRes
 
   //是否为空
   if(!base64Files.length && !Object.values(files).length) {
-    const data = dealErr(ctx)({ errMsg: 'bad request', status: 400 })
+    errRes = {
+      errMsg: 'bad request', 
+      status: 400
+    }
+  }
+  //base64文件格式是否正确
+  else if(!base64Files.every(item => {
+    const { file } = item
+
+    return typeof file === 'string' && base64Reg.test(file)})) {
+      errRes = {
+        errMsg: 'bad request', 
+        status: 400
+      }
+  }
+  //file格式是否正确
+  else if(!!Object.values(files).length && !Object.values(files).every(item => isType(item, 'file'))) {
+    errRes = {
+      errMsg: 'bad request', 
+      status: 400
+    }
+  }
+
+  if(errRes) {
+    const data = dealErr(ctx)(errRes)
     responseDataDeal({
       ctx,
       data
     })
-    return
-  }
-
-  //base64格式是否正确
-  const check = Params.body(ctx, {
-    name: "files",
-    validator: [
-      data => Array.isArray(data) && data.every(item => {
-        const { file } = item
-        return typeof file === 'string' && base64Reg.test(file)
-      }),
-    ]
-  })
-  if(check) return
-
-  //file格式是否正确
-  if(!!Object.value(files).length) {
-
-    if(!Object.values(files).every(item => isType(item, 'file'))) {
-      const data = dealErr(ctx)({ errMsg: 'bad request', status: 400 })
-      responseDataDeal({
-        ctx,
-        data
-      })
-      return
-    }
-
   }
 
   return await next()
@@ -74,7 +72,7 @@ router
 //对于大文件拒绝接收请求
 .use(async(ctx, next) => {
   const { method } = ctx.request
-  const { body: { files: base64Files=[] }, files={} } = ctx.request
+  const { body: { files: base64Files }, files={} } = ctx.request
 
   let error
   let data
@@ -124,6 +122,7 @@ router
  * }]
  */
 .post('/', async(ctx) => {
+
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
@@ -149,7 +148,7 @@ router
           const { file, name, mime } = item
           let newMime = mime
   
-          if(!newMime || !newMime.test(/^[a-zA-Z]+\/[a-zA-Z]$/)) {
+          if(!newMime || !/^[a-zA-Z]+\/[a-zA-Z]$/.test(newMime)) {
             const [type] = file.match(/(?<=:).+(?=;)/)
             newMime = type
           }

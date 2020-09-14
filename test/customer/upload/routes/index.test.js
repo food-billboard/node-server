@@ -1,7 +1,9 @@
-const App = require('../app')
-const path = require('path')
-const Request = require('supertest').agent(App.listen())
-const { assert } = require('chai')
+require('module-alias/register')
+const { expect } = require('chai')
+const { mockCreateUser, Request, mockCreateImage, STATIC_FILE_PATH } = require('@test/utils')
+const { ImageModel, fileEncoded } = require('@src/utils')
+const fs = require('fs')
+const root = require('app-root-path')
 
 const COMMON_API = '/api/customer/upload/chunk'
 
@@ -9,17 +11,13 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`pre check the params -> ${COMMON_API}`, function() {
 
-    describe(`pre check the params success test -> ${COMMON_API}`, function() {
-
-      it(`pre check the params success`, function() {
-
-      })
-
-    })
-
     describe(`pre check the params fail test -> ${COMMON_API}`, function() {
 
       it(`pre check params fail because the file name is not verify of md5`, function() {
+
+      })
+
+      it(`pre check params fail because the file name is not found of md5`, function() {
 
       })
 
@@ -47,7 +45,27 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`check the file is exists and adjust the database fail test -> ${COMMON_API}`, function() {
 
-      it(`check the file is exists and adjust the database fail because the params is not verify or lack`, function() {
+      it(`check the file is exists and adjust the database fail because the params of suffix is not found`, function() {
+
+      })
+
+      it(`check the file is exists and adjust the database fail because the params of suffix is not verify`, function() {
+
+      })
+
+      it(`check the file is exists and adjust the database fail because the params of chunksLength is not found`, function() {
+
+      })
+
+      it(`check the file is exists and adjust the database fail because the params of chunksLength is not verify`, function() {
+
+      })
+
+      it(`check the file is exists and adjust the database fail because the params of size is not found`, function() {
+
+      })
+
+      it(`check the file is exists and adjust the database fail because the params of size is not verify`, function() {
 
       })
 
@@ -63,11 +81,23 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
+      it(`post the file of chunk success but the file is exists before`, function() {
+
+      })
+
     })
 
     describe(`post the file of chunk fail test -> ${COMMON_API}`, function() {
 
-      it(`post the file of chunk fail because the params is not verify`, function() {
+      it(`post the file of chunk fail because the params of index is not verify`, function() {
+
+      })
+
+      it(`post the file of chunk fail because the params of index is not found`, function() {
+
+      })
+
+      it(`post the file of chunk fail because the file is not belong to the user`, function() {
 
       })
 
@@ -91,7 +121,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`put the file complete upload fail because the params is not verify`, function() {
+      it(`put the file complete upload fail because the file is not belong to this user`, function() {
         
       })
 

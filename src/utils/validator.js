@@ -82,6 +82,7 @@ const Params = {
     return data
   },
   body(ctx, ...validators) {
+    console.log(validators)
     const { body } = ctx.request
     const data = this.validate(body, ...validators)
     if(data) {

@@ -83,11 +83,39 @@ function formatMill(date) { return Day(date).valueOf() }
 
 function NUM_DAY(num) { return num * 24 * 60 * 60 * 1000 }
 
-function mergeConfig(origin, target) {
+
+function merge(...restObject) {
+  if(!restObject.length) return {}
+  if(!isType(restObject[0], 'object')) return restObject[0]
+
+  function internalMerge(origin, target) {
+    if(!isType(origin, 'object') || !isType(target, 'object')) return origin
+    
+    Object.keys(target).forEach(key => {
+      if(isType(origin[key], 'object') && isType(target[key], 'object')) {
+        origin[key] = merge(origin[key], target[key])
+      }else {
+        origin[key] = target[key]
+      }
+    })
+  
+    return origin
+    
+  }
+
+  for(let i = restObject.length - 1; i > 0; i --) {
+    restObject[i-1] = internalMerge(restObject[i-1], restObject[i])
+  }
+
+  return restObject[0]
+
+}
+
+function mergeConfig(origin, target, canAddNewProp=false) {
   let _obj = {...origin}
   if(typeof _obj !== 'object') return _obj
-  Object.keys(_obj).forEach(item => {
-    if(_obj[item] != undefined && target[item] != undefined) {
+  Object.keys(target).forEach(item => {
+    if(canAddNewProp || _obj[item] != undefined && target[item] != undefined) {
       if(!typeProto(_obj[item], 'object')) {
         _obj[item] = target[item]
       }else {
@@ -106,5 +134,6 @@ module.exports = {
   formatISO,
   formatMill,
   NUM_DAY,
-  mergeConfig
+  mergeConfig,
+  merge
 }

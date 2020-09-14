@@ -8,7 +8,8 @@ const {
   STATIC_FILE_PATH, 
   isType, 
   fileEncoded, 
-  notFound
+  notFound,
+  merge
 } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -34,7 +35,7 @@ const isFileExistsAndComplete = (name, type, size, auth="public") => {
     }
     return false
   }catch(_) {
-    // console.log(_)
+    console.log(_)
     return false
   }
 }
@@ -50,7 +51,7 @@ const base64Size = base64 => {
   return parseInt( length - ( length / 8 ) * 2 )
 }
 
-const base64Reg = /^data.+\/.+;base64,/g
+const base64Reg = /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*?)\s*$/i
 
 //临时随机名称
 const randomName = () => `${Date.now()}${new Array(Math.ceil(Math.random() * 10)).fill(Math.ceil(Math.random() * 10)).map((i, j) => Math.abs(i - j)).join('')}`
@@ -125,7 +126,7 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
     //文件类型目录
     if(ACCEPT_IMAGE_MIME.some(item => !!~mime.indexOf(item))) {
       typePath = 'image'
-    }else if(ACCEPT_VIDEO_MIME.some(item => !!mime.indexOf(item))) {
+    }else if(ACCEPT_VIDEO_MIME.some(item => !!~mime.indexOf(item))) {
       typePath = 'video'
     }else {
       typePath = 'other'
@@ -136,40 +137,44 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
 
     //文件是否存在判断
     const existCheck = async (name) => {
+
       if(isFileExistsAndComplete(name, typePath, size, auth.toLowerCase())) {
         const { src } = databaseModel
         //判断数据库是否存在
-       let Model
-       if(typePath === 'image') {
-         Model = ImageModel
-       }else if(typePath === 'video') {
-         Model = VideoModel
-       }else {
-         Model = OtherMediaModel
-       }
-       return await Model.findOne({
-         src
-       })
-       .select({_id: 1})
-       .exec()
-       .then(data => {
-         Model = null
-         return !!data ? 1 : -1
-       })
+        let Model
+        if(typePath === 'image') {
+          Model = ImageModel
+        }else if(typePath === 'video') {
+          Model = VideoModel
+        }else {
+          Model = OtherMediaModel
+        }
+        return await Model.findOne({
+          src,
+          origin: databaseModel.origin
+        })
+        .select({_id: 1})
+        .exec()
+        .then(data => {
+          Model = null
+          return !!data ? 1 : -1
+        })
       }
       return false
+
     }
 
     //文件内容写入
     if(isType(file, 'object')) {
 
       const { path: filePath } = file
-      if(!filePath) return target 
+      if(!filePath) return task 
 
       //加密文件并重命名
       try {
         const data = fs.readFileSync(filePath)
-        databaseModel = Object.assign({}, databaseModel, { info: { md5: fileEncoded(data) } })
+        const md5 = fileEncoded(data)
+        databaseModel = merge(databaseModel, { info: { md5 } })
       }catch(err) {
         console.log(err)
       }finally{
@@ -177,22 +182,24 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
       }
 
       const realFilePath = staticPath.match(/\/static\/.+/)[0]
-      if(!realFilePath) return target
-      databaseModel = Object.assign({}, databaseModel, { src: realFilePath })
+      if(!realFilePath) return task
+      databaseModel = merge(databaseModel, { src: realFilePath })
 
       const exist = await existCheck(`${databaseModel.info.md5 || databaseModel.name}.${databaseModel.info.mime.split('/')[1]}`)
 
       //判断文件是否存在
       if(exist) {
-        if(~exist) return null
+        //文件存在且数据库存在
+        if(!!~exist) return null
       }else {
         //文件写入
+        console.log(filePath, staticPath)
         const readStream = fs.createReadStream(filePath)
         const writeStream = fs.createWriteStream(staticPath)
         readStream.pipe(writeStream)
         const res = await new Promise((resolve, _) => {
           readStream.on('end', function(err, _) {
-            if(err) resolve(target)
+            if(err) resolve(task)
             fs.unlinkSync(filePath)
             resolve(null)
           })
@@ -202,36 +209,44 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
     }
     //base64
     else {
-      try{
-        const templateFilePath = path.resolve(staticPath, `${databaseModel.name}.${type}`)
-        //加密文件
-        const data = fs.readFileSync(templateFilePath)
-        databaseModel = Object.assign({}, databaseModel, { info: { md5: fileEncoded(data) } })
+
+      try {
+
         const [, type] = databaseModel.info.mime.split('/')
+        //文件写入(最好将base64正则匹配逻辑写的清晰些，模糊的话在匹配中会花费很大的时间)
+        const base64Data = file.replace(/^data:.{1,10}\/.{1,10};base64,/i, '')
+
+        const buffer = new Buffer.from(base64Data, 'base64')
+        const md5 = fileEncoded(buffer)
+
+        //文件加密
+        databaseModel = merge(databaseModel, { info: { md5 } })
         const name = databaseModel.info.md5 || databaseModel.name
 
-        //获取文件的实际路径
+        //获取实际路径
         staticPath = path.resolve(staticPath, `${name}.${type}`)
         realFilePath = staticPath.match(/\/static\/.+/)[0]
-        if(!realFilePath) return target
-        databaseModel = Object.assign({}, databaseModel, { src: realFilePath })
+        if(!realFilePath) return task
+        databaseModel = merge(databaseModel, { src: realFilePath })
 
         //判断文件是否存在
         const exist = await existCheck(`${name}.${type}`)
-        if(!exist) {
-          //文件写入
-          const base64Data = base64Reg.test(file) ? file.replace(base64Reg, '') : file
-          const buffer = new Buffer.from(base64Data, 'base64')
-          fs.writeFileSync(templateFilePath, buffer)
-          const { size } = fs.statSync(templateFilePath)
-          databaseModel = Object.assign({}, databaseModel, { info: { size } })
-          //重命名
-          fs.renameSync(templateFilePath, staticPath)
+        if(exist) {
+          if(!!~exist) return null
+        }else {
+          return new Promise((resolve, reject) => {
+            //文件写入
+            fs.writeFile(staticPath, base64Data, 'base64', function(err, _) {
+              if(err) return reject({ errMsg: 'write blob error', status: 500 })
+              // fs.unlinkSync(prevFilePath)
+              resolve({ name, type })
+            })
+          })
         }
-        // if(!databaseModel.info.mime.split('/')[1]) return target
+
       }catch(err) {
         console.log(err)
-        return target
+        return task
       }finally{
         // fs.unlinkSync()
         console.log('查看是否存在临时文件')
@@ -276,7 +291,7 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
     })
     .catch(err => {
       console.log('更改路径错误', err)
-      return target
+      return task
     })
   }))
 }
@@ -289,13 +304,16 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
  * auth 权限目录
  */
 const mergeChunkFile = ( { name, extname, mime, auth } ) => {
-  mime = mime && mime.toLowerCase()
+  mime = mime && mime.toLowerCase() && mime.split('/')[1]
+
+  //获取真实存储路径以及临时文件夹文件名称
   let templatePath = path.resolve(STATIC_FILE_PATH, 'template')
   let realPath = path.resolve(STATIC_FILE_PATH, auth)
   checkAndCreateDir(templatePath, realPath)
   realPath = path.resolve(realPath, extname)
   checkAndCreateDir(realPath)
   templatePath = path.resolve(templatePath, name)
+
   //判断文件夹是否存在
   if(checkDir(templatePath)) return ['not found', null]
   //对文件进行合并
@@ -309,53 +327,67 @@ const mergeChunkFile = ( { name, extname, mime, auth } ) => {
   //创建空文件
   fs.writeFileSync(realPath, '')
 
-  chunkList.forEach(chunk => {
-    fs.appendFileSync(realPath, fs.readFileSync(path.resolve(templatePath, chunk)))
-    fs.unlinkSync(path.resolve(templatePath, chunk))
-  })
+  try {
+    chunkList.forEach(chunk => {
+      fs.appendFileSync(realPath, fs.readFileSync(path.resolve(templatePath, chunk)))
+      fs.unlinkSync(path.resolve(templatePath, chunk))
+    }) 
+  }catch(err) {
+    console.log(err)
+    return [err, null]
+  }
 
+  //删除临时文件夹并重命名真实文件
   fs.renameSync(realPath, `${realPath}.${mime}`)
   fs.rmdirSync(templatePath)
+
   return [null, name]
 }
 
 //blob文件保存
-const conserveBlob = (prevFilePath, name, index) => {
+const conserveBlob = (file, md5, index) => {
+
+  //将分片文件集中存储在临时文件夹中
   checkAndCreateDir(STATIC_FILE_PATH)
   let templatePath = path.resolve(STATIC_FILE_PATH, 'template')
   checkAndCreateDir(templatePath)
-  templatePath = path.resolve(templatePath, name)
+  templatePath = path.resolve(templatePath, md5)
   checkAndCreateDir(templatePath)
 
-  const filename = path.resolve(templatePath, `${name}-${index}`)
-  if(true) {
-    const base64Data = /^data:.+\/.+;base64,/.test(prevFilePath) ? prevFilePath.replace(/^data:.+\/.+;base64,/, '') : prevFilePath
-    const buffer = Buffer.from(base64Data, 'base64')
+  //分片名称
+  const filename = path.resolve(templatePath, `${md5}-${index}`)
+
+  //存在分片则直接删除
+  if(fs.existsSync(filename)) return Promise.resolve({ name: md5, index })
+
+  //base64
+  if(typeof file === 'string') {
+    const base64Data = base64Reg.test(file) ? file.replace(/^data:.{1,10}\/.{1,10};base64,/i, '') : file
+
     return new Promise((resolve, reject) => {
-      fs.writeFile(filename, buffer, function(err) {
+      fs.writeFile(filename, base64Data, 'base64',function(err) {
         if(err) return reject({ errMsg: 'write file error', status: 500 })
-        return resolve({ name, index })
+        return resolve({ name: md5, index })
       })
     })
   }
-  //先放着
-  else {
-    //分片存在则直接删除临时文件并返回success
-    if(fs.existsSync(filename)) {
-      fs.unlinkSync(prevFilePath)
-      return Promise.resolve({ name, index })
-    }
+  //blob | file
+  else if(typeof file === 'object' && !!file.path){
 
+    const prevFilePath = file.path
+    //创建读写流
     const readStream = fs.createReadStream(prevFilePath)
     const writeStream = fs.createWriteStream(filename)
     readStream.pipe(writeStream)
     return new Promise((resolve, reject) => {
       readStream.on('end', function(err, _) {
+        //删除临时文件
         fs.unlinkSync(prevFilePath)
         if(err) return reject({ errMsg: 'write blob error', status: 500 })
-        resolve({ name, index })
+        resolve({ name: md5, index })
       })
     })
+
   }
 }
 
