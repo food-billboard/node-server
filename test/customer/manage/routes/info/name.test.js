@@ -12,7 +12,7 @@ describe(`${COMMON_API} test`, function() {
     let selfToken
     let result
 
-    before(function(done) {
+    before(async function() {
 
       const { model, token } = mockCreateUser({
         username: 'common',
@@ -21,28 +21,28 @@ describe(`${COMMON_API} test`, function() {
       selfDatabase = model
       selfToken = token
 
-      selfDatabase.save()
+      await selfDatabase.save()
       .then(data => {
         result = data
-        done()
       })
       .catch(err => {
         console.log('oops: ', err)
       })
+
+      return Promise.resolve()
 
     })
 
-    after(function(done) {
+    after(async function() {
 
-      selfDatabase.deleteOne({
+      await selfDatabase.deleteOne({
         mobile: 15698775364
-      })
-      .then(function() {
-        done()
       })
       .catch(err => {
         console.log('oops: ', err)
       })
+
+      return Promise.resolve()
 
     })
 

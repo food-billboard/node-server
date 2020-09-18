@@ -34,7 +34,7 @@ describe(`${COMMON_API} test`, function() {
   let selfToken
   let userId
 
-  before(function(done) {
+  before(async function() {
 
     const { model:user } = mockCreateUser({
       username: COMMON_API,
@@ -50,7 +50,7 @@ describe(`${COMMON_API} test`, function() {
     userDatabase = user
     selfToken = token
 
-    Promise.all([
+    await Promise.all([
       selfDatabase.save(),
       userDatabase.save()
     ])
@@ -72,26 +72,24 @@ describe(`${COMMON_API} test`, function() {
         })
       ])
     })
-    .then(function() {
-      done()
-    })
     .catch(err => {
       console.log('oops: ', err)
     })
+
+    return Promise.resolve()
 
   })
 
-  after(function(done) {
+  after(async function() {
 
-    UserModel.deleteMany({
+    await UserModel.deleteMany({
       username: COMMON_API
-    })
-    .then(function() {
-      done()
     })
     .catch(err => {
       console.log('oops: ', err)
     })
+
+    return Promise.resolve()
 
   })
 

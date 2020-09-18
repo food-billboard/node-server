@@ -4,7 +4,7 @@
   "description": "电影小程序后端api接口服务，包含mocha单元测试",
   "main": "app.js",
   "scripts": {
-    "test": "mocha -c",
+    "test": "mocha test/**/*.js --recursive",
     "dev": "nodemon app.js",
     "socket": "nodemon ./src/chat/index.js"
   },
@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@koa/router": "^9.0.1",
+    "app-root-path": "^3.0.0",
     "dayjs": "^1.8.28",
     "elasticsearch": "^16.7.1",
     "jsonwebtoken": "^8.5.1",

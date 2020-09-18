@@ -54,7 +54,7 @@ const Params = {
         return result
       }catch(err) {
         if(_default) result = _default
-        console.log(err)
+        // console.log(err)
         return result
       }
     })
@@ -82,7 +82,6 @@ const Params = {
     return data
   },
   body(ctx, ...validators) {
-    console.log(validators)
     const { body } = ctx.request
     const data = this.validate(body, ...validators)
     if(data) {

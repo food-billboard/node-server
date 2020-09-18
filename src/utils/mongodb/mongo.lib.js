@@ -28,8 +28,9 @@ const isOne = fields => {
   return Object.values(nextFields).some(field => field == 1)
 }
 
+//预处理
 function prePopulate(populate) {
-  return function() {
+  return function(next) {
     let activePopulate = []
     const { _fields: fields } = this
     const zero = isZero(fields)
@@ -82,7 +83,14 @@ function prePopulate(populate) {
     activePopulate.forEach(active => {
       this.populate(active)
     })
+
+    next()
   }
+}
+
+//完成处理
+function postMiddleware(error, res, next) {
+  
 }
 
 //预设
@@ -268,7 +276,7 @@ const UserSchema = new Schema({
     default: '默认名称'
   },
 	avatar: {
-    default: ObjectId('5edb3c7b4f88da14ca419e61'),
+    // default: ObjectId('5edb3c7b4f88da14ca419e61'),
     type: ObjectId,
     ref: 'image'
   },
@@ -1118,6 +1126,29 @@ FIND_OPERATION_LIB.forEach(op => {
   ImageSchema.pre(op, prePopulate(PRE_IMAGE_FIND))
   OtherMediaSchema.pre(op, prePopulate(PRE_OTHER_FIND))
   BarrageSchema.pre(op, prePopulate(PRE_BARRAGE_FIND))
+})
+
+//完成处理
+SAVE_OPERATION_LIB.forEach(op => {
+  UserSchema.post(op, postMiddleware)
+  GlobalSchema.post(op, postMiddleware)
+  RoomSchema.post(op, postMiddleware)
+  MessageSchema.post(op, postMiddleware)
+  MovieSchema.post(op, postMiddleware)
+  TagSchema.post(op, postMiddleware)
+  SpecialSchema.post(op, postMiddleware)
+  ActorSchema.post(op, postMiddleware)
+  DirectorSchema.post(op, postMiddleware)
+  DistrictSchema.post(op, postMiddleware)
+  SearchSchema.post(op, postMiddleware)
+  CommentSchema.post(op, postMiddleware)
+  RankSchema.post(op, postMiddleware)
+  ClassifySchema.post(op, postMiddleware)
+  LanguageSchema.post(op, postMiddleware) 
+  VideoSchema.post(op, postMiddleware)
+  ImageSchema.post(op, postMiddleware)
+  OtherMediaSchema.post(op, postMiddleware)
+  BarrageSchema.post(op, postMiddleware)
 })
 
 const UserModel = model('user', UserSchema)

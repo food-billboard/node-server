@@ -20,7 +20,6 @@ const {
   ImageModel,
   BarrageModel, 
   FeedbackModel,
-  encoded,
   mergeConfig
 } = require('@src/utils')
 const App = require('../app')
@@ -28,20 +27,31 @@ const Request = require('supertest').agent(App.listen())
 const { expect } = require('chai')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
-const 
 
 //用户创建
 function mockCreateUser(values={}) {
   const password = '1234567890'
-  const mobile = values.mobile || 18368003190
+  const mobile = parseInt(`1${new Array(10).fill(0).map(_ => Math.floor(Math.random() * 10)).join('')}`)
   const encodedPwd = encoded(password)
   const token = signToken({ mobile, password: encodedPwd }, {expiresIn: '10s'})
 
-  const baseModel = {
+  let baseModel = {
     mobile,
-    password: encodedPwd
+    password: encodedPwd,
+    username: '测试默认名称',
+    avatar: ObjectId('5edb3c7b4f88da14ca419e61'),
+    hot: 0,
+    fans: [],
+    attentions: [],
+    issue: [],
+    glance: [],
+    comment: [],
+    store: [],
+    rate: [],
+    allow_many: false,
+    status: 'SIGNOUT'
   }
-  mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new UserModel(baseModel)
 
@@ -54,7 +64,7 @@ function mockCreateUser(values={}) {
 
 //电影创建
 function mockCreateMovie(values={}) {
-  const baseModel = {
+  let baseModel = {
     name: '测试电影名称',
     info: {
       name: '测试电影名称',
@@ -73,6 +83,7 @@ function mockCreateMovie(values={}) {
     glance: 0,
     author_description: '作者描述',
     author_rate: 0,
+    author: ObjectId('8f63270f005f1c1a0d9448ca'),
     hot:0,
     rate_person: 0,
     total_rate: 0,
@@ -81,7 +92,8 @@ function mockCreateMovie(values={}) {
     related_to: [],
     same_film: []
   }
-  mergeConfig(baseModel, values)
+
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new MovieModel(baseModel)
 
@@ -90,9 +102,10 @@ function mockCreateMovie(values={}) {
 
 //创建评论
 function mockCreateComment(values={}) {
-  const baseModel = {
+  let baseModel = {
     source_type: 'movie',
-    user_info: '',
+    user_info: ObjectId('8f63270f005f1c1a0d9448ca'),
+    source: ObjectId('8f63270f005f1c1a0d9448ca'),
     sub_comments: [],
     total_like: 0,
     like_person: [],
@@ -103,7 +116,7 @@ function mockCreateComment(values={}) {
     },
     comment_users: []
   }
-  mergeConfig(baseModel, vlaues)
+  baseModel = mergeConfig(baseModel, values)
   const model = new CommentModel(baseModel)
 
   return { model }
@@ -111,10 +124,10 @@ function mockCreateComment(values={}) {
 
 //创建标签
 function mockCreateTag(values={}) {
-  const baseModel = {
+  let baseModel = {
     text: '测试标签内容',
   }
-  mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new TagModel(baseModel)
 
@@ -123,12 +136,12 @@ function mockCreateTag(values={}) {
 
 //创建专题
 function mockCreateSpecial(values={}) {
-  const baseModel = {
+  let baseModel = {
     movie: [],
     description: '关于测试专题的内容介绍',
     name: '测试专题名称',
   }
-  mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new SpecialModel(baseModel)
 
@@ -137,14 +150,14 @@ function mockCreateSpecial(values={}) {
 
 //创建演员
 function mockCreateActor(values={}) {
-  const baseModel = {
+  let baseModel = {
     name: '测试演员名称',
     works: [],
     other: {
       another_name: '测试演员的其他名字',
     },
   }
-  mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new ActorModel(baseModel)
 
@@ -153,14 +166,14 @@ function mockCreateActor(values={}) {
 
 //创建导演
 function mockCreateDirector(values={}) {
-  const baseModel = {
+  let baseModel = {
     name: '测试导演名称',
     works: [],
     other: {
       another_name: '导演的其他名称',
     },
   }
-  mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new DirectorModel(baseModel)
 
@@ -169,10 +182,10 @@ function mockCreateDirector(values={}) {
 
 //创建语言
 function mockCreateLanguage(values={}) {
-  const baseModel = {
+  let baseModel = {
     name: '测试语言名称'
   }
-  mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new LanguageModel(baseModel)
 
@@ -181,10 +194,10 @@ function mockCreateLanguage(values={}) {
 
 //创建地区
 function mockCreateDistrict(values={}) {
-  const baseModel = {
+  let baseModel = {
     name: '测试地区名称'
   }
-  mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new DistrictModel(baseModel)
   
@@ -193,18 +206,18 @@ function mockCreateDistrict(values={}) {
 
 //创建图片
 function mockCreateImage(values={}) {
-  const baseModel = {
+  let baseModel = {
     name: '测试图片名称',
     src: '',
     origin_type: 'SYSTEM',
-    origin: '',
+    origin: ObjectId('8f63270f005f1c1a0d9448ca'),
     auth: 'PUBLIC',
     info: {
       mime: 'jpg',
       status: 'COMPLETE'
     },
   }
-  mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new ImageModel(baseModel)
 
@@ -213,18 +226,18 @@ function mockCreateImage(values={}) {
 
 //创建视频
 function mockCreateVideo(values={}) {
-  const baseModel = {
+  let baseModel = {
     name: '测试视频名称',
     src: '',
     origin_type: 'SYSTEM',
-    origin: '',
+    origin: ObjectId('8f63270f005f1c1a0d9448ca'),
     auth: 'PUBLIC',
     info: {
       mime: 'mp4',
       status: 'COMPLETE'
     },
   }
-  mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new VideoModel(baseModel)
 
@@ -233,12 +246,12 @@ function mockCreateVideo(values={}) {
 
 //创建分类
 function mockCreateClassify(values={}) {
-  const baseModel = {
+  let baseModel = {
     name: '测试分类名称',
     match: [],
     glance: 0
   }
-  mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new ClassifyModel(baseModel)
 
@@ -247,11 +260,11 @@ function mockCreateClassify(values={}) {
 
 //创建全局信息
 function mockCreateGlobal(values={}) {
-  const baseModel = {
+  let baseModel = {
     notice: '测试的首页notice内容',
     info: '测试的小程序相关信息内容',
   }
-  mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
   const model = new GlobalModel()
 
@@ -262,12 +275,14 @@ function mockCreateGlobal(values={}) {
 function mockCreateBarrage(values) {
   let baseModel = {
     like_users: [],
-    time_line: 100
+    time_line: 100,
+    origin: ObjectId('8f63270f005f1c1a0d9448ca'),
+    user: ObjectId('8f63270f005f1c1a0d9448ca')
   }
 
-  const newModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values)
 
-  const model = new BarrageModel(newModel)
+  const model = new BarrageModel(baseModel)
 
   return { model }
 }
@@ -282,8 +297,8 @@ function mockCreateFeedback(values) {
     }
   }
 
-  const newModel = mergeConfig(baseModel, values)
-  const model = new FeedbackModel(newModel)
+  baseModel = mergeConfig(baseModel, values)
+  const model = new FeedbackModel(baseModel)
   return { model }
 }
 
@@ -294,8 +309,8 @@ function mockCreateRank(values) {
     glance: 10
   }
 
-  const newModel = mergeConfig(baseModel, values)
-  const model = new RankModel(newModel)
+  baseModel = mergeConfig(baseModel, values)
+  const model = new RankModel(baseModel)
   return { model }
 }
 
@@ -351,5 +366,6 @@ module.exports = {
   mockCreateRank,
   Request,
   createEtag,
-  commonValidate
+  commonValidate,
+  mockCreateFeedback
 }

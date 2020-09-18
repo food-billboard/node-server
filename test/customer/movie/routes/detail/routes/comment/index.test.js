@@ -9,7 +9,7 @@ const {
   mockCreateComment,
   mockCreateMovie
 } = require('@test/utils')
-const { CommentModel } = require('@src/utils')
+const { CommentModel, UserModel, ImageModel, VideoModel, MovieModel } = require('@src/utils')
 
 const COMMON_API = '/api/customer/movie/detail/comment'
 
@@ -79,15 +79,15 @@ describe(`${COMMON_API} test`, function() {
   let commentDatabase
   let movieDatabase
 
-  before(function(done) {
+  before(async function() {
 
     const { model: image } = mockCreateImage({
-      src: COMMON_API
+      src: COMMON_API,
     })
 
     imageDatabase = image
 
-    imageDatabase.save()
+    await imageDatabase.save()
     .then(data => {
       imageId = data._id
 
@@ -97,7 +97,7 @@ describe(`${COMMON_API} test`, function() {
       })
       const { model: user, token } = mockCreateUser({
         username: COMMON_API,
-        avatar: imageId
+        avatar: imageId,
       })
 
       videoDatabase = video
@@ -158,7 +158,6 @@ describe(`${COMMON_API} test`, function() {
       ])
     })
     .then(([comment, subComment]) => {
-
       commentId = comment._id
       subCommentId = subComment._id
 
@@ -178,40 +177,38 @@ describe(`${COMMON_API} test`, function() {
 
       ])
     })
-    .then(function() {
-      done()
-    })
     .catch(err => {
       console.log('oops: ', err)
     })
 
+    return Promise.resolve()
+
   })
 
-  after(function(done) {
+  after(async function() {
 
-    Promise.all([
-      userDatabase.deleteOne({
+    await Promise.all([
+      UserModel.deleteOne({
         username: COMMON_API
       }),
-      imageDatabase.deleteOne({
+      ImageModel.deleteOne({
         src: COMMON_API
       }),
-      videoDatabase.deleteOne({
+      VideoModel.deleteOne({
         src: COMMON_API
       }),
       CommentModel.deleteMany({
         "content.text": COMMON_API
       }),
-      movieDatabase.deleteOne({
+      MovieModel.deleteOne({
         name: COMMON_API
       })
     ])
-    .then(_ => {
-      done()
-    })
     .catch(err => {
       console.log('oops: ', err)
     })
+
+    return Promise.resolve()
 
   })
 
@@ -219,14 +216,19 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`pre check the params fail test -> ${COMMON_API}`, function() {
 
-      const baseContent = {
-        text: COMMON_API,
-        image: [ imageId.toString() ],
-        video: [ videoId.toString() ]
-      }
+      let baseContent, movie, comment
 
-      const movie = movieId.toString()
-      const comment = commentId.toString()
+      before(function(done) {
+        baseContent = {
+          text: COMMON_API,
+          image: [ imageId.toString() ],
+          video: [ videoId.toString() ]
+        }
+  
+        movie = movieId.toString()
+        comment = commentId.toString()
+        done()
+      })
 
       it(`pre check the params fail because the movie id is not verify`, function(done) {
 
@@ -561,14 +563,22 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`post the comment for movie success test -> ${COMMON_API}`, function() {
 
-      const comment = {
-        _id: movieId.toString(),
-        content: {
-          text: `${COMMON_API}/movie-test`,
-          image: [ imageId.toString() ],
-          video: [ videoId.toString() ]
+      let comment
+      
+      before(function(done) {
+
+        comment = {
+          _id: movieId.toString(),
+          content: {
+            text: `${COMMON_API}/movie-test`,
+            image: [ imageId.toString() ],
+            video: [ videoId.toString() ]
+          }
         }
-      }
+
+        done()
+
+      })
 
       after(function(done) {
 
@@ -630,16 +640,21 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`post the comment for user success test -> ${COMMON_API}`, function() {
 
-      const comment = {
-        _id: commentId.toString(),
-        content: {
-          text: `${COMMON_API}-test`,
-          image: [ imageId.toString() ],
-          video: [ videoId.toString() ]
-        }
-      }
+      let comment
 
-      after(function(done) {
+      before(function(done) {
+        comment = {
+          _id: commentId.toString(),
+          content: {
+            text: `${COMMON_API}-test`,
+            image: [ imageId.toString() ],
+            video: [ videoId.toString() ]
+          }
+        }
+        done()
+      })
+
+      after(async function() {
 
         CommentModel.findOne({
           "content.text": comment.content.text
@@ -660,12 +675,12 @@ describe(`${COMMON_API} test`, function() {
 
           expect(content).to.be.a('object').and.that.include.all.keys('text', 'image', 'video')
 
-          done()
-
         })
         .catch(err => {
           console.log('oops: ', err)
         })
+
+        return Promise.resolve()
 
       })
 

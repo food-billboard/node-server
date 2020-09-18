@@ -1,5 +1,6 @@
 const path = require('path')
 const Day = require('dayjs')
+const { Types: { ObjectId } } = require('mongoose')
 //静态资源目录
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
 
@@ -116,7 +117,7 @@ function mergeConfig(origin, target, canAddNewProp=false) {
   if(typeof _obj !== 'object') return _obj
   Object.keys(target).forEach(item => {
     if(canAddNewProp || _obj[item] != undefined && target[item] != undefined) {
-      if(!typeProto(_obj[item], 'object')) {
+      if(!typeProto(_obj[item], 'object') || ObjectId.isValid(_obj[item])) {
         _obj[item] = target[item]
       }else {
         _obj[item] = mergeConfig(_obj[item], target[item])

@@ -46,12 +46,13 @@ describe(`${COMMON_API} test`, function() {
     let selfToken
     let result
 
-    before(function(done) {
+    before(async function() {
       const { model } = mockCreateClassify({
         name: COMMON_API
       })
       classifyDatabase = model
-      classifyDatabase.save()
+
+      await classifyDatabase.save()
       .then(data => {
         const { model } = mockCreateMovie({
           name: COMMON_API,
@@ -74,14 +75,17 @@ describe(`${COMMON_API} test`, function() {
       })
       .then(function(data) {
         result = data
-        done()
       })
       .catch(err => {
         console.log('oops: ', err)
       })
+
+      return Promise.resolve()
+
     })
 
-    after(function(done) {
+    after(async function() {
+      
       Promise.all([
         userDatabase.deleteOne({
           username: COMMON_API
@@ -93,12 +97,12 @@ describe(`${COMMON_API} test`, function() {
           name: COMMON_API
         })
       ])
-      .then(function() {
-        done()
-      })
       .catch(err => {
         console.log('oops: ', err)
       })
+
+      return Promise.resolve()
+
     })
     
     describe(`get the self browser list success test -> ${COMMON_API}`, function() {

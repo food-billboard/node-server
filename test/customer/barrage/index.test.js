@@ -51,7 +51,7 @@ describe(`${COMMON_API} test`, function() {
     user: new ObjectId('56aa3554e90911b64c36a425')
   }
 
-  before(function(done) {
+  before(async function() {
 
     const { model, token } = mockCreateUser({
       username: COMMON_API
@@ -62,8 +62,8 @@ describe(`${COMMON_API} test`, function() {
     userDatabase = model
     movieDatabase = movie
     userToken = token
-    
-    Promise.all([
+
+    await Promise.all([
       userDatabase.save(),
       movieDatabase.save()
     ])
@@ -86,17 +86,16 @@ describe(`${COMMON_API} test`, function() {
         barrage: [ data._id ]
       })
     })
-    .then(function() {
-      done()
-    })
     .catch(err => {
       console.log('oops: ', err)
     })
 
+    return Promise.resolve()
+
   })
 
-  after(function(done) {
-    Promise.all([
+  after(async function() {
+    await Promise.all([
       userDatabase.deleteOne({
         username: COMMON_API
       }),
@@ -107,12 +106,12 @@ describe(`${COMMON_API} test`, function() {
         name: COMMON_API
       })
     ])
-    .then(function() {
-      done()
-    })
     .catch(err => {
       console.log('oops: ', err)
     })
+
+    return Promise.resolve()
+
   })
 
   describe(`pre check token test -> ${COMMON_API}`, function() {
@@ -170,11 +169,11 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`fail the token verify because of the token the outof date`, function(done) {
+      it(`fail the token verify because of the token the outof date`, async function() {
 
-        this.timeout(11000)
+        await this.timeout(11000)
 
-        Request
+        await Request
         .get(COMMON_API)
         .query({
           _id: movieId.toString()
@@ -185,10 +184,11 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(401)
         .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
+        // .end(function(err) {
+        //   if(err) console.log(err)
+        // })
+
+        return Promise.resolve()
 
       })
 
@@ -236,7 +236,7 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -258,12 +258,21 @@ describe(`${COMMON_API} test`, function() {
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
-        .expect(404)
+        .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err) {
+        .end(function(err, res) {
           if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          const { res: { data } } = obj
+          expect(data).to.be.a('array').and.that.lengthOf(0)
           done()
         })
 
@@ -278,7 +287,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -295,16 +304,14 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`put barrage test -> ${COMMON_API}`, function() {
 
-    after(function(done) {
-      BarrageModel.deleteMany({
+    after(async function() {
+      await BarrageModel.deleteMany({
         content: COMMON_API
-      })
-      .then(function() {
-        done()
       })
       .catch(err => {
         console.log('oops: ', err)
       })
+      return Promise.resolve()
     })
     
     describe(`put barrage success`, function() {
@@ -320,7 +327,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -345,7 +352,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -367,7 +374,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -388,7 +395,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -410,7 +417,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -431,7 +438,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -442,18 +449,18 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`put the barrage fail because of lack of the params of time is not number`, function(done) {
+      it(`put the barrage fail because of the params of time is not number`, function(done) {
 
         Request
         .put(COMMON_API)
         .send({
-          time: '400',
+          time: '400a',
           content: COMMON_API,
           _id: movieId.toString()
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -491,13 +498,13 @@ describe(`${COMMON_API} test`, function() {
       it(`like the barrage fail because of the the params have not the movie id`, function(done) {
   
         Request
-        .post(COMMON_API)
+        .post(`${COMMON_API}/like`)
         .send({
           _id: result._id.toString()
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -517,13 +524,13 @@ describe(`${COMMON_API} test`, function() {
         const id = movieId.toString()
 
         Request
-        .post(COMMON_API)
+        .post(`${COMMON_API}/like`)
         .send({
           _id: `${(parseInt(id.slice(0, 1)) + 5) % 10}${id.slice(1)}`
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -537,13 +544,13 @@ describe(`${COMMON_API} test`, function() {
       it(`like the barrage fail because of the the params of movie id is not verify`, function(done) {
   
         Request
-        .post(COMMON_API)
+        .post(`${COMMON_API}/like`)
         .send({
           _id: movieId.toString().slice(1)
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -581,13 +588,13 @@ describe(`${COMMON_API} test`, function() {
       it(`cancel like the barrage success`, function(done) {
 
         Request
-        .delete(COMMON_API)
+        .delete(`${COMMON_API}/like`)
         .send({
           _id: result._id.toString()
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -607,13 +614,13 @@ describe(`${COMMON_API} test`, function() {
         const id = result._id.toString()
 
         Request
-        .delete(COMMON_API)
+        .delete(`${COMMON_API}/like`)
         .send({
           _id: `${(parseInt(id.slice(0, 1)) + 5) % 10}${id.slice(1)}`
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -627,13 +634,13 @@ describe(`${COMMON_API} test`, function() {
       it(`cancel like the barrage fail because of the the params have not the movie id`, function(done) {
         
         Request
-        .delete(COMMON_API)
+        .delete(`${COMMON_API}/like`)
         .send({
           _id: result._id.toString().slice(1)
         })
         .set({
           Accept: 'Application/json',
-          Authorization: `Basic ${userToken.slice(1)}`
+          Authorization: `Basic ${userToken}`
         })
         .expect(400)
         .expect('Content-Type', /json/)

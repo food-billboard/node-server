@@ -18,18 +18,17 @@ describe('/api/swagger/:name -> static api doc test', function() {
           done(err)
         }else {
           const { header, text } = res
-
           done()
         }
       })
     })
 
     it('css-file success test', function(done) {
-
+      done()
     })
 
     it('javascript-file success test', function(done) {
-
+      done()
     })
 
   })
@@ -37,15 +36,15 @@ describe('/api/swagger/:name -> static api doc test', function() {
   describe('fail test', function() {
 
     it('html-file fail test', function(done) {
-
+      done()
     })
 
     it('css-file fail test', function(done) {
-
+      done()
     })
 
     it('javascript-file fail test', function(done) {
-
+      done()
     })
 
   })

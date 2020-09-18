@@ -33,63 +33,66 @@ describe(`${COMMON_API} test`, function() {
   let result
   let selfToken
 
-  before(function(done) {
+  before(async function() {
 
     const { model:self, token } = mockCreateUser({
       username: COMMON_API,
-      mobile: 15632558974
     })
     selfDatabase = self
     selfToken = token
 
-    self.save()
+    await self.save()
     .then(self => {
       result = self
-      done()
     })
     .catch(err => {
       console.log('oops: ', err)
     })
+
+    return Promise.resolve()
 
   })
 
-  after(function(done) {
+  after(async function() {
 
-    selfDatabase.deleteOne({
+    await selfDatabase.deleteOne({
       username: COMMON_API
-    })
-    .then(_ => {
-      done()
     })
     .catch(err => {
       console.log('oops: ', err)
     })
+
+    return Promise.resolve()
 
   })
 
   describe(`pre check params test -> ${COMMON_API}`, function() {
 
-    describe(`pre check params success test -> ${COMMON_API}`, function(done) {
+    describe(`pre check params success test -> ${COMMON_API}`, function() {
 
-      Request
-      .get(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .end(function(err, res) {
-        if(err) return done(err)
-        const { res: { text } } = res
-        let obj
-        try{
-          obj = JSON.parse(text)
-        }catch(_) {
-          console.log(_)
-        }
-        responseExpect(obj)
-        done()
+      it(`pre check params success`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj)
+          done()
+        })
+
       })
 
     })

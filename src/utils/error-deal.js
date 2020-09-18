@@ -5,6 +5,7 @@ const { encoded } = require('./token')
 //错误处理
 const dealErr = (ctx) => {
   return (err) => {
+    console.log(err, 'it is error')
     let res = {}
     if(err && err.errMsg) {
       const { status=500, ...nextErr } = err
@@ -187,9 +188,9 @@ const responseDataDeal = ({
 
     if(afterDeal && typeof afterDeal === 'function') response = afterDeal({...response})
 
-    ctx.body = JSON.stringify(response)
-
   }
+
+  ctx.body = response
 
 }
 

@@ -64,7 +64,7 @@ describe(`${COMMON_API} test`, function() {
   let videoId
   let result
 
-  before(function(done) {
+  before(async function() {
 
     const { model: video } = mockCreateVideo({
       src: COMMON_API
@@ -81,7 +81,7 @@ describe(`${COMMON_API} test`, function() {
     userDatabase = user
     selfToken = token
 
-    Promise.all([
+    await Promise.all([
       imageDatabase.save(),
       videoDatabase.save(),
       userDatabase.save()
@@ -112,16 +112,15 @@ describe(`${COMMON_API} test`, function() {
         comment: [ data._id ]
       })
     })
-    .then(function() {
-      done()
-    })
     .catch(err => {
       console.log('oops: ', err)
     })
 
+    return Promise.resolve()
+
   })
 
-  after(function(done) {
+  after(async function() {
 
     Promise.all([
       imageDatabase.deleteOne({
@@ -137,12 +136,11 @@ describe(`${COMMON_API} test`, function() {
         username: COMMON_API
       })
     ])
-    .then(function() {
-      done()
-    })
     .catch(err => {
       console.log('oops: ', err)
     })
+
+    return Promise.resolve()
 
   })
 

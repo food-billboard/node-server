@@ -4,6 +4,7 @@ const { mockCreateUser, Request, mockCreateImage, STATIC_FILE_PATH } = require('
 const { ImageModel, fileEncoded } = require('@src/utils')
 const fs = require('fs')
 const root = require('app-root-path')
+const path = require('path')
 
 const COMMON_API = '/api/customer/upload'
 
@@ -19,7 +20,7 @@ describe(`${COMMON_API} test`, function() {
   let bigFile
   let littleFile
   
-  before(function(done) {
+  before(async function() {
 
     const { model, token } = mockCreateUser({
       username: COMMON_API,
@@ -28,11 +29,11 @@ describe(`${COMMON_API} test`, function() {
     userDatabase = model
     selfToken = token
 
-    userDatabase.save()
+    await userDatabase.save()
     .then(data => {
       userId = data._id
     })
-    .then(data => {
+    .then(_ => {
       littleFile = fs.readFileSync(mediaPath, { encoding: 'base64' })
       bigFile = fs.readFileSync(mediaBigPath, { encoding: 'base64' })
       littleImageName = fileEncoded(littleFile)
@@ -42,11 +43,13 @@ describe(`${COMMON_API} test`, function() {
       console.log('oops: ', err)
     })
 
+    return Promise.resolve()
+
   })
 
-  after(function(done) {
+  after(async function() {
 
-    Promise.all([
+    await Promise.all([
       userDatabase.deleteOne({
         username: COMMON_API
       }),
@@ -66,12 +69,11 @@ describe(`${COMMON_API} test`, function() {
         })
       })
     ])
-    .then(_ => {
-      done()
-    })
     .catch(err => {
       console.log('oops: ', err)
     })
+
+    return Promise.resolve()
 
   })
 
@@ -316,9 +318,11 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`post the little size file success and the file is exist before test -> ${COMMON_API}`, function() {
 
-      let testMediaPath = path.resolve(STATIC_FILE_PATH, 'public/image', `${littleImageName}.png`)
+      let testMediaPath
       
       before(function(done) {
+
+        testMediaPath = path.resolve(STATIC_FILE_PATH, 'public/image', `${littleImageName}.png`)
 
         const { model } = mockCreateImage({
           src: testMediaPath,
@@ -428,9 +432,11 @@ describe(`${COMMON_API} test`, function() {
 
       let exists = false
 
-      let testMediaPath = path.resolve(STATIC_FILE_PATH, 'public/image', `${littleImageName}.png`)
+      let testMediaPath 
       
       before(function(done) {
+
+        testMediaPath = path.resolve(STATIC_FILE_PATH, 'public/image', `${littleImageName}.png`)
 
         try {
           if(fs.statSync(testMediaPath).isFile()) {
