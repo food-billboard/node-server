@@ -213,8 +213,8 @@ router
   })
   .exec()
   .then(data => {
-    if(data && data.nModified === 0) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-    return null
+    if(data && data.nModified === 0) return Promise.reject({ errMsg: 'write database error', status: 404 })
+    return {}
   })
   .catch(dealErr(ctx))
 
@@ -228,7 +228,7 @@ router
 //取消点赞
 .delete('/like', async(ctx) => {
   //参数验证
-  const check = Params.body(ctx, {
+  const check = Params.query(ctx, {
     name: '_id',
     type: ['isMongoId']
   })
@@ -236,14 +236,14 @@ router
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const [ _id ] = Params.sanitizers(ctx.request.body, {
+  const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
     ]
   })
 
-  const data = await UserModel.findOne({
+  const mineId = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
@@ -251,19 +251,17 @@ router
   })
   .exec()
   .then(data => !!data && data._doc._id)
-  .then(notFound)
-  .then(userId => {
-    return BarrageModel.updateOne({
-      _id,
-      like_users: { $in: [userId] }
-    }, {
-      $pull: { like_users: userId }
-    })
+
+  const data = await BarrageModel.updateOne({
+    _id,
+    like_users: { $in: [mineId] }
+  }, {
+    $pull: { like_users: mineId }
   })
   .exec()
   .then(data => {
-    if(data && data.nModified === 0) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-    return null
+    if(data && data.nModified === 0) return Promise.reject({ errMsg: 'write database error', status: 404 })
+    return {}
   })
   .catch(dealErr(ctx))
 

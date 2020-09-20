@@ -8,7 +8,8 @@ const {
   commonValidate
 } = require('@test/utils')
 const {
-  BarrageModel
+  BarrageModel,
+  
 } = require('@src/utils')
 const mongoose = require("mongoose")
 const { Types: { ObjectId } } = mongoose
@@ -46,6 +47,7 @@ describe(`${COMMON_API} test`, function() {
   let userId
   let movieId
   let userToken
+  let getToken
   const values = {
     origin: new ObjectId('56aa3554e90911b64c36a424'),
     user: new ObjectId('56aa3554e90911b64c36a425')
@@ -53,7 +55,7 @@ describe(`${COMMON_API} test`, function() {
 
   before(async function() {
 
-    const { model, token } = mockCreateUser({
+    const { model, token, signToken } = mockCreateUser({
       username: COMMON_API
     })
     const { model: movie } = mockCreateMovie({
@@ -62,6 +64,7 @@ describe(`${COMMON_API} test`, function() {
     userDatabase = model
     movieDatabase = movie
     userToken = token
+    getToken = signToken
 
     await Promise.all([
       userDatabase.save(),
@@ -171,28 +174,32 @@ describe(`${COMMON_API} test`, function() {
 
       it(`fail the token verify because of the token the outof date`, async function() {
 
-        await this.timeout(11000)
-
-        await Request
-        .get(COMMON_API)
-        .query({
-          _id: movieId.toString()
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve()
+          }, 5100)
         })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${userToken}`
+        .then(_ => {
+          Request
+          .get(COMMON_API)
+          .query({
+            _id: movieId.toString()
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${userToken}`
+          })
+          .expect(401)
+          .expect('Content-Type', /json/)
         })
-        .expect(401)
-        .expect('Content-Type', /json/)
-        // .end(function(err) {
-        //   if(err) console.log(err)
-        // })
 
         return Promise.resolve()
 
       })
 
       it(`fail the token verify because the token is not verify`, function(done) {
+
+        userToken = getToken()
 
         Request
         .get(COMMON_API)
@@ -499,14 +506,11 @@ describe(`${COMMON_API} test`, function() {
   
         Request
         .post(`${COMMON_API}/like`)
-        .send({
-          _id: result._id.toString()
-        })
         .set({
           Accept: 'Application/json',
           Authorization: `Basic ${userToken}`
         })
-        .expect(200)
+        .expect(400)
         .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
@@ -521,7 +525,7 @@ describe(`${COMMON_API} test`, function() {
       
       it(`like the barrage fail because of the movie id is not fuound`, function(done) {
 
-        const id = movieId.toString()
+        const id = result._id.toString()
 
         Request
         .post(`${COMMON_API}/like`)
@@ -532,7 +536,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json',
           Authorization: `Basic ${userToken}`
         })
-        .expect(400)
+        .expect(404)
         .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
@@ -589,7 +593,7 @@ describe(`${COMMON_API} test`, function() {
 
         Request
         .delete(`${COMMON_API}/like`)
-        .send({
+        .query({
           _id: result._id.toString()
         })
         .set({
@@ -615,14 +619,14 @@ describe(`${COMMON_API} test`, function() {
 
         Request
         .delete(`${COMMON_API}/like`)
-        .send({
+        .query({
           _id: `${(parseInt(id.slice(0, 1)) + 5) % 10}${id.slice(1)}`
         })
         .set({
           Accept: 'Application/json',
           Authorization: `Basic ${userToken}`
         })
-        .expect(400)
+        .expect(404)
         .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
@@ -635,7 +639,7 @@ describe(`${COMMON_API} test`, function() {
         
         Request
         .delete(`${COMMON_API}/like`)
-        .send({
+        .query({
           _id: result._id.toString().slice(1)
         })
         .set({

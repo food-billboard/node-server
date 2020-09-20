@@ -6,12 +6,14 @@ const KoaStatic = require('koa-static')
 const KoaBody = require('koa-body')
 const app = new Koa()
 const path = require('path')
-const { MongoDB } = require("@src/utils")
+const { MongoDB, StaticMiddleware } = require("@src/utils")
 
 MongoDB()
 
 app.use(Cors())
 // app.use(bodyParser())
+//请求速率限制
+// .use()
 .use(KoaBody({
   multipart:true, // 支持文件上传
   // encoding:'gzip',
@@ -26,7 +28,7 @@ app.use(Cors())
   // }
 }))
 // 访问权限
-// .use()
+.use(StaticMiddleware)
 .use(KoaStatic(path.resolve(__dirname, 'static'), {}))
 .use(Router.routes()).use(Router.allowedMethods())
 

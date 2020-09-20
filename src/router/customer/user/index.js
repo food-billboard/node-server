@@ -32,7 +32,7 @@ router
         }
       })
     }else if(!token && _id) {
-      ctx.status = 401
+      ctx.status = 302
       return ctx.redirect(newUrl)
     }else {
       ctx.status = 403
@@ -98,10 +98,12 @@ router
   .then(data => {
     let result = {}
     let mine
-    let fans
+    let fans = []
+    let found = false
     data.forEach(d => {
       const { _doc: { _id:id, avatar, ...nextD } } = d 
       if(id.equals(_id)) {
+        found = true
         const { fans:userFans, attentions } = nextD
         result = {
           ...result,
@@ -117,7 +119,7 @@ router
         mine = id
       }
     })
-
+    if(!found) return Promise.reject({ errMsg: 'not found', status: 404 })
     if(mine && fans.some(f => f.equals(mine))) result.like = true
     return result
   })
@@ -135,7 +137,9 @@ router
 
   responseDataDeal({
     ctx,
-    data, 
+    data: {
+      data
+    }, 
   })
 
 })

@@ -31,7 +31,7 @@ const { Types: { ObjectId } } = mongoose
 //用户创建
 function mockCreateUser(values={}) {
   const password = '1234567890'
-  const mobile = parseInt(`1${new Array(10).fill(0).map(_ => Math.floor(Math.random() * 10)).join('')}`)
+  const mobile = values.mobile || parseInt(`1${new Array(10).fill(0).map(_ => Math.floor(Math.random() * 10)).join('')}`)
   const encodedPwd = encoded(password)
   const token = signToken({ mobile, password: encodedPwd }, {expiresIn: '10s'})
 
@@ -58,7 +58,10 @@ function mockCreateUser(values={}) {
   return {
       model,
       decodePassword: password,
-      token
+      token,
+      signToken: () => {
+        return signToken({ mobile, password: encodedPwd }, {expiresIn: '5s'})
+      }
     }
 }
 
@@ -316,12 +319,12 @@ function mockCreateRank(values) {
 
 //创建查询参数etag
 function createEtag(query={}) {
-  Object.keys(query).reduce((acc, cur) => {
+  return Object.keys(query).reduce((acc, cur) => {
     const str = `${cur}=${query[cur]}`
     const encode = encoded(str)
     acc += `,${encode}`
     return acc
-  }, ',')
+  }, '')
   .slice(1)
 }
 
@@ -330,22 +333,29 @@ const _satisfies_ = Symbol('satisfies')
 //常规通用的断言方法
 const commonValidate = {
   [_satisfies_]: (valid, satisfies) => !!satisfies && typeof satisfies === 'function' ? satisfies(target) : valid,
-  string: (target, satisfies) => expect(target).to.be.a('string').and.to.satisfies(function(target) {
+  string(target, satisfies) {
+     expect(target).to.be.a('string').and.to.satisfies((target) => {
     return this[_satisfies_](target.length > 0, satisfies)
-  }),
-  objectId: (target, satisfies) => expect(target).to.be.satisfies(function(target) {
-    return this[_satisfies_](ObjectId.isValid(target), satisfies)
-  }),
-  number: (target, satisfies) => expect(target).to.be.a('number').and.that.satisfies(function() {
+  })},
+  objectId(target, satisfies){
+    expect(target).to.be.satisfies((target) => {
+      return this[_satisfies_](ObjectId.isValid(target), satisfies)
+    })
+  },
+  number(target, satisfies){ expect(target).to.be.a('number').and.that.satisfies((target) => {
     return this[_satisfies_](target >= 0, satisfies)
-  }),
-  date: (target, satisfies) => expect(target).to.be.satisfies(function(target) {
-    return this[_satisfies_](typeof target == 'number' ? target > 0 : Object.prototype.toString.call(target) === '[object Date]', satisfies)
-  }),
-  poster: (target, satisfies) => expect(target).to.be.satisfies(function(target) {
+  })},
+  date(target, satisfies){
+    expect(target).to.be.satisfies((target) => {
+    return this[_satisfies_](typeof target == 'number' ? target > 0 : Object.prototype.toString.call(new Date(target)) === '[object Date]', satisfies)
+  })},
+  poster(target, satisfies){
+    expect(target).to.be.satisfies((target) => {
     return this[_satisfies_](target == null ? true : ( typeof target === 'string' && !!target.length ), satisfies)
-  }),
-  time: this.date
+  })},
+  time(...args) {
+    this.date(...args)
+  }
 }
 
 module.exports = {

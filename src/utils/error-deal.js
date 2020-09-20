@@ -58,9 +58,11 @@ const judgeCache = (ctx, modifiedTime, etagValidate) => {
   const etag = headers['if-none-match'] || headers['If-None-Match']
 
   //设置last-modified
-  !!modified && ctx.set({ 'Last-Modified': modifiedTime })
+  !!modified && ctx.set({ 'Last-Modified': modifiedTime.toString() })
 
-  return !!modified && Day(modified).valueOf() === Day(modifiedTime).valueOf() && ( !!etag && typeof etagValidate == 'function' ? etagValidate(ctx, etag) : true )
+  return ( !!etag && typeof etagValidate == 'function' ? etagValidate(ctx, etag) : true ) && !!modified && new Date(modified).toString() == new Date(modifiedTime).toString()
+
+  // return !!modified && Day(modified).valueOf() === Day(modifiedTime).valueOf() && ( !!etag && typeof etagValidate == 'function' ? etagValidate(ctx, etag) : true )
 }
 
 //将请求参数加密成etag用于缓存处理
@@ -69,24 +71,25 @@ const _etagValidate = (ctx, etag) => {
 
   //只对get进行缓存
   if( 'get' != method.toLowerCase()) return false
-  if(typeof etag !== 'string') return false
+  let isSameEtag = true
+  if(typeof etag !== 'string') isSameEtag = false
   
   //以,分割的加密查询参数
   const queryArray = etag.split(',')
   let keys = Object.keys(query)
 
-  if(keys.length != queryArray.length) return false
+  if(keys.length != queryArray.length) isSameEtag = false
 
   //判断是否所有查询参数与之前相同
-  let isSameEtag = true
   const newEtag = keys.reduce((acc, cur) => {
     let str = `${cur}=${query[cur]}`
     const encode = encoded(str)
-    acc += `,${cur}`
-    isSameEtag = !!~queryArray.indexOf(encode)
-  }, ',')
+    acc += `,${encode}`
+    if(isSameEtag) isSameEtag = !!~queryArray.indexOf(encode)
+    return acc
+  }, '').slice(1)
 
-  if(newEtag.length > 1) ctx.set({ etag: newEtag.slice(1) })
+  if(newEtag.length > 1) ctx.set({ etag: newEtag })
 
   return isSameEtag
 
@@ -168,11 +171,13 @@ const responseDataDeal = ({
 
         const updatedAt = filterField(data)
         
-        if(updatedAt && judgeCache(ctx, updatedAt, etagValidate)) {
+        if(!!updatedAt && judgeCache(ctx, updatedAt, etagValidate)) {
           ctx.status = 304
           response = {
             ...response,
-            res: {}
+            res: {
+              data: {}
+            }
           }
         }
       }

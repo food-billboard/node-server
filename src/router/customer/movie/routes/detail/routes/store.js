@@ -41,11 +41,22 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
-  const data = await UserModel.updateOne({
-    mobile: Number(mobile),
-    store: { $ne: _id }
-  }, {
-    $push: { store: _id }
+  const data = await MovieModel.findOne({
+    _id
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data._doc._id)
+  .then(notFound)
+  .then(_id => {
+    return UserModel.updateOne({
+      mobile: Number(mobile),
+      store: { $ne: _id }
+    }, {
+      $push: { store: _id }
+    })
   })
   .then(data => {
     if(data && data.nModified == 0) return Promise.reject({ errMsg: 'already store', status: 403 })
@@ -75,13 +86,23 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
-  const data = await UserModel.updateOne({
-    mobile: Number(mobile),
-    store: { $in: [_id] }
-  }, {
-    $pull: { store: _id }
+  const data = await MovieModel.findOne({
+    _id
+  })
+  .select({
+    _id: 1
   })
   .exec()
+  .then(data => !!data && data._doc._id)
+  .then(notFound)
+  .then(_id => {
+    return UserModel.updateOne({
+      mobile: Number(mobile),
+      store: { $in: [_id] }
+    }, {
+      $pull: { store: _id }
+    })
+  })
   .then(data => {
     if(data && data.nModified == 0) return Promise.reject({ errMsg: 'no store', status: 403 })
     return MovieModel.updateOne({

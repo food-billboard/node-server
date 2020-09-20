@@ -928,6 +928,12 @@ const VideoSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   },
+  white_list: [
+    {
+      type: ObjectId,
+      ref: 'user'
+    }
+  ],
   auth: {
     required: true,
     type: String,
@@ -985,6 +991,12 @@ const ImageSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   },
+  white_list: [
+    {
+      type: ObjectId,
+      ref: 'user'
+    }
+  ],
   auth: {
     required: true,
     type: String,
@@ -1039,6 +1051,12 @@ const OtherMediaSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   },
+  white_list: [
+    {
+      type: ObjectId,
+      ref: 'user'
+    }
+  ],
   auth: {
     required: true,
     type: String,

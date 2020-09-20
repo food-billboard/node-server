@@ -2,6 +2,7 @@ require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, createEtag, commonValidate } = require('@test/utils')
 const { UserModel } = require('@src/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/customer/user'
 
@@ -15,8 +16,8 @@ function responseExpect(res, validate=[]) {
   commonValidate.number(target.fans)
   commonValidate.string(target.username)
   commonValidate.objectId(target._id)
-  commonValidate.time(target.createdAt)
-  commonValidate.time(target.updatedAt)
+  commonValidate.date(target.createdAt)
+  commonValidate.date(target.updatedAt)
   expect(target.like).to.be.a('boolean')
 
   if(Array.isArray(validate)) {
@@ -34,6 +35,7 @@ describe(`${COMMON_API} test`, function() {
   let userDatabase
   let result
   let selfToken
+  let update
 
   before(function(done) {
 
@@ -122,12 +124,8 @@ describe(`${COMMON_API} test`, function() {
         Request
         .get(COMMON_API)
         .query({ _id: result._id.toString() })
-        .set({
-          Accept: 'application/json',
-        })
-        .expect(301)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
+        .expect(302)
+        .end(function(err) {
           if(err) return done(err)
           done()
         })
@@ -157,7 +155,6 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .set({
           Accept: 'application/json',
-          Authorization: `Basic ${selfToken}`
         })
         .expect(403)
         .expect('Content-Type', /json/)
@@ -176,27 +173,46 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get the user info and not self and with self info success test -> ${COMMON_API}`, function() {
 
+      before(async function() {
+
+        await UserModel.findOne({
+          mobile: 15632558974
+        })
+        .select({
+          _id: 0,
+          updatedAt: 1
+        })
+        .then(data => {
+          updatedAt = data._doc.updatedAt
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+        return Promise.resolve()
+      })
+
       it(`get the user info and not self and with self info success and return the status of 304`, function(done) {
 
         const query = {
           _id: result._id.toString()
         }
 
+        const etag = createEtag(query)
+
         Request
         .get(COMMON_API)
-        .query(query)
+        .query({...query})
         .set({
-          Accept: 'Application/json',
-          'If-Modified-Since': result.updatedAt,
-          'If-None-Match': createEtag(query)
+          Accept: 'application/json',
+          'If-Modified-Since': updatedAt.toString(),
+          'If-None-Match': etag,
+          Authorization: `Basic ${selfToken}`
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
-        .end(function(err, _) {
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', etag)
+        .end(function(err) {
           if(err) return done(err)
           done()
         })
@@ -209,22 +225,22 @@ describe(`${COMMON_API} test`, function() {
           _id: result._id.toString()
         }
 
+        const etag = createEtag(query)
+
         Request
         .get(COMMON_API)
         .query(query)
         .set({
           Accept: 'Application/json',
           'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
-          'If-None-Match': createEtag(query),
+          'If-None-Match': etag,
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
-        .end(function(err, _) {
+        .expect('Content-Type', /json/)
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', etag)
+        .end(function(err, res) {
           if(err) return done(err)
           done()
         })
@@ -242,7 +258,7 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': updatedAt,
           'If-None-Match': createEtag({
             ...query,
             count:9
@@ -250,14 +266,9 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag({
-            ...query,
-            count: 9
-          })
-        })
+        .expect('Content-Type', /json/)
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -294,7 +305,7 @@ describe(`${COMMON_API} test`, function() {
 
         Request
         .get(COMMON_API)
-        .query({ _id: _id.slice(1) })
+        .query({ _id: result._id.toString().slice(1) })
         .set('Accept', 'Application/json')
         .set({
           Authorization: `Basic ${selfToken}`
