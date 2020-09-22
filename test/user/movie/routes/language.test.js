@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateLanguage, Request, commonValidate } = require('@test/utils')
+const { mockCreateLanguage, Request, commonValidate, createEtag } = require('@test/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/language'
 
@@ -71,7 +72,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({ 'Content-Type': /json/ })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -102,11 +103,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag(query)
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -129,11 +127,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag(query)
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -160,11 +155,8 @@ describe(`${COMMON_API} test`, function() {
           })
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -176,20 +168,20 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get language list fail test -> ${COMMON_API}`, function(){
 
-      it(`get language list fail because the list's length is 0`, function(done) {
+      // it(`get language list fail because the list's length is 0`, function(done) {
 
-        Request
-        .get(COMMON_API)
-        .query({ count: 10 })
-        .set('Accept', 'Application/json')
-        .expect(404)
-        .expect('Content-Type', /json/)
-        .end(function(err, _) {
-          if(err) return done(err)
-          done()
-        })
+      //   Request
+      //   .get(COMMON_API)
+      //   .query({ count: 10 })
+      //   .set('Accept', 'Application/json')
+      //   .expect(404)
+      //   .expect('Content-Type', /json/)
+      //   .end(function(err, _) {
+      //     if(err) return done(err)
+      //     done()
+      //   })
 
-      })
+      // })
 
     })
 

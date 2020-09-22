@@ -31,7 +31,7 @@ const { Types: { ObjectId } } = mongoose
 //用户创建
 function mockCreateUser(values={}) {
   const password = '1234567890'
-  const mobile = values.mobile || parseInt(`1${new Array(10).fill(0).map(_ => Math.floor(Math.random() * 10)).join('')}`)
+  const mobile = values.mobile || parseInt(`13${new Array(9).fill(0).map(_ => Math.floor(Math.random() * 10)).join('')}`)
   const encodedPwd = encoded(password)
   const token = signToken({ mobile, password: encodedPwd }, {expiresIn: '10s'})
 
@@ -211,7 +211,7 @@ function mockCreateDistrict(values={}) {
 function mockCreateImage(values={}) {
   let baseModel = {
     name: '测试图片名称',
-    src: '',
+    src: '测试地址',
     origin_type: 'SYSTEM',
     origin: ObjectId('8f63270f005f1c1a0d9448ca'),
     auth: 'PUBLIC',
@@ -251,9 +251,10 @@ function mockCreateVideo(values={}) {
 function mockCreateClassify(values={}) {
   let baseModel = {
     name: '测试分类名称',
-    match: [],
-    glance: 0
+    glance: 0,
+    icon: ObjectId('8f63270f005f1c1a0d9448ca')
   }
+
   baseModel = mergeConfig(baseModel, values)
 
   const model = new ClassifyModel(baseModel)
@@ -275,12 +276,13 @@ function mockCreateGlobal(values={}) {
 }
 
 //创建弹幕
-function mockCreateBarrage(values) {
+function mockCreateBarrage(values={}) {
   let baseModel = {
     like_users: [],
     time_line: 100,
     origin: ObjectId('8f63270f005f1c1a0d9448ca'),
-    user: ObjectId('8f63270f005f1c1a0d9448ca')
+    user: ObjectId('8f63270f005f1c1a0d9448ca'),
+    content: '测试弹幕'
   }
 
   baseModel = mergeConfig(baseModel, values)
@@ -309,7 +311,11 @@ function mockCreateFeedback(values) {
 function mockCreateRank(values) {
   let baseModel = {
     name: '111',
-    glance: 10
+    glance: 10,
+    match_field: {
+      _id: ObjectId('8f63270f005f1c1a0d9448ca'),
+      field: 'classify'
+    },
   }
 
   baseModel = mergeConfig(baseModel, values)
@@ -332,11 +338,12 @@ const _satisfies_ = Symbol('satisfies')
 
 //常规通用的断言方法
 const commonValidate = {
-  [_satisfies_]: (valid, satisfies) => !!satisfies && typeof satisfies === 'function' ? satisfies(target) : valid,
+  [_satisfies_]: (valid, target, satisfies) => !!satisfies && typeof satisfies === 'function' ? satisfies(target) : valid,
   string(target, satisfies) {
-     expect(target).to.be.a('string').and.to.satisfies((target) => {
-    return this[_satisfies_](target.length > 0, satisfies)
-  })},
+    expect(target).to.be.a('string').and.to.satisfies((target) => {
+      return this[_satisfies_](target.length > 0, target, satisfies)
+    })
+  },
   objectId(target, satisfies){
     expect(target).to.be.satisfies((target) => {
       return this[_satisfies_](ObjectId.isValid(target), satisfies)

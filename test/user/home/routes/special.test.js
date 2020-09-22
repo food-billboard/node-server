@@ -1,8 +1,6 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateMovie, mockCreateImage, mockCreateSpecial, mockCreateClassify, Request, createEtag } = require('@test/utils')
-const mongoose = require('mongoose')
-const { Types: { ObjectId } } = mongoose
+const { mockCreateMovie, mockCreateImage, mockCreateSpecial, mockCreateClassify, Request, createEtag, commonValidate } = require('@test/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/user/home/special'
@@ -11,41 +9,27 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
-  const poster = target => expect(target).to.be.satisfies(function(target) {
-    return target == null ? true : typeof target === 'string' && !!target.length
-  })
+  expect(target).to.be.a('object').and.that.includes.all.keys('poster', 'movie', 'name', '_id')
+  commonValidate.poster(target.poster)
+  commonValidate.string(target.name)
+  commonValidate.objectId(target._id)
+  
+  expect(target.movie).to.be.a('array')
 
-  const _id = target => expect(target).to.be.satisfies(function(target) {
-    return ObjectId.isValid(target)
-  })  
+  target.movie.forEach(item => {
 
-  const string = target => expect(target).to.string.and.that.lengthOf.above(0)
-
-  expect(target).to.be.a('array')
-
-  target.forEach(item => {
-
-    expect(item).to.be.a('object').and.to.includes.all.keys('poster', 'movie', 'name', '_id')
-    poster(item.poster)
-    string(item.name)
-    _id(item._id)
-    expect(item.movie).to.be.a('array').and.lengthOf.above(0)
-    item.movie.forEach(movie => {
-      expect(movie).to.be.a('object').and.that.includes.all.keys('name', 'poster', '_id', 'hot', 'description', 'store', 'rate', 'publish_time', 'classify')
-      string(movie.name)
-      poster(movie.poster)
-      _id(movie._id)
-      expect(movie.hot).to.be.a('number').and.least(0)
-      string(movie.description)
-      expect(movie.store).to.be.a('boolean')
-      expect(movie.rate).to.be.a('number').and.within(0, 10)
-      expect(movie.publish_time).to.be.satisfies(function(target) {
-        return typeof target === 'number' ? target > 0 : Object.prototype.toString.call(target) === '[object Date]'
-      })
-      expect(movie.classify).to.be.a('array').and.that.lengthOf.above(0)
-      movie.classsify.forEach(cls => {
-        expect(cls).to.be.a('object').and.that.includes.all.keys('name').and.have.a.property('name').that.is.a('string')
-      })
+    expect(item).to.be.a('object').and.to.includes.all.keys('name', 'poster', '_id', 'hot', 'description', 'store', 'rate', 'publish_time', 'classify')
+    commonValidate.string(item.name)
+    commonValidate.poster(item.poster)
+    commonValidate.objectId(item._id)
+    commonValidate.number(item.hot)
+    commonValidate.string(item.description, () => true)
+    expect(item.store).to.be.a('boolean')
+    commonValidate.number(item.rate)
+    commonValidate.date(item.publish_time)
+    expect(item.classify).to.be.a('array').and.that.lengthOf.above(0)
+    item.classify.forEach(cls => {
+      expect(cls).to.be.a('object').and.that.includes.all.keys('name').and.have.a.property('name').that.is.a('string')
     })
   })
 
@@ -192,11 +176,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag(query)
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -221,11 +202,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag(query)
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': newDate,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -245,14 +223,14 @@ describe(`${COMMON_API} test`, function() {
         .set({
           Accept: 'Application/json',
           'If-Modified-Since': result.updatedAt,
-          'If-None-Match': createEtag(query)
+          'If-None-Match': createEtag({
+            ...query,
+            pageSize: 10
+          })
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': newDate,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -268,7 +246,7 @@ describe(`${COMMON_API} test`, function() {
 
         Request
         .get(COMMON_API)
-        .query({ _id: result._id.toString() })
+        .query({ _id: result._id.toString().slice(1) })
         .set('Accept', 'Application/json')
         .expect(400)
         .expect('Content-Type', /json/)
@@ -285,7 +263,7 @@ describe(`${COMMON_API} test`, function() {
 
         Request
         .get(COMMON_API)
-        .query({ _id: `${(parseInt(_id.slice(0, 1)) + 5) % 10}${_id.slice(1)}` })
+        .query({ _id: `${(parseInt(_id.toString().slice(0, 1)) + 5) % 10}${_id.toString().slice(1)}` })
         .set('Accept', 'Application/json')
         .expect(404)
         .expect('Content-Type', /json/)

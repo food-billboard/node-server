@@ -7,9 +7,11 @@ const {
   mockCreateVideo,
   commonValidate,
   mockCreateComment,
-  mockCreateMovie
+  mockCreateMovie,
+  createEtag
 } = require('@test/utils')
 const { CommentModel, UserModel, ImageModel, VideoModel, MovieModel } = require('@src/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/customer/movie/detail/comment'
 
@@ -78,6 +80,7 @@ describe(`${COMMON_API} test`, function() {
   let videoDatabase
   let commentDatabase
   let movieDatabase
+  let result
 
   before(async function() {
 
@@ -127,6 +130,7 @@ describe(`${COMMON_API} test`, function() {
     })
     .then(data => {
       movieId = data._id
+      result = data
       const { model: comment } = mockCreateComment({
         content: {
           text: COMMON_API,
@@ -139,35 +143,36 @@ describe(`${COMMON_API} test`, function() {
         sub_comments: []
       })
 
+      commentDatabase = comment
+
+      return commentDatabase.save()
+
+    })
+    .then(comment => {
+      commentId = comment._id
       const { model: subComment } = mockCreateComment({
         content: {
           text: COMMON_API,
           video: [ videoId ],
           image: [ imageId ]
         },
-        source_type: 'user',
-        source: userId,
+        source_type: 'comment',
+        source: commentId,
       })
-
-      commentDatabase = comment
       subCommentDatabase = subComment
 
-      return Promise.all([
-        commentDatabase.save(),
-        subCommentDatabase.save()
-      ])
-    })
-    .then(([comment, subComment]) => {
-      commentId = comment._id
-      subCommentId = subComment._id
+      return subCommentDatabase.save()
 
+    })
+    .then(data => {
+      subCommentId = data._id
       return Promise.all([
 
         commentDatabase.updateOne({
           "content.text": COMMON_API,
           source_type: 'movie'
         }, {
-          sub_comments: [  subCommentId]
+          sub_comments: [ subCommentId ]
         }),
         movieDatabase.updateOne({
           name: COMMON_API
@@ -198,7 +203,17 @@ describe(`${COMMON_API} test`, function() {
         src: COMMON_API
       }),
       CommentModel.deleteMany({
-        "content.text": COMMON_API
+        $or: [
+          {
+            "content.text": COMMON_API
+          },
+          {
+            "content.text": `${COMMON_API}/movie-test`
+          },
+          {
+            "content.text": `${COMMON_API}-test`
+          }
+        ]
       }),
       MovieModel.deleteOne({
         name: COMMON_API
@@ -243,9 +258,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(400)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -266,9 +279,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(404)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -289,9 +300,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(400)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -312,9 +321,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(404)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -338,9 +345,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(400)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -366,9 +371,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(404)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -392,9 +395,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(400)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -420,9 +421,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(404)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -450,10 +449,8 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-        })
-        .end(function(err, _) {
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
           let obj
@@ -484,11 +481,8 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -512,11 +506,8 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -528,13 +519,13 @@ describe(`${COMMON_API} test`, function() {
 
         const query = {
           currPage: 0,
-          _id: moveId.toString()
+          _id: movieId.toString()
         }
 
         Request
         .get(COMMON_API)
         .query({
-          _id: moveId.toString()
+          _id: movieId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -543,11 +534,10 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag({
+          _id: movieId.toString()
+        }))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -580,9 +570,9 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      after(function(done) {
+      after(async function() {
 
-        CommentModel.findOne({
+        await CommentModel.findOne({
           "content.text": comment.content.text
         })
         .select({
@@ -593,7 +583,8 @@ describe(`${COMMON_API} test`, function() {
         .then(data => !!data && data._doc)
         .then(data => {
           expect(data).to.be.not.a('boolean')
-          const { content={}, source } = data | {}
+
+          const { content={}, source } = data || {}
 
           expect(source).to.be.satisfies(function(target) {
             return !!target && target.toString() == movieId.toString()
@@ -601,12 +592,12 @@ describe(`${COMMON_API} test`, function() {
 
           expect(content).to.be.a('object').and.that.include.all.keys('text', 'image', 'video')
 
-          done()
-
         })
         .catch(err => {
           console.log('oops: ', err)
         })
+
+        return Promise.resolve()
 
       })
 
@@ -622,9 +613,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -667,11 +656,9 @@ describe(`${COMMON_API} test`, function() {
         .then(data => !!data && data._doc)
         .then(data => {
           expect(data).to.be.not.a('boolean')
-          const { content={}, source } = data | {}
+          const { content={}, source } = data || {}
 
-          expect(source).to.be.satisfies(function(target) {
-            return !!target && target.toString() == movieId.toString()
-          })
+          expect(source.toString()).to.be.equal(commentId.toString())
 
           expect(content).to.be.a('object').and.that.include.all.keys('text', 'image', 'video')
 
@@ -696,9 +683,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()

@@ -6,7 +6,7 @@ const router = new Router()
 
 router
 .get('/', async(ctx) => {
-  const check = Params.get(ctx, {
+  const check = Params.query(ctx, {
     name: '_id',
     type: ['isMongoId']
   })
@@ -37,12 +37,20 @@ router
     select: {
       "info.classify": 1,
 			"info.description": 1,
-			"info.name": 1,
+      "info.name": 1,
+      "info.screen_time": 1,
 			poster: 1,
-			publish_time: 1,
 			hot: 1,
 			// author_rate: 1,
-			rate: 1,
+      total_rate: 1,
+      rate_person: 1
+    },
+    populate: {
+      path: 'info.classify',
+      select: {
+        _id: 0,
+        name: 1
+      }
     }
   })
   .exec()
@@ -51,19 +59,24 @@ router
   .then(data => {
     const { poster, movie, ...nextData } = data
     return {
-      ...nextData,
-      poster: poster ? poster.src : null,
-      movie: movie.map(m => {
-        const { _doc: { poster, info: { classify, description, name }, ...nextM } } = m
-        return {
-          ...nextM,
-          description,
-          name,
-          classify,
-          store: false,
-          poster: poster ? poster.src : null,
-        }
-      })
+      data: {
+        ...nextData,
+        poster: poster ? poster.src : null,
+        movie: movie.map(m => {
+          const { _doc: { poster, info: { classify, description, name, screen_time }, total_rate, rate_person, ...nextM } } = m
+          const rate = total_rate / rate_person
+          return {
+            ...nextM,
+            description,
+            name,
+            classify,
+            store: false,
+            poster: poster ? poster.src : null,
+            publish_time: screen_time,
+            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))

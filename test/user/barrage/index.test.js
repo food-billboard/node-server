@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { BarrageModel } = require('@src/utils')
 const { expect } = require('chai')
-const { mockCreateBarrage, Request } = require('@test/utils')
+const { mockCreateBarrage, Request, commonValidate } = require('@test/utils')
 const mongoose = require("mongoose")
 const { Types: { ObjectId } } = mongoose
 
@@ -10,12 +10,17 @@ const COMMON_API = '/api/user/barrage'
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
          
-  expect(target).to.be.a('array').and.have.a.property('0').that.includes.all.keys('hot', 'like', 'time_line', '_id', 'content')
-  expect(target).to.be.have.a.property('0').have.a.property('hot').and.that.a('number')
-  expect(target).to.be.have.a.property('0').have.a.property('like').and.that.a('boolean')
-  expect(target).to.be.have.a.property('0').have.a.property('time_line').and.that.a('number')
-  expect(target).to.be.have.a.property('0').have.a.property('_id').and.that.a('string')
-  expect(target).to.be.have.a.property('0').have.a.property('content').and.that.a('string')
+  expect(target).to.be.a('array')
+  target.forEach(item => {
+    expect(item).to.be.a('object').and.that.includes.all.keys('hot', 'like', 'time_line', '_id', 'content', 'updatedAt')
+    commonValidate.number(item.hot)
+    expect(item.like).to.be.a('boolean')
+    commonValidate.time(item.time_line)
+    commonValidate.objectId(item._id)
+    commonValidate.string(item.content)
+    commonValidate.time(item.updatedAt)
+  })
+
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
       typeof valid == 'function' && valid(target)
@@ -32,11 +37,14 @@ describe(`${COMMON_API} test`, function() {
     let database
     const values = {
       origin: new ObjectId('56aa3554e90911b64c36a424'),
-      user: new ObjectId('56aa3554e90911b64c36a425')
+      user: new ObjectId('56aa3554e90911b64c36a425'),
+      content: ''
     }
 
     before(function(done) {
-      database = mockCreateBarrage(values)
+      const { model } = mockCreateBarrage(values)
+
+      database = model
 
       database.save()
       .then(function(_) {
@@ -46,7 +54,9 @@ describe(`${COMMON_API} test`, function() {
     })
 
     after(function(done) {
-      BarrageModel.deleteOne(values)
+      BarrageModel.deleteMany({
+        content: COMMON_API
+      })
       .then(function() {
         done()
       })
@@ -94,9 +104,12 @@ describe(`${COMMON_API} test`, function() {
       // })
 
       it(`get movie barrage list without self info fail because the movie id is not found`, function(done) {
+
+        const id = values.origin.toString()
+
         Request
         .get(COMMON_API)
-        .query({ _id: `${parseInt(values.origin.toString().slice(0, 1)) + 1}${values.origin.toString().slice(1)}` })
+        .query({ _id: `${parseInt(id.slice(0, 1)) + 1}${id.slice(1)}` })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200)

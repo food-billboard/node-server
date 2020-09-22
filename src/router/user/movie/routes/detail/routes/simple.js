@@ -35,9 +35,11 @@ router.get('/', async (ctx) => {
   .then(data => {
     const { poster, info: { description }, ...nextData } = data
     return {
-      ...nextData,
-      poster: poster ? poster.src : null,
-      description
+      data: {
+        ...nextData,
+        poster: poster ? poster.src : null,
+        description
+      }
     }
   })
   .catch(dealErr(ctx))

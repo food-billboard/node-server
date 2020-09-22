@@ -130,7 +130,7 @@ router
   .then(id => {
     return CommentModel.findOneAndUpdate({
       _id,
-      like_person: { $in: [id] } 
+      like_person: { $in: [ id ] } 
     }, {
       $inc: { total_like: -1 },
       $pull: { like_person: id }

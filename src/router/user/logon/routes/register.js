@@ -7,7 +7,6 @@ function createInitialUserInfo({mobile, password}) {
   return {
     mobile,
     password: encoded(password),
-    username: '',
     fans: [],
     attention: [],
     issue: [],
@@ -24,10 +23,10 @@ router
 .post('/', async(ctx) => {
   const check = Params.body(ctx, {
     name: 'mobile',
-    type: ['isMobilePhone']
+    validator: [data => /^1[3456789]\d{9}$/.test(data.toString())]
   }, {
     name: 'password',
-    validator: data => typeof data === 'string'
+    validator: [data => typeof data === 'string']
   })
   if(check) return
 
@@ -42,24 +41,33 @@ router
     type: ['toInt']
   })
 
-
   //判断账号是否存在
-  const account = new UserModel({
-    ...createInitialUserInfo({ mobile, password })
+  const data = await UserModel.findOne({
+    mobile: Number(mobile)
   })
-  
-  const data = await account.save()
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data)
   .then(data => {
-    if(!data) return Promise.reject({errMsg: '账号已存在', status: 403})
+    if(data) return Promise.reject({errMsg: '账号已存在', status: 403})
+
+    const account = new UserModel({
+      ...createInitialUserInfo({ mobile, password })
+    })
+    return account.save()
+  })
+  .then(data => {
     const { avatar, _id, username, createdAt, updatedAt } = data
     const token = signToken({mobile, password})
     return {
-      avatar,
+      avatar: avatar || null,
       username,
       updatedAt,
       createdAt,
       fans:0,
-      attention:0,
+      attentions:0,
       hot: 0,
       _id,
       token
@@ -86,9 +94,11 @@ router
         $push: { members: { message: [], user: _id, status: 'OFFLINE' } }
       })
     ])
-    return data
+    return {
+      data
+    }
   })
-  .cache(dealErr(ctx))
+  .catch(dealErr(ctx))
 
   responseDataDeal({
     ctx,

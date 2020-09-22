@@ -4,10 +4,12 @@ const {
   mockCreateRank, 
   mockCreateImage,
   Request, 
-  commonValidate 
+  commonValidate,
+  createEtag
 } = require('@test/utils')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
+const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/rank/specDropList'
 
@@ -41,6 +43,7 @@ describe(`${COMMON_API} test`, function() {
     let rankId
     let rankDatabase
     let imageDatabase
+    let result
     
     before(function(done) {
 
@@ -70,6 +73,7 @@ describe(`${COMMON_API} test`, function() {
       })
       .then(data => {
         rankId = data._id
+        result = data
         done()
       })
       .catch(err => {
@@ -99,31 +103,29 @@ describe(`${COMMON_API} test`, function() {
     
     describe(`get rank type list success test -> ${COMMON_API}`, function() {
 
-      it(`get rank type list success`, function(done) {
+      // it(`get rank type list success`, function(done) {
 
-        Request
-        .get(COMMON_API)
-        .set({
-          Accept: 'Application/json',
-        })
-        .expect(200)
-        .expect({
-          'Content-Type': /json/,
-        })
-        .end(function(err, _) {
-          if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
-          responseExpect(obj)
-          done()
-        })
+      //   Request
+      //   .get(COMMON_API)
+      //   .set({
+      //     Accept: 'Application/json',
+      //   })
+      //   .expect(200)
+      //   .expect('Content-Type', /json/)
+      //   .end(function(err, res) {
+      //     if(err) return done(err)
+      //     const { res: { text } } = res
+      //     let obj
+      //     try{
+      //       obj = JSON.parse(text)
+      //     }catch(_) {
+      //       console.log(_)
+      //     }
+      //     responseExpect(obj)
+      //     done()
+      //   })
 
-      })
+      // })
 
       it(`get rank list success and return the status of 304`, function(done) {
 
@@ -135,11 +137,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag({}),
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag({})
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag({}))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -157,11 +156,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag({}),
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag({})
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag({}))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -184,11 +180,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag({}),
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()

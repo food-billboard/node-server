@@ -32,7 +32,7 @@ const isOne = fields => {
 function prePopulate(populate) {
   return function(next) {
     let activePopulate = []
-    const { _fields: fields } = this
+    const { _fields: fields={} } = this
     const zero = isZero(fields)
     let fieldArr = []
     //筛选同字段不同层
@@ -504,7 +504,8 @@ const BarrageSchema = new Schema({
   }],
   content: {
     type: String,
-    default: ''
+    minlength: 1,
+    required: true
   },
   time_line: {
     type: Number,
@@ -778,7 +779,7 @@ const SearchSchema = new Schema({
 const CommentSchema = new Schema({
   source_type: {
     type: String,
-    enum: ['movie', 'user'],
+    enum: ['movie', 'comment'],
     required: true,
     trim: true,
   },
@@ -1021,6 +1022,7 @@ const ImageSchema = new Schema({
     mime: {
       type: String,
       enum: [],
+      required: true,
       uppercase: true,
       get: function(v) { return v ? v.toLowerCase() : v }
     },

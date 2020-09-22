@@ -53,9 +53,11 @@ const withTry = (callback) => {
 
 //缓存处理
 const judgeCache = (ctx, modifiedTime, etagValidate) => {
-  const { request: { headers } } = ctx
+  const { request: { headers, method } } = ctx
+  //只对get进行缓存
+  if( 'get' != method.toLowerCase()) return false
   const modified = headers['if-modified-since'] || headers['If-Modified-Since']
-  const etag = headers['if-none-match'] || headers['If-None-Match']
+  const etag = headers['if-none-match'] || headers['If-None-Match'] || ''
 
   //设置last-modified
   !!modified && ctx.set({ 'Last-Modified': modifiedTime.toString() })
@@ -67,10 +69,8 @@ const judgeCache = (ctx, modifiedTime, etagValidate) => {
 
 //将请求参数加密成etag用于缓存处理
 const _etagValidate = (ctx, etag) => {
-  const { request: { method, query } } = ctx
+  const { request: { query } } = ctx
 
-  //只对get进行缓存
-  if( 'get' != method.toLowerCase()) return false
   let isSameEtag = true
   if(typeof etag !== 'string') isSameEtag = false
   
@@ -194,6 +194,8 @@ const responseDataDeal = ({
     if(afterDeal && typeof afterDeal === 'function') response = afterDeal({...response})
 
   }
+
+  // console.log(response)
 
   ctx.body = response
 

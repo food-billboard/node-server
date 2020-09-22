@@ -71,13 +71,15 @@ router
 	.then(([_, data]) => !!data && data)
 	.then(notFound)
 	.then(data => {
-		return data.map(item => {
-			const { _doc: { poster: { src }, ...nextM } } = m
-				return {
-					...nextM,
-					poster: src,
-				}
-		})
+		return {
+			data: data.map(item => {
+				const { _doc: { poster: { src }, ...nextM } } = item
+					return {
+						...nextM,
+						poster: src,
+					}
+			})
+		}
 	})
 	.catch(dealErr(ctx))
 

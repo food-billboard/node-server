@@ -5,7 +5,9 @@ const {
   mockCreateImage, 
   Request, 
   commonValidate,
+  createEtag
 } = require('@test/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/detail/simple'
 
@@ -89,10 +91,8 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json',
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-        })
-        .end(function(err, _) {
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
           let obj
@@ -122,11 +122,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag(query)
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -149,11 +146,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag(query)
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -179,11 +173,10 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag(query)
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag({
+          _id: result._id.toString()
+        }))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -208,9 +201,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json'
         })
         .expect(404)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -223,15 +214,13 @@ describe(`${COMMON_API} test`, function() {
         Request
         .get(COMMON_API)
         .query({
-          _id: result._id.slice(1)
+          _id: result._id.toString().slice(1)
         })
         .set({
           Accept: 'Application/json'
         })
         .expect(400)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -247,9 +236,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json'
         })
         .expect(400)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()

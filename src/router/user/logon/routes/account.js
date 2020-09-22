@@ -1,17 +1,19 @@
 const Router = require('@koa/router')
-const { signToken, encoded, dealErr, UserModel, RoomModel, notFound, Params, responseDataDeal } = require("@src/utils")
+const { signToken, encoded, dealErr, UserModel, RoomModel, Params, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
 
-router.post('/', async(ctx) => {
+router
+.post('/', async(ctx) => {
 
   const check = Params.body(ctx, {
     name: 'mobile',
-    type: ['isMobilePhone']
+    validator: [data => /^1[3456789]\d{9}$/.test(data)]
   }, {
     name: 'password',
-    validator: data => typeof data === 'string'
+    validator: [data => typeof data === 'string']
   })
+  console.log(check)
   if(check) return
 
   const [ password, uid, mobile ] = Params.sanitizers(ctx.request.body, {
@@ -25,6 +27,8 @@ router.post('/', async(ctx) => {
     type: ['toInt']
   })
 
+  console.log(mobile)
+
   const data = await UserModel.findOneAndUpdate({
     mobile,
     password: encoded(password)
@@ -33,8 +37,7 @@ router.post('/', async(ctx) => {
   })
   .select({
     allow_many: 1,
-    create_time: 1,
-    modified_time: 1,
+    createdAt: 1,
     username:1,
     avatar: 1,
     hot:1,
@@ -76,7 +79,9 @@ router.post('/', async(ctx) => {
         $push: { members: { message: [], user: _id, status: 'OFFLINE' } }
       })
     ])
-    return data
+    return {
+      data
+    }
   })
   .catch(dealErr(ctx))
 

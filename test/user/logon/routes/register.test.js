@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, commonValidate } = require('@test/utils')
-const { verifyTokenToData, UserModel } = require('@src/utils')
+const { getToken, UserModel } = require('@src/utils')
 
 const COMMON_API = '/api/user/logon/register'
 
@@ -17,7 +17,7 @@ function responseExpect(res, validate=[]) {
   commonValidate.number(target.hot)
   commonValidate.date(target.updatedAt)
   expect(target.token).to.be.satisfies(function(target) {
-    return !!!verifyTokenToData(target)[0]
+    return !!getToken(target)[1]
   })
   commonValidate.string(target.username)
   commonValidate.objectId(target._id)
@@ -61,6 +61,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .set({ Accept: 'Application/json' })
         .expect(200)
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -118,12 +119,13 @@ describe(`${COMMON_API} test`, function() {
         .post(COMMON_API)
         .send({
           mobile: result.mobile,
-          passwrd: '1234567890'
+          password: '1234567890'
         })
         .set({ Accept: 'Application/json' })
         .expect(403)
         .expect('Content-Type', /json/)
         .end(function(err, _) {
+          console.log(err, 11111111)
           if(err) return done(err)
           done()
         })

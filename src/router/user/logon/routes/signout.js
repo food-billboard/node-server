@@ -6,17 +6,26 @@ const router = new Router()
 router
 .post('/', async(ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
 
-  const data = await UserModel.findOneAndUpdate({
-    mobile: Number(mobile)
-  }, {
-    $set: { status: 'SIGNOUT' }
+  const data = await new Promise((resolve, reject) => {
+    if(token) {
+      const { mobile } = token
+      return resolve(mobile)
+    }else {
+      reject({ errMsg: 'not authorization', status: 401 })
+    }
   })
-  .select({
-    _id: 1
+  .then(mobile => {
+    return UserModel.findOneAndUpdate({
+      mobile: Number(mobile)
+    }, {
+      $set: { status: 'SIGNOUT' }
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
   })
-  .exec()
   .then(data => !!data && data._id)
   .then(notFound)
   .then(userId => {
@@ -33,8 +42,11 @@ router
   })
   .then(data => !!data && data._id)
   .then(data => {
-    console.log(data)
-    if(!data) return Promise.reject({errMsg: '服务器错误', status: 500})
+    // console.log(data)
+    // if(!data) return Promise.reject({errMsg: '服务器错误', status: 500})
+    return {
+      data: {}
+    }
   })
   .catch(dealErr(ctx))
 

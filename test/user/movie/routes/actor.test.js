@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateActor, Request, commonValidate, createEtag } = require('@test/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/actor'
 
@@ -64,12 +65,12 @@ describe(`${COMMON_API} test`, function() {
 
         Request
         .get(COMMON_API)
-        .query(count, 10)
+        .query('count', 10)
         .set({
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({ 'Content-Type': /json/ })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -100,11 +101,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag(query)
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -127,11 +125,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag(query)
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -158,11 +153,8 @@ describe(`${COMMON_API} test`, function() {
           })
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -181,10 +173,19 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .query({ count: 10 })
         .set('Accept', 'Application/json')
-        .expect(404)
+        .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err, _) {
+        .end(function(err, res) {
           if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          const { res: { data } } = obj
+          expect(data).to.be.a('array').and.that.lengthOf(0)
           done()
         })
         

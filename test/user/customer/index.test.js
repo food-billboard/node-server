@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, createEtag } = require('@test/utils')
+const { commonValidate } = require('../../utils')
 
 const COMMON_API = '/api/user/customer'
 
@@ -9,11 +10,12 @@ function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
   expect(target).to.be.a('object').and.include.all.keys('attentions', 'avatar', 'fans', 'hot', 'username', '_id')
-  expect(target).to.have.a.property('attentions').and.is.a('number').and.that.above(0)
-  expect(target).to.have.a.property('avatar').and.is.a('string')
-  expect(target).to.have.a.property('fans').and.is.a('number').and.that.above(0)
-  expect(target).to.have.a.property('username').and.is.a('string')
-  expect(target).to.have.a.property('_id').and.is.a('string')
+  commonValidate.number(target.attentions)
+  commonValidate.poster(target.avatar)
+  commonValidate.number(target.fans)
+  commonValidate.number(target.hot)
+  commonValidate.string(target.username)
+  commonValidate.objectId(target._id)
 
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
@@ -83,7 +85,7 @@ describe(`${COMMON_API} test`, function() {
       it(`get another userinfo and not self and without self info success and return status of 304`, function(done) {
 
         const query = {
-          _id: result._id.toStrng()
+          _id: result._id.toString()
         }
 
         Request
@@ -93,8 +95,7 @@ describe(`${COMMON_API} test`, function() {
         .set('If-Modified-Since', result.updatedAt)
         .set('If-None-Match', createEtag(query))
         .expect(304)
-        .expect('Content-Type', /json/)
-        .expect('Last-Modidifed', result.updatedAt)
+        .expect('Last-Modified', result.updatedAt.toString())
         .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
@@ -107,7 +108,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get another userinfo and not self and without self info fail test -> ${COMMON_API}`, function() {
       
-      it(`get another userinfo and not self and without self info fail because of the movie id is not verify`, function() {
+      it(`get another userinfo and not self and without self info fail because of the movie id is not verify`, function(done) {
         
         const id = result._id.toString()
 
@@ -123,7 +124,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get another userinfo and not self and without self info fail because of the movie id is not found`, function() {
+      it(`get another userinfo and not self and without self info fail because of the movie id is not found`, function(done) {
         
         const id = result._id.toString()
 

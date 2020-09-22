@@ -147,7 +147,7 @@ const verifySocketIoToken = token => {
 
 const getToken = (authorization) => {
   if(!authorization) return ['400', null]
-  const token = authorization.split(' ')[1]
+  const token = /.+ .+/.test(authorization) ? authorization.split(' ')[1] : authorization
   try { 
     const { middel, ...nextToken } = verifyToken(token)
     if(middel !== MIDDEL) return ['401', null]
@@ -176,4 +176,5 @@ module.exports = {
   verifySocketIoToken,
   otherToken,
   fileEncoded,
+  getToken
 }

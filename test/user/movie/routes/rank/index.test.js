@@ -6,8 +6,11 @@ const {
   mockCreateMovie, 
   mockCreateImage,
   Request, 
-  commonValidate 
+  commonValidate,
+  createEtag
 } = require('@test/utils')
+const { ImageModel, ClassifyModel, MovieModel, RankModel } = require('@src/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/rank'
 
@@ -16,7 +19,7 @@ function responseExpect(res, validate=[]) {
          
   expect(target).to.be.a('array')
   target.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('poster', 'classify', 'description', 'name', 'publish_time', 'hot', 'author_rate', 'rate', '_id')
+    expect(item).to.be.a('object').and.that.includes.all.keys('poster', 'classify', 'description', 'name', 'publish_time', 'hot', 'author_rate', 'rate', '_id', 'updatedAt')
     commonValidate.number(item.hot)
     expect(item.like).to.be.a('boolean')
     commonValidate.time(item.publish_time)
@@ -24,12 +27,13 @@ function responseExpect(res, validate=[]) {
     commonValidate.poster(item.poster)
     commonValidate.string(item.description)
     commonValidate.string(item.name)
-    
+    commonValidate.time(item.updatedAt)
+
     expect(item.classify).to.be.a('array')
-    item.classify.forEach(cls => commonValidate.string(cls))
+    item.classify.forEach(cls => expect(cls).to.be.a('object').and.that.have.a.property('name').that.is.a('string').and.that.lengthOf.above(0))
 
     commonValidate.number(item.author_rate)
-    commonValidate.number(item.number)
+
   })
 
   if(Array.isArray(validate)) {
@@ -45,14 +49,12 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get rank list test -> ${COMMON_API}`, function() {
 
-    let imageDatabase
-    let classifyDatabase
-    let movieDatabase
-    let rankDatabase
     let imageId
     let classifyId
     let movieId
     let rankId
+    let result
+    let updatedAt
 
     before(function(done) {
 
@@ -63,16 +65,15 @@ describe(`${COMMON_API} test`, function() {
         name: COMMON_API
       })
 
-      imageDatabase = image
-      classifyDatabase = classify
-
       Promise.all([
-        imageDatabase.save(),
-        classifyDatabase.save()
+        image.save(),
+        classify.save()
       ])
       .then(([image, classify]) => {
         imageId = image._id
         classifyId = classify._id
+
+        console.log(classify)
 
         const { model: movie } = mockCreateMovie({
           name: COMMON_API,
@@ -82,28 +83,27 @@ describe(`${COMMON_API} test`, function() {
         })
         const { model: rank } = mockCreateRank({
           name: COMMON_API,
+          icon: imageId,
           match_field: {
             _id: classifyId,
             field: 'classify'
-          },
-          icon: ImageId
+          }
         })
 
-        movieDatabase = movie
-        rankDatabase = rank
-
         return Promise.all([
-          movieDatabase.save(),
-          rankDatabase.save()
+          movie.save(),
+          rank.save()
         ])
 
       })
       .then(function([movie, rank]) {
         movieId = movie._id
         rankId= rank._id
+        result = rank
         done()
       })
       .catch(err => {
+        done(err)
         console.log('oops: ', err)
       })
 
@@ -112,16 +112,16 @@ describe(`${COMMON_API} test`, function() {
     after(function(done) {
 
       Promise.all([
-        imageDatabase.deleteOne({
+        ImageModel.deleteOne({
           src: COMMON_API
         }),
-        classifyDatabase.deleteOne({
+        ClassifyModel.deleteOne({
           name: COMMON_API
         }),
-        movieDatabase.deleteOne({
+        MovieModel.deleteOne({
           name: COMMON_API
         }),
-        rankDatabase.deleteOne({
+        RankModel.deleteOne({
           name: COMMON_API
         })
       ])
@@ -136,8 +136,28 @@ describe(`${COMMON_API} test`, function() {
     
     describe(`get rank list success test -> ${COMMON_API}`, function() {
 
+      before(function(done) {
+        RankModel.findOne({
+          name: COMMON_API
+        })
+        .select({
+          _id: 0,
+          updatedAt: 1
+        })
+        .exec()
+        .then(data => !!data && data._doc.updatedAt)
+        .then(data => {
+          commonValidate.time(data)
+          updatedAt = data
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+      })
+
       after(function(done) {
-        rankDatabase.findOne({
+        RankModel.findOne({
           name: COMMON_API
         })
         .select({
@@ -167,10 +187,8 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-        })
-        .end(function(err, _) {
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
           let obj
@@ -196,15 +214,12 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': result.updatedAt,
+          'If-Modified-Since': updatedAt,
           'If-None-Match': createEtag(query),
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -223,15 +238,12 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': new Date(Day(updatedAt).valueOf - 10000000),
           'If-None-Match': createEtag(query),
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -250,18 +262,15 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': new Date(Day(updatedAt).valueOf - 10000000),
           'If-None-Match': createEtag({
             _id: rankId.toString(),
             currPage: 0
           }),
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -286,9 +295,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json'
         })
         .expect(404)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -307,9 +314,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json'
         })
         .expect(400)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -317,7 +322,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get rank list fail because lack of the params of rank id`, function() {
+      it(`get rank list fail because lack of the params of rank id`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -325,9 +330,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json'
         })
         .expect(400)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()

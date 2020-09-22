@@ -1,6 +1,8 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateClassify, mockCreateMovie, mockCreateImage, Request, commonValidate } = require('@test/utils')
+const { mockCreateClassify, mockCreateMovie, mockCreateImage, Request, commonValidate, createEtag } = require('@test/utils')
+const { ClassifyModel } = require('@src/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/classify'
 
@@ -41,6 +43,7 @@ describe(`${COMMON_API} test`, function() {
     let imageDatabase
     let imageId
     let result
+    let updatedAt
 
     before(function(done) {
       const { model } = mockCreateImage({
@@ -119,7 +122,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({ 'Content-Type': /json/ })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -135,30 +138,41 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get classify list success and return the status of 304`, function(done) {
+      it(`get classify list success and return the status of 304`, async function() {
 
         const query = {
           _id: result._id.toString()
         }
 
-        Request
+        await ClassifyModel.findOne({
+          _id: result._id
+        })
+        .select({
+          updatedAt: 1,
+          _id: 0
+        })
+        .exec()
+        .then(data => !!data && data._doc.updatedAt)
+        .then(data => {
+          updatedAt = data
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+        await Request
         .get(COMMON_API)
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': result.updatedAt,
+          'If-Modified-Since': updatedAt,
           'If-None-Match': createEtag(query)
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
-        .end(function(err, _) {
-          if(err) return done(err)
-          done()
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
+
+        return Promise.resolve()
 
       })
 
@@ -177,11 +191,8 @@ describe(`${COMMON_API} test`, function() {
           'If-None-Match': createEtag(query)
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -203,15 +214,12 @@ describe(`${COMMON_API} test`, function() {
         })
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': updatedAt.toString(),
           'If-None-Match': createEtag(query)
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -244,7 +252,7 @@ describe(`${COMMON_API} test`, function() {
 
         Request
         .get(COMMON_API)
-        .query({ _id: _id.slice(1) })
+        .query({ _id: result._id.toString().slice(1) })
         .set('Accept', 'Application/json')
         .expect(400)
         .expect('Content-Type', /json/)

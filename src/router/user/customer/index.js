@@ -45,10 +45,12 @@ router
     if(!data) return Promise.reject({ errMsg: 'not found', status: 404 })
     const { avatar, attentions, fans, ...nextData } = data
     return {
-      ...nextData,
-      attentions: attentions.length,
-      fans: fans.length,
-      avatar: avatar ? avatar.src : null
+      data: {
+        ...nextData,
+        attentions: attentions.length,
+        fans: fans.length,
+        avatar: avatar ? avatar.src : null 
+      }
     }
   })
   .catch(dealErr(ctx))

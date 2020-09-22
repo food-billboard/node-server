@@ -5,13 +5,12 @@ const {
   mockCreateMovie, 
   Request,
 } = require('@test/utils')
+const { MovieModel, UserModel } = require('@src/utils')
 
 const COMMON_API = '/api/customer/movie/detail/rate'
 
 describe(`${COMMON_API} test`, function() {
 
-  let userDatabase
-  let movieDatabase
   let userId
   let movieId
   let selfToken
@@ -25,13 +24,11 @@ describe(`${COMMON_API} test`, function() {
       name: COMMON_API
     })
 
-    userDatabase = user
-    movieDatabase = movie
     selfToken = token
 
     Promise.all([
-      userDatabase.save(),
-      movieDatabase.save()
+      user.save(),
+      movie.save()
     ])
     .then(([user, movie]) => {
       userId = user._id
@@ -49,10 +46,10 @@ describe(`${COMMON_API} test`, function() {
   after(function(done) {
 
     Promise.all([
-      userDatabase.deleteOne({
+      UserModel.deleteOne({
         username: COMMON_API,
       }),
-      movieDatabase.deleteOne({
+      MovieModel.deleteOne({
         name: COMMON_API
       })
     ])
@@ -72,13 +69,13 @@ describe(`${COMMON_API} test`, function() {
       before(function(done) {
 
         Promise.all([
-          movieDatabase.updateOne({
+          MovieModel.updateOne({
             name: COMMON_API
           }, {
             total_rate: 0,
             rate_person: 0
           }),
-          userDatabase.updateOne({
+          UserModel.updateOne({
             username: COMMON_API
           }, {
             rate: []
@@ -93,10 +90,10 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      after(function(done) {
+      after(async function() {
 
-        Promise.all([
-          movieDatabase.findOne({
+        const res = await Promise.all([
+          MovieModel.findOne({
             name: COMMON_API
           })
           .select({
@@ -111,7 +108,7 @@ describe(`${COMMON_API} test`, function() {
             const { total_rate, rate_person } = data
             return total_rate == 10 && rate_person == 1
           }),
-          userDatabase.findOne({
+          UserModel.findOne({
             username: COMMON_API
           })
           .select({
@@ -123,17 +120,20 @@ describe(`${COMMON_API} test`, function() {
           .then(data => {
             if(typeof data == 'boolean') return false
             const { rate } = data
-            return rate.some(item => item._id == movieId && item.rate == 10)
+            return rate.some(item => item._id.toString() == movieId.toString() && item.rate == 10)
           })
         ])
         .then(data => {
           expect(data).to.be.a('array')
           data.forEach(item => expect(item).to.be.true)
-          done()
+          return true
         })
         .catch(err => {
           console.log('oops: ', err)
+          return false
         })
+
+        return res ? Promise.resolve() : Promise.reject('err')
 
       })
 
@@ -165,13 +165,13 @@ describe(`${COMMON_API} test`, function() {
       before(function(done) {
 
         Promise.all([
-          movieDatabase.updateOne({
+          MovieModel.updateOne({
             name: COMMON_API
           }, {
             total_rate: 10,
             rate_person: 1
           }),
-          userDatabase.updateOne({
+          UserModel.updateOne({
             username: COMMON_API
           }, {
             rate: [
@@ -191,10 +191,10 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      after(function(done) {
+      after(async function() {
 
-        Promise.all([
-          movieDatabase.findOne({
+        const res = await Promise.all([
+          MovieModel.findOne({
             name: COMMON_API
           })
           .select({
@@ -209,7 +209,7 @@ describe(`${COMMON_API} test`, function() {
             const { total_rate, rate_person } = data
             return total_rate == 4 && rate_person == 1
           }),
-          userDatabase.findOne({
+          UserModel.findOne({
             username: COMMON_API
           })
           .select({
@@ -221,17 +221,20 @@ describe(`${COMMON_API} test`, function() {
           .then(data => {
             if(typeof data == 'boolean') return false
             const { rate } = data
-            return rate.some(item => item._id == movieId && item.rate == 4)
+            return rate.some(item => item._id.toString() == movieId.toString() && item.rate == 4)
           })
         ])
         .then(data => {
           expect(data).to.be.a('array')
           data.forEach(item => expect(item).to.be.true)
-          done()
+          return true
         })
         .catch(err => {
           console.log('oops: ', err)
+          return false
         })
+
+        return res ? Promise.resolve() : Promise.reject('err')
 
       })
 
@@ -297,7 +300,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(404)
         .expect('Content-Type', /json/)
-        .end(function(err) {
+        .end(function(err, res) {
           if(err) return done(err)
           done()
         })

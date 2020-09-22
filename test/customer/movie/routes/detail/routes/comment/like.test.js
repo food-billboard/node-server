@@ -4,15 +4,14 @@ const {
   Request, 
   mockCreateUser,
   mockCreateComment,
-  commonValidate,
 } = require('@test/utils')
 const { CommentModel } = require('@src/utils')
+const { Types: { ObjectId } } = require('mongoose')
 
 const COMMON_API = '/api/customer/movie/detail/comment/like'
 
 describe(`${COMMON_API} test`, function() {
 
-  let commentDatabase
   let userDatabase
   let selfToken
   let userId
@@ -31,15 +30,15 @@ describe(`${COMMON_API} test`, function() {
     .then(data => {
       userId = data._id
       const { model } = mockCreateComment({
-        source_type: 'user',
-        source: userId,
+        user_info: userId,
+        source_type: 'comment',
+        source: ObjectId('53102b43bf1044ed8b0ba36b'),
         content: {
           text: COMMON_API
         }
       })
 
-      commentDatabase = model
-      return commentDatabase.save()
+      return model.save()
     })
     .then(function(data) {
       commentId = data._id
@@ -54,7 +53,7 @@ describe(`${COMMON_API} test`, function() {
   after(function(done) {
 
     Promise.all([
-      commentDatabase.deleteOne({
+      CommentModel.deleteOne({
         "content.text": COMMON_API
       }),
       userDatabase.deleteOne({
@@ -143,7 +142,7 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
 
-        commentDatabase.updateOne({
+        CommentModel.updateOne({
           _id: commentId
         },{
           total_like: 0,
@@ -158,9 +157,9 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      after(function(done) {
+      after(async function() {
         
-        commentDatabase.findOne({
+        const res = await CommentModel.findOne({
           _id: commentId,
         })
         .select({
@@ -176,11 +175,14 @@ describe(`${COMMON_API} test`, function() {
         })
         .then(function(data) {
           expect(data).to.be.true
-          done()
+          return true
         })
         .catch(err => {
           console.log('oops: ', err)
+          return false
         })
+
+        return res ? Promise.resolve() : Promise.reject()
 
       })
 
@@ -210,7 +212,7 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
 
-        commentDatabase.updateOne({
+        CommentModel.updateOne({
           _id: commentId
         },{
           total_like: 1,
@@ -225,10 +227,10 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      after(function(done) {
+      after(async function() {
         
-        movieDatabase.findOne({
-          name: COMMON_API,
+        const res = await CommentModel.findOne({
+          "content.text": COMMON_API,
         })
         .select({
           _id: 0,
@@ -243,11 +245,14 @@ describe(`${COMMON_API} test`, function() {
         })
         .then(function(data) {
           expect(data).to.be.true
-          done()
+          return true
         })
         .catch(err => {
           console.log('oops: ', err)
+          return true
         })
+
+        return res ? Promise.resolve() : Promise.reject()
 
       })
 
@@ -281,10 +286,10 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
 
-        commentDatabase.updateOne({
+        CommentModel.updateOne({
           _id: commentId
         },{
-          like_person: [userId],
+          like_person: [ userId ],
           total_like: 1
         })
         .then(function() {
@@ -296,10 +301,10 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      after(function(done) {
+      after(async function() {
         
-        commentDatabase.findOne({
-          name: COMMON_API,
+        const res = await CommentModel.findOne({
+          "content.text": COMMON_API,
         })
         .select({
           _id: 0,
@@ -314,11 +319,14 @@ describe(`${COMMON_API} test`, function() {
         })
         .then(function(data) {
           expect(data).to.be.true
-          done()
+          return true
         })
         .catch(err => {
           console.log('oops: ', err)
+          return false
         })
+
+        return res ? Promise.resolve() : Promise.reject()
 
       })
 
@@ -348,8 +356,8 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
 
-        commentDatabase.updateOne({
-          name: COMMON_API
+        CommentModel.updateOne({
+          "content.text": COMMON_API
         },{
           total_like: 0,
           like_person: []
@@ -363,10 +371,10 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      after(function(done) {
+      after(async function() {
         
-        movieDatabase.findOne({
-          name: COMMON_API,
+        const res = await CommentModel.findOne({
+          "content.text": COMMON_API,
         })
         .select({
           _id: 0,
@@ -381,11 +389,14 @@ describe(`${COMMON_API} test`, function() {
         })
         .then(function(data) {
           expect(data).to.be.true
-          done()
+          return true
         })
         .catch(err => {
           console.log('oops: ', err)
+          return false
         })
+
+        return res ? Promise.resolve() : Promise.reject()
 
       })
 

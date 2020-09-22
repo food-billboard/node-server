@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { RankModel, dealErr, notFound, responseDataDeal } = require("@src/utils")
+const { RankModel, dealErr, notFound, responseDataDeal, Params } = require("@src/utils")
 
 const router = new Router()
 
@@ -23,13 +23,15 @@ router.get('/', async (ctx) => {
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {
-    return data.map(d => {
-      const { _doc: { icon, ...nextD } } = d
-      return {
-        ...nextD,
-        icon: icon ? icon.src : null
-      }
-    })
+    return {
+      data: data.map(d => {
+        const { _doc: { icon, ...nextD } } = d
+        return {
+          ...nextD,
+          icon: icon ? icon.src : null
+        }
+      })
+    }
   })
   .catch(dealErr(ctx))
   
