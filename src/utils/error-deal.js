@@ -53,16 +53,24 @@ const withTry = (callback) => {
 
 //缓存处理
 const judgeCache = (ctx, modifiedTime, etagValidate) => {
-  const { request: { headers, method } } = ctx
+  const { request: { headers, method }, query } = ctx
   //只对get进行缓存
   if( 'get' != method.toLowerCase()) return false
   const modified = headers['if-modified-since'] || headers['If-Modified-Since']
-  const etag = headers['if-none-match'] || headers['If-None-Match'] || ''
+  const etag = headers['if-none-match'] || headers['If-None-Match']
 
   //设置last-modified
   !!modified && ctx.set({ 'Last-Modified': modifiedTime.toString() })
 
-  return ( !!etag && typeof etagValidate == 'function' ? etagValidate(ctx, etag) : true ) && !!modified && new Date(modified).toString() == new Date(modifiedTime).toString()
+  let queryEmpty = false
+
+  //空查询参数处理
+  if(Object.keys(query).length == 0) {
+    ctx.set({ 'ETag': '' })
+    queryEmpty = true
+  }
+
+  return ( queryEmpty ? ( !etag ) : (typeof etagValidate == 'function' ? etagValidate(ctx, !!etag ? etag : '') : true )) && !!modified && new Date(modified).toString() == new Date(modifiedTime).toString()
 
   // return !!modified && Day(modified).valueOf() === Day(modifiedTime).valueOf() && ( !!etag && typeof etagValidate == 'function' ? etagValidate(ctx, etag) : true )
 }

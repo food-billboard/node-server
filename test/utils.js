@@ -67,6 +67,7 @@ function mockCreateUser(values={}) {
 
 //电影创建
 function mockCreateMovie(values={}) {
+
   let baseModel = {
     name: '测试电影名称',
     info: {
@@ -96,7 +97,7 @@ function mockCreateMovie(values={}) {
     same_film: []
   }
 
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new MovieModel(baseModel)
 
@@ -119,7 +120,7 @@ function mockCreateComment(values={}) {
     },
     comment_users: []
   }
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
   const model = new CommentModel(baseModel)
 
   return { model }
@@ -158,9 +159,10 @@ function mockCreateActor(values={}) {
     works: [],
     other: {
       another_name: '测试演员的其他名字',
+      avatar: ObjectId('8f63270f005f1c1a0d9448ca')
     },
   }
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new ActorModel(baseModel)
 
@@ -268,9 +270,10 @@ function mockCreateGlobal(values={}) {
     notice: '测试的首页notice内容',
     info: '测试的小程序相关信息内容',
   }
+
   baseModel = mergeConfig(baseModel, values)
 
-  const model = new GlobalModel()
+  const model = new GlobalModel(baseModel)
 
   return { model }
 }
@@ -350,7 +353,7 @@ const commonValidate = {
     })
   },
   number(target, satisfies){ expect(target).to.be.a('number').and.that.satisfies((target) => {
-    return this[_satisfies_](target >= 0, satisfies)
+    return this[_satisfies_](!Number.isNaN(target) && target >= 0, satisfies)
   })},
   date(target, satisfies){
     expect(target).to.be.satisfies((target) => {

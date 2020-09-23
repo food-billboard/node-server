@@ -76,7 +76,7 @@ function prePopulate(populate) {
     })
 
     //!! need to test
-    this.select({
+    if(!zero) this.select({
       updatedAt: 1
     })
 
@@ -569,7 +569,8 @@ const MovieSchema = new Schema({
   }],
   poster: {
     type: ObjectId,
-    ref: 'image'
+    ref: 'image',
+    required: true
   },
   barrage: [{
     type: ObjectId,

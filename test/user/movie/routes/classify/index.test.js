@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateClassify, mockCreateMovie, mockCreateImage, Request, commonValidate, createEtag } = require('@test/utils')
-const { ClassifyModel } = require('@src/utils')
+const { ClassifyModel, MovieModel } = require('@src/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/classify'
@@ -12,13 +12,13 @@ function responseExpect(res, validate=[]) {
 
   expect(target).to.be.a('array')
   target.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('hot', 'info', 'name', 'poster', '_id')
+    expect(item).to.be.a('object').and.that.includes.all.keys('hot', 'classify', 'publish_time', 'name', 'poster', '_id')
     commonValidate.number(item.hot)
-    expect(item.info).to.be.a('object').and.have.a.property('classify').and.is.a('array')
-    item.info.classify.forEach(cls => {
+    commonValidate.time(item.publish_time)
+    expect(item.classify).to.be.a('array')
+    item.classify.forEach(cls => {
       expect(cls).to.be.a('object').and.have.a.property('name').and.is.a('string').that.lengthOf.above(0)
     })
-    expect(item.info.classify).to.be.a()
     commonValidate.string(item.name)
     commonValidate.poster(item.poster)
     commonValidate.objectId(item._id)
@@ -38,7 +38,6 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get classify list test -> ${COMMON_API}`, function() {
 
-    let movieDatabase
     let classifyDatabase
     let imageDatabase
     let imageId
@@ -60,26 +59,26 @@ describe(`${COMMON_API} test`, function() {
           },
           poster: imageId
         })
-        movieDatabase = model
-        return movieDatabase.save()
+        return model.save()
       })
       .then(data => {
         const { model } = mockCreateClassify({
           name: COMMON_API,
-          match: [data._id]
+          // match: [data._id]
         })
         classifyDatabase = model
         return classifyDatabase.save()
       })
       .then(function(data) {
         result = data
-        return movieDatabase.updateOne({
+
+        return MovieModel.updateOne({
           name: COMMON_API
         }, {
           $push: { "info.classify": result._id }
         })
       })
-      .then(function() {
+      .then(function(data) {
         done()
       })
       .catch(err => {
@@ -90,7 +89,7 @@ describe(`${COMMON_API} test`, function() {
     after(function(done) {
 
       Promise.all([
-        movieDatabase.deleteOne({
+        MovieModel.deleteOne({
           name: COMMON_API
         }),
         classifyDatabase.deleteOne({
@@ -219,7 +218,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(200)
         .expect('Last-Modified', updatedAt.toString())
-        .expect('ETag', createEtag(query))
+        .expect('ETag', createEtag({ _id: result._id.toString() }))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -239,10 +238,19 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .query({ _id: `${(parseInt(_id.slice(0, 1)) + 5) % 10}${_id.slice(1)}` })
         .set('Accept', 'Application/json')
-        .expect(404)
+        .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err, _) {
+        .end(function(err, res) {
           if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          const { res: { data } } = obj
+          expect(data).to.be.a('array').and.that.lengthOf(0)
           done()
         })
 

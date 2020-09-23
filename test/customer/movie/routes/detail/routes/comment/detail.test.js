@@ -6,8 +6,10 @@ const {
   mockCreateUser,
   mockCreateVideo,
   commonValidate,
+  createEtag
 } = require('@test/utils')
-const { CommentModel } = require('@src/utils')
+const { CommentModel, ImageModel, UserModel, VideoModel } = require('@src/utils')
+const  Day = require('dayjs')
 
 const COMMON_API = '/api/customer/movie/detail/comment/detail'
 
@@ -65,15 +67,12 @@ function responseExpect(res, validate=[]) {
 
 describe(`${COMMON_API} test`, function() {
 
-  let imageDatabase
-  let videoDatabase
-  let userDatabase
-  let commentDatabase
-  let commentTestDatabase
   let imageId
   let videoId
   let userId
+  let commentId
   let selfToken
+  let updatedAt
   let result
 
   before(function(done) {
@@ -81,8 +80,8 @@ describe(`${COMMON_API} test`, function() {
     const { model:image } = mockCreateImage({
       src: COMMON_API
     })
-    imageDatabase = image
-    imageDatabase.save()
+
+    image.save()
     .then(data => {
       imageId = data._id
       videoId = data._id
@@ -93,12 +92,11 @@ describe(`${COMMON_API} test`, function() {
       const { model: user, token } = mockCreateUser({
         username: COMMON_API
       })
-      videoDatabase = video
-      userDatabase = user
+
       selfToken = token
       return Promise.all([
-        videoDatabase.save(),
-        userDatabase.save()
+        video.save(),
+        user.save()
       ])
     })
     .then(([video, user]) => {
@@ -116,11 +114,12 @@ describe(`${COMMON_API} test`, function() {
         like_person: [user._id],
         comment_users: [ user._id ]
       })
-      commentDatabase = model
-      return commentDatabase.save()
+
+      return model.save()
     })
     .then(data => {
       result = data
+      commentId = result._id
       const { model } = mockCreateComment({
         source_type: 'user',
         source: userId,
@@ -131,11 +130,11 @@ describe(`${COMMON_API} test`, function() {
           video: [ videoId ]
         },
       })
-      commentTestDatabase = model
-      return commentTestDatabase.save()
+
+      return model.save()
     })
     .then(function(data) {
-      return commentDatabase.updateOne({
+      return CommentModel.updateOne({
         "content.text": COMMON_API
       }, {
         $push: { sub_comments: data._id }
@@ -152,13 +151,13 @@ describe(`${COMMON_API} test`, function() {
   after(function(done) {
 
     Promise.all([
-      imageDatabase.deleteOne({
+      ImageModel.deleteOne({
         src: COMMON_API
       }),
-      videoDatabase.deleteOne({
+      VideoModel.deleteOne({
         src: COMMON_API
       }),
-      userDatabase.deleteOne({
+      UserModel.deleteOne({
         username: COMMON_API
       }),
       CommentModel.deleteMany({
@@ -178,21 +177,40 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get the comment detail with self info success test -> ${COMMON_API}`, function() {
 
+      before(async function() {
+        updatedAt = await CommentModel.findOne({
+          "content.text": COMMON_API
+        })
+        .select({
+          _id: 0,
+          updatedAt: 1
+        })
+        .exec()
+        .then(data => {
+          return data._doc.updatedAt
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          return false
+        })
+
+        return !!updatedAt ? Promise.resolve() : Promise.reject()
+
+      })
+
       it(`get the comment detail with self info success`, function(done) {
         
         Request
         .get(COMMON_API)
         .query({
-          _id: result._id.toString()
+          _id: commentId.toString()
         })
         .set({
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -211,7 +229,7 @@ describe(`${COMMON_API} test`, function() {
       it(`get the comment detail with self info success and return the status of 304`, function(done) {
 
         const query = {
-          _id: result._id.toString()
+          _id: commentId.toString()
         }
 
         Request
@@ -219,16 +237,13 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': result.updatedAt,
+          'If-Modified-Since': updatedAt,
           'If-None-Match': createEtag(query),
           Authorization: `Basic ${selfToken}`
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -239,7 +254,7 @@ describe(`${COMMON_API} test`, function() {
       it(`get the comment detail without self info success and hope return the status of 304 but the content has edited`, function(done) {
 
         const query = {
-          _id: result._id.toString()
+          _id: commentId.toString()
         }
 
         Request
@@ -247,16 +262,13 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': new Date(Day(updatedAt).valueOf - 10000000),
           'If-None-Match': createEtag(query),
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -268,26 +280,23 @@ describe(`${COMMON_API} test`, function() {
 
         const query = {
           currPage: 0,
-          _id: result._id.toString()
+          _id: commentId.toString()
         }
 
         Request
         .get(COMMON_API)
         .query({
-          _id: result._id.toString()
+          _id: commentId.toString()
         })
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': new Date(Day(updatedAt).valueOf - 10000000),
           'If-None-Match': createEtag(query),
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -302,7 +311,7 @@ describe(`${COMMON_API} test`, function() {
 
     //   it(`get the comment detail width self info fail because the comment id is not found`, function(done) {
 
-    //     const _id = result._id.toString()
+    //     const _id = commentId.toString()
 
     //     Request
     //     .get(COMMON_API)
@@ -329,7 +338,7 @@ describe(`${COMMON_API} test`, function() {
     //     Request
     //     .get(COMMON_API)
     //     .query({
-    //       _id: result._id.slice(1)
+    //       _id: commentId.slice(1)
     //     })
     //     .set({
     //       Accept: 'Application/json',

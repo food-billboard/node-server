@@ -103,29 +103,29 @@ describe(`${COMMON_API} test`, function() {
     
     describe(`get rank type list success test -> ${COMMON_API}`, function() {
 
-      // it(`get rank type list success`, function(done) {
+      it(`get rank type list success`, function(done) {
 
-      //   Request
-      //   .get(COMMON_API)
-      //   .set({
-      //     Accept: 'Application/json',
-      //   })
-      //   .expect(200)
-      //   .expect('Content-Type', /json/)
-      //   .end(function(err, res) {
-      //     if(err) return done(err)
-      //     const { res: { text } } = res
-      //     let obj
-      //     try{
-      //       obj = JSON.parse(text)
-      //     }catch(_) {
-      //       console.log(_)
-      //     }
-      //     responseExpect(obj)
-      //     done()
-      //   })
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'Application/json',
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj)
+          done()
+        })
 
-      // })
+      })
 
       it(`get rank list success and return the status of 304`, function(done) {
 

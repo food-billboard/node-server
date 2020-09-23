@@ -1,6 +1,8 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateClassify, mockCreateImage, Request, commonValidate } = require('@test/utils')
+const { mockCreateClassify, mockCreateImage, Request, commonValidate, createEtag } = require('@test/utils')
+const { ClassifyModel, ImageModel } = require('@src/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/classify/specDropList'
 
@@ -32,26 +34,23 @@ describe(`${COMMON_API} test`, function() {
     
     describe(`get classify type list success test -> ${COMMON_API}`, function() {
 
-      let classifyDatabase
-      let imageDatabase
       let result
   
       before(function(done) {
         const { model } = mockCreateImage({
           src: COMMON_API
         })
-        imageDatabase = model
-        imageDatabase.save()
+
+        model.save()
         .then(data => {
           const { model } = mockCreateClassify({
             name: COMMON_API,
-            match: [],
             icon: data._id
           })
-          classifyDatabase = model
-          return classifyDatabase.save()
+
+          return model.save()
         })
-        .then(function() {
+        .then(function(data) {
           result = data
           done()
         })
@@ -63,10 +62,10 @@ describe(`${COMMON_API} test`, function() {
       after(function(done) {
   
         Promise.all([
-          classifyDatabase.deleteOne({
+          ClassifyModel.deleteOne({
             name: COMMON_API
           }),
-          imageDatabase.deleteOne({
+          ImageModel.deleteOne({
             src: COMMON_API
           })
         ])
@@ -87,7 +86,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({ 'Content-Type': /json/ })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -110,12 +109,11 @@ describe(`${COMMON_API} test`, function() {
         .set({
           Accept: 'Application/json',
           'If-Modified-Since': result.updatedAt,
+          'If-None-Match': createEtag({})
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag({}))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -130,12 +128,32 @@ describe(`${COMMON_API} test`, function() {
         .set({
           Accept: 'Application/json',
           'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-None-Match': createEtag({})
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag({}))
+        .end(function(err, _) {
+          if(err) return done(err)
+          done()
         })
+
+      })
+
+      it(`get classify type list success and hope return the status of 304 but the params of query is change`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'Application/json',
+          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-None-Match': createEtag({
+            count: 10
+          })
+        })
+        .expect(200)
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag({}))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -147,23 +165,21 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get classify type list fail test -> ${COMMON_API}`, function() {
 
-      it(`get classify type list fail because the list's length is 0`, function(done) {
+      // it(`get classify type list fail because the list's length is 0`, function(done) {
 
-        Request
-        .get(COMMON_API)
-        .set({
-          Accept: 'Application/json'
-        })
-        .expect(404)
-        .expect({
-          'Content-Type': /json/
-        })
-        .end(function(err, _) {
-          if(err) return done(err)
-          done()
-        })
+      //   Request
+      //   .get(COMMON_API)
+      //   .set({
+      //     Accept: 'Application/json'
+      //   })
+      //   .expect(404)
+      //   .expect('Content-Type', /json/)
+      //   .end(function(err, _) {
+      //     if(err) return done(err)
+      //     done()
+      //   })
 
-      })
+      // })
 
     })
 

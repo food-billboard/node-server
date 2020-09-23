@@ -67,7 +67,7 @@ describe(`${COMMON_API} test`, function() {
 
         Request
         .get(COMMON_API)
-        .query(count, 10)
+        .query('count', 10)
         .set({
           Accept: 'Application/json'
         })

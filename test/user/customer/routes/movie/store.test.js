@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, mockCreateMovie, mockCreateClassify, Request, createEtag } = require('@test/utils')
+const { UserModel, MovieModel, ClassifyModel } = require('@src/utils')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
 
@@ -48,17 +49,16 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get another user store movie list without self info test -> ${COMMON_API}`, function() {
 
-    let userDatabase
-    let movieDatabase
-    let classifyDatabase
     let result
+    let userId
+    let updatedAt
 
     before(function(done) {
       const { model } = mockCreateClassify({
         name: COMMON_API
       })
-      classifyDatabase = model
-      classifyDatabase.save()
+
+      model.save()
       .then(data => {
         const { model } = mockCreateMovie({
           name: COMMON_API,
@@ -66,7 +66,7 @@ describe(`${COMMON_API} test`, function() {
             classify: [ data._id ]
           }
         })
-        movieDatabase = model
+
         model.save()
       })
       .then(function(data) {
@@ -74,11 +74,12 @@ describe(`${COMMON_API} test`, function() {
           username: COMMON_API,
           glance: [ data._id ]
         })
-        userDatabase = model
-        return userDatabase.save()
+
+        return model.save()
       })
       .then(function(data) {
         result = data
+        userId = result._id
         done()
       })
       .catch(err => {
@@ -88,13 +89,13 @@ describe(`${COMMON_API} test`, function() {
 
     after(function(done) {
       Promise.all([
-        userDatabase.deleteOne({
+        UserModel.deleteOne({
           username: COMMON_API
         }),
-        movieDatabase.deleteOne({
+        MovieModel.deleteOne({
           name: COMMON_API
         }),
-        classifyDatabase.deleteOne({
+        ClassifyModel.deleteOne({
           name: COMMON_API
         })
       ])
@@ -108,11 +109,33 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get another user store movie list without self info success test -> ${COMMON_API}`, function() {
 
+      before(async function() {
+
+        updatedAt = await UserModel.findOne({
+          username: COMMON_API
+        })
+        .select({
+          _id: 0,
+          updatedAt: 1
+        })
+        .exec()
+        .then(data => {
+          return data._doc.updatedAt
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          return false
+        })
+
+        return !!updatedAt ? Promise.resolve() : Promise.reject()
+
+      })
+
       it(`get another user store movie list without self info success`, function(done) {
 
         Request
         .get(COMMON_API)
-        .query('_id', userDatabase._id.toString())
+        .query('_id', userId.toString())
         .set('Accept', 'Application/json')
         .expect(200)
         .expect('Content-Type', /json/)
@@ -134,7 +157,7 @@ describe(`${COMMON_API} test`, function() {
       it(`get another user store movie list without self info success and return the status 304`, function(done) {
 
         const query = {
-          _id: userDatabase._id.toString()
+          _id: userId.toString()
         }
         
         Request
@@ -142,15 +165,12 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': userDatabase.updatedAt,
+          'If-Modified-Since': updatedAt,
           'If-None-Match': createEtag(query)
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': userDatabase.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -164,7 +184,7 @@ describe(`${COMMON_API} test`, function() {
       
       it(`get another user store movie list without self info fail because the user id is not found`, function(done) {
         
-        const errorId = result._id.toString()
+        const errorId = userId.toString()
 
         Request
         .get(COMMON_API)
@@ -183,7 +203,7 @@ describe(`${COMMON_API} test`, function() {
         
         Request
         .get(COMMON_API)
-        .query({ _id: result._id.toString().slice(1) })
+        .query({ _id: userId.toString().slice(1) })
         .set('Accept', 'Appication/json')
         .expect(400)
         .expect('Content-Type', /json/)

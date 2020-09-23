@@ -29,11 +29,11 @@ router
     $inc: { glance: 1 }
   })
   .select({
-    updatedAt: 1,
     source_type: 0,
     stauts: 0,
     related_to: 0,
-    barrage: 0
+    barrage: 0,
+    __v: 0
   })
   .populate({
     path: 'comment',
@@ -110,7 +110,7 @@ router
   .then(notFound)
   .then(data => {
     const { ...nextData } = data
-    let newDate = {  
+    let newData = {  
       ...nextData,
       store: false
     }
@@ -122,8 +122,9 @@ router
       total_rate,
       rate_person,
       same_film,
+      video: { _doc: { updatedAt, ...nextVideo } }={},
       ...nextNewData
-    } = newDate
+    } = newData
     const {
       actor,
       director,
@@ -133,37 +134,42 @@ router
       ...nextInfo
     } = info
 
+    const rate = total_rate / rate_person
+
     return {
-      ...nextNewData,
-      rate: total_rate/ rate_person,
-      info: {
-        ...nextInfo,
-        actor,
-        director,
-        district,
-        classify,
-        language
-      },
-      comment: comment.map(c => {
-        const { _doc: { user_info, ...nextC } } = c
-        const { _doc: { avatar, ...nextUserInfo } } = user_info
-        return {
-          ...nextC,
-          user_info: {
-            ...nextUserInfo,
-            avatar: avatar ? avatar.src : null
+      data: {
+        ...nextNewData,
+        rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
+        info: {
+          ...nextInfo,
+          actor,
+          director,
+          district,
+          classify,
+          language
+        },
+        video: nextVideo,
+        comment: comment.map(c => {
+          const { _doc: { user_info, ...nextC } } = c
+          const { _doc: { avatar, ...nextUserInfo } } = user_info
+          return {
+            ...nextC,
+            user_info: {
+              ...nextUserInfo,
+              avatar: avatar ? avatar.src : null
+            }
           }
-        }
-      }),
-      images: images.map(i => i && i.src),
-      poster: poster ? poster.src : null,
-      same_film: same_film.map(s => {
-        const { _doc: { film, ...nextS } } = s
-        return {
-          name: film ? film.name : null,
-          ...nextS
-        }
-      })
+        }),
+        images: images.map(i => i && i.src),
+        poster: poster ? poster.src : null,
+        same_film: same_film.map(s => {
+          const { _doc: { film, ...nextS } } = s
+          return {
+            name: film ? film.name : null,
+            ...nextS
+          }
+        })
+      }
     }
 
   })

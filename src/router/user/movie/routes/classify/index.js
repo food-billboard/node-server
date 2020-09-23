@@ -53,12 +53,12 @@ router
 			poster: 1,
 			name: 1,
 			"info.classify": 1,
-			publish_time: 1,
+			"info.screen_time": 1,
 			hot: 1,
-			author_rate: 1,
+			// author_rate: 1,
 		})
 		.skip((currPage >= 0 && pageSize >= 0) ? pageSize * currPage : 0)
-		.limit(pageSize >= 0 ? pageSize: 0)
+		.limit(pageSize >= 0 ? pageSize: 10)
 		.populate({
 			path: 'info.classify',
 			select: {
@@ -73,10 +73,12 @@ router
 	.then(data => {
 		return {
 			data: data.map(item => {
-				const { _doc: { poster: { src }, ...nextM } } = item
+				const { _doc: { poster: { src }, info: { screen_time, classify }, ...nextM } } = item
 					return {
 						...nextM,
 						poster: src,
+						publish_time: screen_time,
+						classify,
 					}
 			})
 		}
