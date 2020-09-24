@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateGlobal, Request, commonValidate } = require('@test/utils')
+const { GlobalModel } = require('@src/utils')
 
 const COMMON_API = '/api/user/setting/info'
 
@@ -26,15 +27,14 @@ describe(`${COMMON_API} test`, function() {
     
     describe(`get the mini app info success test -> ${COMMON_API}`, function() {
 
-      let database
       let result
   
       before(function(done) {
         const { model } = mockCreateGlobal({
           info: COMMON_API
         })
-        database = model
-        database.save()
+
+        model.save()
         .then(function(data) {
           result = data
           done()
@@ -45,7 +45,7 @@ describe(`${COMMON_API} test`, function() {
       })
   
       after(function(done) {
-        database.deleteOne({
+        GlobalModel.deleteOne({
           info: COMMON_API
         })
         .then(function() {

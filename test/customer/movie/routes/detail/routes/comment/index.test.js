@@ -437,6 +437,28 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get the movie comment list with self info success test -> ${COMMON_API}`, function() {
 
+      beforeEach(async function() {
+
+        updatedAt = await MovieModel.findOne({
+          name: COMMON_API,   
+        })
+        .select({
+          _id: 0,
+          updatedAt: 1
+        })
+        .exec()
+        .then(data => {
+          return data._doc.updatedAt
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          return false
+        })
+
+        return !!updatedAt ? Promise.resolve() : Promise.reject(COMMON_API)
+
+      })
+
       it(`get the movie comment list success`, function(done) {
 
         Request
@@ -476,12 +498,12 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': result.updatedAt,
+          'If-Modified-Since': updatedAt,
           'If-None-Match': createEtag(query),
           Authorization: `Basic ${selfToken}`
         })
         .expect(304)
-        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('Last-Modified', updatedAt.toString())
         .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
@@ -501,12 +523,12 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': new Date(Day(updatedAt).valueOf - 10000000),
           'If-None-Match': createEtag(query),
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('Last-Modified', updatedAt.toString())
         .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
@@ -529,12 +551,12 @@ describe(`${COMMON_API} test`, function() {
         })
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': updatedAt,
           'If-None-Match': createEtag(query),
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('Last-Modified', updatedAt.toString())
         .expect('ETag', createEtag({
           _id: movieId.toString()
         }))

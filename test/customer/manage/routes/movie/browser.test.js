@@ -1,6 +1,8 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, createEtag, commonValidate, mockCreateClassify, mockCreateMovie } = require('@test/utils')
+const { UserModel, ClassifyModel, MovieModel } = require('@src/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/customer/manage/movie/browser'
 
@@ -40,9 +42,7 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get the self browser list test -> ${COMMON_API}`, function() {
 
-    let userDatabase
-    let movieDatabase
-    let classifyDatabase
+    let updatedAt
     let selfToken
     let result
 
@@ -50,9 +50,9 @@ describe(`${COMMON_API} test`, function() {
       const { model } = mockCreateClassify({
         name: COMMON_API
       })
-      classifyDatabase = model
 
-      await classifyDatabase.save()
+
+      await model.save()
       .then(data => {
         const { model } = mockCreateMovie({
           name: COMMON_API,
@@ -60,7 +60,7 @@ describe(`${COMMON_API} test`, function() {
             classify: [ data._id ]
           }
         })
-        movieDatabase = model
+
         model.save()
       })
       .then(function(data) {
@@ -70,8 +70,8 @@ describe(`${COMMON_API} test`, function() {
           store: [ data._id ]
         })
         selfToken = token
-        userDatabase = model
-        return userDatabase.save()
+
+        return model.save()
       })
       .then(function(data) {
         result = data
@@ -87,13 +87,13 @@ describe(`${COMMON_API} test`, function() {
     after(async function() {
       
       Promise.all([
-        userDatabase.deleteOne({
+        UserModel.deleteOne({
           username: COMMON_API
         }),
-        movieDatabase.deleteOne({
+        MovieModel.deleteOne({
           name: COMMON_API
         }),
-        classifyDatabase.deleteOne({
+        ClassifyModel.deleteOne({
           name: COMMON_API
         })
       ])
@@ -107,6 +107,28 @@ describe(`${COMMON_API} test`, function() {
     
     describe(`get the self browser list success test -> ${COMMON_API}`, function() {
 
+      beforeEach(async function() {
+
+        updatedAt = await UserModel.findOne({
+          _id: userId,   
+        })
+        .select({
+          _id: 0,
+          updatedAt: 1
+        })
+        .exec()
+        .then(data => {
+          return data._doc.updatedAt
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          return false
+        })
+
+        return !!updatedAt ? Promise.resolve() : Promise.reject(COMMON_API)
+
+      })
+
       it(`get the self browser list success`, function(done) {
 
         Request
@@ -116,9 +138,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -140,16 +160,13 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': result.updatedAt,
+          'If-Modified-Since': updatedAt,
           'If-None-Match': createEtag({}),
           Authorization: `Basic ${selfToken}`
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag({})
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag({}))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -164,16 +181,13 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': new Date(Day(updatedAt).valueOf - 10000000),
           'If-None-Match': createEtag({}),
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag({})
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag({}))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -192,16 +206,13 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': updatedAt,
           'If-None-Match': createEtag({}),
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()

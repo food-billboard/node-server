@@ -33,7 +33,7 @@ function mockCreateUser(values={}) {
   const password = '1234567890'
   const mobile = values.mobile || parseInt(`13${new Array(9).fill(0).map(_ => Math.floor(Math.random() * 10)).join('')}`)
   const encodedPwd = encoded(password)
-  const token = signToken({ mobile, password: encodedPwd }, {expiresIn: '10s'})
+  const token = signToken({ mobile, password: encodedPwd }, {expiresIn: '5s'})
 
   let baseModel = {
     mobile,
@@ -88,6 +88,7 @@ function mockCreateMovie(values={}) {
     author_description: '作者描述',
     author_rate: 0,
     author: ObjectId('8f63270f005f1c1a0d9448ca'),
+    poster: ObjectId('8f63270f005f1c1a0d9448ca'),
     hot:0,
     rate_person: 0,
     total_rate: 0,

@@ -292,7 +292,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get the movie detail info with self info success test -> ${COMMON_API}`, function() {
 
-      before(async function() {
+      beforeEach(async function() {
 
         updatedAt = await MovieModel.findOne({
           _id: movieId
@@ -558,19 +558,21 @@ describe(`${COMMON_API} test`, function() {
         const res = await new Promise((resolve, reject) => {
           setTimeout(() => {
             resolve()
-          }, 5000)
+          }, 7000)
         })
-        .then(async (_) => {
-          selfToken = signToken()
-          await Request
-          .get(COMMON_API)
+        .then((_) => {
+ 
+          return Request
+          .get(`${COMMON_API}/comment`)
+          .query({
+            _id: movieId.toString()
+          })
           .set({
             Accept: 'Application/json',
             Authorization: `Basic ${selfToken}`
           })
           .expect(401)
           .expect('Content-Type', /json/)
-          return true
         })
         .catch(err => {
           console.log('oops: ', err)

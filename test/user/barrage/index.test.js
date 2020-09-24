@@ -38,7 +38,7 @@ describe(`${COMMON_API} test`, function() {
     const values = {
       origin: new ObjectId('56aa3554e90911b64c36a424'),
       user: new ObjectId('56aa3554e90911b64c36a425'),
-      content: ''
+      content: COMMON_API
     }
 
     before(function(done) {

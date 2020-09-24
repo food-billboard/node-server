@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, Request, createEtag } = require('@test/utils')
-const { commonValidate } = require('../../utils')
+const { mockCreateUser, Request, createEtag, commonValidate } = require('@test/utils')
+const { UserModel } = require('@src/utils')
 
 const COMMON_API = '/api/user/customer'
 
@@ -30,17 +30,19 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get another userinfo and not self and without self info test -> ${COMMON_API}`, function() {
 
-    let database
+    let updatedAt
+    let userId
     let result
 
     before(function(done) {
       const { model } = mockCreateUser({
         username: '测试名字'
       })
-      database = model
-      database.save()
+
+      model.save()
       .then(function(data) {
         result = data
+        userId = data._id
         done()
       })
       .catch(err => {
@@ -49,7 +51,7 @@ describe(`${COMMON_API} test`, function() {
     })
 
     after(function(done) {
-      database.deleteOne({
+      UserModel.deleteOne({
         username: '测试名字'
       })
       .then(function() {
@@ -58,6 +60,28 @@ describe(`${COMMON_API} test`, function() {
     })
 
     describe(`get another userinfo and not self and without self info success test -> ${COMMON_API}`, function() {
+
+      beforeEach(async function() {
+
+        updatedAt = await UserModel.findOne({
+          _id: userId,   
+        })
+        .select({
+          _id: 0,
+          updatedAt: 1
+        })
+        .exec()
+        .then(data => {
+          return data._doc.updatedAt
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          return false
+        })
+
+        return !!updatedAt ? Promise.resolve() : Promise.reject(COMMON_API)
+
+      })
 
       it(`get another userinfo and not self and without self info success`, function(done) {
 

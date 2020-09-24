@@ -31,8 +31,6 @@ function responseExpect(res, validate=[]) {
 
 describe(`${COMMON_API} test`, function() {
 
-  let selfDatabase
-  let userDatabase
   let result
   let selfToken
   let update
@@ -46,8 +44,7 @@ describe(`${COMMON_API} test`, function() {
     const { model:user } = mockCreateUser({
       username: COMMON_API
     })
-    selfDatabase = self
-    userDatabase = user
+
     selfToken = token
 
     Promise.all([
@@ -56,7 +53,7 @@ describe(`${COMMON_API} test`, function() {
     ])
     .then(([self, user]) => {
       result = user
-      selfDatabase.updateOne({
+      UserModel.updateOne({
         mobile: 15632558974
       }, {
         $push: { fans: self._id }

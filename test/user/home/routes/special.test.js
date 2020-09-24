@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateMovie, mockCreateImage, mockCreateSpecial, mockCreateClassify, Request, createEtag, commonValidate } = require('@test/utils')
+const { MovieModel, ImageModel, SpecialModel, ClassifyModel } = require('@src/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/user/home/special'
@@ -46,11 +47,6 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get home special list test -> ${COMMON_API}`, function() {
 
-    let imageDatabase
-    let classifyDatabase
-    let movieDatabase
-    let specialDatabase
-    let specialTestDatabase
     let imageId
     let result
     let resultTest
@@ -62,11 +58,10 @@ describe(`${COMMON_API} test`, function() {
       const { model: classify } = mockCreateClassify({
         name: COMMON_API
       })
-      imageDatabase = image
-      classifyDatabase = classify
+
       Promise.all([
-        imageDatabase.save(),
-        classifyDatabase.save()
+        image.save(),
+        classify.save()
       ])
       .then(function([image, classify]) {
         imageId = image._id
@@ -77,8 +72,8 @@ describe(`${COMMON_API} test`, function() {
             classify: [ classify._id ]
           }
         })
-        movieDatabase = model
-        return movieDatabase.save()
+
+        return model.save()
       })
       .then(function(data) {
         const { model } = mockCreateSpecial({
@@ -93,11 +88,10 @@ describe(`${COMMON_API} test`, function() {
             classify: [ classify._id ]
           }
         })
-        specialDatabase = model
-        specialTestDatabase = testModel
+
         return Promise.all([
-          specialDatabase.save(),
-          specialTestDatabase.save()
+          model.save(),
+          testModel.save()
         ])
       })
       .then(function([data, testData]) {
@@ -112,21 +106,25 @@ describe(`${COMMON_API} test`, function() {
 
     after(function(done) {
       Promise.all([
-        imageDatabase.deleteOne({
+        ImageModel.deleteOne({
           src: COMMON_API
         }),
-        movieDatabase.deleteOne({
+        MovieModel.deleteOne({
           name: COMMON_API
         }),
-        specialDatabase.deleteOne({
+        SpecialModel.deleteMany({
+          $or: [
+            {
+              name: COMMON_API
+            },
+            {
+              name: `${COMMON_API}-test`
+            }
+          ]
+        }),
+        ClassifyModel.deleteOne({
           name: COMMON_API
         }),
-        classifyDatabase.deleteOne({
-          name: COMMON_API
-        }),
-        specialTestDatabase.deleteOne({
-          name: `${COMMON_API}-test`
-        })
       ])
       .then(function() {
         done()

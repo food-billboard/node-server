@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateClassify, mockCreateMovie, mockCreateImage, Request, commonValidate, createEtag } = require('@test/utils')
-const { ClassifyModel, MovieModel } = require('@src/utils')
+const { ClassifyModel, MovieModel, ImageModel } = require('@src/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/classify'
@@ -38,8 +38,6 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get classify list test -> ${COMMON_API}`, function() {
 
-    let classifyDatabase
-    let imageDatabase
     let imageId
     let result
     let updatedAt
@@ -48,8 +46,8 @@ describe(`${COMMON_API} test`, function() {
       const { model } = mockCreateImage({
         src: COMMON_API
       })
-      imageDatabase = model
-      imageDatabase.save()
+
+      model.save()
       .then(function(data) {
         imageId = data._id
         const { model } = mockCreateMovie({
@@ -66,8 +64,8 @@ describe(`${COMMON_API} test`, function() {
           name: COMMON_API,
           // match: [data._id]
         })
-        classifyDatabase = model
-        return classifyDatabase.save()
+
+        return model.save()
       })
       .then(function(data) {
         result = data
@@ -92,10 +90,10 @@ describe(`${COMMON_API} test`, function() {
         MovieModel.deleteOne({
           name: COMMON_API
         }),
-        classifyDatabase.deleteOne({
+        ClassifyModel.deleteOne({
           name: COMMON_API
         }),
-        imageDatabase.deleteOne({
+        ImageModel.deleteOne({
           src: COMMON_API
         })
       ])

@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateMovie, mockCreateImage, mockCreateSpecial, Request, commonValidate } = require('@test/utils')
+const { MovieModel, ImageModel, SpecialModel } = require('@src/utils')
 
 const COMMON_API = '/api/user/home/swiper'
 
@@ -20,8 +21,6 @@ function responseExpect(res, validate=[]) {
     })
   })
 
-
-
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
       typeof valid == 'function' && valid(target)
@@ -35,9 +34,6 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get home swiper list test -> ${COMMON_API}`, function() {
 
-    let imageDatabase
-    let movieDatabase
-    let specialDatabase
     let movieResult
     let specialResult
 
@@ -45,8 +41,8 @@ describe(`${COMMON_API} test`, function() {
       const { model: image } = mockCreateImage({
         src: COMMON_API
       })
-      imageDatabase = image
-      imageDatabase.save()
+
+      image.save()
       .then(function(image) {
         imageId = image._id
         const { model:movie } = mockCreateMovie({
@@ -57,11 +53,10 @@ describe(`${COMMON_API} test`, function() {
           name: COMMON_API,
           poster: imageId
         })
-        movieDatabase = movie
-        specialDatabase = special
+
         return Promise.all([
-          movieDatabase.save(),
-          specialDatabase.save()
+          movie.save(),
+          special.save()
         ])
       })
       .then(function([movie, special]) {
@@ -76,13 +71,13 @@ describe(`${COMMON_API} test`, function() {
 
     after(function(done) {
       Promise.all([
-        imageDatabase.deleteOne({
+        ImageModel.deleteOne({
           src: COMMON_API
         }),
-        movieDatabase.deleteOne({
+        MovieModel.deleteOne({
           name: COMMON_API
         }),
-        specialDatabase.deleteOne({
+        SpecialModel.deleteOne({
           name: COMMON_API
         }),
       ])
@@ -102,9 +97,7 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .set('Accept', 'Application/json')
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res

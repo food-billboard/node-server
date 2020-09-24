@@ -6,6 +6,7 @@ const router = new Router()
 
 router
 .get('/', async (ctx) => {
+
   const check = Params.query(ctx,
     {
       name: "_id",
@@ -74,27 +75,29 @@ router
   .then(data => {
     const { comment, avatar, ...nextData } = data
     return {
-      user_info: {
-        ...nextData,
-        avatar: avatar ? avatar.src : null
-      },
-      data: comment.map(c => {
-        const { _doc: { content: { image, video, ...nextContent }, source_type, source={}, ...nextC } } = c
-        const { _doc: { name, content, ...nextSource }={} } = source
-        return {
-          ...nextC,
-          source: {
-            ...nextSource,
-            type: source_type,
-            content: name ? name : ( content ? content: null )
-          },
-          content: {
-            ...nextContent,
-            image: image.filter(i => !!i.src).map(i => i.src),
-            video: video.filter(v => !!v.src).map(v => v.src)
+      data: {
+        user_info: {
+          ...nextData,
+          avatar: avatar ? avatar.src : null
+        },
+        data: comment.map(c => {
+          const { _doc: { content: { image, video, ...nextContent }, source_type, source={}, ...nextC } } = c
+          const { _doc: { name, content, ...nextSource }={} } = source
+          return {
+            ...nextC,
+            source: {
+              ...nextSource,
+              type: source_type,
+              content: name ? name : ( content || null )
+            },
+            content: {
+              ...nextContent,
+              image: image.filter(i => !!i.src).map(i => i.src),
+              video: video.filter(v => !!v.src).map(v => v.src)
+            }
           }
-        }
-      })
+        })
+      }
     }
   })
   .catch(dealErr(ctx))

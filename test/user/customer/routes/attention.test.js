@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, createEtag } = require('@test/utils')
+const { UserModel } = require('@src/utils')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
 
@@ -10,8 +11,9 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('array')
-  target.forEach(item => {
+  expect(target).to.be.a('object').and.that.includes.all.keys('attentions')
+  expect(target.attentions).to.be.a('array')
+  target.attentions.forEach(item => {
     expect(item).to.be.a('object').and.includes.all.keys('avatar', 'username', '_id')
     //avatar
     expect(item).to.have.a.property('avatar').and.satisfy(function(target) {
@@ -38,14 +40,13 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get another user attention test -> ${COMMON_API}`, function() {
 
-    let database
     let attentionId
     let result
 
     before(function(done) {
 
       const { model } = mockCreateUser({
-        username: '关注用户测试名字',
+        username: COMMON_API,
         mobile: 11256981236
       })
       model.save()
@@ -53,13 +54,13 @@ describe(`${COMMON_API} test`, function() {
         const { _id } = data
         attentionId = _id
         const { model } = mockCreateUser({
-          username: '测试名字',
+          username: COMMON_API,
           attentions: [
             _id
           ]
         })
-        database = model
-        return database.save()
+
+        return model.save()
       })
       .then(function(data) {
         result = data
@@ -71,8 +72,9 @@ describe(`${COMMON_API} test`, function() {
     })
 
     after(function(done) {
-      database.deleteMany({
-        _id: { $in: [ attentionId, result._id ] }
+      UserModel.deleteMany({
+        _id: { $in: [ attentionId, result._id ] },
+        username: COMMON_API
       })
       .then(function() {
         done()
@@ -107,7 +109,7 @@ describe(`${COMMON_API} test`, function() {
       it(`get another user attention success and return the status of 304`, function(done) {
 
         const query = {
-          _id: result._id.toStrng()
+          _id: result._id.toString()
         }
 
         Request
@@ -117,8 +119,7 @@ describe(`${COMMON_API} test`, function() {
         .set('If-Modified-Since', result.updatedAt)
         .set('If-None-Match', createEtag(query))
         .expect(304)
-        .expect('Content-Type', /json/)
-        .expect('Last-Modidifed', result.updatedAt)
+        .expect('Last-Modified', result.updatedAt.toString())
         .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)

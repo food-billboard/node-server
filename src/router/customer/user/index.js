@@ -121,7 +121,9 @@ router
     })
     if(!found) return Promise.reject({ errMsg: 'not found', status: 404 })
     if(mine && fans.some(f => f.equals(mine))) result.like = true
-    return result
+    return {
+      data: result
+    }
   })
   .catch(dealErr(ctx))
 
@@ -137,9 +139,7 @@ router
 
   responseDataDeal({
     ctx,
-    data: {
-      data
-    }, 
+    data, 
   })
 
 })

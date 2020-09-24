@@ -81,7 +81,6 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`post the info for register and verify fail test -> ${COMMON_API}`, function() {
 
-      let database
       let another
       let result
 
@@ -90,8 +89,8 @@ describe(`${COMMON_API} test`, function() {
           username: COMMON_API
         })
         another = nextData
-        database = model
-        database.save()
+
+        model.save()
         .then(function(data) {
           result = data
           done()
@@ -102,7 +101,7 @@ describe(`${COMMON_API} test`, function() {
       })
 
       after(function(done) {
-        database.deleteOne({
+        UserModel.deleteOne({
           username: COMMON_API
         })
         .then(function() {
@@ -125,7 +124,6 @@ describe(`${COMMON_API} test`, function() {
         .expect(403)
         .expect('Content-Type', /json/)
         .end(function(err, _) {
-          console.log(err, 11111111)
           if(err) return done(err)
           done()
         })

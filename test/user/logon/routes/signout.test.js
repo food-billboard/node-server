@@ -8,7 +8,6 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`post for logout test -> ${COMMON_API}`, function() {
 
-    let database
     let another
     let result
 
@@ -17,8 +16,8 @@ describe(`${COMMON_API} test`, function() {
         username: COMMON_API
       })
       another = nextData
-      database = model
-      database.save()
+
+      model.save()
       .then(function(data) {
         result = data
         done()
@@ -29,7 +28,7 @@ describe(`${COMMON_API} test`, function() {
     })
 
     after(function(done) {
-      database.deleteOne({
+      UserModel.deleteOne({
         username: COMMON_API
       })
       .then(function() {

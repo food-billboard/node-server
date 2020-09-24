@@ -54,22 +54,22 @@ router
     return CommentModel.findOne({
       _id: commentId
     })
-  })
-  .select({
-    source: 0,
-  })
-  .populate({
-    path: 'sub_comments',
-    select: {
-      sub_comments: 0,
+    .select({
       source: 0,
-    },
-    options: {
-      ...(pageSize >= 0 ? { limit: pageSize } : {}),
-      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
-    },
+    })
+    .populate({
+      path: 'sub_comments',
+      select: {
+        sub_comments: 0,
+        source: 0,
+      },
+      options: {
+        ...(pageSize >= 0 ? { limit: pageSize } : {}),
+        ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
+      },
+    })
+    .exec()
   })
-  .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {

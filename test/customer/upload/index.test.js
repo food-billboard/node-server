@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, mockCreateImage, STATIC_FILE_PATH } = require('@test/utils')
-const { ImageModel, fileEncoded } = require('@src/utils')
+const { ImageModel, fileEncoded, UserModel } = require('@src/utils')
 const fs = require('fs')
 const root = require('app-root-path')
 const path = require('path')
@@ -10,7 +10,6 @@ const COMMON_API = '/api/customer/upload'
 
 describe(`${COMMON_API} test`, function() {
 
-  let userDatabase
   let selfToken
   let userId
   let mediaPath = path.resolve(root.path, 'test/assets/test-image.png')
@@ -26,10 +25,9 @@ describe(`${COMMON_API} test`, function() {
       username: COMMON_API,
     })
     
-    userDatabase = model
     selfToken = token
 
-    await userDatabase.save()
+    await model.save()
     .then(data => {
       userId = data._id
     })
@@ -50,7 +48,7 @@ describe(`${COMMON_API} test`, function() {
   after(async function() {
 
     await Promise.all([
-      userDatabase.deleteOne({
+      UserModel.deleteOne({
         username: COMMON_API
       }),
       ImageModel.deleteMany({
@@ -89,9 +87,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'application/json',
         })
         .expect(401)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -110,9 +106,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(401)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -137,9 +131,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(400)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -179,9 +171,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(400)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -209,9 +199,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(413)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -229,9 +217,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(413)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -284,9 +270,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -304,9 +288,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -396,9 +378,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -416,9 +396,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -494,9 +472,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -514,9 +490,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()

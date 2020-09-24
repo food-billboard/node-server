@@ -1,6 +1,8 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, createEtag, commonValidate, mockCreateClassify, mockCreateMovie } = require('@test/utils')
+const { UserModel, ClassifyModel, MovieModel } = require('@src/utils') 
+const Day = require('dayjs')
 
 const COMMON_API = '/api/customer/manage/movie/store'
 
@@ -8,9 +10,9 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('object').and.that.have.a.property('browser')
+  expect(target).to.be.a('object').and.that.have.a.property('store')
 
-  target.browser.forEach(item => {
+  target.store.forEach(item => {
     expect(item).to.be.a('object').and.includes.all.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot')
     commonValidate.string(item.description, function() { return true })
     commonValidate.string(item.name)
@@ -20,7 +22,7 @@ function responseExpect(res, validate=[]) {
     commonValidate.number(item.rate)
     //classify
     expect(item.classify).to.be.a('array').and.that.lengthOf.above(0)
-    item.forEach(classify => {
+    item.classify.forEach(classify => {
       expect(classify).to.be.a('object').and.that.has.a.property('name').and.that.is.a('string')
     })
     commonValidate.time(item.publish_time) 
@@ -40,18 +42,17 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get the self store list test -> ${COMMON_API}`, function() {
 
-    let userDatabase
-    let movieDatabase
-    let classifyDatabase
     let selfToken
+    let updatedAt
+    let userId
     let result
 
     before(async function() {
       const { model } = mockCreateClassify({
         name: COMMON_API
       })
-      classifyDatabase = model
-      await classifyDatabase.save()
+
+      await model.save()
       .then(data => {
         const { model } = mockCreateMovie({
           name: COMMON_API,
@@ -59,8 +60,8 @@ describe(`${COMMON_API} test`, function() {
             classify: [ data._id ]
           }
         })
-        movieDatabase = model
-        model.save()
+
+        return model.save()
       })
       .then(function(data) {
         const { model, token } = mockCreateUser({
@@ -69,11 +70,12 @@ describe(`${COMMON_API} test`, function() {
           store: [ data._id ]
         })
         selfToken = token
-        userDatabase = model
-        return userDatabase.save()
+
+        return model.save()
       })
       .then(function(data) {
         result = data
+        userId = result._id
       })
       .catch(err => {
         console.log('oops: ', err)
@@ -85,13 +87,13 @@ describe(`${COMMON_API} test`, function() {
 
     after(async function() {
       await Promise.all([
-        userDatabase.deleteOne({
+        UserModel.deleteOne({
           username: COMMON_API
         }),
-        movieDatabase.deleteOne({
+        MovieModel.deleteOne({
           name: COMMON_API
         }),
-        classifyDatabase.deleteOne({
+        ClassifyModel.deleteOne({
           name: COMMON_API
         })
       ])
@@ -105,6 +107,28 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get the self store list success test -> ${COMMON_API}`, function() {
 
+      beforeEach(async function() {
+
+        updatedAt = await UserModel.findOne({
+          username: COMMON_API
+        })
+        .select({
+          _id: 0,
+          updatedAt: 1
+        })
+        .exec()
+        .then(data => {
+          return data._doc.updatedAt
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          return false
+        })
+
+        return !!updatedAt ? Promise.resolve() : Promise.reject()
+
+      })
+
       it(`get the self store list success`, function(done) {
 
         Request
@@ -114,10 +138,8 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-        })
-        .end(function(err, _) {
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
           let obj
@@ -138,16 +160,13 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': result.updatedAt,
+          'If-Modified-Since': updatedAt,
           'If-None-Match': createEtag({}),
           Authorization: `Basic ${selfToken}`
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag({})
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag({}))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -162,16 +181,13 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': new Date(Day(updatedAt).valueOf - 10000000),
           'If-None-Match': createEtag({}),
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag({})
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag({}))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -190,16 +206,13 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': new Date(Day(updatedAt).valueOf - 10000000),
           'If-None-Match': createEtag({}),
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()

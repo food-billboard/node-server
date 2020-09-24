@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, commonValidate } = require('@test/utils')
-const { getToken } = require('@src/utils')
+const { getToken, UserModel } = require('@src/utils')
 
 const COMMON_API = '/api/user/logon/account'
 
@@ -46,8 +46,8 @@ describe(`${COMMON_API} test`, function() {
         username: COMMON_API
       })
       another = nextData
-      database = model
-      database.save()
+
+      model.save()
       .then(function(data) {
         result = data
         done()
@@ -58,7 +58,7 @@ describe(`${COMMON_API} test`, function() {
     })
 
     after(function(done) {
-      database.deleteOne({
+      UserModel.deleteOne({
         username: COMMON_API
       })
       .then(function() {

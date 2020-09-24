@@ -62,6 +62,8 @@ const judgeCache = (ctx, modifiedTime, etagValidate) => {
   //设置last-modified
   !!modified && ctx.set({ 'Last-Modified': modifiedTime.toString() })
 
+  console.log(new Date(modified).toString() == new Date(modifiedTime).toString())
+
   let queryEmpty = false
 
   //空查询参数处理
@@ -180,6 +182,7 @@ const responseDataDeal = ({
         const updatedAt = filterField(data)
         
         if(!!updatedAt && judgeCache(ctx, updatedAt, etagValidate)) {
+          console.log('缓存')
           ctx.status = 304
           response = {
             ...response,

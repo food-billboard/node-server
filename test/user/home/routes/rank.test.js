@@ -8,8 +8,7 @@ const {
   Request, 
   commonValidate 
 } = require('@test/utils')
-const mongoose = require('mongoose')
-const { Types: { ObjectId } } = mongoose
+const { RankModel, ClassifyModel, DistrictModel, MovieModel } = require('@src/utils')
 
 const COMMON_API = '/api/user/home/rank'
 
@@ -50,12 +49,6 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get home rank list test -> ${COMMON_API}`, function() {
 
-    let movieDatabase
-    let rankClassifyDatabase
-    let rankDistrictDatabase
-    let classifyDatabase
-    let districtDatabase
-
     before(function(done) {
 
       const { model: classify } = mockCreateClassify({
@@ -65,12 +58,9 @@ describe(`${COMMON_API} test`, function() {
         name: COMMON_API
       })
 
-      classifyDatabase = classify
-      districtDatabase = district
-
       Promise.all([
-        classifyDatabase.save(),
-        districtDatabase.save()
+        classify.save(),
+        district.save()
       ])
       .then(([classify, district]) => {
         const classifyId = classify._id
@@ -84,28 +74,24 @@ describe(`${COMMON_API} test`, function() {
           }
         })
         const { model: classifyRank } = mockCreateRank({
-          name: COMMON_API,
+          name: `${COMMON_API}-classify`,
           match_field: {
             _id: classifyId,
             field: 'classify'
           }
         })
         const { model: districtRank } = mockCreateRank({
-          name: COMMON_API,
+          name: `${COMMON_API}-district`,
           match_field: {
             _id: districtId,
             field: 'district'
           }
         })
 
-        movieDatabase = movie
-        rankClassifyDatabase = classifyRank
-        rankDistrictDatabase = districtRank
-
         return Promise.all([
-          movieDatabase.save(),
-          rankClassifyDatabase.save(),
-          rankDistrictDatabase.save()
+          movie.save(),
+          classifyRank.save(),
+          districtRank.save()
         ])
 
       })
@@ -121,19 +107,23 @@ describe(`${COMMON_API} test`, function() {
     after(function(done) {
 
       Promise.all([
-        movieDatabase.deleteOne({
+        MovieModel.deleteOne({
           name: COMMON_API
         }),
-        rankClassifyDatabase.deleteOne({
+        RankModel.deleteMany({
+          $or: [
+            {
+              name: `${COMMON_API}-classify`
+            },
+            {
+              name: `${COMMON_API}-district`
+            }
+          ]
+        }),
+        ClassifyModel.deleteOne({
           name: COMMON_API
         }),
-        rankDistrictDatabase.deleteOne({
-          name: COMMON_API
-        }),
-        classifyDatabase.deleteOne({
-          name: COMMON_API
-        }),
-        districtDatabase.deleteOne({
+        DistrictModel.deleteOne({
           name: COMMON_API
         }),
       ])
@@ -156,9 +146,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json',
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           const { res: { text } } = res

@@ -1,7 +1,9 @@
 require('module-alias/register')
-const { mockCreateUser, mockCreateComment, Request, createEtag } = require('@test/utils')
+const { mockCreateUser, mockCreateComment, mockCreateMovie, Request, createEtag, commonValidate } = require('@test/utils')
 const { expect } = require('chai')
 const mongoose = require('mongoose')
+const { CommentModel, UserModel } = require('@src/utils')
+const { MovieModel } = require('../../../../src/utils/mongodb/mongo.lib')
 const { Types: { ObjectId } } = mongoose
 
 const COMMON_API = '/api/user/customer/comment'
@@ -13,42 +15,39 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.includes.all.keys('user_info', 'data')
   //user_info
   expect(target.user_info).is.a('object').and.to.be.includes.all.keys('avatar', '_id', 'username')
-  expect(target.user_info).to.have.a.property('avatar').that.satisfies(function(target) {
-    return target == null ? true : typeof target === 'string'
-  })
-  expect(target.user_info).to.have.a.property('_id').that.is.a('string')
-  expect(target.user_info).to.have.a.property('username').that.is.a('string')
+  commonValidate.poster(target.user_info.avatar)
+  commonValidate.objectId(target.user_info._id)
+  commonValidate.string(target.user_info.username)
   //data
   expect(target.data).is.a('array')
   target.data.forEach((item) => {
-    expect(item).is.a('object').that.includes.all.keys('content', 'createdAt', 'source', 'total_like', '_id')
+    expect(item).is.a('object').that.includes.all.keys('content', 'createdAt', 'source', 'total_like', '_id', 'updatedAt')
     //content
     expect(item).to.be.have.a.property('content').that.is.a('object').and.includes.all.keys('text', 'image', 'video')
-    expect(item.content).to.have.a.property('text').that.is.a('string')
+    commonValidate.string(item.content.text)
     expect(item.content).to.have.a.property('image').that.is.a('array')
     expect(item.content).to.have.a.property('video').that.is.a('array')
     expect(item.content.image.every(media => typeof media === 'string')).to.be.true
     expect(item.content.video.every(media => typeof media === 'string')).to.be.true
     //createdAt
-    expect(item).have.a.property('createdAt').that.is.a('date')
+    commonValidate.time(item.createdAt)
+    commonValidate.time(item.updatedAt)
     //source
-    expect(item).have.a.property('source').that.is.a('object').and.includes.all.keys('type', 'comment', 'content')
-    expect(item.source).have.a.property('comment').that.is.a('string')
-    expect(item.source.comment).to.be.satisfies(function(target) {
-      return ObjectId.isValid(target)
+    expect(item).have.a.property('source').that.is.a('object').and.includes.all.keys('type', 'content', 'updatedAt', '_id')
+    commonValidate.objectId(item.source._id)
+    // commonValidate.objectId(item.source.comment)
+    commonValidate.string(item.source.type, function(target) {
+      return !!~['movie', 'comment'].indexOf(target.toLowerCase())
     })
-    expect(item.source).have.a.property('type').is.a('string').and.satisfies(function(target) {
-      return !!~['movie', 'user'].indexOf(target.toLowerCase())
-    })
-    expect(item.source).have.a.property('content').satisfies(function(target) {
+    expect(item.source.content).to.be.satisfies(function(target) {
+      return typeof target == 'string' || target == null
+      console.log(target, item.source.type.toLowerCase() == 'movie' ? target == null : typeof target === 'string')
       return item.source.type.toLowerCase() == 'movie' ? target == null : typeof target === 'string'
     })
     //total_like
-    expect(item).to.have.a.property('total_like').and.is.a('number')
+    commonValidate.number(item.total_like)
     //_id
-    expect(item).to.have.a.property('_id').and.is.a('string').that.satisfies(function(target) {
-      return ObjectId.isValid(target)
-    })
+    commonValidate.objectId(item._id)
   })
   
   if(Array.isArray(validate)) {
@@ -64,54 +63,77 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get another user comment test -> ${COMMON_API}`, function() {
 
-    let userDatabase
-    let commentDatabase
-    let originCommentDatabase
     let userResult
+    let userId
+    let movieId
+    // let updatedAt
+    let commentId
 
     before(function(done) {
+
+      const { model: movie } = mockCreateMovie({
+        name: COMMON_API
+      })
       
       const { model } = mockCreateUser({
-        username: '测试名字'
+        username: COMMON_API
       })
-      userDatabase = model
-      userDatabase.save()
-      .then(function(data) {
-        userResult = data
 
+      Promise.all([
+        model.save(),
+        movie.save()
+      ])
+      .then(function([user, movie]) {
+        userResult = user
+        userId = user._id
+        movieId = movie._id
         const { model } = mockCreateComment({
-          source: ObjectId('56aa3554e90911b64c36a424'),
+          source_type: 'movie',
+          source: movieId,
           user_info: userResult._id,
+          content: {
+            text: COMMON_API
+          }
         })
         const { model: origin } = mockCreateComment({
+          source_type: 'comment',
           source: ObjectId('56aa3554e90911b64c36a424'),
           user_info: userResult._id,
           content: {
             text: COMMON_API
           }
         })
-        commentDatabase = model
-        originCommentDatabase = origin
+
         return Promise.all([
-          commentDatabase.save(),
-          originCommentDatabase.save()
+          model.save(),
+          origin.save()
         ])
       })
       .then(([comment, origin]) => {
+        commentId = comment._id
         return Promise.all([
-          userDatabase.updateOne({
-            username: '测试名字'
-          }, {
-            $push: { comment: comment._id }
-          }),
-          commentDatabase.updateOne({
+          CommentModel.updateOne({
             user_info: userResult._id,
+            source_type: 'comment',
           }, {
-            source: origin._id
+            source: comment._id
+          }),
+          CommentModel.updateOne({
+            user_info: userResult._id,
+            source_type: 'movie'
+          }, {
+            sub_comments: [origin._id]
           })
         ])
       })
       .then(function(_) {
+        return UserModel.updateOne({
+          username: COMMON_API
+        }, {
+          $push: { comment: commentId }
+        })
+      })
+      .then(function() {
         done()
       })
       .catch(err => {
@@ -121,11 +143,14 @@ describe(`${COMMON_API} test`, function() {
 
     after(function(done) {
       Promise.all([
-        userDatabase.deleteOne({
-          username: '测试名字'
+        UserModel.deleteOne({
+          username: COMMON_API
         }),
-        commentDatabase.deleteOne({
-          source: ObjectId('56aa3554e90911b64c36a424'),
+        CommentModel.deleteMany({
+          "content.text": COMMON_API
+        }),
+        MovieModel.deleteMany({
+          name: COMMON_API
         })
       ])
       .then(function() {
@@ -138,12 +163,34 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get another user comment success test -> ${COMMON_API}`, function() {
 
+      // beforeEach(async function() {
+
+      //   updatedAt = await UserModel.findOne({
+      //     _id: userId
+      //   })
+      //   .select({
+      //     _id: 0,
+      //     updatedAt: 1
+      //   })
+      //   .exec()
+      //   .then(data => {
+      //     return data._doc.updatedAt
+      //   })
+      //   .catch(err => {
+      //     console.log('oops: ', err)
+      //     return false
+      //   })
+
+      //   return !!updatedAt ? Promise.resolve() : Promise.reject(COMMON_API)
+
+      // })
+
       it(`get another user comment success`, function(done) {
 
         Request
         .get(COMMON_API)
         .set('Accept', 'application/json')
-        .query({ _id: userResult._id.toString() })
+        .query({ _id: userId.toString() })
         .expect(200)
         .expect('Content-Type', /json/)
         .end(function(err, res) {
@@ -161,29 +208,28 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get another user comment success and return the status of 304`, function(done) {
+      // it(`get another user comment success and return the status of 304`, function(done) {
 
-        const query = {
-          _id: userResult._id.toString()
-        }
+      //   const query = {
+      //     _id: userId.toString()
+      //   }
 
-        Request
-        .get(COMMON_API)
-        .query(query)
-        .set({
-          'Accept': 'Application/json',
-          'If-Modified-Since': userResult.updatedAt,
-          'If-None-Match': createEtag(query)
-        })
-        .expect(304)
-        .expect('Content-Type', /json/)
-        .expect('Last-Modidifed', userResult.updatedAt)
-        .expect('ETag', createEtag(query))
-        .end(function(err, _) {
-          if(err) return done(err)
-          done()
-        })
-      })
+      //   Request
+      //   .get(COMMON_API)
+      //   .query(query)
+      //   .set({
+      //     'Accept': 'Application/json',
+      //     'If-Modified-Since': updatedAt,
+      //     'If-None-Match': createEtag(query)
+      //   })
+      //   .expect(304)
+      //   .expect('Last-Modified', updatedAt.toString())
+      //   .expect('ETag', createEtag(query))
+      //   .end(function(err, _) {
+      //     if(err) return done(err)
+      //     done()
+      //   })
+      // })
 
     })
 
@@ -191,11 +237,11 @@ describe(`${COMMON_API} test`, function() {
       
       it(`get another user comment fail because the user id is not found`, function(done) {
 
-        const { _id } = userResult
+        const id = userId.toString()
 
         Request
         .get(COMMON_API)
-        .query('_id', `${parseInt(_id.slice(0, 1) + 5) % 10}${_id.slice(1)}`)
+        .query({'_id': `${(parseInt(id.slice(0, 1)) + 5) % 10}${id.slice(1)}`})
         .set('Accept', 'Application/json')
         .expect(404)
         .expect('Content-Type', /json/)
@@ -210,7 +256,7 @@ describe(`${COMMON_API} test`, function() {
         
         Request
         .get(COMMON_API)
-        .query('_id', userResult._id.slice(1))
+        .query({'_id': userId.toString().slice(1)})
         .set('Accept', 'Application/json')
         .expect(400)
         .expect('Content-Type', /json/)

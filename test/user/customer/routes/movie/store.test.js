@@ -1,6 +1,6 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, mockCreateMovie, mockCreateClassify, Request, createEtag } = require('@test/utils')
+const { mockCreateUser, mockCreateMovie, mockCreateClassify, Request, createEtag, commonValidate } = require('@test/utils')
 const { UserModel, MovieModel, ClassifyModel } = require('@src/utils')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
@@ -15,25 +15,18 @@ function responseExpect(res, validate=[]) {
 
   target.forEach(item => {
     expect(item).to.be.a('object').and.includes.all.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot')
-    expect(item.description).to.be.a('string')
-    expect(item.name).to.be.a('string').and.that.lengthOf.above(0)
-    expect(item.poster).to.be.satisfies(function(target) {
-      return target == null ? true : typeof target === 'string'
-    })
-    expect(item._id).to.be.satisfies(function(target) {
-      return ObjectId.isValid(target)
-    })
-    expect(item._id).to.be.a('boolean')
-    expect(item.rate).to.be.a('number')
+    commonValidate.string(item.description, () => true)
+    commonValidate.string(item.name)
+    commonValidate.poster(item.poster)
+    commonValidate.objectId(item._id)
+    commonValidate.number(item.rate)
     //classify
     expect(item.classify).to.be.a('array').and.that.lengthOf.above(0)
     item.forEach(classify => {
       expect(classify).to.be.a('object').and.that.has.a.property('name').and.that.is.a('string')
     })
-    expect(item.publish_time).to.be.satisfies(function(target) {
-      return typeof target === 'number' || Object.prototype.toString.call(target) === '[object Date]'
-    })  
-    expect(item.hot).to.be.a('number')
+    commonValidate.time(item.publish_time)
+    commonValidate.number(item.hot)
   })
 
   if(Array.isArray(validate)) {

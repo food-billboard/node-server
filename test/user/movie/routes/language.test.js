@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateLanguage, Request, commonValidate, createEtag } = require('@test/utils')
+const { LanguageModel } = require('@src/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/language'
@@ -30,16 +31,15 @@ describe(`${COMMON_API} test`, function() {
   describe(`get language list test -> ${COMMON_API}`, function() {
     
     describe(`get language list success test -> ${COMMON_API}`, function() {
-
-      let database
+      
       let result
   
       before(function(done) {
         const { model } = mockCreateLanguage({
           name: COMMON_API
         })
-        database = model
-        database.save()
+
+        model.save()
         .then(function(data) {
           result = data
           done()
@@ -51,7 +51,7 @@ describe(`${COMMON_API} test`, function() {
   
       after(function(done) {
         
-        database.deleteOne({
+        LanguageModel.deleteOne({
           name: COMMON_API
         })
         .then(function() {

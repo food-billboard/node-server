@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateDistrict, Request, commonValidate, createEtag } = require('@test/utils')
+const { DistrictModel } = require('@src/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/district'
@@ -31,15 +32,14 @@ describe(`${COMMON_API} test`, function() {
     
     describe(`get district list success test -> ${COMMON_API}`, function() {
 
-      let database
       let result
   
       before(function(done) {
         const { model } = mockCreateDistrict({
           name: COMMON_API
         })
-        database = model
-        database.save()
+
+        model.save()
         .then(function(data) {
           result = data
           done()
@@ -50,7 +50,7 @@ describe(`${COMMON_API} test`, function() {
       })
   
       after(function(done) {
-        database.deleteOne({
+        DistrictModel.deleteOne({
           name: COMMON_API
         })
         .then(function() {

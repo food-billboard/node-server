@@ -10,6 +10,7 @@ const {
   Request, 
   commonValidate, 
 } = require('@test/utils')
+const { ActorModel, MovieModel, DirectorModel, LanguageModel, DistrictModel, ClassifyModel } = require('@src/utils')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
 
@@ -47,12 +48,6 @@ function responseExpect(res, validate=[]) {
 
 describe(`get the search result test -> ${ COMMON_API }`, function() {
 
-  let actorDatabase
-  let movieDatabase
-  let directorDatabase
-  let languageDatabase
-  let districtDatabase
-  let classifyDatabase
   let actorId
   let directorId
   let languageId
@@ -78,18 +73,12 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
       name: COMMON_API
     })
 
-    actorDatabase = actor
-    directorDatabase = director
-    languageDatabase = language
-    districtDatabase = district
-    classifyDatabase = classify
-
     Promise.all([
-      actorDatabase.save(),
-      directorDatabase.save(),
-      languageDatabase.save(),
-      districtDatabase.save(),
-      classifyDatabase.save(),
+      actor.save(),
+      director.save(),
+      language.save(),
+      district.save(),
+      classify.save(),
     ])
     .then(([actor, director, language, district, classify]) => {
       actorId = actor._id
@@ -114,9 +103,8 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
         author: ObjectId('53102b43bf1044ed8b0ba36b'),
         author_description: `${COMMON_API}-author_description`
       })
-      movieDatabase = model
 
-      return movieDatabase.save()
+      return model.save()
     })
     .then(function() {
       done()
@@ -130,22 +118,22 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
   after(function(done) {
 
     Promise.all([
-      actorDatabase.deleteOne({
+      ActorModel.deleteOne({
         name: COMMON_API
       }),
-      movieDatabase.deleteOne({
+      MovieModel.deleteOne({
         name: COMMON_API
       }),
-      directorDatabase.deleteOne({
+      DirectorModel.deleteOne({
         name: COMMON_API
       }),
-      languageDatabase.deleteOne({
+      LanguageModel.deleteOne({
         name: COMMON_API
       }),
-      districtDatabase.deleteOne({
+      DistrictModel.deleteOne({
         name: COMMON_API
       }),
-      classifyDatabase.deleteOne({
+      ClassifyModel.deleteOne({
         name: COMMON_API
       }),
     ])
@@ -173,9 +161,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -205,9 +191,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -236,9 +220,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -267,9 +249,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -302,9 +282,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -337,9 +315,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -372,9 +348,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -407,9 +381,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -442,9 +414,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -477,9 +447,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
@@ -518,9 +486,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           Accept: 'Application/json'
         })
         .expect(200)
-        .expect({
-          'Content-Type': /json/
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res

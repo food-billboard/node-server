@@ -6,9 +6,11 @@ const {
   mockCreateUser,
   mockCreateVideo,
   commonValidate,
-  createEtag
+  createEtag,
+  mockCreateComment,
+  mockCreateMovie
 } = require('@test/utils')
-const { CommentModel, ImageModel, UserModel, VideoModel } = require('@src/utils')
+const { CommentModel, ImageModel, UserModel, VideoModel, MovieModel } = require('@src/utils')
 const  Day = require('dayjs')
 
 const COMMON_API = '/api/customer/movie/detail/comment/detail'
@@ -26,19 +28,17 @@ function responseExpect(res, validate=[]) {
       'like', 'user_info', '_id'
     )
     const { comment_users, content, createdAt, updatedAt, total_like, like, user_info, _id } = item
-    expect(comment_users).to.be.satisfies(function(target) {
-      if(typeof target === 'number') {
-        commonValidate.number(target)
-      }else {
-        expect(target).to.be.a('array')
-        target.forEach(tar => {
-          expect(tar).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id')
-          commonValidate.poster(tar.avatar)
-          commonValidate.string(tar.username)
-          commonValidate.objectId(tar._id)
-        })
-      }
-    })
+    if(typeof comment_users === 'number') {
+      commonValidate.number(comment_users)
+    }else {
+      expect(comment_users).to.be.a('array')
+      comment_users.forEach(tar => {
+        expect(tar).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id')
+        commonValidate.poster(tar.avatar)
+        commonValidate.string(tar.username)
+        commonValidate.objectId(tar._id)
+      })
+    }
     expect(content).to.be.a('object').that.includes.all.keys('image', 'text', 'video')
     commonValidate.string(content.text, function(_) { return true })
     expect(content.video).to.be.a('array')
@@ -90,21 +90,28 @@ describe(`${COMMON_API} test`, function() {
         poster: imageId
       })
       const { model: user, token } = mockCreateUser({
-        username: COMMON_API
+        username: COMMON_API,
+        avatar: imageId
+      })
+
+      const { model: movie } = mockCreateMovie({
+        name: COMMON_API
       })
 
       selfToken = token
       return Promise.all([
         video.save(),
-        user.save()
+        user.save(),
+        movie.save()
       ])
     })
-    .then(([video, user]) => {
+    .then(([video, user, movie]) => {
       userId = user._id
       videoId = video._id
+      movieId = movie._id
       const { model } = mockCreateComment({
-        source_type: 'user',
-        source: userId,
+        source_type: 'movie',
+        source: movieId,
         user_info: userId,
         content: {
           text: COMMON_API,
@@ -121,8 +128,8 @@ describe(`${COMMON_API} test`, function() {
       result = data
       commentId = result._id
       const { model } = mockCreateComment({
-        source_type: 'user',
-        source: userId,
+        source_type: 'comment',
+        source: commentId,
         user_info: userId,
         content: {
           text: `${COMMON_API}-test`,
@@ -134,11 +141,18 @@ describe(`${COMMON_API} test`, function() {
       return model.save()
     })
     .then(function(data) {
-      return CommentModel.updateOne({
-        "content.text": COMMON_API
-      }, {
-        $push: { sub_comments: data._id }
-      })
+      return Promise.all([
+        MovieModel.updateOne({
+          name: COMMON_API
+        }, {
+          comment: [ commentId ]
+        }),
+        CommentModel.updateOne({
+          "content.text": COMMON_API
+        }, {
+          $push: { sub_comments: data._id }
+        })
+      ])
     })
     .then(function() {
       done()
@@ -211,7 +225,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err, _) {
+        .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
           let obj
@@ -296,7 +310,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(200)
         .expect('Last-Modified', updatedAt.toString())
-        .expect('ETag', createEtag(query))
+        .expect('ETag', createEtag({ _id: commentId.toString() }))
         .end(function(err, _) {
           if(err) return done(err)
           done()

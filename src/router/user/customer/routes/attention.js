@@ -63,14 +63,16 @@ router
   .then(data => {
     const { attentions, ...nextData } = data
     return {
-      ...nextData,
-      attentions: attentions.map(a => {
-        const { _doc: { avatar, ...nextA } } = a
-        return {
-          ...nextA,
-          avatar: avatar ? avatar.src : null
-        }
-      })
+      data: {
+        ...nextData,
+        attentions: attentions.map(a => {
+          const { _doc: { avatar, ...nextA } } = a
+          return {
+            ...nextA,
+            avatar: avatar ? avatar.src : null
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))

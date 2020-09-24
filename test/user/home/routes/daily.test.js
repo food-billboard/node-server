@@ -1,8 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateMovie, mockCreateImage, Request } = require('@test/utils')
-const mongoose = require('mongoose')
-const { Types: { ObjectId } } = mongoose
+const { mockCreateMovie, mockCreateImage, Request, commonValidate } = require('@test/utils')
+const { ImageModel, MovieModel } = require('@src/utils')
 
 const COMMON_API = '/api/user/home/daily'
 
@@ -13,13 +12,9 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.a('array')
   target.forEach(item => {
     expect(item).to.be.a('object').and.includes.all.keys('name', 'poster', '_id')
-    expect(item.name).to.be.string.and.that.lengthOf.above(0)
-    expect(item.poster).to.be.satisfies(function(target) {
-      return target == null ? true : typeof target === 'string'
-    })
-    expect(item._id).to.be.string.and.satisfies(function(target) {
-      return ObjectId.isValid(target)
-    })
+    commonValidate.string(item.name)
+    commonValidate.poster(item.poster)
+    commonValidate.objectId(item._id)
   })
 
   if(Array.isArray(validate)) {
@@ -35,23 +30,21 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get home daily list test -> ${COMMON_API}`, function() {
 
-    let imageDatabase
-    let movieDatabase
     let result
 
     before(function(done) {
       const { model } = mockCreateImage({
         src: COMMON_API
       })
-      imageDatabase = model
-      imageDatabase.save()
+
+      model.save()
       .then(function(data) {
         const { model } = mockCreateMovie({
           name: COMMON_API,
           poster: data._id
         })
-        movieDatabase = model
-        movieDatabase.save()
+
+        model.save()
       })
       .then(function(data) {
         result = data
@@ -64,10 +57,10 @@ describe(`${COMMON_API} test`, function() {
 
     after(function(done) {
       Promise.all([
-        imageDatabase.deleteOne({
+        ImageModel.deleteOne({
           src: COMMON_API
         }),
-        movieDatabase.deleteOne({
+        MovieModel.deleteOne({
           name: COMMON_API
         })
       ])

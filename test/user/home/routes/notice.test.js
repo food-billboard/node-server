@@ -1,7 +1,6 @@
 require('module-alias/register')
-const { mockCreateGlobal, Request } = require('@test/utils')
-const mongoose = require('mongoose')
-const { Types: { ObjectId } } = mongoose
+const { mockCreateGlobal, Request, createEtag, commonValidate } = require('@test/utils')
+const { GlobalModel } = require('@src/utils')
 
 const COMMON_API = '/api/user/home/notice'
 
@@ -10,10 +9,8 @@ function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
   expect(target).to.be.a('object').and.includes.all.keys('_id', 'notice')
-  expect(target._id).to.be.string.and.to.satisfy(function(target) {
-    return ObjectId.isValid(target)
-  })
-  expect(target.notice).to.be.string.and.that.lengthOf.above(0)
+  commonValidate.objectId(target._id)
+  commonValidate.string(target.notice)
 
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
@@ -28,15 +25,14 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get home notice info test -> ${COMMON_API}`, function() {
 
-    let database
     let result
 
     before(function(done) {
       const { model } = mockCreateGlobal({
         notice: COMMON_API
       })
-      database = model
-      database.save()
+
+      model.save()
       .then(function(data) {
         result = data
         done()
@@ -47,7 +43,7 @@ describe(`${COMMON_API} test`, function() {
     })
 
     after(function(done) {
-      database.deleteOne({
+      GlobalModel.deleteOne({
         notice: COMMON_API
       })
       .then(function() {
@@ -90,10 +86,8 @@ describe(`${COMMON_API} test`, function() {
           'If-Modified-Since': result.updatedAt
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': result.updatedAt
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag({}))
         .end(function(err, res) {
           if(err) return done(err)
           done()

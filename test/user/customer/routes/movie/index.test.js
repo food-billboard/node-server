@@ -1,8 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, mockCreateMovie, mockCreateClassify, Request, createEtag } = require('@test/utils')
-const mongoose = require('mongoose')
-const { Types: { ObjectId } } = mongoose
+const { mockCreateUser, mockCreateMovie, mockCreateClassify, Request, createEtag, commonValidate } = require('@test/utils')
+const { ClassifyModel, MovieModel, UserModel } = require('@src/utils')
 
 const COMMON_API = '/api/user/customer/movie'
 
@@ -14,25 +13,19 @@ function responseExpect(res, validate=[]) {
 
   target.forEach(item => {
     expect(item).to.be.a('object').and.includes.all.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot')
-    expect(item.description).to.be.a('string')
-    expect(item.name).to.be.a('string').and.that.lengthOf.above(0)
-    expect(item.poster).to.be.satisfies(function(target) {
-      return target == null ? true : typeof target === 'string'
-    })
-    expect(item._id).to.be.satisfies(function(target) {
-      return ObjectId.isValid(target)
-    })
+    commonValidate.string(item.description, () => true)
+    commonValidate.string(item.name)
+    commonValidate.poster(item.poster)
+    commonValidate.objectId(item._id)
     expect(item._id).to.be.a('boolean')
-    expect(item.rate).to.be.a('number')
+    commonValidate.number(item.rate)
     //classify
     expect(item.classify).to.be.a('array').and.that.lengthOf.above(0)
     item.forEach(classify => {
       expect(classify).to.be.a('object').and.that.has.a.property('name').and.that.is.a('string')
     })
-    expect(item.publish_time).to.be.satisfies(function(target) {
-      return typeof target === 'number' || Object.prototype.toString.call(target) === '[object Date]'
-    })  
-    expect(item.hot).to.be.a('number')
+    commonValidate.time(item.publish_time)
+    commonValidate.number(item.hot)
   })
 
   if(Array.isArray(validate)) {
@@ -48,17 +41,15 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get another user issue movie list without self info test -> ${COMMON_API}`, function() {
 
-    let userDatabase
-    let movieDatabase
-    let classifyDatabase
     let result
+    let userId
 
     before(function(done) {
       const { model } = mockCreateClassify({
         name: COMMON_API
       })
-      classifyDatabase = model
-      classifyDatabase.save()
+
+      model.save()
       .then(data => {
         const { model } = mockCreateMovie({
           name: COMMON_API,
@@ -66,7 +57,7 @@ describe(`${COMMON_API} test`, function() {
             classify: [ data._id ]
           }
         })
-        movieDatabase = model
+
         model.save()
       })
       .then(function(data) {
@@ -74,11 +65,12 @@ describe(`${COMMON_API} test`, function() {
           username: COMMON_API,
           glance: [ data._id ]
         })
-        userDatabase = model
-        return userDatabase.save()
+
+        return model.save()
       })
       .then(function(data) {
         result = data
+        userId = data._id
         done()
       })
       .catch(err => {
@@ -88,13 +80,13 @@ describe(`${COMMON_API} test`, function() {
 
     after(function(done) {
       Promise.all([
-        userDatabase.deleteOne({
+        UserModel.deleteOne({
           username: COMMON_API
         }),
-        movieDatabase.deleteOne({
+        MovieModel.deleteOne({
           name: COMMON_API
         }),
-        classifyDatabase.deleteOne({
+        ClassifyModel.deleteOne({
           name: COMMON_API
         })
       ])
@@ -112,7 +104,7 @@ describe(`${COMMON_API} test`, function() {
 
         Request
         .get(COMMON_API)
-        .query('_id', userDatabase._id.toString())
+        .query('_id', userId.toString())
         .set('Accept', 'Application/json')
         .expect(200)
         .expect('Content-Type', /json/)
@@ -134,7 +126,7 @@ describe(`${COMMON_API} test`, function() {
       it(`get another user issue movie list without self info success and return the status of 304`, function(done) {
         
         const query = {
-          _id: userDatabase._id.toString()
+          _id: userId.toString()
         }
 
         Request
@@ -142,15 +134,12 @@ describe(`${COMMON_API} test`, function() {
         .query(query)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': userDatabase.updatedAt,
+          'If-Modified-Since': result.updatedAt,
           'If-None-Match': createEtag(query)
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': userDatabase.updatedAt,
-          'ETag': createEtag(query)
-        })
+        .expect('Last-Modified', result.updatedAt.toString())
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -164,7 +153,7 @@ describe(`${COMMON_API} test`, function() {
       
       it(`get another user issue movie list without self info fail because the user id is not found`, function(done) {
         
-        const errorId = result._id.toString()
+        const errorId = userId.toString()
 
         Request
         .get(COMMON_API)

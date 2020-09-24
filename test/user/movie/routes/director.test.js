@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateDirector, Request, commonValidate, createEtag } = require('@test/utils')
+const { DirectorModel } = require('@src/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/director'
@@ -31,15 +32,14 @@ describe(`${COMMON_API} test`, function() {
     
     describe(`get director list success test -> ${COMMON_API}`, function() {
 
-      let database
       let result
   
       before(function(done) {
         const { model } = mockCreateDirector({
           name: COMMON_API
         })
-        database = model
-        database.save()
+
+        model.save()
         .then(function(data) {
           result = data
           done()
@@ -50,7 +50,7 @@ describe(`${COMMON_API} test`, function() {
       })
   
       after(function(done) {
-        database.deleteOne({
+        DirectorModel.deleteOne({
           name: COMMON_API
         })
         .then(function() {

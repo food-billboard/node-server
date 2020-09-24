@@ -1,8 +1,7 @@
 require('module-alias/register')
-const { mockCreateUser, Request, createEtag } = require('@test/utils')
+const { mockCreateUser, Request, createEtag, commonValidate } = require('@test/utils')
+const { UserModel } = require('@src/utils')
 const { expect } = require('chai')
-const mongoose = require('mongoose')
-const { Types: { ObjectId } } = mongoose
 
 const COMMON_API = '/api/user/customer/fans'
 
@@ -10,19 +9,15 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('array')
-  target.forEach(item => {
+  expect(target).to.be.a('object').and.that.includes.all.keys('fans')
+  target.fans.forEach(item => {
     expect(item).to.be.a('object').and.includes.all.keys('avatar', 'username', '_id')
     //avatar
-    expect(item).to.have.a.property('avatar').and.satisfy(function(target) {
-      return target == null ? true : typeof target === 'string'
-    })
+    commonValidate.poster(item.avatar)
     //username
-    expect(item).to.have.a.property('username').and.is.a('string')
+    commonValidate.string(item.username)
     //_id
-    expect(item).to.have.a.property('_id').and.is.a('string').that.satisfy(function(target) {
-      return ObjectId.isValid(target)
-    })
+    commonValidate.objectId(item._id)
   })
 
   if(Array.isArray(validate)) {
@@ -38,31 +33,37 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get another user fans test -> ${COMMON_API}`, function() {
 
-    let database
     let fansId
     let result
 
     before(function(done) {
 
       const { model } = mockCreateUser({
-        username: '关注用户测试名字',
+        username: COMMON_API,
         mobile: 11256981236
       })
       model.save()
       .then(function(data) {
         const { _id } = data
+        result = data
         fansId = _id
         const { model } = mockCreateUser({
-          username: '测试名字',
+          username: COMMON_API,
           attentions: [
             _id
           ]
         })
-        database = model
-        return database.save()
+
+        return model.save()
       })
       .then(function(data) {
-        result = data
+        return UserModel.updateOne({
+          mobile: 11256981236
+        }, {
+          fans: [ data._id ]
+        })
+      })
+      .then(data => {
         done()
       })
       .catch(err => {
@@ -71,8 +72,8 @@ describe(`${COMMON_API} test`, function() {
     })
 
     after(function(done) {
-      database.deleteMany({
-        _id: { $in: [ fansId, result._id ] }
+      UserModel.deleteMany({
+        username: COMMON_API
       })
       .then(function() {
         done()
@@ -80,6 +81,27 @@ describe(`${COMMON_API} test`, function() {
     })
 
     describe(`get another user fans success test -> ${COMMON_API}`, function() {
+
+      beforeEach(async function() {
+
+        updatedAt = await UserModel.findOne({
+          _id: result.id
+        })
+        .select({
+          _id: 0,
+          updatedAt: 1
+        })
+        .then(data => {
+          return data._doc.updatedAt
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          return false
+        })
+
+        return !!updatedAt ? Promise.resolve() : Promise.reject()
+
+      })
 
       it(`get another user fans success`, function(done) {
 
@@ -114,11 +136,10 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .query(query)
         .set('Accept', 'Appication/json')
-        .set('If-Modified-Since', result.updatedAt)
+        .set('If-Modified-Since', updatedAt)
         .set('If-None-Match', createEtag(query))
         .expect(304)
-        .expect('Content-Type', /json/)
-        .expect('Last-Modidifed', result.updatedAt)
+        .expect('Last-Modified', updatedAt.toString())
         .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
@@ -131,7 +152,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get another user fans fail test -> ${COMMON_API}`, function() {
       
-      it(`get another user fans because the user id is not found`, function() {
+      it(`get another user fans because the user id is not found`, function(done) {
         
         const errorId = result._id.toString()
 
@@ -148,7 +169,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get another user fans because the user id is not verify`, function() {
+      it(`get another user fans because the user id is not verify`, function(done) {
 
         Request
         .get(COMMON_API)
