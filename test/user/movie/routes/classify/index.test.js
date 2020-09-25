@@ -87,7 +87,7 @@ describe(`${COMMON_API} test`, function() {
     after(function(done) {
 
       Promise.all([
-        MovieModel.deleteOne({
+        MovieModel.deleteMany({
           name: COMMON_API
         }),
         ClassifyModel.deleteOne({

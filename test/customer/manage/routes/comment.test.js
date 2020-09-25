@@ -1,8 +1,9 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, mockCreateImage, mockCreateVideo, mockCreateComment, Request, createEtag, commonValidate } = require('@test/utils')
-const { UserModel, ImageModel, VideoModel, CommentModel } = require('@src/utils')
+const { UserModel, ImageModel, VideoModel, CommentModel, MovieModel } = require('@src/utils')
 const Day = require('dayjs')
+const { mockCreateMovie } = require('../../../utils')
 
 const COMMON_API = '/api/customer/manage/comment'
 
@@ -16,11 +17,11 @@ function responseExpect(res, validate=[]) {
 
     expect(item).to.be.a('object').and.that.includes.all.keys(
       'comment_users', 'content', 'createdAt', 'updatedAt', 'like', 'total_like',
-      '_id', 'source', 'source_type', 'user_info'
+      '_id', 'source', 'user_info'
     )
 
     commonValidate.number(item.comment_users)
-    expect(item.content).to.be.have.a.property('content').that.is.a('object').and.includes.all.keys('text', 'image', 'video')
+    expect(item.content).to.be.a('object').and.includes.all.keys('text', 'image', 'video')
     commonValidate.string(item.content.text, function(target) { return true })
     item.content.image.forEach(item => commonValidate.poster(item))
     item.content.video.forEach(item => commonValidate.poster(item))
@@ -30,13 +31,15 @@ function responseExpect(res, validate=[]) {
     expect(item.like).to.be.a('boolean')
     commonValidate.number(item.total_like)
     commonValidate.objectId(item._id)
-    
-    expect(item.source).to.be.a('object').and.includes.all.keys('_id', 'content')
-    commonValidate.objectId(item.source._id)
 
-    commonValidate.string(item.source_type, function(target) {
-      return !!~['movie', 'user'].indexOf(target.toLowerCase())
-    })
+    console.log(item.source)
+    
+    // expect(item.source).to.be.a('object').and.includes.all.keys('_id', 'content', 'type')
+    // commonValidate.objectId(item.source._id)
+
+    // commonValidate.string(item.source.type, function(target) {
+    //   return !!~['movie', 'comment'].indexOf(target.toLowerCase())
+    // })
 
     expect(item.user_info).to.be.a('object').and.that.includes.all.keys('avatar', '_id', 'username')
     commonValidate.poster(item.user_info.avatar)
@@ -56,14 +59,11 @@ function responseExpect(res, validate=[]) {
 
 describe(`${COMMON_API} test`, function() {
 
-  let userDatabase
-  let commentDatabase
-  let imageDatabase
-  let videoDatabase
   let userId
   let selfToken
   let imageId
   let videoId
+  let movieId
   let result
 
   before(async function() {
@@ -77,26 +77,32 @@ describe(`${COMMON_API} test`, function() {
     const { model: user, token } = mockCreateUser({
       username: COMMON_API
     })
+    const { model:movie } = mockCreateMovie({
+      name: COMMON_API
+    })
 
     selfToken = token
 
     await Promise.all([
       image.save(),
       video.save(),
-      user.save()
+      user.save(),
+      movie.save()
     ])
-    .then(([image, video, user]) => {
+    .then(([image, video, user, movie]) => {
       imageId = image._id
       videoId = video._id
       userId = user._id
+      movieId = movie._id
       const { model } = mockCreateComment({
         content: {
           text: COMMON_API,
           image: [ imageId ],
           video: [ videoId ]
         },
-        source_type: 'user',
-        source: userId,
+        source_type: 'movie',
+        source: movieId,
+        user_info: userId,
         like_person: [ userId ]
       })
 
@@ -121,17 +127,20 @@ describe(`${COMMON_API} test`, function() {
   after(async function() {
 
     Promise.all([
-      ImageModel.deleteOne({
+      ImageModel.deleteMany({
         src: COMMON_API
       }),
-      VideoModel.deleteOne({
+      VideoModel.deleteMany({
         src: COMMON_API
       }),
-      CommentModel.deleteOne({
-        _id: result._id
+      CommentModel.deleteMany({
+        "content.text": COMMON_API
       }),
-      UserModel.deleteOne({
+      UserModel.deleteMany({
         username: COMMON_API
+      }),
+      MovieModel.deleteMany({
+        name: COMMON_API
       })
     ])
     .catch(err => {

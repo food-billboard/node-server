@@ -118,22 +118,22 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
   after(function(done) {
 
     Promise.all([
-      ActorModel.deleteOne({
+      ActorModel.deleteMany({
         name: COMMON_API
       }),
-      MovieModel.deleteOne({
+      MovieModel.deleteMany({
         name: COMMON_API
       }),
-      DirectorModel.deleteOne({
+      DirectorModel.deleteMany({
         name: COMMON_API
       }),
-      LanguageModel.deleteOne({
+      LanguageModel.deleteMany({
         name: COMMON_API
       }),
-      DistrictModel.deleteOne({
+      DistrictModel.deleteMany({
         name: COMMON_API
       }),
-      ClassifyModel.deleteOne({
+      ClassifyModel.deleteMany({
         name: COMMON_API
       }),
     ])
@@ -173,7 +173,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
           }
 
           responseExpect(obj)
-          expect(obj.res.data.length).to.be.equal(1)
+          expect(obj.res.data.length).to.be.above(0)
 
           done()
         })
@@ -202,7 +202,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
             console.log(_)
           }
 
-          expect(obj.res.data.length).to.be.equal(1)
+          expect(obj.res.data.length).to.be.above(0)
 
           done()
         })
@@ -231,7 +231,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
             console.log(_)
           }
 
-          expect(obj.res.data.length).to.be.equal(1)
+          expect(obj.res.data.length).to.be.above(0)
 
           done()
         })
@@ -260,7 +260,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
             console.log(_)
           }
 
-          expect(obj.res.data.length).to.be.equal(1)
+          expect(obj.res.data.length).to.be.above(0)
 
           done()
         })
@@ -293,7 +293,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
             console.log(_)
           }
 
-          expect(obj.res.data.length).to.be.equal(1)
+          expect(obj.res.data.length).to.be.above(0)
 
           done()
         })
@@ -326,7 +326,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
             console.log(_)
           }
 
-          expect(obj.res.data.length).to.be.equal(1)
+          expect(obj.res.data.length).to.be.above(0)
 
           done()
         })
@@ -359,7 +359,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
             console.log(_)
           }
 
-          expect(obj.res.data.length).to.be.equal(1)
+          expect(obj.res.data.length).to.be.above(0)
 
           done()
         })
@@ -392,7 +392,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
             console.log(_)
           }
 
-          expect(obj.res.data.length).to.be.equal(1)
+          expect(obj.res.data.length).to.be.above(0)
 
           done()
         })
@@ -425,7 +425,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
             console.log(_)
           }
 
-          expect(obj.res.data.length).to.be.equal(1)
+          expect(obj.res.data.length).to.be.above(0)
 
           done()
         })
@@ -458,7 +458,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
             console.log(_)
           }
 
-          expect(obj.res.data.length).to.be.equal(1)
+          expect(obj.res.data.length).to.be.above(0)
 
           done()
         })
@@ -497,7 +497,7 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
             console.log(_)
           }
 
-          expect(obj.res.data.length).to.be.equal(1)
+          expect(obj.res.data.length).to.be.above(0)
 
           done()
         })

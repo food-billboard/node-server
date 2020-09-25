@@ -555,7 +555,7 @@ describe(`${COMMON_API} test`, function() {
 
       it(`pre check the token fail becuase the token is unverify or delay`, async function() {
 
-        const res = await new Promise((resolve, reject) => {
+        const res = await new Promise((resolve) => {
           setTimeout(() => {
             resolve()
           }, 7000)

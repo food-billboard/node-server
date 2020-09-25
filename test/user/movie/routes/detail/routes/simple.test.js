@@ -7,6 +7,7 @@ const {
   commonValidate,
   createEtag
 } = require('@test/utils')
+const { MovieModel, ImageModel } = require('@src/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/detail/simple'
@@ -34,8 +35,6 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get the movie detail simply without self info test -> ${COMMON_API}`, function() {
 
-    let imageDatabase
-    let movieDatabase
     let result
 
     before(function(done) {
@@ -43,16 +42,16 @@ describe(`${COMMON_API} test`, function() {
       const { model:image } = mockCreateImage({
         src: COMMON_API
       })
-      imageDatabase = image
-      imageDatabase.save()
+
+      image.save()
       .then(data => {
         imageId = data._id
         const { model } = mockCreateMovie({
-          src: COMMON_API,
-          poster: data._id
+          poster: data._id,
+          name: COMMON_API
         })
-        movieDatabase = model
-        return movieDatabase.save()
+
+        return model.save()
       })
       .then(function(data) {
         result = data
@@ -66,8 +65,12 @@ describe(`${COMMON_API} test`, function() {
     after(function(done) {
 
       Promise.all([
-        imageDatabase.save(),
-        movieDatabase.save(),
+        ImageModel.deleteMany({
+          src: COMMON_API
+        }),
+        MovieModel.deleteMany({
+          name: COMMON_API
+        }),
       ])
       .then(function() {
         done()

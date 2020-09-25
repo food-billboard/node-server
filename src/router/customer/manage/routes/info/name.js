@@ -8,7 +8,7 @@ router
   const check = Params.body(ctx, {
     name: 'name',
     validator: [
-      data => typeof data === 'string' && data > 0,
+      data => typeof data === 'string' && data.length > 0,
     ]
   })
 
@@ -18,13 +18,19 @@ router
   const { mobile } = token
   const { body: { name } } = ctx.request
 
-  const data = await UserModel.findOne({
-    username: name
+  const data = await UserModel.updateOne({
+    mobile: Number(mobile)
+  }, {
+    $set: { username: name }
   })
   .exec()
   .then(data => {
     if(data && data.nModified === 0) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-    return name
+    return {
+      data: {
+        name
+      }
+    }
   })
   .catch(dealErr(ctx))
 

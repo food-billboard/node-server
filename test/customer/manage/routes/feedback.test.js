@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, mockCreateFeedback, mockCreateImage, Request } = require('@test/utils')
-const { FeedbackModel } = require('@src/utils')
+const { UserModel, FeedbackModel, ImageModel } = require('@src/utils')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
 
@@ -24,9 +24,6 @@ function responseExpect(res, validate=[]) {
 
 describe(`${COMMON_API} test`, function() {
 
-  let feedbackDatabase
-  let userDatabase
-  let imageDatabase
   let imageId
   let userId
   let selfToken
@@ -41,13 +38,11 @@ describe(`${COMMON_API} test`, function() {
       src: COMMON_API
     })
 
-    userDatabase = model
-    imageDatabase = image
     selfToken = token
 
     await Promise.all([
-      userDatabase.save(),
-      imageDatabase.save()
+      model.save(),
+      image.save()
     ])
     .then(([data, image]) => {
       userId = data._id
@@ -65,12 +60,15 @@ describe(`${COMMON_API} test`, function() {
   after(async function() {
 
     await Promise.all([
-      userDatabase.deleteOne({
+      UserModel.deleteOne({
         _id: userId,
         username: COMMON_API
       }),
       FeedbackModel.deleteMany({
         "content.video": [],
+      }),
+      ImageModel.deleteMany({
+        src: COMMON_API
       })
     ])
     .catch(err => {
@@ -108,7 +106,7 @@ describe(`${COMMON_API} test`, function() {
         .send({
           content: {
             text: COMMON_API,
-            image: [ imageId ],
+            image: [ imageId.toString() ],
             video: []
           }
         })
@@ -131,7 +129,8 @@ describe(`${COMMON_API} test`, function() {
 
       describe(`post the feedback fail because the feedback is frequently -> ${COMMON_API}`, function() {
 
-        before(function(done) {
+        before(async function() {
+          console.log(userId)
           const { model } = mockCreateFeedback({
             user_info: userId,
             content: {
@@ -139,21 +138,25 @@ describe(`${COMMON_API} test`, function() {
               image: [ ObjectId('53102b43bf1044ed8b0ba36b') ]
             }
           })
-          feedbackDatabase = model
-          return feedbackDatabase.save()
+
+          const res = await model.save()
           .then(function(data) {
             result = data
-            done()
+            return true
           })
           .catch(err => {
             console.log('oops: ', err)
+            return false
           })
+
+          return res ? Promise.resolve() : Promise.reject()
+
         })
 
         it(`post the feedback test fail because the feedback is frequently`, function(done) {
 
           Request
-          .get(COMMON_API)
+          .get(`${COMMON_API}/precheck`)
           .set({
             Accept: 'Application/json',
             Authorization: `Basic ${selfToken}`
@@ -214,7 +217,7 @@ describe(`${COMMON_API} test`, function() {
           const id = imageId.toString()
 
           Request
-          .get(COMMON_API)
+          .post(COMMON_API)
           .send({
             content: {
               text: COMMON_API,
@@ -248,7 +251,7 @@ describe(`${COMMON_API} test`, function() {
       it(`get the info of the user whether send the feedback suuccess`, function(done) {
 
         Request
-        .get(COMMON_API)
+        .get(`${COMMON_API}/precheck`)
         .set({
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`

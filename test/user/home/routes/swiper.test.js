@@ -15,7 +15,7 @@ function responseExpect(res, validate=[]) {
     expect(item.poster).to.be.satisfies(function(target) {
       return target == null ? true : (typeof target === 'string' && target.length > 0)
     })
-    commonValidate(item._id)
+    commonValidate.objectId(item._id)
     expect(item.type).to.be.a('string').and.that.satisfies(function(target) {
       return !!~['movie', 'special'].indexOf(target.toLowerCase())
     })
@@ -74,7 +74,7 @@ describe(`${COMMON_API} test`, function() {
         ImageModel.deleteOne({
           src: COMMON_API
         }),
-        MovieModel.deleteOne({
+        MovieModel.deleteMany({
           name: COMMON_API
         }),
         SpecialModel.deleteOne({
@@ -91,7 +91,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get home swiper list success test -> ${COMMON_API}`, function() {
 
-      it(`get home swiper list success`, function() {
+      it(`get home swiper list success`, function(done) {
 
         Request
         .get(COMMON_API)

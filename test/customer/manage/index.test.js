@@ -10,7 +10,7 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('object').and.include.all.keys('attentions', 'avatar', 'fans', 'hot', 'username', '_id', 'like', 'createdAt', 'updatedAt')
+  expect(target).to.be.a('object').and.include.all.keys('attentions', 'avatar', 'fans', 'hot', 'username', '_id', 'createdAt', 'updatedAt')
   commonValidate.number(target.attentions)
   commonValidate.poster(target.avatar)
   commonValidate.number(target.fans)
@@ -18,7 +18,6 @@ function responseExpect(res, validate=[]) {
   commonValidate.objectId(target._id)
   commonValidate.time(target.createdAt)
   commonValidate.time(target.updatedAt)
-  expect(target.like).to.be.a('boolean')
 
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
@@ -74,6 +73,11 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`pre check params test -> ${COMMON_API}`, function() {
 
+    beforeEach(function(done) {
+      selfToken = signToken()
+      done()
+    })
+
     describe(`pre check params success test -> ${COMMON_API}`, function() {
 
       it(`pre check params success`, function(done) {
@@ -106,8 +110,6 @@ describe(`${COMMON_API} test`, function() {
     describe(`pre check params fail test -> ${COMMON_API}`, function() {
 
       beforeEach(async function() {
-
-        selfToken = signToken()
 
         updatedAt = await UserModel.findOne({
           _id: userId,   
@@ -207,7 +209,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json',
           'If-Modified-Since': updatedAt,
           'If-None-Match': createEtag({}),
-          Authorization: `Basic ${selfToken.slice(1)}`
+          Authorization: `Basic ${selfToken}`
         })
         .expect(304)
         .expect('Last-Modified', updatedAt.toString())
@@ -269,8 +271,8 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get self userinfo test fail -> ${COMMON_API}`, function() {
 
-      afterEach(function(done) {
-        UserModel.deleteOne({
+      beforeEach(function(done) {
+        UserModel.deleteMany({
           username: COMMON_API
         })
         .then(_ => {
@@ -290,9 +292,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(404)
-        .expect({
-          'Content-Type': /json/,
-        })
+        .expect('Content-Type', /json/)
         .end(function(err, _) {
           if(err) return done(err)
           done()

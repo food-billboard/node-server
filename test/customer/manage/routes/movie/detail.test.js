@@ -25,6 +25,8 @@ const {
   ActorModel,
   LanguageModel
 } = require('@src/utils')
+const Day = require('dayjs')
+const { Types: { ObjectId } } = require('mongoose')
 
 const COMMON_API = '/api/customer/manage/movie/detail'
 
@@ -41,16 +43,15 @@ function responseExpect(res, validate=[]) {
   commonValidate.number(target.author_rate)
   expect(target.images).to.be.a('array')
   target.images.forEach(item => {
-    commonValidate.objectId(item)
+    commonValidate.poster(item)
   })
   expect(target.info).to.be.a('object').and.that.includes.all.keys('actor', 'another_name', 'classify', 'description', 'director', 'district', 'language', 'name', 'screen_time')
-  const { another_name, name, screen_time, ...nextInfo } = target.info
-
+  const { another_name, name, screen_time, description, ...nextInfo } = target.info
+  commonValidate.string(description)
   Object.values(nextInfo).forEach(value => {
     expect(value).to.be.a('array')
     value.forEach(v => commonValidate.objectId(v))
   })
-
   expect(another_name).to.be.a('array')
   another_name.forEach(item => {
     commonValidate.string(item)
@@ -152,6 +153,11 @@ describe(`${COMMON_API} test`, function() {
       .then(function(data) {
         result = data
         movieId = result._id
+        return UserModel.updateOne({
+          username: COMMON_API
+        }, {
+          issue: [ movieId ]
+        })
       })
       .catch(err => {
         console.log('oops: ', err)
@@ -229,7 +235,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .get(COMMON_API)
         .query({
-          _id: result._id.toString(),
+          _id: movieId.toString(),
         })
         .set({
           Accept: 'Application/json',
@@ -254,18 +260,22 @@ describe(`${COMMON_API} test`, function() {
 
       it(`get the movie dtail success and return the status of 304`, function(done) {
 
+        const query = {
+          _id: movieId.toString()
+        }
+
         Request
         .get(COMMON_API)
-        .query({ _id: result._id.toString() })
+        .query(query)
         .set({
           Accept: 'Application/json',
           'If-Modified-Since': updatedAt,
-          'If-None-Match': createEtag({}),
+          'If-None-Match': createEtag(query),
           Authorization: `Basic ${selfToken}`
         })
         .expect(304)
         .expect('Last-Modified', updatedAt.toString())
-        .expect('ETag', createEtag({}))
+        .expect('ETag', createEtag(query))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -276,7 +286,7 @@ describe(`${COMMON_API} test`, function() {
       it(`get the movie dtail success and hope return the status of 304 but the content has edited`, function(done) {
 
         const query = {
-          _id: result._id.toString()
+          _id: movieId.toString()
         }
 
         Request
@@ -302,7 +312,7 @@ describe(`${COMMON_API} test`, function() {
 
         const query = {
           pageSize: 10,
-          _id: result._id.toString()
+          _id: movieId.toString()
         }
 
         Request
@@ -335,7 +345,7 @@ describe(`${COMMON_API} test`, function() {
           Request
           .get(COMMON_API)
           .query({
-            _id: result._id.toString().slice(1),
+            _id: movieId.toString().slice(1),
           })
           .set({
             Accept: 'Application/json',
@@ -352,7 +362,7 @@ describe(`${COMMON_API} test`, function() {
   
         it(`get the movie detail fail because of the movie id is not found`, function(done) {
 
-          const id = result._id.toString()
+          const id = movieId.toString()
   
           Request
           .get(COMMON_API)
@@ -376,19 +386,29 @@ describe(`${COMMON_API} test`, function() {
 
       describe(`get the movie detail width self info fail because of the auth -> ${COMMON_API}`, function() {
 
-        before(function(done) {
+        before(async function() {
 
-          UserModel.updateOne({
-            name: COMMON_API
-          }, {
-            author: ObjectId('53102b43bf1044ed8b0ba36b')
-          })
-          .then(function() {
-            done()
+          const res = await Promise.all([
+            MovieModel.updateOne({
+              name: COMMON_API
+            }, {
+              author: ObjectId('53102b43bf1044ed8b0ba36b')
+            }),
+            UserModel.updateOne({
+              username: COMMON_API
+            }, {
+              issue: []
+            })
+          ])
+          .then(_ => {
+            return true
           })
           .catch(err => {
             console.log('oops: ', err)
+            return false
           })
+
+          return res ? Promise.resolve() : Promise.reject(COMMON_API)
 
         })
 
@@ -397,7 +417,7 @@ describe(`${COMMON_API} test`, function() {
           Request
           .get(COMMON_API)
           .query({
-            _id: result._id.toString()
+            _id: movieId.toString()
           })
           .set({
             Accept: 'Application/json',

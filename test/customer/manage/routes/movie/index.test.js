@@ -37,6 +37,7 @@ function responseExpect(res, validate=[]) {
     expect(item.store).to.be.a('boolean')
     commonValidate.number(item.rate)
     //classify
+    console.log(item.classify)
     expect(item.classify).to.be.a('array').and.that.lengthOf.above(0)
     item.forEach(classify => {
       expect(classify).to.be.a('object').and.that.has.a.property('name').and.that.is.a('string')
@@ -71,6 +72,7 @@ describe(`${COMMON_API} test`, function() {
   let imageId
   let userId
   let selfToken
+  let signToken
   let result
   let classifyId
   let videoId
@@ -114,11 +116,13 @@ describe(`${COMMON_API} test`, function() {
       const { model: language } = mockCreateLanguage({
         name: COMMON_API
       })
-      const { model: user, token } = mockCreateUser({
+      const { model: user, token, signToken:getToken } = mockCreateUser({
         username: COMMON_API
       })
 
+      signToken = getToken
       selfToken = token
+
       return Promise.all([
         video.save(),
         director.save(),
@@ -200,31 +204,31 @@ describe(`${COMMON_API} test`, function() {
   after(async function() {
 
     await Promise.all([
-      ImageModel.deleteOne({
+      ImageModel.deleteMany({
         src: COMMON_API
       }),
       VideoModel.deleteMany({
         src: COMMON_API
       }),
-      ClassifyModel.deleteOne({
+      ClassifyModel.deleteMany({
         name: COMMON_API
       }),
-      LanguageModel.deleteOne({
+      LanguageModel.deleteMany({
         name: COMMON_API
       }),
-      ActorModel.deleteOne({
+      ActorModel.deleteMany({
         name: COMMON_API
       }),
-      DirectorModel.deleteOne({
+      DirectorModel.deleteMany({
         name: COMMON_API
       }),
       MovieModel.deleteMany({
         name: COMMON_API
       }),
-      UserModel.deleteOne({
+      UserModel.deleteMany({
         username: COMMON_API
       }),
-      DistrictModel.deleteOne({
+      DistrictModel.deleteMany({
         name: COMMON_API
       })
     ])
@@ -241,6 +245,11 @@ describe(`${COMMON_API} test`, function() {
     describe(`pre check the uploading movie is valid fail test -> ${COMMON_API}`, function() {
 
       describe(`pre check the uploading movie fail because missing some params -> ${COMMON_API}`, function() {
+
+        beforeEach(function(done) {
+          selfToken = signToken()
+          done()
+        })
         
         it(`pre check the uploading movie fail because missing the params of info'name`, function(done) {
 
@@ -554,6 +563,11 @@ describe(`${COMMON_API} test`, function() {
 
       describe(`pre check uploading movie fail because the params is unverify -> ${COMMON_API}`, function() {
 
+        beforeEach(function(done) {
+          selfToken = signToken()
+          done()
+        })
+
         it(`pre check the uploading movie fail because the params of info'name is not verify`, function(done) {
 
           const { info, ...nextData } = baseData
@@ -593,7 +607,7 @@ describe(`${COMMON_API} test`, function() {
             ...nextData,
             info: {
               ...nextInfo,
-              district: district.map(item => item.slice(1))
+              district: district.map(item => item.toString().slice(1))
             }
           })
           .set({
@@ -620,7 +634,7 @@ describe(`${COMMON_API} test`, function() {
             ...nextData,
             info: {
               ...nextInfo,
-              director: director.map(item => item.slice(1))
+              director: director.map(item => item.toString().slice(1))
             }
           })
           .set({
@@ -647,7 +661,7 @@ describe(`${COMMON_API} test`, function() {
             ...nextData,
             info: {
               ...nextInfo,
-              actor: actor.map(item => item.slice(1))
+              actor: actor.map(item => item.toString().slice(1))
             }
           })
           .set({
@@ -674,7 +688,7 @@ describe(`${COMMON_API} test`, function() {
             ...nextData,
             info: {
               ...nextInfo,
-              classify: classify.map(item => item.slice(1))
+              classify: classify.map(item => item.toString().slice(1))
             }
           })
           .set({
@@ -701,7 +715,7 @@ describe(`${COMMON_API} test`, function() {
             ...nextData,
             info: {
               ...nextInfo,
-              language: language.map(item => item.slice(1))
+              language: language.map(item => item.toString().slice(1))
             }
           })
           .set({
@@ -809,7 +823,7 @@ describe(`${COMMON_API} test`, function() {
             ...nextData,
             video: {
               ...nextVideo,
-              src: src.slice(1)
+              src: src.toString().slice(1)
             }
           })
           .set({
@@ -836,7 +850,7 @@ describe(`${COMMON_API} test`, function() {
             ...nextData,
             video: {
               ...nextVideo,
-              poster: poster.slice(1)
+              poster: poster.toString().slice(1)
             }
           })
           .set({
@@ -860,7 +874,7 @@ describe(`${COMMON_API} test`, function() {
           .post(COMMON_API)
           .send({
             ...nextData,
-            images: images.map(item => item.slice(1))
+            images: images.map(item => item.toString().slice(1))
           })
           .set({
             Accept: 'Application/json',
@@ -900,9 +914,9 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      after(function(done) {
+      after(async function() {
 
-        MovieModel.findOne({
+        const res = await MovieModel.findOne({
           author_rate: 5
         })
         .select({
@@ -952,11 +966,14 @@ describe(`${COMMON_API} test`, function() {
           return removeMovie()
         })
         .then(function() {
-          done()
+          return true
         })
         .catch(err => {
           console.log('oops: ', err)
+          return false
         })
+
+        return res ? Promise.resolve() : Promise.reject(COMMON_API)
 
       })
 
@@ -1010,9 +1027,9 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`put the previous upload movie success test -> ${COMMON_API}`, function() {
 
-      after(function(done) {
+      after(async function() {
 
-        MovieModel.findOne({
+        const res = await MovieModel.findOne({
           _id: movieId,
           author_rate: 3
         })
@@ -1023,11 +1040,14 @@ describe(`${COMMON_API} test`, function() {
         .then(data => !!data && data._doc)
         .then(data => {
           expect(data).to.be.not.a('boolean') 
-          done()
+          return true
         })
         .catch(err => {
           console.log('oops: ', err)
+          return false
         })
+
+        return res ? Promise.resolve() : Promise.reject(COMMON_API)
       
       })
 
@@ -1062,6 +1082,11 @@ describe(`${COMMON_API} test`, function() {
     })
 
     describe(`put the previous upload movie fail test -> ${COMMON_API}`, function() {
+
+      beforeEach(function(done) {
+        selfToken = signToken()
+        done()
+      })
 
       it(`put the previous upload movie fail because the movie id is not verify`, function(done) {
 
@@ -1165,6 +1190,8 @@ describe(`${COMMON_API} test`, function() {
 
       beforeEach(async function() {
 
+        selfToken = signToken()
+
         updatedAt = await UserModel.findOne({
           _id: userId,   
         })
@@ -1195,7 +1222,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err, _) {
+        .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
           let obj

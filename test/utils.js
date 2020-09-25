@@ -289,7 +289,7 @@ function mockCreateBarrage(values={}) {
     content: '测试弹幕'
   }
 
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new BarrageModel(baseModel)
 
@@ -306,7 +306,8 @@ function mockCreateFeedback(values) {
     }
   }
 
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
+
   const model = new FeedbackModel(baseModel)
   return { model }
 }

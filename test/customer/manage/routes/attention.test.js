@@ -98,7 +98,7 @@ describe(`${COMMON_API} test`, function() {
       it(`pre check params fail becasue of the movie id is not verify`, function(done) {
 
         Request
-        .post(COMMON_API)
+        .put(COMMON_API)
         .send({
           _id: userId.toString().slice(1)
         })
@@ -190,6 +190,7 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .set({
           Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -219,11 +220,8 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(304)
-        .expect({
-          'Content-Type': /json/,
-          'Last-Modified': updatedAt,
-          'ETag': createEtag({})
-        })
+        .expect('Last-Modified', updatedAt.toString())
+        .expect('ETag', createEtag({}))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -304,7 +302,7 @@ describe(`${COMMON_API} test`, function() {
         Promise.all([
           UserModel.findOne({
             _id: result._id,
-            attentions: { $in: [ userID ] }
+            attentions: { $in: [ userId ] }
           })
           .select({
             _id: 0,
@@ -342,7 +340,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect('Content-Type')
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -373,7 +371,7 @@ describe(`${COMMON_API} test`, function() {
         Promise.all([
           UserModel.findOne({
             _id: result._id,
-            attentions: { $in: [ userID ] }
+            attentions: { $in: [ userId ] }
           })
           .select({
             _id: 0,
@@ -399,18 +397,18 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`put the new user for attentions success but the user is attentioned`, function(done) {
+      it(`put the new user for attentions fail but the user is attentioned`, function(done) {
 
         Request
         .put(COMMON_API)
         .send({
-          _id: userId
+          _id: userId.toString()
         })
         .set({
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
         })
-        .expect(200)
+        .expect(404)
         .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
@@ -442,8 +440,8 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      after(function(done) {
-        Promise.all([
+      after(async function() {
+        const res = await Promise.all([
           UserModel.findOne({
             _id: result._id,
             attentions: []
@@ -464,25 +462,28 @@ describe(`${COMMON_API} test`, function() {
         .then(([self, user]) => {
           return !!self && !!user
         })
-        .then(result => {
-          if(result) return done()
-          done(new Error(COMMON_API))
+        .catch(err => {
+          console.log('oops: ', err)
+          return false
         })
+
+        return res ? Promise.resolve() : Promise.reject(COMMON_API)
+
       })
 
       it(`cancel the new user for attention success`, function(done) {
 
         Request
         .delete(COMMON_API)
-        .send({
-          _id: userId
+        .query({
+          _id: userId.toString()
         })
         .set({
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
-        .expect('Content-Type')
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -539,19 +540,19 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`cancel the new user for attentions success but the user is not attentioned`, function(done) {
+      it(`cancel the new user for attentions fail because the user is not attentioned`, function(done) {
         
         Request
         .delete(COMMON_API)
-        .send({
-          _id: userId
+        .query({
+          _id: userId.toString()
         })
         .set({
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
         })
-        .expect(200)
-        .expect('Content-Type')
+        .expect(404)
+        .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
           done()

@@ -9,7 +9,8 @@ const {
 } = require('@test/utils')
 const {
   BarrageModel,
-  
+  MovieModel, 
+  UserModel
 } = require('@src/utils')
 const mongoose = require("mongoose")
 const { Types: { ObjectId } } = mongoose
@@ -40,9 +41,6 @@ function responseExpect(res, validate=[]) {
 
 describe(`${COMMON_API} test`, function() {
 
-  let userDatabase
-  let barrageDatabase
-  let movieDatabase
   let result
   let userId
   let movieId
@@ -61,29 +59,29 @@ describe(`${COMMON_API} test`, function() {
     const { model: movie } = mockCreateMovie({
       name: COMMON_API
     })
-    userDatabase = model
-    movieDatabase = movie
+
     userToken = token
     getToken = signToken
 
     await Promise.all([
-      userDatabase.save(),
-      movieDatabase.save()
+      model.save(),
+      movie.save()
     ])
     .then(([user, movie]) => {
       userId = user._id
       movieId = movie._id
       const { model } = mockCreateBarrage({
         ...values,
+        origin: movieId,
         like_users: [ userId ],
         content: COMMON_API
       })
-      barrageDatabase = model
-      return barrageDatabase.save()
+
+      return model.save()
     })
     .then(data => {
       result = data
-      return movieDatabase.updateOne({
+      return MovieModel.updateOne({
         name: COMMON_API
       }, {
         barrage: [ data._id ]
@@ -99,13 +97,13 @@ describe(`${COMMON_API} test`, function() {
 
   after(async function() {
     await Promise.all([
-      userDatabase.deleteOne({
+      UserModel.deleteMany({
         username: COMMON_API
       }),
       BarrageModel.deleteMany({
         origin: movieId
       }),
-      movieDatabase.deleteOne({
+      MovieModel.deleteMany({
         name: COMMON_API
       })
     ])
@@ -310,16 +308,6 @@ describe(`${COMMON_API} test`, function() {
   })
 
   describe(`put barrage test -> ${COMMON_API}`, function() {
-
-    after(async function() {
-      await BarrageModel.deleteMany({
-        content: COMMON_API
-      })
-      .catch(err => {
-        console.log('oops: ', err)
-      })
-      return Promise.resolve()
-    })
     
     describe(`put barrage success`, function() {
 
@@ -488,7 +476,7 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
 
-        barrageDatabase.updateOne({
+        BarrageModel.updateOne({
           origin: movieId
         }, {
           like_users: []
@@ -575,12 +563,13 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
 
-        barrageDatabase.updateOne({
+        BarrageModel.updateOne({
           origin: movieId
         }, {
           like_users: [ userId ]
         })
-        .then(function() {
+        .then(function(data) {
+          console.log(data)
           done()
         })
         .catch(err => {
@@ -594,7 +583,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .delete(`${COMMON_API}/like`)
         .query({
-          _id: result._id.toString()
+          _id: movieId.toString()
         })
         .set({
           Accept: 'Application/json',

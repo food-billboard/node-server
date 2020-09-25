@@ -73,7 +73,7 @@ router
 		name: 'time',
 		sanitizers: [
 			function(data) {
-				return new Date(data)
+				return !!date ? new Date(data).toString() : new Date().toString()
 			}
 		]
   },
@@ -130,7 +130,7 @@ router
       "info.language": { $in: [ ...language ] }
     } : {}),
     ...(!!screen_time ? {
-      "info.screen": screen_time
+      "info.screen_time": screen_time
     } : {})
   })
   .select({
@@ -140,7 +140,8 @@ router
     "info.classify": 1,
     "info.screen_time": 1,
     hot: 1,
-    rate: 1
+    total_rate: 1,
+    rate_person: 1
   })
   .populate({
     path: 'info.classify',
@@ -161,21 +162,25 @@ router
     )
   })
   .skip((currPage >= 0 && pageSize >= 0) ? pageSize * currPage : 0)
-	.limit(pageSize >= 0 ? pageSize : 0)
+	.limit(pageSize >= 0 ? pageSize : 10)
   .exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {
-    return data.map(item => {
-      const { _doc: { info: { screen_time, ...nextInfo }, poster, ...nextItem } } = item
-      return {
-        ...nextItem,
-        ...nextInfo,
-        publish_time: screen_time,
-        poster: poster && poster.src ? poster.src : null,
-        store: false
-      }
-    })
+    return {
+      data: data.map(item => {
+        const { _doc: { info: { screen_time, ...nextInfo }, total_rate, rate_person, poster, ...nextItem } } = item
+        const rate = total_rate / rate_person
+        return {
+          ...nextItem,
+          ...nextInfo,
+          publish_time: screen_time,
+          poster: poster && poster.src ? poster.src : null,
+          store: false,
+          rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+        }
+      })
+    }
   })
   .catch(dealErr(ctx))
 

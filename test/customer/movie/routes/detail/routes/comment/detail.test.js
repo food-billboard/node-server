@@ -177,6 +177,9 @@ describe(`${COMMON_API} test`, function() {
       CommentModel.deleteMany({
         "content.image": [imageId]
       }),
+      MovieModel.deleteMany({
+        name: COMMON_API
+      })
     ])
     .then(function() {
       done()

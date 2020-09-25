@@ -142,7 +142,16 @@ router
         rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
         info: {
           ...nextInfo,
-          actor,
+          actor: actor.map(item => {
+            const { other: { avatar, ...nextOther }, ...nextImte } = item
+            return {
+              ...nextInfo,
+              other: {
+                ...nextOther,
+                avatar: !!avatar ? avatar.src : null
+              }
+            }
+          }),
           director,
           district,
           classify,

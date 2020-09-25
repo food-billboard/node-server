@@ -17,21 +17,23 @@ function responseExpect(res, validate=[]) {
          
   expect(target).to.be.a('array')
   target.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('icon', 'match_field', 'match', 'name', '_id')
-
+    expect(item).to.be.a('object').and.that.includes.all.keys('icon', 'match', 'name', '_id')
+    console.log(item)
     commonValidate.objectId(item._id)
     commonValidate.poster(item.icon)
     commonValidate.string(item.name)
-    commonValidate.string(item.match_field, function(target) {
-      return ['classify', 'district'].indexOf(target.toLowerCase())
-    })
-
+    // commonValidate.string(item.match_field, function(target) {
+    //   return ['classify', 'district'].indexOf(target.toLowerCase())
+    // })
     expect(item.match).to.be.a('array')
     item.match.forEach(mt => {
-      expect(mt).to.be.a('object').and.that.includes.all.keys('name', 'poster', '_id')
+      expect(mt).to.be.a('object').and.that.includes.all.keys('name', 'poster', '_id', 'match_field')
       commonValidate.string(mt.name)
       commonValidate.poster(mt.poster)
       commonValidate.objectId(mt._id)
+      commonValidate.string(mt.match_field, function(target) {
+        return !!~['classify', 'district'].indexOf(target.toLowerCase())
+      })
     })
 
   })
@@ -107,7 +109,7 @@ describe(`${COMMON_API} test`, function() {
     after(function(done) {
 
       Promise.all([
-        MovieModel.deleteOne({
+        MovieModel.deleteMany({
           name: COMMON_API
         }),
         RankModel.deleteMany({
@@ -147,7 +149,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err, _) {
+        .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
           let obj

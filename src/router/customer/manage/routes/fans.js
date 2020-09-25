@@ -47,14 +47,16 @@ router
   .then(data => {
     const { fans, _id, ...nextData } = data
     return {
-      ...nextData,
-      fans: fans.map(f => {
-        const { _doc: { avatar, ...nextF } } = f
-        return {
-          avatar: avatar ? avatar.src : null,
-          ...nextF
-        }
-      })
+      data: {
+        ...nextData,
+        fans: fans.map(f => {
+          const { _doc: { avatar, ...nextF } } = f
+          return {
+            avatar: avatar ? avatar.src : null,
+            ...nextF
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))

@@ -270,7 +270,7 @@ describe(`${COMMON_API} test`, function() {
         DirectorModel.deleteOne({
           name: COMMON_API
         }),
-        MovieModel.deleteOne({
+        MovieModel.deleteMany({
           name: COMMON_API
         }),
         UserModel.deleteOne({

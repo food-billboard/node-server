@@ -10,8 +10,8 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('object').and.that.includes.all.keys('attentions')
-  target.attentions.forEach(item => {
+  expect(target).to.be.a('object').and.that.includes.all.keys('fans')
+  target.fans.forEach(item => {
     expect(item).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id')
     commonValidate.poster(item.avatar)
     commonValidate.string(item.username)
@@ -153,8 +153,9 @@ describe(`${COMMON_API} test`, function() {
         'If-Modified-Since': updatedAt,
         'If-None-Match': createEtag({}),
       })
-      .expect(200)
-      .expect('Content-Type', /json/)
+      .expect(304)
+      .expect('Last-Modified', updatedAt.toString())
+      .expect('ETag', createEtag({}))
       .end(function(err, _) {
         if(err) return done(err)
         done()

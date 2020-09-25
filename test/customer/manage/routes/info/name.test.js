@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, commonValidate } = require('@test/utils')
+const { UserModel } = require('@src/utils')
 
 const COMMON_API = '/api/customer/manage/info/name'
 
@@ -8,8 +9,8 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`put the new name test -> ${COMMON_API}`, function() {
 
-    let selfDatabase
     let selfToken
+    let userId
     let result
 
     before(async function() {
@@ -18,12 +19,13 @@ describe(`${COMMON_API} test`, function() {
         username: 'common',
         mobile: 15698775364
       })
-      selfDatabase = model
+
       selfToken = token
 
-      await selfDatabase.save()
+      await model.save()
       .then(data => {
         result = data
+        userId = data._id
       })
       .catch(err => {
         console.log('oops: ', err)
@@ -35,7 +37,7 @@ describe(`${COMMON_API} test`, function() {
 
     after(async function() {
 
-      await selfDatabase.deleteOne({
+      await UserModel.deleteMany({
         mobile: 15698775364
       })
       .catch(err => {
@@ -48,23 +50,27 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`put the new name success test -> ${COMMON_API}`, function() {
 
-      after(function(done) {
+      after(async function() {
 
-        selfDatabase.findOne({
-          username: COMMON_API
+        const res = await UserModel.findOne({
+          _id: userId
         })
         .select({
-          _id: 1
+          _id: 1,
+          username: 1
         })
         .exec()
-        .then(data => !!data && data._id)
+        .then(data => !!data && data._doc.username)
         .then(data => {
-          commonValidate.objectId(data)
-          done()
+          console.log(data)
+          return data === COMMON_API
         })
         .catch(err => {
           console.log('oops: ', err)
+          return false
         })
+
+        return res ? Promise.resolve() : Promise.reject(COMMON_API)
 
       })
 

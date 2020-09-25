@@ -54,6 +54,16 @@ router
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
+  .then(data => {
+    const { fans, attentions, ...nextData } = data
+    return {
+      data: {
+        ...nextData,
+        fans: fans.length,
+        attentions: attentions.length
+      }
+    }
+  })
   .catch(dealErr(ctx))
 
   responseDataDeal({

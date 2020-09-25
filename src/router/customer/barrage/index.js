@@ -253,8 +253,8 @@ router
   .then(data => !!data && data._doc._id)
 
   const data = await BarrageModel.updateOne({
-    _id,
-    like_users: { $in: [mineId] }
+    origin: _id,
+    like_users: { $in: [ mineId ] }
   }, {
     $pull: { like_users: mineId }
   })

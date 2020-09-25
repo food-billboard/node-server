@@ -51,16 +51,24 @@ router
     select: {
       "info.classify": 1,
 			"info.description": 1,
-			"info.name": 1,
+      "info.name": 1,
+      "info.screen_time": 1,
 			poster: 1,
-			publish_time: 1,
 			hot: 1,
 			// author_rate: 1,
-			rate: 1,
+      total_rate: 1,
+      rate_person: 1
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
+    },
+    populate: {
+      path: "info.classify",
+      select: {
+        name: 1,
+        _id: 0
+      }
     }
   })
   .exec()
@@ -69,18 +77,23 @@ router
   .then(data => {
     const { issue } = data
     return {
-      ...data,
-      issue: issue.map(s => {
-        const { _doc: { poster, info: { description, name, classify }={}, ...nextS } } = s
-        return {
-          ...nextS,
-          poster: poster ? poster.src : null,
-          description,
-          name,
-          classify,
-          store: false,
-        }
-      })
+      data: {
+        ...data,
+        issue: issue.map(s => {
+          const { _doc: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
+          const rate = total_rate / rate_person
+          return {
+            ...nextS,
+            poster: poster ? poster.src : null,
+            description,
+            name,
+            classify,
+            store: false,
+            publish_time: screen_time,
+            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))

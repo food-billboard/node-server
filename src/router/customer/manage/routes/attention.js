@@ -68,14 +68,16 @@ router
   .then(data => {
     const { attentions } = data
     return {
-      ...data,
-      attentions: attentions.map(a => {
-        const { _doc: { avatar, ...nextA } } = a
-        return {
-          ...nextA,
-          avatar: avatar ? avatar.src : null,
-        }
-      })
+      data: {
+        ...data,
+        attentions: attentions.map(a => {
+          const { _doc: { avatar, ...nextA } } = a
+          return {
+            ...nextA,
+            avatar: avatar ? avatar.src : null,
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))
@@ -96,43 +98,44 @@ router
   })
 
   const { mobile } = token
-  let res
+  let mineId
 
-  const data = await Promise.all([
-    UserModel.findOne({
-      mobile: Number(mobile)
-    })
-    .select({
-      _id: 1
-    })
-    .exec(),
-    UserModel.findOne({
-      _id: ObjectId(_id)
+  const data = await UserModel.findOne({
+    mobile: Number(mobile),
+    attentions: { $nin: [ _id ] }
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data._doc._id)
+  .then(notFound)
+  .then(id => {
+    mineId = id
+    return UserModel.findOne({
+      _id,
+      fans: { $nin: [ id ] }
     })
     .select({
       _id: 1
     })
     .exec()
-  ])
-  .then(([mine, user]) => {
-    return Promise.all([
-      !!mine && mine._id,
-      !!user && user._id
-    ])
+    .then(data => !!data && data._doc._id)
   })
-  .then(([mine, user]) => {
+  .then(notFound)
+  .then(_ => {
     return Promise.all([
       UserModel.updateOne({
         mobile: Number(mobile),
-        attentions: { $nin: [ ObjectId(user) ] }
+        attentions: { $nin: [ _id ] }
       }, {
-        $push: { attentions: ObjectId(user) }
+        $push: { attentions: _id }
       }),
       UserModel.updateOne({
-        _id: user,
-        fans: { $nin: [ mine ] }
+        _id: _id,
+        fans: { $nin: [ mineId ] }
       }, {
-        $push: { fans: mine }
+        $push: { fans: mineId }
       }),
     ])
   })
@@ -156,10 +159,11 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
-  const data = await UserModel.findOneAndUpdate({
-    mobile: Number(mobile)
-  }, {
-    $pull: { attentions: ObjectId(_id) }
+  let mineId
+
+  const data = await UserModel.findOne({
+    mobile: Number(mobile),
+    attentions: { $in: [_id] }
   })
   .select({
     _id: 1
@@ -168,31 +172,29 @@ router
   .then(data => !!data && data._id)
   .then(notFound)
   .then(id => {
-    return UserModel.updateOne({
-      _id: ObjectId(id)
+    mineId = id
+    return UserModel.findOne({
+      _id,
+      fans: { $in: [ id ] }
     })
     .select({
       _id: 1
     })
     .exec()
+    .then(data => !!data && data._doc._id)
   })
-  .then(([mine, user]) => {
-    return Promise.all([
-      !!mine && mine._id,
-      !!user && user._id
-    ])
-  })
-  .then(([mine, user]) => {
+  .then(notFound)
+  .then((userId) => {
     return Promise.all([
       UserModel.updateOne({
         mobile: Number(mobile)
       }, {
-        $pull: { attentions: ObjectId(user) }
+        $pull: { attentions: userId }
       }),
       UserModel.updateOne({
-        _id: user
+        _id: userId
       }, {
-        $pull: { fans: mine }
+        $pull: { fans: mineId }
       }),
     ])
   })

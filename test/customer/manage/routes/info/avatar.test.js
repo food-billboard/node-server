@@ -1,5 +1,6 @@
 require('module-alias/register')
 const { mockCreateUser, mockCreateImage, Request, commonValidate } = require('@test/utils')
+const { UserModel, ImageModel } = require('@src/utils')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
 
@@ -7,8 +8,6 @@ const COMMON_API = '/api/customer/manage/info/avatar'
 
 describe(`${COMMON_API} test`, function() {
 
-  let imageDatabase
-  let userDatabase
   let selfToken
   let imageId
   let result
@@ -23,13 +22,11 @@ describe(`${COMMON_API} test`, function() {
       avatar: ObjectId('53102b43bf1044ed8b0ba36b')
     })
 
-    imageDatabase = image
-    userDatabase = user
     selfToken = token
 
     await Promise.all([
-      imageDatabase.save(),
-      userDatabase.save()
+      image.save(),
+      user.save()
     ])
     .then(([image, user]) => {
       result = user
@@ -46,10 +43,10 @@ describe(`${COMMON_API} test`, function() {
   after(async function() {
 
     await Promise.all([
-      imageDatabase.deleteOne({
+      ImageModel.deleteMany({
         src: COMMON_API
       }),
-      userDatabase.deleteOne({
+      UserModel.deleteMany({
         username: COMMON_API
       })
     ])
@@ -67,7 +64,7 @@ describe(`${COMMON_API} test`, function() {
 
       after(function(done) {
 
-        userDatabase.findOne({
+        UserModel.findOne({
           avatar: imageId
         })
         .select({

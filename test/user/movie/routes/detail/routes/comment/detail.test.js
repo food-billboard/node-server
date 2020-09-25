@@ -6,8 +6,12 @@ const {
   mockCreateUser,
   mockCreateVideo,
   commonValidate,
+  mockCreateComment,
+  mockCreateMovie,
+  createEtag
 } = require('@test/utils')
-const { CommentModel } = require('@src/utils')
+const { CommentModel, ImageModel, UserModel, VideoModel, MovieModel } = require('@src/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/detail/comment/detail'
 
@@ -24,19 +28,19 @@ function responseExpect(res, validate=[]) {
       'like', 'user_info', '_id'
     )
     const { comment_users, content, createdAt, updatedAt, total_like, like, user_info, _id } = item
-    expect(comment_users).to.be.satisfies(function(target) {
-      if(typeof target === 'number') {
-        commonValidate.number(target)
-      }else {
-        expect(target).to.be.a('array')
-        target.forEach(tar => {
-          expect(tar).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id')
-          commonValidate.poster(tar.avatar)
-          commonValidate.string(tar.username)
-          commonValidate.objectId(tar._id)
-        })
-      }
-    })
+    if(typeof comment_users === 'number') {
+      commonValidate.number(comment_users)
+    }else if(typeof comment_users == 'string'){
+      expect(Number.isNaN(parseInt(comment_users))).to.be.false
+    }else{
+      expect(comment_users).to.be.a('array')
+      comment_users.forEach(tar => {
+        expect(tar).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id')
+        commonValidate.poster(tar.avatar)
+        commonValidate.string(tar.username)
+        commonValidate.objectId(tar._id)
+      })
+    }
     expect(content).to.be.a('object').that.includes.all.keys('image', 'text', 'video')
     commonValidate.string(content.text, function(_) { return true })
     expect(content.video).to.be.a('array')
@@ -67,14 +71,11 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`get the comment detail without self info test -> ${COMMON_API}`, function() {
 
-    let imageDatabase
-    let videoDatabase
-    let userDatabase
-    let commentDatabase
-    let commentTestDatabase
     let imageId
     let videoId
     let userId
+    let movieId
+    let commentId
     let result
 
     before(function(done) {
@@ -82,8 +83,8 @@ describe(`${COMMON_API} test`, function() {
       const { model:image } = mockCreateImage({
         src: COMMON_API
       })
-      imageDatabase = image
-      imageDatabase.save()
+
+      image.save()
       .then(data => {
         imageId = data._id
         videoId = data._id
@@ -94,36 +95,44 @@ describe(`${COMMON_API} test`, function() {
         const { model: user } = mockCreateUser({
           username: COMMON_API
         })
-        videoDatabase = video
-        userDatabase = user
+
         return Promise.all([
-          videoDatabase.save(),
-          userDatabase.save()
+          video.save(),
+          user.save()
         ])
       })
       .then(([video, user]) => {
         userId = user._id
         videoId = video._id
+        const { model } = mockCreateMovie({
+          name: COMMON_API
+        })
+
+        return model.save()
+      })
+      .then(data => {
+        movieId = data._id
         const { model } = mockCreateComment({
-          source_type: 'user',
-          source: userId,
+          source_type: 'movie',
+          source: movieId,
           user_info: userId,
           content: {
             text: COMMON_API,
             image: [ imageId ],
             video: [ videoId ]
           },
-          like_person: [user._id],
-          comment_users: [ user._id ]
+          like_person: [userId],
+          comment_users: [ userId ]
         })
-        commentDatabase = model
-        return commentDatabase.save()
+
+        return model.save()
       })
       .then(data => {
         result = data
+        commentId = result._id
         const { model } = mockCreateComment({
-          source_type: 'user',
-          source: userId,
+          source_type: 'comment',
+          source: commentId,
           user_info: userId,
           content: {
             text: `${COMMON_API}-test`,
@@ -131,11 +140,11 @@ describe(`${COMMON_API} test`, function() {
             video: [ videoId ]
           },
         })
-        commentTestDatabase = model
-        return commentTestDatabase.save()
+
+        return model.save()
       })
       .then(function(data) {
-        return commentDatabase.updateOne({
+        return CommentModel.updateOne({
           "content.text": COMMON_API
         }, {
           $push: { sub_comments: data._id }
@@ -152,18 +161,21 @@ describe(`${COMMON_API} test`, function() {
     after(function(done) {
 
       Promise.all([
-        imageDatabase.deleteOne({
+        ImageModel.deleteOne({
           src: COMMON_API
         }),
-        videoDatabase.deleteOne({
+        VideoModel.deleteOne({
           src: COMMON_API
         }),
-        userDatabase.deleteOne({
+        UserModel.deleteOne({
           username: COMMON_API
         }),
         CommentModel.deleteMany({
           "content.image": [imageId]
         }),
+        MovieModel.deleteMany({
+          name: COMMON_API
+        })
       ])
       .then(function() {
         done()
@@ -181,14 +193,14 @@ describe(`${COMMON_API} test`, function() {
         Request
         .get(COMMON_API)
         .query({
-          _id: result._id.toString()
+          _id: commentId.toString()
         })
         .set({
           Accept: 'Application/json',
         })
         .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err, _) {
+        .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
           let obj
@@ -206,7 +218,7 @@ describe(`${COMMON_API} test`, function() {
       it(`get the comment detail without self info success and return the status of 304`, function(done) {
 
         const query = {
-          _id: result._id.toString()
+          _id: commentId.toString()
         }
 
         Request
@@ -230,7 +242,7 @@ describe(`${COMMON_API} test`, function() {
       it(`get the comment detail without self info success and hope return the status of 304 but the content has edited`, function(done) {
 
         const query = {
-          _id: result._id.toString()
+          _id: commentId.toString()
         }
 
         Request
@@ -255,22 +267,24 @@ describe(`${COMMON_API} test`, function() {
 
         const query = {
           offset: 0,
-          _id: result._id.toString()
+          _id: commentId.toString()
         }
 
         Request
         .get(COMMON_API)
         .query({
-          _id: result._id.toString()
+          _id: commentId.toString()
         })
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(result.updatedAt).valueOf - 10000000),
+          'If-Modified-Since': result.updatedAt,
           'If-None-Match': createEtag(query)
         })
         .expect(200)
         .expect('Last-Modified', result.updatedAt.toString())
-        .expect('ETag', createEtag(query))
+        .expect('ETag', createEtag({
+          _id: commentId.toString()
+        }))
         .end(function(err, _) {
           if(err) return done(err)
           done()
@@ -284,7 +298,7 @@ describe(`${COMMON_API} test`, function() {
 
       it(`get the comment detail without self info fail because the comment id is not found`, function(done) {
 
-        const _id = result._id.toString()
+        const _id = commentId.toString()
 
         Request
         .get(COMMON_API)
@@ -308,7 +322,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .get(COMMON_API)
         .query({
-          _id: result._id.slice(1)
+          _id: commentId.toString().slice(1)
         })
         .set({
           Accept: 'Application/json'

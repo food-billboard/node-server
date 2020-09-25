@@ -9,9 +9,9 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('array')
+  expect(target).to.be.a('object').and.have.a.property('issue').that.is.a('array')
 
-  target.forEach(item => {
+  target.issue.forEach(item => {
     expect(item).to.be.a('object').and.includes.all.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot')
     commonValidate.string(item.description, () => true)
     commonValidate.string(item.name)
@@ -58,7 +58,7 @@ describe(`${COMMON_API} test`, function() {
           }
         })
 
-        model.save()
+        return model.save()
       })
       .then(function(data) {
         const { model } = mockCreateUser({
@@ -104,7 +104,7 @@ describe(`${COMMON_API} test`, function() {
 
         Request
         .get(COMMON_API)
-        .query('_id', userId.toString())
+        .query({'_id': userId.toString()})
         .set('Accept', 'Application/json')
         .expect(200)
         .expect('Content-Type', /json/)

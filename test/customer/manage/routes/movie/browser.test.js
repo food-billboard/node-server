@@ -10,9 +10,9 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('object').and.that.have.a.property('browser')
+  expect(target).to.be.a('object').and.that.have.a.property('glance')
 
-  target.browser.forEach(item => {
+  target.glance.forEach(item => {
     expect(item).to.be.a('object').and.includes.all.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot')
     commonValidate.string(item.description, function() { return true })
     commonValidate.string(item.name)
@@ -22,7 +22,7 @@ function responseExpect(res, validate=[]) {
     commonValidate.number(item.rate)
     //classify
     expect(item.classify).to.be.a('array').and.that.lengthOf.above(0)
-    item.forEach(classify => {
+    item.classify.forEach(classify => {
       expect(classify).to.be.a('object').and.that.has.a.property('name').and.that.is.a('string')
     })
     commonValidate.time(item.publish_time) 
@@ -44,6 +44,7 @@ describe(`${COMMON_API} test`, function() {
 
     let updatedAt
     let selfToken
+    let userId
     let result
 
     before(async function() {
@@ -61,7 +62,7 @@ describe(`${COMMON_API} test`, function() {
           }
         })
 
-        model.save()
+        return model.save()
       })
       .then(function(data) {
         const { model, token } = mockCreateUser({
@@ -75,6 +76,7 @@ describe(`${COMMON_API} test`, function() {
       })
       .then(function(data) {
         result = data
+        userId = result._id
       })
       .catch(err => {
         console.log('oops: ', err)
@@ -90,7 +92,7 @@ describe(`${COMMON_API} test`, function() {
         UserModel.deleteOne({
           username: COMMON_API
         }),
-        MovieModel.deleteOne({
+        MovieModel.deleteMany({
           name: COMMON_API
         }),
         ClassifyModel.deleteOne({

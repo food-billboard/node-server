@@ -42,42 +42,45 @@ router.get('/', async(ctx) => {
         }
       ]
     })
+    .select({
+      poster: 1, 
+      name: 1,
+      "info.classify": 1,
+      "info.district": 1
+    })
+    .exec()
   })
-  .select({
-    poster: 1, 
-    name: 1,
-    "info.classify": 1,
-    "info.district": 1
-  })
-  .exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {
-    return result.map(item => {
+    console.log(result)
+    return {
+      data: result.map(item => {
 
-      const { _doc: { icon, match_field: { field, _id }, ...nextD } } = item
-
-      const filter = data.filter(item => {
-        const { info } = item
-        return info[field].some(fd => fd.equals(_id))
+        const { _doc: { icon, match_field: { field, _id }, ...nextD } } = item
+  
+        const filter = data.filter(item => {
+          const { info } = item
+          return info[field].some(fd => fd.equals(_id))
+        })
+        .slice(0, count)
+        .map(m => {
+          const { _doc: { poster, info, ...nextM } } = m
+            return {
+              ...nextM,
+              match_field: field,
+              poster: poster ? poster.src : null,
+            }
+        })
+  
+        return {
+          ...nextD,
+          icon: icon ? icon.src : null,
+          match: filter
+        }
+  
       })
-      .slice(0, count)
-      .map(m => {
-        const { _doc: { poster, info, match_field:{ field }, ...nextM } } = m
-          return {
-            ...nextM,
-            match_field: field,
-            poster: poster ? poster.src : null,
-          }
-      })
-
-      return {
-        ...nextD,
-        icon: icon ? icon.src : null,
-        match: filter
-      }
-
-    })
+    }
   })
   .catch(dealErr(ctx))
 

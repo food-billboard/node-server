@@ -1,6 +1,7 @@
 require('module-alias/register')
 const { mockCreateGlobal, Request, createEtag, commonValidate } = require('@test/utils')
 const { GlobalModel } = require('@src/utils')
+const { expect } = require('chai')
 
 const COMMON_API = '/api/user/home/notice'
 
@@ -83,7 +84,8 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .set({
           Accept: 'Application/json',
-          'If-Modified-Since': result.updatedAt
+          'If-Modified-Since': result.updatedAt,
+          'If-None-Match': createEtag({})
         })
         .expect(304)
         .expect('Last-Modified', result.updatedAt.toString())

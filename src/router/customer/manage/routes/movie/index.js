@@ -714,10 +714,11 @@ router
 			"info.description": 1,
 			"info.name": 1,
 			poster: 1,
-			publish_time: 1,
+			"info.screen_time": 1,
 			hot: 1,
 			// author_rate: 1,
-			rate: 1,
+      total_rate: 1,
+      rate_person: 1
     },
     options: {
       ...((pageSize >= 0 && currPage >= 0) ? { skip: pageSize * currPage, } : {}),
@@ -730,18 +731,23 @@ router
   .then(data => {
     const { issue } = data
     return {
-      ...data,
-      issue: issue.map(s => {
-        const { _doc: { poster, info: { description, name, classify }={}, ...nextS } } = s
-        return {
-          ...nextS,
-          poster: poster ? poster.src : null,
-          description,
-          name,
-          classify,
-          store: false,
-        }
-      })
+      data: {
+        ...data,
+        issue: issue.map(s => {
+          const { _doc: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
+          const rate = total_rate / rate_person
+          return {
+            ...nextS,
+            poster: poster ? poster.src : null,
+            description,
+            name,
+            classify,
+            store: false,
+            publish_time: screen_time,
+            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))

@@ -109,7 +109,7 @@ describe(`${COMMON_API} test`, function() {
         ImageModel.deleteOne({
           src: COMMON_API
         }),
-        MovieModel.deleteOne({
+        MovieModel.deleteMany({
           name: COMMON_API
         }),
         SpecialModel.deleteMany({
