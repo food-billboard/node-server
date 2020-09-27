@@ -4,8 +4,9 @@
   "description": "电影小程序后端api接口服务，包含mocha单元测试",
   "main": "app.js",
   "scripts": {
+    "dev": "nodemon app.js --config ./src/config/nodemon/index.dev.json",
+    "prod": "nodemon app.js --config ./src/config/nodemon/index.prod.json",
     "test": "mocha test/**/*.js --recursive --timeout 10000",
-    "dev": "nodemon app.js",
     "socket": "nodemon ./src/chat/index.js"
   },
   "author": "GLF",
@@ -21,11 +22,13 @@
     "koa-body": "^4.1.1",
     "koa-compress": "^4.0.1",
     "koa-cors": "0.0.16",
+    "koa-morgan": "^1.0.1",
     "koa-static": "^5.0.0",
     "module-alias": "^2.2.2",
     "mongoose": "^5.9.17",
     "socket.io": "^2.3.0",
-    "validator": "^13.1.1"
+    "validator": "^13.1.1",
+    "winston": "^3.3.3"
   },
   "_moduleAliases": {
     "@src": "src",
