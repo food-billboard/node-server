@@ -3,7 +3,7 @@ const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -24,43 +24,48 @@ router
       }
     }else if(token && !_id) {
       ctx.status = 400
-      ctx.body = JSON.stringify({
-        success: false,
-        res: null
+      responseDataDeal({
+        ctx,
+        data: {
+          err: true,
+          res: null
+        }
       })
     }else if(!token && _id) {
-      ctx.status = 401
+      ctx.status = 302
       return ctx.redirect(newUrl)
     }else {
       ctx.status = 403
-      ctx.body = JSON.stringify({
-        success: false,
-        res: null
+      responseDataDeal({
+        ctx,
+        data: {
+          err: true,
+          res: null
+        }
       })
     }
   }else {
     ctx.status = 405
-    ctx.body = JSON.stringify({
-      success: false,
-      res: null
+    responseDataDeal({
+      ctx,
+      data: {
+        err: true,
+        res: null
+      }
     })
   }
 })
 //个人信息
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  let res
+
   const { mobile } = token
   const check = Params.query(ctx, {
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
+
   const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
@@ -68,7 +73,7 @@ router
     ]
   })
 
-  const data = await UserModel.find({
+  let data = await UserModel.find({
     $or: [
       {
         mobile: Number(mobile),
@@ -93,10 +98,12 @@ router
   .then(data => {
     let result = {}
     let mine
-    let fans
+    let fans = []
+    let found = false
     data.forEach(d => {
       const { _doc: { _id:id, avatar, ...nextD } } = d 
       if(id.equals(_id)) {
+        found = true
         const { fans:userFans, attentions } = nextD
         result = {
           ...result,
@@ -112,35 +119,29 @@ router
         mine = id
       }
     })
-
+    if(!found) return Promise.reject({ errMsg: 'not found', status: 404 })
     if(mine && fans.some(f => f.equals(mine))) result.like = true
-    return result
+    return {
+      data: result
+    }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    if(!data) {
-      ctx.status = 401
-      res = {
-        success: false,
-        res: {
-          errMsg: '登录过期'
-        }
-      }
-    }else {
-      res = {
-        success: true,
-        res: {
-          data
-        }
+  if(!data) {
+    ctx.status = 401
+    data = {
+      err: true,
+      res: {
+        errMsg: 'not authritarian'
       }
     }
   }
-  ctx.body = JSON.stringify(res)
+
+  responseDataDeal({
+    ctx,
+    data, 
+  })
+
 })
 .use('/fans', Fans.routes(), Fans.allowedMethods())
 .use('/attention', Attention.routes(), Attention.allowedMethods())

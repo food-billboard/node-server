@@ -1,12 +1,12 @@
 {
   "name": "movie-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "电影小程序后端api接口服务，包含mocha单元测试",
   "main": "app.js",
   "scripts": {
-    "test": "jest --forceExit --runInBand --detectOpenHandles",
     "dev": "nodemon app.js --config ./src/config/nodemon/index.dev.json",
     "prod": "nodemon app.js --config ./src/config/nodemon/index.prod.json",
+    "test": "mocha test/**/*.js --recursive --timeout 10000",
     "socket": "nodemon ./src/chat/index.js"
   },
   "author": "GLF",
@@ -16,6 +16,7 @@
     "app-root-path": "^3.0.0",
     "dayjs": "^1.8.28",
     "elasticsearch": "^16.7.1",
+    "ioredis": "^4.17.3",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.11.0",
     "koa-body": "^4.1.1",
@@ -30,9 +31,14 @@
     "winston": "^3.3.3"
   },
   "_moduleAliases": {
-    "@src": "src"
+    "@src": "src",
+    "@test": "test"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "co-mocha": "^1.2.2",
+    "co-supertest": "0.0.10",
+    "mocha": "^8.1.1",
     "supertest": "^4.0.2"
   }
 }

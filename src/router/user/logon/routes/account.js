@@ -1,22 +1,20 @@
 const Router = require('@koa/router')
-const { signToken, encoded, dealErr, UserModel, RoomModel, notFound, Params } = require("@src/utils")
+const { signToken, encoded, dealErr, UserModel, RoomModel, Params, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
 
-router.post('/', async(ctx) => {
+router
+.post('/', async(ctx) => {
+
   const check = Params.body(ctx, {
     name: 'mobile',
-    type: ['isMobilePhone']
+    validator: [data => /^1[3456789]\d{9}$/.test(data)]
   }, {
     name: 'password',
-    validator: data => typeof data === 'string'
+    validator: [data => typeof data === 'string']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  console.log(check)
+  if(check) return
 
   const [ password, uid, mobile ] = Params.sanitizers(ctx.request.body, {
     name: 'password',
@@ -28,7 +26,9 @@ router.post('/', async(ctx) => {
     name: 'mobile',
     type: ['toInt']
   })
-  let res
+
+  console.log(mobile)
+
   const data = await UserModel.findOneAndUpdate({
     mobile,
     password: encoded(password)
@@ -37,8 +37,7 @@ router.post('/', async(ctx) => {
   })
   .select({
     allow_many: 1,
-    create_time: 1,
-    modified_time: 1,
+    createdAt: 1,
     username:1,
     avatar: 1,
     hot:1,
@@ -47,7 +46,10 @@ router.post('/', async(ctx) => {
   })
   .exec()
   .then(data => !!data && data._doc)
-  .then(notFound)
+  .then(data => {
+    if(!data) return Promise.reject({ errMsg: '账号或密码错误', status: 403 })
+    return data
+  })
   .then(data => {
     const { fans=[], attentions=[], password:_, avatar, ...nextData } = data
     const token = signToken({mobile, password})
@@ -77,22 +79,17 @@ router.post('/', async(ctx) => {
         $push: { members: { message: [], user: _id, status: 'OFFLINE' } }
       })
     ])
-    return data
+    return {
+      data
+    }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = data.res
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 })
 
 module.exports = router

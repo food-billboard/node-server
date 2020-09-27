@@ -12,7 +12,8 @@ const {
   dealErr, 
   notFound, 
   Params,
-  NUM_DAY
+  NUM_DAY,
+  responseDataDeal
 } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -263,6 +264,7 @@ router
   const { method, body } = ctx.request
   if(method.toLowerCase() === 'get') return await next()
   const {
+    _id,
     info: {
       author_description,
       alias,
@@ -330,12 +332,7 @@ router
     type: [ 'isMongoId' ]
   })
 
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const {
     screen_time,
@@ -373,6 +370,8 @@ router
 
   //判断是否已经存在
   const data = await MovieModel.findOne({
+    //修改则需要跳过修改的电影id
+    ...(!!_id ? { _id: { $not: _id } } : {}),
     //名字类似
     $or: [
       { name },
@@ -401,8 +400,9 @@ router
   if(data && !data.err) {
     return await next()
   }
-  ctx.body = JSON.stringify({
-    ...data.res
+  responseDataDeal({
+    ctx,
+    data
   })
 
 })
@@ -410,7 +410,7 @@ router
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile }  = token
-  let res
+
   let templateInsertData
   const { body } = ctx.request
   const { 
@@ -509,34 +509,20 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data: '审核中'
-      }
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 .put('/', async (ctx) => {
   const check = Params.body(ctx, {
     name: '_id',
     type: [ 'isMongoId' ]
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
-  let res
   let templateUpdateData
   const { body: { 
     info: {
@@ -597,8 +583,8 @@ router
     .exec()
     .then(data => !!data && data._doc)
   })
+  .then(notFound)
   .then(async (data) => {
-    if(!data) return Promise.reject({errMsg: '电影不存在', status: 400})
 
     const {
       info,
@@ -689,18 +675,11 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 })
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
@@ -721,13 +700,12 @@ router
     ]
   })
 
-  let res 
-
   const data = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
-    issue: 1
+    issue: 1,
+    updatedAt: 1
   })
   .populate({
     path: 'issue',
@@ -736,10 +714,11 @@ router
 			"info.description": 1,
 			"info.name": 1,
 			poster: 1,
-			publish_time: 1,
+			"info.screen_time": 1,
 			hot: 1,
 			// author_rate: 1,
-			rate: 1,
+      total_rate: 1,
+      rate_person: 1
     },
     options: {
       ...((pageSize >= 0 && currPage >= 0) ? { skip: pageSize * currPage, } : {}),
@@ -751,36 +730,37 @@ router
   .then(notFound)
   .then(data => {
     const { issue } = data
-    return issue.map(s => {
-      const { _doc: { poster, info: { description, name, classify }={}, ...nextS } } = s
-      return {
-        ...nextS,
-        poster: poster ? poster.src : null,
-        description,
-        name,
-        classify,
-        store: false,
+    return {
+      data: {
+        ...data,
+        issue: issue.map(s => {
+          const { _doc: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
+          const rate = total_rate / rate_person
+          return {
+            ...nextS,
+            poster: poster ? poster.src : null,
+            description,
+            name,
+            classify,
+            store: false,
+            publish_time: screen_time,
+            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+          }
+        })
       }
-    })
+    }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
 })
 .use('/browser', Browse.routes(), Browse.allowedMethods())
 .use('/store', Store.routes(), Store.allowedMethods())
 .use('/detail', Detail.routes(), Detail.allowedMethods())
+
+//可以再添加一个删除的功能
 
 module.exports = router

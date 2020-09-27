@@ -13,6 +13,7 @@ const SECRET = "________SE__C_R__E_T"
 
 const MIDDEL = "MIDDEL"
 
+//密码加密
 const encoded = (password) => {
   if(crypto) {
     const hmac = crypto.createHmac('sha256', SECRET)
@@ -22,6 +23,7 @@ const encoded = (password) => {
   return password
 }
 
+//文件MD5加密
 const fileEncoded = (str) => {
   if(crypto) {
     const hmac = crypto.createHmac('md5', SECRET)
@@ -51,10 +53,12 @@ const verifyToken = token => jwt.verify(token, SECRET)
 const middlewareVerifyToken = async (ctx, next) => {
   const { header: {authorization} } = ctx.request
   const [err,] = getToken(authorization)
+
   if(!err) {
     ctx.status = 200
     await next()
   }else {
+    ctx.set({ 'Content-Type': 'Application/json' })
     switch(err) {
       case '400':
         ctx.status = 400
@@ -144,14 +148,14 @@ const verifySocketIoToken = token => {
 }
 
 const getToken = (authorization) => {
-  if(!authorization) return ['400', null]
-  const token = authorization.split(' ')[1]
+  if(!authorization) return ['401', null]
+  const token = /.+ .+/.test(authorization) ? authorization.split(' ')[1] : authorization
   try { 
     const { middel, ...nextToken } = verifyToken(token)
     if(middel !== MIDDEL) return ['401', null]
     return [null, nextToken]
   }catch(err) {
-    return [err, null]
+    return ['401', null]
   }
 }
 
@@ -173,5 +177,6 @@ module.exports = {
   verifyTokenToData,
   verifySocketIoToken,
   otherToken,
-  fileEncoded
+  fileEncoded,
+  getToken
 }

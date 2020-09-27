@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params, isType } = require("@src/utils")
+const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params, isType, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -14,6 +14,8 @@ router.put('/', async (ctx) => {
       data => isType(data, 'number') || isType(data, 'string')
     ]
   })
+  if(check) return
+
   const [ _id, value ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
@@ -25,18 +27,29 @@ router.put('/', async (ctx) => {
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    rate: 1
-  })
-  .exec()
-  .then(data => !!data && data._doc)
-  .then(notFound)
-  .then(data => {
-    const { rate } = data
+
+  const data = await Promise.all([
+    UserModel.findOne({
+      mobile: Number(mobile)
+    })
+    .select({
+      rate: 1
+    })
+    .exec()
+    .then(data => !!data && data._doc)
+    .then(notFound),
+    MovieModel.findOne({
+      _id
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(data => !!data && data._doc._id)
+    .then(notFound)
+  ])
+  .then(([user, _]) => {
+    const { rate } = user
     const [rateValue] = rate.filter(r => ObjectId.isValid(r._id) ? r._id.equals(_id) : ObjectId(r._id).equals(_id))
     //修改评分
     if(rateValue) {
@@ -74,18 +87,12 @@ router.put('/', async (ctx) => {
   .then(_ => true)
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 
 module.exports = router

@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
 
@@ -21,13 +21,13 @@ router.get('/', async (ctx) => {
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res 
 
   const data = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
-    glance: 1
+    glance: 1,
+    updatedAt: 1
   })
   .populate({
     path: 'glance',
@@ -36,48 +36,55 @@ router.get('/', async (ctx) => {
 			"info.description": 1,
 			"info.name": 1,
 			poster: 1,
-			publish_time: 1,
+			"info.screen_time": 1,
 			hot: 1,
 			// author_rate: 1,
-			rate: 1,
+      total_rate: 1,
+      rate_person: 1
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
+    },
+    populate: {
+      path: 'info.classify',
+      select: {
+        _id: 0,
+        name: 1
+      }
     }
   })
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { glance } = data
-    return glance.map(g => {
-      const { _doc: { info: { description, name, classify }, poster, ...nextD } } = g
-      return {
-        ...nextD,
-        poster: poster ? poster.src : null,
-        description,
-        name,
-        classify,
-        store:false
+    const { glance, ...nextData } = data
+    return {
+      data: {
+        ...nextData,
+        glance: glance.map(g => {
+          const { _doc: { info: { description, name, classify, screen_time }, poster, total_rate, rate_person, ...nextD } } = g
+          const rate = total_rate /rate_person
+          return {
+            ...nextD,
+            poster: poster ? poster.src : null,
+            description,
+            name,
+            classify,
+            store:false,
+            publish_time: screen_time,
+            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+          }
+        })
       }
-    })
+    }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.ers
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+  })
 })
 
 module.exports = router

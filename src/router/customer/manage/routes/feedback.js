@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, FeedbackModel, dealErr, notFound, Params, formatISO, NUM_DAY } = require("@src/utils")
+const { verifyTokenToData, UserModel, FeedbackModel, dealErr, notFound, Params, formatISO, NUM_DAY, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -11,7 +11,7 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
-  const data = await UserModel.findOne({
+  let data = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
@@ -23,54 +23,61 @@ router
   .then(id => {
     userId = id
     return FeedbackModel.findOne({
-      user_info: id,
-      createdAt: { $lt: formatISO(Date.now() - NUM_DAY(1)) }
+      user_info: userId,
+      createdAt: { $gt: formatISO(Date.now() - NUM_DAY(1)) }
     })
     .select({
-      _id: 1
+      _id: 1,
+      createdAt: 1,
+
     })
     .exec()
   })
-  .then(data => !!data && data._id)
+  .then(data => !!data && data)
+  .then(data => {
+    if(!!data) return Promise.reject({ errMsg: 'frequent', status: 503 })
+  })
   .catch(dealErr(ctx))
 
   if(data && data.err) {
-    ctx.body = JSON.stringify({
-      ...data.res
-    })
-    return
-  }else if(data) {
-    ctx.status = 503
-    ctx.body = JSON.stringify({
-      success: false,
-      res: {
-        errMsg: 'frequent'
-      }
+    responseDataDeal({
+      ctx,
+      data,
+      needCache: false
     })
     return
   }
 
   if(!/.+\/feedback$/g.test(url)) return await next()
-  console.log(ctx.request.body)
+
   const check = Params.body(ctx, {
     name: "content",
     validator: [
-      data => !!Object.keys(data).length && ( 
-        !!data.text
-        &&
-        ( data.video ? data.video.every(d => ObjectId.isValid(d)) : true )
-        &&
-        ( data.image ? data.image.every(d => ObjectId.isValid(d)) : true )
-      )
+      data => {
+        const { text, image, video } = data
+        try {
+          return (
+            (typeof text === 'string' && text.length > 0) 
+            || 
+            (Array.isArray(image) && !!image.length) 
+            || 
+            (Array.isArray(video) && !!video.length)
+          ) 
+            && 
+          ( 
+            ( Array.isArray(video) ? video.every(d => typeof d === 'string' && ObjectId.isValid(d)) && !!video.length : true )
+            ||
+            ( Array.isArray(image) ? image.every(d => typeof d === 'string' && ObjectId.isValid(d)) && !!image.length : true )
+          )
+        }catch(err) {
+          console.log(err)
+          return true
+        }
+      }
     ]
   })
 
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   return await next()
 })
@@ -82,18 +89,19 @@ router
   {
     name: 'content.image',
     sanitizers: [
-      data => data ? data.map(d => ObjectId(d)) : []
+      data => {
+        return Array.isArray(data) ? data.map(d => ObjectId(d)) : []
+      }
     ]
   },
   {
     name: 'content.video',
     sanitizers: [
-      data => data ? data.map(d => ObjectId(d)) : []
+      data => Array.isArray(data) ? data.map(d => ObjectId(d)) : []
     ]
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
 
   const data = await UserModel.findOne({
     mobile: Number(mobile)
@@ -122,23 +130,16 @@ router
   .then(_ => true)
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
 })
 .get('/precheck', async(ctx) => {
-  ctx.body = JSON.stringify({
-    success: true,
-    res: {
+
+  responseDataDeal({
+    ctx,
+    data: {
       data: true
     }
   })

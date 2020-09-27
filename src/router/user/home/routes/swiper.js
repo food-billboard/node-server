@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MovieModel, SpecialModel, isEmpty, Params } = require('@src/utils')
+const { MovieModel, SpecialModel, isEmpty, Params, responseDataDeal } = require('@src/utils')
 const router = new Router()
 
 const cache = {}
@@ -82,12 +82,20 @@ router.get('/', async(ctx) => {
     ]
   })
   let res = await cacheProxy.data(count)
-  ctx.body = JSON.stringify({
-    success: true,
-    res: {
+
+  responseDataDeal({
+    ctx,
+    data: {
       data: res
     }
   })
+
+  // ctx.body = JSON.stringify({
+  //   success: true,
+  //   res: {
+  //     data: res
+  //   }
+  // })
 })
 
 module.exports = router

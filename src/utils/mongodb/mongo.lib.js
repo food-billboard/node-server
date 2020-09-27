@@ -1,7 +1,7 @@
 const Day = require('dayjs')
 const mongoose = require("mongoose")
 const { Schema, model } = mongoose
-const ObjectId = mongoose.Types.ObjectId
+const { Types: { ObjectId } } = mongoose
 
 function getMill(time) {
   return Day(time).valueOf()
@@ -28,10 +28,11 @@ const isOne = fields => {
   return Object.values(nextFields).some(field => field == 1)
 }
 
+//预处理
 function prePopulate(populate) {
   return function(next) {
     let activePopulate = []
-    const { _fields: fields } = this
+    const { _fields: fields={} } = this
     const zero = isZero(fields)
     let fieldArr = []
     //筛选同字段不同层
@@ -74,14 +75,22 @@ function prePopulate(populate) {
         })
     })
 
+    //!! need to test
+    if(!zero) this.select({
+      updatedAt: 1
+    })
 
     activePopulate.forEach(active => {
       this.populate(active)
     })
 
     next()
-
   }
+}
+
+//完成处理
+function postMiddleware(error, res, next) {
+  
 }
 
 //预设
@@ -267,7 +276,7 @@ const UserSchema = new Schema({
     default: '默认名称'
   },
 	avatar: {
-    default: ObjectId('5edb3c7b4f88da14ca419e61'),
+    // default: ObjectId('5edb3c7b4f88da14ca419e61'),
     type: ObjectId,
     ref: 'image'
   },
@@ -493,6 +502,11 @@ const BarrageSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   }],
+  content: {
+    type: String,
+    minlength: 1,
+    required: true
+  },
   time_line: {
     type: Number,
     required: true
@@ -555,12 +569,13 @@ const MovieSchema = new Schema({
   }],
   poster: {
     type: ObjectId,
-    ref: 'image'
+    ref: 'image',
+    required: true
   },
-  barrage: {
+  barrage: [{
     type: ObjectId,
     ref: 'barrage'
-  },
+  }],
   tag: [{
     type: ObjectId,
     ref: 'tag'
@@ -684,10 +699,10 @@ const ActorSchema = new Schema({
     type: String,
     required: true
   },
-  works: [{
-    type: ObjectId,
-    ref: 'movie'
-  }],
+  // works: [{
+  //   type: ObjectId,
+  //   ref: 'movie'
+  // }],
   other: {
     another_name: {
       type: String,
@@ -707,10 +722,10 @@ const DirectorSchema = new Schema({
     type: String,
     required: true
   },
-  works: [{
-    type: ObjectId,
-    ref: 'movie'
-  }],
+  // works: [{
+  //   type: ObjectId,
+  //   ref: 'movie'
+  // }],
   other: {
     another_name: {
       type: String,
@@ -765,7 +780,7 @@ const SearchSchema = new Schema({
 const CommentSchema = new Schema({
   source_type: {
     type: String,
-    enum: ['movie', 'user'],
+    enum: ['movie', 'comment'],
     required: true,
     trim: true,
   },
@@ -827,11 +842,18 @@ const RankSchema = new Schema({
     ref: 'image'
   },
   match_field: {
-    type: String,
-    enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'TOTAL_RATE', 'CLASSIFY' ],
-    uppercase: true,
-    get: function(v) {
-      return v
+    _id: {
+      type: ObjectId,
+      refPath: 'field'
+    },
+    field: {
+      type: String,
+      // enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'TOTAL_RATE', 'CLASSIFY' ],
+      enum: [ 'classify', 'district' ],
+      lowercase: true,
+      get: function(v) {
+        return v
+      }
     }
   },
   // match: [{
@@ -858,12 +880,12 @@ const ClassifySchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
-  match: [
-    {
-      type: ObjectId,
-      ref: 'movie'
-    }
-  ],
+  // match: [
+  //   {
+  //     type: ObjectId,
+  //     ref: 'movie'
+  //   }
+  // ],
   glance: {
     type: Number,
     default: 0
@@ -908,6 +930,12 @@ const VideoSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   },
+  white_list: [
+    {
+      type: ObjectId,
+      ref: 'user'
+    }
+  ],
   auth: {
     required: true,
     type: String,
@@ -916,9 +944,10 @@ const VideoSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
+    md5: String,
     complete: [{
       type: Number,
-      required: true,
+      // required: true,
       min: 0
     }],
     chunk_size: {
@@ -940,7 +969,8 @@ const VideoSchema = new Schema({
       type: String,
       enum: ['ERROR', 'COMPLETE', 'UPLOADING'],
       uppercase: true,
-      required: true
+      required: true,
+      default: 'COMPLETE'
     }
   },
 }, {
@@ -963,6 +993,12 @@ const ImageSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   },
+  white_list: [
+    {
+      type: ObjectId,
+      ref: 'user'
+    }
+  ],
   auth: {
     required: true,
     type: String,
@@ -971,6 +1007,7 @@ const ImageSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
+    md5: String,
     complete: [{
       type: Number,
       min: 0
@@ -986,6 +1023,7 @@ const ImageSchema = new Schema({
     mime: {
       type: String,
       enum: [],
+      required: true,
       uppercase: true,
       get: function(v) { return v ? v.toLowerCase() : v }
     },
@@ -1016,6 +1054,12 @@ const OtherMediaSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   },
+  white_list: [
+    {
+      type: ObjectId,
+      ref: 'user'
+    }
+  ],
   auth: {
     required: true,
     type: String,
@@ -1024,6 +1068,7 @@ const OtherMediaSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
+    md5: String,
     complete: [{
       type: Number,
       min: 0
@@ -1071,64 +1116,61 @@ const FeedbackSchema = new Schema({
   ...defaultConfig
 })
 
+const FIND_OPERATION_LIB = [
+  'find',
+  'findOne',
+  'findOneAndUpdate',
+]
+
+const SAVE_OPERATION_LIB = [
+  'save'
+]
+
 //预处理
-UserSchema.pre('find', prePopulate(PRE_USER_FIND))
-UserSchema.pre('findOne', prePopulate(PRE_USER_FIND))
-UserSchema.pre('findOneAndUpdate', prePopulate(PRE_USER_FIND))
-GlobalSchema.pre('find', prePopulate(PRE_GLOBAL_FIND))
-GlobalSchema.pre('findOne', prePopulate(PRE_GLOBAL_FIND))
-GlobalSchema.pre('findOneAndUpdate', prePopulate(PRE_GLOBAL_FIND))
-RoomSchema.pre('find', prePopulate(PRE_ROOM_FIND))
-RoomSchema.pre('findOne', prePopulate(PRE_ROOM_FIND))
-RoomSchema.pre('findOneAndUpdate', prePopulate(PRE_ROOM_FIND))
-MessageSchema.pre('find', prePopulate(PRE_MESSAGE_FIND))
-MessageSchema.pre('findOne', prePopulate(PRE_MESSAGE_FIND))
-MessageSchema.pre('findOneAndUpdate', prePopulate(PRE_MESSAGE_FIND))
-MovieSchema.pre('find', prePopulate(PRE_MOVIE_FIND))
-MovieSchema.pre('findOne', prePopulate(PRE_MOVIE_FIND))
-MovieSchema.pre('findOneAndUpdate', prePopulate(PRE_MOVIE_FIND))
-TagSchema.pre('find', prePopulate(PRE_TAG_FIND))
-TagSchema.pre('findOne', prePopulate(PRE_TAG_FIND))
-TagSchema.pre('findOneAndUpdate', prePopulate(PRE_TAG_FIND))
-SpecialSchema.pre('find', prePopulate(PRE_SPECIAL_FIND))
-SpecialSchema.pre('findOne', prePopulate(PRE_SPECIAL_FIND))
-SpecialSchema.pre('findOneAndUpdate', prePopulate(PRE_SPECIAL_FIND))
-ActorSchema.pre('find', prePopulate(PRE_ACTOR_FIND))
-ActorSchema.pre('findOne', prePopulate(PRE_ACTOR_FIND))
-ActorSchema.pre('findOneAndUpdate', prePopulate(PRE_ACTOR_FIND))
-DirectorSchema.pre('find', prePopulate(PRE_DIRECTOR_FIND))
-DirectorSchema.pre('findOne', prePopulate(PRE_DIRECTOR_FIND))
-DirectorSchema.pre('findOneAndUpdate', prePopulate(PRE_DIRECTOR_FIND))
-DistrictSchema.pre('find', prePopulate(PRE_DISTRICT_FIND))
-DistrictSchema.pre('findOne', prePopulate(PRE_DISTRICT_FIND))
-DistrictSchema.pre('findOneAndUpdate', prePopulate(PRE_DISTRICT_FIND))
-SearchSchema.pre('find', prePopulate(PRE_SEARCH_FIND))
-SearchSchema.pre('findOne', prePopulate(PRE_SEARCH_FIND))
-SearchSchema.pre('findOneAndUpdate', prePopulate(PRE_SEARCH_FIND))
-CommentSchema.pre('find', prePopulate(PRE_COMMENT_FIND))
-CommentSchema.pre('findOne', prePopulate(PRE_COMMENT_FIND))
-CommentSchema.pre('findOneAndUpdate', prePopulate(PRE_COMMENT_FIND))
-RankSchema.pre('find', prePopulate(PRE_RANK_FIND))
-RankSchema.pre('findOne', prePopulate(PRE_RANK_FIND))
-RankSchema.pre('findOneAndUpdate', prePopulate(PRE_RANK_FIND))
-ClassifySchema.pre('find', prePopulate(PRE_CLASSIFY_FIND))
-ClassifySchema.pre('findOne', prePopulate(PRE_CLASSIFY_FIND))
-ClassifySchema.pre('findOneAndUpdate', prePopulate(PRE_CLASSIFY_FIND))
-LanguageSchema.pre('find', prePopulate(PRE_LANGUAGE_FIND))
-LanguageSchema.pre('findOne', prePopulate(PRE_LANGUAGE_FIND))
-LanguageSchema.pre('findOneAndUpdate', prePopulate(PRE_LANGUAGE_FIND))
-VideoSchema.pre('find', prePopulate(PRE_VIDEO_FIND))
-VideoSchema.pre('findOne', prePopulate(PRE_VIDEO_FIND))
-VideoSchema.pre('findOneAndUpdate', prePopulate(PRE_VIDEO_FIND))
-ImageSchema.pre('find', prePopulate(PRE_IMAGE_FIND))
-ImageSchema.pre('findOne', prePopulate(PRE_IMAGE_FIND))
-ImageSchema.pre('findOneAndUpdate', prePopulate(PRE_IMAGE_FIND))
-OtherMediaSchema.pre('find', prePopulate(PRE_OTHER_FIND))
-OtherMediaSchema.pre('findOne', prePopulate(PRE_OTHER_FIND))
-OtherMediaSchema.pre('findOneAndUpdate', prePopulate(PRE_OTHER_FIND))
-BarrageSchema.pre('find', prePopulate(PRE_BARRAGE_FIND))
-BarrageSchema.pre('findOne', prePopulate(PRE_BARRAGE_FIND))
-BarrageSchema.pre('findOneAndUpdate', prePopulate(PRE_BARRAGE_FIND))
+FIND_OPERATION_LIB.forEach(op => {
+  UserSchema.pre(op, prePopulate(PRE_USER_FIND))
+  GlobalSchema.pre(op, prePopulate(PRE_GLOBAL_FIND))
+  RoomSchema.pre(op, prePopulate(PRE_ROOM_FIND))
+  MessageSchema.pre(op, prePopulate(PRE_MESSAGE_FIND))
+  MovieSchema.pre(op, prePopulate(PRE_MOVIE_FIND))
+  TagSchema.pre(op, prePopulate(PRE_TAG_FIND))
+  SpecialSchema.pre(op, prePopulate(PRE_SPECIAL_FIND))
+  ActorSchema.pre(op, prePopulate(PRE_ACTOR_FIND))
+  DirectorSchema.pre(op, prePopulate(PRE_DIRECTOR_FIND))
+  DistrictSchema.pre(op, prePopulate(PRE_DISTRICT_FIND))
+  SearchSchema.pre(op, prePopulate(PRE_SEARCH_FIND))
+  CommentSchema.pre(op, prePopulate(PRE_COMMENT_FIND))
+  RankSchema.pre(op, prePopulate(PRE_RANK_FIND))
+  ClassifySchema.pre(op, prePopulate(PRE_CLASSIFY_FIND))
+  LanguageSchema.pre(op, prePopulate(PRE_LANGUAGE_FIND))
+  VideoSchema.pre(op, prePopulate(PRE_VIDEO_FIND))
+  ImageSchema.pre(op, prePopulate(PRE_IMAGE_FIND))
+  OtherMediaSchema.pre(op, prePopulate(PRE_OTHER_FIND))
+  BarrageSchema.pre(op, prePopulate(PRE_BARRAGE_FIND))
+})
+
+//完成处理
+SAVE_OPERATION_LIB.forEach(op => {
+  UserSchema.post(op, postMiddleware)
+  GlobalSchema.post(op, postMiddleware)
+  RoomSchema.post(op, postMiddleware)
+  MessageSchema.post(op, postMiddleware)
+  MovieSchema.post(op, postMiddleware)
+  TagSchema.post(op, postMiddleware)
+  SpecialSchema.post(op, postMiddleware)
+  ActorSchema.post(op, postMiddleware)
+  DirectorSchema.post(op, postMiddleware)
+  DistrictSchema.post(op, postMiddleware)
+  SearchSchema.post(op, postMiddleware)
+  CommentSchema.post(op, postMiddleware)
+  RankSchema.post(op, postMiddleware)
+  ClassifySchema.post(op, postMiddleware)
+  LanguageSchema.post(op, postMiddleware) 
+  VideoSchema.post(op, postMiddleware)
+  ImageSchema.post(op, postMiddleware)
+  OtherMediaSchema.post(op, postMiddleware)
+  BarrageSchema.post(op, postMiddleware)
+})
 
 const UserModel = model('user', UserSchema)
 const GlobalModel = model('global', GlobalSchema)

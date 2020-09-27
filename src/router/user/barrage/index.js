@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { BarrageModel, dealErr, notFound, Params } = require("@src/utils")
+const { BarrageModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -11,10 +11,7 @@ router
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({ ...check.res })
-    return
-  }
+  if(check) return
 
   const [ timeStart, process, _id ] = Params.sanitizers(ctx.query, {
     name: 'timeStart',
@@ -39,47 +36,44 @@ router
 
   const data = await BarrageModel.find({
     origin: _id,
-    sort: {
-      time_line: 1
-    },
     ...(timeStart >= 0 ? { 
       $gt: { time_line: timeStart },
       ...(process >= 0 ? { $lt: { time_line: process + timeStart } } : {})
     } : {})
   })
   .select({
-    user: 0,
-    origin:0,
+    like_users: 1,
+    content: 1,
+    time_line: 1,
+    updatedAt: 1,
   })
   .limit(1000)
+  .sort({
+    time_line: 1
+  })
   .exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {
-    return data.map(item => {
-      const { _doc: { like_users, ...nextItem } } = item
-      return {
-        ...nextItem,
-        hot: like_users.length,
-        like: !!~like_users.indexOf(mineId)
-      }
-    })
+    return {
+      data: data.map(item => {
+        const { _doc: { like_users, ...nextItem } } = item
+        return {
+          ...nextItem,
+          hot: like_users.length,
+          like: false
+        }
+      })
+    }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
+
 })
 
 module.exports = router

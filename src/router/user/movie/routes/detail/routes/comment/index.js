@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const List = require('./list')
 const Detail = require('./detail')
-const { MovieModel, dealErr, notFound, Params } = require('@src/utils')
+const { MovieModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -12,12 +12,7 @@ router
     name: "_id",
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ _id, count ] = Params.sanitizers(ctx.query, {
     name: '_id',
@@ -29,12 +24,13 @@ router
     _default: 20,
     type: ['toInt']
   })
-  let res
+
   const data = await MovieModel.findOne({
     _id
   })
   .select({
     comment: 1,
+    updatedAt: 1,
     _id: 0
   })
   .populate({
@@ -60,34 +56,29 @@ router
   .then(data => {
     const { comment } = data
     return {
-      comment: comment.map(c => {
-        const { _doc: { user_info, ...nextC } } = c
-        const { _doc: { avatar, ...nextInfo } } = user_info
-        return {
-          ...nextC,
-          user_info: {
-            ...nextInfo,
-            avatar: avatar ? avatar.src : null
+      data: {
+        ...data,
+        comment: comment.map(c => {
+          const { _doc: { user_info, ...nextC } } = c
+          const { _doc: { avatar, ...nextInfo } } = user_info
+          return {
+            ...nextC,
+            user_info: {
+              ...nextInfo,
+              avatar: avatar ? avatar.src : null
+            }
           }
-        }
-      })
+        })
+      }
     }
   })
   .catch(dealErr(ctx))
   
-  if(data & data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-   res = {
-     success: true,
-     res: {
-       data
-     }
-   }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+
 })
 .use('/list', List.routes(), List.allowedMethods())
 .use('/detail', Detail.routes(), Detail.allowedMethods())

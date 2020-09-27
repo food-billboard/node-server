@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Like = require('./like')
 const Detail = require('./detail')
-const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, notFound, Params, responseDataDeal, ImageModel, VideoModel } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -27,7 +27,10 @@ router
       type: [ 'isMongoId' ]
     }
   ]
-  if(/.+\/comment(\/movie)?$/g.test(url)) {
+
+  let isToComment = /.+\/comment(\/movie)?$/g.test(url)
+
+  if(isToComment) {
     validate = [
       ...validate,
       {
@@ -43,16 +46,111 @@ router
         ]
       }
     ]
+
   }
+
   if(method.toLowerCase() === 'get' || method.toLowerCase() === 'delete') _method = 'query'
   if(method.toLowerCase() === 'put' || method.toLowerCase() === 'post') _method = 'body' 
   
   const check = Params[_method](ctx, ...validate)
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
+  if(check) return
+
+  //判断id是否存在
+
+  let id
+
+  if(_method == 'query') {
+    const { query: { _id } } = ctx
+    id = _id
+  }else {
+    const { request: { body: { _id } } } = ctx
+    id = _id
+  }
+
+  const isExistsId = await CommentModel.findOne({
+    _id: ObjectId(id)
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && !!data._doc._id)
+  .then(data => {
+    if(data) return true
+    return MovieModel.findOne({
+      _id: ObjectId(id)
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(data => !!data && !!data._doc._id)
+  })
+  .catch(err => {
+    console.log('oops: ', err)
+  })
+
+  if(!isExistsId) {
+    const data = dealErr(ctx)({ errMsg: 'the id is not found', status: 404 })
+    responseDataDeal({
+      ctx,
+      data
     })
     return
+  }
+
+  //判断媒体资源是否存在
+  if(isToComment) {
+    const { request: { body: { content: { image, video } } } } = ctx
+    let imageData = true
+    let videoData = true
+
+    if(!!image) {
+      imageData = await ImageModel.find({
+        _id: { $in: [ ...image.map(item => ObjectId(item)) ] }
+      })
+      .select({
+        _id: 1
+      })
+      .exec()
+      .then(data => !!data && data)
+      .then(data => {
+        if(!data) return false
+        return data.length == image.length
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    }
+
+    if(!!video) {
+      videoData = await VideoModel.find({
+        _id: { $in: [ ...video.map(item => ObjectId(item)) ] }
+      })
+      .select({
+        _id: 1
+      })
+      .exec()
+      .then(data => !!data && data)
+      .then(data => {
+        if(!data) return false
+        return data.length == video.length
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    }
+
+    if(!imageData || !videoData ) {
+      const data = dealErr(ctx)({ errMsg: 'media source is not found', status: 404 })
+      responseDataDeal({
+        ctx,
+        data
+      })
+
+      return
+    }
+
   }
 
   return await next()
@@ -80,7 +178,7 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
+
   let mineId
 
   let data = await UserModel.findOne({
@@ -93,80 +191,75 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { _id } = data
-    mineId = _id
+    const { _id:user } = data
+    mineId = user
     return MovieModel.findOne({
       _id
     })
-  })
-  .select({
-    comment: 1,
-    _id: 0
-  })
-  .populate({
-    path: 'comment',
-    select: {
-      sub_comments: 0,
-      source: 0,
-    },
-    options: {
-      ...(pageSize >= 0 ? { limit: pageSize } : {}),
-      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
-    },
-    populate: {
-      path: 'comment_users',
+    .select({
+      comment: 1,
+      updatedAt: 1,
+      _id: 0
+    })
+    .populate({
+      path: 'comment',
       select: {
-        avatar: 1,
-        username: 1
-      }
-    },
+        sub_comments: 0,
+        source: 0,
+      },
+      options: {
+        ...(pageSize >= 0 ? { limit: pageSize } : {}),
+        ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
+      },
+      populate: {
+        path: 'comment_users',
+        select: {
+          avatar: 1,
+          username: 1
+        }
+      },
+    })
+    .exec()
   })
-  .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { comment } = data
-    return comment.map(c => {
-      const { _doc: { comment_users, like_person, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextC } } = c
-      return {
-        ...nextC,
-        like: like_person.some(person => person.equals(mineId)),
-        comment_users: comment_users.map(com => {
-          const { _doc: { avatar, ...nextCom } } = com
+    return {
+      data: {
+        ...data,
+        comment: comment.map(c => {
+          const { _doc: { comment_users, like_person, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextC } } = c
           return {
-            ...nextCom,
-            avatar: avatar ? avatar.src : null
+            ...nextC,
+            like: like_person.some(person => person.equals(mineId)),
+            comment_users: comment_users.map(com => {
+              const { _doc: { avatar, ...nextCom } } = com
+              return {
+                ...nextCom,
+                avatar: avatar ? avatar.src : null
+              }
+            }),
+            content: {
+              ...nextContent,
+              image: image.filter(i => i && !!i.src).map(i => i.src),
+              video: video.filter(v => v &&!!v.src).map(v => v.src),
+            },
+            user_info: {
+              ...nextInfo,
+              avatar: avatar ? avatar.src : null
+            }
           }
-        }),
-        content: {
-          ...nextContent,
-          image: image.filter(i => i && !!i.src).map(i => i.src),
-          video: video.filter(v => v &&!!v.src).map(v => v.src),
-        },
-        user_info: {
-          ...nextInfo,
-          avatar: avatar ? avatar.src : null
-        }
+        })
       }
-    })
+    }
   })
   .catch(dealErr(ctx))
 
-
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
 
 })
 .post('/movie', async (ctx) => {
@@ -193,7 +286,6 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
 
   const data = await Promise.all([
     UserModel.findOne({
@@ -251,18 +343,11 @@ router
   .then(_ => true)
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
   
 })
 .post('/', async(ctx) => {
@@ -289,7 +374,6 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
 
   const data = await Promise.all([
     UserModel.findOne({
@@ -314,7 +398,7 @@ router
   .then(([userId, _]) => {
     const comment = new CommentModel({
       ...TEMPLATE_COMMENT,
-      source_type: "user",
+      source_type: "comment",
       source: _id,
       user_info: userId,
       content: {
@@ -326,7 +410,7 @@ router
 
     return {
       comment,
-      userId: id
+      userId
     }
   })
   .then(({ comment, userId }) => {
@@ -352,18 +436,12 @@ router
   .then(_ => true)
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
-  ctx.body = JSON.stringify(res)
 })
 .use('/like', Like.routes(), Like.allowedMethods())
 .use('/detail', Detail.routes(), Detail.allowedMethods())

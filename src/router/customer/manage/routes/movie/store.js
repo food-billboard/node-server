@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const {  verifyTokenToData, UserModel, dealErr, notFound, Params } = require("@src/utils")
+const {  verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
 
@@ -27,7 +27,8 @@ router.get('/', async (ctx) => {
     mobile: Number(mobile)
   })
   .select({
-    store: 1
+    store: 1,
+    updatedAt: 1
   })
   .populate({
     path: 'store',
@@ -36,14 +37,22 @@ router.get('/', async (ctx) => {
 			"info.description": 1,
 			"info.name": 1,
 			poster: 1,
-			publish_time: 1,
+			"info.screen_time": 1,
 			hot: 1,
 			// author_rate: 1,
-			rate: 1,
+      total_rate: 1,
+      rate_person: 1
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
+    },
+    populate: {
+      path: 'info.classify',
+      select: {
+        _id: 0,
+        name: 1
+      }
     }
   })
   .exec()
@@ -52,34 +61,32 @@ router.get('/', async (ctx) => {
   .then(data => {
     const { store } = data
     return {
-      store: store.map(s => {
-        const { _doc: { poster, info: { description, name, classify }={}, ...nextS } } = s
-        return {
-          ...nextS,
-          poster: poster ? poster.src : null,
-          description,
-          name,
-          classify,
-          store: true,
-        }
-      })
+      data: {
+        ...data,
+        store: store.map(s => {
+          const { _doc: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
+          const rate = total_rate / rate_person
+          return {
+            ...nextS,
+            poster: poster ? poster.src : null,
+            description,
+            name,
+            classify,
+            store: true,
+            publish_time: screen_time,
+            rate: Number.isNaN(rate) ? 0 : rate
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+
 })
 
 module.exports = router

@@ -1,23 +1,19 @@
 const Router = require('@koa/router')
-const { dealErr, UserModel, notFound, Params } = require('@src/utils')
+const { dealErr, UserModel, notFound, Params, responseDataDeal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
 .get('/', async (ctx) => {
+
   const check = Params.query(ctx,
     {
       name: "_id",
       type: ['isMongoId']
     }
   )
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
@@ -41,7 +37,7 @@ router
       }
     ]
   })
-  let res
+
   //查找评论id
   const data = await UserModel.findOne({
     _id
@@ -79,45 +75,38 @@ router
   .then(data => {
     const { comment, avatar, ...nextData } = data
     return {
-      user_info: {
-        ...nextData,
-        avatar: avatar ? avatar.src : null
-      },
-      data: comment.map(c => {
-        const { _doc: { content: { image, video, ...nextContent }, source_type, source={}, ...nextC } } = c
-        const { _doc: { name, content, ...nextSource }={} } = source
-        return {
-          ...nextC,
-          source: {
-            ...nextSource,
-            type: source_type,
-            content: name ? name : ( content ? content: null )
-          },
-          content: {
-            ...nextContent,
-            image: image.filter(i => !!i.src).map(i => i.src),
-            video: video.filter(v => !!v.src).map(v => v.src)
+      data: {
+        user_info: {
+          ...nextData,
+          avatar: avatar ? avatar.src : null
+        },
+        data: comment.map(c => {
+          const { _doc: { content: { image, video, ...nextContent }, source_type, source={}, ...nextC } } = c
+          const { _doc: { name, content, ...nextSource }={} } = source
+          return {
+            ...nextC,
+            source: {
+              ...nextSource,
+              type: source_type,
+              content: name ? name : ( content || null )
+            },
+            content: {
+              ...nextContent,
+              image: image.filter(i => !!i.src).map(i => i.src),
+              video: video.filter(v => !!v.src).map(v => v.src)
+            }
           }
-        }
-      })
+        })
+      }
     }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
 })
 

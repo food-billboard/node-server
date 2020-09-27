@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Simple = require('./routes/simple')
-const { MovieModel, dealErr, notFound, Params } = require("@src/utils")
+const { MovieModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -12,12 +12,7 @@ router
     name: "_id",
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ _id ] = Params.sanitizers(ctx.query, {
 		name: '_id',
@@ -27,17 +22,18 @@ router
 			}
 		]
 	})
-  let res
+
   const data = await MovieModel.findOneAndUpdate({
     _id
   }, {
     $inc: { glance: 1 }
   })
   .select({
-    updatedAt: 0,
     source_type: 0,
     stauts: 0,
     related_to: 0,
+    barrage: 0,
+    __v: 0
   })
   .populate({
     path: 'comment',
@@ -114,7 +110,7 @@ router
   .then(notFound)
   .then(data => {
     const { ...nextData } = data
-    let newDate = {  
+    let newData = {  
       ...nextData,
       store: false
     }
@@ -126,8 +122,9 @@ router
       total_rate,
       rate_person,
       same_film,
+      video: { _doc: { updatedAt, ...nextVideo } }={},
       ...nextNewData
-    } = newDate
+    } = newData
     const {
       actor,
       director,
@@ -137,55 +134,61 @@ router
       ...nextInfo
     } = info
 
+    const rate = total_rate / rate_person
+
     return {
-      ...nextNewData,
-      rate: total_rate/ rate_person,
-      info: {
-        ...nextInfo,
-        actor,
-        director,
-        district,
-        classify,
-        language
-      },
-      comment: comment.map(c => {
-        const { _doc: { user_info, ...nextC } } = c
-        const { _doc: { avatar, ...nextUserInfo } } = user_info
-        return {
-          ...nextC,
-          user_info: {
-            ...nextUserInfo,
-            avatar: avatar ? avatar.src : null
+      data: {
+        ...nextNewData,
+        rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
+        info: {
+          ...nextInfo,
+          actor: actor.map(item => {
+            const { other: { avatar, ...nextOther }, ...nextImte } = item
+            return {
+              ...nextInfo,
+              other: {
+                ...nextOther,
+                avatar: !!avatar ? avatar.src : null
+              }
+            }
+          }),
+          director,
+          district,
+          classify,
+          language
+        },
+        video: nextVideo,
+        comment: comment.map(c => {
+          const { _doc: { user_info, ...nextC } } = c
+          const { _doc: { avatar, ...nextUserInfo } } = user_info
+          return {
+            ...nextC,
+            user_info: {
+              ...nextUserInfo,
+              avatar: avatar ? avatar.src : null
+            }
           }
-        }
-      }),
-      images: images.map(i => i && i.src),
-      poster: poster ? poster.src : null,
-      same_film: same_film.map(s => {
-        const { _doc: { film, ...nextS } } = s
-        return {
-          name: film ? film.name : null,
-          ...nextS
-        }
-      })
+        }),
+        images: images.map(i => i && i.src),
+        poster: poster ? poster.src : null,
+        same_film: same_film.map(s => {
+          const { _doc: { film, ...nextS } } = s
+          return {
+            name: film ? film.name : null,
+            ...nextS
+          }
+        })
+      }
     }
 
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+
 })
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 .use('/simple', Simple.routes(), Simple.allowedMethods())

@@ -41,7 +41,7 @@ router
   }else {
     return await next()
   }
-  ctx.body = JSON.stringify(res)
+  ctx.body = res
 })
 .use('/user', User.routes(), User.allowedMethods())
 .use('/customer', Customer.routes(), Customer.allowedMethods())
