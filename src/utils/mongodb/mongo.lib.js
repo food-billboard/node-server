@@ -89,8 +89,8 @@ function prePopulate(populate) {
 }
 
 //完成处理
-function postMiddleware(error, res, next) {
-  
+function postMiddleware(...params) {
+  return log4Database(...params)
 }
 
 //预设

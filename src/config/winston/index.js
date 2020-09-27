@@ -7,7 +7,7 @@ const path = require('path')
 const { timestamp, label, combine, simple, splat, prettyPrint, printf, json, ms } = format
 const Day = require('dayjs')
 const fs = require('fs')
-const { uuid, verifyTokenToData } = require('@src/utils')
+const { uuid, verifyTokenToData, isType } = require('@src/utils')
 
 // error: 0, 
 // warn: 1, 
@@ -278,28 +278,64 @@ request.stream = {
   }
 }
 
-//数据库日志
-const log4Database = (doc={}, next=()=>{}) => {
+//错误日志
+const log4Error = (ctx, error) => {
+  const { __request_log_id__ } = ctx
+  if(process.env.NODE_ENV !== 'production' || !__request_log_id__) {
+    database.log(error)
+    return
+  }
 
-  const { name, collectionName, schema, query, childSchemas, op, options, _fields, subpaths } = this
+  let writeError
+
+  if(typeof error === 'string') {
+    writeError = {
+      errMsg: error,
+      timestamp: new Date(),
+      uuid: __request_log_id__
+    }
+  }else if(isType(error, 'object')) {
+    writeError = {
+      ...writeError,
+      uuid: __request_log_id__
+    }
+  }else {
+    console.log(error)
+    return
+  }
+
+  database.info(Json.stringify(writeError))
+}
+
+const log4RequestAndResponse = (ctx, response) => {
+
+}
+
+//数据库日志
+const log4Database = (error, doc, next) => {
 
   //仅生产环境
   if(process.env.NODE_ENV === 'production') {
 
-    database.info(JSON.stringify({
-      name, 
-      collectionName, 
-      schema, 
-      query, 
-      childSchemas, 
-      op, 
-      options, 
-      _fields, 
-      subpaths,
-      '$id': this['$id'],
-      response: doc
-    }))
+      const { name, collectionName, schema, query, childSchemas, op, options, _fields, subpaths } = this
 
+      database.info(JSON.stringify({
+        name, 
+        collectionName, 
+        schema, 
+        query, 
+        childSchemas, 
+        op, 
+        options, 
+        _fields, 
+        subpaths,
+        '$id': this['$id'],
+        response: doc,
+        error
+      }))
+
+  }else if(error){
+    console.log(error)
   }
 
   next && next()
@@ -308,16 +344,18 @@ const log4Database = (doc={}, next=()=>{}) => {
 
 const middleware4Uuid = async (ctx, next) => {
 
+  if(process.env.NODE_ENV !== 'production') return await next()
+
   const [, token] = verifyTokenToData
 
-  let uuid = uuid()
+  let id = uuid()
 
   if(token) {
     const { mobile } = token
     uuid = mobile.toString()
   }
 
-  ctx.request.__request_log_id__ = uuid
+  ctx.request.__request_log_id__ = id
 
   return await next()
 }
@@ -330,7 +368,9 @@ module.exports = {
   response,
   exception,
   database,
+  log4Error,
   log4Database,
+  log4RequestAndResponse,
   middleware,
   beforeQueryDatabase,
   afterResponse4Log,

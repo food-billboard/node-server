@@ -1,6 +1,6 @@
-const Day = require('dayjs')
 const { isType } = require('./tool')
 const { encoded } = require('./token')
+const { log4Error, log4RequestAndResponse } = require('@src/config')
 
 //错误处理
 const dealErr = (ctx) => {
@@ -19,6 +19,10 @@ const dealErr = (ctx) => {
         errMsg: err
       }
     }
+
+    //日志写入
+    log4Error(ctx, err)
+
     return {
       err: true,
       res
@@ -207,6 +211,8 @@ const responseDataDeal = ({
   }
 
   // console.log(response)
+
+  log4RequestAndResponse(ctx, response)
 
   ctx.body = response
 
