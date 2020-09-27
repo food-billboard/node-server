@@ -7,6 +7,7 @@ const path = require('path')
 const { timestamp, label, combine, simple, splat, prettyPrint, printf, json, ms } = format
 const Day = require('dayjs')
 const fs = require('fs')
+const { uuid, verifyTokenToData } = require('@src/utils')
 
 // error: 0, 
 // warn: 1, 
@@ -305,6 +306,22 @@ const log4Database = (doc={}, next=()=>{}) => {
 
 }
 
+const middleware4Uuid = async (ctx, next) => {
+
+  const [, token] = verifyTokenToData
+
+  let uuid = uuid()
+
+  if(token) {
+    const { mobile } = token
+    uuid = mobile.toString()
+  }
+
+  ctx.request.__request_log_id__ = uuid
+
+  return await next()
+}
+
 //全链路日志记录
 
 
@@ -317,7 +334,8 @@ module.exports = {
   middleware,
   beforeQueryDatabase,
   afterResponse4Log,
-  afterResponse4Exception
+  afterResponse4Exception,
+  middleware4Uuid
 }
 
 
