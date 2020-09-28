@@ -43,10 +43,10 @@ const Params = {
           let params = t.match(/(?<=\().+(?=\))/)
           method = method ? method[0] : t
           params = params && params[0]
-          result = isType(Validator[method], 'function') ? 
-            Validator[method](...(params ? [ result, ...params.split(',').map(p => p.trim()) ] : [result])) : 
-            result
 
+          result = isType(Validator[method], 'function') ? 
+          Validator[method](...(params ? [ result, ...params.split(',').map(p => p.trim()) ] : [result])) : 
+          result
         })
         realSan.forEach(san => {
           result = san(result)
@@ -55,6 +55,7 @@ const Params = {
       }catch(err) {
         if(_default) result = _default
         // console.log(err)
+
         return result
       }
     })

@@ -1,6 +1,6 @@
 const { isType } = require('./tool')
 const { encoded } = require('./token')
-const { log4Error, log4RequestAndResponse } = require('@src/config')
+const { log4Error, log4RequestAndResponse } = require('@src/config/winston')
 
 //错误处理
 const dealErr = (ctx) => {

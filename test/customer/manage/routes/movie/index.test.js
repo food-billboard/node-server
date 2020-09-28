@@ -37,7 +37,6 @@ function responseExpect(res, validate=[]) {
     expect(item.store).to.be.a('boolean')
     commonValidate.number(item.rate)
     //classify
-    console.log(item.classify)
     expect(item.classify).to.be.a('array').and.that.lengthOf.above(0)
     item.forEach(classify => {
       expect(classify).to.be.a('object').and.that.has.a.property('name').and.that.is.a('string')
@@ -46,17 +45,6 @@ function responseExpect(res, validate=[]) {
     commonValidate.number(item.hot)
 
   })
-
-  expect(another_name).to.be.a('array')
-  another_name.forEach(item => {
-    commonValidate.string(item)
-  })
-  commonValidate.string(name)
-  commonValidate.time(screen_time)
-  commonValidate.string(target.name)
-  commonValidate.poster(target.video)
-  commonValidate.poster(target.poster)
-  commonValidate.objectId(target._id)
 
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
@@ -815,14 +803,14 @@ describe(`${COMMON_API} test`, function() {
         it(`pre check the uploading movie fail because the params of video.src is not verify`, function(done) {
 
           const { video, ...nextData } = baseData
-          const { src, ...nextVideo } = video
+          const { src, poster } = video
             
           Request
           .post(COMMON_API)
           .send({
             ...nextData,
             video: {
-              ...nextVideo,
+              poster: poster.toString(),
               src: src.toString().slice(1)
             }
           })
@@ -866,7 +854,7 @@ describe(`${COMMON_API} test`, function() {
 
         })
 
-        it(`pre check the uploading movie fail because the params of video.poster is not verify`, function(done) {
+        it(`pre check the uploading movie fail because the params of images is not verify`, function(done) {
           
           const { images, ...nextData } = baseData
 
@@ -906,6 +894,13 @@ describe(`${COMMON_API} test`, function() {
         addMovie()
         .then(function(data) {
           movieId = data._id
+          return UserModel.updateOne({
+            username: COMMON_API
+          }, {
+            issue: [ movieId ]
+          })
+        })
+        .then(function() {
           done()
         })
         .catch(err => {
@@ -928,16 +923,10 @@ describe(`${COMMON_API} test`, function() {
           //电影关联是否正确
           return Promise.all([
             MovieModel.findOne({
-              author_rate: 10,
-              same_film: [
-                {
-                  film: _id,
-                  same_type: 'NAMESAKE'
-                }
-              ]
+              author_rate: 0,
             })
             .select({
-              _id: 1
+              _id: 1,
             })
             .exec()
             .then(data => !!data && data._id ? true : false),
@@ -963,7 +952,7 @@ describe(`${COMMON_API} test`, function() {
           })
         })
         .then(_ => {
-          return removeMovie()
+          // return removeMovie()
         })
         .then(function() {
           return true
@@ -977,7 +966,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`post hte new movie success`, function(done) {
+      it(`post the new movie success`, function(done) {
 
         const { info, ...nextData } = baseData
         const { author_rate, screen_time, ...nextInfo } = info
@@ -1013,10 +1002,19 @@ describe(`${COMMON_API} test`, function() {
     let movieId
 
     before(function(done) {
-
-      addMovie()
+      removeMovie()
+      .then(function() {
+        return addMovie()
+      })
       .then(data => {
         movieId = data._id
+        return UserModel.updateOne({
+          username: COMMON_API
+        }, {
+          issue: [ movieId ]
+        })
+      })
+      .then(function() {
         done()
       })
       .catch(err => {

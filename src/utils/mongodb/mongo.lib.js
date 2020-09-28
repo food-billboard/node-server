@@ -2,6 +2,7 @@ const Day = require('dayjs')
 const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
+const { log4Database } = require('@src/config/winston')
 
 function getMill(time) {
   return Day(time).valueOf()

@@ -23,7 +23,6 @@ const TEMPLATE_MOVIE = {
   name: '',
   info: {
     name: '',
-    another_name: [],
     description: '',
     actor: [],
     director: [],
@@ -32,20 +31,21 @@ const TEMPLATE_MOVIE = {
     screen_time: Date.now(),
     language: []
   },
-  rest: {
-    actor: [],
-    director: [],
-    district: [],
-    classify: [],
-    language: []
-  },
+  // rest: {
+  //   actor: [],
+  //   director: [],
+  //   district: [],
+  //   classify: [],
+  //   language: []
+  // },
   images: [],
   tag: [],
   comment: [],
   author_description: '',
   author_rate: '',
 	store: [],
-	rate: [],
+  total_rate: 0,
+  rate_person: 0,
   source_type: 'USER',
 	stauts: 'VERIFY',
 	related_to: [],
@@ -120,10 +120,10 @@ function aboutFind(template) {
         const { name: same_film, _id } = d
         let film = {
           film: _id,
-          type: 'SERIES'
+          same_type: 'SERIES'
         }
         if(name == same_film) {
-          film.type = 'NAMESAKE'
+          film.same_type = 'NAMESAKE'
           namesake.push(film)
         }else {
           series.push(film)
@@ -144,7 +144,9 @@ function aboutFind(template) {
       const {
         _id
       } = _template
+      
       if(!_id) return
+
       return Promise.all([
         MovieModel.updateMany({
           _id: { $in: [ ...series.map(s => s.film) ] }
@@ -159,7 +161,7 @@ function aboutFind(template) {
       ])
       //日志上传
       .catch(_=> {
-        console.log(_)
+        console.log('电影关联失败', _)
       })
     })
     //相关电影关联( 导演 演员 作者 分类 )
@@ -172,12 +174,13 @@ function aboutFind(template) {
         },
         author
       } = _template
+
       return MovieModel.find({
         $or: [
           { "info.director": { $in: [...director] } },
           { "info.classify": { $in: [...classify] } },
           { "info.actor": { $in: [...actor] } },
-          {author}
+          { author }
         ]
       })
       .select({
@@ -198,6 +201,7 @@ function aboutFind(template) {
         director: originDirector,
         actor: originActor
       } } = _template
+
       data.forEach(d => {
         const { 
           _id,
@@ -208,19 +212,20 @@ function aboutFind(template) {
           },
           author
         } = d
+      
         let result = { film: _id, related_type: [] }
         if(director.length && director.some(d => {
-          return originDirector.some(o => o.equals(d))
+          return originDirector.some(o => d.equals(o))
         })) {
           result.related_type.push('director')
         }
         if(actor.length && actor.some(a => {
-          return originActor.some(o => o.equals(a))
+          return originActor.some(o => a.equals(o))
         })) {
           result.related_type.push('actor')
         }
         if(classify.length && classify.some(c => {
-          return originClassify.some(o => o.equals(c))
+          return originClassify.some(o => c.equals(o))
         })) { 
           result.related_type.push('classify')
         }
@@ -280,39 +285,39 @@ router
   }, {
     name: 'info.district',
     validator: [
-      data => Array.isArray(data)
+      data => Array.isArray(data) && data.every(item => ObjectId.isValid(item))
     ]
   }, {
     name: 'info.director',
     validator: [
-      data => Array.isArray(data)
+      data => Array.isArray(data) && data.every(item => ObjectId.isValid(item))
     ]
   }, {
     name: 'info.actor',
     validator: [
-      data => Array.isArray(data)
+      data => Array.isArray(data) && data.every(item => ObjectId.isValid(item))
     ]
   },
   {
     name: 'info.classify',
     validator: [
-      data => Array.isArray(data)
+      data => Array.isArray(data) && data.every(item => ObjectId.isValid(item))
     ]
   },
   {
     name: 'info.language',
     validator: [
-      data => Array.isArray(data)
+      data => Array.isArray(data) && data.every(item => ObjectId.isValid(item))
     ]
   }, {
     name: 'info.screen_time',
     validator: [
-      data => !!data
+      data => !!data && ( typeof data === 'number' ? data > 0 : (typeof data === 'string' && new Date(data).toString() != 'Invalid Date') )
     ]
   }, {
     name: 'info.description',
     validator: [
-      data => !!data
+      data => typeof data === 'string' && data.length > 0 
     ]
   }, {
     name: 'info.author_rate',
@@ -324,13 +329,20 @@ router
     validator: [
       data => Array.isArray(data) && data.length >= 6 && data.every(d => ObjectId.isValid(d)),
     ]
-  }, {
+  }, 
+  {
     name: 'video.src',
-    type: [ 'isMongoId' ]
-  }, {
+    validator: [
+      data =>  ObjectId.isValid(data)
+    ]
+  }, 
+  {
     name: 'video.poster',
-    type: [ 'isMongoId' ]
-  })
+    validator: [
+      data =>  ObjectId.isValid(data)
+    ]
+  }
+  )
 
   if(check) return
 
@@ -371,7 +383,7 @@ router
   //判断是否已经存在
   const data = await MovieModel.findOne({
     //修改则需要跳过修改的电影id
-    ...(!!_id ? { _id: { $not: _id } } : {}),
+    ...(!!_id ? { _id: { $nin: [ _id ] } } : {}),
     //名字类似
     $or: [
       { name },
@@ -424,6 +436,7 @@ router
       ...nextData
     },
   } = body
+
   const [ images, video ] = Params.sanitizers(ctx.request.body, {
     name: 'images',
     sanitizers: [
@@ -444,21 +457,28 @@ router
     rest:originRest,
     ...nextTemplate
   } = TEMPLATE_MOVIE
-  //自定义与系统自带字段分类
-  const [valid, unValid] = fieldDefine({
-    ...info,
-    name,
-    description,
-    screen_time,
-    another_name: alias ? alias : [],
-  }, {
-    ...originRest
-  }, { ...Object.values(nextData).map(data => isType(data, 'array') ? data : [data]) })
+  // //自定义与系统自带字段分类
+  // const [valid, unValid] = fieldDefine({
+  //   ...info,
+  //   name,
+  //   description,
+  //   screen_time,
+  //   another_name: alias ? alias : [],
+  // }, 
+  // {
+  //   ...originRest
+  // }, 
+  // { ...Object.values(nextData).map(data => isType(data, 'array') ? data : [data]) })
+
 
   templateInsertData = {
     ...nextTemplate,
-    info: {...valid},
-    rest: { ...unValid },
+    info: {
+      ...info,
+      ...nextData,
+      name
+    },
+    // rest: { ...unValid },
     name,
     video: video.src,
     poster: video.poster,
@@ -483,17 +503,15 @@ router
       author: _id
     }
   })
-  .then(aboutFind(templateInsertData))
-  .then(data => {
-    templateInsertData = {
-      ...templateInsertData,
-      ...data
-    }
-  })
+  // .then(aboutFind(templateInsertData))
+  // .then(data => {
+  //   templateInsertData = {
+  //     ...templateInsertData,
+  //     ...data
+  //   }
+  // })
   .then(_ => {
-    const movie = new MovieModel({
-      ...templateInsertData
-    })
+    const movie = new MovieModel(templateInsertData)
     return movie.save()
   })
   .then(data => {
@@ -563,12 +581,12 @@ router
     issue: { $in: [ _id ] }
   })
   .select({
-    _id: 1
+    _id: 1,
   })
   .exec()
   .then(data => !!data && data._doc)
   .then(data => {
-    if(!data) return Promise.reject({statsu: 403, errMsg: '非本人发布电影'})
+    if(!data) return Promise.reject({status: 403, errMsg: '非本人发布电影'})
   })
   .then(_ => {
     return MovieModel.findOne({
@@ -588,22 +606,22 @@ router
 
     const {
       info,
-      rest: originRest,
+      // rest: originRest,
       related_to,
       same_film,
     } = data
 
     //对用户自定义和系统自带字段进行区分
     const { another_name: originAlias } = info
-    const [valid, unValid] = fieldDefine({
-      ...info,
-      screen_time,
-      another_name: alias ? alias : originAlias,
-      name,
-      description,
-    }, {
-      ...originRest
-    }, { ...Object.values(nextInfo).map(info => isType(info, 'array') ? info : [info]) })
+    // const [valid, unValid] = fieldDefine({
+    //   ...info,
+    //   screen_time,
+    //   another_name: alias ? alias : originAlias,
+    //   name,
+    //   description,
+    // }, {
+    //   // ...originRest
+    // }, { ...Object.values(nextInfo).map(info => isType(info, 'array') ? info : [info]) })
 
     //合成最终字段
     templateUpdateData = {
@@ -612,8 +630,11 @@ router
       name,
       video: video.src,
       poster: video.poster,
-      info: {...valid},
-      rest: { ...unValid },
+      info: {
+        ...info,
+        ...nextInfo
+      },
+      // rest: { ...unValid },
       images,
       ...(author_rate ? { author_rate } : {}),
       ...( author_description ? { author_description } : {} )
@@ -648,15 +669,15 @@ router
       })
     }
   })
-  .then(_ => {
-    return aboutFind(templateUpdateData)(_)
-  })
-  .then(data => {
-    templateUpdateData = {
-      ...templateUpdateData,
-      ...data
-    }
-  }) 
+  // .then(_ => {
+  //   return aboutFind(templateUpdateData)(_)
+  // })
+  // .then(data => {
+  //   templateUpdateData = {
+  //     ...templateUpdateData,
+  //     ...data
+  //   }
+  // }) 
   .then(_ => {
     return MovieModel.updateOne({
       _id 
@@ -723,6 +744,13 @@ router
     options: {
       ...((pageSize >= 0 && currPage >= 0) ? { skip: pageSize * currPage, } : {}),
       ...(pageSize >= 0 ? { limit: pageSize, } : {})
+    },
+    populate: {
+      path: 'info.classify',
+      select: {
+        name: 1,
+        _id: 0
+      }
     }
   })
   .exec()

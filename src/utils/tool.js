@@ -146,7 +146,7 @@ module.exports = {
   formatISO,
   formatMill,
   NUM_DAY,
-  uuid
+  uuid,
   mergeConfig,
   merge
 }

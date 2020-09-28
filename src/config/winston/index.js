@@ -273,7 +273,7 @@ request.stream = {
     if(process.env.NODE_ENV === 'production') {
       request.info(message)
     }else {
-      console.info(message)
+      // console.info(message)
     }
   }
 }
@@ -282,7 +282,7 @@ request.stream = {
 const log4Error = (ctx, error) => {
   const { __request_log_id__ } = ctx
   if(process.env.NODE_ENV !== 'production' || !__request_log_id__) {
-    database.log(error)
+    // console.log(error)
     return
   }
 
@@ -335,7 +335,7 @@ const log4Database = (error, doc, next) => {
       }))
 
   }else if(error){
-    console.log(error)
+    // console.log(error)
   }
 
   next && next()
