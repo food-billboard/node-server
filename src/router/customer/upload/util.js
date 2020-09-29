@@ -35,14 +35,15 @@ const isFileExistsAndComplete = (name, type, size, auth="public") => {
     }
     return false
   }catch(_) {
-    console.log(_)
+    // console.log(_)
     return false
   }
 }
 
 //计算base64大小
 const base64Size = base64 => {
-  let body = base64.split(",")[1]
+  let [, body] = base64.split(",")
+  if(!body) return 0
   const equalIndex = body.indexOf('=')
   if(body.indexOf('=') > 0) {
     body = body.substring(0, equalIndex)
@@ -117,6 +118,7 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
       info: {
         mime,
         size,
+        status: 'COMPLETE'
       },
       auth,
       origin_type: originType,
@@ -193,7 +195,6 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
         if(!!~exist) return null
       }else {
         //文件写入
-        console.log(filePath, staticPath)
         const readStream = fs.createReadStream(filePath)
         const writeStream = fs.createWriteStream(staticPath)
         readStream.pipe(writeStream)
@@ -263,8 +264,17 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
       Model = OtherMediaModel
     }
 
+    const { src: _src, origin_type: _origin_type, origin: _origin, auth: _auth, info: { md5: _md5, size: _size, mime: _mime, status: _status } } = databaseModel
+
     return await Model.findOne({
-      ...databaseModel
+      src: _src,
+      origin_type: _origin_type, 
+      origin: _origin, 
+      auth: _auth, 
+      "info.md5": _md5,
+      "info.size": _size,
+      "info.mime": _mime,
+      "info.status": _status
     })
     .select({
       _id: 1

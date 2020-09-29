@@ -127,11 +127,11 @@ function mergeConfig(origin, target, canAddNewProp=false) {
   let _obj = {...origin}
   if(typeof _obj !== 'object') return _obj
   Object.keys(target).forEach(item => {
-    if(canAddNewProp || _obj[item] != undefined && target[item] != undefined) {
+    if(canAddNewProp || (_obj[item] != undefined && target[item] != undefined)) {
       if(!typeProto(_obj[item], 'object') || ObjectId.isValid(_obj[item])) {
         _obj[item] = target[item]
       }else {
-        _obj[item] = mergeConfig(_obj[item], target[item])
+        _obj[item] = mergeConfig(_obj[item], target[item], canAddNewProp)
       }
     }
   })

@@ -945,7 +945,10 @@ const VideoSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
-    md5: String,
+    md5: {
+      type: String,
+      required: true
+    },
     complete: [{
       type: Number,
       // required: true,
@@ -1008,14 +1011,17 @@ const ImageSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
-    md5: String,
+    md5: {
+      type: String,
+      required: true
+    },
     complete: [{
       type: Number,
       min: 0
     }],
     chunk_size: {
       type: Number,
-      min: 1
+      min: 0
     },
     size: {
       type: Number,
@@ -1069,7 +1075,10 @@ const OtherMediaSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
-    md5: String,
+    md5: {
+      type: String,
+      required: true
+    },
     complete: [{
       type: Number,
       min: 0
@@ -1086,6 +1095,7 @@ const OtherMediaSchema = new Schema({
       type: String,
       enum: [],
       uppercase: true,
+      required: true,
       get: function(v) { return v ? v.toLowerCase() : v }
     },
     status: {

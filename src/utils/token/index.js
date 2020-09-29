@@ -130,7 +130,7 @@ const middlewareVerifyTokenForSocketIo = socket => async (packet, next) => {
 
 //token验证并返回内容
 const verifyTokenToData = (ctx) => {
-  const { header: {authorization} } = ctx.request
+  const { header: { authorization } } = ctx.request
   return getToken(authorization)
 }
 

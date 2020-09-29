@@ -60,8 +60,7 @@ describe(`${COMMON_API} test`, function() {
   after(async function() {
 
     await Promise.all([
-      UserModel.deleteOne({
-        _id: userId,
+      UserModel.deleteMany({
         username: COMMON_API
       }),
       FeedbackModel.deleteMany({

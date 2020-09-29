@@ -11,12 +11,13 @@ const { dealMedia, base64Size, base64Reg, randomName } = require('./util')
 
 const router = new Router()
 
-const MAX_FILE_SIZE = 1024 * 1024 * 5
+const MAX_FILE_SIZE = 1024 * 500
 
 router
 //token验证
 .use(async (ctx, next) => {
   const [, token] = verifyTokenToData(ctx)
+
   if(!token) {
     const data = dealErr(ctx)({ errMsg: '未登录或登录过期', status: 401 })
     responseDataDeal({
@@ -30,13 +31,13 @@ router
 })
 //检查参数格式是否正确
 .use(async(ctx, next) => {
-  const { body: { files:base64Files }, files={} } = ctx.request
+  const { body: { files:base64Files=[] }, files={} } = ctx.request
   let errRes
 
   //是否为空
   if(!base64Files.length && !Object.values(files).length) {
     errRes = {
-      errMsg: 'bad request', 
+      errMsg: 'bad request with empty file list', 
       status: 400
     }
   }
@@ -46,14 +47,14 @@ router
 
     return typeof file === 'string' && base64Reg.test(file)})) {
       errRes = {
-        errMsg: 'bad request', 
+        errMsg: 'bad request with base64 file type', 
         status: 400
       }
   }
   //file格式是否正确
-  else if(!!Object.values(files).length && !Object.values(files).every(item => isType(item, 'file'))) {
+  else if(!!Object.values(files).length && !Object.values(files).every(item => typeof item === 'object' && !!item.path && !!item.size)) {
     errRes = {
-      errMsg: 'bad request', 
+      errMsg: 'bad request with file type', 
       status: 400
     }
   }
@@ -62,8 +63,10 @@ router
     const data = dealErr(ctx)(errRes)
     responseDataDeal({
       ctx,
-      data
+      data,
+      needCache: false
     })
+    return
   }
 
   return await next()
@@ -72,7 +75,7 @@ router
 //对于大文件拒绝接收请求
 .use(async(ctx, next) => {
   const { method } = ctx.request
-  const { body: { files: base64Files }, files={} } = ctx.request
+  const { body: { files: base64Files=[] }, files={} } = ctx.request
 
   let error
   let data
@@ -103,7 +106,8 @@ router
   data = dealErr(ctx)(error)
   responseDataDeal({
     ctx,
-    data
+    data,
+    needCache: false
   })
   
 })
@@ -152,7 +156,6 @@ router
             const [type] = file.match(/(?<=:).+(?=;)/)
             newMime = type
           }
-  
           return {
             file,
             name: !!name ? name : randomName(),

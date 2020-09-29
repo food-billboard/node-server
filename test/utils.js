@@ -51,7 +51,7 @@ function mockCreateUser(values={}) {
     allow_many: false,
     status: 'SIGNOUT'
   }
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new UserModel(baseModel)
 
@@ -132,7 +132,7 @@ function mockCreateTag(values={}) {
   let baseModel = {
     text: '测试标签内容',
   }
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new TagModel(baseModel)
 
@@ -179,7 +179,7 @@ function mockCreateDirector(values={}) {
       another_name: '导演的其他名称',
     },
   }
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new DirectorModel(baseModel)
 
@@ -203,7 +203,7 @@ function mockCreateDistrict(values={}) {
   let baseModel = {
     name: '测试地区名称'
   }
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new DistrictModel(baseModel)
   
@@ -220,10 +220,12 @@ function mockCreateImage(values={}) {
     auth: 'PUBLIC',
     info: {
       mime: 'jpg',
-      status: 'COMPLETE'
+      status: 'COMPLETE',
+      md5: '测试md5'
     },
   }
-  baseModel = mergeConfig(baseModel, values)
+
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new ImageModel(baseModel)
 
@@ -240,10 +242,11 @@ function mockCreateVideo(values={}) {
     auth: 'PUBLIC',
     info: {
       mime: 'mp4',
-      status: 'COMPLETE'
+      status: 'COMPLETE',
+      md5: '测试md5'
     },
   }
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new VideoModel(baseModel)
 
@@ -258,7 +261,7 @@ function mockCreateClassify(values={}) {
     icon: ObjectId('8f63270f005f1c1a0d9448ca')
   }
 
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new ClassifyModel(baseModel)
 
@@ -272,7 +275,7 @@ function mockCreateGlobal(values={}) {
     info: '测试的小程序相关信息内容',
   }
 
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new GlobalModel(baseModel)
 
@@ -323,7 +326,7 @@ function mockCreateRank(values) {
     },
   }
 
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
   const model = new RankModel(baseModel)
   return { model }
 }
