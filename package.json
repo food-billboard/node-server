@@ -24,6 +24,7 @@
     "koa-cors": "0.0.16",
     "koa-morgan": "^1.0.1",
     "koa-static": "^5.0.0",
+    "mime": "^2.4.6",
     "module-alias": "^2.2.2",
     "mongoose": "^5.9.17",
     "socket.io": "^2.3.0",

@@ -15,6 +15,7 @@ const { Types: { ObjectId } } = require('mongoose')
 
 const ACCEPT_IMAGE_MIME = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp']
 const ACCEPT_VIDEO_MIME = ['avi', 'mp4', 'rmvb', 'mkv', 'f4v', 'wmv']
+const MAX_FILE_SIZE = 1024 * 1024 * 100
 
 //检查是否存在文件夹
 const checkDir = path => !fs.existsSync(path) || !fs.statSync(path).isDirectory()
@@ -38,6 +39,15 @@ const isFileExistsAndComplete = (name, type, size, auth="public") => {
     // console.log(_)
     return false
   }
+}
+
+//查找分片文件
+const getChunkFileList = (path) => {
+  if(checkDir(path)) {
+    return fs.readdirSync(path)
+    .filter(f => path.extname(f) === '' && f !== name && f.includes('-'))
+  } 
+  return []
 }
 
 //计算base64大小
@@ -115,14 +125,18 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
     //数据库模板
     let databaseModel = {
       name: name || randomName(),
+      src: '',
       info: {
+        md5: '',
         mime,
         size,
-        status: 'COMPLETE'
+        status: 'COMPLETE',
+        complete: [0],
+        chunk_size: 1
       },
       auth,
       origin_type: originType,
-      origin: originId
+      white_list: [originId]
     }
 
     //文件类型目录
@@ -153,7 +167,7 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
         }
         return await Model.findOne({
           src,
-          origin: databaseModel.origin
+          white_list: { $in: [originId] }
         })
         .select({_id: 1})
         .exec()
@@ -264,17 +278,18 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
       Model = OtherMediaModel
     }
 
-    const { src: _src, origin_type: _origin_type, origin: _origin, auth: _auth, info: { md5: _md5, size: _size, mime: _mime, status: _status } } = databaseModel
+    const { src: _src, origin_type: _origin_type, auth: _auth, info: { md5: _md5, size: _size, mime: _mime, status: _status } } = databaseModel
 
-    return await Model.findOne({
+    return await Model.findOneAndUpdate({
       src: _src,
       origin_type: _origin_type, 
-      origin: _origin, 
       auth: _auth, 
       "info.md5": _md5,
       "info.size": _size,
       "info.mime": _mime,
-      "info.status": _status
+      // "info.status": _status
+    }, {
+      $addToSet: { white_list: originId }
     })
     .select({
       _id: 1
@@ -327,10 +342,9 @@ const mergeChunkFile = ( { name, extname, mime, auth } ) => {
   //判断文件夹是否存在
   if(checkDir(templatePath)) return ['not found', null]
   //对文件进行合并
-  const chunkList = fs
-  .readdirSync(templatePath)
-  .filter(f => path.extname(f) === '' && f !== name && f.includes('-'))
-  .sort((suffixA, suffixB) => Number(suffixA.split('-')[1]) - Number(suffixB.split('-')[1]))
+  const chunkList = getChunkFileList(templatePath).sort((suffixA, suffixB) => Number(suffixA.split('-')[1]) - Number(suffixB.split('-')[1]))
+
+  if(chunkList.every((chunk, index) => index == Number(chunk.split('-')[1]))) return ['not complete', null]
 
   realPath = path.resolve(realPath, name)
 
@@ -409,8 +423,10 @@ module.exports = {
   conserveBlob,
   isFileExistsAndComplete,
   base64Size,
+  getChunkFileList,
   base64Reg,
   randomName,
   ACCEPT_IMAGE_MIME,
-  ACCEPT_VIDEO_MIME
+  ACCEPT_VIDEO_MIME,
+  MAX_FILE_SIZE
 }

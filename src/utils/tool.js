@@ -4,6 +4,9 @@ const { Types: { ObjectId } } = require('mongoose')
 //静态资源目录
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
 
+//最大单次发送文件大小
+const MAX_FILE_SINGLE_RESPONSE_SIZE = 1024 * 500
+
 const typeProto = (arg, type) => Object.prototype.toString.call(arg) === `[object ${type.slice(0, 1).toUpperCase()}${type.slice(1)}]`
 
 const isNumber = arg => !Number.isNaN(arg) && typeProto(arg, 'number')
@@ -143,6 +146,7 @@ module.exports = {
   isEmpty,
   flat,
   STATIC_FILE_PATH,
+  MAX_FILE_SINGLE_RESPONSE_SIZE,
   formatISO,
   formatMill,
   NUM_DAY,

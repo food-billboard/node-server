@@ -186,7 +186,6 @@ const responseDataDeal = ({
         const updatedAt = filterField(data)
         
         if(!!updatedAt && judgeCache(ctx, updatedAt, etagValidate)) {
-          console.log('缓存')
           ctx.status = 304
           response = {
             ...response,
@@ -209,8 +208,6 @@ const responseDataDeal = ({
     if(afterDeal && typeof afterDeal === 'function') response = afterDeal({...response})
 
   }
-
-  // console.log(response)
 
   log4RequestAndResponse(ctx, response)
 

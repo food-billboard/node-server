@@ -924,12 +924,9 @@ const VideoSchema = new Schema({
   origin_type: {
     required: true,
     type: String,
+    enum: [ 'USER', 'SYSTEM' ],
     uppercase: true,
-    enum: [ "USER", "SYSTEM" ]
-  },
-  origin: {
-    type: ObjectId,
-    ref: 'user'
+    get: function(v) { return v ? v.toLowerCase() : v }
   },
   white_list: [
     {
@@ -990,12 +987,9 @@ const ImageSchema = new Schema({
   origin_type: {
     required: true,
     type: String,
+    enum: [ 'USER', 'SYSTEM' ],
     uppercase: true,
-    enum: [ "USER", "SYSTEM" ]
-  },
-  origin: {
-    type: ObjectId,
-    ref: 'user'
+    get: function(v) { return v ? v.toLowerCase() : v }
   },
   white_list: [
     {
@@ -1021,7 +1015,7 @@ const ImageSchema = new Schema({
     }],
     chunk_size: {
       type: Number,
-      min: 0
+      min: 1
     },
     size: {
       type: Number,
@@ -1054,12 +1048,9 @@ const OtherMediaSchema = new Schema({
   origin_type: {
     required: true,
     type: String,
+    enum: [ 'SYSTEM', 'USER' ],
     uppercase: true,
-    enum: [ "USER", 'SYSTEM' ]
-  },
-  origin: {
-    type: ObjectId,
-    ref: 'user'
+    get: function(v) { return v ? v.toLowerCase() : v }
   },
   white_list: [
     {

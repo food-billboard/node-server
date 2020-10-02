@@ -158,7 +158,7 @@ const Params = {
         )
       }) : true ) && (
         //自定义
-        Array.isArray(validator) ? validator.filter(val => isType(val, 'function')).every(val => val(data)) : true
+        Array.isArray(validator) ? validator.filter(val => isType(val, 'function')).every(val => val(data, origin)) : true
       )
       if(!result) errs.push(name)
       return result

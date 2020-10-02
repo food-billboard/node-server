@@ -9,10 +9,12 @@ const {
   verifyTokenToData,
   Params,
   responseDataDeal,
-  isType
+  isType,
+  STATIC_FILE_PATH
 } = require('@src/utils')
-const { mergeChunkFile, finalFilePath, conserveBlob, isFileExistsAndComplete, ACCEPT_IMAGE_MIME, ACCEPT_VIDEO_MIME } = require('../util')
+const { mergeChunkFile, finalFilePath, conserveBlob, isFileExistsAndComplete, ACCEPT_IMAGE_MIME, ACCEPT_VIDEO_MIME, MAX_FILE_SIZE } = require('../util')
 const path = require('path')
+const fs = require('fs')
 
 const router = new Router()
 
@@ -24,10 +26,26 @@ router
   if(method.toLowerCase() === 'get' || method.toLowerCase() === 'delete') _method = 'query'
   if(method.toLowerCase() === 'post' || method.toLowerCase() === 'put') _method = 'body'
 
-  const check = Params[_method](ctx, {
-    name: 'name',
-    type: ['isMd5']
-  })
+  let validator = [
+    {
+      name: 'name',
+      type: ['isMd5']
+    }
+  ]
+
+  if(method.toLowerCase() === 'get' || method.toLowerCase() === 'post') {
+    validator = [
+      ...validator,
+      {
+        name: 'size',
+        validator: [
+          data => parseInt(data) > 0 && parseInt(data) < MAX_FILE_SIZE
+        ]
+      }
+    ]
+  }
+
+  const check = Params[_method](ctx, ...validator)
   if(check) return
 
   return await next()
@@ -43,13 +61,6 @@ router
   }, {
     //分片数量
     name: 'chunksLength',
-    type: [ 'isInt' ],
-    validator: [
-      data => data > 0
-    ]
-  }, {
-    //文件大小
-    name: 'size',
     type: [ 'isInt' ],
     validator: [
       data => data > 0
@@ -98,49 +109,71 @@ router
     Model = OtherMediaModel
   }
 
-  //查找文件是否存在于数据库
-  const data = await Model
-  .findOne({
-    "info.md5": md5
+  let userId
+
+  //获取来源用户id
+  const _id = await UserModel.findOne({
+    mobile: Number(mobile)
   })
   .select({
-    info: 1,
+    _id: 1
   })
   .exec()
+  .then(data => !!data && data._id)
+
+  //查找文件是否存在于数据库
+  const data = await UserModel.findOne({
+    mobile: Number(mobile)
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data._id)
+  .then(notFound)
+  .then(data => {
+    userId = data
+    return Model
+    .findOneAndUpdate({
+      "info.md5": md5
+    }, {
+      $addToSet: { white_list: userId }
+    })
+    .select({
+      info: 1,
+    })
+    .exec()
+  })
   .then(data => !!data && data._doc)
   .then(async (data) => {
 
     let isExits = isFileExistsAndComplete(`${md5}.${suffix.toLowerCase()}`, model, size, auth)
+    let chunkList = []
+    let chunkIndexList = []
+    try {
+      chunkList = getChunkFileList(path.resolve(STATIC_FILE_PATH, 'template', md5))
+      chunkIndexList = chunkList.map(chunk => Number(chunk.split('-')[1]))
+    }catch(err) {}
 
     //数据库中文件不存在
     if(!data) {
-      //获取来源用户id
-      const _id = await UserModel.findOne({
-        mobile: Number(mobile)
-      })
-      .select({
-        _id: 1
-      })
-      .exec()
-      .then(data => !!data && data._id)
-
       //数据库创建新集合
       const newModel = new Model({
         name: filename || md5,
         src: path.resolve(finalFilePath(auth, model)),
         origin_type: "USER",
-        origin: _id,
+        white_list: [userId],
         auth,
         info: {
           md5,
           size,
-          complete: isExits ? new Array(chunksLength).fill(0).map((_, i) => i) : [],
+          complete: isExits ? new Array(chunksLength).fill(0).map((_, i) => i) : chunkIndexList,
           chunk_size: chunksLength,
           mime: suffix,
           status: isExits ? 'COMPLETE' : 'UPLOADING'
         }
       })
-      return await newModel.save() && (isExits ? false : [])
+      return await newModel.save() && (isExits ? false : chunkIndexList)
     }
 
     //数据库存在文件数据
@@ -152,6 +185,12 @@ router
       if(isExits) return false
 
       //存在误差则提示重新上传
+      try {
+        chunkList.forEach(chunk => {
+          fs.unlink(chunk)
+        })
+      }catch(err){}
+
       return Model.updateOne({
         name: md5
       }, {
@@ -172,6 +211,11 @@ router
     }
     //上传出错提示重新上传
     else {
+      try {
+        chunkList.forEach(chunk => {
+          fs.unlink(chunk)
+        })
+      }catch(err){}
       return []
     }
 
@@ -213,8 +257,21 @@ router
     file = target.file
   }
 
+  if(!file) {
+    const res = dealErr(ctx)({
+      errMsg: 'bad request',
+      status: 400
+    })
+    responseDataDeal({
+      ctx,
+      data: res,
+      needCache: false
+    })
+    return
+  }
+
   //上传用户用户查询
-  const data = UserModel.findOne({
+  const data = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
@@ -226,7 +283,7 @@ router
   .then(id => {
     const commonQuery = {
       name: md5,
-      origin: id
+      white_list: { $in: [ id ] }
     }
     //保存文件
     return conserveBlob(file, md5, index)
@@ -282,7 +339,7 @@ router
     //查询文件是否存在且完整
     const commonQuery = {
       name: md5,
-      origin: id
+      white_list: { $in: [id] }
     }
     const commonSelect = {
       info: 1,
@@ -293,21 +350,23 @@ router
     return Promise.all([
       VideoModel.findOne(commonQuery)
       .select(commonSelect)
-      .exec(),
+      .exec()
+      .then(data => !!data && data._doc),
       ImageModel.findOne(commonQuery)
       .select(commonSelect)
-      .exec(),
+      .exec()
+      .then(data => !!data && data._doc),
       OtherMediaModel.findOne(commonQuery)
       .select(commonSelect)
       .exec()
+      .then(data => !!data && data._doc),
     ])
   })
-  .then(data => !!data && data)
+  .then(data => !!data && data.some(item => !!item) && data)
   .then(notFound)
   .then(data => {
     const index = data.findIndex(val => !!val)
-    //合并失败
-    if(!~index) return Promise.reject({ errMsg: 'fail', status: 500 })
+
     //合并文件
     const { info: { chunk_size, complete, mime }, auth, _id } = data[index]
     if(chunk_size === complete.length) {

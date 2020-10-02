@@ -215,9 +215,8 @@ function mockCreateImage(values={}) {
   let baseModel = {
     name: '测试图片名称',
     src: '测试地址',
-    origin_type: 'SYSTEM',
-    origin: ObjectId('8f63270f005f1c1a0d9448ca'),
     auth: 'PUBLIC',
+    origin_type: 'USER',
     info: {
       mime: 'jpg',
       status: 'COMPLETE',
@@ -237,9 +236,8 @@ function mockCreateVideo(values={}) {
   let baseModel = {
     name: '测试视频名称',
     src: '',
-    origin_type: 'SYSTEM',
-    origin: ObjectId('8f63270f005f1c1a0d9448ca'),
     auth: 'PUBLIC',
+    origin_type: 'USER',
     info: {
       mime: 'mp4',
       status: 'COMPLETE',
