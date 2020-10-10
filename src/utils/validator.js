@@ -140,7 +140,7 @@ const Params = {
         }
       }else {
         data = origin[name]
-        if(!data) {
+        if(data === undefined) {
           errs.push(name)
           return false
         }

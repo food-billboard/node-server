@@ -31,7 +31,10 @@ router
 })
 //检查参数格式是否正确
 .use(async(ctx, next) => {
-  const { body: { files:base64Files=[] }, files={} } = ctx.request
+  const { body: { files:base64Files=[] }, files={}, method } = ctx.request
+  const _method = method.toLowerCase()
+  if(_method == 'get' || _method == 'put') return await next() 
+
   let errRes
 
   //是否为空
@@ -44,8 +47,8 @@ router
   //base64文件格式是否正确
   else if(!base64Files.every(item => {
     const { file } = item
-
-    return typeof file === 'string' && base64Reg.test(file)})) {
+    
+    return typeof file === 'string' && (/^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/.test(file) || base64Reg.test(file))})) {//base64Reg
       errRes = {
         errMsg: 'bad request with base64 file type', 
         status: 400

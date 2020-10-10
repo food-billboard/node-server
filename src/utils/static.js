@@ -203,7 +203,7 @@ const StaticMiddleware = async(ctx, next) => {
           if(end == undefined) end = size - 1
           if(Number.isNaN(parseInt(end)) || parseInt(end) >= size || Number.isNaN(parseInt(start)) || parseInt(start) < 0) {
             ctx.status = 416
-            const error = dealErr(ctx)({ errMsg: 'range error', status = 416 })
+            const error = dealErr(ctx)({ errMsg: 'range error', status: 416 })
             responseDataDeal({
               ctx,
               data: error

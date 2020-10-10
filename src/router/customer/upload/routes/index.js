@@ -33,13 +33,13 @@ router
     }
   ]
 
-  if(method.toLowerCase() === 'get' || method.toLowerCase() === 'post') {
+  if(method.toLowerCase() === 'get') {
     validator = [
       ...validator,
       {
         name: 'size',
         validator: [
-          data => parseInt(data) > 0 && parseInt(data) < MAX_FILE_SIZE
+          data => parseInt(data) > 0 && parseInt(data) <= MAX_FILE_SIZE
         ]
       }
     ]
@@ -56,22 +56,23 @@ router
     //mime
     name: 'suffix',
     validator: [
-      data => typeof data === 'string' && /^.+\/.+$/g.test(data)
+      data => typeof data === 'string' && /^[a-zA-Z0-9]+\/[a-zA-Z0-9]+$/g.test(data)
     ]
   }, {
     //分片数量
     name: 'chunksLength',
-    type: [ 'isInt' ],
+    // type: [ 'isInt' ],
     validator: [
-      data => data > 0
+      data => Number(data) > 0
     ]
   })
   if(check) return
 
   const { name: md5, chunksLength, size } = ctx.query
+
   const [ suffix, chunkSize, filename, auth ] = Params.sanitizers(ctx.query, {
     name: 'suffix',
-    type: [ 'trim'],
+    type: ['trim'],
     sanitizers: [
       data => data.toLowerCase()
     ]
@@ -79,7 +80,7 @@ router
     name: 'chunkSize',
     type: [ 'toInt' ]
   }, {
-    name: filename,
+    name: 'filename',
     _default: md5,
     sanitizers: [
       data => data.toString()
@@ -111,15 +112,15 @@ router
 
   let userId
 
-  //获取来源用户id
-  const _id = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._id)
+  // //获取来源用户id
+  // const _id = await UserModel.findOne({
+  //   mobile: Number(mobile)
+  // })
+  // .select({
+  //   _id: 1
+  // })
+  // .exec()
+  // .then(data => !!data && data._id)
 
   //查找文件是否存在于数据库
   const data = await UserModel.findOne({
@@ -147,7 +148,7 @@ router
   .then(data => !!data && data._doc)
   .then(async (data) => {
 
-    let isExits = isFileExistsAndComplete(`${md5}.${suffix.toLowerCase()}`, model, size, auth)
+    let isExits = isFileExistsAndComplete(`${md5}.${/[a-zA-Z]{1,20}\/[a-zA-Z]{1,20}/.test(suffix) ? suffix.split('/')[1] : suffix}`, model, size, auth)
     let chunkList = []
     let chunkIndexList = []
     try {
@@ -192,7 +193,7 @@ router
       }catch(err){}
 
       return Model.updateOne({
-        name: md5
+        "info.md5": md5
       }, {
         $set: {
           "info.complete": [],
@@ -222,11 +223,13 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && !data.err) ctx.status = 206
+  // if(data && !data.err) ctx.status = 206
 
   responseDataDeal({
     ctx,
-    data: data,
+    data: {
+      data
+    },
     needCache: false
   })
 
@@ -237,9 +240,8 @@ router
   //参数预查
   const check = Params.body(ctx, {
     name: 'index',
-    type: ['isInt'],
     validator: [
-      data => data >= 0
+      data => Number(data) >= 0
     ]
   })
   if(check) return
@@ -250,7 +252,7 @@ router
 
   let file
 
-  if(!!files && !!files.file && isType(files.file, 'file')) {
+  if(!!files && !!files.file) {
     file = files.file
   }else if(base64Files && !!base64Files.length) {
     const [target] = base64Files
@@ -278,11 +280,11 @@ router
     _id: 1
   })
   .exec()
-  .then(data => !!data && data.doc._id)
+  .then(data => !!data && data._doc._id)
   .then(notFound)
   .then(id => {
     const commonQuery = {
-      name: md5,
+      "info.md5": md5,
       white_list: { $in: [ id ] }
     }
     //保存文件
@@ -310,7 +312,7 @@ router
   .catch(dealErr(ctx))
 
 
-  if(data && !data.err) ctx.status = 206
+  // if(data && !data.err) ctx.status = 206
 
   responseDataDeal({
     ctx,
@@ -326,7 +328,7 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
-  UserModel.findOne({
+  const data = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
@@ -338,7 +340,7 @@ router
   .then(id => {
     //查询文件是否存在且完整
     const commonQuery = {
-      name: md5,
+      "info.md5": md5,
       white_list: { $in: [id] }
     }
     const commonSelect = {
@@ -387,16 +389,16 @@ router
           break
       }
 
-      const [err, ] = mergeChunkFile({ name: md5, extname: type, mime, auth })
+      const [err, ] = mergeChunkFile({ name: md5, extname: type, mime: mime.toLowerCase(), auth })
       if(err) return Promise.reject({ errMsg: 'unkonown error', status: 500 })
       
       //修改数据库状态
       return Model.updateOne({
-        name: md5
+        "info.md5": md5
       }, {
         $set: { "info.status": "COMPLETE" }
       })
-      .then(data => !!data && data.nModified === 1)
+      .then(data => !!data && data.nModified == 1)
       .then(notFound)
       .then(_ => {
         Model = null
@@ -409,7 +411,6 @@ router
   })
   .catch(dealErr(ctx))
 
-  if(data && !data.err) ctx.status = 206
   responseDataDeal({
     ctx,
     data,

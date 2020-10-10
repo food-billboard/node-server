@@ -42,10 +42,10 @@ const isFileExistsAndComplete = (name, type, size, auth="public") => {
 }
 
 //查找分片文件
-const getChunkFileList = (path) => {
-  if(checkDir(path)) {
-    return fs.readdirSync(path)
-    .filter(f => path.extname(f) === '' && f !== name && f.includes('-'))
+const getChunkFileList = (_path) => {
+  if(!checkDir(_path)) {
+    return fs.readdirSync(_path)
+    .filter(f => path.extname(f) === '' && f.includes('-'))
   } 
   return []
 }
@@ -344,7 +344,7 @@ const mergeChunkFile = ( { name, extname, mime, auth } ) => {
   //对文件进行合并
   const chunkList = getChunkFileList(templatePath).sort((suffixA, suffixB) => Number(suffixA.split('-')[1]) - Number(suffixB.split('-')[1]))
 
-  if(chunkList.every((chunk, index) => index == Number(chunk.split('-')[1]))) return ['not complete', null]
+  if(!chunkList.every((chunk, index) => index == Number(chunk.split('-')[1]))) return ['not complete', null]
 
   realPath = path.resolve(realPath, name)
 

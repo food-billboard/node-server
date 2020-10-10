@@ -944,7 +944,8 @@ const VideoSchema = new Schema({
   info: {
     md5: {
       type: String,
-      required: true
+      required: true,
+      unique: true
     },
     complete: [{
       type: Number,
