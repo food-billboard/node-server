@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const SpecDropList = require('./sepcDropList')
-const { ClassifyModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { ClassifyModel, MovieModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -8,13 +8,15 @@ const router = new Router()
 router
 .get('/', async(ctx) => {
 
-  const check = Params.query(ctx, {
+	const check = Params.query(ctx, {
     name: "_id",
     type: ['isMongoId']
 	})
 	if(check) return
 
-	const { sort={} } = ctx.query
+	// const { sort={} } = ctx.query
+
+	//参数处理
 	const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
 		name: 'currPage',
 		_default: 0,
@@ -38,50 +40,46 @@ router
 		]
 	})
 
-	const data = await ClassifyModel.findOneAndUpdate({
-		_id
-	}, {
-		$inc: { glance: 1 }
-	})
-	.select({
-		match: 1,
-		_id: 0
-	})
-	.populate({
-		path: 'match',
-		select: {
+	const data = await Promise.all([
+		ClassifyModel.findOneAndUpdate({
+			_id
+		}, {
+			$inc: { glance: 1 }
+		}),
+		MovieModel.find({
+			"info.classify": { $in: [ _id ] }
+		})
+		.select({
 			poster: 1,
 			name: 1,
 			"info.classify": 1,
-			publish_time: 1,
+			"info.screen_time": 1,
 			hot: 1,
-			author_rate: 1,
-		},
-		options: {
-			...(pageSize >= 0 ? { limit: pageSize } : {}),
-      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {}),
-			sort
-		},
-		populate: {
+			// author_rate: 1,
+		})
+		.skip((currPage >= 0 && pageSize >= 0) ? pageSize * currPage : 0)
+		.limit(pageSize >= 0 ? pageSize: 10)
+		.populate({
 			path: 'info.classify',
 			select: {
 				name: 1,
 				_id: 0
 			}
-		}
-	})
-	.exec()
-	.then(data => !!data && data._doc)
+		})
+		.exec()
+	])
+	.then(([_, data]) => !!data && data)
 	.then(notFound)
 	.then(data => {
-		const { match } = data
 		return {
-			match: match.map(m => {
-				const { _doc: { poster: { src }, ...nextM } } = m
-				return {
-					...nextM,
-					poster: src,
-				}
+			data: data.map(item => {
+				const { _doc: { poster: { src }, info: { screen_time, classify }, ...nextM } } = item
+					return {
+						...nextM,
+						poster: src,
+						publish_time: screen_time,
+						classify,
+					}
 			})
 		}
 	})

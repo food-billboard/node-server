@@ -52,12 +52,20 @@ router
     select: {
       "info.classify": 1,
 			"info.description": 1,
-			"info.name": 1,
+      "info.name": 1,
+      "info.screen_time": 1,
 			poster: 1,
-			publish_time: 1,
 			hot: 1,
 			// author_rate: 1,
-			rate: 1,
+      rate_person: 1,
+      total_rate: 1
+    },
+    populate: {
+      path: "info.classify",
+      select: {
+        _id: 0,
+        name: 1
+      }
     }
   })
   .exec()
@@ -66,18 +74,23 @@ router
   .then(data => {
     const { glance, ...nextData } = data
     return {
-      ...nextData,
-      glance: glance.map(g => {
-        const { _doc: { info: { description, name, classify }, poster, ...nextD } } = g
-        return {
-          ...nextD,
-          poster: poster ? poster.src : null,
-          description,
-          name,
-          classify,
-          store:false
-        }
-      })
+      data: {
+        ...nextData,
+        glance: glance.map(g => {
+          const { _doc: { info: { description, name, classify, screen_time }, poster, rate_person, total_rate,  ...nextD } } = g
+          const rate = total_rate / rate_person
+          return {
+            ...nextD,
+            poster: poster ? poster.src : null,
+            description,
+            name,
+            classify,
+            store:false,
+            publish_time: screen_time,
+            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))

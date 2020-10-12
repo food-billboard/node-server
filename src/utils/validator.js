@@ -35,7 +35,7 @@ const Params = {
         }else {
           result = origin[name]
         }
-        if(result === undefined) throw new Error('name is not defined')
+        if(result === undefined) console.warn('attentions! name is not defined')
         //自定义
         let realSan = Array.isArray(sanitizers) ? sanitizers.filter(san => isType(san, 'function')) : []
         type.forEach(t => {
@@ -43,10 +43,10 @@ const Params = {
           let params = t.match(/(?<=\().+(?=\))/)
           method = method ? method[0] : t
           params = params && params[0]
-          result = isType(Validator[method], 'function') ? 
-            Validator[method](...(params ? [ result, ...params.split(',').map(p => p.trim()) ] : [result])) : 
-            result
 
+          result = isType(Validator[method], 'function') ? 
+          Validator[method](...(params ? [ result, ...params.split(',').map(p => p.trim()) ] : [result])) : 
+          result
         })
         realSan.forEach(san => {
           result = san(result)
@@ -54,6 +54,7 @@ const Params = {
         return result
       }catch(err) {
         if(_default) result = _default
+
         return result
       }
     })
@@ -138,7 +139,7 @@ const Params = {
         }
       }else {
         data = origin[name]
-        if(!data) {
+        if(data === undefined) {
           errs.push(name)
           return false
         }
@@ -156,7 +157,7 @@ const Params = {
         )
       }) : true ) && (
         //自定义
-        Array.isArray(validator) ? validator.filter(val => isType(val, 'function')).every(val => val(data)) : true
+        Array.isArray(validator) ? validator.filter(val => isType(val, 'function')).every(val => val(data, origin)) : true
       )
       if(!result) errs.push(name)
       return result

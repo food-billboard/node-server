@@ -23,47 +23,56 @@ router
   .then(id => {
     userId = id
     return FeedbackModel.findOne({
-      user_info: id,
-      createdAt: { $lt: formatISO(Date.now() - NUM_DAY(1)) }
+      user_info: userId,
+      createdAt: { $gt: formatISO(Date.now() - NUM_DAY(1)) }
     })
     .select({
-      _id: 1
+      _id: 1,
+      createdAt: 1,
+
     })
     .exec()
   })
-  .then(data => !!data && data._id)
+  .then(data => !!data && data)
+  .then(data => {
+    if(!!data) return Promise.reject({ errMsg: 'frequent', status: 503 })
+  })
   .catch(dealErr(ctx))
 
-  if(data && !data.err) {
-    ctx.status = 503
-    data = {
-      success: false,
-      res: {
-        errMsg: 'frequent'
-      }
-    }
-  }
-
-  if(data) {
+  if(data && data.err) {
     responseDataDeal({
       ctx,
-      data
+      data,
+      needCache: false
     })
     return
   }
 
   if(!/.+\/feedback$/g.test(url)) return await next()
-  console.log(ctx.request.body)
+
   const check = Params.body(ctx, {
     name: "content",
     validator: [
-      data => !!Object.keys(data).length && ( 
-        !!data.text
-        &&
-        ( data.video ? data.video.every(d => ObjectId.isValid(d)) : true )
-        &&
-        ( data.image ? data.image.every(d => ObjectId.isValid(d)) : true )
-      )
+      data => {
+        const { text, image, video } = data
+        try {
+          return (
+            (typeof text === 'string' && text.length > 0) 
+            || 
+            (Array.isArray(image) && !!image.length) 
+            || 
+            (Array.isArray(video) && !!video.length)
+          ) 
+            && 
+          ( 
+            ( Array.isArray(video) ? video.every(d => typeof d === 'string' && ObjectId.isValid(d)) && !!video.length : true )
+            ||
+            ( Array.isArray(image) ? image.every(d => typeof d === 'string' && ObjectId.isValid(d)) && !!image.length : true )
+          )
+        }catch(err) {
+          return true
+        }
+      }
     ]
   })
 
@@ -79,13 +88,15 @@ router
   {
     name: 'content.image',
     sanitizers: [
-      data => data ? data.map(d => ObjectId(d)) : []
+      data => {
+        return Array.isArray(data) ? data.map(d => ObjectId(d)) : []
+      }
     ]
   },
   {
     name: 'content.video',
     sanitizers: [
-      data => data ? data.map(d => ObjectId(d)) : []
+      data => Array.isArray(data) ? data.map(d => ObjectId(d)) : []
     ]
   })
   const [, token] = verifyTokenToData(ctx)
@@ -124,9 +135,10 @@ router
   })
 })
 .get('/precheck', async(ctx) => {
-  ctx.body = JSON.stringify({
-    success: true,
-    res: {
+
+  responseDataDeal({
+    ctx,
+    data: {
       data: true
     }
   })

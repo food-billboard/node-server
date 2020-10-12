@@ -7,12 +7,12 @@ const router = new Router()
 router
 .get('/', async (ctx) => {
 
-  //validate
-  const check = Params.query(ctx, {
-    name: '_id',
-    type: ['isMongoId']
-  })
-  if(check) return
+  // //validate
+  // const check = Params.query(ctx, {
+  //   name: '_id',
+  //   type: ['isMongoId']
+  // })
+  // if(check) return
 
   const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
@@ -61,16 +61,18 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { attentions, ...nextData, } = data
+    const { attentions, ...nextData } = data
     return {
-      ...nextData,
-      attentions: attentions.map(a => {
-        const { _doc: { avatar, ...nextA } } = a
-        return {
-          ...nextA,
-          avatar: avatar ? avatar.src : null
-        }
-      })
+      data: {
+        ...nextData,
+        attentions: attentions.map(a => {
+          const { _doc: { avatar, ...nextA } } = a
+          return {
+            ...nextA,
+            avatar: avatar ? avatar.src : null
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))

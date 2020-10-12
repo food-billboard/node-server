@@ -6,12 +6,23 @@ const KoaStatic = require('koa-static')
 const KoaBody = require('koa-body')
 const app = new Koa()
 const path = require('path')
-const { MongoDB } = require("@src/utils")
+const { MongoDB, StaticMiddleware, initStaticFileDir } = require("@src/utils")
+const { request, middleware4Uuid } = require('@src/config/winston')
+const morgan = require('koa-morgan')
 
 MongoDB()
+initStaticFileDir()
 
 app.use(Cors())
+//请求前植入uuid来进行全链路的日志记录
+.use(middleware4Uuid)
+.use(morgan('combined', {
+  stream: request.stream,
+  skip: function (req, res) { return res.statusCode < 300 }
+}))
 // app.use(bodyParser())
+//请求速率限制
+// .use()
 .use(KoaBody({
   multipart:true, // 支持文件上传
   // encoding:'gzip',
@@ -26,10 +37,17 @@ app.use(Cors())
   // }
 }))
 // 访问权限
-// .use()
-.use(KoaStatic(path.resolve(__dirname, 'static'), {}))
+.use(StaticMiddleware)
+.use(KoaStatic(path.resolve(__dirname, 'static'), {
+  setHeaders: (res, path, stats) => {
+
+  },
+  extensions: true
+}))
 .use(Router.routes()).use(Router.allowedMethods())
 
-app.listen(3000, () => {
+app.listen( process.env.PORT || 3000, () => {
   console.log('Server is run in port 3000')
 })
+
+module.exports = app

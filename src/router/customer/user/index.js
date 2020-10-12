@@ -32,7 +32,7 @@ router
         }
       })
     }else if(!token && _id) {
-      ctx.status = 401
+      ctx.status = 302
       return ctx.redirect(newUrl)
     }else {
       ctx.status = 403
@@ -58,7 +58,7 @@ router
 //个人信息
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  let res
+
   const { mobile } = token
   const check = Params.query(ctx, {
     name: '_id',
@@ -98,10 +98,12 @@ router
   .then(data => {
     let result = {}
     let mine
-    let fans
+    let fans = []
+    let found = false
     data.forEach(d => {
       const { _doc: { _id:id, avatar, ...nextD } } = d 
       if(id.equals(_id)) {
+        found = true
         const { fans:userFans, attentions } = nextD
         result = {
           ...result,
@@ -117,9 +119,11 @@ router
         mine = id
       }
     })
-
+    if(!found) return Promise.reject({ errMsg: 'not found', status: 404 })
     if(mine && fans.some(f => f.equals(mine))) result.like = true
-    return result
+    return {
+      data: result
+    }
   })
   .catch(dealErr(ctx))
 

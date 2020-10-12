@@ -53,10 +53,12 @@ const verifyToken = token => jwt.verify(token, SECRET)
 const middlewareVerifyToken = async (ctx, next) => {
   const { header: {authorization} } = ctx.request
   const [err,] = getToken(authorization)
+
   if(!err) {
     ctx.status = 200
     await next()
   }else {
+    ctx.set({ 'Content-Type': 'Application/json' })
     switch(err) {
       case '400':
         ctx.status = 400
@@ -128,7 +130,7 @@ const middlewareVerifyTokenForSocketIo = socket => async (packet, next) => {
 
 //token验证并返回内容
 const verifyTokenToData = (ctx) => {
-  const { header: {authorization} } = ctx.request
+  const { header: { authorization } } = ctx.request
   return getToken(authorization)
 }
 
@@ -146,14 +148,14 @@ const verifySocketIoToken = token => {
 }
 
 const getToken = (authorization) => {
-  if(!authorization) return ['400', null]
-  const token = authorization.split(' ')[1]
+  if(!authorization) return ['401', null]
+  const token = /.+ .+/.test(authorization) ? authorization.split(' ')[1] : authorization
   try { 
     const { middel, ...nextToken } = verifyToken(token)
     if(middel !== MIDDEL) return ['401', null]
     return [null, nextToken]
   }catch(err) {
-    return [err, null]
+    return ['401', null]
   }
 }
 
@@ -176,4 +178,5 @@ module.exports = {
   verifySocketIoToken,
   otherToken,
   fileEncoded,
+  getToken
 }

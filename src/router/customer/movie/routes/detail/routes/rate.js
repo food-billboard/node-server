@@ -28,17 +28,28 @@ router.put('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    rate: 1
-  })
-  .exec()
-  .then(data => !!data && data._doc)
-  .then(notFound)
-  .then(data => {
-    const { rate } = data
+  const data = await Promise.all([
+    UserModel.findOne({
+      mobile: Number(mobile)
+    })
+    .select({
+      rate: 1
+    })
+    .exec()
+    .then(data => !!data && data._doc)
+    .then(notFound),
+    MovieModel.findOne({
+      _id
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(data => !!data && data._doc._id)
+    .then(notFound)
+  ])
+  .then(([user, _]) => {
+    const { rate } = user
     const [rateValue] = rate.filter(r => ObjectId.isValid(r._id) ? r._id.equals(_id) : ObjectId(r._id).equals(_id))
     //修改评分
     if(rateValue) {

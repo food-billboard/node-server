@@ -60,14 +60,16 @@ router
   .then(data => {
     const { fans, ...nextData } = data
     return {
-      ...nextData,
-      fans: fans.map(d => {
-        const { _doc: { avatar, ...nextD } } = d
-        return {
-          ...nextD,
-          avatar: avatar ? avatar.src : null,
-        }
-      })
+      data: {
+        ...nextData,
+        fans: fans.map(d => {
+          const { _doc: { avatar, ...nextD } } = d
+          return {
+            ...nextD,
+            avatar: avatar ? avatar.src : null,
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))

@@ -54,47 +54,46 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
-  let mineId
-
-  const data = await UserModel.findOne({
+  const mineId = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
-  .then(notFound)
-  .then(data => {
-    mineId = data._id
-    return BarrageModel.find({
-      origin: _id,
-      sort: {
-        time_line: 1
-      },
-      ...(timeStart >= 0 ? { 
-        $gt: { time_line: timeStart },
-        ...(process >= 0 ? { $lt: { time_line: process + timeStart } } : {})
-      } : {})
-    })
+  .then(data => !!data && data._doc._id)
+
+  const data = await BarrageModel.find({
+    origin: _id,
+    ...(timeStart >= 0 ? { 
+      $gt: { time_line: timeStart },
+      ...(process >= 0 ? { $lt: { time_line: process + timeStart } } : {})
+    } : {})
   })
   .select({
-    user: 0,
-    origin:0,
+    like_users:1,
+    content: 1,
+    time_line: 1,
+    _id: 1
   })
   .limit(1000)
+  .sort({
+    time_line: 1
+  })
   .exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {
-    return data.map(item => {
-      const { _doc: { like_users, ...nextItem } } = item
-      return {
-        ...nextItem,
-        hot: like_users.length,
-        like: !!~like_users.indexOf(mineId)
-      }
-    })
+    return {
+      data: data.map(item => {
+        const { _doc: { like_users, ...nextItem } } = item
+        return {
+          ...nextItem,
+          hot: like_users.length,
+          like: !!~like_users.indexOf(mineId)
+        }
+      })
+    }
   })
   .catch(dealErr(ctx))
 
@@ -114,7 +113,10 @@ router
   },
   {
     name: 'content',
-    type: ['isEmpty']
+    type: ['isEmpty'],
+    validator: [
+      data => typeof data === 'string' && data.length > 0
+    ]
   },
   {
     name: 'time',
@@ -127,11 +129,20 @@ router
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const [ _id ] = Params.sanitizers(ctx.request.body, {
+  const [ _id, content, time ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
     ]
+  }, {
+    name: 'content',
+    sanitizers: [
+      data => data
+    ]
+  }, {
+    name: 'time',
+    _default: 0,
+    type: ['toInt']
   })
 
   const data = await Promise.all([
@@ -156,10 +167,7 @@ router
       origin: _id,
       user,
       like_users: [],
-      time_line: {
-        type: Number,
-        required: true
-      },
+      time_line: time,
       content
     })
     return newModel.save()
@@ -191,7 +199,7 @@ router
     ]
   })
 
-  const data = await UserModel.findOne({
+  const mineId = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
@@ -199,19 +207,17 @@ router
   })
   .exec()
   .then(data => !!data && data._doc._id)
-  .then(notFound)
-  .then(userId => {
-    return BarrageModel.updateOne({
-      _id,
-      like_users: { $nin: [userId] }
-    }, {
-      $push: { like_users: userId }
-    })
+
+  const data = await BarrageModel.updateOne({
+    _id,
+    like_users: { $nin: [mineId] }
+  }, {
+    $push: { like_users: mineId }
   })
   .exec()
   .then(data => {
-    if(data && data.nModified === 0) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-    return null
+    if(data && data.nModified === 0) return Promise.reject({ errMsg: 'write database error', status: 404 })
+    return {}
   })
   .catch(dealErr(ctx))
 
@@ -225,7 +231,7 @@ router
 //取消点赞
 .delete('/like', async(ctx) => {
   //参数验证
-  const check = Params.body(ctx, {
+  const check = Params.query(ctx, {
     name: '_id',
     type: ['isMongoId']
   })
@@ -233,14 +239,14 @@ router
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const [ _id ] = Params.sanitizers(ctx.request.body, {
+  const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
     ]
   })
 
-  const data = await UserModel.findOne({
+  const mineId = await UserModel.findOne({
     mobile: Number(mobile)
   })
   .select({
@@ -248,19 +254,17 @@ router
   })
   .exec()
   .then(data => !!data && data._doc._id)
-  .then(notFound)
-  .then(userId => {
-    return BarrageModel.updateOne({
-      _id,
-      like_users: { $in: [userId] }
-    }, {
-      $pull: { like_users: userId }
-    })
+
+  const data = await BarrageModel.updateOne({
+    origin: _id,
+    like_users: { $in: [ mineId ] }
+  }, {
+    $pull: { like_users: mineId }
   })
   .exec()
   .then(data => {
-    if(data && data.nModified === 0) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-    return null
+    if(data && data.nModified === 0) return Promise.reject({ errMsg: 'write database error', status: 404 })
+    return {}
   })
   .catch(dealErr(ctx))
 

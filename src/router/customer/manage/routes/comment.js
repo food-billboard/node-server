@@ -28,7 +28,9 @@ router.get('/', async (ctx) => {
   })
   .select({
     comment: 1,
-    updatedAt: 1,
+    avatar: 1,
+    username: 1,
+    _id: 1
   })
   .populate({
     path: 'comment',
@@ -38,63 +40,69 @@ router.get('/', async (ctx) => {
     },
     select: {
       source: 1,
-      createdAt: 1,
       updatedAt: 1,
+      createdAt: 1,
       total_like: 1,
       content: 1,
       like_person: 1,
-      comment_users: 1
+      comment_users: 1,
+      source_type: 1,
     },
     populate: {
       path: 'source',
       select: {
         name: 1,
-        content: 1
+        content: 1,
       }
-    }
+    },
   })
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { comment, _id: userId, ...nextData } = data
+    const { comment, _id: userId, avatar, ...nextData } = data
     let like = false
     return {
-      ...nextData,
-      comment: comment.map(c => {
-        like = false
-        const { 
-          _doc: { 
-            like_person, 
-            content: { image, video, ...nextContent }, 
-            source: { name, content, ...nextSoruce }={}, 
-            user_info: { _doc: { avatar, ...nextUserInfo } }, 
-            comment_users,
-            ...nextC 
-          } 
-        } = c
-        if(like_person.some(l => l.equals(userId))) {
-          like = true
-        }
-        return {
-          ...nextC,
-          comment_users: comment_users.length,
-          content: {
-            ...nextContent,
-            image: image.filter(i => i && !!i.src).map(i => i.src),
-            video: video.filter(v => v && !!v.src).map(v => v.src)
-          },
-          source: {
-            ...nextSoruce,
-            content: name ? name : ( content ? content : null )
-          },
-          like,
-          user_info: {
-            ...nextUserInfo,
-            avatar: avatar ? avatar.src : null,
+      data: {
+        comment: comment.map(c => {
+          like = false
+          const { 
+            _doc: { 
+              like_person, 
+              content: { image, video, ...nextContent }, 
+              source={}, 
+              source_type,
+              comment_users,
+              ...nextC 
+            } 
+          } = c
+
+          const { _doc: { name, content, ...nextSoruce } } = source
+          if(like_person.some(l => l.equals(userId))) {
+            like = true
           }
-        }
-      })
+          return {
+            ...nextC,
+            comment_users: comment_users.length,
+            content: {
+              ...nextContent,
+              image: image.filter(i => i && !!i.src).map(i => i.src),
+              video: video.filter(v => v && !!v.src).map(v => v.src)
+            },
+            source: {
+              ...nextSoruce,
+              type: source_type,
+              content: name ? name : ( content || null )
+            },
+            like,
+            user_info: {
+              ...nextData,
+              _id: userId,
+              avatar: avatar ? avatar.src : null,
+            }
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))

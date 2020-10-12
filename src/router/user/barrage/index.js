@@ -36,31 +36,35 @@ router
 
   const data = await BarrageModel.find({
     origin: _id,
-    sort: {
-      time_line: 1
-    },
     ...(timeStart >= 0 ? { 
       $gt: { time_line: timeStart },
       ...(process >= 0 ? { $lt: { time_line: process + timeStart } } : {})
     } : {})
   })
   .select({
-    user: 0,
-    origin:0,
+    like_users: 1,
+    content: 1,
+    time_line: 1,
+    updatedAt: 1,
   })
   .limit(1000)
+  .sort({
+    time_line: 1
+  })
   .exec()
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {
-    return data.map(item => {
-      const { _doc: { like_users, ...nextItem } } = item
-      return {
-        ...nextItem,
-        hot: like_users.length,
-        like: !!~like_users.indexOf(mineId)
-      }
-    })
+    return {
+      data: data.map(item => {
+        const { _doc: { like_users, ...nextItem } } = item
+        return {
+          ...nextItem,
+          hot: like_users.length,
+          like: false
+        }
+      })
+    }
   })
   .catch(dealErr(ctx))
 

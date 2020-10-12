@@ -1,10 +1,12 @@
-const Day = requier('dayjs')
 const { isType } = require('./tool')
 const { encoded } = require('./token')
+const { log4Error, log4RequestAndResponse } = require('@src/config/winston')
+const { Types: { ObjectId } } = require('mongoose')
 
 //错误处理
 const dealErr = (ctx) => {
   return (err) => {
+
     let res = {}
     if(err && err.errMsg) {
       const { status=500, ...nextErr } = err
@@ -18,7 +20,10 @@ const dealErr = (ctx) => {
         errMsg: err
       }
     }
-    console.log(err)
+
+    //日志写入
+    // log4Error(ctx, err)
+
     return {
       err: true,
       res
@@ -53,40 +58,51 @@ const withTry = (callback) => {
 
 //缓存处理
 const judgeCache = (ctx, modifiedTime, etagValidate) => {
-  const { request: { headers } } = ctx
+  const { request: { headers, method }, query } = ctx
+  //只对get进行缓存
+  if( 'get' != method.toLowerCase()) return false
   const modified = headers['if-modified-since'] || headers['If-Modified-Since']
   const etag = headers['if-none-match'] || headers['If-None-Match']
 
   //设置last-modified
-  !!modified && ctx.set({ 'Last-Modified': modifiedTime })
+  !!modified && ctx.set({ 'Last-Modified': modifiedTime.toString() })
 
-  return !!modified && Day(modified).valueOf() === Day(modifiedTime).valueOf() && ( !!etag && typeof etagValidate == 'function' ? etagValidate(ctx, etag) : true )
+  let queryEmpty = false
+
+  //空查询参数处理
+  if(Object.keys(query).length == 0) {
+    ctx.set({ 'ETag': '' })
+    queryEmpty = true
+  }
+
+  return ( queryEmpty ? ( !etag ) : (typeof etagValidate == 'function' ? etagValidate(ctx, !!etag ? etag : '') : true )) && !!modified && new Date(modified).toString() == new Date(modifiedTime).toString()
+
+  // return !!modified && Day(modified).valueOf() === Day(modifiedTime).valueOf() && ( !!etag && typeof etagValidate == 'function' ? etagValidate(ctx, etag) : true )
 }
 
 //将请求参数加密成etag用于缓存处理
 const _etagValidate = (ctx, etag) => {
-  const { request: { method, query } } = ctx
+  const { request: { query } } = ctx
 
-  //只对get进行缓存
-  if( 'get' != method.toLowerCase()) return false
-  if(typeof etag !== 'string') return false
+  let isSameEtag = true
+  if(typeof etag !== 'string') isSameEtag = false
   
   //以,分割的加密查询参数
   const queryArray = etag.split(',')
   let keys = Object.keys(query)
 
-  if(keys.length != queryArray.length) return false
+  if(keys.length != queryArray.length) isSameEtag = false
 
   //判断是否所有查询参数与之前相同
-  let isSameEtag = true
   const newEtag = keys.reduce((acc, cur) => {
     let str = `${cur}=${query[cur]}`
     const encode = encoded(str)
-    acc += `,${cur}`
-    isSameEtag = !!~queryArray.indexOf(encode)
-  }, ',')
+    acc += `,${encode}`
+    if(isSameEtag) isSameEtag = !!~queryArray.indexOf(encode)
+    return acc
+  }, '').slice(1)
 
-  if(newEtag.length > 1) ctx.set({ etag: newEtag.slice(1) })
+  if(newEtag.length > 1) ctx.set({ etag: newEtag })
 
   return isSameEtag
 
@@ -97,6 +113,8 @@ const filterField = (data, field='updatedAt', compare=null) => {
 
   let origin
 
+  let index = 0
+
   function filter(data) {
     if(Array.isArray(data)) {
       data.forEach(item => {
@@ -104,7 +122,7 @@ const filterField = (data, field='updatedAt', compare=null) => {
       })
     }else if(isType(data, 'object')) {
       Object.keys(data).forEach(key => {
-        if(Array.isArray(data[key]) || isType(data[key], 'object')) {
+        if(Array.isArray(data[key]) || (isType(data[key], 'object') && !ObjectId.isValid(data[key]) && key != '$__'/**阻止继续向内部访问mongoose对象 */)) {
           filter(data[key])
         }else if(key === field){
           const target = data[key]
@@ -132,7 +150,7 @@ const responseDataDeal = ({
   //数据响应前的最后处理
   afterDeal,
   //etag 或用于普通参数请求，或用于静态资源请求
-  etagValidate=_etagValidate
+  etagValidate,
 }) => {
   let response = {}
 
@@ -166,31 +184,35 @@ const responseDataDeal = ({
       //304
       if(needCache) {
 
-        const updatedAt = filterField(data)
-        
-        if(updatedAt && judgeCache(ctx, updatedAt, etagValidate)) {
+        let cache = false
+
+        if(typeof etagValidate === 'function') {
+          cache = etagValidate(ctx, response)
+        }else {
+          const updatedAt = filterField(data)
+          cache = !!updatedAt && judgeCache(ctx, updatedAt, _etagValidate)
+        }
+
+        if(cache) {
           ctx.status = 304
           response = {
             ...response,
-            res: {}
+            res: {
+              data: {}
+            }
           }
         }
+        
       }
     }
 
-    // const { res: { updatedAt, ...nextRes }  } = response
-    // response = {
-    //   ...response,
-    //   res: {
-    //     ...nextRes
-    //   }
-    // }
-
     if(afterDeal && typeof afterDeal === 'function') response = afterDeal({...response})
 
-    ctx.body = JSON.stringify(response)
-
   }
+
+  log4RequestAndResponse(ctx, response)
+
+  ctx.body = response
 
 }
 

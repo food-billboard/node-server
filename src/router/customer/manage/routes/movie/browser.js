@@ -36,14 +36,22 @@ router.get('/', async (ctx) => {
 			"info.description": 1,
 			"info.name": 1,
 			poster: 1,
-			publish_time: 1,
+			"info.screen_time": 1,
 			hot: 1,
 			// author_rate: 1,
-			rate: 1,
+      total_rate: 1,
+      rate_person: 1
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
+    },
+    populate: {
+      path: 'info.classify',
+      select: {
+        _id: 0,
+        name: 1
+      }
     }
   })
   .exec()
@@ -52,18 +60,23 @@ router.get('/', async (ctx) => {
   .then(data => {
     const { glance, ...nextData } = data
     return {
-      ...nextData,
-      glance: glance.map(g => {
-        const { _doc: { info: { description, name, classify }, poster, ...nextD } } = g
-        return {
-          ...nextD,
-          poster: poster ? poster.src : null,
-          description,
-          name,
-          classify,
-          store:false
-        }
-      })
+      data: {
+        ...nextData,
+        glance: glance.map(g => {
+          const { _doc: { info: { description, name, classify, screen_time }, poster, total_rate, rate_person, ...nextD } } = g
+          const rate = total_rate /rate_person
+          return {
+            ...nextD,
+            poster: poster ? poster.src : null,
+            description,
+            name,
+            classify,
+            store:false,
+            publish_time: screen_time,
+            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))

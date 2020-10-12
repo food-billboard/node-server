@@ -23,7 +23,7 @@ router
   })
   const [, token] = verifyTokenToData(ctx)
   if(!token) {
-    ctx.status = 401
+    ctx.status = 301
     return ctx.redirect("/api/user/movie/detail")
   }
   const { mobile } = token
@@ -48,7 +48,8 @@ router
       modified_time: 0,
       source_type: 0,
       stauts: 0,
-      related_to: 0
+      related_to: 0,
+      barrage: 0
     })
     .populate({
       path: 'comment',
@@ -123,44 +124,59 @@ router
     .then(notFound)
   })
   .then(data => {
-    const { info, poster, video, images, comment, total_rate, rate_person, same_film, ...nextData } = data
+    const { info, poster, video, images, comment, total_rate, rate_person, same_film, tag, ...nextData } = data
     const { actor, director, district, language, classify, ...nextInfo } = info
+
+    const rate = total_rate / rate_person
+
     return {
-      ...nextData,
-      store,
-      video: video ? src : null,
-      rate: total_rate / rate_person,
-      poster: poster ? poster.src : null,
-      images: images.filter(i => i && !!i.src).map(i => i.src),
-      comment: comment.map(com => {
-        const { _doc: { user_info, content: { text }, ...nextC } } = com
-        const { _doc: { avatar, ...nextUserInfo } } = user_info
-        return {
-          ...nextC,
-          content: {
-            text: text || null
-          },
-          user_info: {
-            ...nextUserInfo,
-            avatar: avatar ? avatar.src : null
+      data: {
+        ...nextData,
+        store,
+        video: video ? video.src : null,
+        rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
+        poster: poster ? poster.src : null,
+        images: images.filter(i => i && !!i.src).map(i => i.src),
+        comment: comment.map(com => {
+          const { _doc: { user_info, content: { text }, ...nextC } } = com
+          const { _doc: { avatar, ...nextUserInfo } } = user_info
+          return {
+            ...nextC,
+            content: {
+              text: text || null
+            },
+            user_info: {
+              ...nextUserInfo,
+              avatar: avatar ? avatar.src : null
+            }
           }
+        }),
+        same_film: same_film.map(same => {
+          const { _doc: { film: { name, _id }, ...nextS } } = same
+          return {
+            name,
+            _id,
+            ...nextS
+          }
+        }),
+        tag: tag.map(item => ({ text: item.text})),
+        info: {
+          ...nextInfo,
+          actor: actor.map(item => {
+            const { _doc: { other: { avatar, ...nextOther }={}, ...nextItem } } = item
+            return {
+              ...nextItem,
+              other: {
+                ...nextOther,
+                avatar: !!avatar ? avatar.src : null
+              }
+            }
+          }),
+          director,
+          district,
+          classify,
+          language
         }
-      }),
-      same_film: same_film.map(same => {
-        const { _doc: { film: { name, _id }, ...nextS } } = same
-        return {
-          name,
-          _id,
-          ...nextS
-        }
-      }),
-      info: {
-        ...nextInfo,
-        actor,
-        director,
-        district,
-        classify,
-        language
       }
     }
   })

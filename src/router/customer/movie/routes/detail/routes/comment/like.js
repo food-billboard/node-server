@@ -5,6 +5,51 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router
+.use(async(ctx, next) => {
+
+  const { method } = ctx
+  let _method
+  let _id
+  if(method.toLowerCase() === 'put') {
+    _method = 'body'
+  }else if(method.toLowerCase() === 'delete') {
+    _method = 'query'
+  }else {
+    const data = dealErr(ctx)({ errMsg: 'request method is not allow', status: 405 })
+    responseDataDeal({
+      data,
+      ctx
+    })
+    return
+  }
+
+  if(_method == 'body') {
+    _id = ctx.request.body._id
+  }else {
+    _id = ctx.query._id
+  }
+
+  const data = await CommentModel.findOne({
+    _id: ObjectId(_id)
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .catch(dealErr(ctx))
+
+  if(data && data.errMsg) {
+    responseDataDeal({
+      ctx,
+      data
+    })  
+    return
+  }
+
+  return await next()
+})
 .put('/', async (ctx) => {
   const [ _id ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
@@ -38,7 +83,13 @@ router
     })
     .exec()
     .then(data => !!data && data.user_info)
-    .then(notFound)
+    .then(data => {
+      if(!data) {
+        ctx.status = 403
+        return Promise.reject({ err: true, errMsg: 'already liked before', status: 403 })
+      }
+      return data
+    })
   })
   .then(userId => {
     return UserModel.updateOne({
@@ -79,7 +130,7 @@ router
   .then(id => {
     return CommentModel.findOneAndUpdate({
       _id,
-      like_person: { $in: [id] } 
+      like_person: { $in: [ id ] } 
     }, {
       $inc: { total_like: -1 },
       $pull: { like_person: id }
@@ -90,7 +141,13 @@ router
     })
     .exec()
     .then(data => !!data && data.user_info)
-    .then(notFound)
+    .then(data => {
+      if(!data) {
+        ctx.status = 403
+        return Promise.reject({ err: true, errMsg: 'not liked before', status: 403 })
+      }
+      return data
+    })
   })
   .then(userId => {
     return UserModel.updateOne({

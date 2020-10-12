@@ -21,6 +21,7 @@ router.get('/', async(ctx) => {
   .exec()
   .then(data => !!data && data)
   .then(notFound)
+  .then(data => ({ data }))
   .catch(dealErr(ctx))
 
   responseDataDeal({

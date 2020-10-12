@@ -30,6 +30,19 @@ router
     _id: 1
   })
   .exec()
+  .then(data => !!data && data._doc._id)
+  .then(notFound)
+  .then(userId => {
+
+    return MovieModel.findOne({
+      _id,
+      author: userId
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+  })
   .then(data => !!data)
   .then(notFound)
   .catch(dealErr(ctx))
@@ -54,7 +67,7 @@ router
   })
 
   const data = await MovieModel.findOne({
-    _id: _id
+    _id,
   })
   .select({
     name: 1,
@@ -80,11 +93,13 @@ router
       ...nextData
     } = data
     return {
-      ... nextData,
-      video: video ? video.src : null,
-      images: images.filter(i => i && !!i.src).map(i => i.src),
-      poster: poster ? poster.src : null,
-      info
+      data: {
+        ... nextData,
+        video: video ? video.src : null,
+        images: images.filter(i => i && !!i.src).map(i => i.src),
+        poster: poster ? poster.src : null,
+        info
+      }
     }
   })
   .catch(dealErr(ctx))

@@ -59,42 +59,44 @@ router.get('/', async (ctx) => {
   .then(data => {
     const { sub_comments, comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextUserInfo } }, ...nextComment } = data
     return {
-      sub: [...sub_comments.map(sub => {
-        const { _doc: { comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextSub } } = sub
-        return {
-          ...nextSub,
-          comment_users: comment_users.map(com => {
-            const { _doc: { avatar, ...nextCom } } = com
-            return {
-              ...nextCom,
+      data: {
+        sub: [...sub_comments.map(sub => {
+          const { _doc: { comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextSub } } = sub
+          return {
+            ...nextSub,
+            comment_users: comment_users.map(com => {
+              const { _doc: { avatar, ...nextCom } } = com
+              return {
+                ...nextCom,
+                avatar: !!avatar ? avatar.src : null
+              }
+            }),
+            content: {
+              ...nextContent,
+              image: image.filter(i => i && !!i.src).map(i => i.src),
+              video: image.filter(v => v && !!v.src).map(v => v.src),
+            },
+            like: false,
+            user_info: {
+              ...nextInfo,
               avatar: avatar ? avatar.src : null
             }
-          }),
+          }
+        })],
+        comment: {
+          ...nextComment,
           content: {
             ...nextContent,
             image: image.filter(i => i && !!i.src).map(i => i.src),
             video: image.filter(v => v && !!v.src).map(v => v.src),
           },
-          like: false,
           user_info: {
-            ...nextInfo,
+            ...nextUserInfo,
             avatar: avatar ? avatar.src : null
-          }
+          },
+          like: false,
+          comment_users: comment_users.length
         }
-      })],
-      comment: {
-        ...nextComment,
-        content: {
-          ...nextContent,
-          image: image.filter(i => i && !!i.src).map(i => i.src),
-          video: image.filter(v => v && !!v.src).map(v => v.src),
-        },
-        user_info: {
-          ...nextUserInfo,
-          avatar: avatar ? avatar.src : null
-        },
-        like: false,
-        comment_users: comment_users.length
       }
     }
   })
