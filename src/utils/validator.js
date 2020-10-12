@@ -54,7 +54,6 @@ const Params = {
         return result
       }catch(err) {
         if(_default) result = _default
-        // console.log(err)
 
         return result
       }

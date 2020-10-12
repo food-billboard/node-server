@@ -42,7 +42,6 @@ router
   })
   .then(data => !!data && data._id)
   .then(data => {
-    // console.log(data)
     // if(!data) return Promise.reject({errMsg: '服务器错误', status: 500})
     return {
       data: {}

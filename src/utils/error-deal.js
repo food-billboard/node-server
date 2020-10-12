@@ -1,11 +1,12 @@
 const { isType } = require('./tool')
 const { encoded } = require('./token')
 const { log4Error, log4RequestAndResponse } = require('@src/config/winston')
+const { Types: { ObjectId } } = require('mongoose')
 
 //错误处理
 const dealErr = (ctx) => {
   return (err) => {
-    console.log(err, 'it is error')
+
     let res = {}
     if(err && err.errMsg) {
       const { status=500, ...nextErr } = err
@@ -21,7 +22,7 @@ const dealErr = (ctx) => {
     }
 
     //日志写入
-    log4Error(ctx, err)
+    // log4Error(ctx, err)
 
     return {
       err: true,
@@ -65,8 +66,6 @@ const judgeCache = (ctx, modifiedTime, etagValidate) => {
 
   //设置last-modified
   !!modified && ctx.set({ 'Last-Modified': modifiedTime.toString() })
-
-  console.log(new Date(modified).toString() == new Date(modifiedTime).toString())
 
   let queryEmpty = false
 
@@ -114,6 +113,8 @@ const filterField = (data, field='updatedAt', compare=null) => {
 
   let origin
 
+  let index = 0
+
   function filter(data) {
     if(Array.isArray(data)) {
       data.forEach(item => {
@@ -121,7 +122,7 @@ const filterField = (data, field='updatedAt', compare=null) => {
       })
     }else if(isType(data, 'object')) {
       Object.keys(data).forEach(key => {
-        if(Array.isArray(data[key]) || isType(data[key], 'object')) {
+        if(Array.isArray(data[key]) || (isType(data[key], 'object') && !ObjectId.isValid(data[key]) && key != '$__'/**阻止继续向内部访问mongoose对象 */)) {
           filter(data[key])
         }else if(key === field){
           const target = data[key]
@@ -149,7 +150,7 @@ const responseDataDeal = ({
   //数据响应前的最后处理
   afterDeal,
   //etag 或用于普通参数请求，或用于静态资源请求
-  etagValidate=_etagValidate
+  etagValidate,
 }) => {
   let response = {}
 
@@ -183,9 +184,16 @@ const responseDataDeal = ({
       //304
       if(needCache) {
 
-        const updatedAt = filterField(data)
-        
-        if(!!updatedAt && judgeCache(ctx, updatedAt, etagValidate)) {
+        let cache = false
+
+        if(typeof etagValidate === 'function') {
+          cache = etagValidate(ctx, response)
+        }else {
+          const updatedAt = filterField(data)
+          cache = !!updatedAt && judgeCache(ctx, updatedAt, _etagValidate)
+        }
+
+        if(cache) {
           ctx.status = 304
           response = {
             ...response,
@@ -194,16 +202,9 @@ const responseDataDeal = ({
             }
           }
         }
+        
       }
     }
-
-    // const { res: { updatedAt, ...nextRes }  } = response
-    // response = {
-    //   ...response,
-    //   res: {
-    //     ...nextRes
-    //   }
-    // }
 
     if(afterDeal && typeof afterDeal === 'function') response = afterDeal({...response})
 

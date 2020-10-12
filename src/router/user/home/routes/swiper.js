@@ -43,7 +43,6 @@ const handle = {
         .then(data => !!data && data),
       ])
       .catch(err => {
-        console.log(err)
         return false
       })
       const result = [ 

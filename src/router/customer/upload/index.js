@@ -98,7 +98,6 @@ router
       }, 0) <= MAX_FILE_SIZE 
     ) return await next()
   }catch(err) {
-    console.log(err)
     error = { errMsg: 'server error', status: 500 }
   }
 

@@ -915,7 +915,8 @@ const VideoSchema = new Schema({
   },
   src: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   poster: {
     type: ObjectId,
@@ -945,7 +946,7 @@ const VideoSchema = new Schema({
     md5: {
       type: String,
       required: true,
-      unique: true
+      // unique: true
     },
     complete: [{
       type: Number,
@@ -983,7 +984,8 @@ const ImageSchema = new Schema({
   name: String,
   src: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   origin_type: {
     required: true,
@@ -1044,7 +1046,8 @@ const OtherMediaSchema = new Schema({
   name: String,
   src: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   origin_type: {
     required: true,

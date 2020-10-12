@@ -87,7 +87,7 @@ router
     .then(data => !!data && !!data._doc._id)
   })
   .catch(err => {
-    console.log('oops: ', err)
+
   })
 
   if(!isExistsId) {
@@ -119,7 +119,6 @@ router
         return data.length == image.length
       })
       .catch(err => {
-        console.log(err)
       })
     }
 
@@ -137,7 +136,7 @@ router
         return data.length == video.length
       })
       .catch(err => {
-        console.log(err)
+
       })
     }
 

@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = require('fs')
+const { Types: { ObjectId } } = require('mongoose')
 const { 
   ImageModel, 
   VideoModel, 
@@ -11,7 +12,6 @@ const {
   notFound,
   merge
 } = require('@src/utils')
-const { Types: { ObjectId } } = require('mongoose')
 
 const ACCEPT_IMAGE_MIME = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp']
 const ACCEPT_VIDEO_MIME = ['avi', 'mp4', 'rmvb', 'mkv', 'f4v', 'wmv']
@@ -36,7 +36,6 @@ const isFileExistsAndComplete = (name, type, size, auth="public") => {
     }
     return false
   }catch(_) {
-    // console.log(_)
     return false
   }
 }
@@ -100,7 +99,6 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
   .then(data => !!data && data._doc._id)
   .then(notFound)
   .catch(err => {
-    console.log(err)
     return false
   })
 
@@ -192,7 +190,7 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
         const md5 = fileEncoded(data)
         databaseModel = merge(databaseModel, { info: { md5 } })
       }catch(err) {
-        console.log(err)
+
       }finally{
         staticPath = path.resolve(staticPath, `${databaseModel.info.md5 || databaseModel.name}.${databaseModel.info.mime.split('/')[1]}`)
       }
@@ -260,11 +258,9 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
         }
 
       }catch(err) {
-        console.log(err)
         return task
       }finally{
         // fs.unlinkSync()
-        console.log('查看是否存在临时文件')
       }
     }
 
@@ -315,7 +311,6 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
       }
     })
     .catch(err => {
-      console.log('更改路径错误', err)
       return task
     })
   }))
@@ -357,7 +352,6 @@ const mergeChunkFile = ( { name, extname, mime, auth } ) => {
       fs.unlinkSync(path.resolve(templatePath, chunk))
     }) 
   }catch(err) {
-    console.log(err)
     return [err, null]
   }
 

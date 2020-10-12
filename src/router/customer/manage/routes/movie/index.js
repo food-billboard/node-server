@@ -161,7 +161,7 @@ function aboutFind(template) {
       ])
       //日志上传
       .catch(_=> {
-        console.log('电影关联失败', _)
+        
       })
     })
     //相关电影关联( 导演 演员 作者 分类 )
@@ -257,7 +257,7 @@ function aboutFind(template) {
       }))
       //日志记录
       .catch(_ => {
-        console.log(_)
+        
       })
     })
     .then(_ => _template)
@@ -363,7 +363,6 @@ router
   .then(data => !!data && data)
   .then(data => data.map(d => d._id))
   .catch(err => {
-    console.log(err)
     return []
   })
   const validActorList = await ActorModel.find({
@@ -376,7 +375,6 @@ router
   .then(data => !!data && data)
   .then(data => data.map(d => d._id))
   .catch(err => {
-    console.log(err)
     return []
   })
 

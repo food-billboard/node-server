@@ -13,7 +13,6 @@ router
     name: 'password',
     validator: [data => typeof data === 'string']
   })
-  console.log(check)
   if(check) return
 
   const [ password, uid, mobile ] = Params.sanitizers(ctx.request.body, {
@@ -26,8 +25,6 @@ router
     name: 'mobile',
     type: ['toInt']
   })
-
-  console.log(mobile)
 
   const data = await UserModel.findOneAndUpdate({
     mobile,

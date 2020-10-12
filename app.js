@@ -6,11 +6,12 @@ const KoaStatic = require('koa-static')
 const KoaBody = require('koa-body')
 const app = new Koa()
 const path = require('path')
-const { MongoDB, StaticMiddleware } = require("@src/utils")
+const { MongoDB, StaticMiddleware, initStaticFileDir } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
 const morgan = require('koa-morgan')
 
 MongoDB()
+initStaticFileDir()
 
 app.use(Cors())
 //请求前植入uuid来进行全链路的日志记录
@@ -37,7 +38,12 @@ app.use(Cors())
 }))
 // 访问权限
 .use(StaticMiddleware)
-.use(KoaStatic(path.resolve(__dirname, 'static'), {}))
+.use(KoaStatic(path.resolve(__dirname, 'static'), {
+  setHeaders: (res, path, stats) => {
+
+  },
+  extensions: true
+}))
 .use(Router.routes()).use(Router.allowedMethods())
 
 app.listen( process.env.PORT || 3000, () => {

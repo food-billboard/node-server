@@ -3,7 +3,6 @@ const { expect } = require('chai')
 const { mockCreateUser, mockCreateImage, Request, mockCreateVideo } = require('@test/utils')
 const { ImageModel, fileEncoded, UserModel, VideoModel, STATIC_FILE_PATH } = require('@src/utils')
 const fs = require('fs')
-const root = require('app-root-path')
 const path = require('path')
 
 const templatePath = path.resolve(__dirname, 'assets')
@@ -13,11 +12,11 @@ const littleFileName = fileEncoded(littleFile)
 const bigFileName = fileEncoded(bigFile)
 const littleFileStat = fs.statSync(path.resolve(templatePath, 'test-image.png'))
 const bigFileStat = fs.statSync(path.resolve(templatePath, 'test-video.mp4'))
-const COMMON_API = '/api/static/'
-const LITTLE_PUBLIC_COMMON_API = `${COMMON_API}image/public/${littleFileName}.png`
-const LITTLE_PRIVATE_COMMON_API = `${COMMON_API}image/private/${littleFileName}.png`
-const LARGE_PUBLIC_COMMON_API = `${COMMON_API}video/public/${bigFileName}.mp4`
-const LARGE_PRIVATE_COMMON_API = `${COMMON_API}video/private/${bigFileName}.mp4`
+const COMMON_API = ''
+const LITTLE_PUBLIC_COMMON_API = `${COMMON_API}/public/image/${littleFileName}.png`
+const LITTLE_PRIVATE_COMMON_API = `${COMMON_API}/private/image/${littleFileName}.png`
+const LARGE_PUBLIC_COMMON_API = `${COMMON_API}/public/video/${bigFileName}.mp4`
+const LARGE_PRIVATE_COMMON_API = `${COMMON_API}/private/video/${bigFileName}.mp4`
 
 function responseExpect(res, validate=[]) {
 
@@ -38,8 +37,43 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
   let selfToken
   let signToken
 
-  before(function(done) {
+  before(async function() {
 
+    let res = true
+
+    //测试文件写入
+    //public
+    fs.writeFileSync(path.resolve(STATIC_FILE_PATH, 'public/image', `${littleFileName}.png`), littleFile)
+    const publicReadStream = fs.createReadStream(path.resolve(templatePath, 'test-video.mp4'))
+    const publicWriteStream = fs.createWriteStream(path.resolve(STATIC_FILE_PATH, 'public/video', `${bigFileName}.mp4`))
+    publicReadStream.pipe(publicWriteStream)
+    await new Promise((resolve, reject) => {
+      publicReadStream.on('end', function(err, res) {
+        if(err) return reject(err)
+        resolve(res)
+      })
+    })
+    .catch(err => {
+      console.log(err)
+      res = false
+    })
+    //private
+    fs.writeFileSync(path.resolve(STATIC_FILE_PATH, 'private/image', `${littleFileName}.png`), littleFile)
+    const privateReadStream = fs.createReadStream(path.resolve(templatePath, 'test-video.mp4'))
+    const privateWriteStream = fs.createWriteStream(path.resolve(STATIC_FILE_PATH, 'private/video', `${bigFileName}.mp4`))
+    privateReadStream.pipe(privateWriteStream)
+    await new Promise((resolve, reject) => {
+      privateReadStream.on('end', function(err, res) {
+        if(err) return reject(err)
+        resolve(res)
+      })
+    })
+    .catch(err => {
+      console.log(err)
+      res = false
+    })
+
+    //临时测试用户录入
     const { model: user, token, signToken: getToken } = mockCreateUser({
       username: COMMON_API
     })
@@ -47,20 +81,25 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
     selfToken = token
     signToken = getToken
 
-    user.save()
+    await user.save()
     .then(function(data) {
       userId = data._id
-      done()
+      res = true
     })
     .catch(err => {
       console.log('oops: ', err)
+      res = false
     })
+
+    return res ? Promise.resolve() : Promise.reject(COMMON_API)
 
   })
 
-  after(function(done) {
+  after(async function() {
 
-    Promise.all([
+    let res = true
+
+    await Promise.all([
       UserModel.deleteMany({
         username: COMMON_API
       }),
@@ -71,22 +110,34 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
         "info.md5": bigFileName
       })
     ])
-    .then(_ => {
-      try {
-        fs.unlinkSync(path.resolve(STATIC_FILE_PATH, 'video/public', `${bigFileName}.mp4`))
-        fs.unlinkSync(path.resolve(STATIC_FILE_PATH, 'video/private', `${bigFileName}.mp4`))
-        fs.unlinkSync(path.resolve(STATIC_FILE_PATH, 'image/public', `${littleFileName}.png`))
-        fs.unlinkSync(path.resolve(STATIC_FILE_PATH, 'image/private', `${littleFileName}.png`))
-      }catch(err){
-        console.log(err)
-      }
-    })
-    .then(_ => {
-      done()
-    })
     .catch(err => {
       console.log('oops: ', err)
+      res = false
     })
+
+    try {
+      const staticVPubPath = path.resolve(STATIC_FILE_PATH, 'public/video', `${bigFileName}.mp4`)
+      const staticVPriPath = path.resolve(STATIC_FILE_PATH, 'private/video', `${bigFileName}.mp4`)
+      const staticIPubPath = path.resolve(STATIC_FILE_PATH, 'public/image', `${littleFileName}.png`)
+      const staticIPriPath = path.resolve(STATIC_FILE_PATH, 'private/image', `${littleFileName}.png`)
+      if(fs.existsSync(staticVPubPath)) {
+        fs.unlinkSync(staticVPubPath)
+      }
+      if(fs.existsSync(staticVPriPath)) {
+        fs.unlinkSync(staticVPriPath)
+      }
+      if(fs.existsSync(staticIPubPath)) {
+        fs.unlinkSync(staticIPubPath)
+      }
+      if(fs.existsSync(staticIPriPath)) {
+        fs.unlinkSync(staticIPriPath)
+      }
+    }catch(err){
+      console.log('oops: ', err)
+      res = false
+    }
+
+    return res ? Promise.resolve() : Promise.reject(LITTLE_PUBLIC_COMMON_API)
 
   })
 
@@ -103,7 +154,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
 
         let res = true
 
-        const filePath = path.resolve(STATIC_FILE_PATH, 'public', `${littleFileName}.png`)
+        const filePath = path.resolve(STATIC_FILE_PATH, 'public/image', `${littleFileName}.png`)
 
         try {
           if(!fs.existsSync(filePath)) {
@@ -125,7 +176,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
           if(!!data) return
           const { model } = mockCreateImage({
             name: littleFileName,
-            src: `/static${LITTLE_PUBLIC_COMMON_API.split('static')[1]}`,
+            src: LITTLE_PUBLIC_COMMON_API,
             white_list: [],
             auth: 'PUBLIC',
             origin_type: 'USER',
@@ -152,6 +203,10 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
         })
         .expect(200)
         .expect('Content-Type', /png/)
+        .then(data => {
+          const { body } = data
+          expect(body.byteLength).to.be.equals(littleFileStat.size)
+        })
 
         return res ? Promise.resolve() : Promise.reject(COMMON_API)
 
@@ -183,7 +238,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
           if(!!data) return
           const { model } = mockCreateImage({
             name: littleFileName,
-            src: `/static${LITTLE_PUBLIC_COMMON_API.split('static')[1]}`,
+            src: LITTLE_PUBLIC_COMMON_API,
             white_list: [],
             auth: 'PUBLIC',
             origin_type: 'USER',
@@ -211,6 +266,10 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
         })
         .expect(200)
         .expect('Content-Type', /png/)
+        .then(data => {
+          const { body } = data
+          expect(body.byteLength).to.be.equals(littleFileStat.size)
+        })
 
         return res ? Promise.resolve() : Promise.reject(COMMON_API)
 
@@ -232,7 +291,8 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
         }
 
         await ImageModel.findOne({
-          "info.md5": littleFileName
+          "info.md5": littleFileName,
+          src: LITTLE_PRIVATE_COMMON_API
         })
         .select({
           _id: 1
@@ -242,7 +302,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
           if(!!data) return
           const { model } = mockCreateImage({
             name: littleFileName,
-            src: `/static${LITTLE_PUBLIC_COMMON_API.split('static')[1]}`,
+            src: LITTLE_PRIVATE_COMMON_API,
             white_list: [ userId ],
             auth: 'PRIVATE',
             origin_type: 'USER',
@@ -270,12 +330,16 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
         })
         .expect(200)
         .expect('Content-Type', /png/)
+        .then(data => {
+          const { body } = data
+          expect(body.byteLength).to.be.equals(littleFileStat.size)
+        })
 
         return res ? Promise.resolve() : Promise.reject(COMMON_API)
 
       })
 
-      it(`get the little file success and the file is exixts and database is not found`, async function() {
+      it(`get the little file success and the file is public and exixts and database is not found`, async function() {
 
         let res = true
 
@@ -291,7 +355,8 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
         }
 
         await ImageModel.deleteMany({
-          "info.md5": littleFileName
+          "info.md5": littleFileName,
+          src: LITTLE_PUBLIC_COMMON_API
         })
         .catch(err => {
           console.log('oops: ', err)
@@ -299,13 +364,17 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
         })
 
         await Request
-        .get(LITTLE_PRIVATE_COMMON_API)
+        .get(LITTLE_PUBLIC_COMMON_API)
         .set({
           Accept: 'image/png',
           Authorization: `Basic ${selfToken}`
         })
         .expect(200)
         .expect('Content-Type', /png/)
+        .then(data => {
+          const { body } = data
+          expect(body.byteLength).to.be.equals(littleFileStat.size)
+        })
 
         return res ? Promise.resolve() : Promise.reject(COMMON_API)
 
@@ -313,7 +382,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
 
     })
 
-    describe(`get the little file fail test -> ${LITTLE_COMMON_API}`, function() {
+    describe(`get the little file fail test -> ${LITTLE_PRIVATE_COMMON_API}`, function() {
 
       beforeEach(function(done) {
         const filePath = path.resolve(STATIC_FILE_PATH, 'private', `${littleFileName}.png`)
@@ -408,14 +477,8 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
 
         let res = true
 
-        try {
-          fs.unlinkSync(path.resolve(STATIC_FILE_PATH, 'public', `${littleFileName}.png`))
-        }catch(err) {
-          done(err)
-        }
-
         await Request
-        .get(LITTLE_PUBLIC_COMMON_API)
+        .get(`${LITTLE_PUBLIC_COMMON_API.split('.')[0]}.jpg`)
         .set({
           Accept: 'image/png',
           Authorization: `Basic ${selfToken}`
@@ -430,21 +493,21 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
 
   })
 
-  describe(`get the large file test -> ${LARGE_COMMON_API}`, function() {
+  describe(`get the large file test -> ${LARGE_PUBLIC_COMMON_API}`, function() {
 
     before(function(done) {
-      try {
-        if(!fs.existsSync(path.resolve(STATIC_FILE_PATH, 'public/video', `${bigFileName}.mp4`))) {
+      // try {
+      //   if(!fs.existsSync(path.resolve(STATIC_FILE_PATH, 'public/video', `${bigFileName}.mp4`))) {
         
-        }
-      }catch(err) {
-        console.log('oops: ', err)
-        done(err)
-      }
+      //   }
+      // }catch(err) {
+      //   console.log('oops: ', err)
+      //   done(err)
+      // }
 
       const { model } = mockCreateVideo({
         name: bigFileName,
-        src: `/static${LARGE_PUBLIC_COMMON_API.split('static')[1]}`,
+        src: LARGE_PUBLIC_COMMON_API,
         white_list: [ userId ],
         auth: 'PUBLIC',
         origin_type: 'USER',
@@ -469,7 +532,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
 
     })
 
-    describe(`get the large file success test -> ${LARGE_COMMON_API}`, function() {
+    describe(`get the large file success test -> ${LARGE_PUBLIC_COMMON_API}`, function() {
 
       it(`get the large file success`, function(done) {
 
@@ -478,12 +541,12 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
         .set({
           Accept: 'video/mp4',
           Authorization: `Basic ${selfToken}`,
-          Range: `bytes 0-500/${bigFileStat.size}`
+          Range: `bytes=0-512000/${bigFileStat.size}`
         })
         .expect(206)
         .expect('Content-Type', /mp4/)
-        .expect('Content-Length', 500)
-        .expect('Content-Rage', `bytes 0-500/${bigFileStat.size}`)
+        .expect('Content-Length', "512000")
+        .expect('Content-Range', `bytes 0-512000/${bigFileStat.size}`)
         .end(function(err) {
           if(err) return done(err)
           done()
@@ -493,18 +556,18 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
 
       it(`get the large file success and return the status of 304`, function(done) {
 
+        const stat = fs.statSync(path.join(STATIC_FILE_PATH, 'public/video', `${bigFileName}.mp4`))
+
         Request
         .get(LARGE_PUBLIC_COMMON_API)
         .set({
           Accept: 'video/mp4',
           Authorization: `Basic ${selfToken}`,
           'IF-None-Match': bigFileName,
-          "If-Modified-Since": bigFileStat.mtime
+          "If-Modified-Since": new Date(stat.mtimeMs).toString()
         })
         .expect(304)
-        .expect('Content-Type', /mp4/)
-        .expect('Content-Rage', `bytes 0-500/${bigFileStat.size}`)
-        .expect('Last-Modified', bigFileStat.mtime)
+        .expect('Last-Modified', new Date(stat.mtimeMs).toString())
         .expect('ETag', bigFileName)
         .end(function(err) {
           if(err) return done(err)
@@ -514,6 +577,8 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
       })
 
       it(`get the large file success and hope return the status of 304 but the file is updated`, function(done) {
+
+        const stat = fs.statSync(path.join(STATIC_FILE_PATH, 'public/video', `${bigFileName}.mp4`))
         
         Request
         .get(LARGE_PUBLIC_COMMON_API)
@@ -521,13 +586,13 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
           Accept: 'video/mp4',
           Authorization: `Basic ${selfToken}`,
           'IF-None-Match': bigFileName,
-          "If-Modified-Since": bigFileStat.mtimeMs - 100000
+          "If-Modified-Since": new Date(stat.mtimeMs - 111111111)
         })
-        .expect(200)
+        .expect(206)
         .expect('Content-Type', /mp4/)
-        .expect('Content-Length', 500)
-        .expect('Content-Rage', `bytes 0-500/${bigFileStat.size}`)
-        .expect('Last-Modified', bigFileStat.mtime)
+        .expect('Content-Length', "512000")
+        .expect('Content-Range', `bytes 0-512000/${bigFileStat.size}`)
+        .expect('Last-Modified', new Date(stat.mtimeMs).toString())
         .expect('ETag', bigFileName)
         .end(function(err) {
           if(err) return done(err)
@@ -538,7 +603,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
 
     })
 
-    describe(`get the large file fail test -> ${LARGE_COMMON_API}`, function() {
+    describe(`get the large file fail test -> ${LARGE_PUBLIC_COMMON_API}`, function() {
 
       it(`get the larage file fail because the range header is not verify`, function(done) {
 
@@ -547,10 +612,11 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
         .set({
           Accept: 'video/mp4',
           Authorization: `Basic ${selfToken}`,
+          Range: `bytes=0-0/${bigFileStat.size}`
         })
         .expect(416)
-        .expect('Content-Type', /mp4/)
-        .expect('Content-Rage', `bytes 0-500/${bigFileStat.size}`)
+        .expect('Content-Type', /json/)
+        // .expect('Content-Range', `bytes 0-512000/${bigFileStat.size}`)
         .end(function(err) {
           if(err) return done(err)
           done()

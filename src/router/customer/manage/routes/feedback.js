@@ -70,7 +70,6 @@ router
             ( Array.isArray(image) ? image.every(d => typeof d === 'string' && ObjectId.isValid(d)) && !!image.length : true )
           )
         }catch(err) {
-          console.log(err)
           return true
         }
       }

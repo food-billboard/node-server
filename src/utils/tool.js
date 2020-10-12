@@ -1,6 +1,8 @@
 const path = require('path')
 const Day = require('dayjs')
 const { Types: { ObjectId } } = require('mongoose')
+const fs = require('fs')
+const { checkAndCreateDir } = require('@src/router/customer/upload/util')
 //静态资源目录
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
 
@@ -141,6 +143,65 @@ function mergeConfig(origin, target, canAddNewProp=false) {
   return _obj
 }
 
+const DIR_LIST = {
+  dir: 'static',
+  path: STATIC_FILE_PATH,
+  children: [
+    {
+      dir: 'public',
+      path: path.resolve(STATIC_FILE_PATH, 'public'),
+      children: [
+        {
+          dir: 'image',
+          path: path.resolve(STATIC_FILE_PATH, 'public/image'),
+        },
+        {
+          dir: 'video',
+          path: path.resolve(STATIC_FILE_PATH, 'public/video'),
+        },
+        {
+          dir: 'other',
+          path: path.resolve(STATIC_FILE_PATH, 'public/other'),
+        }
+      ]
+    },
+    {
+      dir: 'private',
+      path: path.resolve(STATIC_FILE_PATH, 'private'),
+      children: [
+        {
+          dir: 'image',
+          path: path.resolve(STATIC_FILE_PATH, 'private/image'),
+        },
+        {
+          dir: 'video',
+          path: path.resolve(STATIC_FILE_PATH, 'private/video'),
+        },
+        {
+          dir: 'other',
+          path: path.resolve(STATIC_FILE_PATH, 'private/other'),
+        }
+      ]
+    },
+    {
+      dir: 'template',
+      path: path.resolve(STATIC_FILE_PATH, 'template'),
+    }
+  ]
+}
+
+//静态资源文件夹初始化
+const initStaticFileDir = (dirList=DIR_LIST) => {
+  Object.keys(dirList).forEach(dir => {
+    if(dir == 'path') checkAndCreateDir(dirList.path)
+    if(dir == 'children' && Array.isArray(dirList.children)) {
+      dirList.children.forEach(child => {
+        initStaticFileDir(child)
+      })
+    }
+  })
+}
+
 module.exports = {
   isType,
   isEmpty,
@@ -152,5 +213,6 @@ module.exports = {
   NUM_DAY,
   uuid,
   mergeConfig,
-  merge
+  merge,
+  initStaticFileDir
 }

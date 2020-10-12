@@ -53,7 +53,6 @@ router.get('/', async(ctx) => {
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {
-    console.log(result)
     return {
       data: result.map(item => {
 

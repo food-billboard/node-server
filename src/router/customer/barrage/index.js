@@ -113,7 +113,10 @@ router
   },
   {
     name: 'content',
-    type: ['isEmpty']
+    type: ['isEmpty'],
+    validator: [
+      data => typeof data === 'string' && data.length > 0
+    ]
   },
   {
     name: 'time',
