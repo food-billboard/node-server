@@ -282,7 +282,7 @@ request.stream = {
 const log4Error = (ctx, error) => {
   const { __request_log_id__ } = ctx
   if(process.env.NODE_ENV !== 'production' || !__request_log_id__) {
-    // console.log(error)
+    console.log(error)
     return
   }
 

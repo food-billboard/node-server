@@ -6,7 +6,6 @@ const { Types: { ObjectId } } = require('mongoose')
 //错误处理
 const dealErr = (ctx) => {
   return (err) => {
-
     let res = {}
     if(err && err.errMsg) {
       const { status=500, ...nextErr } = err
@@ -22,7 +21,7 @@ const dealErr = (ctx) => {
     }
 
     //日志写入
-    // log4Error(ctx, err)
+    log4Error(ctx, err)
 
     return {
       err: true,
