@@ -1,8 +1,5 @@
-// require('co-mocha');
-// require('mocha')
 require('module-alias/register')
 const App = require('../app')
-// const Request = require('co-supertest').agent(App.listen())
 const Request = require('supertest').agent(App.listen())
 const should = require('chai').should()
 const assert = require('chai').assert

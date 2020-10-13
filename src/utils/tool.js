@@ -2,9 +2,15 @@ const path = require('path')
 const Day = require('dayjs')
 const { Types: { ObjectId } } = require('mongoose')
 const fs = require('fs')
-const { checkAndCreateDir } = require('@src/router/customer/upload/util')
+
 //静态资源目录
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
+
+//检查是否存在文件夹
+const checkDir = path => !fs.existsSync(path) || !fs.statSync(path).isDirectory()
+
+//检查并创建文件夹
+const checkAndCreateDir = (...paths) => paths.forEach(path => Array.isArray(path) ? checkAndCreateDir(path) : ( typeof path === 'string' && checkDir(path) && fs.mkdirSync(path)))
 
 //最大单次发送文件大小
 const MAX_FILE_SINGLE_RESPONSE_SIZE = 1024 * 500
@@ -214,5 +220,7 @@ module.exports = {
   uuid,
   mergeConfig,
   merge,
-  initStaticFileDir
+  initStaticFileDir,
+  checkDir,
+  checkAndCreateDir
 }

@@ -6,12 +6,16 @@ const KoaStatic = require('koa-static')
 const KoaBody = require('koa-body')
 const app = new Koa()
 const path = require('path')
-const { MongoDB, StaticMiddleware, initStaticFileDir } = require("@src/utils")
+const { MongoDB, StaticMiddleware, initStaticFileDir, AccessLimitCheck, redisConnect } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
 const morgan = require('koa-morgan')
 
+//数据库启动
 MongoDB()
+//初始化静态资源目录
 initStaticFileDir()
+//redis服务启动
+redisConnect()
 
 app.use(Cors())
 //请求前植入uuid来进行全链路的日志记录
@@ -22,7 +26,7 @@ app.use(Cors())
 }))
 // app.use(bodyParser())
 //请求速率限制
-// .use()
+.use(AccessLimitCheck)
 .use(KoaBody({
   multipart:true, // 支持文件上传
   // encoding:'gzip',

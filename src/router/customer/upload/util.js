@@ -1,27 +1,11 @@
+const { Types: { ObjectId } } = require('mongoose')
 const path = require('path')
 const fs = require('fs')
-const { Types: { ObjectId } } = require('mongoose')
-const { 
-  ImageModel, 
-  VideoModel, 
-  UserModel,
-  OtherMediaModel, 
-  STATIC_FILE_PATH, 
-  isType, 
-  fileEncoded, 
-  notFound,
-  merge
-} = require('@src/utils')
+const { ImageModel, VideoModel, UserModel, OtherMediaModel, STATIC_FILE_PATH, isType, fileEncoded, notFound, merge, checkAndCreateDir, checkDir } = require('@src/utils')
 
 const ACCEPT_IMAGE_MIME = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp']
 const ACCEPT_VIDEO_MIME = ['avi', 'mp4', 'rmvb', 'mkv', 'f4v', 'wmv']
 const MAX_FILE_SIZE = 1024 * 1024 * 100
-
-//检查是否存在文件夹
-const checkDir = path => !fs.existsSync(path) || !fs.statSync(path).isDirectory()
-
-//检查并创建文件夹
-const checkAndCreateDir = (...paths) => paths.forEach(path => Array.isArray(path) ? checkAndCreateDir(path) : ( typeof path === 'string' && checkDir(path) && fs.mkdirSync(path)))
 
 //获取最终文件存放目录
 const finalFilePath = (auth, type) => path.resolve(STATIC_FILE_PATH, auth, type)
@@ -195,7 +179,7 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
         staticPath = path.resolve(staticPath, `${databaseModel.info.md5 || databaseModel.name}.${databaseModel.info.mime.split('/')[1]}`)
       }
 
-      const realFilePath = staticPath.match(/\/static\/.+/)[0]
+      const realFilePath = staticPath.match(/(?<=\/static)\/.+/)[0]
       if(!realFilePath) return task
       databaseModel = merge(databaseModel, { src: realFilePath })
 
@@ -238,7 +222,7 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
 
         //获取实际路径
         staticPath = path.resolve(staticPath, `${name}.${type}`)
-        realFilePath = staticPath.match(/\/static\/.+/)[0]
+        realFilePath = staticPath.match(/(?<=\/static)\/.+/)[0]
         if(!realFilePath) return task
         databaseModel = merge(databaseModel, { src: realFilePath })
 
