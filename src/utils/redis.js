@@ -22,6 +22,7 @@ const redisConnect = ({ port=6379, host='localhost', options={
     _host,
     options
   )
+
   client.on('connect', function () {
     console.log(`redis is connected and run in host: ${_host} port: ${_port}`)
   })
@@ -86,8 +87,10 @@ const isAcessLimit = async (ctx) => {
   return true
 }
 
+
 module.exports = {
   AccessLimitCheck,
   redisConnect,
-  redisDisConnect
+  redisDisConnect,
+  redis: client
 }

@@ -11,7 +11,7 @@ router
     validator: [data => /^1[3456789]\d{9}$/.test(data)]
   }, {
     name: 'password',
-    validator: [data => typeof data === 'string']
+    validator: [data => typeof data === 'string' && data.length >= 8 && data.length <= 20]
   })
   if(check) return
 

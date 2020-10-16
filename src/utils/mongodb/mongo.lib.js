@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
+const { EMAIL_REGEXP } = require('../tool')
 
 function getMill(time) {
   return Day(time).valueOf()
@@ -265,12 +266,19 @@ const UserSchema = new Schema({
     unique: true,
     set: (v) => Number(v),
     required: function() {
-      return /^1[3456789]\d{9}$/g.test(this.mob)
+      return /^1[3456789]\d{9}$/g.test(this.mobile)
     },
   },
 	password: {
     type: String,
     required: true
+  },
+  email: {
+    type: String,
+    unique: true,
+    required: function() {
+      return EMAIL_REGEXP.test(this.email)
+    }
   },
 	username: {
     type: String,

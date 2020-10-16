@@ -1,8 +1,15 @@
 const nodemailer = require('nodemailer')
 
 const DEFAULT_TRANSPORT = {
-
+  host : 'smtp.qq.com',
+  port: 465,
+  secureConnection: false, // 使用SSL方式（安全方式，防止被窃取信息）
+  auth : {
+      
+  },
 }
+
+let transporter
 
 //https://nodemailer.com/message/
 
@@ -26,6 +33,7 @@ const createMailTtransporter = (transport={}) => {
 }
 
 const sendMail = (data, callback) => {
+  createMailTtransporter()
   /**
    * data defines the mail content (see Message Configuration for possible options)
       callback is an optional callback function to run once the message is delivered or it failed
@@ -42,6 +50,5 @@ const sendMail = (data, callback) => {
 }
 
 module.exports = {
-  createMailTtransporter,
-  sendMail
+  sendMail,
 }

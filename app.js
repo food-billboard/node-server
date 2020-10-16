@@ -6,7 +6,7 @@ const KoaStatic = require('koa-static')
 const KoaBody = require('koa-body')
 const app = new Koa()
 const path = require('path')
-const { MongoDB, StaticMiddleware, initStaticFileDir, AccessLimitCheck, redisConnect } = require("@src/utils")
+const { MongoDB, StaticMiddleware, initStaticFileDir, AccessLimitCheck, redisConnect, createMailTtransporter, sendMail } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
 const morgan = require('koa-morgan')
 
@@ -48,9 +48,29 @@ app.use(Cors())
   },
   extensions: true
 }))
+.use(async (ctx, next) => {
+  createMailTtransporter()
+  sendMail({
+    // 发件人 邮箱  '昵称<发件人邮箱>'
+    // from: '"G" <>',
+    // 主题
+    subject: '激活验证码',
+    // 收件人 的邮箱 可以是其他邮箱 不一定是qq邮箱
+    to: '1xxxxxx@163.com',
+    // 内容
+    text: `您的激活验证码为：${123456}, 请24小时内有效，请谨慎保管。` ,
+    //这里可以添加html标签
+    html: '<a href="https://www.cnblogs.com/HJ412/">xxx</a>'
+  }, (error, info) => {
+    console.log(error, info)
+  })
+  
+  ctx.body = '111111'
+
+})
 .use(Router.routes()).use(Router.allowedMethods())
 
-app.listen( process.env.PORT || 3000, () => {
+app.listen( process.env.PORT || 4000, () => {
   console.log('Server is run in port 3000')
 })
 

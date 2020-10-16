@@ -1,7 +1,8 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, commonValidate } = require('@test/utils')
-const { getToken, UserModel } = require('@src/utils')
+const { getToken, UserModel, redis } = require('@src/utils')
+const { email_type } = require('@src/router/user/logon/map')
 
 const COMMON_API = '/api/user/logon/register'
 
@@ -83,6 +84,7 @@ describe(`${COMMON_API} test`, function() {
 
       let another
       let result
+      let captcha = '123456'
 
       before(function(done) {
         const { model, ...nextData } = mockCreateUser({
@@ -93,6 +95,7 @@ describe(`${COMMON_API} test`, function() {
         model.save()
         .then(function(data) {
           result = data
+          redis.set(`${result.email}-${email_type[1]}`, captcha, 10)
           done()
         })
         .catch(err => {
@@ -118,7 +121,9 @@ describe(`${COMMON_API} test`, function() {
         .post(COMMON_API)
         .send({
           mobile: result.mobile,
-          password: '1234567890'
+          password: '1234567890',
+          email: result.email,
+          captcha
         })
         .set({ Accept: 'Application/json' })
         .expect(403)
@@ -136,7 +141,9 @@ describe(`${COMMON_API} test`, function() {
         .post(COMMON_API)
         .send({
           mobile: parseInt(result.mobile.toString().slice(1)),
-          passwrd: '1234567890'
+          passwrd: '1234567890',
+          email: result.email,
+          captcha
         })
         .set({ Accept: 'Application/json' })
         .expect(400)
@@ -154,7 +161,49 @@ describe(`${COMMON_API} test`, function() {
         .post(COMMON_API)
         .send({
           mobile: result.mobile,
-          passwrd: null
+          passwrd: null,
+          email: result.email,
+          captcha
+        })
+        .set({ Accept: 'Application/json' })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err, _) {
+          if(err) return done(err)
+          done()
+        })
+
+      })
+
+      it(`post the info for register and verify fail becuase the email is not verify`, function(done) {
+
+        Request
+        .post(COMMON_API)
+        .send({
+          mobile: result.email,
+          passwrd: '1234567890',
+          email: COMMON_API,
+          captcha
+        })
+        .set({ Accept: 'Application/json' })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err, _) {
+          if(err) return done(err)
+          done()
+        })
+
+      })
+
+      it(`post the info for register and verify fail becuase the captcha is not verify`, function(done) {
+
+        Request
+        .post(COMMON_API)
+        .send({
+          mobile: result.captcha,
+          passwrd: '1234567890',
+          email: result.email,
+          captcha: ''
         })
         .set({ Accept: 'Application/json' })
         .expect(400)
@@ -171,7 +220,9 @@ describe(`${COMMON_API} test`, function() {
         Request
         .post(COMMON_API)
         .send({
-          passwrd: '1234567890'
+          passwrd: '1234567890',
+          email: result.email,
+          captcha
         })
         .set({ Accept: 'Application/json' })
         .expect(400)
@@ -189,6 +240,8 @@ describe(`${COMMON_API} test`, function() {
         .post(COMMON_API)
         .send({
           mobile: result.mobile,
+          email: result.email,
+          captcha
         })
         .set({ Accept: 'Application/json' })
         .expect(400)
@@ -197,6 +250,67 @@ describe(`${COMMON_API} test`, function() {
           if(err) return done(err)
           done()
         })
+
+      })
+
+      it(`post the info for register and verify fail because lack the params of email`, function(done) {
+        
+        Request
+        .post(COMMON_API)
+        .send({
+          mobile: result.mobile,
+          passwrd: '1234567890',
+          captcha
+        })
+        .set({ Accept: 'Application/json' })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err, _) {
+          if(err) return done(err)
+          done()
+        })
+
+      })
+
+      it(`post the info for register and verify fail because lack the params of captcha`, function(done) {
+        
+        Request
+        .post(COMMON_API)
+        .send({
+          mobile: result.mobile,
+          passwrd: '1234567890',
+          email: result.email,
+        })
+        .set({ Accept: 'Application/json' })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err, _) {
+          if(err) return done(err)
+          done()
+        })
+
+      })
+
+      it(`post the info for register and verify fail because the captcha is overday`, async function() {
+        
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve()
+          }, 1000)
+        })
+
+        await Request
+        .post(COMMON_API)
+        .send({
+          mobile: result.mobile,
+          passwrd: '1234567890',
+          email: result.email,
+        })
+        .set({ Accept: 'Application/json' })
+        .expect(400)
+        .expect('Content-Type', /json/)
+
+        return Promise.resolve()
 
       })
 
