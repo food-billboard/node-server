@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request, commonValidate } = require('@test/utils')
-const { getToken, UserModel, redis } = require('@src/utils')
+const { getToken, UserModel, dealRedis } = require('@src/utils')
 const { email_type } = require('@src/router/user/logon/map')
 
 const COMMON_API = '/api/user/logon/register'
@@ -39,11 +39,32 @@ describe(`${COMMON_API} test`, function() {
     describe(`post the info for register and verify success test -> ${COMMON_API}`, function() {
 
       let mobile = 18368003190
+      let email = `${mobile}@qq.com`
+      let captcha = '123456'
+
+      let redisKey = `${email}-${email_type[1]}`
+
+      before(function(done) {
+        dealRedis(function(redis) {
+          redis.set(redisKey, captcha)
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+      })
 
       after(function(done) {
-        UserModel.deleteOne({
-          mobile
-        })
+        Promise.all([
+          UserModel.deleteOne({
+            mobile
+          }),
+          dealRedis(function(redis) {
+            redis.del(redisKey)
+          })
+        ])
         .then(function() {
           done()
         })
@@ -58,7 +79,9 @@ describe(`${COMMON_API} test`, function() {
         .post(COMMON_API)
         .send({
           mobile,
-          password: '1234567890'
+          password: '1234567890',
+          email,
+          captcha
         })
         .set({ Accept: 'Application/json' })
         .expect(200)
@@ -85,17 +108,22 @@ describe(`${COMMON_API} test`, function() {
       let another
       let result
       let captcha = '123456'
+      let email = `15895336842@163.com`
+      let redisKey = `${email}-${email_type[1]}`
 
       before(function(done) {
         const { model, ...nextData } = mockCreateUser({
-          username: COMMON_API
+          username: COMMON_API,
+          email
         })
         another = nextData
 
         model.save()
         .then(function(data) {
           result = data
-          redis.set(`${result.email}-${email_type[1]}`, captcha, 10)
+          dealRedis(function(redis) {
+            redis.set(redisKey, captcha, 'EX', 10)
+          })
           done()
         })
         .catch(err => {
@@ -293,10 +321,14 @@ describe(`${COMMON_API} test`, function() {
 
       it(`post the info for register and verify fail because the captcha is overday`, async function() {
         
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve()
-          }, 1000)
+        let res = true
+
+        await dealRedis(function(redis) {
+          redis.del(redisKey)
+        })
+        .catch(function(err) {
+          console.log('oops: ', err)
+          res = false
         })
 
         await Request
@@ -310,7 +342,7 @@ describe(`${COMMON_API} test`, function() {
         .expect(400)
         .expect('Content-Type', /json/)
 
-        return Promise.resolve()
+        return res ? Promise.resolve() : Promise.reject(COMMON_API)
 
       })
 

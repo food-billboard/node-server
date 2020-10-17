@@ -265,8 +265,11 @@ const UserSchema = new Schema({
     type: Number,
     unique: true,
     set: (v) => Number(v),
-    required: function() {
-      return /^1[3456789]\d{9}$/g.test(this.mobile)
+    required: true,
+    validate: {
+      validator: function(v) {
+        return /^1[3456789]\d{9}$/.test(v);
+      },
     },
   },
 	password: {
@@ -276,9 +279,12 @@ const UserSchema = new Schema({
   email: {
     type: String,
     unique: true,
-    required: function() {
-      return EMAIL_REGEXP.test(this.email)
-    }
+    validate: {
+      validator: function(v) {
+        return EMAIL_REGEXP.test(v);
+      },
+    },
+    required: true
   },
 	username: {
     type: String,

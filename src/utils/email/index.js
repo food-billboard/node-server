@@ -1,11 +1,13 @@
 const nodemailer = require('nodemailer')
+const { EMAIL_AUTH } = require('../tool')
 
 const DEFAULT_TRANSPORT = {
   host : 'smtp.qq.com',
   port: 465,
-  secureConnection: false, // 使用SSL方式（安全方式，防止被窃取信息）
+  secureConnection: true, // 使用SSL方式（安全方式，防止被窃取信息）
   auth : {
-      
+    user : EMAIL_AUTH.email,
+    pass : EMAIL_AUTH.pass
   },
 }
 

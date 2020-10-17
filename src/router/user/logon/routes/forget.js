@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { dealErr, UserModel, encoded, Params, responseDataDeal, redis, notFound } = require("@src/utils")
+const { dealErr, UserModel, encoded, Params, responseDataDeal, dealRedis, notFound, EMAIL_REGEXP } = require("@src/utils")
 const { email_type } = require('../map')
 
 const router = new Router()
@@ -23,7 +23,9 @@ router
   const { request: { body: { email, captcha, password } } } = ctx
   const redisKey = `${email}-${email_type[0]}`
 
-  const data = await redis.get(redisKey)
+  const data = await dealRedis(function(redis) {
+    return redis.get(redisKey)
+  })
   .then(data => {
     if(data != captcha) return Promise.reject({ errMsg: 'captcha is error', status: 400 }) 
     return UserModel.findOneAndUpdate({
@@ -32,7 +34,7 @@ router
       password: encoded(password)
     })
     .select({
-      _id: 1
+      _id: 1,
     })
     .exec()
   })
@@ -54,3 +56,5 @@ router
   })
 
 })
+
+module.exports = router

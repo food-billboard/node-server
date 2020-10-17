@@ -1,7 +1,14 @@
 const Router = require('@koa/router')
-const { dealErr, UserModel, notFound, Params, responseDataDeal, EMAIL_REGEXP, sendEmail, redis, email_type } = require("@src/utils")
+const { dealErr, UserModel, notFound, Params, responseDataDeal, EMAIL_REGEXP, sendMail, dealRedis, EMAIL_AUTH, uuid } = require("@src/utils")
+const { email_type } = require('../map')
 
 const router = new Router()
+
+const TEMPLATE_MAIL = {
+  from: EMAIL_AUTH.email,
+  subject: '身份认证',
+  html: '<h1>你好，这是一封来自NodeMailer的邮件！</h1><p>用于身份认证，请在两分钟内进行认证！</p>',
+}
 
 router
 .post('/', async (ctx) => {
@@ -15,15 +22,18 @@ router
   })
   if(check) return
 
+  const code = uuid().slice(0, 6)
+
   const send_mail_template = {
-    code: ''
+    ...TEMPLATE_MAIL,
+    text: `身份认证验证码为: ${code};`
   }
 
   const { request: { body: { email, type } } } = ctx
   const redisKey = `${email}-${type}`
 
   const data = await UserModel.findOne({
-    emial
+    email
   })
   .select({
     _id: 1
@@ -33,17 +43,21 @@ router
   .then(notFound)
   .then(_ => {
     //判断之前是否存在验证码
-    return redis.get(redisKey)
+    return dealRedis(function(redis) {
+      return redis.get(redisKey)
+    })
   })
   .then(data => {
     if(!!data) return Promise.reject({ status: 429, errMsg: 'request too frequently' })
     //存在该用户并存储验证码
-    return redis.set(redisKey, send_mail_template.code, 120)
+    return dealRedis(function(redis) {
+      return redis.set(redisKey, code, 'EX', 120)
+    })
   })
   .then(_ => {
     //发送验证码
     return new Promise((resolve, reject) => {
-      sendEmail(send_mail_template, function(error, _) {
+      sendMail(send_mail_template, function(error, _) {
         if(error) {
           reject(error)
         }else {
@@ -69,3 +83,5 @@ router
   })
 
 })
+
+module.exports = router

@@ -3,6 +3,12 @@ const Day = require('dayjs')
 const { Types: { ObjectId } } = require('mongoose')
 const fs = require('fs')
 
+const EMAIL_AUTH = {
+  pass: 'hgldcifqqwmlbajd',
+  username: 'G',
+  email: '944745590@qq.com'
+}
+
 //邮箱正则
 const EMAIL_REGEXP = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
 
@@ -226,5 +232,6 @@ module.exports = {
   initStaticFileDir,
   checkDir,
   checkAndCreateDir,
-  EMAIL_REGEXP
+  EMAIL_REGEXP,
+  EMAIL_AUTH
 }

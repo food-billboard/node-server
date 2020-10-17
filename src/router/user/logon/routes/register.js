@@ -1,10 +1,10 @@
 const Router = require('@koa/router')
-const { encoded, signToken, Params, UserModel, RoomModel, responseDataDeal, dealErr, redis } = require('@src/utils')
+const { encoded, signToken, Params, UserModel, RoomModel, responseDataDeal, dealErr, dealRedis, EMAIL_REGEXP } = require('@src/utils')
 const { email_type } = require('../map')
 
 const router = new Router()
 
-function createInitialUserInfo({mobile, password}) {
+function createInitialUserInfo({ mobile, password, ...nextData }) {
   return {
     mobile,
     password: encoded(password),
@@ -17,6 +17,7 @@ function createInitialUserInfo({mobile, password}) {
     rate: [],
     allow_many: false,
     status: 'SIGNIN',
+    ...nextData
   }
 }
 
@@ -69,7 +70,9 @@ router
   .then(data => {
     if(data) return Promise.reject({errMsg: '账号已存在', status: 403})
 
-    return redis.get(`${email}-${email_type[1]}`)
+    return dealRedis(function(redis) {
+      return redis.get(`${email}-${email_type[1]}`)
+    })
   })
   .then(data => {
     //判断验证码是否正确

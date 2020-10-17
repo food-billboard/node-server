@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, Request } = require('@test/utils')
-const { UserModel } = require('@src/utils')
+const { UserModel, dealRedis } = require('@src/utils')
 const { email_type } = require('@src/router/user/logon/map')
 
 const COMMON_API = '/api/user/logon/forget'
@@ -10,21 +10,26 @@ describe(`reset the password test -> ${COMMON_API}`, function() {
 
   let result
   let password
-  const redisKey = `${result.email}-${email_type[0]}`
+  let email
+  let redisKey
   const captcha = '123456'
 
   before(function(done) {
 
     const { model, decodePassword } = mockCreateUser({
-      username: COMMON_API
+      username: COMMON_API,
     })
 
     password = decodePassword
 
-    return model.save()
+    model.save()
     .then(data => {
       result = data
-      return redis.set(redisKey, captcha, 10)
+      email = result.email
+      redisKey = `${email}-${email_type[0]}`
+      return dealRedis(function(redis) {
+        return redis.set(redisKey, captcha, 'EX', 10)
+      })
     })
     .then(data => {
       done()
@@ -174,7 +179,7 @@ describe(`reset the password test -> ${COMMON_API}`, function() {
         password
       })
       .set('Accept', 'Application/json')
-      .expect(200)
+      .expect(400)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if(err) return done(err)
@@ -185,10 +190,14 @@ describe(`reset the password test -> ${COMMON_API}`, function() {
 
     it(`reset the password fail because the captcha is overday`, async function() {
 
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          resolve()
-        }, 10000)
+      let res = true
+
+      await dealRedis(function(redis) {
+        return redis.del(redisKey)
+      })
+      .catch(err => {
+        res = false
+        console.log('oops: ', err)
       })
 
       await Request
@@ -201,12 +210,8 @@ describe(`reset the password test -> ${COMMON_API}`, function() {
       .set('Accept', 'Application/json')
       .expect(400)
       .expect('Content-Type', /json/)
-      .end(function(err, res) {
-        if(err) return done(err)
-        done()
-      })
 
-      return Promise.resolve()
+      return res ? Promise.resolve() : Promise.reject(COMMON_API)
 
     })
     
