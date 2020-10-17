@@ -5,6 +5,8 @@ const Error = require('./error-deal')
 const Validator = require('./validator')
 const Redis = require('./redis')
 const Static = require('./static')
+const Email = require('./email')
+
 module.exports = {
   ...MongoDB,
   ...Tool,
@@ -12,5 +14,6 @@ module.exports = {
   ...Error,
   ...Validator,
   ...Redis,
-  ...Static
+  ...Static,
+  ...Email
 }

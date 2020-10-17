@@ -50,8 +50,8 @@ app.use(Cors())
 }))
 .use(Router.routes()).use(Router.allowedMethods())
 
-app.listen( process.env.PORT || 3000, () => {
-  console.log('Server is run in port 3000')
+app.listen( process.env.PORT || 4000, () => {
+  console.log('Server is run in port 4000')
 })
 
 module.exports = app

@@ -37,6 +37,7 @@ function mockCreateUser(values={}) {
 
   let baseModel = {
     mobile,
+    email: `${mobile}@163.com`,
     password: encodedPwd,
     username: '测试默认名称',
     avatar: ObjectId('5edb3c7b4f88da14ca419e61'),
