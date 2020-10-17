@@ -259,6 +259,10 @@ const PRE_BARRAGE_FIND = [
   }
 ]
 
+const ROLES_MAP = [ 'SUPER_ADMIN', 'ADMIN', 'CUSTOMER', 'USER' ]
+
+const METHOD_MAP = [ 'GET', 'POST', 'DELETE', 'PUT', '*' ]
+
 //user
 const UserSchema = new Schema({
 	mobile: {
@@ -352,7 +356,14 @@ const UserSchema = new Schema({
     trim: true,
     uppercase: true,
     default: "SIGNOUT"
-  }
+  },
+  roles: [{
+    type: String,
+    enum: ROLES_MAP,
+    set: (v) => {
+      return v.toUpperCase()
+    }
+  }]
 }, {
   ...defaultConfig
 })
@@ -1136,6 +1147,63 @@ const FeedbackSchema = new Schema({
   ...defaultConfig
 })
 
+const AuthSchema = new Schema({
+  roles: [{
+    required: true,
+    type: String,
+    enum: ROLES_MAP, 
+    set: (v) => {
+      return v.toUpperCase()
+    }
+  }],
+  allow: {
+    resources: [{
+      type: String,
+    }],
+    actions: [{
+      url: {
+        type: String,
+        validator: {
+          validate: (v) => {
+            return typeof v === 'string' && /(\/.+)+(\?(.+=.+)+)?/.test(v)
+          }
+        }
+      },
+      method: {
+        type: String,
+        enum: METHOD_MAP,
+        set: (v) => {
+          return v.toUpperCase()
+        } 
+      }
+    }],
+    attributes: [{
+      type: String
+    }],
+    where: [{
+      platform: {
+        type: String
+      },
+      app: {
+        type: String
+      }
+    }],
+  }
+})
+
+// const ApisSchema = new Schema({
+//   url: {
+//     type: String
+//   },
+//   roles: [{
+//     type: String,
+//     enum: ROLES_MAP,
+//     set: (v) => {
+//       return v.toUpperCase()
+//     }
+//   }]
+// })
+
 const FIND_OPERATION_LIB = [
   'find',
   'findOne',
@@ -1189,7 +1257,8 @@ SAVE_OPERATION_LIB.forEach(op => {
   VideoSchema.post(op, postMiddleware)
   ImageSchema.post(op, postMiddleware)
   OtherMediaSchema.post(op, postMiddleware)
-  BarrageSchema.post(op, postMiddleware)
+  BarrageSchema.post(op, postMiddleware),
+  AuthSchema.post(op, postMiddleware)
 })
 
 const UserModel = model('user', UserSchema)
@@ -1212,6 +1281,8 @@ const ImageModel = model('image', ImageSchema)
 const OtherMediaModel = model('other_media', OtherMediaSchema)
 const FeedbackModel = model('feedback', FeedbackSchema)
 const BarrageModel = model('barrage', BarrageSchema)
+const AuthModel = model('auth', AuthSchema)
+// const ApisModel = model('api', ApisSchema)
 
 module.exports = {
   UserModel,
@@ -1234,6 +1305,8 @@ module.exports = {
   OtherMediaModel,
   FeedbackModel,
   BarrageModel,
+  AuthModel,
+  // ApisModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1253,5 +1326,9 @@ module.exports = {
   ImageSchema,
   OtherMediaSchema,
   FeedbackSchema,
-  BarrageSchema
+  BarrageSchema,
+  AuthSchema,
+  // ApisSchema,
+  ROLES_MAP,
+  METHOD_MAP
 }
