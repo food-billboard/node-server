@@ -1,13 +1,9 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters.",
+    "description": "这是某微信小程序的用户后端api接口文档，有兴趣可以去github上给个鼓励  github at [https://github.com/food-billboard?tab=repositories) ",
     "version": "1.0.0",
-    "title": "Swagger Petstore",
-    "termsOfService": "http://swagger.io/terms/",
-    "contact": {
-      "email": "apiteam@swagger.io"
-    },
+    "title": "小程序api文档",
     "license": {
       "name": "Apache 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -17,20 +13,40 @@
   "basePath": "/v2",
   "tags": [
     {
-      "name": "pet",
-      "description": "Everything about your Pets",
+      "name": "barrage",
+      "description": "弹幕相关",
       "externalDocs": {
         "description": "Find out more",
         "url": "http://swagger.io"
       }
     },
     {
-      "name": "store",
-      "description": "Access to Petstore orders"
+      "name": "manage",
+      "description": "用户管理相关",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "movie",
+      "description": "用户电影相关",
+      "externalDocs": {
+        "description": "Find out more about our store",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "upload",
+      "description": "上传相关",
+      "externalDocs": {
+        "description": "Find out more about our store",
+        "url": "http://swagger.io"
+      }
     },
     {
       "name": "user",
-      "description": "Operations about user",
+      "description": "游客相关",
       "externalDocs": {
         "description": "Find out more about our store",
         "url": "http://swagger.io"
@@ -42,14 +58,64 @@
     "http"
   ],
   "paths": {
-    "/pet": {
-      "post": {
+    "/api/barrage": {
+      "get": {
         "tags": [
-          "pet"
+          "barrage"
         ],
-        "summary": "Add a new pet to the store",
+        "summary": "获取电影的弹幕列表",
         "description": "",
-        "operationId": "addPet",
+        "operationId": "customer_get_barrage",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "_id",
+            "description": "电影id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "timeStart",
+            "description": "弹幕出现在视频中的起始时间(ms)",
+            "type": "number"
+          },
+          {
+            "in": "query",
+            "name": "process",
+            "description": "获取的弹幕时长(ms)",
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "barrage"
+        ],
+        "summary": "发送电影弹幕",
+        "description": "",
+        "operationId": "customer_put_barrage",
         "consumes": [
           "application/json",
           "application/xml"
@@ -70,8 +136,14 @@
           }
         ],
         "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Pet not found"
+          },
           "405": {
-            "description": "Invalid input"
+            "description": "Validation exception"
           }
         },
         "security": [
@@ -83,13 +155,59 @@
           }
         ]
       },
-      "put": {
+      "post": {
         "tags": [
-          "pet"
+          "barrage"
         ],
-        "summary": "Update an existing pet",
+        "summary": "电影弹幕点赞",
         "description": "",
-        "operationId": "updatePet",
+        "operationId": "customer_post_barrage",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Pet object that needs to be added to the store",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Pet"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Pet not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "barrage"
+        ],
+        "summary": "电影弹幕取消点赞",
+        "description": "",
+        "operationId": "customer_delete_barrage",
         "consumes": [
           "application/json",
           "application/xml"
@@ -130,14 +248,14 @@
         ]
       }
     },
-    "/pet/findByStatus": {
+    "/api/customer/manage": {
       "get": {
         "tags": [
-          "pet"
+          "manage"
         ],
-        "summary": "Finds Pets by status",
-        "description": "Multiple status values can be provided with comma separated strings",
-        "operationId": "findPetsByStatus",
+        "summary": "获取用户信息",
+        "description": "获取用户的基本信息",
+        "operationId": "customer_get_manage",
         "produces": [
           "application/xml",
           "application/json"
@@ -185,14 +303,110 @@
         ]
       }
     },
-    "/pet/findByTags": {
+    "/api/customer/manage/attention": {
       "get": {
         "tags": [
-          "pet"
+          "manage"
         ],
-        "summary": "Finds Pets by tags",
-        "description": "Muliple tags can be provided with comma separated strings. Use         tag1, tag2, tag3 for testing.",
-        "operationId": "findPetsByTags",
+        "summary": "用户关注",
+        "description": "获取用户关注的人员列表",
+        "operationId": "customer_get_manage_attention",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "Tags to filter by",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Pet"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid tag value"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "deprecated": true
+      },
+      "put": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "关注用户",
+        "description": "关注用户",
+        "operationId": "customer_put_manage_attention",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "Tags to filter by",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Pet"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid tag value"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "deprecated": true
+      },
+      "delete": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "取消关注用户",
+        "description": "取消关注用户",
+        "operationId": "customer_delete_manage_attention",
         "produces": [
           "application/xml",
           "application/json"
@@ -235,14 +449,14 @@
         "deprecated": true
       }
     },
-    "/pet/{petId}": {
+    "/api/customer/manage/fans": {
       "get": {
         "tags": [
-          "pet"
+          "manage"
         ],
-        "summary": "Find pet by ID",
-        "description": "Returns a single pet",
-        "operationId": "getPetById",
+        "summary": "用户粉丝",
+        "description": "获取用户的粉丝列表",
+        "operationId": "customer_manage_get_fans",
         "produces": [
           "application/xml",
           "application/json"
@@ -276,14 +490,16 @@
             "api_key": []
           }
         ]
-      },
-      "post": {
+      }
+    },
+    "/api/customer/manage/comment": {
+      "get": {
         "tags": [
-          "pet"
+          "manage"
         ],
-        "summary": "Updates a pet in the store with form data",
-        "description": "",
-        "operationId": "updatePetWithForm",
+        "summary": "评论列表",
+        "description": "用户发布的评论列表",
+        "operationId": "customer_manage_get_comment",
         "consumes": [
           "application/x-www-form-urlencoded"
         ],
@@ -328,14 +544,16 @@
             ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/customer/manage/movie": {
+      "post": {
         "tags": [
-          "pet"
+          "manage"
         ],
-        "summary": "Deletes a pet",
-        "description": "",
-        "operationId": "deletePet",
+        "summary": "发布电影",
+        "description": "发布用户自己定义的电影",
+        "operationId": "customer_manage_post_movie",
         "produces": [
           "application/xml",
           "application/json"
@@ -372,16 +590,14 @@
             ]
           }
         ]
-      }
-    },
-    "/pet/{petId}/uploadImage": {
-      "post": {
+      },
+      "put": {
         "tags": [
-          "pet"
+          "manage"
         ],
-        "summary": "uploads an image",
-        "description": "",
-        "operationId": "uploadFile",
+        "summary": "编辑电影",
+        "description": "编辑用户自己之前发布的电影",
+        "operationId": "customer_manage_put_movie",
         "consumes": [
           "multipart/form-data"
         ],
@@ -428,16 +644,14 @@
             ]
           }
         ]
-      }
-    },
-    "/store/inventory": {
+      },
       "get": {
         "tags": [
-          "store"
+          "manage"
         ],
-        "summary": "Returns pet inventories by status",
-        "description": "Returns a map of status codes to quantities",
-        "operationId": "getInventory",
+        "summary": "发布电影列表",
+        "description": "获取用户发布的电影列表",
+        "operationId": "customer_manage_get_movie",
         "produces": [
           "application/json"
         ],
@@ -461,14 +675,14 @@
         ]
       }
     },
-    "/store/order": {
-      "post": {
+    "/api/customer/manage/movie/store": {
+      "get": {
         "tags": [
-          "store"
+          "manage"
         ],
-        "summary": "Place an order for a pet",
-        "description": "",
-        "operationId": "placeOrder",
+        "summary": "收藏电影列表",
+        "description": "获取用户收藏的电影列表",
+        "operationId": "customer_manage_get_store",
         "produces": [
           "application/xml",
           "application/json"
@@ -497,14 +711,14 @@
         }
       }
     },
-    "/store/order/{orderId}": {
+    "/api/customer/manage/movie/detail": {
       "get": {
         "tags": [
-          "store"
+          "manage"
         ],
-        "summary": "Find purchase order by ID",
-        "description": "For valid response try integer IDs with value >= 1 and <= 10.         Other values will generated exceptions",
-        "operationId": "getOrderById",
+        "summary": "用户发布电影详情",
+        "description": "用户发布的电影的具体id信息，用于用户修改时",
+        "operationId": "customer_mange_get_movie_detail",
         "produces": [
           "application/xml",
           "application/json"
@@ -535,14 +749,16 @@
             "description": "Order not found"
           }
         }
-      },
-      "delete": {
+      }
+    },
+    "/api/customer/manage/movie/browser": {
+      "get": {
         "tags": [
-          "store"
+          "manage"
         ],
-        "summary": "Delete purchase order by ID",
-        "description": "For valid response try integer IDs with positive integer value.         Negative or non-integer values will generate API errors",
-        "operationId": "deleteOrder",
+        "summary": "浏览记录",
+        "description": "用户浏览过的电影记录",
+        "operationId": "customer_manage_get_browser",
         "produces": [
           "application/xml",
           "application/json"
@@ -568,14 +784,14 @@
         }
       }
     },
-    "/user": {
+    "/api/customer/manage/feedback": {
       "post": {
         "tags": [
-          "user"
+          "manage"
         ],
-        "summary": "Create user",
-        "description": "This can only be done by the logged in user.",
-        "operationId": "createUser",
+        "summary": "用户反馈",
+        "description": "用户反馈内容",
+        "operationId": "customer_manage_post_feedback",
         "produces": [
           "application/xml",
           "application/json"
@@ -596,82 +812,80 @@
             "description": "successful operation"
           }
         }
-      }
-    },
-    "/user/createWithArray": {
-      "post": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Creates list of users with given input array",
-        "description": "",
-        "operationId": "createUsersWithArrayInput",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "List of user object",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "successful operation"
-          }
-        }
-      }
-    },
-    "/user/createWithList": {
-      "post": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Creates list of users with given input array",
-        "description": "",
-        "operationId": "createUsersWithListInput",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "List of user object",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "successful operation"
-          }
-        }
-      }
-    },
-    "/user/login": {
+      },
       "get": {
         "tags": [
-          "user"
+          "manage"
         ],
-        "summary": "Logs user into the system",
+        "summary": "用户反馈预查",
+        "description": "预先检查用户是否符合反馈条件",
+        "operationId": "customer_manage_get_feedback",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "List of user object",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/api/customer/manage/info/name": {
+      "put": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "修改用户名",
         "description": "",
-        "operationId": "loginUser",
+        "operationId": "customer_manage_put_name",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "List of user object",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/api/customer/manage/info/avatar": {
+      "put": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "修改用户头像",
+        "description": "",
+        "operationId": "customer_manage_put_avatar",
         "produces": [
           "application/xml",
           "application/json"
@@ -717,14 +931,14 @@
         }
       }
     },
-    "/user/logout": {
+    "/api/customer/movie/detail": {
       "get": {
         "tags": [
-          "user"
+          "movie"
         ],
-        "summary": "Logs out current logged in user session",
-        "description": "",
-        "operationId": "logoutUser",
+        "summary": "电影详情",
+        "description": "电影详情",
+        "operationId": "customer_movie_get_detail",
         "produces": [
           "application/xml",
           "application/json"
@@ -737,14 +951,51 @@
         }
       }
     },
-    "/user/{username}": {
+    "/api/customer/movie/detail/rate": {
+      "put": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "评分",
+        "description": "电影频分",
+        "operationId": "customer_movie_put_rate",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/customer/movie/detail/comment": {
       "get": {
         "tags": [
-          "user"
+          "movie"
         ],
-        "summary": "Get user by user name",
-        "description": "",
-        "operationId": "getUserByName",
+        "summary": "评论列表",
+        "description": "关于指定电影的评论列表",
+        "operationId": "customer_movie_get_comment",
         "produces": [
           "application/xml",
           "application/json"
@@ -773,13 +1024,345 @@
           }
         }
       },
+      "post": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "评论用户",
+        "description": "发布评论（对象为用户）",
+        "operationId": "customer_movie_post_comment_user",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/customer/movie/detail/comment/detail": {
+      "get": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "评论详情",
+        "description": "",
+        "operationId": "customer_movie_get_comment_detail",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/customer/movie/detail/comment/movie": {
+      "post": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "发布评论",
+        "description": "发布评论（评论对象为电影）",
+        "operationId": "customer_movie_post_comment_movie",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/customer/movie/detail/comment/like": {
       "put": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "点赞",
+        "description": "评论点赞",
+        "operationId": "customer_movie_put_comment_like",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "取消点赞",
+        "description": "",
+        "operationId": "customer_movie_delete_comment_like",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "name that need to be updated",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Updated user object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid user supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/customer/user": {
+      "get": {
         "tags": [
           "user"
         ],
-        "summary": "Updated user",
-        "description": "This can only be done by the logged in user.",
-        "operationId": "updateUser",
+        "summary": "非本人用户信息",
+        "description": "",
+        "operationId": "customer_user_get_user",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/customer/user/comment": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "评论信息",
+        "description": "非本人用户的评论列表列表",
+        "operationId": "customer_user_get_comment",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/customer/upload": {
+      "post": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "小文件上传",
+        "description": "",
+        "operationId": "customer_upload_post_file",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/customer/upload/chunk": {
+      "get": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "文件分片上传预查",
+        "description": "文件上传前检查文件是否存在",
+        "operationId": "customer_upload_get_chunk",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "分片文件上传",
+        "description": "",
+        "operationId": "customer_upload_post_chunk",
         "produces": [
           "application/xml",
           "application/json"
@@ -811,13 +1394,13 @@
           }
         }
       },
-      "delete": {
+      "put": {
         "tags": [
-          "user"
+          "upload"
         ],
-        "summary": "Delete user",
-        "description": "This can only be done by the logged in user.",
-        "operationId": "deleteUser",
+        "summary": "分片文件上传完成",
+        "description": "",
+        "operationId": "customer_upload_put_chunk",
         "produces": [
           "application/xml",
           "application/json"
@@ -826,14 +1409,23 @@
           {
             "name": "username",
             "in": "path",
-            "description": "The name that needs to be deleted",
+            "description": "name that need to be updated",
             "required": true,
             "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Updated user object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
           }
         ],
         "responses": {
           "400": {
-            "description": "Invalid username supplied"
+            "description": "Invalid user supplied"
           },
           "404": {
             "description": "User not found"
