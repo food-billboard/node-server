@@ -97,7 +97,13 @@
         ],
         "responses": {
           "200": {
-            "description": "成功"
+            "description": "成功",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/customer_get_barrage"
+              }
+            }
           }
         },
         "security": [
@@ -127,23 +133,30 @@
         "parameters": [
           {
             "in": "body",
-            "name": "body",
-            "description": "Pet object that needs to be added to the store",
+            "name": "_id",
+            "description": "电影id",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/Pet"
-            }
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "content",
+            "description": "弹幕内容",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "time",
+            "description": "弹幕出现在视频中的时间",
+            "required": true,
+            "type": "string",
+            "format":"date-time"
           }
         ],
         "responses": {
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Pet not found"
-          },
-          "405": {
-            "description": "Validation exception"
+          "200": {
+            "description": "发送成功"
           }
         },
         "security": [
@@ -173,23 +186,15 @@
         "parameters": [
           {
             "in": "body",
-            "name": "body",
-            "description": "Pet object that needs to be added to the store",
+            "name": "_id",
+            "description": "弹幕id",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/Pet"
-            }
+            "type":"string"
           }
         ],
         "responses": {
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Pet not found"
-          },
-          "405": {
-            "description": "Validation exception"
+          "200": {
+            "description": "成功"
           }
         },
         "security": [
@@ -218,24 +223,16 @@
         ],
         "parameters": [
           {
-            "in": "body",
+            "in":"query",
             "name": "body",
-            "description": "Pet object that needs to be added to the store",
+            "description": "弹幕id",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/Pet"
-            }
+            "type":"string"
           }
         ],
         "responses": {
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Pet not found"
-          },
-          "405": {
-            "description": "Validation exception"
+          "200": {
+            "description": "成功"
           }
         },
         "security": [
@@ -260,37 +257,16 @@
           "application/xml",
           "application/json"
         ],
-        "parameters": [
-          {
-            "name": "status",
-            "in": "query",
-            "description": "Status values that need to be considered for filter",
-            "required": true,
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "available",
-                "pending",
-                "sold"
-              ],
-              "default": "available"
-            },
-            "collectionFormat": "multi"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "成功",
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Pet"
+                "$ref": "#/definitions/customer_get_manage"
               }
             }
-          },
-          "400": {
-            "description": "Invalid status value"
           }
         },
         "security": [
@@ -317,29 +293,27 @@
         ],
         "parameters": [
           {
-            "name": "tags",
+            "name": "currPage",
             "in": "query",
-            "description": "Tags to filter by",
-            "required": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "成功",
             "schema": {
-              "type": "array",
+              "type": "object",
               "items": {
-                "$ref": "#/definitions/Pet"
+                "$ref": "#/definitions/customer_get_manage_attention"
               }
             }
-          },
-          "400": {
-            "description": "Invalid tag value"
           }
         },
         "security": [
@@ -365,29 +339,15 @@
         ],
         "parameters": [
           {
-            "name": "tags",
-            "in": "query",
-            "description": "Tags to filter by",
-            "required": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
+            "name": "_id",
+            "in": "body",
+            "description": "用户id",
+            "required": true
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Pet"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid tag value"
+            "description": "成功"
           }
         },
         "security": [
@@ -413,29 +373,15 @@
         ],
         "parameters": [
           {
-            "name": "tags",
+            "name": "_id",
             "in": "query",
-            "description": "Tags to filter by",
-            "required": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
+            "description": "用户id",
+            "required": true
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Pet"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid tag value"
+            "description": "成功"
           }
         },
         "security": [
@@ -463,26 +409,24 @@
         ],
         "parameters": [
           {
-            "name": "petId",
-            "in": "path",
-            "description": "ID of pet to return",
-            "required": true,
-            "type": "integer",
-            "format": "int64"
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "成功",
             "schema": {
-              "$ref": "#/definitions/Pet"
+              "$ref": "#/definitions/customer_get_manage_attention"
             }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Pet not found"
           }
         },
         "security": [
@@ -501,7 +445,7 @@
         "description": "用户发布的评论列表",
         "operationId": "customer_manage_get_comment",
         "consumes": [
-          "application/x-www-form-urlencoded"
+          "application/json"
         ],
         "produces": [
           "application/xml",
@@ -509,31 +453,24 @@
         ],
         "parameters": [
           {
-            "name": "petId",
-            "in": "path",
-            "description": "ID of pet that needs to be updated",
-            "required": true,
-            "type": "integer",
-            "format": "int64"
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
           },
           {
-            "name": "name",
-            "in": "formData",
-            "description": "Updated name of the pet",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "status",
-            "in": "formData",
-            "description": "Updated status of the pet",
-            "required": false,
-            "type": "string"
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
           }
         ],
         "responses": {
-          "405": {
-            "description": "Invalid input"
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/customer_manage_get_comment"
+            }
           }
         },
         "security": [
@@ -558,28 +495,125 @@
           "application/xml",
           "application/json"
         ],
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
-            "name": "api_key",
-            "in": "header",
-            "required": false,
-            "type": "string"
+            "name": "video",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "description": "视频信息",
+            "properties": {
+              "src": {
+                "type": "string",
+                "description": "视频id"
+              },
+              "poster": {
+                "type": "string",
+                "description": "海报图片id"
+              }
+            }
           },
           {
-            "name": "petId",
-            "in": "path",
-            "description": "Pet id to delete",
+            "name": "info",
+            "in": "body",
+            "description": "电影信息",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "电影名称",
+                "required": true
+              },
+              "district": {
+                "type": "array",
+                "description": "电影地区",
+                "items": {
+                  "type":"string",
+                  "description": "地区id"
+                },
+                "required": true
+              },
+              "director": {
+                "type": "array",
+                "description": "电影导演",
+                "items": {
+                  "type":"string",
+                  "description": "导演id"
+                },
+                "required": true
+              },
+              "actor": {
+                "type": "array",
+                "description": "电影演员",
+                "items": {
+                  "type":"string",
+                  "description": "演员id"
+                },
+                "required": true
+              },
+              "classify": {
+                "type": "array",
+                "description": "电影分类",
+                "items": {
+                  "type":"string",
+                  "description": "分类id"
+                },
+                "required": true
+              },
+              "screen_time": {
+                "type": "string",
+                "description": "电影上映时间",
+                "required": true,
+                "format":"date-time"
+              },
+              "description": {
+                "type": "string",
+                "description": "电影描述"
+              },
+              "language": {
+                "type": "array",
+                "description": "电影语言",
+                "items": {
+                  "type":"string",
+                  "description": "语言id"
+                },
+                "required": true
+              },
+              "author_rate": {
+                "type": "integer",
+                "description": "评分"
+              },
+              "alias": {
+                "type": "array",
+                "description": "电影别名",
+                "items": {
+                  "type":"string"
+                }
+              },
+              "author_description": {
+                "type": "string",
+                "description": "作者对电影的描述"
+              }
+            }
+          },
+          {
+            "name": "images",
+            "description": "电影截图(6张)",
+            "type": "array",
+            "required": true,
+            "items": {
+              "type": "string",
+              "description": "截图id"
+            }
           }
         ],
         "responses": {
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Pet not found"
+          "200": {
+            "description": "成功"
           }
         },
         "security": [
@@ -606,26 +640,119 @@
         ],
         "parameters": [
           {
-            "name": "petId",
-            "in": "path",
-            "description": "ID of pet to update",
-            "required": true,
-            "type": "integer",
-            "format": "int64"
-          },
-          {
-            "name": "additionalMetadata",
-            "in": "formData",
-            "description": "Additional data to pass to server",
-            "required": false,
+            "name": "_id",
             "type": "string"
           },
           {
-            "name": "file",
-            "in": "formData",
-            "description": "file to upload",
-            "required": false,
-            "type": "file"
+            "name": "video",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "description": "视频信息",
+            "properties": {
+              "src": {
+                "type": "string",
+                "description": "视频id"
+              },
+              "poster": {
+                "type": "string",
+                "description": "海报图片id"
+              }
+            }
+          },
+          {
+            "name": "info",
+            "in": "body",
+            "description": "电影信息",
+            "required": true,
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "电影名称",
+                "required": true
+              },
+              "district": {
+                "type": "array",
+                "description": "电影地区",
+                "items": {
+                  "type":"string",
+                  "description": "地区id"
+                },
+                "required": true
+              },
+              "director": {
+                "type": "array",
+                "description": "电影导演",
+                "items": {
+                  "type":"string",
+                  "description": "导演id"
+                },
+                "required": true
+              },
+              "actor": {
+                "type": "array",
+                "description": "电影演员",
+                "items": {
+                  "type":"string",
+                  "description": "演员id"
+                },
+                "required": true
+              },
+              "classify": {
+                "type": "array",
+                "description": "电影分类",
+                "items": {
+                  "type":"string",
+                  "description": "分类id"
+                },
+                "required": true
+              },
+              "screen_time": {
+                "type": "string",
+                "description": "电影上映时间",
+                "required": true,
+                "format":"date-time"
+              },
+              "description": {
+                "type": "string",
+                "description": "电影描述"
+              },
+              "language": {
+                "type": "array",
+                "description": "电影语言",
+                "items": {
+                  "type":"string",
+                  "description": "语言id"
+                },
+                "required": true
+              },
+              "author_rate": {
+                "type": "integer",
+                "description": "评分"
+              },
+              "alias": {
+                "type": "array",
+                "description": "电影别名",
+                "items": {
+                  "type":"string"
+                }
+              },
+              "author_description": {
+                "type": "string",
+                "description": "作者对电影的描述"
+              }
+            }
+          },
+          {
+            "name": "images",
+            "description": "电影截图(6张)",
+            "type": "array",
+            "required": true,
+            "items": {
+              "type": "string",
+              "description": "截图id"
+            }
           }
         ],
         "responses": {
@@ -655,16 +782,25 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
         "responses": {
           "200": {
             "description": "successful operation",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "integer",
-                "format": "int32"
-              }
+              "$ref":"#/definitions/customer_manage_get_movie"
             }
           }
         },
@@ -689,24 +825,24 @@
         ],
         "parameters": [
           {
-            "in": "body",
-            "name": "body",
-            "description": "order placed for purchasing the pet",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Order"
-            }
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "成功",
             "schema": {
-              "$ref": "#/definitions/Order"
+              "$ref": "#/definitions/customer_manage_get_movie"
             }
-          },
-          "400": {
-            "description": "Invalid Order"
           }
         }
       }
@@ -725,28 +861,19 @@
         ],
         "parameters": [
           {
-            "name": "orderId",
-            "in": "path",
-            "description": "ID of pet that needs to be fetched",
+            "name": "_id",
+            "in": "query",
+            "description": "电影id",
             "required": true,
-            "type": "integer",
-            "maximum": 10,
-            "minimum": 1,
-            "format": "int64"
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/Order"
+              "$ref": "#/definitions/customer_mange_get_movie_detail"
             }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Order not found"
           }
         }
       }
@@ -765,21 +892,24 @@
         ],
         "parameters": [
           {
-            "name": "orderId",
-            "in": "path",
-            "description": "ID of the order that needs to be deleted",
-            "required": true,
-            "type": "integer",
-            "minimum": 1,
-            "format": "int64"
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
           }
         ],
         "responses": {
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Order not found"
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref":"#/definitions/customer_manage_get_movie"
+            }
           }
         }
       }
@@ -799,17 +929,17 @@
         "parameters": [
           {
             "in": "body",
-            "name": "body",
-            "description": "Created user object",
+            "name": "content",
+            "description": "反馈内容",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/media_content"
             }
           }
         ],
         "responses": {
-          "default": {
-            "description": "successful operation"
+          "200": {
+            "description": "成功"
           }
         }
       },
@@ -824,23 +954,13 @@
           "application/xml",
           "application/json"
         ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "List of user object",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
-          "default": {
-            "description": "successful operation"
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref":"#/definitions/customer_manage_get_feedback"
+            }
           }
         }
       }
@@ -860,20 +980,14 @@
         "parameters": [
           {
             "in": "body",
-            "name": "body",
-            "description": "List of user object",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
+            "name": "name",
+            "description": "名字",
+            "required": true
           }
         ],
         "responses": {
-          "default": {
-            "description": "successful operation"
+          "200": {
+            "description": "成功"
           }
         }
       }
@@ -892,16 +1006,9 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "query",
-            "description": "The user name for login",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "password",
-            "in": "query",
-            "description": "The password for login in clear text",
+            "name": "_id",
+            "in": "body",
+            "description": "头像图片id",
             "required": true,
             "type": "string"
           }
@@ -943,10 +1050,75 @@
           "application/xml",
           "application/json"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "电影id",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
-          "default": {
-            "description": "successful operation"
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref":"#/definitions/customer_movie_get_detail"
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/movie/detail/store": {
+      "put": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "收藏",
+        "description": "电影收藏",
+        "operationId": "customer_movie_put_store",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "电影id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "取消收藏",
+        "description": "取消电影收藏",
+        "operationId": "customer_movie_delete_store",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "电影id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
           }
         }
       }
@@ -965,25 +1137,23 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "name": "_id",
+            "in": "body",
+            "description": "电影id",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "value",
+            "in": "body",
+            "description": "分数",
+            "required": true,
+            "type": "integer"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
+            "description": "成功"
           }
         }
       }
@@ -1002,25 +1172,31 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "name": "_id",
+            "in": "query",
+            "description": "电影id",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "成功",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/customer_manage_get_comment"
             }
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
           }
         }
       },
@@ -1037,25 +1213,43 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "name": "_id",
+            "in": "body",
+            "description": "用户id",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "content",
+            "in": "body",
+            "description": "评论内容",
+            "required": true,
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "description": "文字内容"
+              },
+              "image": {
+                "type":"array",
+                "description": "图片id",
+                "items": {
+                  "type":"string"
+                }
+              },
+              "video": {
+                "type":"array",
+                "description": "视频id",
+                "items": {
+                  "type":"string"
+                }
+              }
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
+            "description": "成功"
           }
         }
       }
@@ -1074,25 +1268,31 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "name": "_id",
+            "in": "query",
+            "description": "评论id",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
           }
         ],
         "responses": {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/customer_movie_get_comment_detail"
             }
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
           }
         }
       }
@@ -1111,25 +1311,43 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "name": "_id",
+            "in": "body",
+            "description": "电影id",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "content",
+            "in": "body",
+            "description": "评论内容",
+            "required": true,
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "description": "文字内容"
+              },
+              "image": {
+                "type":"array",
+                "description": "图片id",
+                "items": {
+                  "type":"string"
+                }
+              },
+              "video": {
+                "type":"array",
+                "description": "视频id",
+                "items": {
+                  "type":"string"
+                }
+              }
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
+            "description": "成功"
           }
         }
       }
@@ -1148,25 +1366,16 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "name": "_id",
+            "in": "body",
+            "description": "评论id",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
+            "description": "成功"
           }
         }
       },
@@ -1183,28 +1392,16 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "name that need to be updated",
+            "name": "_id",
+            "in": "query",
+            "description": "取消点赞",
             "required": true,
             "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Updated user object",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
           }
         ],
         "responses": {
-          "400": {
-            "description": "Invalid user supplied"
-          },
-          "404": {
-            "description": "User not found"
+          "200": {
+            "description": "成功"
           }
         }
       }
@@ -1223,25 +1420,19 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "成功",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/customer_user_get_user"
             }
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
           }
         }
       }
@@ -1260,25 +1451,31 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
           }
         ],
         "responses": {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/customer_user_get_comment"
             }
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
           }
         }
       }
@@ -1451,6 +1648,900 @@
     }
   },
   "definitions": {
+    "media_content": {
+      "type": "object",
+      "description": "评论内容",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "文字内容"
+        },
+        "image": {
+          "type":"array",
+          "description": "图片",
+          "items": {
+            "type":"string"
+          }
+        },
+        "video": {
+          "type":"array",
+          "description": "视频",
+          "items": {
+            "type":"string"
+          }
+        }
+      }
+    },
+    "customer_get_barrage": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "hot": {
+                    "type": "integer",
+                    "description": "弹幕点赞人数"
+                  },
+                  "like": {
+                    "type": "boolean",
+                    "description": "是否点过赞"
+                  },
+                  "time_line": {
+                    "type": "integer",
+                    "description": "弹幕出现的时间"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "弹幕的内容"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_barrage"
+      }
+    },
+    "customer_get_manage": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "hot": {
+                  "type": "integer",
+                  "description": "被点赞次数"
+                },
+                "attentions": {
+                  "type": "integer",
+                  "description": "关注人数"
+                },
+                "avatar": {
+                  "type": "string",
+                  "description": "头像"
+                },
+                "fans": {
+                  "type": "integer",
+                  "description": "粉丝人数"
+                },
+                "username": {
+                  "type": "string",
+                  "description": "用户名"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format":"date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format":"date-time"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_barrage"
+      }
+    },
+    "customer_get_manage_attention": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "attentions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "description": "头像"
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "用户名"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_barrage"
+      }
+    },
+    "customer_manage_get_comment": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "comment": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "schema": {
+                  "$ref":"#/definitions/comment_data"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_barrage"
+      }
+    },
+    "customer_manage_get_movie": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "issue": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string",
+                    "description": "电影描述"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "电影名称"
+                  },
+                  "poster": {
+                    "type": "string",
+                    "description": "海报"
+                  },
+                  "_id": {
+                    "type": "string"
+                  },
+                  "store": {
+                    "type": "boolean",
+                    "description": "是否收藏"
+                  },
+                  "rate": {
+                    "type": "integer",
+                    "description": "综合评分"
+                  },
+                  "classify": {
+                    "type": "array",
+                    "description": "分类",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "分类名称"
+                        }
+                      }
+                    }
+                  },
+                  "publish_time": {
+                    "type": "string",
+                    "description": "上映时间",
+                    "format":"date-time"
+                  },
+                  "hot": {
+                    "type": "integer",
+                    "description": "收藏人数"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_barrage"
+      }
+    },
+    "customer_mange_get_movie_detail": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                  "author_description": {
+                    "type": "string",
+                    "description": "作者电影描述"
+                  },
+                  "author_rate": {
+                    "type": "integer",
+                    "description": "作者评分"
+                  },
+                  "images": {
+                    "type": "array",
+                    "description": "电影截图",
+                    "items": {
+                      "type": "string",
+                      "description": "图片地址"
+                    }
+                  },
+                  "info": {
+                    "type": "object",
+                    "properties": {
+                      "actor": {
+                        "type": "array",
+                        "description": "电影演员",
+                        "items": {
+                          "type": "string",
+                          "description": "演员id"
+                        }
+                      },
+                      "another_name": {
+                        "type": "array",
+                        "description": "电影其他名称",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "classify": {
+                        "type": "array",
+                        "description": "电影分类",
+                        "items": {
+                          "type": "string",
+                          "description": "分类id"
+                        }
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "电影描述"
+                      },
+                      "director": {
+                        "type": "array",
+                        "description": "电影导演",
+                        "items": {
+                          "type": "string",
+                          "description": "导演id"
+                        }
+                      },
+                      "district": {
+                        "type": "array",
+                        "description": "电影地区",
+                        "items": {
+                          "type": "string",
+                          "description": "地区id"
+                        }
+                      },
+                      "language": {
+                        "type": "array",
+                        "description": "电影语言",
+                        "items": {
+                          "type": "string",
+                          "description": "语言id"
+                        }
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "电影名称"
+                      },
+                      "screen_time": {
+                        "type": "string",
+                        "description": "上映时间"
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "电影名称"
+                  },
+                  "video": {
+                    "type": "string",
+                    "description": "视频地址"
+                  },
+                  "poster": {
+                    "type": "string",
+                    "description": "海报地址"
+                  },
+                  "_id": {
+                    "type": "string"
+                  }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_barrage"
+      }
+    },
+    "customer_manage_get_feedback": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "boolean",
+              "description": "是否可以发送"
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_barrage"
+      }
+    },
+    "customer_movie_get_detail": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "author": {
+                  "type": "object",
+                  "properties": {
+                    "username": {
+                      "type":"string",
+                      "description": "作者名称"
+                    }
+                  }
+                },
+                "author_description": {
+                  "type": "string",
+                  "description": "作者电影描述"
+                },
+                "author_rate": {
+                  "type": "integer",
+                  "description": "作者评分"
+                },
+                "comment": {
+                  "type": "array",
+                  "description": "评论列表",
+                  "items": {
+                    "type":"object",
+                    "properties": {
+                      "user_info": {
+                        "type": "object",
+                        "properties": {
+                          "avatar": {
+                            "type":"string",
+                            "description": "头像"
+                          }
+                        },
+                        "content": {
+                          "type": "object",
+                          "properties": {
+                            "text": {
+                              "type": "string",
+                              "description": "文字评论"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "glance": {
+                  "type": "integer",
+                  "description": "浏览人数"
+                },
+                "hot": {
+                  "type": "integer",
+                  "description": "收藏人数"
+                },
+                "images": {
+                  "type": "array",
+                  "description": "电影截图",
+                  "items": {
+                    "type": "string",
+                    "description": "图片地址"
+                  }
+                },
+                "info": {
+                  "type": "object",
+                  "properties": {
+                    "actor": {
+                      "type": "array",
+                      "description": "电影演员",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "演员名称"
+                          },
+                          "other": {
+                            "type": "object",
+                            "properties": {
+                              "avatar": {
+                                "type": "string",
+                                "description": "演员海报地址"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "another_name": {
+                      "type": "array",
+                      "description": "电影别名",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "classify": {
+                      "type": "array",
+                      "description": "电影分类",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "分类名称"
+                          }
+                        }
+                      }
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "电影描述"
+                    },
+                    "director": {
+                      "type": "array",
+                      "description": "电影导演",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "导演名称"
+                          }
+                        }
+                      }
+                    },
+                    "district": {
+                      "type": "array",
+                      "description": "电影地区",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "地区名称"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "type": "array",
+                      "description": "电影语言",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "语言名称"
+                          }
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "电影名称"
+                    },
+                    "screen_time": {
+                      "type": "string",
+                      "description": "上映时间"
+                    }
+                  }
+                },
+                "name": {
+                  "type": "string",
+                  "description": "电影名称"
+                },
+                "poster": {
+                  "type": "string",
+                  "description": "电影海报地址"
+                },
+                "rate": {
+                  "type": "integer",
+                  "description": "电影评分"
+                },
+                "same_film": {
+                  "type": "array",
+                  "description": "相关电影",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "电影名称"
+                      },
+                      "_id": {
+                        "type": "string",
+                        "description": "电影id"
+                      },
+                      "same_type": {
+                        "type": "string",
+                        "description": "相关类型",
+                        "enum": ["SERIES", "NAMESAKE"]
+                      }
+                    }
+                  }
+                },
+                "store": {
+                  "type": "boolean",
+                  "description": "是否收藏"
+                },
+                "tag": {
+                  "type": "array",
+                  "description": "标签",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "description": "内容"
+                      }
+                    }
+                  }
+                },
+                "video": {
+                  "type": "string",
+                  "description": "视频地址"
+                },
+                "_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_barrage"
+      }
+    },
+    "comment_data": {
+      "type": "object",
+      "properties": {
+        "comment_users": {
+          "type": "array",
+          "description":"评论人",
+          "items": {
+            "type": "object",
+            "properties": {
+              "avatar": {
+                "type": "string",
+                "description": "头像"
+              },
+              "username": {
+                "type": "string",
+                "description": "用户名"
+              },
+              "_id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "content": {
+          "type": "object",
+          "schema": {
+            "$ref":"#/definitions/media_content"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "like": {
+          "type": "boolean",
+          "description": "是否点赞"
+        },
+        "total_like": {
+          "type": "integer",
+          "description": "总点赞数量"
+        },
+        "_id": {
+          "type": "string"
+        },
+        "user_info": {
+          "type": "object",
+          "description": "发布评论的用户信息",
+          "properties": {
+            "_id": {
+              "type": "string"
+            },
+            "avatar": {
+              "type": "string",
+              "description": "头像"
+            },
+            "username": {
+              "type": "string",
+              "description": "用户名"
+            }
+          }
+        }
+      }
+    },
+    "customer_movie_get_comment_detail": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "comment": {
+              "description": "主评论信息",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "comment_users": {
+                    "type": "integer",
+                    "description":"评论人数"
+                  },
+                  "content": {
+                    "type": "object",
+                    "schema": {
+                      "$ref":"#/definitions/media_content"
+                    }
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "like": {
+                    "type": "boolean",
+                    "description": "是否点赞"
+                  },
+                  "total_like": {
+                    "type": "integer",
+                    "description": "总点赞数量"
+                  },
+                  "_id": {
+                    "type": "string"
+                  },
+                  "user_info": {
+                    "type": "object",
+                    "description": "发布评论的用户信息",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "头像"
+                      },
+                      "username": {
+                        "type": "string",
+                        "description": "用户名"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "sub": {
+              "type": "object",
+              "description": "子评论信息",
+              "schema": {
+                "$ref":"#/definitions/comment_data"
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_barrage"
+      }
+    },
+    "customer_user_get_user": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "hot": {
+                  "type": "integer",
+                  "description": "被点赞次数"
+                },
+                "attentions": {
+                  "type": "integer",
+                  "description": "关注人数"
+                },
+                "avatar": {
+                  "type": "string",
+                  "description": "头像"
+                },
+                "fans": {
+                  "type": "integer",
+                  "description": "粉丝人数"
+                },
+                "username": {
+                  "type": "string",
+                  "description": "用户名"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format":"date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format":"date-time"
+                },
+                "like": {
+                  "type": "boolean",
+                  "description": "是否关注"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_barrage"
+      }
+    },
+    "customer_user_get_comment": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "object",
+          "schema": {
+            "$ref":"#/definitions/media_content"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "源评论类型",
+              "enum": ["movie", "comment"]
+            },
+            "_id": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string",
+              "description": "源评论或电影文字内容"
+            }
+          }
+        },
+        "total_like": {
+          "type": "integer",
+          "description": "总点赞数量"
+        },
+        "like": {
+          "type": "boolean",
+          "description": "是否点赞"
+        },
+        "_id": {
+          "type": "string"
+        },
+        "user_info": {
+          "type": "object",
+          "description": "发布评论的用户信息",
+          "properties": {
+            "_id": {
+              "type": "string"
+            },
+            "avatar": {
+              "type": "string",
+              "description": "头像"
+            },
+            "username": {
+              "type": "string",
+              "description": "用户名"
+            }
+          }
+        }
+      }
+    },
+
+
     "Order": {
       "type": "object",
       "properties": {
