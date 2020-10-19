@@ -100,6 +100,7 @@
             "description": "成功",
             "schema": {
               "type": "array",
+              "name": "response",
               "items": {
                 "$ref": "#/definitions/customer_get_barrage"
               }
@@ -224,7 +225,7 @@
         "parameters": [
           {
             "in":"query",
-            "name": "body",
+            "name": "_id",
             "description": "弹幕id",
             "required": true,
             "type":"string"
@@ -310,9 +311,7 @@
             "description": "成功",
             "schema": {
               "type": "object",
-              "items": {
-                "$ref": "#/definitions/customer_get_manage_attention"
-              }
+              "$ref":"#/definitions/customer_get_manage_attention"
             }
           }
         },
@@ -323,8 +322,7 @@
               "read:pets"
             ]
           }
-        ],
-        "deprecated": true
+        ]
       },
       "put": {
         "tags": [
@@ -357,8 +355,7 @@
               "read:pets"
             ]
           }
-        ],
-        "deprecated": true
+        ]
       },
       "delete": {
         "tags": [
@@ -391,8 +388,7 @@
               "read:pets"
             ]
           }
-        ],
-        "deprecated": true
+        ]
       }
     },
     "/api/customer/manage/fans": {
@@ -469,6 +465,7 @@
           "200": {
             "description": "成功",
             "schema": {
+              "type": "object",
               "$ref": "#/definitions/customer_manage_get_comment"
             }
           }
@@ -757,10 +754,7 @@
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/ApiResponse"
-            }
+            "description": "成功"
           }
         },
         "security": [
@@ -1146,9 +1140,9 @@
           {
             "name": "value",
             "in": "body",
-            "description": "分数",
+            "description": "分数(integer)",
             "required": true,
-            "type": "integer"
+            "type":"number"
           }
         ],
         "responses": {
@@ -1472,8 +1466,9 @@
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "成功",
             "schema": {
+              "type": "object",
               "$ref": "#/definitions/customer_user_get_comment"
             }
           }
@@ -1494,25 +1489,22 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
-            "required": true,
-            "type": "string"
+            "name": "auth",
+            "in": "body",
+            "description": "资源访问权限(PUBLIC, PRIVATE)",
+            "type": "string",
+            "enum": [ "PUBLIC", "PRIVATE" ]
+          },
+          {
+            "name": "file",
+            "type":"file",
+            "in": "body",
+            "description": "文件"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
+            "description": "成功"
           }
         }
       }
@@ -1531,25 +1523,59 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "name": "name",
+            "in": "query",
+            "description": "文件md5名称",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "chunksLength",
+            "in": "query",
+            "description": "分片数量",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "文件大小(bytes)",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "suffix",
+            "in": "query",
+            "description": "mime类型",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "chunkSize",
+            "in": "query",
+            "description": "分片大小(bytes)",
+            "type": "integer"
+          },
+          {
+            "name": "filename",
+            "in": "query",
+            "description": "文件名称",
+            "type": "string"
+          },
+          {
+            "name": "auth",
+            "in": "query",
+            "description": "资源访问权限",
+            "type": "string",
+            "enum": [ "PUBLIC", "PRIVATE" ]
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "成功",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/customer_upload_get_chunk"
             }
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
           }
         }
       },
@@ -1566,28 +1592,29 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "name that need to be updated",
+            "name": "index",
+            "in": "body",
+            "description": "文件分片索引(integer)",
             "required": true,
-            "type": "string"
+            "type": "integer"
           },
           {
-            "in": "body",
+            "in": "name",
             "name": "body",
-            "description": "Updated user object",
+            "description": "文件MD5名称",
+            "required": true
+          },
+          {
+            "name": "files",
+            "in": "body",
+            "description": "文件分片(file或base64)",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
+            "type": "file"
           }
         ],
         "responses": {
-          "400": {
-            "description": "Invalid user supplied"
-          },
-          "404": {
-            "description": "User not found"
+          "200": {
+            "description": "成功"
           }
         }
       },
@@ -1604,28 +1631,16 @@
         ],
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "description": "name that need to be updated",
+            "name": "name",
+            "in": "body",
+            "description": "文件md5名称",
             "required": true,
             "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Updated user object",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
           }
         ],
         "responses": {
-          "400": {
-            "description": "Invalid user supplied"
-          },
-          "404": {
-            "description": "User not found"
+          "200": {
+            "description": "成功"
           }
         }
       }
@@ -1668,6 +1683,73 @@
           "description": "视频",
           "items": {
             "type":"string"
+          }
+        }
+      }
+    },
+    "comment_data": {
+      "type": "object",
+      "properties": {
+        "comment_users": {
+          "type": "array",
+          "description":"评论人",
+          "items": {
+            "type": "object",
+            "properties": {
+              "avatar": {
+                "type": "string",
+                "description": "头像"
+              },
+              "username": {
+                "type": "string",
+                "description": "用户名"
+              },
+              "_id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "content": {
+          "type": "object",
+          "schema": {
+            "$ref":"#/definitions/media_content"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "like": {
+          "type": "boolean",
+          "description": "是否点赞"
+        },
+        "total_like": {
+          "type": "integer",
+          "description": "总点赞数量"
+        },
+        "_id": {
+          "type": "string"
+        },
+        "user_info": {
+          "type": "object",
+          "description": "发布评论的用户信息",
+          "properties": {
+            "_id": {
+              "type": "string"
+            },
+            "avatar": {
+              "type": "string",
+              "description": "头像"
+            },
+            "username": {
+              "type": "string",
+              "description": "用户名"
+            }
           }
         }
       }
@@ -1814,17 +1896,15 @@
             "comment": {
               "type": "array",
               "items": {
-                "type": "object",
-                "schema": {
-                  "$ref":"#/definitions/comment_data"
-                }
+                "type":"object",
+                "$ref":"#/definitions/comment_data"
               }
             }
           }
         }
       },
       "xml": {
-        "name": "customer_get_barrage"
+        "name": "customer_manage_get_comment"
       }
     },
     "customer_manage_get_movie": {
@@ -2275,73 +2355,6 @@
         "name": "customer_get_barrage"
       }
     },
-    "comment_data": {
-      "type": "object",
-      "properties": {
-        "comment_users": {
-          "type": "array",
-          "description":"评论人",
-          "items": {
-            "type": "object",
-            "properties": {
-              "avatar": {
-                "type": "string",
-                "description": "头像"
-              },
-              "username": {
-                "type": "string",
-                "description": "用户名"
-              },
-              "_id": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "content": {
-          "type": "object",
-          "schema": {
-            "$ref":"#/definitions/media_content"
-          }
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "like": {
-          "type": "boolean",
-          "description": "是否点赞"
-        },
-        "total_like": {
-          "type": "integer",
-          "description": "总点赞数量"
-        },
-        "_id": {
-          "type": "string"
-        },
-        "user_info": {
-          "type": "object",
-          "description": "发布评论的用户信息",
-          "properties": {
-            "_id": {
-              "type": "string"
-            },
-            "avatar": {
-              "type": "string",
-              "description": "头像"
-            },
-            "username": {
-              "type": "string",
-              "description": "用户名"
-            }
-          }
-        }
-      }
-    },
     "customer_movie_get_comment_detail": {
       "type": "object",
       "properties": {
@@ -2363,9 +2376,7 @@
                   },
                   "content": {
                     "type": "object",
-                    "schema": {
-                      "$ref":"#/definitions/media_content"
-                    }
+                    "$ref":"#/definitions/media_content"
                   },
                   "createdAt": {
                     "type": "string",
@@ -2409,9 +2420,7 @@
             "sub": {
               "type": "object",
               "description": "子评论信息",
-              "schema": {
-                "$ref":"#/definitions/comment_data"
-              }
+              "$ref":"#/definitions/comment_data"
             }
           }
         }
@@ -2479,236 +2488,110 @@
     "customer_user_get_comment": {
       "type": "object",
       "properties": {
-        "content": {
-          "type": "object",
-          "schema": {
-            "$ref":"#/definitions/media_content"
-          }
+        "success": {
+          "type": "boolean"
         },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "source": {
+        "data": {
           "type": "object",
           "properties": {
-            "type": {
-              "type": "string",
-              "description": "源评论类型",
-              "enum": ["movie", "comment"]
-            },
-            "_id": {
-              "type": "string"
-            },
-            "content": {
-              "type": "string",
-              "description": "源评论或电影文字内容"
+            "comment": {
+              "type": "array",
+              "items": {
+                "type":"object",
+                "properties": {
+                  "content": {
+                    "type": "object",
+                    "$ref":"#/definitions/media_content"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "source": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "description": "源评论类型",
+                        "enum": ["movie", "comment"]
+                      },
+                      "_id": {
+                        "type": "string"
+                      },
+                      "content": {
+                        "type": "string",
+                        "description": "源评论或电影文字内容"
+                      }
+                    }
+                  },
+                  "total_like": {
+                    "type": "integer",
+                    "description": "总点赞数量"
+                  },
+                  "like": {
+                    "type": "boolean",
+                    "description": "是否点赞"
+                  },
+                  "_id": {
+                    "type": "string"
+                  },
+                  "user_info": {
+                    "type": "object",
+                    "description": "发布评论的用户信息",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "头像"
+                      },
+                      "username": {
+                        "type": "string",
+                        "description": "用户名"
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
+        }
+      },
+      "xml": {
+        "name": "customer_user_get_comment"
+      }
+    },
+    "customer_upload_get_chunk": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
         },
-        "total_like": {
-          "type": "integer",
-          "description": "总点赞数量"
-        },
-        "like": {
-          "type": "boolean",
-          "description": "是否点赞"
-        },
-        "_id": {
-          "type": "string"
-        },
-        "user_info": {
+        "res": {
           "type": "object",
-          "description": "发布评论的用户信息",
           "properties": {
-            "_id": {
-              "type": "string"
-            },
-            "avatar": {
-              "type": "string",
-              "description": "头像"
-            },
-            "username": {
-              "type": "string",
-              "description": "用户名"
+            "data": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "description": "如果已经存在则返回false",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              }
             }
           }
         }
-      }
-    },
-
-
-    "Order": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "petId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "quantity": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "shipDate": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "status": {
-          "type": "string",
-          "description": "Order Status",
-          "enum": [
-            "placed",
-            "approved",
-            "delivered"
-          ]
-        },
-        "complete": {
-          "type": "boolean",
-          "default": false
-        }
       },
       "xml": {
-        "name": "Order"
-      }
-    },
-    "Category": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Category"
-      }
-    },
-    "User": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "username": {
-          "type": "string"
-        },
-        "firstName": {
-          "type": "string"
-        },
-        "lastName": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        },
-        "phone": {
-          "type": "string"
-        },
-        "userStatus": {
-          "type": "integer",
-          "format": "int32",
-          "description": "User Status"
-        }
-      },
-      "xml": {
-        "name": "User"
-      }
-    },
-    "Tag": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Tag"
-      }
-    },
-    "Pet": {
-      "type": "object",
-      "required": [
-        "name",
-        "photoUrls"
-      ],
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "category": {
-          "$ref": "#/definitions/Category"
-        },
-        "name": {
-          "type": "string",
-          "example": "doggie"
-        },
-        "photoUrls": {
-          "type": "array",
-          "xml": {
-            "name": "photoUrl",
-            "wrapped": true
-          },
-          "items": {
-            "type": "string"
-          }
-        },
-        "tags": {
-          "type": "array",
-          "xml": {
-            "name": "tag",
-            "wrapped": true
-          },
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        },
-        "status": {
-          "type": "string",
-          "description": "pet status in the store",
-          "enum": [
-            "available",
-            "pending",
-            "sold"
-          ]
-        }
-      },
-      "xml": {
-        "name": "Pet"
-      }
-    },
-    "ApiResponse": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "type": {
-          "type": "string"
-        },
-        "message": {
-          "type": "string"
-        }
+        "name": "customer_get_barrage"
       }
     }
   },
