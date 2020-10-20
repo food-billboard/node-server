@@ -633,7 +633,7 @@
     "/api/user/logon/account": {
       "post": {
         "tags": [
-          "manage"
+          "logon"
         ],
         "summary": "登录",
         "description": "",
@@ -1660,7 +1660,7 @@
     },
     "user_movie_list": {
       "type": "object",
-      "prperties": {
+      "properties": {
         "description": {
           "type": "string",
           "description": "电影描述"
@@ -1720,11 +1720,7 @@
             "issue": {
               "type": "array",
               "items": {
-                "type": "object",
-                "schema": {
-                  "$ref": "#/definitions/user_movie_list"
-                }
-                  
+                "$ref": "#/definitions/user_movie_list" 
               }
             }
           }
@@ -1740,16 +1736,15 @@
         "success": {
           "type": "boolean"
         },
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "store": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "schema": {
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "store": {
+                  "type": "array",
+                  "items": {
                     "$ref": "#/definitions/user_movie_list"
                   }
                 }
@@ -1759,7 +1754,7 @@
         }
       },
       "xml": {
-        "name": "customer_get_barrage"
+        "name": "user_customer_get_store"
       }
     },
     "user_customer_get_browser": {
@@ -1777,10 +1772,7 @@
                 "glance": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "schema": {
-                      "$ref": "#/definitions/user_movie_list"
-                    }
+                    "$ref": "#/definitions/user_movie_list"
                   }
                 }
               }
@@ -1973,10 +1965,7 @@
                   "movie": {
                     "type": "array",
                     "items": {
-                      "type":"object",
-                      "schema": {
-                        "$ref":"#/definitions/user_movie_list"
-                      }
+                      "$ref":"#/definitions/user_movie_list"
                     }
                   }
                 }
@@ -2457,10 +2446,7 @@
                 "comment": {
                   "type": "array",
                   "items": {
-                    "type":"object",
-                    "schema": {
-                      "$ref": "#/definitions/comment_data"
-                    }
+                    "$ref": "#/definitions/comment_data"
                   }
                 }
               }
@@ -2559,7 +2545,7 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "prperties": {
+                "properties": {
                   "author_rate": {
                     "type": "integer",
                     "description": "作者评分"
@@ -2656,7 +2642,7 @@
     },
     "movie_info_list": {
       "type": "object",
-      "prperties": {
+      "properties": {
         "name": {
           "type": "string",
           "description": "名称"
@@ -2678,10 +2664,7 @@
             "data": {
               "type": "array",
               "items": {
-                "type": "object",
-                "schema": {
-                  "$ref":"#/definitions/movie_info_list"
-                }
+                "$ref":"#/definitions/movie_info_list"
               }
             }
           }
@@ -2703,10 +2686,7 @@
             "data": {
               "type": "array",
               "items": {
-                "type": "object",
-                "schema": {
-                  "$ref":"#/definitions/movie_info_list"
-                }
+                "$ref":"#/definitions/movie_info_list"
               }
             }
           }
@@ -2728,10 +2708,7 @@
             "data": {
               "type": "array",
               "items": {
-                "type": "object",
-                "schema": {
-                  "$ref":"#/definitions/movie_info_list"
-                }
+                "$ref":"#/definitions/movie_info_list"
               }
             }
           }
@@ -2753,10 +2730,7 @@
             "data": {
               "type": "array",
               "items": {
-                "type": "object",
-                "schema": {
-                  "$ref":"#/definitions/movie_info_list"
-                }
+                "$ref":"#/definitions/movie_info_list"
               }
             }
           }
@@ -2803,10 +2777,7 @@
             "data": {
               "type": "array",
               "items": {
-                "type": "object",
-                "schema": {
-                  "$ref":"#/definitions/user_movie_list"
-                }
+                "$ref":"#/definitions/user_movie_list"
               }
             }
           }

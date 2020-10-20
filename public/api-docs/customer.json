@@ -1711,10 +1711,7 @@
           }
         },
         "content": {
-          "type": "object",
-          "schema": {
-            "$ref":"#/definitions/media_content"
-          }
+          "$ref":"#/definitions/media_content"
         },
         "createdAt": {
           "type": "string",
@@ -1880,10 +1877,7 @@
                 "fans": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "schema": {
-                      "$ref":"#/definitions/customer_manage_get_fans"
-                    }
+                    "$ref":"#/definitions/customer_user_list"
                   }
                 }
               }
@@ -1910,10 +1904,7 @@
                 "attentions": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "schema": {
-                      "$ref":"#/definitions/customer_manage_get_fans"
-                    }
+                    "$ref":"#/definitions/customer_user_list"
                   }
                 }
               }
@@ -2046,9 +2037,7 @@
                 "store": {
                   "type": "array",
                   "items": {
-                    "schema": {
-                      "$ref": "#/definitions/customer_movie_list"
-                    }
+                    "$ref": "#/definitions/customer_movie_list"
                   }
                 }
               }
@@ -2075,9 +2064,7 @@
                 "issue": {
                   "type": "array",
                   "items": {
-                    "schema": {
-                      "$ref": "#/definitions/customer_movie_list"
-                    }
+                    "$ref": "#/definitions/customer_movie_list"
                   }
                 }
               }
