@@ -82,7 +82,7 @@ router
 		sanitizers: [
 			function(data) {
         if(typeof data !== 'string') return undefined
-        if(Array.isArray(data)) {
+        if(data.includes(',')) {
           const realData = data.split(',').filter(item => !!~item.indexOf('=')).map(item => item.trim().split('=')).filter(item => sortList.some(sort => item[0].toUpperCase() === sort._id)).map(item => [ item[0].toLowerCase(), item[1] >= 0 ? 1 : -1 ])
           return !!realData.length ? realData : undefined
         }

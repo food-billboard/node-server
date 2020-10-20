@@ -58,7 +58,7 @@
     "http"
   ],
   "paths": {
-    "/api/barrage": {
+    "/api/customer/barrage": {
       "get": {
         "tags": [
           "barrage"
@@ -421,7 +421,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref": "#/definitions/customer_get_manage_attention"
+              "$ref": "#/definitions/customer_manage_get_fans"
             }
           }
         },
@@ -1849,6 +1849,52 @@
         "name": "customer_get_barrage"
       }
     },
+    "customer_user_list": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string",
+          "description": "头像"
+        },
+        "username": {
+          "type": "string",
+          "description": "用户名"
+        }
+      }
+    },
+    "customer_manage_get_fans": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "fans": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "schema": {
+                      "$ref":"#/definitions/customer_manage_get_fans"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_manage_get_fans"
+      }
+    },
     "customer_get_manage_attention": {
       "type": "object",
       "properties": {
@@ -1858,21 +1904,16 @@
         "res": {
           "type": "object",
           "properties": {
-            "attentions": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "_id": {
-                    "type": "string"
-                  },
-                  "avatar": {
-                    "type": "string",
-                    "description": "头像"
-                  },
-                  "username": {
-                    "type": "string",
-                    "description": "用户名"
+            "data": {
+              "type":"object",
+              "properties": {
+                "attentions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "schema": {
+                      "$ref":"#/definitions/customer_manage_get_fans"
+                    }
                   }
                 }
               }
@@ -1881,7 +1922,7 @@
         }
       },
       "xml": {
-        "name": "customer_get_barrage"
+        "name": "customer_get_manage_attention"
       }
     },
     "customer_manage_get_comment": {
@@ -1893,11 +1934,16 @@
         "res": {
           "type": "object",
           "properties": {
-            "comment": {
-              "type": "array",
-              "items": {
-                "type":"object",
-                "$ref":"#/definitions/comment_data"
+            "data": {
+              "type": "object",
+              "properties": {
+                "comment": {
+                  "type": "array",
+                  "items": {
+                    "type":"object",
+                    "$ref":"#/definitions/comment_data"
+                  }
+                }
               }
             }
           }
@@ -1905,6 +1951,113 @@
       },
       "xml": {
         "name": "customer_manage_get_comment"
+      }
+    },
+    "customer_movie_get_comment": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "comment": {
+                  "type": "array",
+                  "items": {
+                    "type":"object",
+                    "$ref":"#/definitions/comment_data"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_manage_get_comment"
+      }
+    },
+    "customer_movie_list": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "电影描述"
+        },
+        "name": {
+          "type": "string",
+          "description": "电影名称"
+        },
+        "poster": {
+          "type": "string",
+          "description": "海报"
+        },
+        "_id": {
+          "type": "string"
+        },
+        "store": {
+          "type": "boolean",
+          "description": "是否收藏"
+        },
+        "rate": {
+          "type": "integer",
+          "description": "综合评分"
+        },
+        "classify": {
+          "type": "array",
+          "description": "分类",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "分类名称"
+              }
+            }
+          }
+        },
+        "publish_time": {
+          "type": "string",
+          "description": "上映时间",
+          "format":"date-time"
+        },
+        "hot": {
+          "type": "integer",
+          "description": "收藏人数"
+        }
+      }
+    },
+    "customer_manage_get_store": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "store": {
+                  "type": "array",
+                  "items": {
+                    "schema": {
+                      "$ref": "#/definitions/customer_movie_list"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_manage_get_store"
       }
     },
     "customer_manage_get_movie": {
@@ -1916,55 +2069,15 @@
         "res": {
           "type": "object",
           "properties": {
-            "issue": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "description": {
-                    "type": "string",
-                    "description": "电影描述"
-                  },
-                  "name": {
-                    "type": "string",
-                    "description": "电影名称"
-                  },
-                  "poster": {
-                    "type": "string",
-                    "description": "海报"
-                  },
-                  "_id": {
-                    "type": "string"
-                  },
-                  "store": {
-                    "type": "boolean",
-                    "description": "是否收藏"
-                  },
-                  "rate": {
-                    "type": "integer",
-                    "description": "综合评分"
-                  },
-                  "classify": {
-                    "type": "array",
-                    "description": "分类",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "type": "string",
-                          "description": "分类名称"
-                        }
-                      }
+            "data": {
+              "type": "object",
+              "properties": {
+                "issue": {
+                  "type": "array",
+                  "items": {
+                    "schema": {
+                      "$ref": "#/definitions/customer_movie_list"
                     }
-                  },
-                  "publish_time": {
-                    "type": "string",
-                    "description": "上映时间",
-                    "format":"date-time"
-                  },
-                  "hot": {
-                    "type": "integer",
-                    "description": "收藏人数"
                   }
                 }
               }
@@ -1973,7 +2086,7 @@
         }
       },
       "xml": {
-        "name": "customer_get_barrage"
+        "name": "customer_manage_get_movie"
       }
     },
     "customer_mange_get_movie_detail": {
@@ -2102,8 +2215,13 @@
           "type": "object",
           "properties": {
             "data": {
-              "type": "boolean",
-              "description": "是否可以发送"
+              "type": "object",
+              "properties": {
+                "data": {
+                  "description": "是否可以发送",
+                  "type": "boolean"
+                }
+              }
             }
           }
         }
@@ -2364,63 +2482,68 @@
         "res": {
           "type": "object",
           "properties": {
-            "comment": {
-              "description": "主评论信息",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "comment_users": {
-                    "type": "integer",
-                    "description":"评论人数"
-                  },
-                  "content": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "comment": {
+                  "description": "主评论信息",
+                  "type": "array",
+                  "items": {
                     "type": "object",
-                    "$ref":"#/definitions/media_content"
-                  },
-                  "createdAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "updatedAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "like": {
-                    "type": "boolean",
-                    "description": "是否点赞"
-                  },
-                  "total_like": {
-                    "type": "integer",
-                    "description": "总点赞数量"
-                  },
-                  "_id": {
-                    "type": "string"
-                  },
-                  "user_info": {
-                    "type": "object",
-                    "description": "发布评论的用户信息",
                     "properties": {
+                      "comment_users": {
+                        "type": "integer",
+                        "description":"评论人数"
+                      },
+                      "content": {
+                        "type": "object",
+                        "$ref":"#/definitions/media_content"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "like": {
+                        "type": "boolean",
+                        "description": "是否点赞"
+                      },
+                      "total_like": {
+                        "type": "integer",
+                        "description": "总点赞数量"
+                      },
                       "_id": {
                         "type": "string"
                       },
-                      "avatar": {
-                        "type": "string",
-                        "description": "头像"
-                      },
-                      "username": {
-                        "type": "string",
-                        "description": "用户名"
+                      "user_info": {
+                        "type": "object",
+                        "description": "发布评论的用户信息",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
+                          },
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          }
+                        }
                       }
                     }
                   }
+                },
+                "sub": {
+                  "type": "object",
+                  "description": "子评论信息",
+                  "$ref":"#/definitions/comment_data"
                 }
               }
-            },
-            "sub": {
-              "type": "object",
-              "description": "子评论信息",
-              "$ref":"#/definitions/comment_data"
             }
           }
         }
@@ -2491,68 +2614,73 @@
         "success": {
           "type": "boolean"
         },
-        "data": {
+        "res": {
           "type": "object",
           "properties": {
-            "comment": {
-              "type": "array",
-              "items": {
-                "type":"object",
-                "properties": {
-                  "content": {
-                    "type": "object",
-                    "$ref":"#/definitions/media_content"
-                  },
-                  "createdAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "updatedAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "source": {
-                    "type": "object",
+            "data": {
+              "type": "object",
+              "properties": {
+                "comment": {
+                  "type": "array",
+                  "items": {
+                    "type":"object",
                     "properties": {
-                      "type": {
-                        "type": "string",
-                        "description": "源评论类型",
-                        "enum": ["movie", "comment"]
-                      },
-                      "_id": {
-                        "type": "string"
-                      },
                       "content": {
+                        "type": "object",
+                        "$ref":"#/definitions/media_content"
+                      },
+                      "createdAt": {
                         "type": "string",
-                        "description": "源评论或电影文字内容"
-                      }
-                    }
-                  },
-                  "total_like": {
-                    "type": "integer",
-                    "description": "总点赞数量"
-                  },
-                  "like": {
-                    "type": "boolean",
-                    "description": "是否点赞"
-                  },
-                  "_id": {
-                    "type": "string"
-                  },
-                  "user_info": {
-                    "type": "object",
-                    "description": "发布评论的用户信息",
-                    "properties": {
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "source": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "源评论类型",
+                            "enum": ["movie", "comment"]
+                          },
+                          "_id": {
+                            "type": "string"
+                          },
+                          "content": {
+                            "type": "string",
+                            "description": "源评论或电影文字内容"
+                          }
+                        }
+                      },
+                      "total_like": {
+                        "type": "integer",
+                        "description": "总点赞数量"
+                      },
+                      "like": {
+                        "type": "boolean",
+                        "description": "是否点赞"
+                      },
                       "_id": {
                         "type": "string"
                       },
-                      "avatar": {
-                        "type": "string",
-                        "description": "头像"
-                      },
-                      "username": {
-                        "type": "string",
-                        "description": "用户名"
+                      "user_info": {
+                        "type": "object",
+                        "description": "发布评论的用户信息",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
+                          },
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          }
+                        }
                       }
                     }
                   }

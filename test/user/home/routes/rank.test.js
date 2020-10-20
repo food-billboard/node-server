@@ -18,7 +18,6 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.a('array')
   target.forEach(item => {
     expect(item).to.be.a('object').and.that.includes.all.keys('icon', 'match', 'name', '_id')
-    console.log(item)
     commonValidate.objectId(item._id)
     commonValidate.poster(item.icon)
     commonValidate.string(item.name)
