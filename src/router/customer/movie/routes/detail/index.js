@@ -8,6 +8,19 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router
+.use(async(ctx, next) => {
+  const [, token] = verifyTokenToData(ctx)
+  if(!token) {
+    const data = dealErr(ctx)({ errMsg: 'not authorization', status: 401 })
+    responseDataDeal({
+      ctx,
+      data,
+      needCache: false
+    })
+    return 
+  }
+  return await next()
+})
 .get('/', async (ctx) => {
   const check = Params.query(ctx, {
     name: "_id",
@@ -22,12 +35,8 @@ router
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  if(!token) {
-    ctx.status = 301
-    return ctx.redirect("/api/user/movie/detail")
-  }
   const { mobile } = token
-  let res
+
   let store = true
 
   const data = await UserModel.findOne({

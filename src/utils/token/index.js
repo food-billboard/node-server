@@ -34,7 +34,7 @@ const fileEncoded = (str) => {
 }
 
 //创建token
-const signToken = ({mobile, password}, options={expiresIn: '1d'}, callback=(err, token)=>{}) => {
+const signToken = ({ mobile, password, roles }, options={expiresIn: '1d'}, callback=(err, token)=>{}) => {
   let newOptions = options, newCallback = callback
   if(typeof options === 'function') {
     newOptions = {}
@@ -42,8 +42,7 @@ const signToken = ({mobile, password}, options={expiresIn: '1d'}, callback=(err,
   }
   return jwt.sign({
     mobile,
-    password,
-    middel: MIDDEL
+    middel: MIDDEL,
   }, SECRET, newOptions)
 }
 
