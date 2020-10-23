@@ -39,17 +39,20 @@ router
 
   let store = true
 
-  const data = await UserModel.findOne({
+  const data = await UserModel.findOneAndUpdate({
     mobile: Number(mobile),
-    store: { $in: [_id] }
+    // store: { $in: [_id] }
+  }, {
+    $push: { glance: { _id, timestamps: Date.now() } }
   })
   .select({
     _id: 1,
+    store: 1
   })
   .exec()
   .then(data => !!data && data._doc)
   .then(data => {
-    if(!data) store = false
+    if(!data.store.some(item => item._id.equals(_id))) store = false
     return MovieModel.findOneAndUpdate({
       _id
     }, { $inc: { glance: 1 } })

@@ -258,6 +258,11 @@ const PRE_BARRAGE_FIND = [
     }
   }
 ]
+const PRE_BEHAVIOUR_FIND = []
+
+const ROLES_MAP = [ 'SUPER_ADMIN', 'ADMIN', 'DEVELOPMENT', 'SUB_DEVELOPMENT', 'CUSTOMER', 'USER' ]
+
+const METHOD_MAP = [ 'GET', 'POST', 'DELETE', 'PUT', '*' ]
 
 //user
 const UserSchema = new Schema({
@@ -295,34 +300,83 @@ const UserSchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
+  hot_history: [{
+    _id: {
+      type: ObjectId,
+      ref: 'user'
+    },
+    origin_id: {
+      type: ObjectId,
+      refPath: 'origin_type'
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    },
+    origin_type: {
+      type: String,
+      enum: [ 'comment', 'barrage' ],
+      default: 'comment'
+    }
+  }],
 	hot: {
     type: Number,
     default: 0,
     min: 0,
   },
   fans: [{
-    type: ObjectId,
-    ref: 'user',
+    _id: {
+      type: ObjectId,
+      ref: 'user',
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   attentions: [{
-    type: ObjectId,
-    ref: 'user',
+    _id: {
+      type: ObjectId,
+      ref: 'user',
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   issue: [{
-    type: ObjectId,
-    ref: 'movie'
+    _id: {
+      type: ObjectId,
+      ref: 'movie'
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   glance: [{
-    type: ObjectId,
-    ref: 'movie'
+    _id: {
+      type: ObjectId,
+      ref: 'movie'
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   comment: [{
     type: ObjectId,
     ref: 'comment',
   }],
   store: [{
-    type: ObjectId,
-    ref: 'movie'
+    _id: {
+      type: ObjectId,
+      ref: 'movie'
+    },
+    timestamps: {
+      min: 0,
+      type: Number
+    }
   }],
   rate: [{
     _id: {
@@ -340,6 +394,10 @@ const UserSchema = new Schema({
         if(rate > 10) return 10
         return rate
       }
+    },
+    timestamps: {
+      type: Number,
+      min: 0
     }
   }],
   allow_many: {
@@ -352,7 +410,14 @@ const UserSchema = new Schema({
     trim: true,
     uppercase: true,
     default: "SIGNOUT"
-  }
+  },
+  roles: [{
+    type: String,
+    enum: ROLES_MAP,
+    set: (v) => {
+      return v.toUpperCase()
+    }
+  }]
 }, {
   ...defaultConfig
 })
@@ -705,6 +770,15 @@ const SpecialSchema = new Schema({
     required: true,
     unique: true,
   },
+  glance: [{
+    _id: {
+      type: ObjectId,
+      ref: 'user'
+    },
+    timestamps: {
+      type: Number
+    }
+  }]
 }, {
   ...defaultConfig
 })
@@ -1136,6 +1210,82 @@ const FeedbackSchema = new Schema({
   ...defaultConfig
 })
 
+const AuthSchema = new Schema({
+  roles: [{
+    required: true,
+    type: String,
+    enum: ROLES_MAP, 
+    set: (v) => {
+      return v.toUpperCase()
+    }
+  }],
+  allow: {
+    resources: [{
+      type: String,
+    }],
+    actions: [{
+      url: {
+        type: String,
+        validator: {
+          validate: (v) => {
+            return typeof v === 'string' && /(\/.+)+(\?(.+=.+)+)?/.test(v)
+          }
+        }
+      },
+      method: {
+        type: String,
+        enum: METHOD_MAP,
+        set: (v) => {
+          return v.toUpperCase()
+        } 
+      }
+    }],
+    attributes: [{
+      type: String
+    }],
+    where: [{
+      platform: {
+        type: String
+      },
+      app: {
+        type: String
+      }
+    }],
+  }
+})
+
+const BehaviourSchema = new Schema({
+  timestamps: {
+    type: Number,
+    min: 0
+  },
+  url_type: {
+    type: String,
+    required: true,
+    enum: [ 'LOGIN_IN', 'LOGOUT', 'MOVIE_GET', 'MOVIE_POST', 'COMMENT', 'SEARCH', 'RANK_GET', 'CLASSIFY', 'USER_GET', 'USER_GET' ]
+  },
+  user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  target: {
+    type: ObjectId
+  }
+})
+
+// const ApisSchema = new Schema({
+//   url: {
+//     type: String
+//   },
+//   roles: [{
+//     type: String,
+//     enum: ROLES_MAP,
+//     set: (v) => {
+//       return v.toUpperCase()
+//     }
+//   }]
+// })
+
 const FIND_OPERATION_LIB = [
   'find',
   'findOne',
@@ -1167,6 +1317,7 @@ FIND_OPERATION_LIB.forEach(op => {
   ImageSchema.pre(op, prePopulate(PRE_IMAGE_FIND))
   OtherMediaSchema.pre(op, prePopulate(PRE_OTHER_FIND))
   BarrageSchema.pre(op, prePopulate(PRE_BARRAGE_FIND))
+  BehaviourSchema.pre(op, prePopulate(PRE_BEHAVIOUR_FIND))
 })
 
 //完成处理
@@ -1189,7 +1340,9 @@ SAVE_OPERATION_LIB.forEach(op => {
   VideoSchema.post(op, postMiddleware)
   ImageSchema.post(op, postMiddleware)
   OtherMediaSchema.post(op, postMiddleware)
-  BarrageSchema.post(op, postMiddleware)
+  BarrageSchema.post(op, postMiddleware),
+  AuthSchema.post(op, postMiddleware),
+  BehaviourSchema.post(op, postMiddleware)
 })
 
 const UserModel = model('user', UserSchema)
@@ -1212,6 +1365,9 @@ const ImageModel = model('image', ImageSchema)
 const OtherMediaModel = model('other_media', OtherMediaSchema)
 const FeedbackModel = model('feedback', FeedbackSchema)
 const BarrageModel = model('barrage', BarrageSchema)
+const AuthModel = model('auth', AuthSchema)
+// const ApisModel = model('api', ApisSchema)
+const BehaviourModel = model('behaviour', BehaviourSchema)
 
 module.exports = {
   UserModel,
@@ -1234,6 +1390,9 @@ module.exports = {
   OtherMediaModel,
   FeedbackModel,
   BarrageModel,
+  AuthModel,
+  // ApisModel,
+  BehaviourModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1253,5 +1412,10 @@ module.exports = {
   ImageSchema,
   OtherMediaSchema,
   FeedbackSchema,
-  BarrageSchema
+  BarrageSchema,
+  AuthSchema,
+  // ApisSchema,
+  BehaviourSchema,
+  ROLES_MAP,
+  METHOD_MAP
 }

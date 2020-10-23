@@ -52,7 +52,7 @@ router
     updatedAt: 1
   })
   .populate({
-    path: 'attentions',
+    path: 'attentions._id',
     select: {
       username: 1,
       avatar: 1
@@ -71,9 +71,9 @@ router
       data: {
         ...data,
         attentions: attentions.map(a => {
-          const { _doc: { avatar, ...nextA } } = a
+          const { _doc: { _id: { _doc: { avatar, ...nextData } }, timestamps } } = a
           return {
-            ...nextA,
+            ...nextData,
             avatar: avatar ? avatar.src : null,
           }
         })
@@ -102,7 +102,7 @@ router
 
   const data = await UserModel.findOne({
     mobile: Number(mobile),
-    attentions: { $nin: [ _id ] }
+    "attentions._id": { $nin: [ _id ] }
   })
   .select({
     _id: 1
@@ -114,7 +114,7 @@ router
     mineId = id
     return UserModel.findOne({
       _id,
-      fans: { $nin: [ id ] }
+      "fans._id": { $nin: [ id ] }
     })
     .select({
       _id: 1
@@ -127,15 +127,15 @@ router
     return Promise.all([
       UserModel.updateOne({
         mobile: Number(mobile),
-        attentions: { $nin: [ _id ] }
+        "attentions._id": { $nin: [ _id ] }
       }, {
-        $push: { attentions: _id }
+        $push: { attentions: { _id, timestamps: Date.now() } }
       }),
       UserModel.updateOne({
         _id: _id,
-        fans: { $nin: [ mineId ] }
+        "fans._id": { $nin: [ mineId ] }
       }, {
-        $push: { fans: mineId }
+        $push: { fans: { _id: mineId, timestamps: Date.now() } }
       }),
     ])
   })
@@ -163,7 +163,7 @@ router
 
   const data = await UserModel.findOne({
     mobile: Number(mobile),
-    attentions: { $in: [_id] }
+    "attentions._id": { $in: [_id] }
   })
   .select({
     _id: 1
@@ -175,7 +175,7 @@ router
     mineId = id
     return UserModel.findOne({
       _id,
-      fans: { $in: [ id ] }
+      "fans._id": { $in: [ id ] }
     })
     .select({
       _id: 1
@@ -189,12 +189,12 @@ router
       UserModel.updateOne({
         mobile: Number(mobile)
       }, {
-        $pull: { attentions: userId }
+        $pull: { attentions: { _id: userId } }
       }),
       UserModel.updateOne({
         _id: userId
       }, {
-        $pull: { fans: mineId }
+        $pull: { fans: { _id: mineId } }
       }),
     ])
   })

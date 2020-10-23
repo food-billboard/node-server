@@ -64,7 +64,7 @@ describe(`${COMMON_API} test`, function() {
       .then(function(data) {
         const { model } = mockCreateUser({
           username: COMMON_API,
-          glance: [ data._id ]
+          glance: [ { _id: data._id } ]
         })
 
         return model.save()

@@ -66,8 +66,8 @@ describe(`${COMMON_API} test`, function() {
       .then(function(data) {
         const { model, token } = mockCreateUser({
           username: COMMON_API,
-          glance: [ data._id ],
-          store: [ data._id ]
+          glance: [ { _id: data._id } ],
+          store: [ { _id: data._id } ]
         })
         selfToken = token
 

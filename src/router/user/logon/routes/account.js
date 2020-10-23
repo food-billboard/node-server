@@ -49,13 +49,14 @@ router
     return data
   })
   .then(data => {
-    const { fans=[], attentions=[], password:_, avatar, roles, ...nextData } = data
-    const token = signToken({ mobile, password, roles })
+    const { fans=[], attentions=[], password:_, avatar, roles, _id, ...nextData } = data
+    const token = signToken({ mobile, roles, _id })
     return {
       fans: fans.length,
       attentions: attentions.length,
       token,
       avatar: avatar ? avatar.src : null,
+      _id,
       ...nextData
     }
   })

@@ -235,7 +235,7 @@ describe(`${COMMON_API} test`, function() {
           UserModel.updateOne({
             username: COMMON_API
           },{
-            store: [ movieId ]
+            store: [ { _id: movieId } ]
           })
         ])
         .then(function() {
@@ -327,7 +327,7 @@ describe(`${COMMON_API} test`, function() {
           UserModel.updateOne({
             username: COMMON_API
           },{
-            store: [ movieId ]
+            store: [ { _id: movieId } ]
           })
         ])
         .then(function() {

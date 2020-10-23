@@ -63,7 +63,7 @@ describe(`${COMMON_API} test`, function() {
         .then(data => !!data && data._doc.username)
         .then(data => {
           console.log(data)
-          return data === COMMON_API
+          return data === COMMON_API.slice(0, 10)
         })
         .catch(err => {
           console.log('oops: ', err)
@@ -79,7 +79,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .put(COMMON_API)
         .send({
-          name: COMMON_API
+          name: COMMON_API.slice(0, 10)
         })
         .set({
           Accept: 'Application/json',

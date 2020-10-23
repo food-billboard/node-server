@@ -156,7 +156,7 @@ describe(`${COMMON_API} test`, function() {
         return UserModel.updateOne({
           username: COMMON_API
         }, {
-          issue: [ movieId ]
+          issue: [ { _id: movieId } ]
         })
       })
       .catch(err => {

@@ -6,7 +6,7 @@ const KoaStatic = require('koa-static')
 const KoaBody = require('koa-body')
 const app = new Koa()
 const path = require('path')
-const { MongoDB, StaticMiddleware, initStaticFileDir, AccessLimitCheck, redisConnect } = require("@src/utils")
+const { MongoDB, StaticMiddleware, initStaticFileDir, AccessLimitCheck, redisConnect, authMiddleware, notes_customer_behaviour_middleware } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
 const morgan = require('koa-morgan')
 
@@ -40,14 +40,19 @@ app.use(Cors())
   //   },
   // }
 }))
-// 访问权限
+//api访问权限
+.use(authMiddleware)
+//静态资源访问权限
 .use(StaticMiddleware)
+//用户行为记录
+.use(notes_customer_behaviour_middleware)
 .use(KoaStatic(path.resolve(__dirname, 'static'), {
   setHeaders: (res, path, stats) => {
 
   },
   extensions: true
 }))
+//路由地址
 .use(Router.routes()).use(Router.allowedMethods())
 
 app.listen( process.env.PORT || 4000, () => {

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const Lib = require("./mongo.lib")
+const { initAuthMapData } = require('../auth')
 
 let instance = false
 
@@ -9,6 +10,9 @@ function MongoDB(url="mongodb://localhost:27017/movie") {
     mongoose.connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true
+    })
+    .then(_ => {
+      // initAuthMapData()
     })
     .catch(err => {
       

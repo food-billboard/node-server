@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { SpecialModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { SpecialModel, dealErr, notFound, Params, responseDataDeal, verifyTokenToData } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -19,10 +19,16 @@ router
 				return ObjectId(data)
 			}
 		]
-	})
+  })
+  
+  const [, token] = verifyTokenToData
+  let pushData = { timestamps: Date.now() }
+  if(token) pushData = { ...pushData, _id: token._id }
 
-  const data = await SpecialModel.findOne({
+  const data = await SpecialModel.findOneAndUpdate({
     _id
+  }, {
+    $push: { glance: pushData }
   })
   .select({
     movie: 1,
