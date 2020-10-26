@@ -12,7 +12,13 @@ const ROLES_DATABASE_MAP = [
   {
     roles: ['SUPER_ADMIN'],
     allow: {
-      ...DEFAULT_ROLES_DATABASE
+      ...DEFAULT_ROLES_DATABASE,
+      actions: [
+        {
+          methods: '*', //or [ get, post ]
+          url: '/api/manage/'
+        }
+      ]
     }
   },
   {
