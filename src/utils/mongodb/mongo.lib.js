@@ -432,6 +432,10 @@ const GlobalSchema = new Schema({
     type: String,
     required: true
   },
+  visit_count: {
+    type: Number,
+    min: 0
+  }
 }, {
   ...defaultConfig
 })
@@ -1205,6 +1209,11 @@ const FeedbackSchema = new Schema({
       type: ObjectId,
       ref: 'video'
     }]
+  },
+  status: {
+    type: String,
+    enum: [ 'DEALING', 'DEAL' ],
+    default: 'DEALING'
   }
 }, {
   ...defaultConfig

@@ -1,6 +1,6 @@
 const { verifyTokenToData } = require('../token')
 const url_map = require('./url-map')
-const { BehaviourModel } = require('../mongodb')
+const { BehaviourModel, GlobalModel } = require('../mongodb')
 const Url = require('url')
 
 const NEED_DEAL_ROLE = [ 'CUSTOMER', 'USER' ]
@@ -36,6 +36,9 @@ const notes_customer_behaviour_middleware = async (ctx, next) => {
     model.save(function(err) {
       if(err) reject(err)
       resolve()
+    })
+    GlobalModel.updateOne({}, {
+      $inc: { visit_count: 1 }
     })
   })
   .catch(err => {
