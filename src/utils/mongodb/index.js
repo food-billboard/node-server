@@ -9,7 +9,8 @@ function MongoDB(url="mongodb://localhost:27017/movie") {
     instance = true
     mongoose.connect(url, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
+      autoIndex: false
     })
     .then(_ => {
       // initAuthMapData()

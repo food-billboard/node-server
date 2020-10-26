@@ -603,6 +603,7 @@ const MovieSchema = new Schema({
   name: {
     type: String,
     required: true,
+    index: true
   },
   info: {
     name: {
@@ -790,7 +791,8 @@ const SpecialSchema = new Schema({
 const ActorSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   // works: [{
   //   type: ObjectId,
@@ -813,7 +815,8 @@ const ActorSchema = new Schema({
 const DirectorSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   // works: [{
   //   type: ObjectId,
@@ -1003,7 +1006,7 @@ const LanguageSchema = new Schema({
 const VideoSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   src: {
     type: String,

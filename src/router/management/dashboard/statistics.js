@@ -37,6 +37,43 @@ const getDateParams = (ctx) => {
   }
 }
 
+const aggregate = () => {
+  UserModel.aggregate([
+    // {
+    //   $match: {
+    //     createdAt: {
+    //       $gte: !!start_date ? start_date : new Date(Date.now() - date_value[date_type || 'week']),
+    //       $lte: !!end_date ? end_date : new Date()
+    //     }
+    //   }
+    // },
+    {
+      $project: {
+        username: 1,
+        createdAt: 1,
+        issue: 1,
+        issue_count: {
+          $size: {
+            $ifNull: [
+              '$issue', []
+            ]
+          }
+        }
+      }
+    },
+    {
+      $group: {
+        
+      }
+    },  
+    {
+      $sort: {
+        $issue_count: -1
+      }
+    }
+  ])
+}
+
 //用户电影数据统计图
 router
 //注册用户
