@@ -264,6 +264,12 @@ const ROLES_MAP = [ 'SUPER_ADMIN', 'ADMIN', 'DEVELOPMENT', 'SUB_DEVELOPMENT', 'C
 
 const METHOD_MAP = [ 'GET', 'POST', 'DELETE', 'PUT', '*' ]
 
+const USER_STATUS = [ 'SIGNIN', 'SIGNOUT', 'FREEZE' ]
+
+const MOVIE_STATUS = [ 'VERIFY', 'COMPLETE', 'NOT_VERIFY' ]
+
+const MOVIE_SOURCE_TYPE = [ [ 'ORIGIN', 'USER' ] ]
+
 //user
 const UserSchema = new Schema({
 	mobile: {
@@ -406,7 +412,7 @@ const UserSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['SIGNIN', 'SIGNOUT', 'FREEZE'],
+    enum: USER_STATUS,
     trim: true,
     uppercase: true,
     default: "SIGNOUT"
@@ -701,14 +707,14 @@ const MovieSchema = new Schema({
   source_type: {
     type: String,
     required: true,
-    enum: [ 'ORIGIN', 'USER' ],
+    enum: MOVIE_SOURCE_TYPE,
     trim: true,
     uppercase: true,
   },
   stauts: {
     type: String,
     required: true,
-    enum: [ 'VERIFY', 'COMPLETE' ],
+    enum: MOVIE_STATUS,
     trim: true,
     uppercase: true,
   },
@@ -1429,5 +1435,8 @@ module.exports = {
   // ApisSchema,
   BehaviourSchema,
   ROLES_MAP,
-  METHOD_MAP
+  METHOD_MAP,
+  USER_STATUS,
+  MOVIE_STATUS,
+  MOVIE_SOURCE_TYPE
 }
