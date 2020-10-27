@@ -295,6 +295,12 @@ const UserSchema = new Schema({
     type: String,
     default: '默认名称'
   },
+  description: {
+    type: String,
+    default: "描述一下你自己吧",
+    min: 0,
+    max: 50
+  },
 	avatar: {
     // default: ObjectId('5edb3c7b4f88da14ca419e61'),
     type: ObjectId,

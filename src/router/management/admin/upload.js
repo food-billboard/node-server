@@ -26,19 +26,6 @@ router
     ]
   })
 
-  const data = await UserModel.aggregate([
-    {
-      $match: {
-        mobile: Number(mobile)
-      }
-    },
-    {
-      $project: {
-        
-      }
-    }
-  ])
-
   const data = await UserModel.findOne({
     mobile: Number(mobile)
   })
@@ -78,16 +65,18 @@ router
       data: {
         ...data,
         issue: issue.map(s => {
-          const { _doc: { _id: { _doc: { poster, , total_rate, rate_person, ...nextS } } } } = s
+          const { _doc: { _id: { _doc: { poster, total_rate, rate_person, comment, barrage, glance, ...nextS } } } } = s
           const rate = total_rate / rate_person
           return {
             ...nextS,
+            comment: comment.length,
+            barrage: barrage.length,
+            glance: glance.length,
+            total_rate,
+            rate_person,
             poster: poster ? poster.src : null,
             description,
             name,
-            classify,
-            store: false,
-            publish_time: screen_time,
             rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
           }
         })
@@ -105,3 +94,29 @@ router
 })
 
 module.exports = router
+
+/**
+ *  {
+   data: {
+     issue: [
+       {
+        poster,
+        hot,
+        author_rate,
+        author_description,
+        total_rate,
+        rate_person,
+        rate,
+        createdAt,
+        updatedAt,
+        tag,
+        comment: number,
+        glance: number,
+        stauts,
+        name,
+        barrage: number
+       }
+     ]
+   }
+ }
+ */

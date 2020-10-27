@@ -3,6 +3,7 @@ const Upload = require('./upload')
 const Comment = require('./comment')
 const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal, Params } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
+const { default: validator } = require('validator')
 
 const router = new Router()
 
@@ -48,11 +49,62 @@ router
 })
 //修改
 .put('/', async(ctx) => {
+  /**
+   * username
+   * avatar
+   * description
+   */
 
   const check = Params.body(ctx, {
-    name: '',
-    type: [  ],
-    validator: []
+    name: 'username',
+    validator: [
+      data => typeof data === 'string' ? data.length > 0 && data.length <= 20 : typeof data === 'undefined',
+    ]
+  }, {
+    name: 'avatar',
+    validator: [
+      data => typeof data === 'string' ? ObjectId.isValid(data) : typeof data === 'undefined'
+    ]
+  }, {
+    name: "description",
+    validator: [
+      data => typeof data === 'string' ? data.length > 0 && data.length <= 50 : typeof data === 'undefined',
+    ]
+  })
+
+  if(check) return
+
+  const [, token] = verifyTokenToData(ctx)
+  const { mobile } = token
+  const { request: { username, avatar, description } } = ctx
+
+  let updateField = {}
+  if(username) updateField = { ...updateField, username }
+  if(avatar) updateField = { ...updateField, avatar }
+  if(description) updateField = { ...updateField, description }
+
+  const data = await UserModel.findOneAndUpdate({
+    mobile: Number(mobile)
+  }, {
+    $set: updateField
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => ({
+    data: {
+      _id: data._id
+    }
+  }))
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
   })
   
 })
@@ -60,3 +112,18 @@ router
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 
 module.exports = router
+
+/**
+ * {
+  username,
+  avatar,
+  hot,
+  fans: number,
+  attentions: number,
+  createdAt,
+  updatedAt
+}
+ */
+/**
+ * _id
+ */

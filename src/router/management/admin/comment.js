@@ -46,7 +46,7 @@ router
       createdAt: 1,
       total_like: 1,
       content: 1,
-      like_person: 1,
+      // like_person: 1,
       comment_users: 1,
       source_type: 1,
     },
@@ -63,14 +63,12 @@ router
   .then(notFound)
   .then(data => {
     const { comment, _id: userId, avatar, ...nextData } = data
-    let like = false
     return {
       data: {
         comment: comment.map(c => {
-          like = false
           const { 
             _doc: { 
-              like_person, 
+              // like_person, 
               content: { image, video, ...nextContent }, 
               source={}, 
               source_type,
@@ -80,9 +78,7 @@ router
           } = c
 
           const { _doc: { name, content, ...nextSoruce } } = source
-          if(like_person.some(l => l.equals(userId))) {
-            like = true
-          }
+
           return {
             ...nextC,
             comment_users: comment_users.length,
@@ -96,7 +92,6 @@ router
               type: source_type,
               content: name ? name : ( content || null )
             },
-            like,
             user_info: {
               ...nextData,
               _id: userId,
@@ -116,3 +111,25 @@ router
 })
 
 module.exports = router
+
+/**
+ * source: {
+  type: source_type,
+  content,
+  _id,
+},
+updatedAt,
+createdAt,
+total_like,
+content: {
+  image,
+  video,
+  text
+},
+comment_users: number,
+user_info: {
+  _id,
+  avatar,
+  username,
+}
+ */
