@@ -3,7 +3,6 @@ const Upload = require('./upload')
 const Comment = require('./comment')
 const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal, Params } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
-const { default: validator } = require('validator')
 
 const router = new Router()
 

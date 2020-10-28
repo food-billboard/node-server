@@ -260,7 +260,14 @@ const PRE_BARRAGE_FIND = [
 ]
 const PRE_BEHAVIOUR_FIND = []
 
-const ROLES_MAP = [ 'SUPER_ADMIN', 'ADMIN', 'DEVELOPMENT', 'SUB_DEVELOPMENT', 'CUSTOMER', 'USER' ]
+const ROLES_MAP = {
+  SUPER_ADMIN: 0,
+  ADMIN: 1,
+  DEVELOPMENT: 2,
+  SUB_DEVELOPMENT: 3,
+  CUSTOMER: 4,
+  USER: 5
+}
 
 const METHOD_MAP = [ 'GET', 'POST', 'DELETE', 'PUT', '*' ]
 
@@ -268,7 +275,7 @@ const USER_STATUS = [ 'SIGNIN', 'SIGNOUT', 'FREEZE' ]
 
 const MOVIE_STATUS = [ 'VERIFY', 'COMPLETE', 'NOT_VERIFY' ]
 
-const MOVIE_SOURCE_TYPE = [ [ 'ORIGIN', 'USER' ] ]
+const MOVIE_SOURCE_TYPE = [ 'ORIGIN', 'USER' ]
 
 //user
 const UserSchema = new Schema({
@@ -425,7 +432,7 @@ const UserSchema = new Schema({
   },
   roles: [{
     type: String,
-    enum: ROLES_MAP,
+    enum: Object.keys(ROLES_MAP),
     set: (v) => {
       return v.toUpperCase()
     }
@@ -1238,7 +1245,7 @@ const AuthSchema = new Schema({
   roles: [{
     required: true,
     type: String,
-    enum: ROLES_MAP, 
+    enum: Object.keys(ROLES_MAP), 
     set: (v) => {
       return v.toUpperCase()
     }

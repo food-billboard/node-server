@@ -10,7 +10,7 @@ router
   const check = Params.query(ctx, {
     name: 'role',
     validator: [
-      data => typeof data === 'string' ? ROLES_MAP.includes(data.toUpperCase()) : typeof data == 'undefined'
+      data => typeof data === 'string' ? Object.values(ROLES_MAP).includes(data.toUpperCase()) : typeof data == 'undefined'
     ]
   }, {
     name: 'start_date',

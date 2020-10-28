@@ -2,6 +2,7 @@ const path = require('path')
 const Day = require('dayjs')
 const { Types: { ObjectId } } = require('mongoose')
 const fs = require('fs')
+const { ROLES_MAP } = require('./mongodb')
 
 const EMAIL_AUTH = {
   pass: 'hgldcifqqwmlbajd',
@@ -217,6 +218,21 @@ const initStaticFileDir = (dirList=DIR_LIST) => {
   })
 }
 
+//角色查找
+const findMostRole = (roles) => {
+  const maxRoleAuth = Object.keys(ROLES_MAP).length - 1
+  const minRoleAuth = 0
+  let targetRole = maxRoleAuth
+  roles.forEach(role => {
+      const _role = Number(ROLES_MAP[role])
+      if(!Number.isNaN(_role) && _role <= maxRoleAuth && _role >= minRoleAuth && _role < targetRole ) {
+          targetRole = _role
+      }
+  })
+
+  return targetRole
+}
+
 module.exports = {
   isType,
   isEmpty,
@@ -233,5 +249,6 @@ module.exports = {
   checkDir,
   checkAndCreateDir,
   EMAIL_REGEXP,
-  EMAIL_AUTH
+  EMAIL_AUTH,
+  findMostRole
 }

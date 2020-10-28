@@ -68,7 +68,7 @@ const authMiddleware = async (ctx, next) => {
   roles = !!roles.length ? roles : false
 
   //若包含最低访问权限则直接放行
-  if(roles && roles.includes(ROLES_MAP[ROLES_MAP.length - 1])) return await next()
+  if(roles && roles.includes('USER')) return await next()
 
   data = await (!token ? Promise.reject({ errMsg: 'not authorization', status: 401 }) : Promise.resolve()) //未登录
   .then(_ => roles)
