@@ -1,5 +1,5 @@
 const { ROLES_DATABASE_MAP } = require('./map')
-const { AuthModel, ApisModel, UserModel, ROLES_MAP } = require('../mongodb')
+const { AuthModel, ApisModel, UserModel } = require('../mongodb/mongo.lib')
 const { log4Error } = require('@src/config/winston')
 const { verifyTokenToData } = require('../token')
 const { responseDataDeal, dealErr, notFound } = require('../error-deal')

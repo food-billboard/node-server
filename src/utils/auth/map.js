@@ -1,4 +1,4 @@
-const { ROLES_MAP, METHOD_MAP } = require('../mongodb')
+const { ROLES_MAP, METHOD_MAP } = require('../constant')
 
 const DEFAULT_ROLES_DATABASE = {
   resources: [],

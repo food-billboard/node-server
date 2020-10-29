@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
-const { EMAIL_REGEXP } = require('../tool')
+const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP } = require('../constant')
 
 function getMill(time) {
   return Day(time).valueOf()
@@ -259,23 +259,6 @@ const PRE_BARRAGE_FIND = [
   }
 ]
 const PRE_BEHAVIOUR_FIND = []
-
-const ROLES_MAP = {
-  SUPER_ADMIN: 0,
-  ADMIN: 1,
-  DEVELOPMENT: 2,
-  SUB_DEVELOPMENT: 3,
-  CUSTOMER: 4,
-  USER: 5
-}
-
-const METHOD_MAP = [ 'GET', 'POST', 'DELETE', 'PUT', '*' ]
-
-const USER_STATUS = [ 'SIGNIN', 'SIGNOUT', 'FREEZE' ]
-
-const MOVIE_STATUS = [ 'VERIFY', 'COMPLETE', 'NOT_VERIFY' ]
-
-const MOVIE_SOURCE_TYPE = [ 'ORIGIN', 'USER' ]
 
 //user
 const UserSchema = new Schema({

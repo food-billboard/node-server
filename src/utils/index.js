@@ -8,6 +8,7 @@ const Static = require('./static')
 const Email = require('./email')
 const Auth = require('./auth')
 const CustomerOperation = require('./customer-operation')
+const Constant = require('./constant')
 
 module.exports = {
   ...MongoDB,
@@ -19,5 +20,6 @@ module.exports = {
   ...Static,
   ...Email,
   ...Auth,
-  ...CustomerOperation
+  ...CustomerOperation,
+  ...Constant
 }

@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { UserModel, verifyTokenToData, dealErr, notFound, responseDataDeal, Params, ROLES_MAP, findMostRole } = require('@src/utils')
+const { UserModel, verifyTokenToData, dealErr, notFound, responseDataDeal, Params, ROLES_MAP, findMostRole, EMAIL_REGEXP} = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
