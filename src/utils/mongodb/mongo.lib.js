@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
-const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP } = require('../constant')
+const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS } = require('../constant')
 
 function getMill(time) {
   return Day(time).valueOf()
@@ -1217,7 +1217,7 @@ const FeedbackSchema = new Schema({
   },
   status: {
     type: String,
-    enum: [ 'DEALING', 'DEAL' ],
+    enum: Object.keys(FEEDBACK_STATUS),
     default: 'DEALING'
   }
 }, {

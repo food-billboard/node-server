@@ -1,33 +1,13 @@
 const Router = require('@koa/router')
-const { UserModel, BehaviourSchema, GlobalModel, MovieModel, FeedbackModel, dealErr, notFound, responseDataDeal } = require('@src/utils')
+const { UserModel, BehaviourModel, GlobalModel, MovieModel, FeedbackModel, dealErr, notFound, responseDataDeal, FEEDBACK_STATUS } = require('@src/utils')
 const Day = require('dayjs')
+const { Aggregate } = require('mongoose')
 
 const router = new Router()
 
-const getDateAbout = () => {
-  const nowDate = Day()
-  const nowYear = nowDate.year()
-  const nowMonth = nowDate.month()
-  //几号
-  const nowToday = nowDate.date()
-  //周几
-  const thisWeek = nowDate.day()
-  //本周起始日期
-  const thisStartWeek = new Date(nowYear, nowMonth, thisWeek == 0 ? nowToday - 6 : nowToday - thisWeek + 1).getTime()
-  //上周起始日期
-  const lastStartWeek = new Date(thisStartWeek - 7 * 24 * 60 * 60 * 1000).getTime()
-  //今日起始
-  const thisStartDay = new Date(nowYear, nowMonth, nowToday).getTime()
-  //昨日起始
-  const lastStartDay = new Date(thisStartDay - 24 * 60 * 60 * 1000).getTime()
+const GMT_ADJUST = 8 * 60 * 60 * 1000
+const DAY_MILL_TIME = 24 * 60 * 60 * 1000
 
-  return {
-    lastStartDay,
-    thisStartDay,
-    lastStartWeek,
-    thisStartWeek
-  }
-}
 
 const userStatistics = () => {
   const templateData = {
@@ -37,56 +17,96 @@ const userStatistics = () => {
     day_add_count: 0
   }
 
-  return UserModel.find({})
-  .select({
-    createdAt: 1,
-    _id: 0,
-  })
-  .exec()
-  .then(data => {
-    if(!Array.isArray(data)) return Promise.reject({ errMsg: 'data error', status: 404 })
-    const total = data.length
+  const now = new Date()
+  const millNow = now.getTime()
+  const weekNow = now.getDay()
 
-    //上周新增
-    let lastWeekCount = 0
-    //本周新增
-    let thisWeekCount = 0
-    //昨日新增
-    let lastDay = 0
-    //今日新增
-    let thisDay = 0
+  const aggregate = new Aggregate()
 
-    const { 
-      lastStartDay,
-      thisStartDay,
-      lastStartWeek,
-      thisStartWeek
-    } = getDateAbout()
+  aggregate.model(UserModel)
+
+  return Promise.all([
+    UserModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          total: 1
+        }
+      }
+    ])
+    .exec(),
+    aggregate
+    .match({
+      createdAt: {
+        $gte: new Date(millNow - 7 * DAY_MILL_TIME - (weekNow == 0 ? 6 : weekNow - 1) * DAY_MILL_TIME)
+      }
+    })
+    .project({
+      createdAt: 1,
+      _id: 0
+    })
+    .group({
+      _id: {
+        year: {
+          $year: "$createdAt"
+        },
+        // month: {
+        //   $month: "$createdAt"
+        // },
+        // week: {
+        //   $week: "$createdAt"
+        // },
+        week_day: {
+          $dayOfWeek: "$createdAt"
+        },
+        day: {
+          $dayOfYear: "$createdAt"
+        }
+      },
+      count: {
+        $sum: 1
+      }
+    })
+    .sort({
+      "_id.year": -1,
+      "_id.day": -1
+    })
+  ])
+  .then(([total_data, data]) => {
+    if(!Array.isArray(data) || !Array.isArray(total_data)) return Promise.reject({ errMsg: 'data error', status: 404 })
+
+    const [ total={ total: 0 } ] = total_data
+    let week_count = {
+      thisWeek: 0,
+      lastWeek: 0
+    }
+
+    const [ today={ count: 0, week_day: 1, day: 1, year: new Date().getFullYear() }, yestoday={ count: 0 } ] = data
+
+    let thisWeek = today.day - today.week_day 
 
     data.forEach(item => {
-      const { createdAt } = item
-      const millTime = new Date(createdAt).getTime()
-
-      if(millTime >= thisStartWeek) {
-        thisWeekCount ++
-      }else if(millTime >= lastStartWeek) {
-        lastWeekCount ++
+      const { _id: { day, year }, count } = item
+      if(day - (today.year - year) * 356 <= thisWeek) {
+        week_count.lastWeek += count
+      }else {
+        week_count.thisWeek += count
       }
-
-      if(millTime >= thisStartDay) {
-        thisDay ++
-      }else if(millTime >= lastStartDay) {
-        lastDay ++
-      }
-
     })
 
     return {
-      ...templateData,
-      total,
-      week_add: ((thisWeekCount - lastWeekCount) / lastWeekCount).toFixed(3),
-      day_add: ((thisDay - lastDay) / lastDay).toFixed(3),
-      day_add_count: thisDay
+      total: total.total,
+      week_add: (( week_count.thisWeek - week_count.lastWeek) / week_count.lastWeek == 0 ? 1 : week_count.lastWeek ).toFixed(3),
+      day_add: ((today.count - yestoday.count) / (yestoday.count == 0 ? 1 : yestoday.count)).toFixed(3),
+      day_add_count: today.count
     }
   })
   .catch(err => {
@@ -101,58 +121,57 @@ const visitStatistics = () => {
     data: []
   }
   let today = new Date().getTime()
-  const oneDay = 24 * 60 * 60 * 1000
-  let dayArr = new Array(7).fill(0).map((_, index) => {
-    return {
-      count: 0,
-      day: Day(today - oneDay * (index + 1) + 10000).format('YYYY-MM-DD'),
-      date_area: [ today - oneDay * (index + 1), today - oneDay * index ]
-    }
-  })
 
   return Promise.all([
-    BehaviourSchema.find({
-      createdAt: { $gt: new Date(today - 7 * oneDay) }
-    })
-    .select({
-      createdAt: 1,
-      _id: 0
-    }),
-    GlobalModel.find({})
-    .select({
-      visit_count: 1,
-      _id: 0
-    })
-    .exec()
+    BehaviourModel.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: new Date(today - 7 * DAY_MILL_TIME)
+          }
+        }
+      },
+      {
+        $project: {
+          date: { $substr: [ { $add: [ "$createdAt" ] }, 10, 0 ] },
+          _id: 0
+        }
+      },
+      {
+        $group: {
+          _id: "$date",
+          count: {
+            $sum: 1
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          count: 1
+        }
+      }
+    ])
+    .exec(),
+    GlobalModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: "$visit_count"
+          } 
+        }
+      }
+    ])
   ])
   .then(([behaviout_data, visit_count]) => {
+
     if(!Array.isArray(behaviout_data) || !Array.isArray(visit_count)) return Promise.reject({ errMsg: 'data error', status: 404 })
 
-    behaviout_data.forEach(current => {
-      const { createdAt } = current
-      const time = new Date(createdAt).getTime()
-      dayArr = dayArr.map(item => {
-        const { date_area, count } = item
-        const [ start, end ] = date_area
-        if(start <= time && end >= time) return {
-          ...item,
-          count: count + 1
-        }
-        return item
-      })
-    })
-
     return {
-      ...templateData,
-      total: visit_count.reduce((acc, cur) => {
-        const { visit_count } = cur
-        acc += typeof visit_count == 'number' ? visit_count : 0
-        return acc
-      }, 0),
-      data: dayArr.map(item => {
-        const { date_area, ...nextItem } = item
-        return nextItem
-      })
+      total: visit_count.length ? visit_count[0].total : 0,
+      data: behaviout_data
     }
   })
   .catch(err => {
@@ -171,76 +190,103 @@ const dataStatistics = () => {
     day_add: 0,
     day_count: 0,
   }
-  let today = new Date().getTime()
-  const oneDay = 24 * 60 * 60 * 1000
-  let dayArr = new Array(7).fill(0).map((_, index) => {
-    return {
-      count: 0,
-      day: Day(today - oneDay * (index + 1) + 10000).format('YYYY-MM-DD'),
-      date_area: [ today - oneDay * (index + 1), today - oneDay * index ]
-    }
-  })
-  const {
-    lastStartDay,
-    thisStartDay,
-    lastStartWeek,
-    thisStartWeek
-  } = getDateAbout()
 
-  return MovieModel.find({})
-  .select({
-    createdAt: 1,
-    _id: 0
-  })
-  .exec()
-  .then(data => {
-    if(!Array.isArray(data)) return Promise.reject({ errMsg: 'data error', status: 404 })
-    const total = data.length
+  const now = new Date()
+  const millNow = now.getTime()
+  const day = now.getDay()
 
-    let thisWeekCount = 0
-    let lastWeekCount = 0
-    let thisDay = 0
-    let lastDay = 0
+  const aggregate = new Aggregate()
+  aggregate.model(MovieModel)
 
-    data.forEach(item => {
-      const { createdAt } = item
-      const millTime = new Date(createdAt).getTime()
-
-      if(millTime >= thisStartWeek) {
-        thisWeekCount ++
-      }else if(millTime >= lastStartWeek) {
-        lastWeekCount ++
-      }
-
-      if(millTime >= thisStartDay) {
-        thisDay ++
-      }else if(millTime >= lastStartDay) {
-        lastDay ++
-      }
-
-      dayArr = dayArr.map(item => {
-        const { date_area, count } = item
-        const [ start, end ] = date_area
-        if(start <= millTime && end >= millTime) return {
-          ...item,
-          count: count + 1
+  return Promise.all([
+    MovieModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1
+          }
         }
-        return item
-      })
-
+      },
+      {
+        $project: {
+          _id: 0,
+          total: 1
+        }
+      }
+    ])
+    .exec(),
+    aggregate
+    .match({
+      createdAt: {
+        $gte: new Date(millNow - 7 * DAY_MILL_TIME - (day == 0 ? 6 : day - 1) * DAY_MILL_TIME)
+      }
     })
+    .project({
+      _id: 0,
+      createdAt: 1
+    })
+    .group({
+      _id: {
+        day: {
+          $dayOfYear: "$createdAt"
+        },
+        year: {
+          $year: "$createdAt"
+        },
+        week_day: {
+          $dayOfWeek: "$createdAt"
+        },
+        month_day: {
+          $dayOfMonth: "$createdAt"
+        },
+        month: {
+          $month: "$createdAt"
+        }
+      },
+      count: {
+        $sum: 1
+      }
+    })
+    .sort({
+      "_id.year": -1,
+      "_id.day": -1
+    })
+  ])
+  .then(([total_data, data]) => {
+    if(!Array.isArray(data) || !Array.isArray(total_data)) return Promise.reject({ errMsg: 'data error', status: 404 })
 
-    return {
-      total,
-      week_add: ((thisWeekCount - lastWeekCount) / lastWeekCount).toFixed(3),
-      day_add: ((thisDay - lastDay) / lastDay).toFixed(3),
-      day_count: thisDay,
-      data: dayArr.map(item => {
-        const { date_area, ...nextItem } = item
-        return nextItem
+    const [ total={ total: 0 } ] = total_data
+    let week_count = {
+      thisWeek: 0,
+      lastWeek: 0
+    }
+    let statistics = []
+
+    const [ today={ count: 0, week_day: 1, day: 1, year: new Date().getFullYear() }, yestoday={ count: 0 } ] = data
+
+    let thisWeek = today.day - today.week_day 
+
+    for(let i = data.length - 1; i >= 0; i --) {
+      const { _id: { day, year, month, month_day }, count } = data[i]
+      if(day - (today.year - year) * 356 <= thisWeek) {
+        week_count.lastWeek += count
+      }else {
+        week_count.thisWeek += count
+      }
+      statistics.push({
+        date: Day(`${year}-${month}-${month_day}`).format('YYYY-MM-DD'),
+        count
       })
     }
 
+    return {
+      total: total.total,
+      week_add: (( week_count.thisWeek - week_count.lastWeek ) / week_count.lastWeek == 0 ? 1 : week_count.lastWeek ).toFixed(3),
+      day_add: ((today.count - yestoday.count) / (yestoday.count == 0 ? 1 : yestoday.count)).toFixed(3),
+      day_add_count: today.count,
+      data: statistics
+    }
   })
   .catch(err => {
     console.log(err)
@@ -255,62 +301,108 @@ const feedbackStatistics = () => {
     total: 0,
     week_add: 0,
     day_add: 0,
+    day_add_count: 0,
     transform_count: 0
   }
 
-  const {
-    lastStartDay,
-    thisStartDay,
-    lastStartWeek,
-    thisStartWeek
-  } = getDateAbout()
+  const now = new Date()
+  const nowWeekDay = now.getDay()
+  const nowMill = now.getTime()
 
-  return FeedbackModel.find({})
-  .select({
-    createdAt: 1,
-    _id: 0,
-    status: 1
-  })
-  .then(data => {
-    if(!Array.isArray(data)) return Promise.reject({ errMsg: 'data error', status: 404 })
+  const aggregate = new Aggregate()
+  aggregate.model(FeedbackModel)
 
-    const total = data.length
-
-    let thisWeekCount = 0
-    let lastWeekCount = 0
-    let thisDay = 0
-    let lastDay = 0
-    let complete = 0
-
-    data.forEach(item => {
-      const { createdAt, status } = item
-      const millTime = new Date(createdAt).getTime()
-
-      if(millTime >= thisStartWeek) {
-        thisWeekCount ++
-      }else if(millTime >= lastStartWeek) {
-        lastWeekCount ++
+  return Promise.all([
+    FeedbackModel.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: {
+            $sum: 1
+          },
+        }
       }
-
-      if(millTime >= thisStartDay) {
-        thisDay ++
-      }else if(millTime >= lastStartDay) {
-        lastDay ++
+    ])
+    .exec(),
+    aggregate
+    .match({
+      createdAt: {
+        $gte: new Date(nowMill - ( 7 + nowWeekDay == 0 ? 6 : nowWeekDay - 1 ) * DAY_MILL_TIME)
       }
-
-      if(status == 'DEAL') {
-        complete ++
-      }
-
     })
+    .project({
+      _id: 0,
+      createdAt: 1
+    })
+    .group({
+      _id: {
+        year: {
+          $year: "$createdAt"
+        },
+        month: {
+          $month: "$createdAt"
+        },
+        month_day: {
+          $dayOfMonth: "$createdAt"
+        },
+        week_day: {
+          $dayOfWeek: "$createdAt"
+        },
+        day: {
+          $dayOfYear: "$createdAt"
+        }
+      },
+      count: {
+        $sum: 1
+      }
+    })
+    .sort({
+      "_id.year": -1,
+      "_id.day": -1
+    })
+    .exec()
+  ])
+  .then(([total_data, data]) => {
+    if(!Array.isArray(data) || !Array.isArray(total_data)) return Promise.reject({ errMsg: 'data error', status: 404 })
+
+    let transform_count = 0
+    const total = total_data.reduce((acc, cur) => {
+      const { count, _id } = cur
+      if(_id == FEEDBACK_STATUS.DEAL) transform_count = count
+      acc += count
+      return acc
+    }, 0)
+
+    let week_count = {
+      thisWeek: 0,
+      lastWeek: 0
+    }
+    // let statistics = []
+
+    const [ today={ count: 0, week_day: 1, day: 1, year: new Date().getFullYear() }, yestoday={ count: 0 } ] = data
+
+    let thisWeek = today.day - today.week_day 
+
+    for(let i = data.length - 1; i >= 0; i --) {
+      const { _id: { day, year, month, month_day }, count } = data[i]
+      if(day - (today.year - year) * 356 <= thisWeek) {
+        week_count.lastWeek += count
+      }else {
+        week_count.thisWeek += count
+      }
+      // statistics.push({
+      //   date: Day(`${year}-${month}-${month_day}`).format('YYYY-MM-DD'),
+      //   count
+      // })
+    }
 
     return {
-      ...templateData,
       total,
-      transform_count: complete / total,
-      week_add: ((thisWeekCount - lastWeekCount) / lastWeekCount).toFixed(3),
-      day_add: ((thisDay - lastDay) / lastDay).toFixed(3),
-      day_count: thisDay,
+      week_add: (( week_count.thisWeek - week_count.lastWeek ) / week_count.lastWeek == 0 ? 1 : week_count.lastWeek ).toFixed(3),
+      day_add: ((today.count - yestoday.count) / (yestoday.count == 0 ? 1 : yestoday.count)).toFixed(3),
+      day_add_count: today.count,
+      // data: statistics
+      transform_count: transform_count / (total == 0 ? 1 : total)
     }
   })
   .catch(err => {
@@ -324,7 +416,7 @@ const feedbackStatistics = () => {
 router
 .get('/', async(ctx) => {
 
-  const data = Promise.all([
+  const data = await Promise.all([
     //用户量统计
     userStatistics(),
     //访问量统计
@@ -334,6 +426,10 @@ router
     //反馈量统计
     feedbackStatistics()
   ])
+  .then(data => {
+    console.log(data)
+    return data
+  })
   .then(([user_count, visit_day, data_count, feedback_count]) => ({
     data: {
       user_count,

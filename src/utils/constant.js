@@ -79,6 +79,11 @@ const ROLES_MAP = {
   USER: 5
 }
 
+const FEEDBACK_STATUS = {
+  DEALING: 'DEALING',
+  DEAL: 'DEAL'
+}
+
 module.exports = {
   EMAIL_AUTH,
   EMAIL_REGEXP,
@@ -89,5 +94,6 @@ module.exports = {
   USER_STATUS,
   MOVIE_STATUS,
   MOVIE_SOURCE_TYPE,
-  ROLES_MAP
+  ROLES_MAP,
+  FEEDBACK_STATUS
 }
