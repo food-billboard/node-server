@@ -5,7 +5,7 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router
-//电影评论列表
+//电影评论列表 时间 分页 排序（hot 时间）
 .get('/', async(ctx) => {
 
     const check = Params.query(ctx, {

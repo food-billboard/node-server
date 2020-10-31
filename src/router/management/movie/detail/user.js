@@ -5,7 +5,7 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router
-//电影访问用户列表
+//电影访问用户列表(分页 时间 用户状态)
 .get('/', async(ctx) => {
 
     const check = Params.query(ctx, {
