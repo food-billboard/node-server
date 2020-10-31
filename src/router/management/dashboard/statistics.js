@@ -1,148 +1,129 @@
 const Router = require('@koa/router')
 const { UserModel, MovieModel, BehaviourModel, dealErr, responseDataDeal, Params } = require('@src/utils')
+const { getDateParams } = require('@src/router/management/utils')
 const Day = require('dayjs')
 
 const router = new Router()
-
-const date_type = ["year", "month", "week", "day" ]
-const date_value = {
-  year: 365,
-  month: 30,
-  week: 7,
-  day: 1
-}
-
-const getDateParams = (ctx) => {
-  const [ dateType, start_date, end_date ] = Params.sanitizers(ctx.query, {
-    name: 'date_type',
-    sanitizers: [
-      data => date_type.includes(data.toLowerCase()) ? data : 'week'
-    ]
-  }, {
-    name: 'start_date',
-    sanitizers: [
-      data => (typeof data === 'string' && /\d{4}-\d{2}-\d{2}/.test(data)) ? Day(data).toDate() : undefined
-    ]
-  }, {
-    name: 'end_date',
-    sanitizers: [
-      data => (typeof data === 'string' && /\d{4}-\d{2}-\d{2}/.test(data)) ? Day(data).toDate() : undefined
-    ]
-  })
-
-  return {
-    date_type: dateType,
-    start_date,
-    end_date
-  }
-}
-
-const aggregate = () => {
-  UserModel.aggregate([
-    // {
-    //   $match: {
-    //     createdAt: {
-    //       $gte: !!start_date ? start_date : new Date(Date.now() - date_value[date_type || 'week']),
-    //       $lte: !!end_date ? end_date : new Date()
-    //     }
-    //   }
-    // },
-    {
-      $project: {
-        username: 1,
-        createdAt: 1,
-        issue: 1,
-        issue_count: {
-          $size: {
-            $ifNull: [
-              '$issue', []
-            ]
-          }
-        }
-      }
-    },
-    {
-      $group: {
-        
-      }
-    },  
-    {
-      $sort: {
-        $issue_count: -1
-      }
-    }
-  ])
-}
 
 //用户电影数据统计图
 router
 //注册用户
 .get('/user', async(ctx) => {
-  const { date_type, start_date, end_date } = getDateParams(ctx)
+  const { date_type, start_date, end_date, group, sort, templateList } = getDateParams(ctx)
 
-  let select = {
-    createdAt: {
-      $gte: !!start_date ? start_date : new Date(Date.now() - date_value[date_type || 'week']),
-      $lte: !!end_date ? end_date : new Date()
-    }
-  }
-
-  const data = await UserModel.find(select)
-  .select({
-    username: 1,
-    createdAt: 1,
-    issue: 1
-  })
-  .exec()
-  .then(data => {
-    if(!Array.isArray(data)) return Promise.reject({ errMsg: 'not found', status: 404 })
-
-    const oneDay = 24 * 60 * 60 * 1000
-    let today = !!end_date ? end_date.getTime() : new Date().getTime()
-    let startDate = !!start_date ? start_date.getTime() : today - oneDay * (date_value[date_type] || 'week')
-    const dayCount = Math.ceil((today - startDate) / oneDay)
-
-    let dayArr = new Array(dayCount).fill(0).map((_, index) => {
-      return {
-        count: 0,
-        day: Day(today - oneDay * (index + 1) + 10000).format('YYYY-MM-DD'),
-        date_area: [ today - oneDay * (index + 1), today - oneDay * index ]
-      }
-    })
-     
-    const sortArr = data.sort((a, b) => {
-      return b.issue.length - a.issue.length
-    })
-
-    data.forEach(item => {
-      const { createdAt } = item
-      const millTime = new Date(createdAt).getTime()
-      dayArr = dayArr.map(item => {
-        const { date_area, count } = item
-        const [ start, end ] = date_area
-        if(start <= millTime && end >= millTime) return {
-          ...item,
-          count: count + 1
+  const data = await Promise.all([
+    //注册用户统计
+    UserModel.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: start_date,
+            $lte: end_date
+          }
         }
-        return item
+      },
+      {
+        $project: {
+          createdAt: 1,
+          _id: 0
+        }
+      },
+      {
+        $group: group
+      },
+      {
+        $sort: sort
+      }
+    ])
+    .exec(),
+    //排行榜统计
+    UserModel.aggregate([
+      {
+        $project: {
+          username: 1,
+          issue_count: {
+            $size: {
+              $ifNull: [
+                '$issue', []
+              ]
+            }
+          },
+          hot: 1
+        }
+      },
+      {
+        $sort: {
+          issue_count: -1,
+          hot: -1
+        }
+      },
+      {
+        $limit: 10
+      }
+    ])
+    .exec()
+  ])
+  .then(([register_user, rank_user]) => {
+
+    if(!Array.isArray(register_user) || !Array.isArray(rank_user)) return Promise.reject({ errMsg: 'data error', status: 404 })
+
+    const data = register_user.reduce((acc, cur) => {
+      const { _id: { year, month, month_day, hour }, count } = cur
+      let day
+      if(date_type == 'week' || date_type == 'month') {
+        day = Day(`${year}-${month}-${month_day}`).format('YYYY-MM-DD')
+      }else if(date_type == 'year') {
+        day = Day(`${year}-${month}`).format('YYYY-MM')
+      }else if(date_type == 'day'){
+        day = Day(`${year}-${month}-${month_day} ${hour}`).format('YYYY-MM-DD HH')
+      }
+      acc.push({
+        day,
+        count
       })
-    })
+      return acc
+    }, [])
 
     return {
-      data: dayArr.map(item => {
-        const { date_area, ...nextItem } = item
-        return nextItem
-      }),
-      rank: sortArr.slice(0, 10).map(item => {
-        const { _id, username, issue } = item
-        return {
-          _id,
-          name: username,
-          count: issue.length
-        }
-      })
-    }
+      
+      // {
+      //   data: {
+      //     data: [
+      //       {
+      //         day: '',
+      //         count: ''
+      //       }
+      //     ],
+      //     rank: [
+      //       {
+      //         name,
+      //         _id,
+      //         count,
+      //         hot
+      //       }
+      //     ]
+      //   }
+      // }
 
+      data: {
+        data: templateList.map(item => {
+          const { date, count } = item
+          const [target={}] = data.filter(item => item.day == date)
+          return {
+            day: date,
+            count: count + (target.count || 0)
+          }
+        }),
+        rank: rank_user.map(item => {
+          const { username, issue_count, ...nextItem } = item
+          return {
+            ...nextItem,
+            name: username,
+            count: issue_count
+          }
+        })
+      }
+    }
   })
   .catch(dealErr(ctx))
 
@@ -154,16 +135,108 @@ router
 })
 //用户上传
 .get('/movie', async(ctx) => {
-  const { date_type, start_date, end_date } = getDateParams(ctx)
+  const { date_type, start_date, end_date, group, sort, templateList } = getDateParams(ctx)
 
-  const data = await MovieModel.find({
+  const data = await Promise.all([
+    UserModel.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: start_date,
+            $lte: end_date
+          }
+        }
+      },
+      {
+        $project: {
+          createdAt: 1,
+          _id: 0
+        }
+      },
+      {
+        $group: group
+      },
+      {
+        $sort: sort
+      }
+    ])
+    .exec(),
+    MovieModel.aggregate([
+      {
+        $match: {
+          source_type: "USER"
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          count: "$hot",
+        }
+      },
+      {
+        $sort: {
+          count: -1
+        }
+      },
+      {
+        $limit: 10
+      }
+    ])
+    .exec()
+  ])
+  .then(([issue_statistics, movie_hot_statistics]) => {
 
-  })
-  .select({
+    if(!Array.isArray(issue_statistics) || !Array.isArray(movie_hot_statistics)) return Promise.reject({ errMsg: 'data error', status: 404 })
 
-  })
-  .then(data => {
+    const data = issue_statistics.reduce((acc, cur) => {
+      const { _id: { year, month, month_day, hour }, count } = cur
+      let day
+      if(date_type == 'week' || date_type == 'month') {
+        day = Day(`${year}-${month}-${month_day}`).format('YYYY-MM-DD')
+      }else if(date_type == 'year') {
+        day = Day(`${year}-${month}`).format('YYYY-MM')
+      }else if(date_type == 'day'){
+        day = Day(`${year}-${month}-${month_day} ${hour}`).format('YYYY-MM-DD HH')
+      }
+      acc.push({
+        day,
+        count
+      })
+      return acc
+    }, [])
 
+    return {
+
+      // {
+      //   data: {
+      //     data: [
+      //       {
+      //         day: '',
+      //         count: ''
+      //       }
+      //     ],
+      //     rank: [
+      //       {
+      //         name,
+      //         _id,
+      //         count,
+      //       }
+      //     ]
+      //   }
+      // }
+
+      data: {
+        data: templateList.map(item => {
+          const { date, count } = item
+          const [target={}] = data.filter(item => item.day == date)
+          return {
+            day: date,
+            count: count + (target.count || 0)
+          }
+        }),
+        rank: movie_hot_statistics
+      }
+    }
   })
   .catch(dealErr(ctx))
 
@@ -173,17 +246,70 @@ router
     needCache: false
   })
 })
-//用户访问统计(日 月 年)
+//用户访问统计(日 月 周 年)
 .get('/visit', async(ctx) => {
-  const { date_type, start_date, end_date } = getDateParams(ctx)
-  
-  const data = await BehaviourModel.find({
+  const { date_type, start_date, end_date, group, sort, templateList } = getDateParams(ctx)
 
-  })
-  .select({
+  const data = await BehaviourModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $lte: end_date,
+          $gte: start_date
+        }
+      }
+    },
+    {
+      $project: {
+        createdAt: 1,
+        _id: 0
+      }
+    },
+    {
+      $group: group
+    },
+    {
+      $sort: sort
+    }
+  ])
+  .then(visit_count => {
+    if(!Array.isArray(visit_count)) return Promise.reject({ errMsg: 'data error', status: 404 })
 
-  })
-  .then(data => {
+    const data = visit_count.reduce((acc, cur) => {
+      const { _id: { year, month, month_day, hour }, count } = cur
+      let day
+      if(date_type == 'week' || date_type == 'month') {
+        day = Day(`${year}-${month}-${month_day}`).format('YYYY-MM-DD')
+      }else if(date_type == 'year') {
+        day = Day(`${year}-${month}`).format('YYYY-MM')
+      }else if(date_type == 'day'){
+        day = Day(`${year}-${month}-${month_day} ${hour}`).format('YYYY-MM-DD HH')
+      }
+      acc.push({
+        day,
+        count
+      })
+      return acc
+    }, [])
+
+    return {
+
+      // [
+      //   {
+      //     day
+      //     count
+      //   }
+      // ]
+
+      data: templateList.map(item => {
+        const { date, count } = item
+        const [target={}] = data.filter(item => item.day == date)
+        return {
+          day: date,
+          count: count + (target.count || 0)
+        }
+      })
+    }
 
   })
   .catch(dealErr(ctx))

@@ -864,7 +864,10 @@ const SearchSchema = new Schema({
     },
 		field: String
 	}],
-	match_texts: [String],
+	match_texts: [{
+    type: String,
+    min: 1
+  }],
   hot: {
     type: Number,
     default: 0,

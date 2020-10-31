@@ -1,4 +1,6 @@
 const Router = require('@koa/router')
+const { MovieModel, SearchModel, dealErr, responseDataDeal } = require('@src/utils')
+const { getDateParams } = require('@src/router/management/utils')
 
 const router = new Router()
 

@@ -1,8 +1,11 @@
 const path = require('path')
 const Day = require('dayjs')
+var isoWeek = require('dayjs/plugin/isoWeek')
 const { Types: { ObjectId } } = require('mongoose')
 const fs = require('fs')
 const { DIR_LIST, ROLES_MAP } = require('./constant')
+
+Day.extend(isoWeek)
 
 //检查是否存在文件夹
 const checkDir = path => !fs.existsSync(path) || !fs.statSync(path).isDirectory()
