@@ -1,5 +1,4 @@
 const Router = require('@koa/router')
-const Manage = require('./manage')
 const Detail = require('./detail')
 const { UserModel, verifyTokenToData, dealErr, notFound, Params, responseDataDeal, ROLES_MAP, USER_STATUS } = require('@src/utils')
 
@@ -97,7 +96,6 @@ router
     needCachme: false
   })
 })
-.use('/manage', Manage.routes(), Manage.allowedMethods())
 .use('/detail', Detail.routes(), Detail.allowedMethods())
 //预查角色分配相关
 .use(async (ctx, next) => {

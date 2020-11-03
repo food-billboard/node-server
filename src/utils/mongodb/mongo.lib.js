@@ -707,7 +707,7 @@ const MovieSchema = new Schema({
     trim: true,
     uppercase: true,
   },
-  stauts: {
+  status: {
     type: String,
     required: true,
     enum: MOVIE_STATUS,

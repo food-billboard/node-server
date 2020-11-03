@@ -43,7 +43,7 @@ router
     mobile: Number(mobile),
     // store: { $in: [_id] }
   }, {
-    $push: { glance: { _id, timestamps: Date.now() } }
+    $pull: { glance: { _id } },
   })
   .select({
     _id: 1,
@@ -51,6 +51,7 @@ router
   })
   .exec()
   .then(data => !!data && data._doc)
+  .then(notFound)
   .then(data => {
     if(!data.store.some(item => item._id.equals(_id))) store = false
     return MovieModel.findOneAndUpdate({
@@ -140,6 +141,12 @@ router
     const { actor, director, district, language, classify, ...nextInfo } = info
 
     const rate = total_rate / rate_person
+
+    UserModel.updateOne({
+      mobile: Number(mobile),
+    }, {
+      $push: { glance: { _id, timestamps: Date.now() } }
+    })
 
     return {
       data: {

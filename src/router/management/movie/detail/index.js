@@ -2,50 +2,129 @@ const Router = require('@koa/router')
 const Comment = require('./comment')
 const User = require('./user')
 const { MovieModel, dealErr, notFound, responseDataDeal, Params } = require('@src/utils')
-const { Types: { ObjectId } } = require('mongoose')
+const { Types: { ObjectId }, Aggregate } = require('mongoose')
 
 const router = new Router()
 
 router
 //id判断中间件
 .use(async (ctx, next) => {
+  const check = Params.query(ctx, {
+    name: '_id',
+    type: [ 'isMongoId' ]
+  })
+
+  if(check) return
   return await next()
 })
 //电影详细信息
 .get('/', async(ctx) => {
 
-  const check = Params.query(ctx, {
-      name: '_id',
-      type: [ 'isMongoId' ]
-  })
-
-  if(check) return
-
   const [ _id ] = Params.sanitizers(ctx.query, {
-      name: '_id',
-      sanitizers: [
-        data => ObjectId(data)
-      ]
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
   })
 
-  const data = await MovieModel.findOne({
-      _id
-  })
-  .select({
+  const aggregate = new Aggregate()
 
+  aggregate.model(MovieModel)
+
+  const data = await aggregate.match({
+    _id
   })
-  .exec()
-  .then(data => !!data && data._doc)
+  .lookup({
+    from: 'users', 
+    localField: 'author', 
+    foreignField: '_id', 
+    as: 'author'
+  })
+  .unwind("author")
+  .lookup({
+    from: 'images', 
+    localField: 'images', 
+    foreignField: '_id', 
+    as: 'images'
+  })
+  .lookup({
+    from: 'videos', 
+    localField: 'video', 
+    foreignField: '_id', 
+    as: 'video'
+  })
+  .unwind("video")
+  .project({
+    name: 1,
+    video: "$video.src",
+    classify: "$info.classify",
+    images: "images.src",
+    poster: 1,
+    createdAt: 1,
+    updatedAt: 1,
+    glance: 1,
+    hot: 1,
+    rate_person: 1,
+    total_rate: 1,
+    source_type: 1,
+    status: 1,
+    barrage_count: {
+      $size: {
+        $ifNull: [
+          "$barrage", []
+        ]
+      }
+    },
+    tag_count: {
+      $size: {
+        $ifNull: [
+          "$tag", []
+        ]
+      }
+    },
+    comment_count: {
+      $size: {
+        $ifNull: [
+          "$comment", []
+        ]
+      }
+    },
+    author: {
+      _id: "$author._id",
+      username: "$author.username"
+    },
+  })
+  .then(data => !!Object.keys(data).length && data)
   .then(notFound)
-  .then(data => {
-
-  })
+  // {
+  //   data: {
+  //     name,
+  //     classify,
+  //     images,
+  //     poster,
+  //     createdAt,
+  //     updatedAt,
+  //     glance,
+  //     hot,
+  //     rate_person,
+  //     total_rate,
+  //     source_type,
+  //     status,
+  //     barrage_count,
+  //     tag_count,
+  //     comment_count,
+  //     author,
+  //     images: [],
+  //     video
+  //   }
+  // }
+  .then(data => ({ data }))
   .catch(dealErr(ctx))
 
   responseDataDeal({
-      ctx,
-      data,
-      needCache: false
+    ctx,
+    data,
+    needCache: false
   })
 
 })
