@@ -868,10 +868,9 @@ const SearchSchema = new Schema({
     type: String,
     min: 1
   }],
-  hot: {
-    type: Number,
-    default: 0,
-  },
+  hot: [{
+    type: Date,
+  }],
   other: {},
 }, {
   ...defaultConfig,
@@ -1222,7 +1221,18 @@ const FeedbackSchema = new Schema({
     type: String,
     enum: Object.keys(FEEDBACK_STATUS),
     default: 'DEALING'
-  }
+  },
+  history: [
+    {
+      user: {
+        type: ObjectId,
+        ref: 'user'
+      },
+      timestamps: {
+        type: Date
+      }
+    }
+  ]
 }, {
   ...defaultConfig
 })

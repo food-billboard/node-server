@@ -9,14 +9,17 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router
-//用户详细信息
-.get('/', async(ctx) => {
+.use(async (ctx, next) => {
   const check = Params.query(ctx, {
     name: '_id',
     type: [ 'isMongoId' ]
   })
 
   if(check) return
+  return await next()
+})
+//用户详细信息
+.get('/', async(ctx) => {
 
   const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
@@ -25,18 +28,89 @@ router
     ]
   })
 
-  const data = await UserModel.findOne({
-    _id
-  })
-  .select({
-
-  })
-  .exec()
+  const data = await UserModel.aggregate([
+    {
+      $match: {
+        _id
+      }
+    },
+    {
+      $project: {
+        createdAt: 1,
+        updatedAt: 1,
+        mobile: 1,
+        email: 1,
+        username: 1,
+        description: 1,
+        avatar: 1,
+        hot: 1,
+        status: 1,
+        roles: 1,
+        fans_count: {
+          $size: {
+            $ifNull: [
+              "$fans",
+              []
+            ]
+          }
+        },
+        attentions_count: {
+          $size: {
+            $ifNull: [
+              "$attentons",
+              []
+            ]
+          }
+        },
+        issue_count: {
+          $size: {
+            $ifNull: [
+              "$issue",
+              []
+            ]
+          }
+        },
+        comment_count: {
+          $size: {
+            $ifNull: [
+              "$comment",
+              []
+            ]
+          }
+        },
+        store_count: {
+          $size: {
+            $ifNull: [
+              "$store",
+              []
+            ]
+          }
+        },
+      }
+    }
+  ])
   .then(data => !!data && data._doc)
   .then(notFound)
-  .then(data => {
-
-  })
+  // data: {
+  //   createdAt,
+  //   updatedAt,
+  //   mobile,
+  //   email,
+  //   username,
+  //   description,
+  //   avatar,
+  //   hot,
+  //   status,
+  //   roles,
+  //   fans_count,
+  //   attentions_count,
+  //   issue_count,
+  //   comment_count,
+  //   store_count,
+  // }
+  .then(data => ({
+    data
+  }))
   .catch(dealErr(ctx))
 
   responseDataDeal({
