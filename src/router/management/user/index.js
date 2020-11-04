@@ -183,6 +183,7 @@ router
       //     total,
       //     list: [
       //       {
+      //         _id,
       //         createdAt,
       //         updatedAt,
       //         username,
@@ -391,21 +392,28 @@ router
   })
   const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'role' ]
   const { request: { body } } = ctx
-  const { mobile:newUserMobile, email } = body
 
   editModel = Object.keys(body).reduce((acc, cur) => {
     if(params.includes(cur)) {
-      if(typeof cur == 'undefined' && cur == 'role') {
-          acc[cur] = role
+      if(typeof body[cur] == 'undefined' && cur == 'role') {
+        acc[cur] = role
       }else if(typeof cur != 'undefined') {
-          acc[cur] = body[cur]
+        acc[cur] = body[cur]
       }
     }
     return acc
   }, {})
 
-  const data = await UserModel.findOneAndUpdate({
-
+  const data = await UserModel.updateOne({
+    _id
+  }, {
+    $set: editModel
+  })
+  .then(data => {
+    if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+    return {
+      data: null
+    }
   })
   .catch(dealErr(ctx))
 

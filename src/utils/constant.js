@@ -66,9 +66,16 @@ const METHOD_MAP = [ 'GET', 'POST', 'DELETE', 'PUT', '*' ]
 
 const USER_STATUS = [ 'SIGNIN', 'SIGNOUT', 'FREEZE' ]
 
-const MOVIE_STATUS = [ 'VERIFY', 'COMPLETE', 'NOT_VERIFY' ]
+const MOVIE_STATUS = {
+  VERIFY: 'VERIFY', 
+  COMPLETE: 'COMPLETE', 
+  NOT_VERIFY: 'NOT_VERIFY'
+}
 
-const MOVIE_SOURCE_TYPE = [ 'ORIGIN', 'USER' ]
+const MOVIE_SOURCE_TYPE = {
+  ORIGIN: 'ORIGIN', 
+  USER: 'USER'
+}
 
 const ROLES_MAP = {
   SUPER_ADMIN: 0,
@@ -84,6 +91,11 @@ const FEEDBACK_STATUS = {
   DEAL: 'DEAL'
 }
 
+const COMMENT_SOURCE_TYPE = {
+  movie: 'movie', 
+  comment: 'comment'
+}
+
 module.exports = {
   EMAIL_AUTH,
   EMAIL_REGEXP,
@@ -95,5 +107,6 @@ module.exports = {
   MOVIE_STATUS,
   MOVIE_SOURCE_TYPE,
   ROLES_MAP,
-  FEEDBACK_STATUS
+  FEEDBACK_STATUS,
+  COMMENT_SOURCE_TYPE
 }

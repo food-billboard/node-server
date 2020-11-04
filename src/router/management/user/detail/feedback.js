@@ -5,27 +5,6 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router
-//id检查
-.use(async (ctx, next) => {
-  const { request: { method } } = ctx
-  const _method = method.toLowerCase()
-  let body
-  if(_method == 'delete' || _method == 'get') {
-    body = 'query'
-  }else if(_method == 'put') {
-    body = 'body'
-  }
-
-  const check = Params[body](ctx, {
-    name: '_id',
-    type: [ 'isMongoId' ]
-  })
-
-  if(check) return
-
-  return await next()
-
-})
 //反馈列表
 .get('/', async(ctx) => {
 
@@ -155,6 +134,7 @@ router
       //   data: {
       //     total,
       //     list: [{
+      //       _id,
       //       user_info: {
       //         _id,
       //         username
@@ -186,6 +166,15 @@ router
 //修改feedback状态
 .put('/', async(ctx) => {
 
+  const check = Params.body(ctx, {
+    name: 'description',
+    validator:[
+      data => typeof data === 'string' && data.length > 0
+    ]
+  })
+
+  if(check) return
+
   const [ _id, status ] = Params.sanitizers(ctx.body, {
     name: '_id',
     sanitizers: [
@@ -197,6 +186,7 @@ router
       data => typeof data == 'string' ? data : FEEDBACK_STATUS.DEAL
     ]
   })
+  const { request: { body: { description } } } = ctx
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
@@ -210,12 +200,12 @@ router
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
-  .then(({ _id }) => {
+  .then(({ _id:user }) => {
     return FeedbackModel.updateOne({
       _id
     }, {
       $push: {
-        history: { user, timestamps: new Date() }
+        history: { user, timestamps: new Date(), description }
       },
       $set: {
         status

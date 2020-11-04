@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
-const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS } = require('../constant')
+const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS, COMMENT_SOURCE_TYPE } = require('../constant')
 
 function getMill(time) {
   return Day(time).valueOf()
@@ -703,14 +703,14 @@ const MovieSchema = new Schema({
   source_type: {
     type: String,
     required: true,
-    enum: MOVIE_SOURCE_TYPE,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
     trim: true,
     uppercase: true,
   },
   status: {
     type: String,
     required: true,
-    enum: MOVIE_STATUS,
+    enum: Object.keys(MOVIE_STATUS),
     trim: true,
     uppercase: true,
   },
@@ -809,6 +809,15 @@ const ActorSchema = new Schema({
       ref: 'image'
     }
   },
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -833,6 +842,15 @@ const DirectorSchema = new Schema({
       ref: 'image'
     }
   },
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -844,7 +862,16 @@ const DistrictSchema = new Schema({
     required: true,
     unique: true,
   },
-  other: {}
+  other: {},
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -880,7 +907,7 @@ const SearchSchema = new Schema({
 const CommentSchema = new Schema({
   source_type: {
     type: String,
-    enum: ['movie', 'comment'],
+    enum: Object.keys(COMMENT_SOURCE_TYPE),
     required: true,
     trim: true,
   },
@@ -989,6 +1016,15 @@ const ClassifySchema = new Schema({
   glance: {
     type: Number,
     default: 0
+  },
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
   }
 }, {
   ...defaultConfig,
@@ -1002,6 +1038,15 @@ const LanguageSchema = new Schema({
     unique: true,
   },
   other: {},
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -1226,10 +1271,15 @@ const FeedbackSchema = new Schema({
     {
       user: {
         type: ObjectId,
-        ref: 'user'
+        ref: 'user',
+        required: true
       },
       timestamps: {
         type: Date
+      },
+      description: {
+        type: String,
+        required: true
       }
     }
   ]
@@ -1443,9 +1493,4 @@ module.exports = {
   AuthSchema,
   // ApisSchema,
   BehaviourSchema,
-  ROLES_MAP,
-  METHOD_MAP,
-  USER_STATUS,
-  MOVIE_STATUS,
-  MOVIE_SOURCE_TYPE
 }

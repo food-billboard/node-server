@@ -9,15 +9,6 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router
-.use(async (ctx, next) => {
-  const check = Params.query(ctx, {
-    name: '_id',
-    type: [ 'isMongoId' ]
-  })
-
-  if(check) return
-  return await next()
-})
 //用户详细信息
 .get('/', async(ctx) => {
 
@@ -92,6 +83,7 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   // data: {
+  //   _id,
   //   createdAt,
   //   updatedAt,
   //   mobile,

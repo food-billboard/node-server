@@ -6,8 +6,6 @@ const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
-const EDIT_FIELDS = []
-
 router
 //信息
 .get('/', async(ctx) => {
@@ -121,6 +119,7 @@ module.exports = router
   attentions: number,
   createdAt,
   updatedAt
+  _id,
 }
  */
 /**

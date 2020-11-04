@@ -1,22 +1,13 @@
 const Router = require('@koa/router')
 const Comment = require('./comment')
 const User = require('./user')
+const Info = require('./info')
 const { MovieModel, dealErr, notFound, responseDataDeal, Params } = require('@src/utils')
 const { Types: { ObjectId }, Aggregate } = require('mongoose')
 
 const router = new Router()
 
 router
-//id判断中间件
-.use(async (ctx, next) => {
-  const check = Params.query(ctx, {
-    name: '_id',
-    type: [ 'isMongoId' ]
-  })
-
-  if(check) return
-  return await next()
-})
 //电影详细信息
 .get('/', async(ctx) => {
 
@@ -98,6 +89,7 @@ router
   .then(notFound)
   // {
   //   data: {
+  //     _id,
   //     name,
   //     classify,
   //     images,
@@ -130,5 +122,6 @@ router
 })
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 .use('/user', User.routes(), User.allowedMethods())
+.use('/info', Info.routes(), Info.allowedMethods())
 
 module.exports = router

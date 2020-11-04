@@ -1,10 +1,154 @@
 const Router = require('@koa/router')
 const Detail = require('./detail')
-const { MovieModel, UserModel, dealErr, notFound, Params, responseDataDeal, MOVIE_STATUS, MOVIE_SOURCE_TYPE } = require('@src/utils')
+const { MovieModel, UserModel, verifyTokenToData, dealErr, notFound, Params, responseDataDeal, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, findMostRole } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
 
 const router = new Router()
+
+//参数检查
+const checkParams = (ctx, ...validator) => {
+  return Params.body(ctx, {
+    name: 'name',
+    validator: [
+      data => typeof data === 'string' && data.length > 0
+    ]
+  }, {
+    name: 'alias',
+    validator: [
+      data => Array.isArray(data) && data.every(d => typeof d === 'string' && d.length > 0)
+    ]
+  }, {
+    name: 'description',
+    validator: [
+      data => typeof data === 'string' && data.length > 0
+    ]
+  }, {
+    name: "actor",
+    validator: [
+      data => Array.isArray(data) && !!data.length && data.every(d => ObjectId.isValid(d))
+    ]
+  }, {
+    name: "director",
+    validator: [
+      data => Array.isArray(data) && !!data.length && data.every(d => ObjectId.isValid(d))
+    ]
+  }, {
+    name: "district",
+    validator: [
+      data => Array.isArray(data) && !!data.length && data.every(d => ObjectId.isValid(d))
+    ]
+  }, {
+    name: "classify",
+    validator: [
+      data => Array.isArray(data) && !!data.length && data.every(d => ObjectId.isValid(d))
+    ]
+  }, {
+    name: "language",
+    validator: [
+      data => Array.isArray(data) && !!data.length && data.every(d => ObjectId.isValid(d))
+    ]
+  }, {
+    name: 'screen_time',
+    validator: [
+      data => typeof data === 'string' && new Date(data).toString() != 'Invalid Date'
+    ]
+  }, {
+    name: 'video',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  }, {
+    name: 'images',
+    validator: [
+      data => Array.isArray(data) && data.length == 6 && data.every(d => ObjectId.isValid(d))
+    ]
+  }, {
+    name: 'poster',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  }, {
+    name: 'author_rate',
+    validator: [
+      data => {
+        const value = parseInt(data)
+        return value >= 0 && value <= 10 
+      }
+    ]
+  }, ...validator)
+}
+
+//参数处理
+const sanitizersParams = (ctx, ...sanitizers) => {
+  return Params.sanitizers(ctx.body, {
+    name: 'actor',
+    sanitizers: [
+      data => data.map(d => ObjectId(d))
+    ]
+  }, {
+    name: 'director',
+    sanitizers: [
+      data => data.map(d => ObjectId(d))
+    ]
+  }, {
+    name: 'district',
+    sanitizers: [
+      data => data.map(d => ObjectId(d))
+    ]
+  }, {
+    name: 'classify',
+    sanitizers: [
+      data => data.map(d => ObjectId(d))
+    ]
+  }, {
+    name: 'language',
+    sanitizers: [
+      data => data.map(d => ObjectId(d))
+    ]
+  }, {
+    name: 'screen_time',
+    sanitizers: [
+      data => Day(data).toDate()
+    ]
+  }, {
+    name: 'video',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  }, {
+    name: 'images',
+    sanitizers: [
+      data => data.map(d => ObjectId(d))
+    ]
+  }, {
+    name: 'poster',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  }, {
+    name: 'author_description',
+    sanitizers: [
+      data => typeof data === 'string' ? data.length > 30 > data.slice(0, 30) : ''
+    ]
+  }, {
+    name: 'author_rate',
+    sanitizers: [
+      data => parseInt(data)
+    ]
+  }, ...sanitizers)
+}
+
+//获取最高角色
+const getRoles = (roles) => {
+  let role = 99
+  roles.forEach(item => {
+    if(ROLES_MAP[item] < role) {
+      role = ROLES_MAP[item]
+    }
+  })
+  return role
+}
 
 router
 //搜索(筛选)-分类-日期-状态-来源分类(系统、用户)
@@ -30,12 +174,12 @@ router
   }, {
     name: 'status',
     sanitizers: [
-      data => typeof data === 'undefined' ? MOVIE_STATUS : [ data ]
+      data => typeof data === 'undefined' ? Object.keys(MOVIE_STATUS) : [ data ]
     ]
   }, {
     name: 'source_type',
     sanitizers: [
-      data => typeof data === 'undefined' ? MOVIE_SOURCE_TYPE : [ data ]
+      data => typeof data === 'undefined' ? Object.keys(MOVIE_SOURCE_TYPE) : [ data ]
     ]
   }, {
     name: 'end_date',
@@ -247,10 +391,10 @@ router
     let query = {
       $or: [
         {
-            _id: author
+          _id: author
         },
         {
-            mobile: Number(mobile)
+          mobile: Number(mobile)
         }
       ]
     }
@@ -315,9 +459,144 @@ router
 //新增
 .post('/', async(ctx) => {
 
+  const check = checkParams(ctx)
+  if(check) return
+
+  const [
+    actor,
+    director,
+    district,
+    classify,
+    language,
+    screen_time,
+    video,
+    images,
+    poster,
+    author_description,
+    author_rate
+  ] = sanitizers(ctx)
+
+  const { body: { name, alias, description } } = ctx.request
+  const [, token] = verifyTokenToData(ctx)
+  const { mobile } = token
+
+  const data = await UserModel.findOne({
+    mobile: Number(mobile)
+  })
+  .select({
+    _id: 1,
+    roles: 1
+  })
+  .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(({ _id, roles }) => {
+
+    const role = getRoles(roles)
+
+    const model = new MovieModel({
+      name,
+      info: {
+        name,
+        another_name: alias,
+        description,
+        actor,
+        director,
+        district,
+        classify,
+        language,
+        screen_time,
+      },
+      poster,
+      video,
+      images,
+      author: _id,
+      author_description,
+      author_rate,
+      source_type: 'USER',
+      status: role == ROLES_MAP.SUPER_ADMIN ? MOVIE_SOURCE_TYPE.ORIGIN : MOVIE_SOURCE_TYPE.USER
+    })
+    return model.save()
+  })
+  .then(data => !!data && data._id)
+  .then(notFound)
+  .then(data => ({ data: { _id: data } }))
+  .catch(dealErr(ctx))
+  
+
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
+  
 })
 //修改
 .put('/', async(ctx) => {
+
+  const check = checkParams(ctx)
+  if(check) return
+
+  const [
+    actor,
+    director,
+    district,
+    classify,
+    language,
+    screen_time,
+    video,
+    images,
+    poster,
+    author_description,
+    author_rate,
+    _id
+  ] = sanitizersParams(ctx, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
+
+  const { body: { name, alias, description } } = ctx.request
+
+  const data = await MovieModel.updateOne({
+    _id
+  }, {
+    $set: {
+      name,
+      info: {
+        name,
+        another_name: alias,
+        description,
+        actor,
+        director,
+        district,
+        classify,
+        screen_time,
+        language
+      },
+      video,
+      poster,
+      images,
+      author_description,
+      author_rate
+    }
+  })
+  .then(data => { 
+    if(data.nModified == 0) return Promise.reject({ errMsg: 'not Found', status: 404 })
+    return {
+      data: {
+        _id
+      }
+    }
+  })
+  .catch(dealErr(ctx))
+  
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
 })
 //删除
@@ -343,5 +622,6 @@ router
   })
 
 })
+
 
 module.exports = router

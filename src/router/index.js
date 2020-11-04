@@ -4,45 +4,39 @@ const Customer = require('./customer')
 const Management = require('./management')
 const Swagger = require('./swagger')
 const { Types: { ObjectId } } = require('mongoose')
+const { dealErr, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
 router
 .use(async(ctx, next) => {
+
   const { body: { _id:dataId } } = ctx.request
   const { _id:queryId } = ctx.query
-  let res = {
-    success: false,
-    res: null
-  }
+  let valid = true
 
   const isValidData = ObjectId.isValid(dataId)
   const isValidQuery = ObjectId.isValid(queryId)
 
   if(dataId || queryId) {
     if(dataId && queryId) {
-      if(isValidData && isValidQuery) {
-        return await next()
-      }else {
-        ctx.status = 400
-      }
+      if(!isValidData || !isValidQuery) valid = false
     }else if(dataId && !queryId) {
-      if(isValidData) {
-        return await next()
-      }else {
-        ctx.status = 400
-      }
+      if(!isValidData) valid = false
     }else {
-      if(isValidQuery) {
-        return await next()
-      }else {
-        ctx.status = 400
-      }
+      if(!isValidQuery) valid = false
     }
-  }else {
-    return await next()
   }
-  ctx.body = res
+
+  if(valid) return await next()
+  
+  const data = dealErr(ctx)({ errMsg: 'bad request', status: 400 })
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
+  
 })
 .use('/user', User.routes(), User.allowedMethods())
 .use('/customer', Customer.routes(), Customer.allowedMethods())

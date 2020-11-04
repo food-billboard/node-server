@@ -12,16 +12,14 @@ router
   const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
-    type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 0
     ]
   }, {
     name: 'pageSize',
     _default: 30,
-    type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 30
     ]
   })
 
@@ -29,76 +27,135 @@ router
     mobile: Number(mobile)
   })
   .select({
-    comment: 1,
-    avatar: 1,
-    username: 1,
     _id: 1
-  })
-  .populate({
-    path: 'comment',
-    options: {
-      ...(pageSize >= 0 ? { limit: pageSize } : {}),
-      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
-    },
-    select: {
-      source: 1,
-      updatedAt: 1,
-      createdAt: 1,
-      total_like: 1,
-      content: 1,
-      // like_person: 1,
-      comment_users: 1,
-      source_type: 1,
-    },
-    populate: {
-      path: 'source',
-      select: {
-        name: 1,
-        content: 1,
-      }
-    },
   })
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { comment, _id: userId, avatar, ...nextData } = data
-    return {
-      data: {
-        comment: comment.map(c => {
-          const { 
-            _doc: { 
-              // like_person, 
-              content: { image, video, ...nextContent }, 
-              source={}, 
-              source_type,
-              comment_users,
-              ...nextC 
-            } 
-          } = c
 
-          const { _doc: { name, content, ...nextSoruce } } = source
+    const { _id } = data
 
-          return {
-            ...nextC,
-            comment_users: comment_users.length,
-            content: {
-              ...nextContent,
-              image: image.filter(i => i && !!i.src).map(i => i.src),
-              video: video.filter(v => v && !!v.src).map(v => v.src)
-            },
-            source: {
-              ...nextSoruce,
-              type: source_type,
-              content: name ? name : ( content || null )
-            },
-            user_info: {
-              ...nextData,
-              _id: userId,
-              avatar: avatar ? avatar.src : null,
+    return Promise.all([
+      CommentModel.aggregate([
+        {
+          $match: {
+            user_info: _id,
+            // createdAt: {
+            //   $lte: end_date,
+            //   ...(!!start_date ? { $gte: start_date } : {})
+            // },
+            // source_type: { $in: source_type }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: 1
             }
           }
-        })
+        }
+      ]),
+      aggregate
+      .match({
+        user_info: _id,
+        // createdAt: {
+        //   $lte: end_date,
+        //   ...(!!start_date ? { $gte: start_date } : {})
+        // },
+        // source_type: { $in: source_type }
+      })
+      .project({
+        source_type: 1,
+        source: 1,
+        // user_info: 1,
+        sub_comments: {
+          $size: {
+            $ifNull: [
+              "$sub_comments", []
+            ]
+          }
+        },
+        total_like: 1,
+        content: 1,
+        createdAt: 1,
+        updatedAt: 1
+      })
+      .sort({
+        total_like: like, 
+        sub_comments: comment
+      })
+      .skip(currPage * pageSize)
+      .limit(pageSize)
+      // .lookup({
+      //   from: 'users',
+      //   localField: 'user_info',
+      //   foreignField: '_id',
+      //   as: 'user_info'
+      // })
+      // .unwind("user_info")
+      .lookup({
+        from: 'images',
+        localField: 'content.image',
+        foreignField: '_id',
+        as: 'image'
+      })
+      .lookup({
+        from: 'videos',
+        localField: 'content.video',
+        foreignField: '_id',
+        as: 'video'
+      })
+      .unwind("content.video")
+      .project({
+        source_type: 1,
+        source: 1,
+        // user_info: {
+        //   _id: "$user_info._id",
+        //   username: "$user_info.username"
+        // },
+        sub_comments: 1,
+        total_like: 1,
+        content: {
+          text: "$content.text",
+          video: "$content.video.src",
+          image: "$content.image.src"
+        },
+        createdAt: 1,
+        updatedAt: 1
+      })
+    ])
+
+  })
+  .then(([total_count, comment_data]) => {
+    if(!Array.isArray(total_count) || !Array.isArray(comment_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
+
+    return {
+
+      // {
+      //   data: {
+      //     total,
+      //     list: [{
+      //       _id,
+      //       source_type,
+      //       source,
+      //       sub_comments,
+      //       total_like,
+      //       content: {
+      //         text,
+      //         video,
+      //         image
+      //       },
+      //       createdAt,
+      //       updatedAt
+      //     }]
+      //   }
+      // }
+
+      data: {
+        total: !!total_count.length ? total_count[0].total || 0 : 0,
+        list: comment_data
       }
     }
   })
@@ -111,25 +168,3 @@ router
 })
 
 module.exports = router
-
-/**
- * source: {
-  type: source_type,
-  content,
-  _id,
-},
-updatedAt,
-createdAt,
-total_like,
-content: {
-  image,
-  video,
-  text
-},
-comment_users: number,
-user_info: {
-  _id,
-  avatar,
-  username,
-}
- */
