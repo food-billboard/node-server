@@ -43,11 +43,10 @@ router
   })
   .select({
     attentions: 1,
-    updatedAt: 1,
     _id: 0,
   })
   .populate({
-    path: 'attentions',
+    path: 'attentions._id',
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
@@ -66,7 +65,7 @@ router
       data: {
         ...nextData,
         attentions: attentions.map(a => {
-          const { _doc: { avatar, ...nextA } } = a
+          const { _doc: { _id: { _doc: { avatar, ...nextA } } } } = a
           return {
             ...nextA,
             avatar: avatar ? avatar.src : null

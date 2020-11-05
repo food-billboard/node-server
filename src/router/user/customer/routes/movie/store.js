@@ -43,7 +43,7 @@ router
     _id: 0
   })
   .populate({
-    path: 'store',
+    path: 'store._id',
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
@@ -76,7 +76,7 @@ router
       data: {
         ...data,
         store: store.map(s => {
-          const { _doc: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
+          const { _doc: { _id: { _doc: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } } } = s
           const rate = total_rate / rate_person
           return {
             ...nextS,

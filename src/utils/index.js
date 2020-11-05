@@ -6,6 +6,9 @@ const Validator = require('./validator')
 const Redis = require('./redis')
 const Static = require('./static')
 const Email = require('./email')
+const Auth = require('./auth')
+const CustomerOperation = require('./customer-operation')
+const Constant = require('./constant')
 
 module.exports = {
   ...MongoDB,
@@ -15,5 +18,8 @@ module.exports = {
   ...Validator,
   ...Redis,
   ...Static,
-  ...Email
+  ...Email,
+  ...Auth,
+  ...CustomerOperation,
+  ...Constant
 }

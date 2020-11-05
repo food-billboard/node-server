@@ -44,7 +44,7 @@ router
     _id: 0
   })
   .populate({
-    path: 'fans',
+    path: 'fans._id',
     select: {
       username: 1,
       avatar: 1
@@ -63,7 +63,7 @@ router
       data: {
         ...nextData,
         fans: fans.map(d => {
-          const { _doc: { avatar, ...nextD } } = d
+          const { _doc: { _id: { _doc: { avatar, ...nextD } } } } = d
           return {
             ...nextD,
             avatar: avatar ? avatar.src : null,

@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
-const { EMAIL_REGEXP } = require('../tool')
+const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS, COMMENT_SOURCE_TYPE } = require('../constant')
 
 function getMill(time) {
   return Day(time).valueOf()
@@ -258,6 +258,7 @@ const PRE_BARRAGE_FIND = [
     }
   }
 ]
+const PRE_BEHAVIOUR_FIND = []
 
 //user
 const UserSchema = new Schema({
@@ -290,39 +291,94 @@ const UserSchema = new Schema({
     type: String,
     default: '默认名称'
   },
+  description: {
+    type: String,
+    default: "描述一下你自己吧",
+    min: 0,
+    max: 50
+  },
 	avatar: {
     // default: ObjectId('5edb3c7b4f88da14ca419e61'),
     type: ObjectId,
     ref: 'image'
   },
+  hot_history: [{
+    _id: {
+      type: ObjectId,
+      ref: 'user'
+    },
+    origin_id: {
+      type: ObjectId,
+      refPath: 'origin_type'
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    },
+    origin_type: {
+      type: String,
+      enum: [ 'comment', 'barrage' ],
+      default: 'comment'
+    }
+  }],
 	hot: {
     type: Number,
     default: 0,
     min: 0,
   },
   fans: [{
-    type: ObjectId,
-    ref: 'user',
+    _id: {
+      type: ObjectId,
+      ref: 'user',
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   attentions: [{
-    type: ObjectId,
-    ref: 'user',
+    _id: {
+      type: ObjectId,
+      ref: 'user',
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   issue: [{
-    type: ObjectId,
-    ref: 'movie'
+    _id: {
+      type: ObjectId,
+      ref: 'movie'
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   glance: [{
-    type: ObjectId,
-    ref: 'movie'
+    _id: {
+      type: ObjectId,
+      ref: 'movie'
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   comment: [{
     type: ObjectId,
     ref: 'comment',
   }],
   store: [{
-    type: ObjectId,
-    ref: 'movie'
+    _id: {
+      type: ObjectId,
+      ref: 'movie'
+    },
+    timestamps: {
+      min: 0,
+      type: Number
+    }
   }],
   rate: [{
     _id: {
@@ -340,6 +396,10 @@ const UserSchema = new Schema({
         if(rate > 10) return 10
         return rate
       }
+    },
+    timestamps: {
+      type: Number,
+      min: 0
     }
   }],
   allow_many: {
@@ -348,11 +408,18 @@ const UserSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['SIGNIN', 'SIGNOUT', 'FREEZE'],
+    enum: USER_STATUS,
     trim: true,
     uppercase: true,
     default: "SIGNOUT"
-  }
+  },
+  roles: [{
+    type: String,
+    enum: Object.keys(ROLES_MAP),
+    set: (v) => {
+      return v.toUpperCase()
+    }
+  }]
 }, {
   ...defaultConfig
 })
@@ -367,6 +434,10 @@ const GlobalSchema = new Schema({
     type: String,
     required: true
   },
+  visit_count: {
+    type: Number,
+    min: 0
+  }
 }, {
   ...defaultConfig
 })
@@ -534,6 +605,7 @@ const MovieSchema = new Schema({
   name: {
     type: String,
     required: true,
+    index: true
   },
   info: {
     name: {
@@ -631,14 +703,14 @@ const MovieSchema = new Schema({
   source_type: {
     type: String,
     required: true,
-    enum: [ 'ORIGIN', 'USER' ],
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
     trim: true,
     uppercase: true,
   },
-  stauts: {
+  status: {
     type: String,
     required: true,
-    enum: [ 'VERIFY', 'COMPLETE' ],
+    enum: Object.keys(MOVIE_STATUS),
     trim: true,
     uppercase: true,
   },
@@ -705,6 +777,15 @@ const SpecialSchema = new Schema({
     required: true,
     unique: true,
   },
+  glance: [{
+    _id: {
+      type: ObjectId,
+      ref: 'user'
+    },
+    timestamps: {
+      type: Number
+    }
+  }]
 }, {
   ...defaultConfig
 })
@@ -712,7 +793,8 @@ const SpecialSchema = new Schema({
 const ActorSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   // works: [{
   //   type: ObjectId,
@@ -727,6 +809,15 @@ const ActorSchema = new Schema({
       ref: 'image'
     }
   },
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -735,7 +826,8 @@ const ActorSchema = new Schema({
 const DirectorSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   // works: [{
   //   type: ObjectId,
@@ -750,6 +842,15 @@ const DirectorSchema = new Schema({
       ref: 'image'
     }
   },
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -761,7 +862,16 @@ const DistrictSchema = new Schema({
     required: true,
     unique: true,
   },
-  other: {}
+  other: {},
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -781,11 +891,13 @@ const SearchSchema = new Schema({
     },
 		field: String
 	}],
-	match_texts: [String],
-  hot: {
-    type: Number,
-    default: 0,
-  },
+	match_texts: [{
+    type: String,
+    min: 1
+  }],
+  hot: [{
+    type: Date,
+  }],
   other: {},
 }, {
   ...defaultConfig,
@@ -795,7 +907,7 @@ const SearchSchema = new Schema({
 const CommentSchema = new Schema({
   source_type: {
     type: String,
-    enum: ['movie', 'comment'],
+    enum: Object.keys(COMMENT_SOURCE_TYPE),
     required: true,
     trim: true,
   },
@@ -904,6 +1016,15 @@ const ClassifySchema = new Schema({
   glance: {
     type: Number,
     default: 0
+  },
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
   }
 }, {
   ...defaultConfig,
@@ -917,6 +1038,15 @@ const LanguageSchema = new Schema({
     unique: true,
   },
   other: {},
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -925,7 +1055,7 @@ const LanguageSchema = new Schema({
 const VideoSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   src: {
     type: String,
@@ -1131,10 +1261,107 @@ const FeedbackSchema = new Schema({
       type: ObjectId,
       ref: 'video'
     }]
-  }
+  },
+  status: {
+    type: String,
+    enum: Object.keys(FEEDBACK_STATUS),
+    default: 'DEALING'
+  },
+  history: [
+    {
+      user: {
+        type: ObjectId,
+        ref: 'user',
+        required: true
+      },
+      timestamps: {
+        type: Date
+      },
+      description: {
+        type: String,
+        required: true
+      }
+    }
+  ]
 }, {
   ...defaultConfig
 })
+
+const AuthSchema = new Schema({
+  roles: [{
+    required: true,
+    type: String,
+    enum: Object.keys(ROLES_MAP), 
+    set: (v) => {
+      return v.toUpperCase()
+    }
+  }],
+  allow: {
+    resources: [{
+      type: String,
+    }],
+    actions: [{
+      url: {
+        type: String,
+        validator: {
+          validate: (v) => {
+            return typeof v === 'string' && /(\/.+)+(\?(.+=.+)+)?/.test(v)
+          }
+        }
+      },
+      method: {
+        type: String,
+        enum: METHOD_MAP,
+        set: (v) => {
+          return v.toUpperCase()
+        } 
+      }
+    }],
+    attributes: [{
+      type: String
+    }],
+    where: [{
+      platform: {
+        type: String
+      },
+      app: {
+        type: String
+      }
+    }],
+  }
+})
+
+const BehaviourSchema = new Schema({
+  timestamps: {
+    type: Number,
+    min: 0
+  },
+  url_type: {
+    type: String,
+    required: true,
+    enum: [ 'LOGIN_IN', 'LOGOUT', 'MOVIE_GET', 'MOVIE_POST', 'COMMENT', 'SEARCH', 'RANK_GET', 'CLASSIFY', 'USER_GET', 'USER_GET' ]
+  },
+  user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  target: {
+    type: ObjectId
+  }
+})
+
+// const ApisSchema = new Schema({
+//   url: {
+//     type: String
+//   },
+//   roles: [{
+//     type: String,
+//     enum: ROLES_MAP,
+//     set: (v) => {
+//       return v.toUpperCase()
+//     }
+//   }]
+// })
 
 const FIND_OPERATION_LIB = [
   'find',
@@ -1167,6 +1394,7 @@ FIND_OPERATION_LIB.forEach(op => {
   ImageSchema.pre(op, prePopulate(PRE_IMAGE_FIND))
   OtherMediaSchema.pre(op, prePopulate(PRE_OTHER_FIND))
   BarrageSchema.pre(op, prePopulate(PRE_BARRAGE_FIND))
+  BehaviourSchema.pre(op, prePopulate(PRE_BEHAVIOUR_FIND))
 })
 
 //完成处理
@@ -1189,7 +1417,9 @@ SAVE_OPERATION_LIB.forEach(op => {
   VideoSchema.post(op, postMiddleware)
   ImageSchema.post(op, postMiddleware)
   OtherMediaSchema.post(op, postMiddleware)
-  BarrageSchema.post(op, postMiddleware)
+  BarrageSchema.post(op, postMiddleware),
+  AuthSchema.post(op, postMiddleware),
+  BehaviourSchema.post(op, postMiddleware)
 })
 
 const UserModel = model('user', UserSchema)
@@ -1212,6 +1442,9 @@ const ImageModel = model('image', ImageSchema)
 const OtherMediaModel = model('other_media', OtherMediaSchema)
 const FeedbackModel = model('feedback', FeedbackSchema)
 const BarrageModel = model('barrage', BarrageSchema)
+const AuthModel = model('auth', AuthSchema)
+// const ApisModel = model('api', ApisSchema)
+const BehaviourModel = model('behaviour', BehaviourSchema)
 
 module.exports = {
   UserModel,
@@ -1234,6 +1467,9 @@ module.exports = {
   OtherMediaModel,
   FeedbackModel,
   BarrageModel,
+  AuthModel,
+  // ApisModel,
+  BehaviourModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1253,5 +1489,8 @@ module.exports = {
   ImageSchema,
   OtherMediaSchema,
   FeedbackSchema,
-  BarrageSchema
+  BarrageSchema,
+  AuthSchema,
+  // ApisSchema,
+  BehaviourSchema,
 }

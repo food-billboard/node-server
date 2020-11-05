@@ -59,13 +59,13 @@ describe(`${COMMON_API} test`, function() {
           mobile: 15789665412,
           username: COMMON_API,
         }, {
-          fans: [ userId ]
+          fans: [ { _id: userId } ]
         }),
         UserModel.updateOne({
           username: COMMON_API,
           mobile: 15874996521
         }, {
-          attentions: [ result._id ]
+          attentions: [ { _id: result._id } ]
         })
       ])
     })

@@ -60,13 +60,13 @@ describe(`${COMMON_API} test`, function() {
           mobile: 15789665412,
           username: COMMON_API,
         }, {
-          attentions: [ userId ]
+          attentions: [ { _id: userId, timestamps: Date.now() } ]
         }),
         UserModel.updateOne({
           username: COMMON_API,
           mobile: 15874996521
         }, {
-          fans: [ result._id ]
+          fans: [ { _id: result._id, timestamps: Date.now() } ]
         })
       ])
     })
@@ -302,7 +302,7 @@ describe(`${COMMON_API} test`, function() {
         Promise.all([
           UserModel.findOne({
             _id: result._id,
-            attentions: { $in: [ userId ] }
+            "attentions._id": { $in: [ userId ] }
           })
           .select({
             _id: 0,
@@ -311,7 +311,7 @@ describe(`${COMMON_API} test`, function() {
           .exec(),
           UserModel.findOne({
             _id: userId,
-            fans: { $in: [ result._id ] }
+            "fans._id": { $in: [ result._id ] }
           })
           .select({
             _id: 0,
@@ -356,8 +356,8 @@ describe(`${COMMON_API} test`, function() {
         UserModel.updateMany({
           username: COMMON_API
         }, {
-          fans: [result._id],
-          attentions: [userId]
+          fans: [ { _id: result._id } ],
+          attentions: [ { _id: userId } ]
         })
         .then(function() {
           done()
@@ -371,7 +371,7 @@ describe(`${COMMON_API} test`, function() {
         Promise.all([
           UserModel.findOne({
             _id: result._id,
-            attentions: { $in: [ userId ] }
+            "attentions._id": { $in: [ userId ] }
           })
           .select({
             _id: 0,
@@ -380,7 +380,7 @@ describe(`${COMMON_API} test`, function() {
           .exec(),
           UserModel.findOne({
             _id: userId,
-            fans: { $in: [ result._id ] }
+            "fans._id": { $in: [ result._id ] }
           })
           .select({
             _id: 0,
@@ -429,8 +429,8 @@ describe(`${COMMON_API} test`, function() {
         UserModel.updateMany({
           username: COMMON_API
         }, {
-          fans: [result._id],
-          attentions: [userId]
+          fans: [ { _id: result._id } ],
+          attentions: [ { _id: userId } ]
         })
         .then(function() {
           done()

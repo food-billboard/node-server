@@ -33,7 +33,7 @@ function mockCreateUser(values={}) {
   const password = '1234567890'
   const mobile = values.mobile || parseInt(`13${new Array(9).fill(0).map(_ => Math.floor(Math.random() * 10)).join('')}`)
   const encodedPwd = encoded(password)
-  const token = signToken({ mobile, password: encodedPwd }, {expiresIn: '5s'})
+  const token = signToken({ mobile, role: Array.isArray(values.roles) && !!values.roles.length ? values.roles[0] : 'SUPER_ADMIN' }, {expiresIn: '5s'})
 
   let baseModel = {
     mobile,
@@ -50,7 +50,8 @@ function mockCreateUser(values={}) {
     store: [],
     rate: [],
     allow_many: false,
-    status: 'SIGNOUT'
+    status: 'SIGNOUT',
+    roles: [ 'SUPER_ADMIN' ]
   }
   baseModel = mergeConfig(baseModel, values, true)
 

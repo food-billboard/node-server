@@ -352,7 +352,7 @@ describe(`${COMMON_API} test`, function() {
         .set({
           Accept: 'Application/json',
         })
-        .expect(301)
+        .expect(401)
         .end(function(err, _) {
           if(err) return done(err)
           done()

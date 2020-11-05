@@ -39,7 +39,8 @@ router
     avatar: 1,
     hot:1,
     fans: 1,
-    attention:1
+    attention:1,
+    roles: 1
   })
   .exec()
   .then(data => !!data && data._doc)
@@ -48,13 +49,14 @@ router
     return data
   })
   .then(data => {
-    const { fans=[], attentions=[], password:_, avatar, ...nextData } = data
-    const token = signToken({mobile, password})
+    const { fans=[], attentions=[], password:_, avatar, roles, _id, ...nextData } = data
+    const token = signToken({ mobile, roles, _id })
     return {
       fans: fans.length,
       attentions: attentions.length,
       token,
       avatar: avatar ? avatar.src : null,
+      _id,
       ...nextData
     }
   })

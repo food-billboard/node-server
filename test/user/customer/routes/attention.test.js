@@ -47,7 +47,7 @@ describe(`${COMMON_API} test`, function() {
 
       const { model } = mockCreateUser({
         username: COMMON_API,
-        mobile: 11256981236
+        mobile: 13256981236
       })
       model.save()
       .then(function(data) {
@@ -56,7 +56,7 @@ describe(`${COMMON_API} test`, function() {
         const { model } = mockCreateUser({
           username: COMMON_API,
           attentions: [
-            _id
+            { _id }
           ]
         })
 

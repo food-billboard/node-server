@@ -24,7 +24,7 @@ router
 
   const data = UserModel.findOne({
     mobile: Number(mobile),
-    issue: { $in: [ _id ] }
+    "issue._id": { $in: [ _id ] }
   })
   .select({
     _id: 1

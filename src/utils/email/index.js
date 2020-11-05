@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer')
-const { EMAIL_AUTH } = require('../tool')
+const { EMAIL_AUTH } = require('../constant')
 
 const DEFAULT_TRANSPORT = {
   host : 'smtp.qq.com',

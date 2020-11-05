@@ -518,7 +518,7 @@ router
       return UserModel.updateOne({
         mobile: Number(mobile),
       }, {
-        $addToSet: { issue: data._id }
+        $addToSet: { issue: { _id: data._id, timestampes: Date.now() } }
       })
     }
     return Promise.reject({ errMsg: 'something error', status: 500 })
@@ -576,7 +576,7 @@ router
 
   const data = await UserModel.findOne({
     mobile: Number(mobile),
-    issue: { $in: [ _id ] }
+    "issue._id": { $in: [ _id ] }
   })
   .select({
     _id: 1,
@@ -727,7 +727,7 @@ router
     updatedAt: 1
   })
   .populate({
-    path: 'issue',
+    path: 'issue._id',
     select: {
       "info.classify": 1,
 			"info.description": 1,
@@ -760,7 +760,8 @@ router
       data: {
         ...data,
         issue: issue.map(s => {
-          const { _doc: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
+          console.log(s)
+          const { _doc: { _id: { _doc: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } } } = s
           const rate = total_rate / rate_person
           return {
             ...nextS,
