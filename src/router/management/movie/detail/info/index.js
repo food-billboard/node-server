@@ -5,7 +5,7 @@ const District = require('./district')
 const Director = require('./director')
 const Classify = require('./classify')
 const Url = require('url')
-const { LanguageModel, ActorModel, DistrictModel, DirectorModel, ClassifyModel, dealErr, responseDataDeal, Params, verifyTokenToData } = require('@src/utils')
+const { LanguageModel, ActorModel, DistrictModel, DirectorModel, ClassifyModel, dealErr, responseDataDeal, Params, verifyTokenToData, UserModel, notFound, ROLES_MAP, MOVIE_SOURCE_TYPE } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -48,12 +48,60 @@ router
     resolve()
   })
   .then(_ => {
-    return model.findOne({
-      _id
+    return Promise.all([
+      UserModel.findOne({
+        mobile: Number(mobile)
+      })
+      .select({
+        roles: 1
+      })
+      .exec()
+      .then(data => !!data && data._doc)
+      .then(notFound),
+      model.findOne({
+        _id
+      })
+      .select({
+        source: 1,
+        source_type: 1
+      })
+      .populate({
+        path: 'source',
+        select: {
+          roles: 1
+        }
+      })
+      .exec()
+      .then(data => !!data && data._doc)
+      .then(notFound)
+    ])
+  })
+  .then(([user_data, media_data]) => {
+    //获取待操作信息权限及操作用户权限
+    const { roles: user_roles } = user_data
+    const { source: { roles: media_roles }, source_type } = media_data
+    let max_user_roles = 99
+    let max_media_roles = 99
+    user_roles.forEach(role => {
+      const curr = ROLES_MAP[role] ?? 100
+      if(curr < max_user_roles) max_user_roles = curr
     })
-    .select({
+    media_roles.forEach(role => {
+      const curr = ROLES_MAP[role] ?? 100
+      if(curr < max_media_roles) max_media_roles = curr
+    })
 
-    })
+    let valid = true
+    if(source_type === MOVIE_SOURCE_TYPE.ORIGIN) {
+      if(max_user_roles > ROLES_MAP.SUPER_ADMIN) valid = false
+    }else if(max_user_roles > max_media_roles) {
+      valid = false
+    }
+
+    if(valid) return
+
+    return Promise.reject({ errMsg: 'forbidden', status: 403 })
+
   })
   .catch(dealErr(ctx))
 

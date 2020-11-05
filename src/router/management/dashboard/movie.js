@@ -1,8 +1,28 @@
 const Router = require('@koa/router')
-const { MovieModel, SearchModel, dealErr, responseDataDeal } = require('@src/utils')
+const { MovieModel, SearchModel, UserModel, dealErr, responseDataDeal } = require('@src/utils')
 const { getDateParams } = require('@src/router/management/utils')
 
 const router = new Router()
+
+// "total",
+// "average": "人均搜索量",
+// "count_total_day": "日同比",
+// "count_average_day": "日同比",
+// total_chart: [{
+//   day,
+//   count
+// }]
+// average_chart: [{
+//   day,
+//   count
+// }]
+// data: [{
+//   _id,
+//   key_word: "关键字",
+//   count: 搜索数量,
+//   week_count: 周同比(较上周新增百分比),
+
+// }]
 
 router
 //热搜
@@ -13,16 +33,14 @@ router
   const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
-    type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 0
     ]
   }, {
     name: 'pageSize',
     _default: 30,
-    type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 30
     ]
   })
 
@@ -46,28 +64,37 @@ router
         }
       }
     ]),
-    //搜索用户数量统计
+    //用户总数
+    UserModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          user_total: {
+            $sum: 1
+          }
+        }
+      }
+    ]),
     SearchModel.aggregate([
 
     ]),
     //数据统计
     SearchModel.aggregate([
       {
+        $unwind: "hot"
+      },
+      {
         $match: {
-        
+          hot: {
+            ...(!!start_date ? { $gte: start_date } : {}),
+            $lte: end_date
+          }
         }
       },
       {
         $project: {
           key_word: 1,
-          hot: 1,
-          hot_count: {
-            $size: {
-              $ifNull: [
-                "$hot", []
-              ]
-            }
-          },
+          hot: 1
         },
       },
       {
@@ -80,16 +107,24 @@ router
 
         }
       },
-      {
-        $skip: currPage * pageSize
-      },
-      {
-        limit: pageSize
-      },
+      // {
+      //   $skip: currPage * pageSize
+      // },
+      // {
+      //   limit: pageSize
+      // },
 
     ])
   ])
-  .then(([]) => {
+  .then(([ key_word_total, user_total, search_data ]) => {
+
+    const user_count = user_total.length ? user_total.total || 0 : 0
+    const { total=0, search_total=0 } = key_word_total.length ? key_word_total[0] : {}
+
+    return {
+      total,
+      average: (search_total / (user_count == 0 ? 1 : user_count)).toFixed(3)
+    }
 
   })
   .catch(dealErr(ctx))
