@@ -1,19 +1,17 @@
 const path = require('path')
 const Day = require('dayjs')
+var isoWeek = require('dayjs/plugin/isoWeek')
 const { Types: { ObjectId } } = require('mongoose')
 const fs = require('fs')
+const { DIR_LIST, ROLES_MAP } = require('./constant')
 
-//静态资源目录
-const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
+Day.extend(isoWeek)
 
 //检查是否存在文件夹
 const checkDir = path => !fs.existsSync(path) || !fs.statSync(path).isDirectory()
 
 //检查并创建文件夹
 const checkAndCreateDir = (...paths) => paths.forEach(path => Array.isArray(path) ? checkAndCreateDir(path) : ( typeof path === 'string' && checkDir(path) && fs.mkdirSync(path)))
-
-//最大单次发送文件大小
-const MAX_FILE_SINGLE_RESPONSE_SIZE = 1024 * 500
 
 const typeProto = (arg, type) => Object.prototype.toString.call(arg) === `[object ${type.slice(0, 1).toUpperCase()}${type.slice(1)}]`
 
@@ -149,53 +147,6 @@ function mergeConfig(origin, target, canAddNewProp=false) {
   return _obj
 }
 
-const DIR_LIST = {
-  dir: 'static',
-  path: STATIC_FILE_PATH,
-  children: [
-    {
-      dir: 'public',
-      path: path.resolve(STATIC_FILE_PATH, 'public'),
-      children: [
-        {
-          dir: 'image',
-          path: path.resolve(STATIC_FILE_PATH, 'public/image'),
-        },
-        {
-          dir: 'video',
-          path: path.resolve(STATIC_FILE_PATH, 'public/video'),
-        },
-        {
-          dir: 'other',
-          path: path.resolve(STATIC_FILE_PATH, 'public/other'),
-        }
-      ]
-    },
-    {
-      dir: 'private',
-      path: path.resolve(STATIC_FILE_PATH, 'private'),
-      children: [
-        {
-          dir: 'image',
-          path: path.resolve(STATIC_FILE_PATH, 'private/image'),
-        },
-        {
-          dir: 'video',
-          path: path.resolve(STATIC_FILE_PATH, 'private/video'),
-        },
-        {
-          dir: 'other',
-          path: path.resolve(STATIC_FILE_PATH, 'private/other'),
-        }
-      ]
-    },
-    {
-      dir: 'template',
-      path: path.resolve(STATIC_FILE_PATH, 'template'),
-    }
-  ]
-}
-
 //静态资源文件夹初始化
 const initStaticFileDir = (dirList=DIR_LIST) => {
   Object.keys(dirList).forEach(dir => {
@@ -208,12 +159,25 @@ const initStaticFileDir = (dirList=DIR_LIST) => {
   })
 }
 
+//角色查找
+const findMostRole = (roles) => {
+  const maxRoleAuth = Object.keys(ROLES_MAP).length - 1
+  const minRoleAuth = 0
+  let targetRole = maxRoleAuth
+  roles.forEach(role => {
+      const _role = Number(ROLES_MAP[role])
+      if(!Number.isNaN(_role) && _role <= maxRoleAuth && _role >= minRoleAuth && _role < targetRole ) {
+          targetRole = _role
+      }
+  })
+
+  return targetRole
+}
+
 module.exports = {
   isType,
   isEmpty,
   flat,
-  STATIC_FILE_PATH,
-  MAX_FILE_SINGLE_RESPONSE_SIZE,
   formatISO,
   formatMill,
   NUM_DAY,
@@ -222,5 +186,6 @@ module.exports = {
   merge,
   initStaticFileDir,
   checkDir,
-  checkAndCreateDir
+  checkAndCreateDir,
+  findMostRole
 }

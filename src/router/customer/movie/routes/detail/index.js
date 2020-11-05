@@ -8,6 +8,19 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router
+.use(async(ctx, next) => {
+  const [, token] = verifyTokenToData(ctx)
+  if(!token) {
+    const data = dealErr(ctx)({ errMsg: 'not authorization', status: 401 })
+    responseDataDeal({
+      ctx,
+      data,
+      needCache: false
+    })
+    return 
+  }
+  return await next()
+})
 .get('/', async (ctx) => {
   const check = Params.query(ctx, {
     name: "_id",
@@ -22,25 +35,25 @@ router
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  if(!token) {
-    ctx.status = 301
-    return ctx.redirect("/api/user/movie/detail")
-  }
   const { mobile } = token
-  let res
+
   let store = true
 
-  const data = await UserModel.findOne({
+  const data = await UserModel.findOneAndUpdate({
     mobile: Number(mobile),
-    store: { $in: [_id] }
+    // store: { $in: [_id] }
+  }, {
+    $pull: { glance: { _id } },
   })
   .select({
     _id: 1,
+    store: 1
   })
   .exec()
   .then(data => !!data && data._doc)
+  .then(notFound)
   .then(data => {
-    if(!data) store = false
+    if(!data.store.some(item => item._id.equals(_id))) store = false
     return MovieModel.findOneAndUpdate({
       _id
     }, { $inc: { glance: 1 } })
@@ -128,6 +141,12 @@ router
     const { actor, director, district, language, classify, ...nextInfo } = info
 
     const rate = total_rate / rate_person
+
+    UserModel.updateOne({
+      mobile: Number(mobile),
+    }, {
+      $push: { glance: { _id, timestamps: Date.now() } }
+    })
 
     return {
       data: {

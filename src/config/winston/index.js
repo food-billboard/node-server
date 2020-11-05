@@ -7,7 +7,8 @@ const path = require('path')
 const { timestamp, label, combine, simple, splat, prettyPrint, printf, json, ms } = format
 const Day = require('dayjs')
 const fs = require('fs')
-const { uuid, verifyTokenToData, isType } = require('@src/utils')
+const { verifyTokenToData } = require('@src/utils/token')
+const { isType, uuid } = require('@src/utils/tool')
 
 // error: 0, 
 // warn: 1, 

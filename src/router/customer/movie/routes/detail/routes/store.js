@@ -53,9 +53,9 @@ router
   .then(_id => {
     return UserModel.updateOne({
       mobile: Number(mobile),
-      store: { $ne: _id }
+      "store._id": { $ne: _id }
     }, {
-      $push: { store: _id }
+      $push: { store: { _id, timestamps: Date.now() } }
     })
   })
   .then(data => {
@@ -98,9 +98,9 @@ router
   .then(_id => {
     return UserModel.updateOne({
       mobile: Number(mobile),
-      store: { $in: [_id] }
+      "store._id": { $in: [_id] }
     }, {
-      $pull: { store: _id }
+      $pull: { store: { _id } }
     })
   })
   .then(data => {

@@ -897,7 +897,7 @@ describe(`${COMMON_API} test`, function() {
           return UserModel.updateOne({
             username: COMMON_API
           }, {
-            issue: [ movieId ]
+            issue: [ { _id: movieId } ]
           })
         })
         .then(function() {
@@ -1011,7 +1011,7 @@ describe(`${COMMON_API} test`, function() {
         return UserModel.updateOne({
           username: COMMON_API
         }, {
-          issue: [ movieId ]
+          issue: [ { _id: movieId } ]
         })
       })
       .then(function() {
@@ -1138,7 +1138,7 @@ describe(`${COMMON_API} test`, function() {
             UserModel.updateOne({
               _id: userId
             }, {
-              $pull: { issue: movieId }
+              $pull: { issue: { _id: movieId } }
             }),
             MovieModel.updateOne({
               _id: movieId

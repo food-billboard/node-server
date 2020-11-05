@@ -40,7 +40,7 @@ describe(`${COMMON_API} test`, function() {
 
       const { model } = mockCreateUser({
         username: COMMON_API,
-        mobile: 11256981236
+        mobile: 15256981236
       })
       model.save()
       .then(function(data) {
@@ -50,7 +50,7 @@ describe(`${COMMON_API} test`, function() {
         const { model } = mockCreateUser({
           username: COMMON_API,
           attentions: [
-            _id
+            { _id }
           ]
         })
 
@@ -60,7 +60,7 @@ describe(`${COMMON_API} test`, function() {
         return UserModel.updateOne({
           mobile: 11256981236
         }, {
-          fans: [ data._id ]
+          fans: [ { _id: data._id } ]
         })
       })
       .then(data => {

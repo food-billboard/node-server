@@ -31,7 +31,7 @@ router
     updatedAt: 1
   })
   .populate({
-    path: 'fans',
+    path: 'fans._id',
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
@@ -50,7 +50,7 @@ router
       data: {
         ...nextData,
         fans: fans.map(f => {
-          const { _doc: { avatar, ...nextF } } = f
+          const { _doc: { _id: { _doc: { avatar, ...nextF } } } } = f
           return {
             avatar: avatar ? avatar.src : null,
             ...nextF

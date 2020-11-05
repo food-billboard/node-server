@@ -44,7 +44,7 @@ router
     _id: 0
   })
   .populate({
-    path: 'glance',
+    path: 'glance._id',
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
@@ -77,7 +77,7 @@ router
       data: {
         ...nextData,
         glance: glance.map(g => {
-          const { _doc: { info: { description, name, classify, screen_time }, poster, rate_person, total_rate,  ...nextD } } = g
+          const { _doc: { _id: { _doc: { info: { description, name, classify, screen_time }, poster, rate_person, total_rate,  ...nextD } } } } = g
           const rate = total_rate / rate_person
           return {
             ...nextD,

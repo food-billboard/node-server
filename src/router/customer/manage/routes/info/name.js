@@ -8,7 +8,7 @@ router
   const check = Params.body(ctx, {
     name: 'name',
     validator: [
-      data => typeof data === 'string' && data.length > 0,
+      data => typeof data === 'string' && data.length > 0 && data.length <= 20,
     ]
   })
 

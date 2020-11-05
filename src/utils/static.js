@@ -1,7 +1,7 @@
 const { UserModel, ImageModel, VideoModel, OtherMediaModel } = require('./mongodb/mongo.lib')
 const { verifyTokenToData, fileEncoded } = require('./token')
 const { dealErr, responseDataDeal, notFound } = require('./error-deal')
-const { STATIC_FILE_PATH, MAX_FILE_SINGLE_RESPONSE_SIZE } = require('./tool')
+const { STATIC_FILE_PATH, MAX_FILE_SINGLE_RESPONSE_SIZE } = require('./constant')
 const fs = require('fs')
 const path = require('path')
 const Mime = require('mime')

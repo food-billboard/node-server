@@ -56,7 +56,7 @@ describe(`${COMMON_API} test`, function() {
       UserModel.updateOne({
         mobile: 15632558974
       }, {
-        $push: { fans: self._id }
+        $push: { fans: { _id: self._id } }
       })
     })
     .then(function() {

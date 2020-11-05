@@ -208,15 +208,27 @@ router
   .exec()
   .then(data => !!data && data._doc._id)
 
-  const data = await BarrageModel.updateOne({
+  const data = await BarrageModel.findOneAndUpdate({
     _id,
     like_users: { $nin: [mineId] }
   }, {
     $push: { like_users: mineId }
   })
+  .select({
+    user: 1,
+  })
   .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
   .then(data => {
-    if(data && data.nModified === 0) return Promise.reject({ errMsg: 'write database error', status: 404 })
+    const { user, _id } = data
+    UserModel.updateOne({
+      _id: user
+    }, {
+      $push: { hot_history: { _id: mineId, timestamps: Date.now(), origin_type: 'barrage', origin_id: _id } },
+      $inc: { hot: 1 }
+    })
+
     return {}
   })
   .catch(dealErr(ctx))
@@ -255,15 +267,26 @@ router
   .exec()
   .then(data => !!data && data._doc._id)
 
-  const data = await BarrageModel.updateOne({
+  const data = await BarrageModel.findOneAndUpdate({
     origin: _id,
     like_users: { $in: [ mineId ] }
   }, {
     $pull: { like_users: mineId }
   })
+  .select({
+    user: 1
+  })
   .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
   .then(data => {
-    if(data && data.nModified === 0) return Promise.reject({ errMsg: 'write database error', status: 404 })
+    const { user, _id } = data
+    UserModel.updateOne({
+      _id: user
+    }, {
+      $pull: { hot_history: { origin_type: 'barrage', origin_id: _id, } },
+      $inc: { hot: -1 }
+    })
     return {}
   })
   .catch(dealErr(ctx))

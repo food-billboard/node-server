@@ -10,10 +10,10 @@ const redisConnect = ({ port=6379, host='localhost', options={
   // connectTimeout
 } }={}) => {
 
-  if(process.env.NODE_ENV !== 'production') {
-    console.log("development environment not run the redis default, you can run the command 'npm run prod' to start the redis server")
-    return
-  }
+  // if(process.env.NODE_ENV !== 'production') {
+  //   console.log("development environment not run the redis default, you can run the command 'npm run prod' to start the redis server")
+  //   return
+  // }
 
   const _port = process.env.REDIS_PORT || port
   const _host = process.env.REDIS_HOST || host
@@ -22,6 +22,7 @@ const redisConnect = ({ port=6379, host='localhost', options={
     _host,
     options
   )
+
   client.on('connect', function () {
     console.log(`redis is connected and run in host: ${_host} port: ${_port}`)
   })
@@ -64,7 +65,7 @@ getIp = (ctx) => {
 }
 
 const isAcessLimit = async (ctx) => {
-  if(!client) return false
+  if(!client || process.env.NODE_ENV !== 'production') return false
   const { request: { method, url } } = ctx
   //客户端ip获取
   const ip = getIp(ctx)
@@ -86,8 +87,14 @@ const isAcessLimit = async (ctx) => {
   return true
 }
 
+const dealRedis = async (opera) => {
+  return await opera(client)
+}
+
+
 module.exports = {
   AccessLimitCheck,
   redisConnect,
-  redisDisConnect
+  redisDisConnect,
+  dealRedis
 }

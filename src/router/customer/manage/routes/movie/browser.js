@@ -30,7 +30,7 @@ router.get('/', async (ctx) => {
     updatedAt: 1
   })
   .populate({
-    path: 'glance',
+    path: 'glance._id',
     select: {
       "info.classify": 1,
 			"info.description": 1,
@@ -63,7 +63,7 @@ router.get('/', async (ctx) => {
       data: {
         ...nextData,
         glance: glance.map(g => {
-          const { _doc: { info: { description, name, classify, screen_time }, poster, total_rate, rate_person, ...nextD } } = g
+          const { _doc: { _id: { _doc: { info: { description, name, classify, screen_time }, poster, total_rate, rate_person, ...nextD } } } } = g
           const rate = total_rate /rate_person
           return {
             ...nextD,

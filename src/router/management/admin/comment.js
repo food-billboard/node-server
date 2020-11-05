@@ -1,0 +1,170 @@
+const Router = require('@koa/router')
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+
+const router = new Router()
+
+router
+//评论列表
+.get('/', async(ctx) => {
+  const [, token] = verifyTokenToData(ctx)
+  const { mobile } = token
+
+  const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
+    name: 'currPage',
+    _default: 0,
+    sanitizers: [
+      data => data >= 0 ? data : 0
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    sanitizers: [
+      data => data >= 0 ? data : 30
+    ]
+  })
+
+  const data = await UserModel.findOne({
+    mobile: Number(mobile)
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => {
+
+    const { _id } = data
+
+    return Promise.all([
+      CommentModel.aggregate([
+        {
+          $match: {
+            user_info: _id,
+            // createdAt: {
+            //   $lte: end_date,
+            //   ...(!!start_date ? { $gte: start_date } : {})
+            // },
+            // source_type: { $in: source_type }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: 1
+            }
+          }
+        }
+      ]),
+      aggregate
+      .match({
+        user_info: _id,
+        // createdAt: {
+        //   $lte: end_date,
+        //   ...(!!start_date ? { $gte: start_date } : {})
+        // },
+        // source_type: { $in: source_type }
+      })
+      .project({
+        source_type: 1,
+        source: 1,
+        // user_info: 1,
+        sub_comments: {
+          $size: {
+            $ifNull: [
+              "$sub_comments", []
+            ]
+          }
+        },
+        total_like: 1,
+        content: 1,
+        createdAt: 1,
+        updatedAt: 1
+      })
+      .sort({
+        total_like: like, 
+        sub_comments: comment
+      })
+      .skip(currPage * pageSize)
+      .limit(pageSize)
+      // .lookup({
+      //   from: 'users',
+      //   localField: 'user_info',
+      //   foreignField: '_id',
+      //   as: 'user_info'
+      // })
+      // .unwind("user_info")
+      .lookup({
+        from: 'images',
+        localField: 'content.image',
+        foreignField: '_id',
+        as: 'image'
+      })
+      .lookup({
+        from: 'videos',
+        localField: 'content.video',
+        foreignField: '_id',
+        as: 'video'
+      })
+      .unwind("content.video")
+      .project({
+        source_type: 1,
+        source: 1,
+        // user_info: {
+        //   _id: "$user_info._id",
+        //   username: "$user_info.username"
+        // },
+        sub_comments: 1,
+        total_like: 1,
+        content: {
+          text: "$content.text",
+          video: "$content.video.src",
+          image: "$content.image.src"
+        },
+        createdAt: 1,
+        updatedAt: 1
+      })
+    ])
+
+  })
+  .then(([total_count, comment_data]) => {
+    if(!Array.isArray(total_count) || !Array.isArray(comment_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
+
+    return {
+
+      // {
+      //   data: {
+      //     total,
+      //     list: [{
+      //       _id,
+      //       source_type,
+      //       source,
+      //       sub_comments,
+      //       total_like,
+      //       content: {
+      //         text,
+      //         video,
+      //         image
+      //       },
+      //       createdAt,
+      //       updatedAt
+      //     }]
+      //   }
+      // }
+
+      data: {
+        total: !!total_count.length ? total_count[0].total || 0 : 0,
+        list: comment_data
+      }
+    }
+  })
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data
+  })
+})
+
+module.exports = router
