@@ -44,8 +44,6 @@ router
     ]
   })
 
-
-
   const data = await Promise.all([
     UserModel.aggregate([
       {

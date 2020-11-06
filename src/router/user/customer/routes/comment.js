@@ -94,7 +94,8 @@ router
               ...nextContent,
               image: image.filter(i => !!i.src).map(i => i.src),
               video: video.filter(v => !!v.src).map(v => v.src)
-            }
+            },
+            like: false
           }
         })
       }

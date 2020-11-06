@@ -83,11 +83,11 @@ router
     let max_user_roles = 99
     let max_media_roles = 99
     user_roles.forEach(role => {
-      const curr = ROLES_MAP[role] ?? 100
+      const curr = ROLES_MAP[role] == undefined ? 100 : ROLES_MAP[role]
       if(curr < max_user_roles) max_user_roles = curr
     })
     media_roles.forEach(role => {
-      const curr = ROLES_MAP[role] ?? 100
+      const curr = ROLES_MAP[role] == undefined ? 100 : ROLES_MAP[role]
       if(curr < max_media_roles) max_media_roles = curr
     })
 
