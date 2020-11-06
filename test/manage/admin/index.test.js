@@ -1,13 +1,24 @@
 require('module-alias/register')
-const {  } = require('@src/utils')
+const { UserModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser } = require('@test/utils')
 const { Types: { ObjectId } } = require("mongoose")
 
 const COMMON_API = '/api/manage/admin'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
+
+  expect(target).to.be.a('object').and.that.include.all.keys('username', 'avatar', 'hot', 'fans', 'attentions', 'createdAt', 'updatedAt', '_id')
+
+  commonValidate.string(target.username)
+  commonValidate.avatar(target.avatar)
+  commonValidate.number(target.hot)
+  commonValidate.number(target.fans)
+  commonValidate.number(target.attentions)
+  commonValidate.date(target.createdAt)
+  commonValidate.date(target.updatedAt)
+  commonValidate.objectId(target._id)
 
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
@@ -20,11 +31,64 @@ function responseExpect(res, validate=[]) {
 
 describe(`${COMMON_API} test`, function() {
 
+  let userInfo
+  let selfToken
+
+  before(function(done) {
+    const { model, token } = mockCreateUser({
+      username: COMMON_API
+    })
+
+    selfToken = token
+
+    model.save()
+    .then(data => {
+      userInfo = data
+      done()
+    })
+    .catch(err => {
+      console.log('oops: ', err)
+    })
+  })
+
+  after(function(done) {
+    UserModel.deleteMany({
+      _id: userInfo._id
+    })
+    .then(data => {
+      done()
+    })
+    .catch(err => {
+      console.log('oops: ', err)
+    }) 
+  })
+
   describe(`${COMMON_API} success test`, function() {
 
     describe(`get the admin info success -> ${COMMON_API}`, function() {
 
       it(`get the admin info success`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj)
+          done()
+        })
 
       })
 
@@ -32,16 +96,52 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`put the admin info success -> ${COMMON_API}`, function() {
 
-      it(`put the admin info of the username success`, function(done) {
+      let newUserName = COMMON_API.slice(0, -1)
+      let newAvatar = ObjectId('571094e2976aeb1df982ad4e')
+      let newDescription = COMMON_API
 
+      after(function(done) {
+        UserModel.findOne({
+          _id: userInfo._id
+        })
+        .select({
+          username: 1,
+          avatar: 1,
+          description: 1
+        })
+        .exec()
+        .then(data => {
+          const { _doc: { username, avatar, description } } = data
+          expect(username).to.be(newUserName)
+          expect(avatar.equals(newAvatar)).to.be.true
+          expect(description).to.be(newDescription)
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
       })
 
-      it(`put the admin info of the avatar success`, function(done) {
+      it(`put the admin info success`, function(done) {
 
-      })
+        Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          username: newUserName,
+          avatar: newAvatar.toString(),
+          description: newDescription
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
 
-      it(`put the admin info of the description success`, function(done) {
-        
       })
 
     })
@@ -54,22 +154,112 @@ describe(`${COMMON_API} test`, function() {
 
       it(`put the admin info fail because the username's length is to long`, function(done) {
 
+        Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          username: newUserName.repeat(10),
+          avatar: newAvatar.toString(),
+          description: newDescription
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+
       })
 
       it(`put the admin info fail because the username's length is to short`, function(done) {
+
+        Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          username: '',
+          avatar: newAvatar.toString(),
+          description: newDescription
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
 
       })
 
       it(`put the admin info fail because the description's length is to long`, function(done) {
 
+        Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          username: newUserName,
+          avatar: newAvatar.toString(),
+          description: newDescription.repeat(10)
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+
       })
 
       it(`put the admin info fail because the description's length is to short`, function(done) {
+
+        Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          username: newUserName,
+          avatar: newAvatar.toString(),
+          description: ''
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
 
       })
 
       it(`put the admin info fail because the avatar is not verify`, function(done) {
         
+        Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          username: newUserName,
+          avatar: newAvatar.toString().slice(1),
+          description: newDescription
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+
       })
 
     })

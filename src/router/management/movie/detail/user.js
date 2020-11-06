@@ -116,7 +116,7 @@ router
             hot: 1,
             status: 1,
             roles: 1,
-            creaetdAt: 1,
+            createdAt: 1,
             updatedAt: 1,
             glance_date: "$glance.timestamps",
             movie_name: "$glance._id.name",

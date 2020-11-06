@@ -45,10 +45,16 @@ router
     as: 'video'
   })
   .unwind("video")
+  .lookup({
+    from: 'classifies', 
+    localField: 'classify', 
+    foreignField: '_id', 
+    as: 'classify'
+  })
   .project({
     name: 1,
     video: "$video.src",
-    classify: "$info.classify",
+    classify: "$classify.name",
     images: "images.src",
     poster: 1,
     createdAt: 1,
