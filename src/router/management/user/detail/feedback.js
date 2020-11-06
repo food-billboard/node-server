@@ -116,6 +116,8 @@ router
             _id: "$user_info._id",
             username: "$user_info.username"
           },
+          createdAt: 1,
+          updatedAt: 1,
           status: 1,
           content: {
             text: "$content.text",

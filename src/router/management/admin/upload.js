@@ -12,17 +12,15 @@ router
 
   const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
-    type: ['toInt'],
     _default: 0,
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 0
     ]
   }, {
     name: 'pageSize',
-    type: ['toInt'],
     _default: 30,
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 30
     ]
   })
 
