@@ -1,9 +1,8 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, mockCreateImage, mockCreateVideo, mockCreateComment, Request, createEtag, commonValidate } = require('@test/utils')
+const { mockCreateUser, mockCreateImage, mockCreateMovie, mockCreateVideo, mockCreateComment, Request, createEtag, commonValidate } = require('@test/utils')
 const { UserModel, ImageModel, VideoModel, CommentModel, MovieModel } = require('@src/utils')
 const Day = require('dayjs')
-const { mockCreateMovie } = require('../../../utils')
 
 const COMMON_API = '/api/customer/manage/comment'
 
@@ -31,8 +30,6 @@ function responseExpect(res, validate=[]) {
     expect(item.like).to.be.a('boolean')
     commonValidate.number(item.total_like)
     commonValidate.objectId(item._id)
-
-    console.log(item.source)
     
     // expect(item.source).to.be.a('object').and.includes.all.keys('_id', 'content', 'type')
     // commonValidate.objectId(item.source._id)

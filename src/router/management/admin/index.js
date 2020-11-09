@@ -22,18 +22,30 @@ router
     fans:1,
     attentions: 1,
     createdAt: 1,
+    updatedAt: 1,
+    issue: 1,
+    comment: 1,
+    store: 1,
+    email: 1,
+    roles: 1,
+    createdAt: 1,
     updatedAt: 1
   })
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { fans, attentions, ...nextData } = data
+    const { fans, attentions, issue, comment, store, ...nextData } = data
     return {
       data: {
         ...nextData,
         fans: fans.length,
-        attentions: attentions.length
+        attentions: attentions.length,
+        issue: issue.length,
+        comment: comment.length,
+        store: store.length,
+        mobile,
+
       }
     }
   })
@@ -106,7 +118,7 @@ router
   
 })
 .use('/upload', Upload.routes(), Upload.allowedMethods())
-.use('/issue', Comment.routes(), Comment.allowedMethods())
+.use('/comment', Comment.routes(), Comment.allowedMethods())
 
 module.exports = router
 

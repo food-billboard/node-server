@@ -2,8 +2,7 @@ require('module-alias/register')
 const { mockCreateUser, mockCreateComment, mockCreateMovie, Request, createEtag, commonValidate } = require('@test/utils')
 const { expect } = require('chai')
 const mongoose = require('mongoose')
-const { CommentModel, UserModel } = require('@src/utils')
-const { MovieModel } = require('../../../../src/utils/mongodb/mongo.lib')
+const { CommentModel, UserModel, MovieModel } = require('@src/utils')
 const { Types: { ObjectId } } = mongoose
 
 const COMMON_API = '/api/user/customer/comment'
@@ -21,7 +20,7 @@ function responseExpect(res, validate=[]) {
   //data
   expect(target.data).is.a('array')
   target.data.forEach((item) => {
-    expect(item).is.a('object').that.includes.all.keys('content', 'createdAt', 'source', 'total_like', '_id', 'updatedAt')
+    expect(item).is.a('object').that.includes.all.keys('content', 'createdAt', 'source', 'total_like', '_id', 'updatedAt', 'like')
     //content
     expect(item).to.be.have.a.property('content').that.is.a('object').and.includes.all.keys('text', 'image', 'video')
     commonValidate.string(item.content.text)
@@ -39,6 +38,7 @@ function responseExpect(res, validate=[]) {
     commonValidate.string(item.source.type, function(target) {
       return !!~['movie', 'comment'].indexOf(target.toLowerCase())
     })
+    expect(item.like).to.be.a('boolean')
     expect(item.source.content).to.be.satisfies(function(target) {
       return typeof target == 'string' || target == null
       console.log(target, item.source.type.toLowerCase() == 'movie' ? target == null : typeof target === 'string')
