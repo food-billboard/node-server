@@ -1,7 +1,7 @@
 require('module-alias/register')
-const { MovieModel, UserModel, ClassifyModel } = require('@src/utils')
+const { MovieModel, UserModel, ClassifyModel, ImageModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateMovie, mockCreateClassify, mockCreateUser } = require('@test/utils')
+const { Request, commonValidate, mockCreateMovie, mockCreateClassify, mockCreateUser, mockCreateImage } = require('@test/utils')
 const { Types: { ObjectId } } = require("mongoose")
 const Day = require('dayjs')
 
@@ -52,6 +52,7 @@ describe(`${COMMON_API} test`, function() {
   let statusId
   let sourceTypeId
   let otherUserId
+  let imageId
 
   let newMovie = {
     actor: [ ObjectId('571094e2976aeb1df982ad4e') ],
@@ -72,6 +73,10 @@ describe(`${COMMON_API} test`, function() {
 
   before(function(done) {
 
+    const { model: image } = mockCreateImage({
+      src: COMMON_API
+    })
+
     const { model: user, token } = mockCreateUser({
       username: COMMON_API
     })
@@ -87,12 +92,20 @@ describe(`${COMMON_API} test`, function() {
     Promise.all([
       user.save(),
       classify.save(),
-      otherUser.save()
+      otherUser.save(),
+      image.save()
     ])
-    .then(([ user, classify, otherUser ]) => {
+    .then(([ user, classify, otherUser, image ]) => {
       userInfo = user
       classifyId = classify._id
       otherUserId = otherUser._id
+      imageId = image._id
+
+      newMovie = {
+        ...newMovie,
+        images: [imageId]
+      }
+
       return Promise.all(['classify', 'status', 'sourceType'].map(item => {
         const { model } = mockCreateMovie({
           name: `${COMMON_API}-${item}`,
@@ -127,6 +140,9 @@ describe(`${COMMON_API} test`, function() {
       }),
       ClassifyModel.deleteMany({
         name: COMMON_API
+      }),
+      ImageModel.deleteMany({
+        src: COMMON_API
       })
     ])
     .then(data => {

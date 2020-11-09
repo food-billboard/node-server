@@ -347,7 +347,7 @@ const middleware4Uuid = async (ctx, next) => {
 
   if(process.env.NODE_ENV !== 'production') return await next()
 
-  const [, token] = verifyTokenToData
+  const [, token] = verifyTokenToData(ctx)
 
   let id = uuid()
 

@@ -11,16 +11,14 @@ router
   const [ currPage, pageSize, _id, start_date, end_date, status ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
-    type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 0
     ]
   }, {
     name: 'pageSize',
     _default: 30,
-    type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 30
     ]
   }, {
     name: '_id',
@@ -224,6 +222,69 @@ router
 
   responseDataDeal({
     ctx,
+    data,
+    needCache: false
+  })
+
+})
+//权限判断
+.use(async (ctx, next) => {
+
+  const [ _id ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
+
+  const [ , token ] = verifyTokenToData(ctx)
+
+  const { mobile } = token
+
+  let userMaxRole = 100
+  let selfMaxRole = 100
+
+  const data = FeedbackModel.findOne({
+    _id
+  })
+  .select({
+    user_info: 1,
+    _id: 0
+  })
+  .populate({
+    path: 'user_info',
+    select: {
+      roles: 1
+    }
+  })
+  .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => {
+    const { author: { roles } } = data
+    userMaxRole = findMostRole(roles)
+    if(userMaxRole == ROLES_MAP.SUPER_ADMIN) return Promise.reject({ errMsg: 'forbidden', status: 403 })
+    return UserModel.findOne({ mobile: Number(mobile) })
+    .select({
+      _id: 0,
+      roles: 1
+    })
+    .exec()
+  })
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => {
+    const { roles } = data
+    selfMaxRole = findMostRole(roles)
+    if(selfMaxRole >= userMaxRole) return Promise.reject({ errMsg: 'forbidden', status: 403 }) 
+    return
+  })
+  .catch(dealErr(ctx))
+
+  if(!data) return await next()
+
+  responseDataDeal({
+    ctx, 
     data,
     needCache: false
   })

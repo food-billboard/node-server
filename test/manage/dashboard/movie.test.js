@@ -1,7 +1,7 @@
 require('module-alias/register')
-const {  } = require('@src/utils')
+const { MovieModel, SearchModel, UserModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate } = require('@test/utils')
+const { Request, commonValidate, mockCreateSearch, mockCreateUser, mockCreateMovie } = require('@test/utils')
 const { Types: { ObjectId } } = require("mongoose")
 
 const COMMON_API_KEYWORD = '/api/manage/dashboard/movie/keyword'

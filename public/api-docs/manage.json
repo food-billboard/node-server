@@ -1919,6 +1919,32 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "summary": "删除用户发布的评论",
+        "description": "",
+        "operationId": "manage_user_detail_delete_comment",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "评论id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
       }
     },
     "/api/manage/user/detail/feedback": {

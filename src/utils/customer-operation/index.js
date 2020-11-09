@@ -7,14 +7,16 @@ const NEED_DEAL_ROLE = [ 'CUSTOMER', 'USER' ]
 
 const notes_customer_behaviour_middleware = async (ctx, next) => {
   const { request: { url, method } } = ctx
-  const pathname = Url.parse(url)
+  const { pathname } = Url.parse(url)
   let action
+  //判断请求是否需要进行记录处理
   Object.keys(url_map).some(url => {
-    if(url == pathname && method.toLowerCase() == url_map[url].method) {
-      action = url_map[url]
-      return false
+    const reg = new RegExp(url)
+    if(reg.test(pathname) && method.toLowerCase() == url_map[url].method) {
+      action = url_map[url].action
+      return true
     }
-    return true
+    return false
   })
 
   //只处理登录用户且非后台用户行为

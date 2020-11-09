@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { UserModel, MovieModel, BehaviourModel, dealErr, responseDataDeal, Params } = require('@src/utils')
+const { UserModel, MovieModel, BehaviourModel, dealErr, responseDataDeal } = require('@src/utils')
 const { getDateParams } = require('@src/router/management/utils')
 const Day = require('dayjs')
 

@@ -3,6 +3,7 @@ const { UserModel, CommentModel, MovieModel, ImageModel } = require('@src/utils'
 const { expect } = require('chai')
 const { Request, commonValidate, mockCreateUser, mockCreateMovie, mockCreateComment, mockCreateImage } = require('@test/utils')
 const { Types: { ObjectId } } = require("mongoose")
+const Day = require('dayjs')
 
 const COMMON_API = '/api/manage/movie/detail/comment'
 
@@ -16,7 +17,7 @@ function responseExpect(res, validate=[]) {
   target.list.forEach(item => {
     expect(item).to.be.a('object').that.includes.all.keys('_id', 'user_info', 'comment_count', 'total_like', 'like_person', 'content')
     commonValidate.objectId(item._id)
-    expect(item).to.be.a('object').that.includes.all.keys('_id', 'username')
+    expect(item.user_info).to.be.a('object').that.includes.all.keys('_id', 'username')
     commonValidate.number(item.comment_count)
     commonValidate.number(item.total_like)
     commonValidate.number(item.like_person)
@@ -287,7 +288,7 @@ describe(`${COMMON_API} test`, function() {
       })
       .query({
         _id: movieId,
-        start_date: '2021-10-11'
+        start_date: Day(Date.now() + 10000000).format('YYYY-MM-DD')
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -320,7 +321,7 @@ describe(`${COMMON_API} test`, function() {
       })
       .query({
         _id: movieId,
-        start_date: '2019-10-11'
+        end_date: '2019-10-11'
       })
       .expect(200)
       .expect('Content-Type', /json/)

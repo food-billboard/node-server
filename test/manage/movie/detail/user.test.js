@@ -2,6 +2,7 @@ require('module-alias/register')
 const { UserModel, MovieModel, ImageModel } = require('@src/utils')
 const { expect } = require('chai')
 const { Request, commonValidate, mockCreateUser, mockCreateMovie, mockCreateImage } = require('@test/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/manage/movie/detail/user'
 
@@ -179,7 +180,7 @@ describe(`${COMMON_API} test`, function() {
       })
       .query({
         _id: movieId.toString(),
-        start_date: '2021-11-22'
+        start_date: Day(Date.now() + 10000000).format('YYYY-MM-DD')
       })
       .expect(200)
       .expect('Content-Type', /json/)

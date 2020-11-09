@@ -1,6 +1,7 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId }, Aggregate } = require('mongoose')
-const { CommentModel, dealErr, responseDataDeal, Params, COMMENT_SOURCE_TYPE } = require('@src/utils')
+const { CommentModel, dealErr, verifyTokenToData, responseDataDeal, Params, COMMENT_SOURCE_TYPE, notFound, findMostRole, ROLES_MAP } = require('@src/utils')
+const { UserModel } = require('../../../../utils/mongodb/mongo.lib')
 
 const router = new Router()
 
@@ -188,6 +189,69 @@ router
 
   responseDataDeal({
     ctx,
+    data,
+    needCache: false
+  })
+
+})
+//权限判断
+.use(async (ctx, next) => {
+
+  const [ _id ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
+
+  const [ , token ] = verifyTokenToData(ctx)
+
+  const { mobile } = token
+
+  let userMaxRole = 100
+  let selfMaxRole = 100
+
+  const data = CommentModel.findOne({
+    _id
+  })
+  .select({
+    author: 1,
+    _id: 0
+  })
+  .populate({
+    path: 'author',
+    select: {
+      roles: 1
+    }
+  })
+  .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => {
+    const { author: { roles } } = data
+    userMaxRole = findMostRole(roles)
+    if(userMaxRole == ROLES_MAP.SUPER_ADMIN) return Promise.reject({ errMsg: 'forbidden', status: 403 })
+    return UserModel.findOne({ mobile: Number(mobile) })
+    .select({
+      _id: 0,
+      roles: 1
+    })
+    .exec()
+  })
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => {
+    const { roles } = data
+    selfMaxRole = findMostRole(roles)
+    if(selfMaxRole >= userMaxRole) return Promise.reject({ errMsg: 'forbidden', status: 403 }) 
+    return
+  })
+  .catch(dealErr(ctx))
+
+  if(!data) return await next()
+
+  responseDataDeal({
+    ctx, 
     data,
     needCache: false
   })

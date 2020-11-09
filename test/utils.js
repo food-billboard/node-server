@@ -20,6 +20,7 @@ const {
   ImageModel,
   BarrageModel, 
   FeedbackModel,
+  BehaviourModel,
   mergeConfig
 } = require('@src/utils')
 const App = require('../app')
@@ -273,6 +274,7 @@ function mockCreateGlobal(values={}) {
   let baseModel = {
     notice: '测试的首页notice内容',
     info: '测试的小程序相关信息内容',
+    visit_count: 0
   }
 
   baseModel = mergeConfig(baseModel, values, true)
@@ -306,7 +308,9 @@ function mockCreateFeedback(values) {
       text: '111',
       image: [],
       video: []
-    }
+    },
+    status: 'DEALING',
+    user_info: ObjectId('8f63270f005f1c1a0d9448ca')
   }
 
   baseModel = mergeConfig(baseModel, values, true)
@@ -328,6 +332,35 @@ function mockCreateRank(values) {
 
   baseModel = mergeConfig(baseModel, values, true)
   const model = new RankModel(baseModel)
+  return { model }
+}
+
+//创建行为
+function mockCreateBehaviour(values) {
+  let baseModel = {
+    timestamps: Date.now(),
+    url_type: 'USER_GET',
+    user: ObjectId('8f63270f005f1c1a0d9448ca'),
+    target: ObjectId('8f63270f005f1c1a0d9448ca')
+  }
+
+  baseModel = mergeConfig(baseModel, values, true)
+  const model = new BehaviourModel(baseModel)
+  return { model }
+}
+
+SearchModel
+//创建搜索
+function mockCreateSearch(values) {
+  let baseModel = {
+    key_word: '测试关键词',
+    match_movies: [],
+    match_texts: [],
+    hot: [],
+  }
+
+  baseModel = mergeConfig(baseModel, values, true)
+  const model = new SearchModel(baseModel)
   return { model }
 }
 
@@ -389,6 +422,8 @@ module.exports = {
   mockCreateGlobal,
   mockCreateBarrage,
   mockCreateRank,
+  mockCreateBehaviour,
+  mockCreateSearch,
   Request,
   createEtag,
   commonValidate,
