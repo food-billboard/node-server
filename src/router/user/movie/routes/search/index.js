@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { dealErr, notFound, Params, MovieModel, responseDataDeal } = require("@src/utils")
+const { dealErr, notFound, Params, MovieModel, responseDataDeal, SearchModel } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 const { sortList } = require('../orderList')
 
@@ -91,6 +91,8 @@ router
 			}
 		]
   })
+
+  const reg = new RegExp(content)
   
   //数据库操作
   const data = await MovieModel.find({
@@ -167,6 +169,38 @@ router
   .then(data => !!data && data)
   .then(notFound)
   .then(data => {
+
+    const movieIdList = data.map(item => ({ movie: item._id }))
+
+    //关键词搜索存储
+    if(content) {
+      SearchModel.findOneAndUpdate({
+        key_word: content
+      }, {
+        $push: { hot: new Date() },
+        $set: {
+          match_movies: movieIdList
+        }
+      })
+      .select({
+        _id: 1
+      })
+      .exec()
+      .then(data => {
+        if(!data) {
+          const model = new SearchModel({
+            key_word: content,
+            match_movies: movieIdList,
+            match_texts: [],
+            hot: [new Date()],
+            other: {},
+          })
+          model.save(function() {})
+        }
+      })
+      .catch(err => {})
+    }
+
     return {
       data: data.map(item => {
         const { _doc: { info: { screen_time, ...nextInfo }, total_rate, rate_person, poster, ...nextItem } } = item

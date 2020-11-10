@@ -2642,7 +2642,6 @@
         "name": "manage_dashboard_statistics_visit"
       }
     },
-
     "manage_dashboard_movie_keyword": {
       "type": "object",
       "properties": {
@@ -2717,10 +2716,6 @@
                   "count": {
                     "type": "integer",
                     "description": "搜索数量"
-                  },
-                  "week_count": {
-                    "type": "integer",
-                    "description": "周同比(较上周新增百分比)"
                   }
                 }
               }
@@ -2767,7 +2762,6 @@
         "name": "manage_dashboard_movie_type"
       }
     },
-
     "manage_movie_get": {
       "type": "object",
       "properties": {
