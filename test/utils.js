@@ -96,7 +96,7 @@ function mockCreateMovie(values={}) {
     rate_person: 0,
     total_rate: 0,
     source_type: 'ORIGIN',
-    stauts: 'COMPLETE',
+    status: 'COMPLETE',
     related_to: [],
     same_film: []
   }

@@ -6,6 +6,9 @@ const Url = require('url')
 const NEED_DEAL_ROLE = [ 'CUSTOMER', 'USER' ]
 
 const notes_customer_behaviour_middleware = async (ctx, next) => {
+
+  if(process.env.NODE_ENV !== 'production') return await next()
+
   const { request: { url, method } } = ctx
   const { pathname } = Url.parse(url)
   let action

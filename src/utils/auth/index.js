@@ -42,6 +42,8 @@ const initAuthMapData = () => {
 }
 
 const authMiddleware = async (ctx, next) => {
+  
+  if(process.env.NODE_ENV !== 'production') return await next()
   const { request: { method, url } } = ctx
   const { pathname } = Url.parse(url)
   //不在限制范围内

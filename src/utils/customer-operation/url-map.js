@@ -116,7 +116,7 @@ module.exports = {
     return acc
   }, {}),
   ...Object.keys(customer_behaviour).reduce((acc, cur) => {
-    acc[`${CUSTOMER_PREFIX}${cur}`] = user_behaviour[cur]
+    acc[`${CUSTOMER_PREFIX}${cur}`] = customer_behaviour[cur]
     return acc
   }, {})
 }

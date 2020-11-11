@@ -3,7 +3,7 @@ const { SearchModel, UserModel } = require('@src/utils')
 const { expect } = require('chai')
 const { Request, commonValidate, mockCreateSearch, mockCreateUser } = require('@test/utils')
 
-const COMMON_API = '/api/manage/dashboard/movie/keyword'
+const COMMON_API = '/api/manage/dashboard/search/keyword'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res

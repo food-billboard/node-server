@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { UserModel, notFound, dealErr, responseDataDeal, verifyTokenToData, Params } = require('@src/utils')
+const { UserModel, notFound, dealErr, responseDataDeal, verifyTokenToData, Params, MovieModel } = require('@src/utils')
 
 const router = new Router()
 

@@ -100,7 +100,7 @@ describe(`${COMMON_API} test`, function() {
         sub_comments: [ ObjectId('571094e2976aeb1df982ad4e') ]
       }) 
 
-      const { model: two } = mockCreateComment({
+      const { model: three } = mockCreateComment({
         source_type: 'movie',
         source: ObjectId('571094e2976aeb1df982ad4e'),
         content: {

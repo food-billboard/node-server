@@ -1,12 +1,14 @@
 require('module-alias/register')
-const { CommentModel, UserModel } = require('@src/utils')
+const { CommentModel, UserModel, ImageModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateComment } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateComment, mockCreateImage } = require('@test/utils')
 
 const COMMON_API = '/api/manage/admin/comment'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
+
+  console.log(target)
 
   expect(target).to.be.a('object').and.that.include.all.keys('total', 'list')
   commonValidate.number(target.total)
@@ -19,6 +21,7 @@ function responseExpect(res, validate=[]) {
     commonValidate.number(item.total_like)
     expect(item.content).to.be.a('object').and.that.include.all.keys('text', 'image', 'video')
     commonValidate.string(item.content.text)
+    console.log(item.content.image)
     expect(item.content.image).to.be.a('array')
     item.content.image.forEach(img => commonValidate.string(img))
     commonValidate.string(item.content.video)
@@ -45,17 +48,23 @@ describe(`${COMMON_API} test`, function() {
     const { model, token } = mockCreateUser({
       username: COMMON_API
     })
+    const { model: image } = mockCreateImage({
+      src: COMMON_API
+    })
 
     selfToken = token
 
-    model.save()
-    .then(data => {
-      userInfo = data
+    Promise.all([
+      image.save(),
+      model.save()
+    ])
+    .then(([image, user]) => {
+      userInfo = user
 
       const { model } = mockCreateComment({
         content: {
           text: COMMON_API,
-          image: [],
+          image: [ image._id ],
           video: []
         },
         user_info: userInfo._id
@@ -87,6 +96,9 @@ describe(`${COMMON_API} test`, function() {
       }),
       CommentModel.deleteMany({
         "content.text": COMMON_API
+      }),
+      ImageModel.deleteMany({
+        src: COMMON_API
       })
     ])
     .then(_ => {
@@ -100,7 +112,7 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`${COMMON_API} success test`, function() {
 
-    it(`get the admin comment list success`, function() {
+    it(`get the admin comment list success`, function(done) {
       
       Request
       .get(COMMON_API)
@@ -110,7 +122,7 @@ describe(`${COMMON_API} test`, function() {
       })
       .expect(200)
       .expect('Content-Type', /json/)
-      .end(function(err, _) {
+      .end(function(err, res) {
         if(err) return done(err)
           const { res: { text } } = res
           let obj

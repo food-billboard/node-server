@@ -3,7 +3,7 @@ const { MovieModel, UserModel } = require('@src/utils')
 const { expect } = require('chai')
 const { Request, commonValidate, mockCreateUser, mockCreateMovie } = require('@test/utils')
 
-const COMMON_API = '/api/manage/admin/issue'
+const COMMON_API = '/api/manage/admin/upload'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res

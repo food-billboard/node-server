@@ -488,7 +488,7 @@ describe(`${COMMON_API} test`, function() {
         email: '13111111111@163.com',
         username: COMMON_API.slice(1),
         description: COMMON_API,
-        avatar: imageId.toString(),
+        avatar: '571094e2976aeb1df982ad4e',
         role: 'User'
       }
 
@@ -789,7 +789,7 @@ describe(`${COMMON_API} test`, function() {
         email: '13111111111@163.com',
         username: COMMON_API.slice(1),
         description: COMMON_API,
-        avatar: imageId.toString(),
+        avatar: '571094e2976aeb1df982ad4e',
         role: 'SUPER_ADMIN'
       }
 
@@ -837,6 +837,7 @@ describe(`${COMMON_API} test`, function() {
     describe(`put the user fail test -> ${COMMON_API}`, function() {
 
       let userInfo
+      let send
 
       before(function(done) {
 
@@ -848,6 +849,16 @@ describe(`${COMMON_API} test`, function() {
         model.save()
         .then(data => {
           userInfo = data
+          send = {
+            _id: userInfo._id,
+            mobile: userInfo.mobile,
+            password: userInfo.password,
+            email: userInfo.email,
+            username: userInfo.username,
+            description: userInfo.description,
+            avatar: userInfo.avatar,
+            role: 'USER'
+          }
           done()
         })
         .catch(err => {
@@ -869,17 +880,6 @@ describe(`${COMMON_API} test`, function() {
         })
 
       })
-
-      const send = {
-        _id: userInfo._id,
-        mobile: userInfo.mobile,
-        password: userInfo.password,
-        email: userInfo.email,
-        username: userInfo.username,
-        description: userInfo.description,
-        avatar: userInfo.avatar,
-        role: 'USER'
-      }
 
       it(`put the user fail because the user is not the auth`, function(done) {
 

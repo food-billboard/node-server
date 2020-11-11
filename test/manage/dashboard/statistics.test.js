@@ -97,7 +97,8 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
     })
     const { model:movie } = mockCreateMovie({
       name: COMMON_API_USER,
-      description: COMMON_API_USER
+      author_description: COMMON_API_USER,
+      source_type: 'USER'
     })
 
     selfToken = token
@@ -123,7 +124,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
         username: COMMON_API_USER
       }),
       MovieModel.deleteMany({
-        description: COMMON_API_USER
+        author_description: COMMON_API_USER
       }),
       BehaviourModel.deleteMany({
         user: ObjectId('8f63270f005f1c1a0d9448ca')
@@ -188,7 +189,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectUser(obj, target => {
-          expect(target.data.length + target.rank.length).to.be(2)
+          expect(target.data.length + target.rank.length).to.be.equals(25)
         })
         done()
       })
@@ -204,7 +205,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        start_date: Day(Date.now() + 100000).format('YYYY-MM-DD')
+        start_date: Day(Date.now() + 60 * 24 * 60 * 1000).format('YYYY-MM-DD')
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -218,7 +219,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectUser(obj, target => {
-          expect(target.data.length + target.rank.length).to.be(0)
+          expect(target.data.every(item => item.count == 0)).to.be.true
         })
         done()
       })
@@ -248,7 +249,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectUser(obj, target => {
-          expect(target.data.length + target.rank.length).to.be(0)
+          expect(target.data.every(item => item.count == 0)).to.be.true
         })
         done()
       })
@@ -307,7 +308,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectMovie(obj, target => {
-          expect(target.data.length + target.rank.length).to.be(2)
+          expect(target.data.length + target.rank.length).to.be.equals(25)
         })
         done()
       })
@@ -323,7 +324,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        start_date: Day(Date.now() + 100000).format('YYYY-MM-DD')
+        start_date: Day(Date.now() + 24 * 1000 * 60 * 60).format('YYYY-MM-DD')
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -337,7 +338,8 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectMovie(obj, target => {
-          expect(target.data.length + target.rank.length).to.be(0)
+          console.log(target)
+          expect(target.data.every(item => item.count == 0)).to.be.true
         })
         done()
       })
@@ -367,7 +369,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectMovie(obj, target => {
-          expect(target.data.length + target.rank.length).to.be(0)
+          expect(target.data.every(item => item.count == 0)).to.be.true
         })
         done()
       })
@@ -426,7 +428,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectVisit(obj, target => {
-          expect(target.length).to.be(1)
+          expect(target.length).to.be.equals(24)
         })
         done()
       })
@@ -456,7 +458,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectVisit(obj, target => {
-          expect(target.length).to.be(0)
+          expect(target.every(item => item.count == 0)).to.be.true
         })
         done()
       })
@@ -486,7 +488,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectVisit(obj, target => {
-          expect(target.length).to.be(0)
+          expect(target.every(item => item.count == 0)).to.be.true
         })
         done()
       })

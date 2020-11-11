@@ -1,5 +1,6 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal, CommentModel } = require('@src/utils')
+const { Aggregate } = require('mongoose')
 
 const router = new Router()
 
@@ -9,7 +10,7 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
-  const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
+  const [ currPage, pageSize, like, comment ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
     sanitizers: [
@@ -21,7 +22,22 @@ router
     sanitizers: [
       data => data >= 0 ? data : 30
     ]
+  }, {
+    name: 'like',
+    sanitizers: [
+      data => parseInt(data),
+      data => Number.isNaN(data) ? -1 : data > 0 ? 1 : -1
+    ]
+  }, {
+    name: 'comment',
+    sanitizers: [
+      data => parseInt(data),
+      data => Number.isNaN(data) ? -1 : data > 0 ? 1 : -1
+    ]
   })
+
+  const aggregate = new Aggregate()
+  aggregate.model(CommentModel)
 
   const data = await UserModel.findOne({
     mobile: Number(mobile)

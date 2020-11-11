@@ -246,7 +246,7 @@
         ]
       }
     },
-    "/api/manage/dashboard/movie/keyword": {
+    "/api/manage/dashboard/search/keyword": {
       "get": {
         "tags": [
           "dashboard"
@@ -297,7 +297,7 @@
         ]
       }
     },
-    "/api/manage/dashboard/movie/type": {
+    "/api/manage/dashboard/search/type": {
       "get": {
         "tags": [
           "dashboard"
@@ -2325,6 +2325,18 @@
             "name": "pageSize",
             "in": "query",
             "description": "每页数量",
+            "type": "integer"
+          },
+          {
+            "name": "like",
+            "in": "query",
+            "description": "人气排序(-1 1)",
+            "type": "integer"
+          },
+          {
+            "name": "comment",
+            "in": "query",
+            "description": "评论数量排序(-1 1)",
             "type": "integer"
           }
         ],

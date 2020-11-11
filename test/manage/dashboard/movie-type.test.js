@@ -4,17 +4,21 @@ const { expect } = require('chai')
 const { Request, commonValidate, mockCreateUser, mockCreateMovie, mockCreateClassify } = require('@test/utils')
 const Day = require('dayjs')
 
-const COMMON_API = '/api/manage/dashboard/movie/type'
+const COMMON_API = '/api/manage/dashboard/search/type'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
-
-  expect(target).to.be.a('array')
-  target.forEach(item => {
-    expect(item).to.be.a('item').and.that.include.all.keys('_id', 'name', 'value')
-    commonValidate.objectId(item._id)
-    commonValidate.string(item.name)
-    commonValidate.number(value)
+  console.log(target)
+  expect(target).to.be.a('object').and.that.include.all.keys('data', 'total')
+  commonValidate.number(target.total)
+  expect(target.data).to.be.a('array')
+  target.data.forEach(item => {
+    expect(item).to.be.a('object').and.that.include.all.keys('classify', 'count')
+    expect(item.classify).to.be.a('object').and.that.include.all.keys('name', '_id')
+    commonValidate.string(item.classify.name)
+    expect(typeof item.classify._id === 'string' || item.classify._id == null).to.be.true
+    let count = parseInt(item.count)
+    commonValidate.number(count)
   })
 
   if(Array.isArray(validate)) {
@@ -113,7 +117,7 @@ describe(`${COMMON_API} test`, function() {
         }catch(_) {
           console.log(_)
         }
-        responseExpectVisit(obj)
+        responseExpect(obj)
         done()
       })
 
@@ -128,7 +132,7 @@ describe(`${COMMON_API} test`, function() {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        start_date: Day(Date.now() + 1000000).format('YYYY-MM-DD')
+        start_date: Day(Date.now() + 24 * 60 * 60 * 1000).format('YYYY-MM-DD')
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -141,9 +145,7 @@ describe(`${COMMON_API} test`, function() {
         }catch(_) {
           console.log(_)
         }
-        responseExpectVisit(obj, target => {
-          expect(target.list.length).to.be(0)
-        })
+        responseExpect(obj)
         done()
       })
 
@@ -171,9 +173,7 @@ describe(`${COMMON_API} test`, function() {
         }catch(_) {
           console.log(_)
         }
-        responseExpectVisit(obj, target => {
-          expect(target.list.length).to.be(0)
-        })
+        responseExpect(obj)
         done()
       })
 

@@ -1,7 +1,7 @@
 require('module-alias/register')
-const { UserModel } = require('@src/utils')
+const { UserModel, ImageModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateImage } = require('@test/utils')
 const { Types: { ObjectId } } = require("mongoose")
 
 const COMMON_API = '/api/manage/admin'
@@ -12,7 +12,7 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.a('object').and.that.include.all.keys('username', 'avatar', 'hot', 'fans', 'attentions', 'createdAt', 'updatedAt', '_id')
 
   commonValidate.string(target.username)
-  commonValidate.avatar(target.avatar)
+  commonValidate.poster(target.avatar)
   commonValidate.number(target.hot)
   commonValidate.number(target.fans)
   commonValidate.number(target.attentions)
@@ -33,17 +33,25 @@ describe(`${COMMON_API} test`, function() {
 
   let userInfo
   let selfToken
+  let newAvatar
 
   before(function(done) {
     const { model, token } = mockCreateUser({
       username: COMMON_API
     })
+    const { model: image } = mockCreateImage({
+      src: COMMON_API
+    })
 
     selfToken = token
 
-    model.save()
-    .then(data => {
+    Promise.all([
+      model.save(),
+      image.save()
+    ])
+    .then(([data, image]) => {
       userInfo = data
+      newAvatar = image._id
       done()
     })
     .catch(err => {
@@ -52,15 +60,22 @@ describe(`${COMMON_API} test`, function() {
   })
 
   after(function(done) {
-    UserModel.deleteMany({
-      _id: userInfo._id
-    })
+
+    Promise.all([
+      ImageModel.deleteMany({
+        src: COMMON_API
+      }),
+      UserModel.deleteMany({
+        _id: userInfo._id
+      })
+    ])
     .then(data => {
       done()
     })
     .catch(err => {
       console.log('oops: ', err)
     }) 
+
   })
 
   describe(`${COMMON_API} success test`, function() {
@@ -97,8 +112,7 @@ describe(`${COMMON_API} test`, function() {
     describe(`put the admin info success -> ${COMMON_API}`, function() {
 
       let newUserName = COMMON_API.slice(0, -1)
-      let newAvatar = ObjectId('571094e2976aeb1df982ad4e')
-      let newDescription = COMMON_API
+      let newDescription = COMMON_API.slice(0, -1)
 
       after(function(done) {
         UserModel.findOne({
@@ -112,9 +126,9 @@ describe(`${COMMON_API} test`, function() {
         .exec()
         .then(data => {
           const { _doc: { username, avatar, description } } = data
-          expect(username).to.be(newUserName)
-          expect(avatar.equals(newAvatar)).to.be.true
-          expect(description).to.be(newDescription)
+          expect(username).to.be.equals(newUserName)
+          expect(avatar.src == (COMMON_API)).to.be.true
+          expect(description).to.be.equals(newDescription)
           done()
         })
         .catch(err => {
@@ -151,6 +165,10 @@ describe(`${COMMON_API} test`, function() {
   describe(`${COMMON_API} fail test`, function() {
     
     describe(`put theadmin info fail -> ${COMMON_API}`, function() {
+
+      let newUserName = COMMON_API.slice(0, -1)
+      let newAvatar = ObjectId('571094e2976aeb1df982ad4e')
+      let newDescription = COMMON_API
 
       it(`put the admin info fail because the username's length is to long`, function(done) {
 
@@ -231,7 +249,7 @@ describe(`${COMMON_API} test`, function() {
           avatar: newAvatar.toString(),
           description: ''
         })
-        .expect(200)
+        .expect(400)
         .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
