@@ -148,5 +148,4 @@ router
 .use('/movie', Movie.routes(), Movie.allowedMethods())
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 
-
 module.exports = router

@@ -104,13 +104,6 @@ router
       })
       .skip(currPage * pageSize)
       .limit(pageSize)
-      // .lookup({
-      //   from: 'users',
-      //   localField: 'user_info',
-      //   foreignField: '_id',
-      //   as: 'user_info'
-      // })
-      // .unwind("user_info")
       .lookup({
         from: 'images',
         localField: 'content.image',
@@ -123,20 +116,15 @@ router
         foreignField: '_id',
         as: 'video'
       })
-      .unwind("content.video")
       .project({
         source_type: 1,
         source: 1,
-        // user_info: {
-        //   _id: "$user_info._id",
-        //   username: "$user_info.username"
-        // },
         sub_comments: 1,
         total_like: 1,
         content: {
           text: "$content.text",
-          video: "$content.video.src",
-          image: "$content.image.src"
+          video: "$video.src",
+          image: "$image.src"
         },
         createdAt: 1,
         updatedAt: 1
@@ -146,7 +134,6 @@ router
   })
   .then(([total_count, comment_data]) => {
     if(!Array.isArray(total_count) || !Array.isArray(comment_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
-
     return {
 
       // {

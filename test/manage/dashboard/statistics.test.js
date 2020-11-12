@@ -160,7 +160,10 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
         }catch(_) {
           console.log(_)
         }
-        responseExpectUser(obj)
+        responseExpectUser(obj, target => {
+          expect(target.data.length).to.not.be.equals(0)
+          expect(target.rank.length).to.not.be.equals(0)
+        })
         done()
       })
 
@@ -279,7 +282,10 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
         }catch(_) {
           console.log(_)
         }
-        responseExpectMovie(obj)
+        responseExpectMovie(obj, target => {
+          expect(target.data.length).to.not.be.equals(0)
+          expect(target.rank.length).to.not.be.equals(0)
+        })
         done()
       })
 
@@ -338,7 +344,6 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectMovie(obj, target => {
-          console.log(target)
           expect(target.data.every(item => item.count == 0)).to.be.true
         })
         done()
@@ -444,7 +449,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        start_date: Day(Date.now() + 100000).format('YYYY-MM-DD')
+        start_date: Day(Date.now() + 1000 * 24 * 60 * 60).format('YYYY-MM-DD')
       })
       .expect(200)
       .expect('Content-Type', /json/)

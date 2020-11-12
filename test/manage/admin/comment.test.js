@@ -8,8 +8,6 @@ const COMMON_API = '/api/manage/admin/comment'
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
-  console.log(target)
-
   expect(target).to.be.a('object').and.that.include.all.keys('total', 'list')
   commonValidate.number(target.total)
   expect(target.list).to.be.a('array')
@@ -24,7 +22,8 @@ function responseExpect(res, validate=[]) {
     console.log(item.content.image)
     expect(item.content.image).to.be.a('array')
     item.content.image.forEach(img => commonValidate.string(img))
-    commonValidate.string(item.content.video)
+    expect(item.content.video).to.be.a('array')
+    item.content.video.forEach(vi => commonValidate.string(vi))
     commonValidate.date(item.createdAt)
     commonValidate.date(item.updatedAt)
   })
@@ -131,7 +130,9 @@ describe(`${COMMON_API} test`, function() {
           }catch(_) {
             console.log(_)
           }
-          responseExpect(obj)
+          responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
+          })
           done()
       })
 

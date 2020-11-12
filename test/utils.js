@@ -390,7 +390,7 @@ const commonValidate = {
       return this[_satisfies_](ObjectId.isValid(target), satisfies)
     })
   },
-  number(target, satisfies){ expect(target).to.be.a('number').and.that.satisfies((target) => {
+  number(target, satisfies){ expect(parseInt(target)).to.be.a('number').and.that.satisfies((target) => {
     return this[_satisfies_](!Number.isNaN(target) && target >= 0, satisfies)
   })},
   date(target, satisfies){

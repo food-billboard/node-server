@@ -2725,7 +2725,7 @@
                     "type": "string",
                     "description": "关键字"
                   },
-                  "count": {
+                  "hot": {
                     "type": "integer",
                     "description": "搜索数量"
                   }

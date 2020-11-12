@@ -218,7 +218,7 @@ router
         "info.description": reg
       },
       {
-        "info.author_description": reg
+        author_description: reg
       },
     ]
   }
@@ -287,7 +287,7 @@ router
           rate_person: 1,
           total_rate: 1,
           source_type: 1,
-          stauts: 1,
+          status: 1,
           comment_count: {
             $size: {
               $ifNull: [

@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MovieModel, SearchModel, dealErr, responseDataDeal } = require('@src/utils')
+const { MovieModel, SearchModel, dealErr, responseDataDeal, Params } = require('@src/utils')
 const { getDateParams } = require('@src/router/management/utils')
 const Day = require('dayjs')
 
@@ -72,7 +72,7 @@ router
     //最近7天的搜索用户数量
     SearchModel.aggregate([
       {
-        $unwind: 'hot'
+        $unwind: '$hot'
       },
       {
         $match: {
@@ -113,9 +113,9 @@ router
     ]),
     //数据统计
     SearchModel.aggregate([
-      {
-        $unwind: "hot"
-      },
+      // {
+      //   $unwind: "$hot"
+      // },
       {
         $project: {
           key_word: 1,
@@ -137,7 +137,7 @@ router
         $skip: currPage * pageSize
       },
       {
-        limit: pageSize
+        $limit: pageSize
       },
     ])
   ])
@@ -174,7 +174,7 @@ router
       })
       average_chart.push({
         ...item,
-        count: count / target.length,
+        count: target.length == 0 ? 0 : count / target.length,
         day: day.format('YYYY-MM-DD')
       })
 
@@ -190,13 +190,15 @@ router
     const yestoday_search_keyword = total - last_day_count
 
     return {
-      total,
-      average: average.toFixed(3),
-      count_total_day: yestoday_total == 0 ? 0 : ( yestoday_search_total / yestoday_total).toFixed(3),
-      count_average_day: yestoday_search_keyword == 0 ? 0 : ( yestoday_total / yestoday_search_keyword ).toFixed(3),
-      total_chart,
-      average_chart,
-      data: search_list
+      data: {
+        total,
+        average: average.toFixed(3),
+        count_total_day: yestoday_total == 0 ? 0 : ( yestoday_search_total / yestoday_total).toFixed(3),
+        count_average_day: yestoday_search_keyword == 0 ? 0 : ( yestoday_total / yestoday_search_keyword ).toFixed(3),
+        total_chart,
+        average_chart,
+        data: search_list
+      }
     }
 
   })

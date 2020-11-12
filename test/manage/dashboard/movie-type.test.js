@@ -117,7 +117,9 @@ describe(`${COMMON_API} test`, function() {
         }catch(_) {
           console.log(_)
         }
-        responseExpect(obj)
+        responseExpect(obj, target => {
+          expect(target.data.length).to.not.be.equals(0)
+        })
         done()
       })
 

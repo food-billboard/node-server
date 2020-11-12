@@ -1329,6 +1329,8 @@ const AuthSchema = new Schema({
       }
     }],
   }
+}, {
+  ...defaultConfig
 })
 
 const BehaviourSchema = new Schema({
@@ -1348,6 +1350,8 @@ const BehaviourSchema = new Schema({
   target: {
     type: ObjectId
   }
+}, {
+  ...defaultConfig
 })
 
 // const ApisSchema = new Schema({

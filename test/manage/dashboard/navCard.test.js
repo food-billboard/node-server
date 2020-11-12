@@ -12,12 +12,12 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.a('object').and.that.include.all.keys('user_count', 'visit_day', 'data_count', 'feedback_count')
   const { user_count, visit_day, data_count, feedback_count } = target
   expect(user_count).to.be.a('object').and.that.include.all.keys('total', 'week_add', 'day_add', 'day_add_count')
-  commonValidate.number(user_count.total)
-  commonValidate.number(user_count.week_add)
-  commonValidate.number(user_count.day_add)
-  commonValidate.number(user_count.day_add_count)
-  expect(visit_day).to.be.a('object').and.that.include.all.keys('data', 'day_count')
-  commonValidate.number(visit_day.day_count)
+  commonValidate.number(parseInt(user_count.total))
+  commonValidate.number(parseInt(user_count.week_add))
+  commonValidate.number(parseInt(user_count.day_add))
+  commonValidate.number(parseInt(user_count.day_add_count))
+  expect(visit_day).to.be.a('object').and.that.include.all.keys('data', 'total')
+  commonValidate.number(visit_day.total)
   expect(visit_day.data).to.be.a('array')
   visit_day.data.forEach(item => {
     expect(item).to.be.a('object').and.that.include.all.keys('day', 'count')
@@ -25,9 +25,9 @@ function responseExpect(res, validate=[]) {
     commonValidate.number(item.count)
   })
   expect(data_count).to.be.a('object').and.that.include.all.keys('total', 'week_add', 'day_add', 'day_count', 'data')
-  commonValidate.number(data_count.total)
-  commonValidate.number(data_count.week_add)
-  commonValidate.number(data_count.day_add)
+  commonValidate.number(parseInt(data_count.total))
+  commonValidate.number(parseInt(data_count.week_add))
+  commonValidate.number(parseInt(data_count.day_add))
   commonValidate.number(data_count.day_count)
   expect(data_count.data).to.be.a('array')
   data_count.data.forEach(item => {
@@ -166,7 +166,10 @@ describe(`${COMMON_API} test`, function() {
         }catch(_) {
           console.log(_)
         }
-        responseExpect(obj)
+        responseExpect(obj, target => {
+          expect(target.visit_day.data.length).to.not.be.equals(0)
+          expect(target.data_count.data.length).to.not.be.equals(0)
+        })
         done()
       })
 

@@ -120,7 +120,7 @@ const visitStatistics = () => {
     total: 0,
     data: []
   }
-  let today = new Date().getTime()
+  let today = Date.now()
 
   return Promise.all([
     BehaviourModel.aggregate([
@@ -133,13 +133,13 @@ const visitStatistics = () => {
       },
       {
         $project: {
-          date: { $substr: [ { $add: [ "$createdAt" ] }, 10, 0 ] },
+          day: { $substr: [ { $add: [ "$createdAt" ] }, 0, 10 ] },
           _id: 0
         }
       },
       {
         $group: {
-          _id: "$date",
+          _id: "$day",
           count: {
             $sum: 1
           }
@@ -148,12 +148,11 @@ const visitStatistics = () => {
       {
         $project: {
           _id: 0,
-          date: "$_id",
+          day: "$_id",
           count: 1
         }
       }
-    ])
-    .exec(),
+    ]),
     GlobalModel.aggregate([
       {
         $group: {
@@ -275,7 +274,7 @@ const dataStatistics = () => {
         week_count.thisWeek += count
       }
       statistics.push({
-        date: Day(`${year}-${month}-${month_day}`).format('YYYY-MM-DD'),
+        day: Day(`${year}-${month}-${month_day}`).format('YYYY-MM-DD'),
         count
       })
     }
@@ -284,7 +283,7 @@ const dataStatistics = () => {
       total: total.total,
       week_add: (( week_count.thisWeek - week_count.lastWeek ) / week_count.lastWeek == 0 ? 1 : week_count.lastWeek ).toFixed(3),
       day_add: ((today.count - yestoday.count) / (yestoday.count == 0 ? 1 : yestoday.count)).toFixed(3),
-      day_add_count: today.count,
+      day_count: today.count,
       data: statistics
     }
   })
@@ -426,10 +425,6 @@ router
     //反馈量统计
     feedbackStatistics()
   ])
-  .then(data => {
-    console.log(data)
-    return data
-  })
   .then(([user_count, visit_day, data_count, feedback_count]) => ({
     data: {
       user_count,

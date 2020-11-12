@@ -8,6 +8,8 @@ const COMMON_API = '/api/manage/dashboard/search/keyword'
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
+  console.log(target)
+
   expect(target).to.be.a('object').and.that.include.all.keys('total', 'average', 'count_total_day', 'count_average_day', 'total_chart', 'average_chart', 'data')
   commonValidate.number(target.total)
   commonValidate.number(target.average)
@@ -29,9 +31,9 @@ function responseExpect(res, validate=[]) {
 
   expect(target.data).to.be.a('array')
   target.data.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'key_word', 'count')
+    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'key_word', 'hot')
     commonValidate.string(item.key_word)
-    commonValidate.number(item.count)
+    commonValidate.number(item.hot)
     commonValidate.objectId(item._id)
   })
 
@@ -120,7 +122,11 @@ describe(`${COMMON_API} test`, function() {
         }catch(_) {
           console.log(_)
         }
-        responseExpect(obj)
+        responseExpect(obj, target => {
+          expect(target.total_chart.length).to.not.be.equals(0)
+          expect(target.average_chart.length).to.not.be.equals(0)
+          expect(target.data.length).to.not.be.equals(0)
+        })
         done()
       })
 

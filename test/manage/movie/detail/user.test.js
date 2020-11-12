@@ -15,7 +15,7 @@ function responseExpect(res, validate=[]) {
 
   target.list.forEach(item => {
 
-    expect(item).to.be.a('object').and.that.includes.all.keys('movie_name', 'glance_date', 'issue_count', 'status', 'username', 'mobile', 'email', 'avatar', 'hot', 'fans_count', 'attentions_count', 'createdAt', 'updatedAt', '_id')
+    expect(item).to.be.a('object').and.that.includes.all.keys('movie_name', 'roles', 'glance_date', 'issue_count', 'status', 'username', 'mobile', 'email', 'hot', 'fans_count', 'attentions_count', 'createdAt', 'updatedAt', '_id')
 
     expect(item.roles).to.be.a('array')
     item.roles.forEach(role => commonValidate.string(role))
@@ -24,7 +24,7 @@ function responseExpect(res, validate=[]) {
     commonValidate.string(item.status)
     commonValidate.string(item.movie_name)
     commonValidate.string(item.username)
-    commonValidate.avatar(item.avatar)
+    // commonValidate.poster(item.avatar)
     commonValidate.number(item.hot)
     commonValidate.number(item.fans_count)
     commonValidate.number(item.attentions_count)
@@ -164,7 +164,9 @@ describe(`${COMMON_API} test`, function() {
         }catch(_) {
           console.log(_)
         }
-        responseExpect(obj)
+        responseExpect(obj, target => {
+          expect(target.list.length).to.not.be.equals(0)
+        })
         done()
       })
 
@@ -180,7 +182,7 @@ describe(`${COMMON_API} test`, function() {
       })
       .query({
         _id: movieId.toString(),
-        start_date: Day(Date.now() + 10000000).format('YYYY-MM-DD')
+        start_date: Day(Date.now() + 24 * 60 * 60 * 1000).format('YYYY-MM-DD')
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -194,7 +196,7 @@ describe(`${COMMON_API} test`, function() {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.list.length).to.be(0)
+          expect(target.list.length).to.be.equals(0)
         })
         done()
       })
@@ -211,7 +213,7 @@ describe(`${COMMON_API} test`, function() {
       })
       .query({
         _id: movieId.toString(),
-        end_date: '2019-11-22'
+        end_date: '1970-11-22'
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -225,7 +227,7 @@ describe(`${COMMON_API} test`, function() {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.list.length).to.be(0)
+          expect(target.list.length).to.be.equals(0)
         })
         done()
       })
@@ -256,7 +258,7 @@ describe(`${COMMON_API} test`, function() {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.list.length).to.be(1)
+          expect(target.list.length).to.be.equals(1)
         })
         done()
       })
@@ -287,7 +289,7 @@ describe(`${COMMON_API} test`, function() {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.list.length).to.be(1)
+          expect(target.list.length).to.be.equals(1)
         })
         done()
       })

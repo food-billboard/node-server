@@ -15,7 +15,7 @@ function responseExpect(res, validate=[]) {
   expect(target.list).to.be.a('array')
 
   target.list.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'name', 'author', 'comment_count', 'total_rate', 'rate_person', 'createdAt', 'updatedAt', 'source_type', 'glance', 'hot', 'stauts', 'tag_count', 'barrage_count')
+    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'name', 'author', 'comment_count', 'total_rate', 'rate_person', 'createdAt', 'updatedAt', 'source_type', 'glance', 'hot', 'status', 'tag_count', 'barrage_count')
     commonValidate.objectId(item._id)
     commonValidate.string(item.name)
     expect(item.author).to.be.a('object').and.that.include.all.keys('_id', 'username')
@@ -53,6 +53,7 @@ describe(`${COMMON_API} test`, function() {
   let sourceTypeId
   let otherUserId
   let imageId
+  let getToken
 
   let newMovie = {
     actor: [ ObjectId('571094e2976aeb1df982ad4e') ],
@@ -77,7 +78,7 @@ describe(`${COMMON_API} test`, function() {
       src: COMMON_API
     })
 
-    const { model: user, token } = mockCreateUser({
+    const { model: user, token, signToken } = mockCreateUser({
       username: COMMON_API
     })
     const { model: otherUser } = mockCreateUser({
@@ -85,9 +86,10 @@ describe(`${COMMON_API} test`, function() {
     })
     const { model:classify } = mockCreateClassify({
       name: COMMON_API,
-      roles: [ 'CUSTOMER' ]
+      // roles: [ 'CUSTOMER' ]
     })
     selfToken = token
+    getToken = signToken
 
     Promise.all([
       user.save(),
@@ -105,10 +107,10 @@ describe(`${COMMON_API} test`, function() {
         ...newMovie,
         images: [imageId]
       }
-
       return Promise.all(['classify', 'status', 'sourceType'].map(item => {
         const { model } = mockCreateMovie({
           name: `${COMMON_API}-${item}`,
+          author: userInfo._id,
           ...(item == 'classify' ? { info: { classify: [ classifyId ] } } : {}),
           ...(item === 'status' ? { status: 'NOT_VERIFY' } : {}),
           ...(item === 'sourceType' ? { source_type: 'USER' } : {}),
@@ -154,6 +156,11 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
+  beforeEach(function(done) {
+    selfToken = getToken()
+    done()
+  })
+
   describe(`${COMMON_API} success test`, function() {
 
     describe(`get the movie list success with classify -> ${COMMON_API}`, function() {
@@ -182,7 +189,8 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, (target) => {
             const { list } = target
-            const exists = list.some(item => item._id.equals(classifyMovieId))
+            expect(list.length).to.not.be.equals(0)
+            const exists = list.some(item => classifyMovieId.equals(item._id))
             expect(exists).to.be.true
           })
           done()
@@ -218,7 +226,7 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, (target) => {
             const { list } = target
-            expect(list.length).to.be(1)
+            expect(list.length).to.be.equals(1)
           })
           done()
         })
@@ -253,7 +261,7 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, (target) => {
             const { list } = target
-            expect(list.length).to.be(1)
+            expect(list.length).to.be.equals(1)
           })
           done()
         })
@@ -324,7 +332,7 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, (target) => {
             const { list } = target
-            expect(list.length).to.be(0)
+            expect(list.length).to.be.equals(0)
           })
           done()
         })
@@ -359,7 +367,7 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, (target) => {
             const { list } = target
-            expect(list.length).to.be(1)
+            expect(list.length).to.be.equals(1)
           })
           done()
         })
@@ -943,10 +951,6 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(403)
         .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if(err) return done(err)
-          done()
-        })
 
         return res ? Promise.resolve() : Promise.reject()
 
