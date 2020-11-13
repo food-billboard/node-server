@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId }, Aggregate } = require('mongoose')
-const { CommentModel, dealErr, verifyTokenToData, responseDataDeal, Params, COMMENT_SOURCE_TYPE, notFound, findMostRole, ROLES_MAP } = require('@src/utils')
-const { UserModel } = require('../../../../utils/mongodb/mongo.lib')
+const { UserModel, CommentModel, dealErr, verifyTokenToData, responseDataDeal, Params, COMMENT_SOURCE_TYPE, notFound, findMostRole, ROLES_MAP } = require('@src/utils')
+const Day = require('dayjs')
 
 const router = new Router()
 
@@ -36,12 +36,12 @@ router
   }, {
     name: 'start_date',
     sanitizers: [
-      data => ((typeof data === 'string' && (new Date(data)).toString() !== 'Invalid Date') || typeof data === 'undefined') ? undefined : Day(data).toDate()
+      data => ((typeof data === 'string' && (new Date(data)).toString() == 'Invalid Date') || typeof data === 'undefined') ? undefined : Day(data).toDate()
     ]
   }, {
     name: 'end_date',
     sanitizers: [
-      data => ((typeof data === 'string' && (new Date(data)).toString() !== 'Invalid Date') || typeof data === 'undefined') ? Day().toDate() : Day(data).toDate()
+      data => ((typeof data === 'string' && (new Date(data)).toString() == 'Invalid Date') || typeof data === 'undefined') ? Day().toDate() : Day(data).toDate()
     ]
   }, {
     name: 'like',
@@ -131,7 +131,6 @@ router
       foreignField: '_id',
       as: 'video'
     })
-    .unwind("content.video")
     .project({
       source_type: 1,
       source: 1,
@@ -143,8 +142,8 @@ router
       total_like: 1,
       content: {
         text: "$content.text",
-        video: "$content.video.src",
-        image: "$content.image.src"
+        video: "$video.src",
+        image: "$image.src"
       },
       createdAt: 1,
       updatedAt: 1
@@ -211,39 +210,46 @@ router
   let userMaxRole = 100
   let selfMaxRole = 100
 
-  const data = CommentModel.findOne({
+  const data = await CommentModel.findOne({
     _id
   })
   .select({
-    author: 1,
+    user_info: 1,
     _id: 0
-  })
-  .populate({
-    path: 'author',
-    select: {
-      roles: 1
-    }
   })
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { author: { roles } } = data
-    userMaxRole = findMostRole(roles)
-    if(userMaxRole == ROLES_MAP.SUPER_ADMIN) return Promise.reject({ errMsg: 'forbidden', status: 403 })
-    return UserModel.findOne({ mobile: Number(mobile) })
+    const { user_info } = data
+    userMaxRole = user_info
+    return UserModel.find({
+      $or: [
+        {
+          mobile: Number(mobile)
+        },
+        {
+          _id: user_info
+        }
+      ]
+    })
     .select({
-      _id: 0,
       roles: 1
     })
     .exec()
   })
-  .then(data => !!data && data._doc)
+  .then(data => !!data && !!(data.length == 2) && data)
   .then(notFound)
   .then(data => {
-    const { roles } = data
-    selfMaxRole = findMostRole(roles)
-    if(selfMaxRole >= userMaxRole) return Promise.reject({ errMsg: 'forbidden', status: 403 }) 
+    data.forEach(d => {
+      const { _id, roles } = d
+      if(_id.equals(userMaxRole)) {
+        userMaxRole = findMostRole(roles)
+      }else {
+        selfMaxRole = findMostRole(roles)
+      }
+    })
+    if(userMaxRole == ROLES_MAP.SUPER_ADMIN || selfMaxRole >= userMaxRole) return Promise.reject({ errMsg: 'forbidden', status: 403 })
     return
   })
   .catch(dealErr(ctx))
@@ -259,6 +265,15 @@ router
 })
 //删除评论
 .delete('/', async(ctx) => {
+
+  const check = Params.query(ctx, {
+    name: '_id',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  })
+
+  if(check) return
   
   const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',

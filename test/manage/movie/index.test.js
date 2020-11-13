@@ -105,7 +105,8 @@ describe(`${COMMON_API} test`, function() {
 
       newMovie = {
         ...newMovie,
-        images: [imageId]
+        poster: imageId,
+        images: new Array(6).fill(imageId)
       }
       return Promise.all(['classify', 'status', 'sourceType'].map(item => {
         const { model } = mockCreateMovie({
@@ -528,21 +529,25 @@ describe(`${COMMON_API} test`, function() {
         })
         .exec()
         .then(data => {
+          console.log(data)
           expect(!!data).to.be.false
           done()
         })
         .catch(err => {
           console.log('oops: ', err)
+          done(err)
         })
 
       })
 
       it(`delete the movie success`, function(done) {
 
+        console.log(statusId)
+
         Request
         .delete(COMMON_API)
         .query({
-          _id: statusId
+          _id: statusId.toString()
         })
         .set({
           Accept: 'application/json',

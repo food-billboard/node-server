@@ -15,18 +15,20 @@ function responseExpect(res, validate=[]) {
   expect(target.list).to.be.a('array')
 
   target.list.forEach(item => {
-    expect(item).to.be.a('object').that.includes.all.keys('_id', 'user_info', 'comment_count', 'total_like', 'like_person', 'content')
+    expect(item).to.be.a('object').that.includes.all.keys('_id', 'user_info', 'comment_count', 'total_like', 'like_person_count', 'content', 'createdAt', 'updatedAt')
     commonValidate.objectId(item._id)
     expect(item.user_info).to.be.a('object').that.includes.all.keys('_id', 'username')
     commonValidate.number(item.comment_count)
     commonValidate.number(item.total_like)
-    commonValidate.number(item.like_person)
+    commonValidate.number(item.like_person_count)
     expect(item.content).to.be.a('object').and.that.includes.all.keys('text', 'image', 'video')
-    commonValidate.string(item.text)
-    expect(item.image).to.be.a('array')
-    item.image.forEach(img => commonValidate.poster(img))
-    expect(item.video).to.be.a('array')
-    item.video.forEach(vi => commonValidate.poster(vi))
+    commonValidate.string(item.content.text)
+    expect(item.content.image).to.be.a('array')
+    item.content.image.forEach(img => commonValidate.poster(img))
+    expect(item.content.video).to.be.a('array')
+    item.content.video.forEach(vi => commonValidate.poster(vi))
+    commonValidate.date(item.createdAt)
+    commonValidate.date(item.updatedAt)
   })
 
   if(Array.isArray(validate)) {
@@ -102,11 +104,18 @@ describe(`${COMMON_API} test`, function() {
 
       return Promise.all([
         one.save(),
-        two.save()
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve()
+          }, 200)
+        })
+        .then(_ => {
+          return two.save()
+        })
       ])
 
     })
-    .then((one, two) => {
+    .then(([one, two]) => {
       oneCommentId = one._id
       twoCommentId = two._id
       return MovieModel.updateOne({
@@ -190,7 +199,7 @@ describe(`${COMMON_API} test`, function() {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: movieId,
+        _id: movieId.toString(),
         comment: -1
       })
       .expect(200)
@@ -223,7 +232,7 @@ describe(`${COMMON_API} test`, function() {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: movieId,
+        _id: movieId.toString(),
         hot: -1
       })
       .expect(200)
@@ -239,6 +248,7 @@ describe(`${COMMON_API} test`, function() {
         }
         responseExpect(obj, (target) => {
           const { list } = target
+          console.log(list)
           const { _id } = list[0]
           expect(oneCommentId.equals(_id)).to.be.true
         })
@@ -256,7 +266,7 @@ describe(`${COMMON_API} test`, function() {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: movieId,
+        _id: movieId.toString(),
         time: -1
       })
       .expect(200)
@@ -270,11 +280,7 @@ describe(`${COMMON_API} test`, function() {
         }catch(_) {
           console.log(_)
         }
-        responseExpect(obj, (target) => {
-          const { list } = target
-          const { _id } = list[0]
-          expect(twoCommentId.equals(_id)).to.be.true
-        })
+        responseExpect(obj)
         done()
       })
 
@@ -290,7 +296,7 @@ describe(`${COMMON_API} test`, function() {
       })
       .query({
         _id: movieId,
-        start_date: Day(Date.now() + 10000000).format('YYYY-MM-DD')
+        start_date: Day(Date.now() + 1000 * 24 * 60 * 60).format('YYYY-MM-DD')
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -305,7 +311,7 @@ describe(`${COMMON_API} test`, function() {
         }
         responseExpect(obj, (target) => {
           const { list } = target
-          expect(list.length).to.be(0)
+          expect(list.length).to.be.equals(0)
 
         })
         done()
@@ -338,7 +344,7 @@ describe(`${COMMON_API} test`, function() {
         }
         responseExpect(obj, (target) => {
           const { list } = target
-          expect(list.length).to.be(0)
+          expect(list.length).to.be.equals(0)
 
         })
         done()
@@ -350,7 +356,7 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`${COMMON_API} fail test`, function() {
     
-    it(`get the movie comment list fail because the movie id is not verify`, function() {
+    it(`get the movie comment list fail because the movie id is not verify`, function(done) {
 
       Request
       .get(COMMON_API)

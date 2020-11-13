@@ -1,7 +1,7 @@
 require('module-alias/register')
-const { UserModel, MovieModel, ClassifyModel } = require('@src/utils')
+const { UserModel, MovieModel, ClassifyModel, VideoModel, ImageModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateMovie, mockCreateClassify } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateMovie, mockCreateClassify, mockCreateVideo, mockCreateImage } = require('@test/utils')
 
 const COMMON_API = '/api/manage/movie/detail'
 
@@ -28,7 +28,7 @@ function responseExpect(res, validate=[]) {
   commonValidate.number(target.total_rate)
   commonValidate.string(target.source_type)
   commonValidate.string(target.status)
-  commonValidate.number(target.barrge_count)
+  commonValidate.number(target.barrage_count)
   commonValidate.number(target.tag_count)
   commonValidate.number(target.comment_count)
   expect(target.author).to.be.a('object').and.that.includes.all.keys('_id', 'username')
@@ -51,6 +51,8 @@ describe(`${COMMON_API} test`, function() {
   let userInfo
   let movieId
   let classId
+  let imageId
+  let videoId
 
   before(function(done) {
 
@@ -62,18 +64,37 @@ describe(`${COMMON_API} test`, function() {
       name: COMMON_API
     })
 
+    const { model: video } = mockCreateVideo({
+      src: COMMON_API
+    })
+
+    const { model: image } = mockCreateImage({
+      src: COMMON_API
+    })
+
     selfToken = token
 
     Promise.all([
       user.save(),
-      classify.save()
+      classify.save(),
+      video.save(),
+      image.save()
     ])
-    .then(([user, classify]) => {
+    .then(([user, classify, video, image]) => {
       userInfo = user._id
       classId = classify._id
+      videoId = video._id
+      imageId = image._id
 
       const { model } = mockCreateMovie({
-        name: COMMON_API
+        name: COMMON_API,
+        poster: imageId,
+        images: new Array(6).fill(imageId),
+        video: videoId,
+        author: userInfo,
+        info: {
+          classify: [ classId ]
+        }
       })
       return model.save()
     })
@@ -98,6 +119,12 @@ describe(`${COMMON_API} test`, function() {
       }),
       MovieModel.deleteMany({
         name: COMMON_API
+      }),
+      ImageModel.deleteMany({
+        src: COMMON_API
+      }),
+      VideoModel.deleteMany({
+        src: COMMON_API
       })
     ])
     .then(data => {
@@ -174,7 +201,7 @@ describe(`${COMMON_API} test`, function() {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: `${_id.slice(0, -1)}${parseInt(_id.slice(-1) + 5)}`
+        _id: `${_id.slice(0, -1)}${Math.ceil(10 / (parseInt(_id.slice(-1) + 5)))}`
       })
       .expect(404)
       .expect('Content-Type', /json/)

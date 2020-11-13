@@ -21,11 +21,11 @@ function responseExpect(res, validate=[]) {
     commonValidate.number(item.sub_comments)
     commonValidate.number(item.total_like)
     expect(item.content).to.be.a('object').and.that.includes.all.keys('text', 'image', 'video')
-    commonValidate.string(item.text)
-    expect(item.image).to.be.a('array')
-    item.image.forEach(img => commonValidate.poster(img))
-    expect(item.video).to.be.a('array')
-    item.video.forEach(vi => commonValidate.poster(vi))
+    commonValidate.string(item.content.text)
+    expect(item.content.image).to.be.a('array')
+    item.content.image.forEach(img => commonValidate.poster(img))
+    expect(item.content.video).to.be.a('array')
+    item.content.video.forEach(vi => commonValidate.poster(vi))
     commonValidate.objectId(item.source)
     commonValidate.string(item.source_type)
     commonValidate.date(item.createdAt)
@@ -57,11 +57,11 @@ describe(`${COMMON_API} test`, function() {
       username: COMMON_API
     })
     const { model: other } = mockCreateUser({
-      username: COMMON_API
+      username: COMMON_API,
+      roles: [ 'CUSTOMER' ]
     })
     const { model: image } = mockCreateImage({
       src: COMMON_API,
-      roles: [ 'CUSTOMER' ]
     })
 
     selfToken = token
@@ -180,7 +180,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: userId._id.toString()
+          _id: userInfo._id.toString()
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -234,7 +234,7 @@ describe(`${COMMON_API} test`, function() {
   
       })
   
-      it(`get the movie comment list with sort of like`, function(done) {
+      it(`get the user comment list with sort of like`, function(done) {
   
         Request
         .get(COMMON_API)
@@ -243,7 +243,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: movieId,
+          _id: userInfo._id.toString(),
           like: -1
         })
         .expect(200)
@@ -267,7 +267,7 @@ describe(`${COMMON_API} test`, function() {
   
       })
   
-      it(`get the movie comment list with sort of start_date`, function(done) {
+      it(`get the user comment list with sort of start_date`, function(done) {
   
         Request
         .get(COMMON_API)
@@ -276,8 +276,8 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: movieId,
-          start_date: Day(Date.now() + 10000000).format('YYYY-MM-DD')
+          _id: userInfo._id.toString(),
+          start_date: Day(Date.now() + 1000 * 24 * 60 * 60).format('YYYY-MM-DD')
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -292,7 +292,7 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, (target) => {
             const { list } = target
-            expect(list.length).to.be(0)
+            expect(list.length).to.be.equals(0)
   
           })
           done()
@@ -309,7 +309,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: movieId,
+          _id: userInfo._id.toString(),
           end_date: '1970-10-11'
         })
         .expect(200)
@@ -325,7 +325,7 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, (target) => {
             const { list } = target
-            expect(list.length).to.be(0)
+            expect(list.length).to.be.equals(0)
   
           })
           done()
@@ -352,6 +352,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .catch(err => {
           console.log('oops: ', err)
+          done(err)
         })
 
       })
@@ -359,7 +360,7 @@ describe(`${COMMON_API} test`, function() {
       it(`delete the user comment success`, function(done) {
 
         Request
-        .get(COMMON_API)
+        .delete(COMMON_API)
         .set({
           Accept: 'application/json',
           Authorization: `Basic ${selfToken}`

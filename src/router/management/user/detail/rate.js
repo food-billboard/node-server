@@ -142,8 +142,10 @@ router
       //     }]
       //   }
       // }
-      total: !!total_count.length ? total_count[0].total || 0 : 0,
-      list: rate_data
+      data: {
+        total: !!total_count.length ? total_count[0].total || 0 : 0,
+        list: rate_data
+      }
     }
 
   })

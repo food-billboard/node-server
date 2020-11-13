@@ -2,11 +2,14 @@ require('module-alias/register')
 const { UserModel, MovieModel } = require('@src/utils')
 const { expect } = require('chai')
 const { Request, commonValidate, mockCreateUser, mockCreateMovie } = require('@test/utils')
+const Day = require('dayjs')
 
 const COMMON_API = '/api/manage/user/detail/rate'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
+
+  console.log(target)
 
   expect(target).to.be.a('object').and.that.include.all.keys('total', 'list')
   commonValidate.number(target.total)
@@ -163,7 +166,7 @@ describe(`${COMMON_API} test`, function() {
       .get(COMMON_API)
       .query({
         _id: userInfo._id.toString(),
-        start_date: Day(Date.now() + 10000000).format('YYYY-MM-DD')
+        start_date: Day(Date.now() + 1000 * 24 * 60 * 60).format('YYYY-MM-DD')
       })
       .set({
         Accept: 'application/json',
@@ -181,7 +184,7 @@ describe(`${COMMON_API} test`, function() {
           console.log(_)
         }
         responseExpect(obj, target => {
-          expect(target.list.length).to.be(0)
+          expect(target.list.length).to.be.equals(0)
         })
         done()
       })
@@ -212,7 +215,7 @@ describe(`${COMMON_API} test`, function() {
           console.log(_)
         }
         responseExpect(obj, target => {
-          expect(target.list.length).to.be(0)
+          expect(target.list.length).to.be.equals(0)
         })
         done()
       })
@@ -223,7 +226,7 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`${COMMON_API} fail test`, function() {
     
-    it(`get the user rate list fail because the id is not found`, function() {
+    it(`get the user rate list fail because the id is not found`, function(done) {
 
       const id = userInfo._id.toString()
 
@@ -234,7 +237,7 @@ describe(`${COMMON_API} test`, function() {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: `${id.slice(0, -1)}${Math.ceil(10 / (parseInt(id.slice(-1)) + 5))}`,
+        _id: `${id.slice(1)}${Math.ceil(10 / (parseInt(id.slice(0, 1)) + 5))}`,
       })
       .expect(404)
       .expect('Content-Type', /json/)
@@ -245,7 +248,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`get the user rate list fail because the id is not verify`, function() {
+    it(`get the user rate list fail because the id is not verify`, function(done) {
       
       Request
       .get(COMMON_API)

@@ -1,12 +1,22 @@
 const Router = require('@koa/router')
 const { MovieModel, dealErr, Params, responseDataDeal, MOVIE_STATUS } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
+const Day = require('dayjs')
 
 const router = new Router()
 
 router
 //上传电影列表
 .get('/', async(ctx) => {
+
+  const check = Params.query(ctx, {
+    name: '_id',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  })
+
+  if(check) return
 
   const [ currPage, pageSize, _id, end_date, start_date, status ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
@@ -84,7 +94,7 @@ router
         }
       },
       {
-        $unwind: "$users"
+        $unwind: "$author"
       },
       {
         $project: {

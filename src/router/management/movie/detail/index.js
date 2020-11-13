@@ -11,6 +11,15 @@ router
 //电影详细信息
 .get('/', async(ctx) => {
 
+  const check = Params.query(ctx, {
+    name: '_id',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  })
+
+  if(check) return
+
   const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
@@ -47,7 +56,7 @@ router
   .unwind("video")
   .lookup({
     from: 'classifies', 
-    localField: 'classify', 
+    localField: 'info.classify', 
     foreignField: '_id', 
     as: 'classify'
   })
@@ -55,7 +64,7 @@ router
     name: 1,
     video: "$video.src",
     classify: "$classify.name",
-    images: "images.src",
+    images: "$images.src",
     poster: 1,
     createdAt: 1,
     updatedAt: 1,
@@ -91,7 +100,7 @@ router
       username: "$author.username"
     },
   })
-  .then(data => !!Object.keys(data).length && data)
+  .then(data => !!data && data.length == 1 && data[0])
   .then(notFound)
   // {
   //   data: {

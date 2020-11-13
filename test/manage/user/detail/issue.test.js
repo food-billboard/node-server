@@ -1,5 +1,5 @@
 require('module-alias/register')
-const { MovieModel, UserModel } = require('@src/utils')
+const { MovieModel, UserModel, ImageModel } = require('@src/utils')
 const { expect } = require('chai')
 const { Request, commonValidate, mockCreateMovie, mockCreateUser, mockCreateImage } = require('@test/utils')
 const Day = require('dayjs')
@@ -14,7 +14,7 @@ function responseExpect(res, validate=[]) {
   expect(target.list).to.be.a('array')
 
   target.list.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'name', 'author', 'comment_count', 'total_rate', 'rate_person', 'createdAt', 'updatedAt', 'glance', 'hot', 'stauts', 'tag_count', 'barrage_count')
+    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'name', 'author', 'comment_count', 'total_rate', 'rate_person', 'createdAt', 'updatedAt', 'glance', 'hot', 'status', 'tag_count', 'barrage_count')
     commonValidate.objectId(item._id)
     commonValidate.string(item.name)
     expect(item.author).to.be.a('object').and.that.include.all.keys('_id', 'username')
@@ -76,7 +76,7 @@ describe(`${COMMON_API} test`, function() {
       const { model } = mockCreateMovie({
         name: COMMON_API,
         author: otherUserId,
-        images: [ imageId ]
+        images: new Array(6).fill(imageId)
       })
 
       return model.save()
@@ -176,7 +176,7 @@ describe(`${COMMON_API} test`, function() {
           console.log(_)
         }
         responseExpect(obj, target => {
-          expect(target.list.length).to.be.be(0)
+          expect(target.list.length).to.be.equals(0)
         })
         done()
       })
@@ -207,7 +207,7 @@ describe(`${COMMON_API} test`, function() {
           console.log(_)
         }
         responseExpect(obj, target => {
-          expect(target.list.length).to.be(0)
+          expect(target.list.length).to.be.equals(0)
         })
         done()
       })
@@ -238,7 +238,7 @@ describe(`${COMMON_API} test`, function() {
           console.log(_)
         }
         responseExpect(obj, target => {
-          expect(target.list.length).to.be(0)
+          expect(target.list.length).to.be.equals(0)
         })
         done()
       })
@@ -249,7 +249,7 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`${COMMON_API} fail test`, function() {
     
-    it(`get the user issue list fail because the id is not found`, function() {
+    it(`get the user issue list fail because the id is not found`, function(done) {
 
       const id = otherUserId.toString()
 
@@ -262,16 +262,26 @@ describe(`${COMMON_API} test`, function() {
       .query({
         _id: `${id.slice(0, -1)}${Math.ceil(10 / (parseInt(id.slice(-1)) + 5))}`,
       })
-      .expect(404)
+      .expect(200)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if(err) return done(err)
+        const { res: { text } } = res
+        let obj
+        try{
+          obj = JSON.parse(text)
+        }catch(_) {
+          console.log(_)
+        }
+        responseExpect(obj, target => {
+          expect(target.list.length).to.be.equals(0)
+        })
         done()
       })
 
     })
 
-    it(`get the user issue list fail because the id is not verify`, function() {
+    it(`get the user issue list fail because the id is not verify`, function(done) {
       
       Request
       .get(COMMON_API)

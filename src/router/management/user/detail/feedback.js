@@ -1,10 +1,12 @@
 const Router = require('@koa/router')
-const { FeedbackModel, UserModel, dealErr, notFound, Params, responseDataDeal, verifyTokenToData, FEEDBACK_STATUS } = require('@src/utils')
+const { FeedbackModel, UserModel, dealErr, notFound, Params, responseDataDeal, verifyTokenToData, FEEDBACK_STATUS, findMostRole, ROLES_MAP } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
+const Day = require('dayjs')
 
 const router = new Router()
 
 router
+
 //反馈列表
 .get('/', async(ctx) => {
 
@@ -28,12 +30,12 @@ router
   }, {
     name: 'start_date',
     sanitizers: [
-      data => ((typeof data === 'string' && (new Date(data)).toString() !== 'Invalid Date') || typeof data === 'undefined') ? undefined : Day(data).toDate()
+      data => ((typeof data === 'string' && (new Date(data)).toString() == 'Invalid Date') || typeof data === 'undefined') ? undefined : Day(data).toDate()
     ]
   }, {
     name: 'end_date',
     sanitizers: [
-      data => ((typeof data === 'string' && (new Date(data)).toString() !== 'Invalid Date') || typeof data === 'undefined') ? Day().toDate() : Day(data).toDate()
+      data => ((typeof data === 'string' && (new Date(data)).toString() == 'Invalid Date') || typeof data === 'undefined') ? Day().toDate() : Day(data).toDate()
     ]
   }, {
     name: 'status',
@@ -76,7 +78,7 @@ router
         $skip: currPage * pageSize
       },
       {
-        limit: pageSize
+        $limit: pageSize
       },
       {
         $lookup: {
@@ -98,9 +100,6 @@ router
         }
       },
       {
-        $unwind: "$content.video"
-      },
-      {
         $lookup: {
           from: 'images', 
           localField: 'content.image', 
@@ -119,8 +118,8 @@ router
           status: 1,
           content: {
             text: "$content.text",
-            image: "$content.image.src",
-            video: "$content.video.src"
+            image: "$image.src",
+            video: "$video.src"
           }
         }
       }
@@ -175,7 +174,7 @@ router
 
   if(check) return
 
-  const [ _id, status ] = Params.sanitizers(ctx.body, {
+  const [ _id, status ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
@@ -213,6 +212,7 @@ router
     })
   })
   .then(data => {
+    console.log(data)
     if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
     return {
       data: null
@@ -244,41 +244,49 @@ router
   let userMaxRole = 100
   let selfMaxRole = 100
 
-  const data = FeedbackModel.findOne({
+  const data = await FeedbackModel.findOne({
     _id
   })
   .select({
     user_info: 1,
     _id: 0
   })
-  .populate({
-    path: 'user_info',
-    select: {
-      roles: 1
-    }
-  })
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { author: { roles } } = data
-    userMaxRole = findMostRole(roles)
-    if(userMaxRole == ROLES_MAP.SUPER_ADMIN) return Promise.reject({ errMsg: 'forbidden', status: 403 })
-    return UserModel.findOne({ mobile: Number(mobile) })
+    const { user_info } = data
+    userMaxRole = user_info
+    return UserModel.find({
+      $or: [
+        {
+          mobile: Number(mobile)
+        },
+        {
+          _id: user_info
+        }
+      ]
+    })
     .select({
-      _id: 0,
       roles: 1
     })
     .exec()
   })
-  .then(data => !!data && data._doc)
+  .then(data => !!data && !!(data.length == 2) && data)
   .then(notFound)
   .then(data => {
-    const { roles } = data
-    selfMaxRole = findMostRole(roles)
-    if(selfMaxRole >= userMaxRole) return Promise.reject({ errMsg: 'forbidden', status: 403 }) 
+    data.forEach(d => {
+      const { _id, roles } = d
+      if(_id.equals(userMaxRole)) {
+        userMaxRole = findMostRole(roles)
+      }else {
+        selfMaxRole = findMostRole(roles)
+      }
+    })
+    if(userMaxRole == ROLES_MAP.SUPER_ADMIN || selfMaxRole >= userMaxRole) return Promise.reject({ errMsg: 'forbidden', status: 403 })
     return
   })
+
   .catch(dealErr(ctx))
 
   if(!data) return await next()

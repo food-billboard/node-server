@@ -44,6 +44,7 @@ describe(`${COMMON_API} test`, function() {
   let imageId
   let oneFeedId
   let twoFeedId
+  let threeFeedId
 
   before(function(done) {
 
@@ -51,7 +52,8 @@ describe(`${COMMON_API} test`, function() {
       username: COMMON_API
     })
     const { model: other } = mockCreateUser({
-      username: COMMON_API
+      username: COMMON_API,
+      roles: [ 'CUSTOMER' ]
     })
     const { model: image } = mockCreateImage({
       src: COMMON_API
@@ -85,17 +87,27 @@ describe(`${COMMON_API} test`, function() {
         },
         user_info: otherUserId,
       }) 
+      const { model: three } = mockCreateFeedback({
+        content: {
+          text: COMMON_API,
+          image: [ imageId ],
+          video: []
+        },
+        user_info: otherUserId,
+      }) 
 
       return Promise.all([
         one.save(),
-        two.save()
+        two.save(),
+        three.save()
       ])
 
     })
-    .then(([one, two]) => {
+    .then(([one, two, three]) => {
 
       oneFeedId = one._id
       twoFeedId = two._id
+      threeFeedId = three._id
 
       done()
 
@@ -141,7 +153,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: otherUserId,
+          _id: otherUserId.toString(),
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -171,7 +183,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: otherUserId,
+          _id: otherUserId.toString(),
           status:'DEAL'
         })
         .expect(200)
@@ -186,7 +198,7 @@ describe(`${COMMON_API} test`, function() {
             console.log(_)
           }
           responseExpect(obj, (target) => {
-            expect(target.list.length).to.be(0)
+            expect(target.list.length).to.be.equals(0)
           })
           done()
         })
@@ -202,8 +214,8 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: otherUserId,
-          start_date: Day(Date.now() + 10000000).format('YYYY-MM-DD')
+          _id: otherUserId.toString(),
+          start_date: Day(Date.now() + 1000 * 24 * 60 * 60).format('YYYY-MM-DD')
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -218,7 +230,7 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, (target) => {
             const { list } = target
-            expect(list.length).to.be(0)
+            expect(list.length).to.be.equals(0)
   
           })
           done()
@@ -235,7 +247,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: otherUserId,
+          _id: otherUserId.toString(),
           end_date: '1970-10-11'
         })
         .expect(200)
@@ -251,7 +263,7 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, (target) => {
             const { list } = target
-            expect(list.length).to.be(0)
+            expect(list.length).to.be.equals(0)
   
           })
           done()
@@ -312,10 +324,10 @@ describe(`${COMMON_API} test`, function() {
       after(function(done) {
 
         FeedbackModel.findOne({
-          _id: twoFeedId
+          _id: threeFeedId
         })
         .select({
-          _id
+          _id: 1
         })
         .exec()
         .then(data => {
@@ -324,6 +336,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .catch(err => {
           console.log('oops: ', err)
+          done(err)
         })
 
       })
@@ -337,7 +350,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: twoFeedId.toString()
+          _id: threeFeedId.toString()
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -367,12 +380,22 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: `${id.slice(0, -1)}${Math.ceil(10 / (parseInt(id.slice(-1)) + 5))}`
+          _id: `${id.slice(1)}${Math.ceil(10 / (parseInt(id.slice(0, 1)) + 5))}`
         })
-        .expect(404)
+        .expect(200)
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, target => {
+            expect(target.list.length).to.be.equals(0)
+          })
           done()
         })
 
@@ -434,7 +457,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          _id: `${id.slice(0, -1)}${Math.ceil(10 / (parseInt(id.slice(-1)) + 5))}`,
+          _id: `${id.slice(1)}${Math.ceil(10 / (parseInt(id.slice(0, 1)) + 5))}`,
           description: COMMON_API
         })
         .expect(404)
@@ -520,7 +543,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: oneFeedId.toString().slice(1)
+          _id: twoFeedId.toString().slice(1)
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -533,7 +556,7 @@ describe(`${COMMON_API} test`, function() {
 
       it(`delete the user feedback fail because the id is not found`, function(done) {
 
-        const id = oneFeedId.toString()
+        const id = twoFeedId.toString()
 
         Request
         .delete(COMMON_API)
@@ -542,7 +565,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: `${id.slice(0, -1)}${Math.ceil(10 / (parseInt(id.slice(-1)) + 5))}`,
+          _id: `${id.slice(1)}${Math.ceil(10 / (parseInt(id.slice(0, 1)) + 5))}`,
         })
         .expect(404)
         .expect('Content-Type', /json/)
@@ -575,9 +598,9 @@ describe(`${COMMON_API} test`, function() {
         let res = true
 
         await UserModel.updateOne({
-          _id: userInfo._id
+          _id: otherUserId
         }, {
-          $set: { roles: [ 'SUB_DEVELOPMENT' ] }
+          $set: { roles: [ 'SUPER_ADMIN' ] }
         })
         .catch(err => {
           console.log('oops: ', err)
@@ -595,6 +618,16 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(403)
         .expect('Content-Type', /json/)
+
+        await UserModel.updateOne({
+          _id: otherUserId
+        }, {
+          $set: { roles: [ 'SUPER_ADMIN' ] }
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          res = false
+        })
 
         return res ? Promise.resolve() : Promise.reject()
 
