@@ -64,7 +64,7 @@ const judgeCache = (ctx, modifiedTime, etagValidate) => {
   const etag = headers['if-none-match'] || headers['If-None-Match']
 
   //设置last-modified
-  !!modified && ctx.set({ 'Last-Modified': modifiedTime.toString() })
+  !!modified && ctx.set('last-modified', modifiedTime.toString() )
 
   let queryEmpty = false
 

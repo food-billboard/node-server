@@ -21,7 +21,7 @@ router
 		]
   })
   
-  const [, token] = verifyTokenToData
+  const [, token] = verifyTokenToData(ctx)
   let pushData = { timestamps: Date.now() }
   if(token) pushData = { ...pushData, _id: token._id }
 

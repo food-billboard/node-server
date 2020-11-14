@@ -1,5 +1,6 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal, CommentModel } = require('@src/utils')
+const { Aggregate } = require('mongoose')
 
 const router = new Router()
 
@@ -9,7 +10,7 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
 
-  const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
+  const [ currPage, pageSize, like, comment ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
     sanitizers: [
@@ -21,7 +22,22 @@ router
     sanitizers: [
       data => data >= 0 ? data : 30
     ]
+  }, {
+    name: 'like',
+    sanitizers: [
+      data => parseInt(data),
+      data => Number.isNaN(data) ? -1 : data > 0 ? 1 : -1
+    ]
+  }, {
+    name: 'comment',
+    sanitizers: [
+      data => parseInt(data),
+      data => Number.isNaN(data) ? -1 : data > 0 ? 1 : -1
+    ]
   })
+
+  const aggregate = new Aggregate()
+  aggregate.model(CommentModel)
 
   const data = await UserModel.findOne({
     mobile: Number(mobile)
@@ -88,13 +104,6 @@ router
       })
       .skip(currPage * pageSize)
       .limit(pageSize)
-      // .lookup({
-      //   from: 'users',
-      //   localField: 'user_info',
-      //   foreignField: '_id',
-      //   as: 'user_info'
-      // })
-      // .unwind("user_info")
       .lookup({
         from: 'images',
         localField: 'content.image',
@@ -107,20 +116,15 @@ router
         foreignField: '_id',
         as: 'video'
       })
-      .unwind("content.video")
       .project({
         source_type: 1,
         source: 1,
-        // user_info: {
-        //   _id: "$user_info._id",
-        //   username: "$user_info.username"
-        // },
         sub_comments: 1,
         total_like: 1,
         content: {
           text: "$content.text",
-          video: "$content.video.src",
-          image: "$content.image.src"
+          video: "$video.src",
+          image: "$image.src"
         },
         createdAt: 1,
         updatedAt: 1
@@ -130,7 +134,6 @@ router
   })
   .then(([total_count, comment_data]) => {
     if(!Array.isArray(total_count) || !Array.isArray(comment_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
-
     return {
 
       // {

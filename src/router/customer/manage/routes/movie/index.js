@@ -47,7 +47,7 @@ const TEMPLATE_MOVIE = {
   total_rate: 0,
   rate_person: 0,
   source_type: 'USER',
-	stauts: 'VERIFY',
+	status: 'VERIFY',
 	related_to: [],
 	same_film: []
 }

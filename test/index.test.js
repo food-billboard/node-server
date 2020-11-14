@@ -9,7 +9,7 @@ process.env.NODE_ENV = 'test'
 process.env.DATABASE = 'mongodb://localhost'
 
 describe('APP', async function () {
-  it('server is complete run in port 3000', function (done) {
+  it('server is complete run in port 4000', function (done) {
       done()
   })
 })

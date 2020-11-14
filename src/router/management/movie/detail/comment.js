@@ -12,12 +12,14 @@ router
       name: 'currPage',
       _default: 0,
       sanitizers: [
+        data => parseInt(data),
         data => data >= 0 ? data : 0
       ]
     }, {
       name: 'pageSize',
       _default: 30,
       sanitizers: [
+        data => parseInt(data),
         data => data >= 0 ? data : 30
       ]
     }, {
@@ -28,12 +30,12 @@ router
     }, {
       name: 'start_date',
       sanitizers: [
-        data => ((typeof data === 'string' && (new Date(data)).toString() !== 'Invalid Date') || typeof data === 'undefined') ? undefined : Day(data).toDate()
+        data => ((typeof data === 'string' && (new Date(data)).toString() == 'Invalid Date') || typeof data === 'undefined') ? undefined : Day(data).toDate()
       ]
     }, {
       name: 'end_date',
       sanitizers: [
-        data => ((typeof data === 'string' && (new Date(data)).toString() !== 'Invalid Date') || typeof data === 'undefined') ? Day().toDate() : Day(data).toDate()
+        data => ((typeof data === 'string' && (new Date(data)).toString() == 'Invalid Date') || typeof data === 'undefined') ? Day().toDate() : Day(data).toDate()
       ]
     }, {
       name: 'hot',
@@ -77,21 +79,20 @@ router
       CommentModel.aggregate([
         {
           $match: {
-            source: _id
-          }
-        },
-        {
-          $match: {
-            createdAt: {
-              $lte: end_date,
-              ...(!!start_date ? { $gte: start_date } : {})
-            }
+            source_type: 'movie',
+            source: _id,
+            // createdAt: {
+            //   $lte: end_date,
+            //   ...(!!start_date ? { $gte: start_date } : {})
+            // }
           }
         },
         {
           $project: {
             user_info: 1,
             total_like: 1,
+            createdAt: 1,
+            updatedAt: 1,
             like_person_count: {
               $size: {
                 $ifNull: [
@@ -133,11 +134,14 @@ router
           }
         },
         {
+          $unwind: "$user_info"
+        },
+        {
           $lookup: {
             from: 'images', 
             localField: 'content.image', 
             foreignField: '_id', 
-            as: 'images'
+            as: 'image'
           }
         },
         {
@@ -152,16 +156,18 @@ router
           $project: {
             user_info: {
               _id: "$user_info._id",
-              uesrname: "$user_info.uesrname"
+              username: "$user_info.username"
             },
             comment_count: 1,
             total_like: 1,
             like_person_count: 1,
             content: {
               text: "$content.text",
-              video: "$content.video.src",
-              image: "$content.image.src",
+              video: "$video.src",
+              image: "$image.src",
             },
+            createdAt: 1,
+            updatedAt: 1
           }
         }
       ])

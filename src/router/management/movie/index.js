@@ -81,7 +81,7 @@ const checkParams = (ctx, ...validator) => {
 
 //参数处理
 const sanitizersParams = (ctx, ...sanitizers) => {
-  return Params.sanitizers(ctx.body, {
+  return Params.sanitizers(ctx.request.body, {
     name: 'actor',
     sanitizers: [
       data => data.map(d => ObjectId(d))
@@ -218,7 +218,7 @@ router
         "info.description": reg
       },
       {
-        "info.author_description": reg
+        author_description: reg
       },
     ]
   }
@@ -287,7 +287,7 @@ router
           rate_person: 1,
           total_rate: 1,
           source_type: 1,
-          stauts: 1,
+          status: 1,
           comment_count: {
             $size: {
               $ifNull: [
@@ -373,14 +373,17 @@ router
     _id = _method == 'put' ? ctx.request.body._id : ctx.query._id
   }catch(err) {}
 
-  const data = MovieModel.findOne({
-    _id
+  const data = await (ObjectId.isValid(_id) ? Promise.resolve() : Promise.reject({ errMsg: 'bad request', status: 400 }))
+  .then(_ => {
+    return MovieModel.findOne({
+      _id
+    })
+    .select({
+      source_type: 1,
+      author: 1
+    })
+    .exec()
   })
-  .select({
-    source_type: 1,
-    author: 1
-  })
-  .exec()
   .then(data => !!data && data._doc)
   .then(data => {
     if(!data) return Promise.reject({ errMsg: 'not found', status: 404 })
@@ -407,7 +410,7 @@ router
     })
     .exec()
   })
-  .then(data => !!data && !!data.length)
+  .then(data => !!data && !!data.length && data)
   .then(notFound)
   .then(data => {
     if(data.length == 1) {
@@ -420,9 +423,9 @@ router
       data.forEach(item => {
         const { mobile: _mobile, _id, roles } = item
         if(mobile == _mobile) {
-            manageRoles = roles
+          manageRoles = roles
         }else if(_id.equals(author)) {
-            userRoles = roles
+          userRoles = roles
         }
       })
 
@@ -432,11 +435,11 @@ router
       //权限判断
       if(source_type === 'ORIGIN') {
         if(maxManageRole > ROLES_MAP.SUPER_ADMIN) {
-            return false
+          return false
         }
       }else {
         if(maxManageRole >= maxUserRole) {
-            return false
+          return false
         }
       }
     }
@@ -474,7 +477,7 @@ router
     poster,
     author_description,
     author_rate
-  ] = sanitizers(ctx)
+  ] = sanitizersParams(ctx)
 
   const { body: { name, alias, description } } = ctx.request
   const [, token] = verifyTokenToData(ctx)
@@ -513,8 +516,8 @@ router
       author: _id,
       author_description,
       author_rate,
-      source_type: 'USER',
-      status: role == ROLES_MAP.SUPER_ADMIN ? MOVIE_SOURCE_TYPE.ORIGIN : MOVIE_SOURCE_TYPE.USER
+      source_type: role == ROLES_MAP.SUPER_ADMIN ? MOVIE_SOURCE_TYPE.ORIGIN : MOVIE_SOURCE_TYPE.USER,
+      status: MOVIE_STATUS.VERIFY
     })
     return model.save()
   })
@@ -611,6 +614,9 @@ router
 
   const data = await MovieModel.deleteOne({
     _id
+  })
+  .then(data => {
+    return data
   })
   .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))

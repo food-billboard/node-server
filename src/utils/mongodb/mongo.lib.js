@@ -1329,6 +1329,8 @@ const AuthSchema = new Schema({
       }
     }],
   }
+}, {
+  ...defaultConfig
 })
 
 const BehaviourSchema = new Schema({
@@ -1339,7 +1341,7 @@ const BehaviourSchema = new Schema({
   url_type: {
     type: String,
     required: true,
-    enum: [ 'LOGIN_IN', 'LOGOUT', 'MOVIE_GET', 'MOVIE_POST', 'COMMENT', 'SEARCH', 'RANK_GET', 'CLASSIFY', 'USER_GET', 'USER_GET' ]
+    enum: [ 'LOGIN_IN', 'LOGOUT', 'MOVIE_GET', 'MOVIE_POST', 'COMMENT', 'SEARCH', 'RANK_GET', 'CLASSIFY', 'USER_GET' ]
   },
   user: {
     type: ObjectId,
@@ -1348,6 +1350,8 @@ const BehaviourSchema = new Schema({
   target: {
     type: ObjectId
   }
+}, {
+  ...defaultConfig
 })
 
 // const ApisSchema = new Schema({

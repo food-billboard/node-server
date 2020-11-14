@@ -5,8 +5,10 @@
   "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js --config ./src/config/nodemon/index.dev.json",
-    "prod": "nodemon app.js --config ./src/config/nodemon/index.prod.json",
-    "test": "mocha test/**/*.js --recursive --timeout 10000",
+    "prod": "pm2 start ecosystem.config.js",
+    "stop": "pm2 stop app",
+    "delete": "pm2 delete app",
+    "test": "mocha --recursive --timeout 10000",
     "socket": "nodemon ./src/chat/index.js"
   },
   "author": "GLF",

@@ -195,17 +195,23 @@ describe(`${COMMON_API} test`, function() {
           _id: result._id.toString()
         }
 
+        console.log(updatedAt.toString(), 22222222)
+
         const etag = createEtag(query)
 
         Request
         .get(COMMON_API)
         .query({...query})
-        .set({
-          Accept: 'application/json',
-          'If-Modified-Since': updatedAt.toString(),
-          'If-None-Match': etag,
-          Authorization: `Basic ${selfToken}`
-        })
+        .set('Accept', 'application/json')
+        .set('if-modified-since', updatedAt.toString())
+        .set('if-none-match', etag)
+        .set('Authorization', `Basic ${selfToken}`)
+        // .set({
+        //   Accept: 'application/json',
+        //   'If-Modified-Since': updatedAt.toString(),
+        //   'If-None-Match': etag,
+        //   Authorization: `Basic ${selfToken}`
+        // })
         .expect(304)
         .expect('Last-Modified', updatedAt.toString())
         .expect('ETag', etag)

@@ -1,6 +1,7 @@
 const Router = require('@koa/router')
-const { MovieModel, SearchModel, UserModel, dealErr, responseDataDeal } = require('@src/utils')
+const { MovieModel, SearchModel, dealErr, responseDataDeal, Params } = require('@src/utils')
 const { getDateParams } = require('@src/router/management/utils')
+const Day = require('dayjs')
 
 const router = new Router()
 
@@ -28,9 +29,7 @@ router
 //热搜
 .get('/keyword', async(ctx) => {
 
-  const { date_type, start_date, end_date, group, sort, templateList } = getDateParams(ctx)
-
-  const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
+  const [ currPage, pageSize, hot ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
     sanitizers: [
@@ -41,6 +40,12 @@ router
     _default: 30,
     sanitizers: [
       data => data >= 0 ? data : 30
+    ]
+  }, {
+    name: 'hot',
+    sanitizers: [
+      data => parseInt(data),
+      data => Number.isNaN(data) ? -1 : data > 0 ? 1 : -1
     ]
   })
 
@@ -64,66 +69,136 @@ router
         }
       }
     ]),
-    //用户总数
-    UserModel.aggregate([
-      {
-        $group: {
-          _id: null,
-          user_total: {
-            $sum: 1
-          }
-        }
-      }
-    ]),
-    SearchModel.aggregate([
-
-    ]),
-    //数据统计
+    //最近7天的搜索用户数量
     SearchModel.aggregate([
       {
-        $unwind: "hot"
+        $unwind: '$hot'
       },
       {
         $match: {
           hot: {
-            ...(!!start_date ? { $gte: start_date } : {}),
-            $lte: end_date
+            $gte: Day().subtract(7, 'd').toDate(),
+            $lte: Day().toDate()
           }
         }
       },
       {
-        $project: {
-          key_word: 1,
-          hot: 1
-        },
-      },
-      {
         $group: {
-
+          _id: {
+            year: {
+              $year: "$createdAt"
+            },
+            month: {
+              $month: "$createdAt"
+            },
+            day: {
+              $dayOfYear: "$createdAt"
+            },
+            month_day: {
+              $dayOfMonth: "$createdAt"
+            },
+            key_word: "$key_word",
+            createdAt: "$createdAt"
+          },
+          count: {
+            $sum: 1
+          },
         }
       },
       {
         $sort: {
-
+          "_id.day": 1
+        }
+      }
+    ]),
+    //数据统计
+    SearchModel.aggregate([
+      // {
+      //   $unwind: "$hot"
+      // },
+      {
+        $project: {
+          key_word: 1,
+          hot: {
+            $size: {
+              $ifNull: [
+                "$hot", []
+              ]
+            }
+          },
+        },
+      },
+      {
+        $sort: {
+          hot
         }
       },
-      // {
-      //   $skip: currPage * pageSize
-      // },
-      // {
-      //   limit: pageSize
-      // },
-
+      {
+        $skip: currPage * pageSize
+      },
+      {
+        $limit: pageSize
+      },
     ])
   ])
-  .then(([ key_word_total, user_total, search_data ]) => {
+  .then(([ key_word_total, search_data, search_list ]) => {
 
-    const user_count = user_total.length ? user_total.total || 0 : 0
     const { total=0, search_total=0 } = key_word_total.length ? key_word_total[0] : {}
+    
+    //搜索数据图
+    let total_chart = []
+    //人均搜索数据图
+    let average_chart = []
+    //最后一天的搜索关键词
+    let last_day_count = 0
+    const doc = new Array(7).fill(0).map((_, index) => ({ day: Day().subtract(7 - index, 'd'), count: 0 }))
+
+    doc.forEach((item, index) => {
+      const { day } = item
+      const target = search_data.filter(val => {
+        const { _id: { month_day } } = val
+        return month_day == day.date()
+      })
+
+      const count = target.reduce((acc, cur) => {
+        const { count, _id: { createdAt } } = cur
+        if(index == 6 && Day(createdAt).date() == day.date()) last_day_count ++
+        acc += count
+        return acc
+      }, 0)
+
+      total_chart.push({
+        ...item,
+        count,
+        day: day.format('YYYY-MM-DD')
+      })
+      average_chart.push({
+        ...item,
+        count: target.length == 0 ? 0 : count / target.length,
+        day: day.format('YYYY-MM-DD')
+      })
+
+    })
+
+    //用户平均搜索
+    const average = total == 0 ? 0 : (search_total / total)
+    //昨日搜索量
+    const yestoday_search_total = total_chart[total_chart.length - 1].count
+    //截止昨日搜索量
+    const yestoday_total = total - yestoday_search_total
+    //昨日关键词搜索量
+    const yestoday_search_keyword = total - last_day_count
 
     return {
-      total,
-      average: (search_total / (user_count == 0 ? 1 : user_count)).toFixed(3)
+      data: {
+        total,
+        average: average.toFixed(3),
+        count_total_day: yestoday_total == 0 ? 0 : ( yestoday_search_total / yestoday_total).toFixed(3),
+        count_average_day: yestoday_search_keyword == 0 ? 0 : ( yestoday_total / yestoday_search_keyword ).toFixed(3),
+        total_chart,
+        average_chart,
+        data: search_list
+      }
     }
 
   })
@@ -217,7 +292,7 @@ router
         }
       },
       {
-        limit: 15
+        $limit: 15
       },
       {
         $project: {

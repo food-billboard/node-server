@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const Detail = require('./detail')
-const { UserModel, verifyTokenToData, dealErr, notFound, Params, responseDataDeal, ROLES_MAP, USER_STATUS } = require('@src/utils')
+const { UserModel, verifyTokenToData, dealErr, notFound, Params, responseDataDeal, ROLES_MAP, USER_STATUS, findMostRole, EMAIL_REGEXP } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
 
@@ -9,7 +9,9 @@ const router = new Router()
 const checkParams = (ctx, ...nextCheck) => {
   return Params.body(ctx, {
     name: 'mobile',
-    validator: [data => /^1[3456789]\d{9}$/.test(data.toString())]
+    validator: [
+      data => /^1[3456789]\d{9}$/.test(data.toString())
+    ]
   }, {
     name: 'password',
     validator: [data => typeof data === 'string' && data.length >= 8 && data.length <= 20]
@@ -19,12 +21,12 @@ const checkParams = (ctx, ...nextCheck) => {
   }, {
     name: 'username',
     validator: [
-        data => typeof data === 'string' ? data > 0 && data <= 20 : typeof data === 'undefined'
+        data => typeof data === 'string' ? data.length > 0 && data.length <= 20 : typeof data === 'undefined'
     ]
   }, {
     name: 'description',
     validator: [
-      data => typeof data === 'string' ? data > 0 && data <= 50 : typeof data === 'undefined'
+      data => typeof data === 'string' ? data.length > 0 && data.length <= 50 : typeof data === 'undefined'
     ]
   }, {
     name: 'avatar',
@@ -34,7 +36,7 @@ const checkParams = (ctx, ...nextCheck) => {
   }, {
     name: 'role',
     validator: [
-      data => typeof data === 'string' ? Object.values(ROLES_MAP).includes(data.toUpperCase())  : typeof data === 'undefined'
+      data => typeof data === 'string' ? Object.keys(ROLES_MAP).includes(data.toUpperCase())  : typeof data === 'undefined'
     ]
   }, ...nextCheck)
 }
@@ -46,18 +48,18 @@ router
     name: 'currPage',
     _default: 0,
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 0
     ]
   }, {
     name: 'pageSize',
     _default: 30,
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 30
     ]
   }, {
     name: 'role',
     sanitizers: [
-      data => typeof data === 'string' ? [ data ] : ROLES_MAP
+      data => typeof data === 'string' ? [ data ] : Object.keys(ROLES_MAP)
     ]
   }, {
     name: 'start_date',
@@ -67,7 +69,7 @@ router
   }, {
     name: 'end_date',
     sanitizers: [
-      data => ((typeof data === 'string' && (new Date(data)).toString() !== 'Invalid Date') || typeof data === 'undefined') ? Day().toDate() : Day(data).toDate()
+      data => ((typeof data === 'string' && (new Date(data)).toString() == 'Invalid Date') || typeof data === 'undefined') ? Day().toDate() : Day(data).toDate()
     ]
   }, {
     name: 'status',
@@ -86,9 +88,11 @@ router
     //用户总数
     UserModel.aggregate([
       {
-        _id: null,
-        total: {
-          $sum: 1
+        $project: {
+          _id: null,
+          total: {
+            $sum: 1
+          }
         }
       }
     ]),
@@ -99,7 +103,7 @@ router
             $lte: end_date,
             ...(!!start_date ? { $gte: start_date } : {})
           },
-          role: {
+          roles: {
             $in: role
           },
           status: {
@@ -234,15 +238,15 @@ router
     }
   }catch(err){}
 
-  const data = await UserModel.findOne(
+  const data = await UserModel.find(
     (_method === 'delete' || _method === 'put') ?
     {
       $or: [
         {
-            mobile: Number(mobile)
+          mobile: Number(mobile)
         },
         {
-            _id: ObjectId(_id)
+          _id: ObjectId(_id)
         }
       ]
     }
@@ -252,7 +256,7 @@ router
     }
   )
   .select({
-    _id: 0,
+    _id: 1,
     mobile: 1,
     roles: 1
   })
@@ -266,30 +270,32 @@ router
     //删除
     if(_method === 'delete') {
       if(data.length != 2) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-      const [target] = data.filter(item => item.mobile != mobile)
+      const [ self ] = data.filter(item => item.mobile == mobile)
+      const [ target ] = data.filter(item => item._id.equals(_id))
       const targetRole = findMostRole(target.roles)
+      const selfRole = findMostRole(self.roles)
 
-      if(!roles.some(role => typeof ROLES_MAP[role] == 'undefined' ? false : (ROLES_MAP[role] <= ROLES_MAP.DEVELOPMENT) && ROLES_MAP[role] < targetRole)) {
-        forbidden = true
-      }
+      if(selfRole > ROLES_MAP.DEVELOPMENT || selfRole >= targetRole) forbidden = true
+
     }
     //编辑
     else if(_method === 'put') {
       if(data.length != 2) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-      const [target] = data.filter(item => item.mobile != mobile)
+      const [self] = data.filter(item => item.mobile == mobile)
+      const [ target ] = data.filter(item => item._id.equals(_id))
+      const selfRole = findMostRole(self.roles)
       const targetRole = findMostRole(target.roles)
-      if(!roles.some(role => typeof ROLES_MAP[role] == 'undefined' ? false : (ROLES_MAP[role] <= ROLES_MAP.DEVELOPMENT && targetRole > ROLES_MAP[role]) )) {
-          forbidden = true
-      }
+      if(selfRole > ROLES_MAP.DEVELOPMENT || selfRole >= targetRole) forbidden = true
     }
     //新增
     else if(_method === 'post') {
-        const { roles } = data
+        if(data.length != 1) return Promise.reject({ errMsg: 'unknown error', status: 500 })
+        const { roles } = data[0]
         const targetRole = findMostRole(roles)
-        let newUserRole = Number(ctx.query.role)
-        newUserRole = (Number.isNaN(newUserRole) || newUserRole > maxRoleAuth || newUserRole < minRoleAuth) ? maxRoleAuth : targetRole
+        let newUserRole = Number(ROLES_MAP[ctx.request.body.role])
+        newUserRole = (Number.isNaN(newUserRole) || newUserRole > maxRoleAuth || newUserRole < minRoleAuth) ? maxRoleAuth : newUserRole
         if(targetRole > ROLES_MAP.DEVELOPMENT || targetRole >= newUserRole) {
-            forbidden = true
+          forbidden = true
         }
     }
 
@@ -354,7 +360,7 @@ router
   .exec()
   .then(data => {
     if(data.length == 0) return Promise.reject({ status: 403, errMsg: 'forbidden' })
-    if(data.length >= 2 || (data.length == 1 && data[0]._doc.mobile != Number(newUserMobile))) return Promise.reject({ status: 400, errMsg: 'user exists' }) 
+    if(data.length >= 2 || (data.length == 1 && data[0].mobile == Number(newUserMobile))) return Promise.reject({ status: 400, errMsg: 'user exists' }) 
     const model = new UserModel(userModel)
     return model.save()
   })
@@ -379,7 +385,7 @@ router
   if(check) return
 
   let editModel = {}
-  const [ _id, role ] = Params.sanitizers(ctx.body, {
+  const [ _id, role ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
@@ -427,14 +433,14 @@ router
 //删除
 .delete('/', async(ctx) => {
 
-  const check = checkParams(ctx, {
+  const check = Params.query(ctx, {
     name: '_id',
     type: [ 'isMongoId' ]
   })
 
   if(check) return
 
-  const [ _id ] = Params.sanitizers(ctx.body, {
+  const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
@@ -445,10 +451,10 @@ router
     _id
   })
   .then(data => {
-    if(typeof data !== 'object' || (typeof data === 'object' && data.nModified != 1)) return Promise.reject({ errMsg: 'error', status: 500 })
+    if(data.deletedCount != 1) return Promise.reject({ errMsg: 'error', status: 500 })
     return {
       data: {
-          _id
+        _id
       }
     }
   })

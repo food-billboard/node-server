@@ -42,6 +42,8 @@ const initAuthMapData = () => {
 }
 
 const authMiddleware = async (ctx, next) => {
+  
+  if(process.env.NODE_ENV !== 'production') return await next()
   const { request: { method, url } } = ctx
   const { pathname } = Url.parse(url)
   //不在限制范围内
@@ -53,14 +55,20 @@ const authMiddleware = async (ctx, next) => {
   if(token) {
     ROLES_DATABASE_MAP.forEach(role => {
       const { allow: { actions }, roles:_role } = role
-      actions.every(action => {
-        const { url, methods } = action
-        if(role.includes('SUPER_ADMIN') || (url == pathname && (methods == '*' || (Array.isArray(methods) && methods.includes(method.toLowerCase()))))) {
-          roles = [ ...new Set([ ...roles, ..._role ]) ]
-          return false
-        }
-        return true
-      })
+      if(actions == '*') {
+        roles = [ ...new Set([ ...roles, ..._role ]) ]
+        return
+      }else if(Array.isArray(actions)) {
+        actions.every(action => {
+          const { url, methods } = action
+          const reg = new RegExp(url)
+          if(role.includes('SUPER_ADMIN') || (reg.test(pathname) && (methods == '*' || (Array.isArray(methods) && methods.includes(method.toLowerCase()))))) {
+            roles = [ ...new Set([ ...roles, ..._role ]) ]
+            return false
+          }
+          return true
+        })
+      }
 
     })
   }
@@ -70,8 +78,7 @@ const authMiddleware = async (ctx, next) => {
   //若包含最低访问权限则直接放行
   if(roles && roles.includes('USER')) return await next()
 
-  data = await (!token ? Promise.reject({ errMsg: 'not authorization', status: 401 }) : Promise.resolve()) //未登录
-  .then(_ => roles)
+  data = await (!token ? Promise.reject({ errMsg: 'not authorization', status: 401 }) : Promise.resolve(roles)) //未登录
   //不在权限范围内表示不可访问
   .then(notFound)
   .then(_ => {
@@ -110,6 +117,6 @@ const authMiddleware = async (ctx, next) => {
 }
 
 module.exports = {
-  initAuthMapData,
+  // initAuthMapData,
   authMiddleware
 }

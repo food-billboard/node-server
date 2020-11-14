@@ -40,7 +40,7 @@ router
     name: 'value',
     sanitizers: [
       data => parseInt(data),
-      data => Number.isNaN(data) ? new Array(10).fill(0).map((_, index) => index) : [ data ]
+      data => Number.isNaN(data) ? new Array(11).fill(0).map((_, index) => index) : [ data ]
     ]
   })
 
@@ -101,20 +101,23 @@ router
           from: 'movies', 
           localField: 'rate._id', 
           foreignField: '_id', 
-          as: '_id'
+          as: 'movie'
         }
+      },
+      {
+        $unwind: "$movie"
       },
       {
         $project: {
           value: "$rate.rate",
           createdAt: "$rate.timestamps",
           movie: {
-            _id: "$rate._id._id",
-            name: "$rate._id.name",
-            author_rate: "$rate._id.author_rate",
-            rate_person: "$rate._id.rate_person",
-            total_rate: "$rate._id.total_rate",
-            source_type: "$rate._id.source_type",
+            _id: "$movie._id",
+            name: "$movie.name",
+            author_rate: "$movie.author_rate",
+            rate_person: "$movie.rate_person",
+            total_rate: "$movie.total_rate",
+            source_type: "$movie.source_type",
           }
         }
       }
@@ -142,8 +145,10 @@ router
       //     }]
       //   }
       // }
-      total: !!total_count.length ? total_count[0].total || 0 : 0,
-      list: rate_data
+      data: {
+        total: !!total_count.length ? total_count[0].total || 0 : 0,
+        list: rate_data
+      }
     }
 
   })

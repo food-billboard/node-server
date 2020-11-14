@@ -1,4 +1,4 @@
-const CUSTOMER_PREFIX = '/api/customer'
+const CUSTOMER_PREFIX = '\\/api\\/customer'
 const USER_PREFIX = '/api/user'
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -6,7 +6,7 @@ const toId = (target) => ObjectId.isValid(target) ? ObjectId(target) : target
 
 const user_behaviour = {
   //登录
-  '/logon/account': {
+  '\\/logon\\/account': {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
@@ -16,7 +16,7 @@ const user_behaviour = {
     })
   },
   //退出
-  '/logon/signout': {
+  '\\/logon\\/signout': {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
@@ -26,7 +26,7 @@ const user_behaviour = {
     })
   },
   //获取用户信息
-  '/customer/*': {
+  '\\/customer\\/.+': {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
@@ -36,7 +36,7 @@ const user_behaviour = {
     })
   },
   //专题
-  '/home/speical': {
+  '\\/home\\/speical.?': {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
@@ -46,7 +46,7 @@ const user_behaviour = {
     })
   },
   //电影排行榜
-  '/movie/rank': {
+  '\\/movie\\/rank.?': {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
@@ -56,7 +56,7 @@ const user_behaviour = {
     })
   },
   //电影
-  '/movie/detail/*': {
+  '\\/movie\/detail\\/.?': {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
@@ -66,7 +66,7 @@ const user_behaviour = {
     })
   },
   //搜索
-  '/movie/search': {
+  '\\/movie\\/search.?': {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
@@ -79,7 +79,7 @@ const user_behaviour = {
 }
 const customer_behaviour = {
   //上传
-  '/manage/movie': {
+  '\\/manage\\/movie.?': {
     method: 'post',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
@@ -89,7 +89,7 @@ const customer_behaviour = {
     })
   },
   //电影
-  '/movie/detail/*': {
+  '\\/movie\\/detail\\/.?': {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
@@ -99,7 +99,7 @@ const customer_behaviour = {
     })
   },
   //用户
-  '/user/*': {
+  '\\/user\\/.?': {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
@@ -110,13 +110,13 @@ const customer_behaviour = {
   },
 }
 
-module.export = {
+module.exports = {
   ...Object.keys(user_behaviour).reduce((acc, cur) => {
     acc[`${USER_PREFIX}${cur}`] = user_behaviour[cur]
     return acc
   }, {}),
   ...Object.keys(customer_behaviour).reduce((acc, cur) => {
-    acc[`${CUSTOMER_PREFIX}${cur}`] = user_behaviour[cur]
+    acc[`${CUSTOMER_PREFIX}${cur}`] = customer_behaviour[cur]
     return acc
   }, {})
 }

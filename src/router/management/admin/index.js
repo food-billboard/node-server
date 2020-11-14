@@ -85,12 +85,14 @@ router
 
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  const { request: { username, avatar, description } } = ctx
+  const { request: { body: { username, description, avatar } } } = ctx
 
   let updateField = {}
   if(username) updateField = { ...updateField, username }
-  if(avatar) updateField = { ...updateField, avatar }
+  if(avatar) updateField = { ...updateField, avatar: ObjectId(avatar) }
   if(description) updateField = { ...updateField, description }
+
+  console.log(updateField)
 
   const data = await UserModel.findOneAndUpdate({
     mobile: Number(mobile)
@@ -98,7 +100,7 @@ router
     $set: updateField
   })
   .select({
-    _id: 1
+    _id: 1,
   })
   .exec()
   .then(data => !!data && data._doc)
