@@ -2117,7 +2117,6 @@
         "hot": 0,
         "rate": 0,
         "store": true,
-
       }
     ]
   }
@@ -3118,7 +3117,8 @@
         "comment_users": [
           {
             "_id": "string",
-            "avatar": "string"
+            "avatar": "string",
+            "username": "string"
           }
         ],
         "content": {
@@ -3152,7 +3152,8 @@
         "comment_users": [ 评论用户
           {
             "_id": "string" id,
-            "avatar": "string" 头像
+            "avatar": "string" 头像,
+            "username": "string" 用户名
           }
         ],
         "content": { 内容
@@ -4909,7 +4910,7 @@
           <li class="content-get">
             <h6 class="method-backgound-get method-title-get">
               <span class="method get">get</span>
-              /api/user/customer/movie/borwser 用户浏览记录
+              /api/user/customer/movie/browser 用户浏览记录
             </h6>
             <div class="main-get hide">
               <div class="main-get-content">
@@ -5659,7 +5660,7 @@
           <li class="content-post">
             <h6 class="method-backgound-post method-title-post">
               <span class="method post">post</span>
-              /api/user/logon/signin 登录
+              /api/user/logon/account 登录
             </h6>
             <div class="main-post hide">
               <div class="main-post-content">
@@ -6243,7 +6244,7 @@
       },
       "name": "string",
       "poster": "string",
-      "rate": "string",
+      "rate": "integer",
       "same_film": [
         {
           "name": "string",
@@ -6326,7 +6327,7 @@
       },
       "name": "string" 名称,
       "poster": "string" 海报,
-      "rate": "string" 评分,
+      "rate": "integer" 评分,
       "same_film": [ 类似电影
         {
           "_id": "string" id,
@@ -6974,7 +6975,7 @@
           <li class="content-get">
             <h6 class="method-backgound-get method-title-get">
               <span class="method get">get</span>
-              /api/user/movie/classify/specDropList 排行榜列表
+              /api/user/movie/rank/specDropList 排行榜列表
             </h6>
             <div class="main-get hide">
               <div class="main-get-content">
@@ -7359,7 +7360,195 @@
             </div>
           </li>
           <li class="content-get">
-            <h6>/api/user/movie/search</h6>
+            <h6 class="method-backgound-get method-title-get">
+              <span class="method get">get</span>
+              /api/user/movie/search 搜索
+            </h6>
+            <div class="main-get hide">
+              <div class="main-get-content">
+                <h6 class="main-title-get">Parameters</h6>
+                <table class="params">
+                  <tr>
+                    <td>
+                      <span class="params-name-item">currPage</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>当前页</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">pageSize</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>数量</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">content</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>搜索内容</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">area</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>地区id(可以用,拼接多个)</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">director</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>导演id(可以用,拼接多个)</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">actor</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>演员id(可以用,拼接多个)</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">lang</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>语言id(可以用,拼接多个)</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">time</span>
+                      <br/>
+                      <span class="typeof-int"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>上映时间(时间戳)</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="params-name-item">sort</span>
+                      <br/>
+                      <span class="typeof-string"></span>
+                      <br/>
+                      <span class="type">query</span>
+                    </td>
+                    <td style="position: relative;">
+                      <p>排序(可以用,拼接多个)(comment=1,rate=1,hot=1,glance=1)</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div>
+                <h6 class="main-title-get">Responses</h6>
+                <ul class="response">
+                  <li class="res-code">
+                    <ul>
+                      <li>
+                        200
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="res-description">
+                    <ul>
+                      <li>
+                        <div class="res-description-title status-200"></div>
+                        <div class="res-description-detail">
+                          <p class="res-description-detail-title"><span class="active example">Example Value</span> | <span class="modal">Modal</span></p>
+                          <div class="example">
+                            <pre>
+{
+  "success": true,
+  "res": {
+    "data": {
+      "description": "string",
+      "name": "string",
+      "poster": "string",
+      "_id": "string",
+      "classify": [
+        {
+          "name": "string"
+        }
+      ],
+      "publish_time": 1234567890,
+      "hot": 0,
+      "rate": 0,
+      "store": true,
+    }
+  }
+}
+                            </pre>
+                          </div>
+                          <div class="modal hide">
+                            <pre>
+{
+  "success": "boolean",
+  "res": {
+    "data": {
+      "description": "string" 电影简介,
+      "name": "string" 电影名称,
+      "poster": "string" 海报,
+      "_id": "string" 电影id,
+      "classify": [ 分类
+        {
+          "name": "string" 分类名称
+        }
+      ],
+      "publish_time": "date_time" 上映时间,
+      "hot": "integer" 人气,
+      "rate": "integer" 评分,
+      "store": "boolean" 是否收藏,
+    }
+  }
+}
+                            </pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </li>
         </ul>
       </div>

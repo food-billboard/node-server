@@ -1,7 +1,9 @@
 const Day = require('dayjs')
 const mongoose = require("mongoose")
 const { Schema, model } = mongoose
-const ObjectId = mongoose.Types.ObjectId
+const { Types: { ObjectId } } = mongoose
+const { log4Database } = require('@src/config/winston')
+const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS, COMMENT_SOURCE_TYPE } = require('../constant')
 
 function getMill(time) {
   return Day(time).valueOf()
@@ -28,10 +30,11 @@ const isOne = fields => {
   return Object.values(nextFields).some(field => field == 1)
 }
 
+//预处理
 function prePopulate(populate) {
-  return function() {
+  return function(next) {
     let activePopulate = []
-    const { _fields: fields } = this
+    const { _fields: fields={} } = this
     const zero = isZero(fields)
     let fieldArr = []
     //筛选同字段不同层
@@ -74,11 +77,22 @@ function prePopulate(populate) {
         })
     })
 
+    //!! need to test
+    if(!zero) this.select({
+      updatedAt: 1
+    })
 
     activePopulate.forEach(active => {
       this.populate(active)
     })
+
+    next()
   }
+}
+
+//完成处理
+function postMiddleware(...params) {
+  return log4Database(...params)
 }
 
 //预设
@@ -244,6 +258,7 @@ const PRE_BARRAGE_FIND = [
     }
   }
 ]
+const PRE_BEHAVIOUR_FIND = []
 
 //user
 const UserSchema = new Schema({
@@ -251,51 +266,119 @@ const UserSchema = new Schema({
     type: Number,
     unique: true,
     set: (v) => Number(v),
-    required: function() {
-      return /^1[3456789]\d{9}$/g.test(this.mob)
+    required: true,
+    validate: {
+      validator: function(v) {
+        return /^1[3456789]\d{9}$/.test(v);
+      },
     },
   },
 	password: {
     type: String,
     required: true
   },
+  email: {
+    type: String,
+    unique: true,
+    validate: {
+      validator: function(v) {
+        return EMAIL_REGEXP.test(v);
+      },
+    },
+    required: true
+  },
 	username: {
     type: String,
     default: '默认名称'
   },
+  description: {
+    type: String,
+    default: "描述一下你自己吧",
+    min: 0,
+    max: 50
+  },
 	avatar: {
-    default: ObjectId('5edb3c7b4f88da14ca419e61'),
+    // default: ObjectId('5edb3c7b4f88da14ca419e61'),
     type: ObjectId,
     ref: 'image'
   },
+  hot_history: [{
+    _id: {
+      type: ObjectId,
+      ref: 'user'
+    },
+    origin_id: {
+      type: ObjectId,
+      refPath: 'origin_type'
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    },
+    origin_type: {
+      type: String,
+      enum: [ 'comment', 'barrage' ],
+      default: 'comment'
+    }
+  }],
 	hot: {
     type: Number,
     default: 0,
     min: 0,
   },
   fans: [{
-    type: ObjectId,
-    ref: 'user',
+    _id: {
+      type: ObjectId,
+      ref: 'user',
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   attentions: [{
-    type: ObjectId,
-    ref: 'user',
+    _id: {
+      type: ObjectId,
+      ref: 'user',
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   issue: [{
-    type: ObjectId,
-    ref: 'movie'
+    _id: {
+      type: ObjectId,
+      ref: 'movie'
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   glance: [{
-    type: ObjectId,
-    ref: 'movie'
+    _id: {
+      type: ObjectId,
+      ref: 'movie'
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
   }],
   comment: [{
     type: ObjectId,
     ref: 'comment',
   }],
   store: [{
-    type: ObjectId,
-    ref: 'movie'
+    _id: {
+      type: ObjectId,
+      ref: 'movie'
+    },
+    timestamps: {
+      min: 0,
+      type: Number
+    }
   }],
   rate: [{
     _id: {
@@ -313,6 +396,10 @@ const UserSchema = new Schema({
         if(rate > 10) return 10
         return rate
       }
+    },
+    timestamps: {
+      type: Number,
+      min: 0
     }
   }],
   allow_many: {
@@ -321,11 +408,18 @@ const UserSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['SIGNIN', 'SIGNOUT', 'FREEZE'],
+    enum: USER_STATUS,
     trim: true,
     uppercase: true,
     default: "SIGNOUT"
-  }
+  },
+  roles: [{
+    type: String,
+    enum: Object.keys(ROLES_MAP),
+    set: (v) => {
+      return v.toUpperCase()
+    }
+  }]
 }, {
   ...defaultConfig
 })
@@ -340,6 +434,10 @@ const GlobalSchema = new Schema({
     type: String,
     required: true
   },
+  visit_count: {
+    type: Number,
+    min: 0
+  }
 }, {
   ...defaultConfig
 })
@@ -490,6 +588,11 @@ const BarrageSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   }],
+  content: {
+    type: String,
+    minlength: 1,
+    required: true
+  },
   time_line: {
     type: Number,
     required: true
@@ -502,6 +605,7 @@ const MovieSchema = new Schema({
   name: {
     type: String,
     required: true,
+    index: true
   },
   info: {
     name: {
@@ -552,12 +656,13 @@ const MovieSchema = new Schema({
   }],
   poster: {
     type: ObjectId,
-    ref: 'image'
+    ref: 'image',
+    required: true
   },
-  barrage: {
+  barrage: [{
     type: ObjectId,
     ref: 'barrage'
-  },
+  }],
   tag: [{
     type: ObjectId,
     ref: 'tag'
@@ -598,14 +703,14 @@ const MovieSchema = new Schema({
   source_type: {
     type: String,
     required: true,
-    enum: [ 'ORIGIN', 'USER' ],
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
     trim: true,
     uppercase: true,
   },
-  stauts: {
+  status: {
     type: String,
     required: true,
-    enum: [ 'VERIFY', 'COMPLETE' ],
+    enum: Object.keys(MOVIE_STATUS),
     trim: true,
     uppercase: true,
   },
@@ -672,6 +777,15 @@ const SpecialSchema = new Schema({
     required: true,
     unique: true,
   },
+  glance: [{
+    _id: {
+      type: ObjectId,
+      ref: 'user'
+    },
+    timestamps: {
+      type: Number
+    }
+  }]
 }, {
   ...defaultConfig
 })
@@ -679,12 +793,13 @@ const SpecialSchema = new Schema({
 const ActorSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
-  works: [{
-    type: ObjectId,
-    ref: 'movie'
-  }],
+  // works: [{
+  //   type: ObjectId,
+  //   ref: 'movie'
+  // }],
   other: {
     another_name: {
       type: String,
@@ -694,6 +809,15 @@ const ActorSchema = new Schema({
       ref: 'image'
     }
   },
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -702,12 +826,13 @@ const ActorSchema = new Schema({
 const DirectorSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
-  works: [{
-    type: ObjectId,
-    ref: 'movie'
-  }],
+  // works: [{
+  //   type: ObjectId,
+  //   ref: 'movie'
+  // }],
   other: {
     another_name: {
       type: String,
@@ -717,6 +842,15 @@ const DirectorSchema = new Schema({
       ref: 'image'
     }
   },
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -728,7 +862,16 @@ const DistrictSchema = new Schema({
     required: true,
     unique: true,
   },
-  other: {}
+  other: {},
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -748,11 +891,13 @@ const SearchSchema = new Schema({
     },
 		field: String
 	}],
-	match_texts: [String],
-  hot: {
-    type: Number,
-    default: 0,
-  },
+	match_texts: [{
+    type: String,
+    min: 1
+  }],
+  hot: [{
+    type: Date,
+  }],
   other: {},
 }, {
   ...defaultConfig,
@@ -762,7 +907,7 @@ const SearchSchema = new Schema({
 const CommentSchema = new Schema({
   source_type: {
     type: String,
-    enum: ['movie', 'user'],
+    enum: Object.keys(COMMENT_SOURCE_TYPE),
     required: true,
     trim: true,
   },
@@ -824,17 +969,24 @@ const RankSchema = new Schema({
     ref: 'image'
   },
   match_field: {
-    type: String,
-    enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'TOTAL_RATE', 'CLASSIFY' ],
-    uppercase: true,
-    get: function(v) {
-      return v
+    _id: {
+      type: ObjectId,
+      refPath: 'field'
+    },
+    field: {
+      type: String,
+      // enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'TOTAL_RATE', 'CLASSIFY' ],
+      enum: [ 'classify', 'district' ],
+      lowercase: true,
+      get: function(v) {
+        return v
+      }
     }
   },
-  match: [{
-    type: ObjectId,
-    ref: 'movie'
-  }],
+  // match: [{
+  //   type: ObjectId,
+  //   ref: 'movie'
+  // }],
   glance: {
     type: Number,
     default: 0
@@ -855,15 +1007,24 @@ const ClassifySchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
-  match: [
-    {
-      type: ObjectId,
-      ref: 'movie'
-    }
-  ],
+  // match: [
+  //   {
+  //     type: ObjectId,
+  //     ref: 'movie'
+  //   }
+  // ],
   glance: {
     type: Number,
     default: 0
+  },
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
   }
 }, {
   ...defaultConfig,
@@ -877,6 +1038,15 @@ const LanguageSchema = new Schema({
     unique: true,
   },
   other: {},
+  source_type: {
+    type: String,
+    enum: Object.keys(MOVIE_SOURCE_TYPE),
+    default: MOVIE_SOURCE_TYPE.USER
+  },
+  source: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
   minimize: false
@@ -885,11 +1055,12 @@ const LanguageSchema = new Schema({
 const VideoSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   src: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   poster: {
     type: ObjectId,
@@ -898,13 +1069,16 @@ const VideoSchema = new Schema({
   origin_type: {
     required: true,
     type: String,
+    enum: [ 'USER', 'SYSTEM' ],
     uppercase: true,
-    enum: [ "USER", "SYSTEM" ]
+    get: function(v) { return v ? v.toLowerCase() : v }
   },
-  origin: {
-    type: ObjectId,
-    ref: 'user'
-  },
+  white_list: [
+    {
+      type: ObjectId,
+      ref: 'user'
+    }
+  ],
   auth: {
     required: true,
     type: String,
@@ -913,9 +1087,14 @@ const VideoSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
+    md5: {
+      type: String,
+      required: true,
+      // unique: true
+    },
     complete: [{
       type: Number,
-      required: true,
+      // required: true,
       min: 0
     }],
     chunk_size: {
@@ -937,7 +1116,8 @@ const VideoSchema = new Schema({
       type: String,
       enum: ['ERROR', 'COMPLETE', 'UPLOADING'],
       uppercase: true,
-      required: true
+      required: true,
+      default: 'COMPLETE'
     }
   },
 }, {
@@ -948,18 +1128,22 @@ const ImageSchema = new Schema({
   name: String,
   src: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   origin_type: {
     required: true,
     type: String,
+    enum: [ 'USER', 'SYSTEM' ],
     uppercase: true,
-    enum: [ "USER", "SYSTEM" ]
+    get: function(v) { return v ? v.toLowerCase() : v }
   },
-  origin: {
-    type: ObjectId,
-    ref: 'user'
-  },
+  white_list: [
+    {
+      type: ObjectId,
+      ref: 'user'
+    }
+  ],
   auth: {
     required: true,
     type: String,
@@ -968,6 +1152,10 @@ const ImageSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
+    md5: {
+      type: String,
+      required: true
+    },
     complete: [{
       type: Number,
       min: 0
@@ -983,6 +1171,7 @@ const ImageSchema = new Schema({
     mime: {
       type: String,
       enum: [],
+      required: true,
       uppercase: true,
       get: function(v) { return v ? v.toLowerCase() : v }
     },
@@ -1001,18 +1190,22 @@ const OtherMediaSchema = new Schema({
   name: String,
   src: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   origin_type: {
     required: true,
     type: String,
+    enum: [ 'SYSTEM', 'USER' ],
     uppercase: true,
-    enum: [ "USER", 'SYSTEM' ]
+    get: function(v) { return v ? v.toLowerCase() : v }
   },
-  origin: {
-    type: ObjectId,
-    ref: 'user'
-  },
+  white_list: [
+    {
+      type: ObjectId,
+      ref: 'user'
+    }
+  ],
   auth: {
     required: true,
     type: String,
@@ -1021,6 +1214,10 @@ const OtherMediaSchema = new Schema({
     get: function(v) { return v ? v.toLowerCase() : v }
   },
   info: {
+    md5: {
+      type: String,
+      required: true
+    },
     complete: [{
       type: Number,
       min: 0
@@ -1037,6 +1234,7 @@ const OtherMediaSchema = new Schema({
       type: String,
       enum: [],
       uppercase: true,
+      required: true,
       get: function(v) { return v ? v.toLowerCase() : v }
     },
     status: {
@@ -1063,69 +1261,170 @@ const FeedbackSchema = new Schema({
       type: ObjectId,
       ref: 'video'
     }]
+  },
+  status: {
+    type: String,
+    enum: Object.keys(FEEDBACK_STATUS),
+    default: 'DEALING'
+  },
+  history: [
+    {
+      user: {
+        type: ObjectId,
+        ref: 'user',
+        required: true
+      },
+      timestamps: {
+        type: Date
+      },
+      description: {
+        type: String,
+        required: true
+      }
+    }
+  ]
+}, {
+  ...defaultConfig
+})
+
+const AuthSchema = new Schema({
+  roles: [{
+    required: true,
+    type: String,
+    enum: Object.keys(ROLES_MAP), 
+    set: (v) => {
+      return v.toUpperCase()
+    }
+  }],
+  allow: {
+    resources: [{
+      type: String,
+    }],
+    actions: [{
+      url: {
+        type: String,
+        validator: {
+          validate: (v) => {
+            return typeof v === 'string' && /(\/.+)+(\?(.+=.+)+)?/.test(v)
+          }
+        }
+      },
+      method: {
+        type: String,
+        enum: METHOD_MAP,
+        set: (v) => {
+          return v.toUpperCase()
+        } 
+      }
+    }],
+    attributes: [{
+      type: String
+    }],
+    where: [{
+      platform: {
+        type: String
+      },
+      app: {
+        type: String
+      }
+    }],
   }
 }, {
   ...defaultConfig
 })
 
+const BehaviourSchema = new Schema({
+  timestamps: {
+    type: Number,
+    min: 0
+  },
+  url_type: {
+    type: String,
+    required: true,
+    enum: [ 'LOGIN_IN', 'LOGOUT', 'MOVIE_GET', 'MOVIE_POST', 'COMMENT', 'SEARCH', 'RANK_GET', 'CLASSIFY', 'USER_GET' ]
+  },
+  user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  target: {
+    type: ObjectId
+  }
+}, {
+  ...defaultConfig
+})
+
+// const ApisSchema = new Schema({
+//   url: {
+//     type: String
+//   },
+//   roles: [{
+//     type: String,
+//     enum: ROLES_MAP,
+//     set: (v) => {
+//       return v.toUpperCase()
+//     }
+//   }]
+// })
+
+const FIND_OPERATION_LIB = [
+  'find',
+  'findOne',
+  'findOneAndUpdate',
+]
+
+const SAVE_OPERATION_LIB = [
+  'save'
+]
+
 //预处理
-UserSchema.pre('find', prePopulate(PRE_USER_FIND))
-UserSchema.pre('findOne', prePopulate(PRE_USER_FIND))
-UserSchema.pre('findOneAndUpdate', prePopulate(PRE_USER_FIND))
-GlobalSchema.pre('find', prePopulate(PRE_GLOBAL_FIND))
-GlobalSchema.pre('findOne', prePopulate(PRE_GLOBAL_FIND))
-GlobalSchema.pre('findOneAndUpdate', prePopulate(PRE_GLOBAL_FIND))
-RoomSchema.pre('find', prePopulate(PRE_ROOM_FIND))
-RoomSchema.pre('findOne', prePopulate(PRE_ROOM_FIND))
-RoomSchema.pre('findOneAndUpdate', prePopulate(PRE_ROOM_FIND))
-MessageSchema.pre('find', prePopulate(PRE_MESSAGE_FIND))
-MessageSchema.pre('findOne', prePopulate(PRE_MESSAGE_FIND))
-MessageSchema.pre('findOneAndUpdate', prePopulate(PRE_MESSAGE_FIND))
-MovieSchema.pre('find', prePopulate(PRE_MOVIE_FIND))
-MovieSchema.pre('findOne', prePopulate(PRE_MOVIE_FIND))
-MovieSchema.pre('findOneAndUpdate', prePopulate(PRE_MOVIE_FIND))
-TagSchema.pre('find', prePopulate(PRE_TAG_FIND))
-TagSchema.pre('findOne', prePopulate(PRE_TAG_FIND))
-TagSchema.pre('findOneAndUpdate', prePopulate(PRE_TAG_FIND))
-SpecialSchema.pre('find', prePopulate(PRE_SPECIAL_FIND))
-SpecialSchema.pre('findOne', prePopulate(PRE_SPECIAL_FIND))
-SpecialSchema.pre('findOneAndUpdate', prePopulate(PRE_SPECIAL_FIND))
-ActorSchema.pre('find', prePopulate(PRE_ACTOR_FIND))
-ActorSchema.pre('findOne', prePopulate(PRE_ACTOR_FIND))
-ActorSchema.pre('findOneAndUpdate', prePopulate(PRE_ACTOR_FIND))
-DirectorSchema.pre('find', prePopulate(PRE_DIRECTOR_FIND))
-DirectorSchema.pre('findOne', prePopulate(PRE_DIRECTOR_FIND))
-DirectorSchema.pre('findOneAndUpdate', prePopulate(PRE_DIRECTOR_FIND))
-DistrictSchema.pre('find', prePopulate(PRE_DISTRICT_FIND))
-DistrictSchema.pre('findOne', prePopulate(PRE_DISTRICT_FIND))
-DistrictSchema.pre('findOneAndUpdate', prePopulate(PRE_DISTRICT_FIND))
-SearchSchema.pre('find', prePopulate(PRE_SEARCH_FIND))
-SearchSchema.pre('findOne', prePopulate(PRE_SEARCH_FIND))
-SearchSchema.pre('findOneAndUpdate', prePopulate(PRE_SEARCH_FIND))
-CommentSchema.pre('find', prePopulate(PRE_COMMENT_FIND))
-CommentSchema.pre('findOne', prePopulate(PRE_COMMENT_FIND))
-CommentSchema.pre('findOneAndUpdate', prePopulate(PRE_COMMENT_FIND))
-RankSchema.pre('find', prePopulate(PRE_RANK_FIND))
-RankSchema.pre('findOne', prePopulate(PRE_RANK_FIND))
-RankSchema.pre('findOneAndUpdate', prePopulate(PRE_RANK_FIND))
-ClassifySchema.pre('find', prePopulate(PRE_CLASSIFY_FIND))
-ClassifySchema.pre('findOne', prePopulate(PRE_CLASSIFY_FIND))
-ClassifySchema.pre('findOneAndUpdate', prePopulate(PRE_CLASSIFY_FIND))
-LanguageSchema.pre('find', prePopulate(PRE_LANGUAGE_FIND))
-LanguageSchema.pre('findOne', prePopulate(PRE_LANGUAGE_FIND))
-LanguageSchema.pre('findOneAndUpdate', prePopulate(PRE_LANGUAGE_FIND))
-VideoSchema.pre('find', prePopulate(PRE_VIDEO_FIND))
-VideoSchema.pre('findOne', prePopulate(PRE_VIDEO_FIND))
-VideoSchema.pre('findOneAndUpdate', prePopulate(PRE_VIDEO_FIND))
-ImageSchema.pre('find', prePopulate(PRE_IMAGE_FIND))
-ImageSchema.pre('findOne', prePopulate(PRE_IMAGE_FIND))
-ImageSchema.pre('findOneAndUpdate', prePopulate(PRE_IMAGE_FIND))
-OtherMediaSchema.pre('find', prePopulate(PRE_OTHER_FIND))
-OtherMediaSchema.pre('findOne', prePopulate(PRE_OTHER_FIND))
-OtherMediaSchema.pre('findOneAndUpdate', prePopulate(PRE_OTHER_FIND))
-BarrageSchema.pre('find', prePopulate(PRE_BARRAGE_FIND))
-BarrageSchema.pre('findOne', prePopulate(PRE_BARRAGE_FIND))
-BarrageSchema.pre('findOneAndUpdate', prePopulate(PRE_BARRAGE_FIND))
+FIND_OPERATION_LIB.forEach(op => {
+  UserSchema.pre(op, prePopulate(PRE_USER_FIND))
+  GlobalSchema.pre(op, prePopulate(PRE_GLOBAL_FIND))
+  RoomSchema.pre(op, prePopulate(PRE_ROOM_FIND))
+  MessageSchema.pre(op, prePopulate(PRE_MESSAGE_FIND))
+  MovieSchema.pre(op, prePopulate(PRE_MOVIE_FIND))
+  TagSchema.pre(op, prePopulate(PRE_TAG_FIND))
+  SpecialSchema.pre(op, prePopulate(PRE_SPECIAL_FIND))
+  ActorSchema.pre(op, prePopulate(PRE_ACTOR_FIND))
+  DirectorSchema.pre(op, prePopulate(PRE_DIRECTOR_FIND))
+  DistrictSchema.pre(op, prePopulate(PRE_DISTRICT_FIND))
+  SearchSchema.pre(op, prePopulate(PRE_SEARCH_FIND))
+  CommentSchema.pre(op, prePopulate(PRE_COMMENT_FIND))
+  RankSchema.pre(op, prePopulate(PRE_RANK_FIND))
+  ClassifySchema.pre(op, prePopulate(PRE_CLASSIFY_FIND))
+  LanguageSchema.pre(op, prePopulate(PRE_LANGUAGE_FIND))
+  VideoSchema.pre(op, prePopulate(PRE_VIDEO_FIND))
+  ImageSchema.pre(op, prePopulate(PRE_IMAGE_FIND))
+  OtherMediaSchema.pre(op, prePopulate(PRE_OTHER_FIND))
+  BarrageSchema.pre(op, prePopulate(PRE_BARRAGE_FIND))
+  BehaviourSchema.pre(op, prePopulate(PRE_BEHAVIOUR_FIND))
+})
+
+//完成处理
+SAVE_OPERATION_LIB.forEach(op => {
+  UserSchema.post(op, postMiddleware)
+  GlobalSchema.post(op, postMiddleware)
+  RoomSchema.post(op, postMiddleware)
+  MessageSchema.post(op, postMiddleware)
+  MovieSchema.post(op, postMiddleware)
+  TagSchema.post(op, postMiddleware)
+  SpecialSchema.post(op, postMiddleware)
+  ActorSchema.post(op, postMiddleware)
+  DirectorSchema.post(op, postMiddleware)
+  DistrictSchema.post(op, postMiddleware)
+  SearchSchema.post(op, postMiddleware)
+  CommentSchema.post(op, postMiddleware)
+  RankSchema.post(op, postMiddleware)
+  ClassifySchema.post(op, postMiddleware)
+  LanguageSchema.post(op, postMiddleware) 
+  VideoSchema.post(op, postMiddleware)
+  ImageSchema.post(op, postMiddleware)
+  OtherMediaSchema.post(op, postMiddleware)
+  BarrageSchema.post(op, postMiddleware),
+  AuthSchema.post(op, postMiddleware),
+  BehaviourSchema.post(op, postMiddleware)
+})
 
 const UserModel = model('user', UserSchema)
 const GlobalModel = model('global', GlobalSchema)
@@ -1147,6 +1446,9 @@ const ImageModel = model('image', ImageSchema)
 const OtherMediaModel = model('other_media', OtherMediaSchema)
 const FeedbackModel = model('feedback', FeedbackSchema)
 const BarrageModel = model('barrage', BarrageSchema)
+const AuthModel = model('auth', AuthSchema)
+// const ApisModel = model('api', ApisSchema)
+const BehaviourModel = model('behaviour', BehaviourSchema)
 
 module.exports = {
   UserModel,
@@ -1169,6 +1471,9 @@ module.exports = {
   OtherMediaModel,
   FeedbackModel,
   BarrageModel,
+  AuthModel,
+  // ApisModel,
+  BehaviourModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1188,5 +1493,8 @@ module.exports = {
   ImageSchema,
   OtherMediaSchema,
   FeedbackSchema,
-  BarrageSchema
+  BarrageSchema,
+  AuthSchema,
+  // ApisSchema,
+  BehaviourSchema,
 }

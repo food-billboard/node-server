@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal, Params } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -11,12 +11,8 @@ router.get('/', async (ctx) => {
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
+
   const [ _id, currPage, pageSize ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
@@ -37,13 +33,13 @@ router.get('/', async (ctx) => {
       data => data >= 0 ? data : -1
     ]
   })
-  let res
 
   const data = await UserModel.find({
     $or: [ { mobile: Number(mobile) }, { _id } ]
   })
   .select({
-    comment: 1
+    comment: 1,
+    updatedAt: 1
   })
   .populate({
     path: 'comment',
@@ -51,6 +47,7 @@ router.get('/', async (ctx) => {
       user_info: _id
     },
     select: {
+      source_type: 1,
       source: 1,
       createdAt: 1,
       updatedAt: 1,
@@ -69,6 +66,14 @@ router.get('/', async (ctx) => {
         content: 1
       }
     },
+    populate: {
+      path: 'user_info',
+      select: {
+        _id: 0,
+        avatar: 1,
+        username: 1
+      }
+    }
   })
   .exec()
   .then(data => !!data && data)
@@ -77,7 +82,7 @@ router.get('/', async (ctx) => {
     let result = {}
     let mine = {}
     const index = data.findIndex(d => d._id.equals(_id))
-    if(!~index) return Promise.reject({err: null, data: []})
+    if(!~index) return Promise.reject({errMsg: 'not Found', status: 404})
     result = {
       ...data[index]._doc
     } 
@@ -85,53 +90,52 @@ router.get('/', async (ctx) => {
       ...data[(index + 1) % 2]._doc
     }
     const { _id:mineId } = mine
-    const { comment } = result
+    const { comment, updatedAt } = result
     let like = false
-    return comment.map(c => {
-      const { _doc: { 
-        like_person, 
-        source: { name, content, ...nextSource }={}, 
-        content: { image, video, ...nextContent }, 
-        user_info: { _doc: { avatar, ...nextUserInfo } },
-        ...nextC 
-      } } = c
-      like = false
-      if(like_person.some(l => l.equals(mineId))) like = true
-      return {
-        ...nextC,
-        user_info: {
-          ...nextUserInfo,
-          avatar: avatar ? avatar.src : null
-        },
-        content: {
-          ...nextContent,
-          image: image.filter(i => i && !!i.src).map(i => i.src),
-          video: video.filter(v => v && !!v.src).map(v => v.src)
-        },
-        source: {
-          ...nextSource,
-          content: name ? name : ( content || null )
-        },
-        like
+    return {
+      data: {
+        ...result,
+        comment: comment.map(c => {
+          const { _doc: { 
+            like_person, 
+            source_type,
+            source: { name, content, _id }={}, 
+            content: { image, video, ...nextContent }, 
+            user_info: { _doc: { avatar, ...nextUserInfo } },
+            ...nextC 
+          } } = c
+
+          like = false
+          if(like_person.some(l => l.equals(mineId))) like = true
+          return {
+            ...nextC,
+            user_info: {
+              ...nextUserInfo,
+              avatar: avatar ? avatar.src : null
+            },
+            content: {
+              ...nextContent,
+              image: image.filter(i => i && !!i.src).map(i => i.src),
+              video: video.filter(v => v && !!v.src).map(v => v.src)
+            },
+            source: {
+              _id,
+              content: !!name ? name : ( content || null ),
+              type: source_type
+            },
+            like
+          }
+        })
       }
-    })
+    }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
 })
 

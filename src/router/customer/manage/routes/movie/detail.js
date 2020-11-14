@@ -1,35 +1,48 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params } = require("@src/utils")
+const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
 .use(async(ctx, next) => {
-  const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
   const check = Params.query(ctx, {
     name: '_id',
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({ ...check.res })
-    return
-  }
+  if(check) return
+
   const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
     ]
   })
+
+  const [, token] = verifyTokenToData(ctx)
+  const { mobile } = token
+
   const data = UserModel.findOne({
     mobile: Number(mobile),
-    issue: { $in: [ _id ] }
+    "issue._id": { $in: [ _id ] }
   })
   .select({
     _id: 1
   })
   .exec()
+  .then(data => !!data && data._doc._id)
+  .then(notFound)
+  .then(userId => {
+
+    return MovieModel.findOne({
+      _id,
+      author: userId
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+  })
   .then(data => !!data)
   .then(notFound)
   .catch(dealErr(ctx))
@@ -38,7 +51,11 @@ router
     return await next()
   }
 
-  ctx.body = JSON.stringify(data.res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+
 })
 .get('/', async(ctx) => {
 
@@ -49,9 +66,8 @@ router
     ]
   })
 
-  let res
   const data = await MovieModel.findOne({
-    _id: _id
+    _id,
   })
   .select({
     name: 1,
@@ -62,6 +78,7 @@ router
     poster: 1,
     author_description: 1,
     author_rate: 1,
+    updatedAt: 1
   })
   .exec()
   .then(data => !!data && data._doc)
@@ -76,26 +93,22 @@ router
       ...nextData
     } = data
     return {
-      ... nextData,
-      video: video ? video.src : null,
-      images: images.filter(i => i && !!i.src).map(i => i.src),
-      poster: poster ? poster.src : null,
-      info
+      data: {
+        ... nextData,
+        video: video ? video.src : null,
+        images: images.filter(i => i && !!i.src).map(i => i.src),
+        poster: poster ? poster.src : null,
+        info
+      }
     }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = data.res
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+
 })
 
 module.exports = router

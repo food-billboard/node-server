@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { CommentModel, dealErr, notFound, Params } = require('@src/utils')
+const { CommentModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -9,12 +9,7 @@ router.get('/', async (ctx) => {
     name: "_id",
     type: ['isMongoId']
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
 		name: 'currPage',
@@ -38,7 +33,7 @@ router.get('/', async (ctx) => {
 			}
 		]
 	})
-  let res 
+
   const data = await CommentModel.findOne({
     _id
   })
@@ -64,60 +59,54 @@ router.get('/', async (ctx) => {
   .then(data => {
     const { sub_comments, comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextUserInfo } }, ...nextComment } = data
     return {
-      sub: [...sub_comments.map(sub => {
-        const { _doc: { comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextSub } } = sub
-        return {
-          ...nextSub,
-          comment_users: comment_users.map(com => {
-            const { _doc: { avatar, ...nextCom } } = com
-            return {
-              ...nextCom,
+      data: {
+        sub: [...sub_comments.map(sub => {
+          const { _doc: { comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextSub } } = sub
+          return {
+            ...nextSub,
+            comment_users: comment_users.map(com => {
+              const { _doc: { avatar, ...nextCom } } = com
+              return {
+                ...nextCom,
+                avatar: !!avatar ? avatar.src : null
+              }
+            }),
+            content: {
+              ...nextContent,
+              image: image.filter(i => i && !!i.src).map(i => i.src),
+              video: image.filter(v => v && !!v.src).map(v => v.src),
+            },
+            like: false,
+            user_info: {
+              ...nextInfo,
               avatar: avatar ? avatar.src : null
             }
-          }),
+          }
+        })],
+        comment: {
+          ...nextComment,
           content: {
             ...nextContent,
             image: image.filter(i => i && !!i.src).map(i => i.src),
             video: image.filter(v => v && !!v.src).map(v => v.src),
           },
-          like: false,
           user_info: {
-            ...nextInfo,
+            ...nextUserInfo,
             avatar: avatar ? avatar.src : null
-          }
+          },
+          like: false,
+          comment_users: comment_users.length
         }
-      })],
-      comment: {
-        ...nextComment,
-        content: {
-          ...nextContent,
-          image: image.filter(i => i && !!i.src).map(i => i.src),
-          video: image.filter(v => v && !!v.src).map(v => v.src),
-        },
-        user_info: {
-          ...nextUserInfo,
-          avatar: avatar ? avatar.src : null
-        },
-        like: false,
-        comment_users: comment_users.length
       }
     }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+
 })
 
 module.exports = router

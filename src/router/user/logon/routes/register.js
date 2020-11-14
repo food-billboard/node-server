@@ -1,13 +1,13 @@
 const Router = require('@koa/router')
-const { encoded, signToken, Params, UserModel, RoomModel } = require('@src/utils')
+const { encoded, signToken, Params, UserModel, RoomModel, responseDataDeal, dealErr, dealRedis, EMAIL_REGEXP } = require('@src/utils')
+const { email_type } = require('../map')
 
 const router = new Router()
 
-function createInitialUserInfo({mobile, password}) {
+function createInitialUserInfo({ mobile, password, ...nextData }) {
   return {
     mobile,
     password: encoded(password),
-    username: '',
     fans: [],
     attention: [],
     issue: [],
@@ -17,6 +17,7 @@ function createInitialUserInfo({mobile, password}) {
     rate: [],
     allow_many: false,
     status: 'SIGNIN',
+    ...nextData
   }
 }
 
@@ -24,21 +25,23 @@ router
 .post('/', async(ctx) => {
   const check = Params.body(ctx, {
     name: 'mobile',
-    type: ['isMobilePhone']
+    validator: [data => /^1[3456789]\d{9}$/.test(data.toString())]
   }, {
     name: 'password',
-    validator: data => typeof data === 'string'
+    validator: [data => typeof data === 'string' && data.length >= 8 && data.length <= 20]
+  }, {
+    name: 'email',
+    validator: [data => EMAIL_REGEXP.test(data)]
+  },
+  {
+    name: 'captcha',
+    validator: [data => typeof data === 'string' && data.length === 6]
   })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+  if(check) return
 
   const [ password, uid, mobile ] = Params.sanitizers(ctx.request.body, {
     name: 'password',
-    type: ['trim']
+    type: ['trim'],
   }, {
     name: 'uid',
     type: ['trim']
@@ -46,24 +49,51 @@ router
     name: 'mobile',
     type: ['toInt']
   })
+  const { request: { body: { email, captcha } } } = ctx
 
-  let res
   //判断账号是否存在
-  const account = new UserModel({
-    ...createInitialUserInfo({ mobile, password })
+  const data = await UserModel.findOne({
+    $or: [
+      {
+        mobile: Number(mobile)
+      },
+      {
+        email
+      }
+    ]
   })
-  const data = await account.save()
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data)
   .then(data => {
-    if(!data) return Promise.reject({errMsg: '账号已存在', status: 403})
+    if(data) return Promise.reject({errMsg: '账号已存在', status: 403})
+
+    return dealRedis(function(redis) {
+      return redis.get(`${email}-${email_type[1]}`)
+    })
+  })
+  .then(data => {
+    //判断验证码是否正确
+    if(!data || (!!data && data != captcha)) return Promise.reject({ errMsg: 'the captcha is error', status: 400 })
+
+    //创建用户
+    const account = new UserModel({
+      ...createInitialUserInfo({ mobile, password, email })
+    })
+    return account.save()
+  })
+  .then(data => {
     const { avatar, _id, username, createdAt, updatedAt } = data
     const token = signToken({mobile, password})
     return {
-      avatar,
+      avatar: avatar || null,
       username,
       updatedAt,
       createdAt,
       fans:0,
-      attention:0,
+      attentions:0,
       hot: 0,
       _id,
       token
@@ -90,27 +120,17 @@ router
         $push: { members: { message: [], user: _id, status: 'OFFLINE' } }
       })
     ])
-    return data
-  })
-  .catch(err => {
-    ctx.status = 403
-    res = {
-      success: false,
-      res: null
+    return {
+      data
     }
-    console.log(err)
   })
+  .catch(dealErr(ctx))
 
-  if(!res) {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
   
 })
 

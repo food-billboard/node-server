@@ -5,7 +5,7 @@ const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const Feedback = require('./routes/feedback')
 const Info = require('./routes/info')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
@@ -22,9 +22,14 @@ router
     if(_id) {
       ctx.redirect(newUrl)
     }else {
-      ctx.body = JSON.stringify({
-        success: false,
-        res: null
+      responseDataDeal({
+        ctx,
+        data: {
+          err: true,
+          res: {
+            errMsg: 'not authentication'
+          }
+        }
       })
     }
   }
@@ -33,7 +38,7 @@ router
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { mobile } = token
-  let res
+
   const data = await UserModel.findOne({
     mobile: Number(mobile)
   })
@@ -49,37 +54,23 @@ router
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
+  .then(data => {
+    const { fans, attentions, ...nextData } = data
+    return {
+      data: {
+        ...nextData,
+        fans: fans.length,
+        attentions: attentions.length
+      }
+    }
+  })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.res
-    }
-  }else {
-    if(!data) {
-      ctx.status = 401
-      res = {
-        success: false,
-        res: {
-          errMsg: '登录过期'
-        }
-      }
-    }else {
-      const { fans, attentions, avatar, ...nextData } = data
-      res = {
-        success: true,
-        res: {
-          data: {
-            fans: fans.length,
-            attentions: attentions.length,
-            avatar: avatar ? avatar.src : null,
-            ...nextData
-          }
-        }
-      }
-    }
-  }
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data
+  })
+
 })
 .use('/attention', Attention.routes(), Attention.allowedMethods())
 .use('/movie', Movie.routes(), Movie.allowedMethods())

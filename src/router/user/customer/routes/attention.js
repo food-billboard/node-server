@@ -1,21 +1,18 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr, notFound, Params } = require("@src/utils")
+const { UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require("mongoose")
 
 const router = new Router()
 
 router
 .get('/', async (ctx) => {
-  const check = Params.query(ctx, {
-    name: '_id',
-    type: ['isMongoId']
-  })
-  if(check) {
-    ctx.body = JSON.stringify({
-      ...check.res
-    })
-    return
-  }
+
+  // //validate
+  // const check = Params.query(ctx, {
+  //   name: '_id',
+  //   type: ['isMongoId']
+  // })
+  // if(check) return
 
   const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
@@ -39,7 +36,8 @@ router
       }
     ]
   })
-  let res
+
+  //database
   const data = await UserModel.findOne({
     _id
   })
@@ -48,7 +46,7 @@ router
     _id: 0,
   })
   .populate({
-    path: 'attentions',
+    path: 'attentions._id',
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
       ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
@@ -62,33 +60,27 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { attentions } = data
+    const { attentions, ...nextData } = data
     return {
-      attentions: attentions.map(a => {
-        const { _doc: { avatar, ...nextA } } = a
-        return {
-          ...nextA,
-          avatar: avatar ? avatar.src : null
-        }
-      })
+      data: {
+        ...nextData,
+        attentions: attentions.map(a => {
+          const { _doc: { _id: { _doc: { avatar, ...nextA } } } } = a
+          return {
+            ...nextA,
+            avatar: avatar ? avatar.src : null
+          }
+        })
+      }
     }
   })
   .catch(dealErr(ctx))
 
-  if(data && data.err) {
-    res = {
-      ...data.err
-    }
-  }else {
-    res = {
-      success: true,
-      res: {
-        data
-      }
-    }
-  }
-
-  ctx.body = JSON.stringify(res)
+  responseDataDeal({
+    ctx,
+    data,
+  })
+  
 })
 
 module.exports = router

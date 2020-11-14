@@ -1,16 +1,21 @@
 const Router = require('@koa/router')
-const orderList = require('../orderList')
+const { sortList } = require('../orderList')
+const { responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
 router.get('/', async(ctx) => {
 
-  ctx.body = JSON.stringify({
-    success: true,
-    res: {
-      data: orderList
-    }
+  ctx.set({
+    'Cache-Control': `max-age=${24 * 60 * 60}`
   })
+
+  responseDataDeal({
+    ctx,
+    data: sortList,
+    needCache: false
+  })
+
 })
 
 module.exports = router

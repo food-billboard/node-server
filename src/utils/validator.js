@@ -1,13 +1,17 @@
 const Validator = require('validator')
 const { isType } = require('./tool')
+const { responseDataDeal } = require('./error-deal')
 
 const TEMPLATE_ERROR = ctx => {
   ctx.status = 400
   return {
-    success: false,
     res: {
-      errMsg: 'bad request'
-    }
+      success: false,
+      res: {
+        errMsg: 'bad request'
+      }
+    },
+    err: true
   }
 }
 
@@ -31,7 +35,7 @@ const Params = {
         }else {
           result = origin[name]
         }
-        if(result === undefined) throw new Error('name is not defined')
+        if(result === undefined) console.warn('attentions! name is not defined')
         //自定义
         let realSan = Array.isArray(sanitizers) ? sanitizers.filter(san => isType(san, 'function')) : []
         type.forEach(t => {
@@ -39,10 +43,10 @@ const Params = {
           let params = t.match(/(?<=\().+(?=\))/)
           method = method ? method[0] : t
           params = params && params[0]
-          result = isType(Validator[method], 'function') ? 
-            Validator[method](...(params ? [ result, ...params.split(',').map(p => p.trim()) ] : [result])) : 
-            result
 
+          result = isType(Validator[method], 'function') ? 
+          Validator[method](...(params ? [ result, ...params.split(',').map(p => p.trim()) ] : [result])) : 
+          result
         })
         realSan.forEach(san => {
           result = san(result)
@@ -50,6 +54,7 @@ const Params = {
         return result
       }catch(err) {
         if(_default) result = _default
+
         return result
       }
     })
@@ -62,11 +67,17 @@ const Params = {
     const { query } = ctx
     const data = this.validate(query, ...validators)
     if(data) {
-      const res = TEMPLATE_ERROR(ctx)
-      return {
-        errors: data,
-        res
-      }
+      // const res = TEMPLATE_ERROR(ctx)
+      // return {
+      //   errors: data,
+      //   res
+      // }
+      //fail
+      responseDataDeal({
+        ctx,
+        data: TEMPLATE_ERROR(ctx)
+      })
+      return true
     }
     return data
   },
@@ -74,11 +85,19 @@ const Params = {
     const { body } = ctx.request
     const data = this.validate(body, ...validators)
     if(data) {
-      const res = TEMPLATE_ERROR(ctx)
-      return {
-        errors: data,
-        res
-      }
+      //fail
+      // const res = TEMPLATE_ERROR(ctx)
+      // return {
+      //   errors: data,
+      //   res
+      // }
+      //fail
+      responseDataDeal({
+        ctx,
+        data: TEMPLATE_ERROR(ctx)
+      })
+      return true
+      
     }
     return data
   },
@@ -86,11 +105,16 @@ const Params = {
     const { files } = ctx.request
     const data = !!files && names.every(name => !!files[name] && !!files[name].size)
     if(!data) {
-      const res = TEMPLATE_ERROR(ctx)
-      return {
-        errors: data,
-        res
-      }
+      // const res = TEMPLATE_ERROR(ctx)
+      // return {
+      //   errors: data,
+      //   res
+      // }
+      responseDataDeal({
+        ctx,
+        data: TEMPLATE_ERROR(ctx)
+      })
+      return true
     }
     return null
   },
@@ -115,7 +139,7 @@ const Params = {
         }
       }else {
         data = origin[name]
-        if(!data) {
+        if(data === undefined) {
           errs.push(name)
           return false
         }
@@ -133,7 +157,7 @@ const Params = {
         )
       }) : true ) && (
         //自定义
-        Array.isArray(validator) ? validator.filter(val => isType(val, 'function')).every(val => val(data)) : true
+        Array.isArray(validator) ? validator.filter(val => isType(val, 'function')).every(val => val(data, origin)) : true
       )
       if(!result) errs.push(name)
       return result
