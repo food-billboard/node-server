@@ -58,7 +58,8 @@ describe(`${COMMON_API} test`, function() {
       imageId = data._id
 
       const { model, token } = mockCreateUser({
-        username: COMMON_API
+        username: COMMON_API,
+        // avatar: imageId
       })
 
       selfToken = token
@@ -156,7 +157,7 @@ describe(`${COMMON_API} test`, function() {
             console.log(_)
           }
           responseExpect(obj, target => {
-            expect(target.list.length).to.be(0)
+            expect(target.list.length).to.be.equals(0)
           })
           done()
         })
@@ -172,7 +173,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          start_date: Day(Date.now() + 10000000).format('YYYY-MM-DD')
+          start_date: Day(Date.now() + 1000 * 24 * 60 * 60).format('YYYY-MM-DD')
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -186,14 +187,14 @@ describe(`${COMMON_API} test`, function() {
             console.log(_)
           }
           responseExpect(obj, target => {
-            expect(target.list.length).to.be(0)
+            expect(target.list.length).to.be.equals(0)
           })
           done()
         })
 
       })
 
-      it(`get user list success with end_date`, function() {
+      it(`get user list success with end_date`, function(done) {
         
         Request
         .get(COMMON_API)
@@ -216,7 +217,7 @@ describe(`${COMMON_API} test`, function() {
             console.log(_)
           }
           responseExpect(obj, target => {
-            expect(target.list.length).to.be(0)
+            expect(target.list.length).to.be.equals(0)
           })
           done()
         })
@@ -246,7 +247,7 @@ describe(`${COMMON_API} test`, function() {
             console.log(_)
           }
           responseExpect(obj, target => {
-            expect(target.list.length).to.be(0)
+            expect(target.list.length).to.be.equals(0)
           })
           done()
         })
@@ -276,7 +277,7 @@ describe(`${COMMON_API} test`, function() {
             console.log(_)
           }
           responseExpect(obj, target => {
-            expect(target.list.length).to.be(0)
+            expect(target.list.length).to.be.equals(0)
           })
           done()
         })
@@ -316,7 +317,7 @@ describe(`${COMMON_API} test`, function() {
           username: COMMON_API.slice(1),
           description: COMMON_API,
           avatar: imageId.toString(),
-          role: 'User'
+          role: 'USER'
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -381,12 +382,12 @@ describe(`${COMMON_API} test`, function() {
         const info = {
           _id: userInfo._id,
           mobile: userInfo.mobile,
-          password: userInfo.password,
+          password: 'shenjing8',
           email: userInfo.email,
           username: COMMON_API.slice(2),
           description: userInfo.description,
           avatar: imageId.toString(),
-          role: 'User'
+          role: 'USER'
         }
 
         Request
@@ -414,7 +415,8 @@ describe(`${COMMON_API} test`, function() {
       before(function(done) {
 
         const { model } = mockCreateUser({
-          username: COMMON_API.slice(1)
+          username: COMMON_API.slice(1),
+          roles: [ 'CUSTOMER' ]
         })
 
         model.save()
@@ -458,7 +460,6 @@ describe(`${COMMON_API} test`, function() {
         .query({
           _id: userId.toString()
         })
-        .send(info)
         .expect(200)
         .expect('Content-Type', /json/)
         .end(function(err, res) {
@@ -491,7 +492,7 @@ describe(`${COMMON_API} test`, function() {
         username: COMMON_API.slice(1),
         description: COMMON_API,
         avatar: '571094e2976aeb1df982ad4e',
-        role: 'User'
+        role: 'USER'
       }
 
       it(`check the edit user info fail because mobile is not verify`, function(done) {
@@ -845,7 +846,6 @@ describe(`${COMMON_API} test`, function() {
 
         const { model } = mockCreateUser({
           username: COMMON_API.slice(1),
-          roles: [ 'CUSTOMER' ]
         })
 
         model.save()
@@ -854,7 +854,7 @@ describe(`${COMMON_API} test`, function() {
           send = {
             _id: userInfo._id,
             mobile: userInfo.mobile,
-            password: userInfo.password,
+            password: 'shenjing8',
             email: userInfo.email,
             username: userInfo.username,
             description: userInfo.description,
@@ -883,9 +883,11 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`put the user fail because the user is not the auth`, function(done) {
+      it(`put the user fail because the user is not the auth`, async function() {
 
-        Request
+        let res = true
+
+        await Request
         .put(COMMON_API)
         .set({
           Accept: 'Application/json',
@@ -897,10 +899,20 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(403)
         .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if(err) return done(err)
-          done()
+        
+        await UserModel.updateOne({
+          _id: userInfo._id
+        }, {
+          $set: {
+            roles: [ 'CUSTOMER' ]
+          }
         })
+        .catch(err => {
+          console.log('oops: ', err)
+          res = false
+        })
+
+        return res ? Promise.resolve() : Promise.reject(COMMON_API)
 
       })
 
@@ -925,7 +937,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`put the user fail because the user id is is not found`, function() {
+      it(`put the user fail because the user id is is not found`, function(done) {
 
         const id = send._id.toString()
         
@@ -937,9 +949,9 @@ describe(`${COMMON_API} test`, function() {
         })
         .send({
           ...send,
-          _id: `${id.slice(0, -1)}${Math.floor(10 / (parseInt(id.slice(-1)) + 5))}`
+          _id: `${id.slice(1)}${Math.floor(10 / (parseInt(id.slice(0, 1)) + 5))}`
         })
-        .expect(404)
+        .expect(500)
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
@@ -1048,9 +1060,9 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: `${id.slice(0, -1)}${Math.floor(10 / (parseInt(id.slice(-1)) + 5))}`
+          _id: `${id.slice(1)}${Math.floor(10 / (parseInt(id.slice(0, 1)) + 5))}`
         })
-        .expect(404)
+        .expect(500)
         .expect('Content-Type', /json/)
 
         return res ? Promise.resolve() : Promise.reject(COMMON_API)

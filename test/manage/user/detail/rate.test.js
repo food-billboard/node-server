@@ -25,7 +25,7 @@ function responseExpect(res, validate=[]) {
     commonValidate.number(item.movie.author_rate)
     commonValidate.number(item.movie.total_rate)
     commonValidate.number(item.movie.rate_person)
-    commonValidate.string(item.source_type)
+    commonValidate.string(item.movie.source_type)
   })
 
   if(Array.isArray(validate)) {
@@ -153,7 +153,7 @@ describe(`${COMMON_API} test`, function() {
           console.log(_)
         }
         responseExpect(obj, target => {
-          expect(target.list.length).to.be.be(0)
+          expect(target.list.length).to.be.equals(0)
         })
         done()
       })
@@ -196,7 +196,7 @@ describe(`${COMMON_API} test`, function() {
       Request
       .get(COMMON_API)
       .query({
-        _id: otherUserId.toString(),
+        _id: userInfo._id.toString(),
         value: 9
       })
       .set({
@@ -239,10 +239,20 @@ describe(`${COMMON_API} test`, function() {
       .query({
         _id: `${id.slice(1)}${Math.ceil(10 / (parseInt(id.slice(0, 1)) + 5))}`,
       })
-      .expect(404)
+      .expect(200)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if(err) return done(err)
+        const { res: { text } } = res
+        let obj
+        try{
+          obj = JSON.parse(text)
+        }catch(_) {
+          console.log(_)
+        }
+        responseExpect(obj, target => {
+          expect(target.list.length).to.be.equals(0)
+        })
         done()
       })
 

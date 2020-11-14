@@ -154,7 +154,7 @@ router
   })
   .sort({
     ...(
-      !!sort ? 
+      Array.isArray(sort) ? 
       sort.reduce((acc, cur) => {
         acc[cur[0]] = cur[1]
         return acc

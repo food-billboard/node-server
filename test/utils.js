@@ -84,7 +84,7 @@ function mockCreateMovie(values={}) {
       screen_time: new Date(),
       language: []
     },
-    images: [],
+    images: new Array(6).fill(ObjectId('8f63270f005f1c1a0d9448ca')),
     tag: [],
     comment: [],
     glance: 0,
@@ -217,7 +217,7 @@ function mockCreateDistrict(values={}) {
 function mockCreateImage(values={}) {
   let baseModel = {
     name: '测试图片名称',
-    src: '测试地址',
+    src: '测试地址' + Math.random(),
     auth: 'PUBLIC',
     origin_type: 'USER',
     info: {
