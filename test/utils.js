@@ -194,7 +194,7 @@ function mockCreateLanguage(values={}) {
   let baseModel = {
     name: '测试语言名称'
   }
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new LanguageModel(baseModel)
 

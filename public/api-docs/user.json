@@ -784,6 +784,7 @@
             "in": "body",
             "name": "email",
             "description": "邮箱",
+            "type": "string",
             "required": true
           },
           {
@@ -791,7 +792,8 @@
             "name": "type",
             "description": "验证码类型",
             "enum": ["forget", "register"],
-            "required": true
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {

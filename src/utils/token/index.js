@@ -15,6 +15,7 @@ const MIDDEL = "MIDDEL"
 
 //密码加密
 const encoded = (password) => {
+  if(!password) return 'jstoken'
   if(crypto) {
     const hmac = crypto.createHmac('sha256', SECRET)
     hmac.update(password)
@@ -130,7 +131,8 @@ const middlewareVerifyTokenForSocketIo = socket => async (packet, next) => {
 //token验证并返回内容
 const verifyTokenToData = (ctx) => {
   const { header: { authorization } } = ctx.request
-  return getToken(authorization)
+  const token = ctx.cookies.get('jstoken')
+  return getToken(token || authorization)
 }
 
 //socket验证token
@@ -177,5 +179,6 @@ module.exports = {
   verifySocketIoToken,
   otherToken,
   fileEncoded,
-  getToken
+  getToken,
+
 }

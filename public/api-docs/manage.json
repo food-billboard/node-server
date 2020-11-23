@@ -940,8 +940,13 @@
             "name": "_id",
             "in": "query",
             "description": "演员id",
-            "type": "string",
-            "required": true
+            "type": "string"
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "演员名称",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1084,8 +1089,13 @@
             "name": "_id",
             "in": "query",
             "description": "导演id",
-            "type": "string",
-            "required": true
+            "type": "string"
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "导演名称",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1228,8 +1238,13 @@
             "name": "_id",
             "in": "query",
             "description": "地区id",
-            "type": "string",
-            "required": true
+            "type": "string"
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "地区名称",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1344,8 +1359,13 @@
             "name": "_id",
             "in": "query",
             "description": "语言id",
-            "type": "string",
-            "required": true
+            "type": "string"
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "语言名称",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1459,9 +1479,14 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "份额里id",
-            "type": "string",
-            "required": true
+            "description": "分类id",
+            "type": "string"
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "分类名称",
+            "type": "string"
           }
         ],
         "responses": {
@@ -3157,35 +3182,38 @@
           "type": "object",
           "properties": {
             "data": {
-              "type": "object",
-              "properties": {
-                "_id": {
-                  "type": "string"
-                },
-                "another_name": {
-                  "type": "string",
-                  "description": "别名"
-                },
-                "name": {
-                  "type": "string",
-                  "description": "名称"
-                },
-                "createdAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updatedAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "avatar": {
-                  "type": "string",
-                  "description": "头像"
-                },
-                "source_type": {
-                  "type": "array",
-                  "description": "来源类型",
-                  "enum": [ "ORIGIN", "USER" ]
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "another_name": {
+                    "type": "string",
+                    "description": "别名"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "名称"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "description": "头像"
+                  },
+                  "source_type": {
+                    "type": "array",
+                    "description": "来源类型",
+                    "enum": [ "ORIGIN", "USER" ]
+                  }
                 }
               }
             }
@@ -3206,35 +3234,38 @@
           "type": "object",
           "properties": {
             "data": {
-              "type": "object",
-              "properties": {
-                "_id": {
-                  "type": "string"
-                },
-                "another_name": {
-                  "type": "string",
-                  "description": "别名"
-                },
-                "name": {
-                  "type": "string",
-                  "description": "名称"
-                },
-                "createdAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updatedAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "avatar": {
-                  "type": "string",
-                  "description": "头像"
-                },
-                "source_type": {
-                  "type": "array",
-                  "description": "来源类型",
-                  "enum": [ "ORIGIN", "USER" ]
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "another_name": {
+                    "type": "string",
+                    "description": "别名"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "名称"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "description": "头像"
+                  },
+                  "source_type": {
+                    "type": "array",
+                    "description": "来源类型",
+                    "enum": [ "ORIGIN", "USER" ]
+                  }
                 }
               }
             }
@@ -3255,27 +3286,30 @@
           "type": "object",
           "properties": {
             "data": {
-              "type": "object",
-              "properties": {
-                "_id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string",
-                  "description": "名称"
-                },
-                "createdAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updatedAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "source_type": {
-                  "type": "array",
-                  "description": "来源类型",
-                  "enum": [ "ORIGIN", "USER" ]
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "名称"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "source_type": {
+                    "type": "array",
+                    "description": "来源类型",
+                    "enum": [ "ORIGIN", "USER" ]
+                  }
                 }
               }
             }
@@ -3296,27 +3330,30 @@
           "type": "object",
           "properties": {
             "data": {
-              "type": "object",
-              "properties": {
-                "_id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string",
-                  "description": "名称"
-                },
-                "createdAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updatedAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "source_type": {
-                  "type": "array",
-                  "description": "来源类型",
-                  "enum": [ "ORIGIN", "USER" ]
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "名称"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "source_type": {
+                    "type": "array",
+                    "description": "来源类型",
+                    "enum": [ "ORIGIN", "USER" ]
+                  }
                 }
               }
             }
@@ -3337,35 +3374,38 @@
           "type": "object",
           "properties": {
             "data": {
-              "type": "object",
-              "properties": {
-                "_id": {
-                  "type": "string"
-                },
-                "glance": {
-                  "type": "integer",
-                  "description": "浏览人数"
-                },
-                "name": {
-                  "type": "string",
-                  "description": "名称"
-                },
-                "createdAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updatedAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "icon": {
-                  "type": "string",
-                  "description": "图标"
-                },
-                "source_type": {
-                  "type": "array",
-                  "description": "来源类型",
-                  "enum": [ "ORIGIN", "USER" ]
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "glance": {
+                    "type": "integer",
+                    "description": "浏览人数"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "名称"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "icon": {
+                    "type": "string",
+                    "description": "图标"
+                  },
+                  "source_type": {
+                    "type": "array",
+                    "description": "来源类型",
+                    "enum": [ "ORIGIN", "USER" ]
+                  }
                 }
               }
             }

@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { DistrictModel, UserModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { DistrictModel, UserModel, dealErr, notFound, Params, responseDataDeal, MOVIE_SOURCE_TYPE, ROLES_MAP, verifyTokenToData } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -16,16 +16,22 @@ const checkParams = (ctx, ...params) => {
 router
 .get('/', async(ctx) => {
 
-  const [ _id ] = Params.sanitizers(ctx.query, {
-    name: '_id',
-    sanitizers: [
-      data => ObjectId(data)
-    ]
-  })
+  const { _id, content } = ctx.query
+  let query = {}
+  if(ObjectId.isValid(_id)) {
+    query = {
+      _id: ObjectId(_id)
+    }
+  }else {
+    query = {
+      name: {
+        $regex: content,
+        $options: 'gi'
+      }
+    }
+  }
 
-  const data = await DistrictModel.findOne({
-    _id
-  })
+  const data = await DistrictModel.find(query)
   .select({
     _id: 1,
     name: 1,
@@ -34,17 +40,6 @@ router
     source_type: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
-  .then(notFound)
-  // {
-    //   data: {
-    //     name,
-    //     _id,
-    //     createdAt,
-    //     updatedAt,
-    //     source_type
-    //   }
-    // }
   .then(data => ({ data }))
   .catch(dealErr(ctx))
 
@@ -107,6 +102,13 @@ router
   const check = checkParams(ctx)
   if(check) return
 
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
+
   const { request: { body: { name } } } = ctx
   
   const data = await DistrictModel.updateOne({
@@ -147,7 +149,7 @@ router
     _id
   })
   .then(data => {
-    if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+    if(data.deletedCount == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
     return {
       data: {
         data: null

@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { signToken, encoded, dealErr, UserModel, RoomModel, Params, responseDataDeal } = require("@src/utils")
+const { signToken, encoded, dealErr, UserModel, RoomModel, Params, responseDataDeal, encoded } = require("@src/utils")
 
 const router = new Router()
 
@@ -51,6 +51,14 @@ router
   .then(data => {
     const { fans=[], attentions=[], password:_, avatar, roles, _id, ...nextData } = data
     const token = signToken({ mobile, roles, _id })
+
+    //设置cookie
+    ctx.cookies.set(encoded(), token, {
+      maxAge:1000 * 60 * 60 * 24,
+      httpOnly: true,
+      overwrite: false
+    })
+
     return {
       fans: fans.length,
       attentions: attentions.length,

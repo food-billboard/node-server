@@ -25,12 +25,12 @@ router
   if(_method !== 'delete' && _method !== 'put') return await next()
   let body
   if(_method == 'delete') {
-    body = 'query'
+    body = ctx.query
   }else {
-    body = 'body'
+    body = ctx.request.body
   }
 
-  const [ _id ] = Params.sanitizers(ctx[body], {
+  const [ _id ] = Params.sanitizers(body, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
@@ -112,6 +112,25 @@ router
     data
   })
 
+})
+//get参数校验
+.use(async (ctx, next) => {
+  const { request: { method } } = ctx
+  const _method = method.toLowerCase()
+  if(_method !== 'get') return await next()
+  const { _id, content } = ctx.query
+  if(!ObjectId.isValid(_id) && (typeof content !== 'string' || !content)) {
+    const data = dealErr(ctx)({
+      errMsg: 'bad request',
+      status: 400
+    })
+    responseDataDeal({
+      ctx,
+      data
+    })
+    return
+  }
+  return await next()
 })
 .use('/language', Language.routes(), Language.allowedMethods())
 .use('/actor', Actor.routes(), Actor.allowedMethods())
