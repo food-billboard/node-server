@@ -805,6 +805,11 @@ const ActorSchema = new Schema({
   //   type: ObjectId,
   //   ref: 'movie'
   // }],
+  country: {
+    type: ObjectId,
+    ref: 'district',
+    required: true
+  },
   other: {
     another_name: {
       type: String,
@@ -838,6 +843,11 @@ const DirectorSchema = new Schema({
         return v.length < 100
       }
     }
+  },
+  country: {
+    type: ObjectId,
+    ref: 'district',
+    required: true
   },
   // works: [{
   //   type: ObjectId,

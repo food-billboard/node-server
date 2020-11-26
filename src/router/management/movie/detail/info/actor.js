@@ -15,6 +15,11 @@ const checkParams = (ctx, ...params) => {
     validator: [
       data => ObjectId.isValid(data)
     ]
+  }, {
+    name: 'country',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
   }, ...params)
 }
 
@@ -28,6 +33,11 @@ const sanitizersParams = (ctx, ...params) => {
     name: 'alias',
     sanitizers: [
       data => typeof data === 'string' && !!data.length ? data : undefined
+    ]
+  }, {
+    name: 'country',
+    sanitizers: [
+      data => ObjectId(data)
     ]
   }, ...params)
 }
@@ -57,14 +67,22 @@ router
     name: 1,
     createdAt: 1,
     updatedAt: 1,
-    source_type: 1
+    source_type: 1,
+    country: 1
+  })
+  .populate({
+    path: 'country',
+    select: {
+      name: 1,
+      _id: 1
+    }
   })
   .exec()
   .then(data => {
 
     return {
       data: data.map(item => {
-        const { name, other: { another_name, avatar }, createdAt, updatedAt, source_type, _id } = item
+        const { name, other: { another_name, avatar }, createdAt, country, updatedAt, source_type, _id } = item
         return {
           name,
           another_name,
@@ -72,7 +90,8 @@ router
           _id,
           createdAt,
           updatedAt,
-          source_type
+          source_type,
+          country
         }
       })
     }
@@ -91,7 +110,7 @@ router
   const check = checkParams(ctx)
   if(check) return
 
-  const [avatar, alias] = sanitizersParams(ctx)
+  const [avatar, alias, country] = sanitizersParams(ctx)
   const { request: { body: { name } } } = ctx
 
   const [, token] = verifyTokenToData(ctx)
@@ -115,6 +134,7 @@ router
         another_name: alias || '',
         avatar
       },
+      country,
       source_type: roles.some(role => ROLES_MAP[role] === ROLES_MAP.SUPER_ADMIN) ? MOVIE_SOURCE_TYPE.ORIGIN : MOVIE_SOURCE_TYPE.USER,
       source: _id
     })
@@ -143,7 +163,7 @@ router
   const check = checkParams(ctx)
   if(check) return
 
-  const [ avatar, alias, _id ] = sanitizersParams(ctx, {
+  const [ avatar, alias, country, _id ] = sanitizersParams(ctx, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
@@ -156,6 +176,7 @@ router
   }, {
     $set: {
       name,
+      country,
       "other.avatar": avatar,
       ...(alias ? { "other.another_name": alias } : {})
     }

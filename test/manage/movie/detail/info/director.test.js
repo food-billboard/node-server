@@ -1,7 +1,7 @@
 require('module-alias/register')
-const { UserModel, DirectorModel, ImageModel } = require('@src/utils')
+const { UserModel, DirectorModel, ImageModel, DistrictModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateDirector, mockCreateImage } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateDirector, mockCreateImage, mockCreateDistrict } = require('@test/utils')
 
 const COMMON_API = '/api/manage/movie/detail/info/director'
 
@@ -11,7 +11,7 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.a('array')
 
   target.forEach(item => {
-    expect(item).to.be.a('object').that.includes.all.keys('_id', 'another_name', 'name', 'createdAt', 'updatedAt', 'avatar', 'source_type')
+    expect(item).to.be.a('object').that.includes.all.keys('_id', 'another_name', 'name', 'createdAt', 'updatedAt', 'avatar', 'source_type', 'country')
     commonValidate.objectId(item._id)
     commonValidate.string(item.another_name)
     commonValidate.string(item.name)
@@ -19,6 +19,9 @@ function responseExpect(res, validate=[]) {
     commonValidate.string(item.source_type)
     commonValidate.date(item.createdAt)
     commonValidate.date(item.updatedAt)
+    expect(item.country).to.be.a('object').and.that.include.all.keys('_id', 'name')
+    commonValidate.string(item.country.name)
+    commonValidate.objectId(item.country._id)
   })
 
   if(Array.isArray(validate)) {
@@ -37,16 +40,24 @@ describe(`${COMMON_API} test`, () => {
   let selfToken
   let imageId
   let directorId
+  let districtId
 
   before(function(done) {
 
     const { model } = mockCreateImage({
       src: COMMON_API
     })
+    const { model: district } = mockCreateImage({
+      name: COMMON_API
+    })
 
-    model.save()
-    .then(data => {
-      imageId = data._id
+    Promise.all([
+      model.save(),
+      district.save()
+    ])
+    .then(([image, district]) => {
+      imageId = image._id
+      districtId = district._id
 
       const { model: user, token } = mockCreateUser({
         username: COMMON_API,
@@ -73,6 +84,7 @@ describe(`${COMMON_API} test`, () => {
         other: {
           avatar: imageId
         },
+        country: districtId,
         source: userInfo._id
       })
 
@@ -99,6 +111,9 @@ describe(`${COMMON_API} test`, () => {
       }),
       DirectorModel.deleteMany({
         source: { $in: [ userInfo._id, anotherUserId ] }
+      }),
+      DistrictModel.deleteMany({
+        name: COMMON_API
       })
     ])
     .then(_ => {
@@ -208,7 +223,8 @@ describe(`${COMMON_API} test`, () => {
       .send({
         name,
         alias: name,
-        avatar: imageId.toString()
+        avatar: imageId.toString(),
+        country: districtId.toString()
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -256,7 +272,8 @@ describe(`${COMMON_API} test`, () => {
         _id: directorId.toString(),
         name,
         alias: name,
-        avatar: imageId.toString()
+        avatar: imageId.toString(),
+        country: districtId.toString()
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -277,7 +294,8 @@ describe(`${COMMON_API} test`, () => {
 
       const { model } = mockCreateDirector({
         name: COMMON_API.slice(22),
-        source: anotherUserId
+        source: anotherUserId,
+        country: districtId
       })
 
       Promise.all([
@@ -372,7 +390,8 @@ describe(`${COMMON_API} test`, () => {
       .send({
         name: name.repeat(5),
         alias: name,
-        avatar: imageId.toString()
+        avatar: imageId.toString(),
+        country: districtId.toString()
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -393,7 +412,8 @@ describe(`${COMMON_API} test`, () => {
       })
       .send({
         alias: name,
-        avatar: imageId.toString()
+        avatar: imageId.toString(),
+        country: districtId.toString()
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -415,7 +435,8 @@ describe(`${COMMON_API} test`, () => {
       .send({
         name: name,
         alias: name,
-        avatar: imageId.toString().slice(1)
+        avatar: imageId.toString().slice(1),
+        country: districtId.toString()
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -437,6 +458,52 @@ describe(`${COMMON_API} test`, () => {
       .send({
         name: name,
         alias: name,
+        country: districtId.toString()
+      })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
+        if(err) return done(err)
+        done()
+      })
+
+    })
+
+    it(`post new director fail because lack of the country`, function(done) {
+
+      Request
+      .post(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        name: name,
+        alias: name,
+        avatar: imageId.toString(),
+      })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
+        if(err) return done(err)
+        done()
+      })
+
+    })
+
+    it(`post new director fail because the country is not verify`, function(done) {
+
+      Request
+      .post(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        name: name,
+        alias: name,
+        avatar: imageId.toString(),
+        country: districtId.toString().slice(1)
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -470,7 +537,8 @@ describe(`${COMMON_API} test`, () => {
       .send({
         name: name,
         alias: name,
-        avatar: imageId.toString()
+        avatar: imageId.toString(),
+        country: districtId.toString()
       })
       .expect(403)
       .expect('Content-Type', /json/)
@@ -507,7 +575,8 @@ describe(`${COMMON_API} test`, () => {
         _id: directorId.toString(),
         name: name.repeat(5),
         alias: name,
-        avatar: imageId.toString()
+        avatar: imageId.toString(),
+        country: districtId.toString()
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -529,7 +598,8 @@ describe(`${COMMON_API} test`, () => {
       .send({
         _id: directorId.toString(),
         alias: name,
-        avatar: imageId.toString()
+        avatar: imageId.toString(),
+        country: districtId.toString()
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -553,6 +623,7 @@ describe(`${COMMON_API} test`, () => {
         alias: name,
         avatar: imageId.toString().slice(1),
         _id: directorId.toString(),
+        country: districtId.toString()
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -575,6 +646,7 @@ describe(`${COMMON_API} test`, () => {
         _id: directorId.toString(),
         name: name,
         alias: name,
+        country: districtId.toString()
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -598,6 +670,7 @@ describe(`${COMMON_API} test`, () => {
         alias: name,
         avatar: imageId.toString(),
         _id: directorId.toString().slice(1),
+        country: districtId.toString()
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -619,7 +692,8 @@ describe(`${COMMON_API} test`, () => {
       .send({
         name: name,
         alias: name,
-        avatar: imageId.toString()
+        avatar: imageId.toString(),
+        country: districtId.toString()
       })
       .expect(404)
       .expect('Content-Type', /json/)
@@ -654,7 +728,8 @@ describe(`${COMMON_API} test`, () => {
         _id: directorId.toString(),
         name: name,
         alias: name,
-        avatar: imageId.toString()
+        avatar: imageId.toString(),
+        country: districtId.toString()
       })
       .expect(403)
       .expect('Content-Type', /json/)
@@ -673,6 +748,53 @@ describe(`${COMMON_API} test`, () => {
 
     })
 
+    it(`put the director fail because lack of the count`, function(done) {
+
+      Request
+      .put(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        _id: directorId.toString(),
+        name,
+        alias: name,
+        avatar: imageId.toString(),
+      })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
+        if(err) return done(err)
+        done()
+      })
+
+    })
+
+    it(`put the director fail because the country is not verify`, function(done) {
+
+      Request
+      .put(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        _id: directorId.toString(),
+        name,
+        alias: name,
+        avatar: imageId.toString(),
+        country: districtId.toString().slice(1)
+      })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
+        if(err) return done(err)
+        done()
+      })
+
+    })
+
   })
 
   describe(`delete the director fail test -> ${COMMON_API}`, function() {
@@ -682,7 +804,8 @@ describe(`${COMMON_API} test`, () => {
     before(function(done) {
       const { model } = mockCreateDirector({
         name: COMMON_API,
-        source: anotherUserId
+        source: anotherUserId,
+        country: districtId
       })
 
       Promise.all([

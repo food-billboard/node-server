@@ -542,8 +542,6 @@ describe(`${COMMON_API} test`, function() {
 
       it(`delete the movie success`, function(done) {
 
-        console.log(statusId)
-
         Request
         .delete(COMMON_API)
         .query({

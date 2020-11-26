@@ -86,20 +86,11 @@ describe(`${COMMON_API} test`, function() {
         src: COMMON_API,
         poster: imageId
       })
-      const { model: director } = mockCreateDirector({
-        name: COMMON_API
-      })
       const { model: classify } = mockCreateClassify({
         name: COMMON_API
       })
       const { model: district } = mockCreateDistrict({
         name: COMMON_API
-      })
-      const { model: actor } = mockCreateActor({
-        name: COMMON_API,
-        other: {
-          avatar: imageId
-        }
       })
       const { model: language } = mockCreateLanguage({
         name: COMMON_API
@@ -113,23 +104,42 @@ describe(`${COMMON_API} test`, function() {
 
       return Promise.all([
         video.save(),
-        director.save(),
         classify.save(),
         district.save(),
-        actor.save(),
         language.save(),
         user.save()
       ])
     })
-    .then(([video, director, classify, district, actor, language, user]) => {
+    .then(([video, classify, district, language, user]) => {
 
       classifyId = classify._id
       videoId = video._id
-      directorId = director._id
       districtId = district._id
       languageId = language._id
-      actorId = actor._id
       userId = user._id
+
+
+      const { model: actor } = mockCreateActor({
+        name: COMMON_API,
+        other: {
+          avatar: imageId
+        },
+        country: districtId
+      })
+      const { model: director } = mockCreateDirector({
+        name: COMMON_API,
+        country: districtId
+      })
+      return Promise.all([
+        actor.save(),
+        director.save(),
+      ])
+
+    })
+    .then(([actor, director]) => {
+
+      directorId = director._id
+      actorId = actor._id
 
       //模板参数
       baseData = {
