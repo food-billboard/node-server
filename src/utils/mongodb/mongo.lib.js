@@ -794,12 +794,22 @@ const ActorSchema = new Schema({
   name: {
     type: String,
     required: true,
-    index: true
+    index: true,
+    validator: {
+      validate: (v) => {
+        return v.length < 100
+      }
+    }
   },
   // works: [{
   //   type: ObjectId,
   //   ref: 'movie'
   // }],
+  country: {
+    type: ObjectId,
+    ref: 'district',
+    required: true
+  },
   other: {
     another_name: {
       type: String,
@@ -827,7 +837,17 @@ const DirectorSchema = new Schema({
   name: {
     type: String,
     required: true,
-    index: true
+    index: true,
+    validator: {
+      validate: (v) => {
+        return v.length < 100
+      }
+    }
+  },
+  country: {
+    type: ObjectId,
+    ref: 'district',
+    required: true
   },
   // works: [{
   //   type: ObjectId,
@@ -861,6 +881,11 @@ const DistrictSchema = new Schema({
     type: String,
     required: true,
     unique: true,
+    validator: {
+      validate: (v) => {
+        return v.length < 100
+      }
+    }
   },
   other: {},
   source_type: {
@@ -1001,6 +1026,11 @@ const ClassifySchema = new Schema({
     type: String,
     required: true,
     unique: true,
+    validator: {
+      validate: (v) => {
+        return v.length < 100
+      }
+    }
   },
   other: {},
   icon: {
@@ -1036,6 +1066,11 @@ const LanguageSchema = new Schema({
     type: String,
     required: true,
     unique: true,
+    validator: {
+      validate: (v) => {
+        return v.length < 100
+      }
+    }
   },
   other: {},
   source_type: {

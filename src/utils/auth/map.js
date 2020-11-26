@@ -33,6 +33,10 @@ const ROLES_DATABASE_MAP = [
         },
         {
           methods: [ 'get' ],
+          url: `${PREFIX_URL}manage\\/movie\\/edit$`
+        },
+        {
+          methods: [ 'get' ],
           url: `${PREFIX_URL}manage\\/movie\\/detail(\\/(comment|user))?`
         },
         {
@@ -81,6 +85,10 @@ const ROLES_DATABASE_MAP = [
         },
         {
           methods: [ 'get' ],
+          url: `${PREFIX_URL}manage\\/movie\\/edit$`
+        },
+        {
+          methods: [ 'get' ],
           url: `${PREFIX_URL}manage\\/movie\\/detail(\\/(comment|user))?`
         },
         {
@@ -126,6 +134,10 @@ const ROLES_DATABASE_MAP = [
         {
           methods: [ 'get', 'put' ],
           url: `${PREFIX_URL}manage\\/movie$`
+        },
+        {
+          methods: [ 'get' ],
+          url: `${PREFIX_URL}manage\\/movie\\/edit$`
         },
         {
           methods: [ 'get' ],

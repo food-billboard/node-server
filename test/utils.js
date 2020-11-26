@@ -194,7 +194,7 @@ function mockCreateLanguage(values={}) {
   let baseModel = {
     name: '测试语言名称'
   }
-  baseModel = mergeConfig(baseModel, values)
+  baseModel = mergeConfig(baseModel, values, true)
 
   const model = new LanguageModel(baseModel)
 
@@ -204,7 +204,7 @@ function mockCreateLanguage(values={}) {
 //创建地区
 function mockCreateDistrict(values={}) {
   let baseModel = {
-    name: '测试地区名称'
+    name: '测试地区名称',
   }
   baseModel = mergeConfig(baseModel, values, true)
 

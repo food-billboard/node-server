@@ -57,12 +57,6 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
 
   before(function(done) {
 
-    const { model: actor } = mockCreateActor({
-      name: COMMON_API
-    })
-    const { model: director } = mockCreateDirector({
-      name: COMMON_API
-    })
     const { model: language } = mockCreateLanguage({
       name: COMMON_API
     })
@@ -74,18 +68,34 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
     })
 
     Promise.all([
-      actor.save(),
-      director.save(),
       language.save(),
       district.save(),
       classify.save(),
     ])
-    .then(([actor, director, language, district, classify]) => {
-      actorId = actor._id
-      directorId = director._id
+    .then(([language, district, classify]) => {
+
       languageId = language._id
       districtId = district._id
       classifyId = classify._id
+
+      const { model: actor } = mockCreateActor({
+        name: COMMON_API,
+        country: districtId
+      })
+      const { model: director } = mockCreateDirector({
+        name: COMMON_API,
+        country: districtId
+      })
+
+      return Promise.all([
+        actor.save(),
+        director.save(),
+      ])
+
+    })
+    .then(([actor, director]) => {
+      actorId = actor._id
+      directorId = director._id
 
       const { model } = mockCreateMovie({
         name: COMMON_API,

@@ -96,20 +96,11 @@ describe(`${COMMON_API} test`, function() {
           src: COMMON_API,
           poster: imageId
         })
-        const { model: director } = mockCreateDirector({
-          name: COMMON_API
-        })
         const { model: classify } = mockCreateClassify({
           name: COMMON_API
         })
         const { model: district } = mockCreateDistrict({
           name: COMMON_API
-        })
-        const { model: actor } = mockCreateActor({
-          name: COMMON_API,
-          other: {
-            avatar: imageId
-          }
         })
         const { model: language } = mockCreateLanguage({
           name: COMMON_API
@@ -121,15 +112,35 @@ describe(`${COMMON_API} test`, function() {
         selfToken = token
         return Promise.all([
           video.save(),
-          director.save(),
           classify.save(),
           district.save(),
-          actor.save(),
           language.save(),
           user.save()
         ])
       })
-      .then(([video, director, classify, district, actor, language, user]) => {
+      .then(data => {
+
+        const [ ,,district ] = data
+
+        const { model: actor } = mockCreateActor({
+          name: COMMON_API,
+          other: {
+            avatar: imageId
+          },
+          country: district._id
+        })
+        const { model: director } = mockCreateDirector({
+          name: COMMON_API,
+          country: district._id
+        })
+
+        return Promise.all([
+          actor.save(),
+          director.save(),
+          ...data
+        ])
+      })
+      .then(([actor, director, video, classify, district, language, user]) => {
         userId = user._id
         const { model } = mockCreateMovie({
           video: video._id,

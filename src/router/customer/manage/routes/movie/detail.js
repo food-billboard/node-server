@@ -72,7 +72,6 @@ router
   .select({
     name: 1,
     info: 1,
-    rest: 1,
     video: 1,
     images: 1,
     poster: 1,
