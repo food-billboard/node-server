@@ -182,30 +182,6 @@ router
     if(!Array.isArray(total_count) || !Array.isArray(user_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
 
     return {
-      // {
-      //   data: {
-      //     total,
-      //     list: [
-      //       {
-      //         _id,
-      //         createdAt,
-      //         updatedAt,
-      //         username,
-      //         mobile,
-      //         email,
-      //         hot,
-      //         status,
-      //         roles,
-      //         fans_count,
-      //         attentions_count,
-      //         issue_count,
-      //         comment_count,
-      //         store_count,
-      //       }
-      //     ]
-      //   }
-      // }
-
       data: {
         total: !!total_count.length ? total_count[0].total || 0 : 0,
         list: user_data
@@ -225,7 +201,7 @@ router
 .use(async (ctx, next) => {
   const { request: { method } } = ctx
   const [ , token ] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
   const _method = method.toLowerCase()
 
   let _id
@@ -241,18 +217,11 @@ router
   const data = await UserModel.find(
     (_method === 'delete' || _method === 'put') ?
     {
-      $or: [
-        {
-          mobile: Number(mobile)
-        },
-        {
-          _id: ObjectId(_id)
-        }
-      ]
+      _id: { $in: [ ObjectId(_id), ObjectId(id) ] }
     }
     :
     {
-      mobile: Number(mobile)
+      _id: ObjectId(id)
     }
   )
   .select({
@@ -270,7 +239,7 @@ router
     //删除
     if(_method === 'delete') {
       if(data.length != 2) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-      const [ self ] = data.filter(item => item.mobile == mobile)
+      const [ self ] = data.filter(item => item._id.equals(id))
       const [ target ] = data.filter(item => item._id.equals(_id))
       const targetRole = findMostRole(target.roles)
       const selfRole = findMostRole(self.roles)
@@ -281,7 +250,7 @@ router
     //编辑
     else if(_method === 'put') {
       if(data.length != 2) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-      const [self] = data.filter(item => item.mobile == mobile)
+      const [self] = data.filter(item => item._id.equals(id))
       const [ target ] = data.filter(item => item._id.equals(_id))
       const selfRole = findMostRole(self.roles)
       const targetRole = findMostRole(target.roles)
@@ -328,7 +297,7 @@ router
   })
   const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'role' ]
   const { request: { body } } = ctx
-  const { mobile:newUserMobile, email } = body
+  const { mobile: newUserMobile, email } = body
 
   userModel = Object.keys(body).reduce((acc, cur) => {
     if(params.includes(cur)) {
@@ -342,15 +311,18 @@ router
   }, {})
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await UserModel.find({
     $or: [
       {
-        mobile: { $in: [ Number(mobile), Number(newUserMobile) ] }
+        mobile: Number(newUserMobile)
       },
       {
         email
+      },
+      {
+        _id: ObjectId(id)
       }
     ]
   })

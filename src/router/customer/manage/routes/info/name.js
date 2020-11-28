@@ -1,5 +1,6 @@
 const Router = require('@koa/router')
 const { verifyTokenToData, UserModel, dealErr, Params, responseDataDeal } = require('@src/utils')
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
@@ -15,11 +16,11 @@ router
   if(check) return
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
   const { body: { name } } = ctx.request
 
   const data = await UserModel.updateOne({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   }, {
     $set: { username: name }
   })

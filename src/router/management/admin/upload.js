@@ -1,5 +1,6 @@
 const Router = require('@koa/router')
 const { UserModel, notFound, dealErr, responseDataDeal, verifyTokenToData, Params, MovieModel } = require('@src/utils')
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
@@ -8,7 +9,7 @@ router
 .get('/', async(ctx) => {
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
@@ -24,81 +25,69 @@ router
     ]
   })
 
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1,
-  })
-  .exec()
-  .then(data => !!data && data._doc)
-  .then(notFound)
-  .then(data => {
-    const { _id } = data
-    return Promise.all([
-      MovieModel.aggregate([
-        {
-          $match: {
-            author: _id,
+  const data = await Promise.all([
+    MovieModel.aggregate([
+      {
+        $match: {
+          author: ObjectId(id),
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1
           }
-        },
-        {
-          $group: {
-            _id: null,
-            total: {
-              $sum: 1
+        }
+      }
+    ]),
+    MovieModel.aggregate([
+      {
+        $match: {
+          author: ObjectId(id),
+        }
+      },
+      {
+        $skip: currPage * pageSize
+      },
+      {
+        $limit: pageSize
+      },
+      {
+        $project: {
+          name: 1,
+          glance: 1,
+          hot: 1,
+          rate_person: 1,
+          total_rate: 1,
+          status: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          barrage_count: {
+            $size: {
+              $ifNull: [
+                "$barrage", []
+              ]
             }
-          }
+          },
+          tag_count: {
+            $size: {
+              $ifNull: [
+                "$tag", []
+              ]
+            }
+          },
+          comment_count: {
+            $size: {
+              $ifNull: [
+                "$comment", []
+              ]
+            }
+          },
         }
-      ]),
-      MovieModel.aggregate([
-        {
-          $match: {
-            author: _id,
-          }
-        },
-        {
-          $skip: currPage * pageSize
-        },
-        {
-          $limit: pageSize
-        },
-        {
-          $project: {
-            name: 1,
-            glance: 1,
-            hot: 1,
-            rate_person: 1,
-            total_rate: 1,
-            status: 1,
-            createdAt: 1,
-            updatedAt: 1,
-            barrage_count: {
-              $size: {
-                $ifNull: [
-                  "$barrage", []
-                ]
-              }
-            },
-            tag_count: {
-              $size: {
-                $ifNull: [
-                  "$tag", []
-                ]
-              }
-            },
-            comment_count: {
-              $size: {
-                $ifNull: [
-                  "$comment", []
-                ]
-              }
-            },
-          }
-        }
-      ])
-    ]) 
-  })
+      }
+    ])
+  ]) 
   .then(([ total_count, issue_data ]) => {
 
     if(!Array.isArray(total_count) || !Array.isArray(issue_data)) return Promise.reject({ errMsg: 'data error', status: 404 })

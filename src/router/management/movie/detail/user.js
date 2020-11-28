@@ -168,27 +168,6 @@ router
       }
     ])
   ])
-  // {
-  //   data: {
-  //     total,
-  //     list: [{
-          // _id
-  //       username,
-  //       mobile,
-  //       email,
-  //       hot,
-  //       status,
-  //       roles,
-  //       creaetdAt,
-  //       updatedAt,
-  //       glance_date,
-  //       movie_name,
-  //       issue_count,
-  //       fans_count,
-  //       attentions_count,
-  //     }]
-  //   }
-  // }
   .then(([total_count, user_data]) => {
     if(!Array.isArray(total_count) || !Array.isArray(user_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
 

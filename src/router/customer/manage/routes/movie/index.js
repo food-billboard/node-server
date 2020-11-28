@@ -419,7 +419,7 @@ router
 .post('/', async (ctx) => {
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile }  = token
+  let { id }  = token
 
   let templateInsertData
   const { body } = ctx.request
@@ -485,38 +485,46 @@ router
     author_description: author_description ? author_description : description,
   }
 
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._doc)
-  .then(data => {
-    if(!data) return Promise.reject({errMsg: '登录过期', status: 401}) 
-    const { _id } = data
-    templateInsertData = {
-      ...templateInsertData,
-      author: _id
-    }
-  })
-  // .then(aboutFind(templateInsertData))
+  // const data = await UserModel.findOne({
+  //   mobile: Number(mobile)
+  // })
+  // .select({
+  //   _id: 1
+  // })
+  // .exec()
+  // .then(data => !!data && data._doc)
   // .then(data => {
+  //   if(!data) return Promise.reject({errMsg: '登录过期', status: 401}) 
+  //   const { _id } = data
   //   templateInsertData = {
   //     ...templateInsertData,
-  //     ...data
+  //     author: _id
   //   }
   // })
+  // // .then(aboutFind(templateInsertData))
+  // // .then(data => {
+  // //   templateInsertData = {
+  // //     ...templateInsertData,
+  // //     ...data
+  // //   }
+  // // })
+
+  const data = await Promise.resolve()
   .then(_ => {
+    id = ObjectId(id)
+    templateInsertData = {
+      ...templateInsertData,
+      author: ObjectId(id)
+    }
     const movie = new MovieModel(templateInsertData)
-    return movie.save()
+
+    return  movie.save()
   })
   .then(data => {
     const { _id } = data
     if(_id) {
       return UserModel.updateOne({
-        mobile: Number(mobile),
+        _id: id,
       }, {
         $addToSet: { issue: { _id: data._id, timestampes: Date.now() } }
       })
@@ -552,7 +560,7 @@ router
     },
   } } = ctx.request
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const [ _id, images, video ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
@@ -575,7 +583,7 @@ router
   })
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile),
+    _id: ObjectId(id),
     "issue._id": { $in: [ _id ] }
   })
   .select({
@@ -702,7 +710,7 @@ router
 })
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
   const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     type: ['toInt'],
@@ -720,7 +728,7 @@ router
   })
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   })
   .select({
     issue: 1,

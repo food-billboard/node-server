@@ -63,7 +63,7 @@ describe(`${COMMON_API} test`, function() {
     const { model:behaviourB } = mockCreateBehaviour({
       user: ObjectId('8f63270f005f1c1a0d9448ca')
     })
-    const { model: userA, token } = mockCreateUser({
+    const { model: userA, signToken } = mockCreateUser({
       username: COMMON_API
     })
     const { model: userB } = mockCreateUser({
@@ -94,8 +94,6 @@ describe(`${COMMON_API} test`, function() {
       notice: COMMON_API
     })
 
-    selfToken = token
-
     Promise.all([
       behaviourA.save(),
       behaviourB.save(),
@@ -108,7 +106,8 @@ describe(`${COMMON_API} test`, function() {
       globalA.save(),
       globalB.save(),
     ])
-    .then(_ => {
+    .then(([,,userInfo]) => {
+      selfToken = signToken(userInfo._id)
       done()
     })
     .catch(err => {

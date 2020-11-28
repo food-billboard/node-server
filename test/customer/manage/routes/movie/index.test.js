@@ -95,12 +95,11 @@ describe(`${COMMON_API} test`, function() {
       const { model: language } = mockCreateLanguage({
         name: COMMON_API
       })
-      const { model: user, token, signToken:getToken } = mockCreateUser({
+      const { model: user, signToken:getToken } = mockCreateUser({
         username: COMMON_API
       })
 
       signToken = getToken
-      selfToken = token
 
       return Promise.all([
         video.save(),
@@ -245,7 +244,7 @@ describe(`${COMMON_API} test`, function() {
       describe(`pre check the uploading movie fail because missing some params -> ${COMMON_API}`, function() {
 
         beforeEach(function(done) {
-          selfToken = signToken()
+          selfToken = signToken(userId)
           done()
         })
         
@@ -562,7 +561,7 @@ describe(`${COMMON_API} test`, function() {
       describe(`pre check uploading movie fail because the params is unverify -> ${COMMON_API}`, function() {
 
         beforeEach(function(done) {
-          selfToken = signToken()
+          selfToken = signToken(userId)
           done()
         })
 
@@ -1092,7 +1091,7 @@ describe(`${COMMON_API} test`, function() {
     describe(`put the previous upload movie fail test -> ${COMMON_API}`, function() {
 
       beforeEach(function(done) {
-        selfToken = signToken()
+        selfToken = signToken(userId)
         done()
       })
 
@@ -1198,7 +1197,7 @@ describe(`${COMMON_API} test`, function() {
 
       beforeEach(async function() {
 
-        selfToken = signToken()
+        selfToken = signToken(userId)
 
         updatedAt = await UserModel.findOne({
           _id: userId,   

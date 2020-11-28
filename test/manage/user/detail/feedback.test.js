@@ -48,7 +48,7 @@ describe(`${COMMON_API} test`, function() {
 
   before(function(done) {
 
-    const { model: user, token } = mockCreateUser({
+    const { model: user, signToken } = mockCreateUser({
       username: COMMON_API
     })
     const { model: other } = mockCreateUser({
@@ -59,8 +59,6 @@ describe(`${COMMON_API} test`, function() {
       src: COMMON_API
     })
 
-    selfToken = token
-
     Promise.all([
       user.save(),
       other.save(),
@@ -70,6 +68,8 @@ describe(`${COMMON_API} test`, function() {
       userInfo = user
       otherUserId = other._id
       imageId = image._id
+
+      selfToken = signToken(userInfo._id)
 
       const { model: one } = mockCreateFeedback({
         content: {

@@ -42,16 +42,16 @@ describe(`${COMMON_API} test`, function() {
     if(!fs.existsSync(path.resolve(STATIC_FILE_PATH, 'private/image'))) fs.mkdirSync(path.resolve(STATIC_FILE_PATH, 'private/image'))
     if(!fs.existsSync(path.resolve(STATIC_FILE_PATH, 'private/video'))) fs.mkdirSync(path.resolve(STATIC_FILE_PATH, 'private/video'))
 
-    const { model, token, signToken: getToken } = mockCreateUser({
+    const { model, signToken: getToken } = mockCreateUser({
       username: COMMON_API
     })
 
     signToken = getToken
-    selfToken = token
 
     model.save()
     .then(data => {
       userId = data._id
+      selfToken = signToken(userId)
       done()
     })
     .catch(err => {
@@ -99,7 +99,7 @@ describe(`${COMMON_API} test`, function() {
   })
 
   beforeEach(function(done) {
-    selfToken = signToken()
+    selfToken = signToken(userId)
     done()
   })
 

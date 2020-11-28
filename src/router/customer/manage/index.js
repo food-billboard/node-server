@@ -6,6 +6,7 @@ const Fans = require('./routes/fans')
 const Feedback = require('./routes/feedback')
 const Info = require('./routes/info')
 const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal } = require('@src/utils')
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
@@ -37,10 +38,10 @@ router
 //个人信息
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   })
   .select({
     username: 1,

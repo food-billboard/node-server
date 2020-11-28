@@ -8,8 +8,6 @@ const COMMON_API = '/api/manage/dashboard/search/keyword'
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
-  console.log(target)
-
   expect(target).to.be.a('object').and.that.include.all.keys('total', 'average', 'count_total_day', 'count_average_day', 'total_chart', 'average_chart', 'data')
   commonValidate.number(target.total)
   commonValidate.number(target.average)
@@ -54,7 +52,7 @@ describe(`${COMMON_API} test`, function() {
 
   before(function(done) {
 
-    const { model: user, token } = mockCreateUser({
+    const { model: user, signToken } = mockCreateUser({
       username: COMMON_API
     })
 
@@ -65,8 +63,6 @@ describe(`${COMMON_API} test`, function() {
       ]
     })
 
-    selfToken = token
-
     Promise.all([
       user.save(),
       search.save()
@@ -74,6 +70,7 @@ describe(`${COMMON_API} test`, function() {
     .then(([user, search]) => {
       userInfo = user
       searchId = search._id
+      selfToken = signToken(userInfo._id)
       done()
     })
     .catch(err => {

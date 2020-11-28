@@ -364,7 +364,7 @@ router
   if(_method === 'post') return await next()
 
   const [ , token ] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   let _id
   let movieData
@@ -392,21 +392,14 @@ router
     const { author } = data
 
     let query = {
-      $or: [
-        {
-          _id: author
-        },
-        {
-          mobile: Number(mobile)
-        }
-      ]
+      _id: { $in: [ author, ObjectId(id) ] }
     }
 
     return UserModel.find(query)
     .select({
       _id: 1,
       roles: 1,
-      mobile
+      mobile: 1
     })
     .exec()
   })
@@ -414,7 +407,7 @@ router
   .then(notFound)
   .then(data => {
     if(data.length == 1) {
-      if(data[0].mobile != mobile) return Promise.reject({ errMsg: 'not found', status: 404 })
+      if(!data[0]._id.equals(id)) return Promise.reject({ errMsg: 'not found', status: 404 })
     }else {
       let manageRoles
       let userRoles 
@@ -422,7 +415,7 @@ router
       //查找对应的用户
       data.forEach(item => {
         const { mobile: _mobile, _id, roles } = item
-        if(mobile == _mobile) {
+        if(_id.equals(id)) {
           manageRoles = roles
         }else if(_id.equals(author)) {
           userRoles = roles
@@ -482,10 +475,10 @@ router
 
   const { body: { name, alias, description } } = ctx.request
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   })
   .select({
     _id: 1,

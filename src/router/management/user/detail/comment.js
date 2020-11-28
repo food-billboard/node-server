@@ -205,7 +205,7 @@ router
 
   const [ , token ] = verifyTokenToData(ctx)
 
-  const { mobile } = token
+  const { id } = token
 
   let userMaxRole = 100
   let selfMaxRole = 100
@@ -224,14 +224,7 @@ router
     const { user_info } = data
     userMaxRole = user_info
     return UserModel.find({
-      $or: [
-        {
-          mobile: Number(mobile)
-        },
-        {
-          _id: user_info
-        }
-      ]
+      _id: { $in: [ user_info, ObjectId(id) ] }
     })
     .select({
       roles: 1

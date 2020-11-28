@@ -60,7 +60,6 @@ describe(`${COMMON_API} test`, function() {
       name: COMMON_API
     })
 
-    userToken = token
     getToken = signToken
 
     await Promise.all([
@@ -69,6 +68,7 @@ describe(`${COMMON_API} test`, function() {
     ])
     .then(([user, movie]) => {
       userId = user._id
+      userToken = getToken(userId)
       movieId = movie._id
       const { model } = mockCreateBarrage({
         ...values,
@@ -197,7 +197,7 @@ describe(`${COMMON_API} test`, function() {
 
       it(`fail the token verify because the token is not verify`, function(done) {
 
-        userToken = getToken()
+        userToken = getToken(userId)
 
         Request
         .get(COMMON_API)

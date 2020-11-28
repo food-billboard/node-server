@@ -31,14 +31,12 @@ describe(`${COMMON_API} test`, function() {
 
   before(async function() {
 
-    const { model, token } = mockCreateUser({
+    const { model, signToken } = mockCreateUser({
       username: COMMON_API
     })
     const { model: image } = mockCreateImage({
       src: COMMON_API
     })
-
-    selfToken = token
 
     await Promise.all([
       model.save(),
@@ -48,6 +46,7 @@ describe(`${COMMON_API} test`, function() {
       userId = data._id
       imageId = image._id
       result = data
+      selfToken = signToken(userId)
     })
     .catch(err => {
       console.log('oops: ', err)

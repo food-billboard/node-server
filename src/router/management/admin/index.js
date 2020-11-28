@@ -10,10 +10,10 @@ router
 //信息
 .get('/', async(ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   })
   .select({
     username: 1,
@@ -29,7 +29,8 @@ router
     email: 1,
     roles: 1,
     createdAt: 1,
-    updatedAt: 1
+    updatedAt: 1,
+    mobile: 1
   })
   .exec()
   .then(data => !!data && data._doc)
@@ -44,8 +45,6 @@ router
         issue: issue.length,
         comment: comment.length,
         store: store.length,
-        mobile,
-
       }
     }
   })
@@ -84,7 +83,7 @@ router
   if(check) return
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
   const { request: { body: { username, description, avatar } } } = ctx
 
   let updateField = {}
@@ -95,7 +94,7 @@ router
   console.log(updateField)
 
   const data = await UserModel.findOneAndUpdate({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   }, {
     $set: updateField
   })

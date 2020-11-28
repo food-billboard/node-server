@@ -42,6 +42,7 @@ describe(`${COMMON_API} test`, function() {
   let selfToken
   let userInfo
   let movieId
+  let getToken
 
   before(function(done) {
 
@@ -53,7 +54,7 @@ describe(`${COMMON_API} test`, function() {
     .then(data => {
       movieId = data._id
 
-      const { model, token } = mockCreateUser({
+      const { model, signToken } = mockCreateUser({
         username: COMMON_API,
         rate: [
           {
@@ -64,12 +65,13 @@ describe(`${COMMON_API} test`, function() {
         ]
       })
       
-      selfToken = token
+      getToken = signToken
 
       return model.save()
     })
     .then(function(data) {
       userInfo = data
+      selfToken = getToken(userInfo._id)
       done()
     })
     .catch(err => {

@@ -24,16 +24,16 @@ describe(`${COMMON_API} test`, function() {
   
   before(async function() {
 
-    const { model, token, signToken:getToken } = mockCreateUser({
+    const { model, signToken:getToken } = mockCreateUser({
       username: COMMON_API,
     })
     
-    selfToken = token
     signToken = getToken
 
     await model.save()
     .then(data => {
       userId = data._id
+      selfToken = signToken(userId)
     })
     .then(_ => {
       littleFile = fs.readFileSync(mediaPath, { encoding: 'base64' })
@@ -84,7 +84,7 @@ describe(`${COMMON_API} test`, function() {
   })
 
   beforeEach(function() {
-    selfToken = signToken()
+    selfToken = signToken(userId)
   })
 
   describe(`pre check the token test -> ${COMMON_API}`, function() {

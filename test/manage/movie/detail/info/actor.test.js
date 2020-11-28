@@ -41,6 +41,7 @@ describe(`${COMMON_API} test`, () => {
   let imageId
   let districtId
   let actorId
+  let getToken
 
   before(function(done) {
 
@@ -59,7 +60,7 @@ describe(`${COMMON_API} test`, () => {
       imageId = image._id
       districtId = district._id
 
-      const { model: user, token } = mockCreateUser({
+      const { model: user, signToken } = mockCreateUser({
         username: COMMON_API,
         avatar: imageId
       })
@@ -68,7 +69,7 @@ describe(`${COMMON_API} test`, () => {
         username: COMMON_API,
       })
 
-      selfToken = token
+      getToken = signToken
 
       return Promise.all([
         user.save(),
@@ -79,6 +80,7 @@ describe(`${COMMON_API} test`, () => {
     .then(([user, other]) => {
       userInfo = user
       anotherUserId = other._id
+      selfToken = getToken(userInfo._id)
       const { model } = mockCreateActor({
         name: COMMON_API,
         other: {

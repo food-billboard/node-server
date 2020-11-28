@@ -38,7 +38,7 @@ router
   })
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const { pathname } = Url.parse(url)
   const mediaType = pathname.replace(/(\/.+)+\/(?=.+)/, '')
@@ -50,7 +50,7 @@ router
   .then(_ => {
     return Promise.all([
       UserModel.findOne({
-        mobile: Number(mobile)
+        _id: ObjectId(id)
       })
       .select({
         roles: 1

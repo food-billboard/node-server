@@ -129,24 +129,6 @@ router
     if(!Array.isArray(total_count) || !Array.isArray(feedback_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
 
     return {
-      // {
-      //   data: {
-      //     total,
-      //     list: [{
-      //       _id,
-      //       user_info: {
-      //         _id,
-      //         username
-      //       },
-      //       status,
-      //       content: {
-      //         text,
-      //         image,
-      //         video
-      //       }
-      //     }]
-      //   }
-      // }
       data: {
         total: !!total_count.length ? total_count[0].total || 0 : 0,
         list: feedback_data
@@ -188,31 +170,19 @@ router
   const { request: { body: { description } } } = ctx
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
   
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._doc)
-  .then(notFound)
-  .then(({ _id:user }) => {
-    return FeedbackModel.updateOne({
-      _id
-    }, {
-      $push: {
-        history: { user, timestamps: new Date(), description }
-      },
-      $set: {
-        status
-      }
-    })
+  const data = await FeedbackModel.updateOne({
+    _id
+  }, {
+    $push: {
+      history: { user: ObjectId(id), timestamps: new Date(), description }
+    },
+    $set: {
+      status
+    }
   })
   .then(data => {
-    console.log(data)
     if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
     return {
       data: null
@@ -239,7 +209,7 @@ router
 
   const [ , token ] = verifyTokenToData(ctx)
 
-  const { mobile } = token
+  const { id } = token
 
   let userMaxRole = 100
   let selfMaxRole = 100
@@ -258,14 +228,7 @@ router
     const { user_info } = data
     userMaxRole = user_info
     return UserModel.find({
-      $or: [
-        {
-          mobile: Number(mobile)
-        },
-        {
-          _id: user_info
-        }
-      ]
+      _id: { $in: [ user_info, ObjectId(id) ] }
     })
     .select({
       roles: 1

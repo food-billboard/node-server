@@ -42,10 +42,10 @@ router
   })
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   })
   .select({
     attentions: 1,
@@ -97,11 +97,11 @@ router
     ]
   })
 
-  const { mobile } = token
-  let mineId
+  let { id } = token
+  id = ObjectId(id)
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile),
+    _id: id,
     "attentions._id": { $nin: [ _id ] }
   })
   .select({
@@ -111,7 +111,6 @@ router
   .then(data => !!data && data._doc._id)
   .then(notFound)
   .then(id => {
-    mineId = id
     return UserModel.findOne({
       _id,
       "fans._id": { $nin: [ id ] }
@@ -126,16 +125,16 @@ router
   .then(_ => {
     return Promise.all([
       UserModel.updateOne({
-        mobile: Number(mobile),
+        _id: id,
         "attentions._id": { $nin: [ _id ] }
       }, {
         $push: { attentions: { _id, timestamps: Date.now() } }
       }),
       UserModel.updateOne({
-        _id: _id,
-        "fans._id": { $nin: [ mineId ] }
+        _id,
+        "fans._id": { $nin: [ id ] }
       }, {
-        $push: { fans: { _id: mineId, timestamps: Date.now() } }
+        $push: { fans: { _id: id, timestamps: Date.now() } }
       }),
     ])
   })
@@ -157,22 +156,19 @@ router
   })
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
-
-  let mineId
+  const { id } = token
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile),
-    "attentions._id": { $in: [_id] }
+    _id: ObjectId(id),
+    "attentions._id": { $in: [ _id ] }
   })
   .select({
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._id)
+  .then(data => !!data && data._doc._id)
   .then(notFound)
   .then(id => {
-    mineId = id
     return UserModel.findOne({
       _id,
       "fans._id": { $in: [ id ] }
@@ -187,14 +183,14 @@ router
   .then((userId) => {
     return Promise.all([
       UserModel.updateOne({
-        mobile: Number(mobile)
+        _id: ObjectId(id)
       }, {
         $pull: { attentions: { _id: userId } }
       }),
       UserModel.updateOne({
         _id: userId
       }, {
-        $pull: { fans: { _id: mineId } }
+        $pull: { fans: { _id: ObjectId(id) } }
       }),
     ])
   })

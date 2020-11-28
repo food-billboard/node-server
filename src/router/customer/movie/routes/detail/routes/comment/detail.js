@@ -13,7 +13,7 @@ router
   if(check) return
 
   const [ , token ] = verifyTokenToData(ctx)
-  const { mobile } = token
+  let { id } = token
   const [ currPage, pageSize, commentId ] = Params.sanitizers(ctx.query, {
 		name: 'currPage',
 		_default: 0,
@@ -36,43 +36,29 @@ router
 			}
 		]
   })
-  
-  let mineId
 
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
+  const data = await CommentModel.findOne({
+    _id: commentId
   })
   .select({
-    _id: 1
+    source: 0,
+  })
+  .populate({
+    path: 'sub_comments',
+    select: {
+      sub_comments: 0,
+      source: 0,
+    },
+    options: {
+      ...(pageSize >= 0 ? { limit: pageSize } : {}),
+      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
+    },
   })
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { _id:userId } = data
-    mineId = userId
-    return CommentModel.findOne({
-      _id: commentId
-    })
-    .select({
-      source: 0,
-    })
-    .populate({
-      path: 'sub_comments',
-      select: {
-        sub_comments: 0,
-        source: 0,
-      },
-      options: {
-        ...(pageSize >= 0 ? { limit: pageSize } : {}),
-        ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
-      },
-    })
-    .exec()
-  })
-  .then(data => !!data && data._doc)
-  .then(notFound)
-  .then(data => {
+    id = ObjectId(id)
     const { sub_comments, like_person, comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextUserInfo } }, ...nextComment } = data
     return {
       data: {
@@ -96,7 +82,7 @@ router
               ...nextInfo,
               avatar: avatar ? avatar.src : null
             },
-            like: like_person.some(person => person.equals(mineId))
+            like: like_person.some(person => person.equals(id))
           }
         })],
         comment: {
@@ -111,7 +97,7 @@ router
             avatar: avatar ? avatar.src : null
           },
           comment_users: comment_users.length,
-          like: like_person.some(person => person.equals(mineId))
+          like: like_person.some(person => person.equals(id))
         }
       }
     }

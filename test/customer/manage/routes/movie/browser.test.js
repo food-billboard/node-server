@@ -46,6 +46,7 @@ describe(`${COMMON_API} test`, function() {
     let selfToken
     let userId
     let result
+    let getToken
 
     before(async function() {
       const { model } = mockCreateClassify({
@@ -65,18 +66,18 @@ describe(`${COMMON_API} test`, function() {
         return model.save()
       })
       .then(function(data) {
-        const { model, token } = mockCreateUser({
+        const { model, signToken } = mockCreateUser({
           username: COMMON_API,
           glance: [ { _id: data._id  }],
           store: [ { _id: data._id } ]
         })
-        selfToken = token
-
+        getToken = signToken
         return model.save()
       })
       .then(function(data) {
         result = data
         userId = result._id
+        selfToken = getToken(userId)
       })
       .catch(err => {
         console.log('oops: ', err)

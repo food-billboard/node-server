@@ -20,10 +20,10 @@ router
   })
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = UserModel.findOne({
-    mobile: Number(mobile),
+    _id: ObjectId(id),
     "issue._id": { $in: [ _id ] }
   })
   .select({

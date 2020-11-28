@@ -114,10 +114,10 @@ router
   const { request: { body: { name } } } = ctx
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   })
   .select({
     _id: 1,

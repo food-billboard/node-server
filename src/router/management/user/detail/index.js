@@ -106,24 +106,6 @@ router
   ])
   .then(data => !!data && data.length == 1 && data[0])
   .then(notFound)
-  // data: {
-  //   _id,
-  //   createdAt,
-  //   updatedAt,
-  //   mobile,
-  //   email,
-  //   username,
-  //   description,
-  //   avatar,
-  //   hot,
-  //   status,
-  //   roles,
-  //   fans_count,
-  //   attentions_count,
-  //   issue_count,
-  //   comment_count,
-  //   store_count,
-  // }
   .then(data => ({
     data
   }))

@@ -176,54 +176,40 @@ router
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  let { id } = token
 
-  let mineId
-
-  let data = await UserModel.findOne({
-    mobile: Number(mobile)
+  let data = await MovieModel.findOne({
+    _id
   })
   .select({
-    _id: 1
+    comment: 1,
+    updatedAt: 1,
+    _id: 0
+  })
+  .populate({
+    path: 'comment',
+    select: {
+      sub_comments: 0,
+      source: 0,
+    },
+    options: {
+      ...(pageSize >= 0 ? { limit: pageSize } : {}),
+      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
+    },
+    populate: {
+      path: 'comment_users',
+      select: {
+        avatar: 1,
+        username: 1
+      }
+    },
   })
   .exec()
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { _id:user } = data
-    mineId = user
-    return MovieModel.findOne({
-      _id
-    })
-    .select({
-      comment: 1,
-      updatedAt: 1,
-      _id: 0
-    })
-    .populate({
-      path: 'comment',
-      select: {
-        sub_comments: 0,
-        source: 0,
-      },
-      options: {
-        ...(pageSize >= 0 ? { limit: pageSize } : {}),
-        ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
-      },
-      populate: {
-        path: 'comment_users',
-        select: {
-          avatar: 1,
-          username: 1
-        }
-      },
-    })
-    .exec()
-  })
-  .then(data => !!data && data._doc)
-  .then(notFound)
-  .then(data => {
     const { comment } = data
+    id = ObjectId(id)
     return {
       data: {
         ...data,
@@ -231,7 +217,7 @@ router
           const { _doc: { comment_users, like_person, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextC } } = c
           return {
             ...nextC,
-            like: like_person.some(person => person.equals(mineId)),
+            like: like_person.some(person => person.equals(id)),
             comment_users: comment_users.map(com => {
               const { _doc: { avatar, ...nextCom } } = com
               return {
@@ -284,34 +270,23 @@ router
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
-  const data = await Promise.all([
-    UserModel.findOne({
-      mobile: Number(mobile)
-    })
-    .select({
-      _id: 1
-    })
-    .exec()
-    .then(data => !!data && data._id)
-    .then(notFound),
-    MovieModel.findOne({
-      _id
-    })
-    .select({
-      _id: 1
-    })
-    .exec()
-    .then(data => !!data && data._id)
-    .then(notFound),
-  ])
-  .then(([userId, _]) => {
+  const data = await MovieModel.findOne({
+    _id
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data._id)
+  .then(notFound)
+  .then(_ => {
     const comment = new CommentModel({
       ...TEMPLATE_COMMENT,
       source_type: 'movie',
       source: _id,
-      user_info: userId,
+      user_info: ObjectId(id),
       content: {
         text,
         video,
@@ -332,7 +307,7 @@ router
           $push: { comment: commentId }
         }),
         UserModel.updateOne({
-          mobile: Number(mobile)
+          _id: ObjectId(id)
         }, {
           $push: { comment: commentId }
         })
@@ -372,34 +347,23 @@ router
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  let { id } = token
 
-  const data = await Promise.all([
-    UserModel.findOne({
-      mobile: Number(mobile)
-    })
-    .select({
-      _id: 1
-    })
-    .exec()
-    .then(data => !!data && data._id)
-    .then(notFound),
-    CommentModel.findOne({
-      _id
-    })
-    .select({
-      _id: 1
-    })
-    .exec()
-    .then(data => !!data && data._id)
-    .then(notFound),
-  ])
-  .then(([userId, _]) => {
+  const data = await CommentModel.findOne({
+    _id
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => !!data && data._id)
+  .then(notFound)
+  .then(_ => {
     const comment = new CommentModel({
       ...TEMPLATE_COMMENT,
       source_type: "comment",
       source: _id,
-      user_info: userId,
+      user_info: ObjectId(id),
       content: {
         text,
         video,
@@ -407,30 +371,24 @@ router
       }
     })
 
-    return {
-      comment,
-      userId
-    }
-  })
-  .then(({ comment, userId }) => {
     return comment.save()
-    .then(data => {
-      const { _id: commentId } = data
-      return Promise.all([
-        CommentModel.updateOne({
-          _id
-        }, {
-          $push: { sub_comments: commentId },
-          $addToSet: { comment_users: [userId] }
-        }),
-        UserModel.updateOne({
-          mobile: Number(mobile),
-          _id
-        }, {
-          $push: { comment: commentId },
-        })
-      ])
-    })
+  })
+  .then(data => {
+    const { _id: commentId } = data
+    id = ObjectId(id)
+    return Promise.all([
+      CommentModel.updateOne({
+        _id
+      }, {
+        $push: { sub_comments: commentId },
+        $addToSet: { comment_users: [ id ] }
+      }),
+      UserModel.updateOne({
+        _id: id
+      }, {
+        $push: { comment: commentId },
+      })
+    ])
   })
   .then(_ => true)
   .catch(dealErr(ctx))

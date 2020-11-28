@@ -92,7 +92,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
     const { model:behaviour } = mockCreateBehaviour({
       user: ObjectId('8f63270f005f1c1a0d9448ca')
     })
-    const { model: user, token } = mockCreateUser({
+    const { model: user, token, signToken } = mockCreateUser({
       username: COMMON_API_USER
     })
     const { model:movie } = mockCreateMovie({
@@ -101,14 +101,13 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
       source_type: 'USER'
     })
 
-    selfToken = token
-
     Promise.all([
       behaviour.save(),
       user.save(),
       movie.save()
     ])
-    .then(data => {
+    .then(([, user]) => {
+      selfToken = signToken(user._id)
       done()
     })
     .catch(err => {

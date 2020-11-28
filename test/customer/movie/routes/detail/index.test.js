@@ -152,10 +152,10 @@ describe(`${COMMON_API} test`, function() {
       const { model: tag } = mockCreateTag({
         text: COMMON_API
       })
-      const { model: user, token, signToken: getToken } = mockCreateUser({
+      const { model: user, signToken: getToken } = mockCreateUser({
         username: COMMON_API
       })
-      selfToken = token
+
       signToken = getToken
 
       return Promise.all([
@@ -189,6 +189,7 @@ describe(`${COMMON_API} test`, function() {
     .then(([actor, director, video, classify, district, language, tag, user]) => {
       userId = user._id
       videoId = video._id
+      selfToken = signToken(userId)
       const { model } = mockCreateMovie({
         video: videoId,
         info: {
@@ -451,7 +452,7 @@ describe(`${COMMON_API} test`, function() {
     describe(`get the movie detail info with self info fail test -> ${COMMON_API}`, function() {
 
       beforeEach(function(done) {
-        selfToken = signToken()
+        selfToken = signToken(userId)
         done()
       })
 

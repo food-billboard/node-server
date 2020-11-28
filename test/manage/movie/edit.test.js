@@ -76,6 +76,7 @@ describe(`${COMMON_API} test`, function() {
   let languageId
   let actorId
   let movieId
+  let getToken
 
   before(async function() {
     const { model:image } = mockCreateImage({
@@ -98,11 +99,10 @@ describe(`${COMMON_API} test`, function() {
       const { model: language } = mockCreateLanguage({
         name: COMMON_API
       })
-      const { model: user, token } = mockCreateUser({
+      const { model: user, signToken } = mockCreateUser({
         username: COMMON_API
       })
-
-      selfToken = token
+      getToken = signToken
 
       return Promise.all([
         video.save(),
@@ -119,6 +119,7 @@ describe(`${COMMON_API} test`, function() {
       districtId = district._id
       languageId = language._id
       userId = user._id
+      selfToken = getToken(userId)
 
       const { model: actor } = mockCreateActor({
         name: COMMON_API,

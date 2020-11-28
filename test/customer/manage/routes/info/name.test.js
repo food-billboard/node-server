@@ -15,17 +15,16 @@ describe(`${COMMON_API} test`, function() {
 
     before(async function() {
 
-      const { model, token } = mockCreateUser({
+      const { model, signToken } = mockCreateUser({
         username: 'common',
         mobile: 15698775364
       })
-
-      selfToken = token
 
       await model.save()
       .then(data => {
         result = data
         userId = data._id
+        selfToken = signToken(userId)
       })
       .catch(err => {
         console.log('oops: ', err)

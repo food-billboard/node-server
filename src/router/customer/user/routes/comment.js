@@ -6,7 +6,7 @@ const router = new Router()
 
 router.get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
   const check = Params.query(ctx, {
     name: '_id',
     type: ['isMongoId']
@@ -34,8 +34,10 @@ router.get('/', async (ctx) => {
     ]
   })
 
+  console.log(_id, id, 22222222)
+
   const data = await UserModel.find({
-    $or: [ { mobile: Number(mobile) }, { _id } ]
+    _id: { $in: [ _id, ObjectId(id) ] }
   })
   .select({
     comment: 1,

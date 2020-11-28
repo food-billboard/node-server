@@ -42,16 +42,14 @@ describe(`${COMMON_API} test`, function() {
 
   before(function(done) {
 
-    const { model, token } = mockCreateUser({
+    const { model, signToken } = mockCreateUser({
       username: COMMON_API
     })
-
-    selfToken = token
 
     model.save()
     .then(data => {
       userInfo = data
-
+      selfToken = signToken(userInfo._id)
       const { model } = mockCreateMovie({
         name: COMMON_API,
         author: userInfo._id

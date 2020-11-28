@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { encoded, signToken, Params, UserModel, RoomModel, responseDataDeal, dealErr, dealRedis, EMAIL_REGEXP } = require('@src/utils')
+const { encoded, signToken, Params, UserModel, RoomModel, responseDataDeal, dealErr, dealRedis, EMAIL_REGEXP, setCookie, TOKEN_COOKIE } = require('@src/utils')
 const { email_type } = require('../map')
 
 const router = new Router()
@@ -86,7 +86,11 @@ router
   })
   .then(data => {
     const { avatar, _id, username, createdAt, updatedAt } = data
-    const token = signToken({mobile, password})
+    const token = signToken({ mobile, id: _id })
+    //设置cookie
+    //临时设置，需要修改
+    setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set' })
+    
     return {
       avatar: avatar || null,
       username,

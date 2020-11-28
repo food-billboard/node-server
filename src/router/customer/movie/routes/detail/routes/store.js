@@ -39,7 +39,7 @@ router
   })
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await MovieModel.findOne({
     _id
@@ -52,7 +52,7 @@ router
   .then(notFound)
   .then(_id => {
     return UserModel.updateOne({
-      mobile: Number(mobile),
+      _id: ObjectId(id),
       "store._id": { $ne: _id }
     }, {
       $push: { store: { _id, timestamps: Date.now() } }
@@ -84,7 +84,7 @@ router
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await MovieModel.findOne({
     _id
@@ -97,7 +97,7 @@ router
   .then(notFound)
   .then(_id => {
     return UserModel.updateOne({
-      mobile: Number(mobile),
+      _id: ObjectId(id),
       "store._id": { $in: [_id] }
     }, {
       $pull: { store: { _id } }
