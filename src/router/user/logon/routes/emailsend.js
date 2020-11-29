@@ -24,15 +24,15 @@ router
 
   const code = uuid().slice(0, 6)
 
-  const send_mail_template = {
+  let send_mail_template = {
     ...TEMPLATE_MAIL,
-    text: `身份认证验证码为: ${code};`
+    html: `${TEMPLATE_MAIL.html}<p>身份认证验证码为: ${code};</p>`
   }
 
   const { request: { body: { email, type } } } = ctx
   const redisKey = `${email}-${type}`
 
-  const data = await UserModel.findOne({
+  const data = await type == 'forget' ? UserModel.findOne({
     email
   })
   .select({
@@ -40,7 +40,7 @@ router
   })
   .exec()
   .then(data => !!data && data._doc._id)
-  .then(notFound)
+  .then(notFound) : Promise.resolve()
   .then(_ => {
     //判断之前是否存在验证码
     return dealRedis(function(redis) {
@@ -57,6 +57,10 @@ router
   .then(_ => {
     //发送验证码
     return new Promise((resolve, reject) => {
+      send_mail_template = {
+        ...send_mail_template,
+        to: email,
+      }
       sendMail(send_mail_template, function(error, _) {
         if(error) {
           reject(error)

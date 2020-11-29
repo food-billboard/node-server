@@ -47,7 +47,7 @@ const getCookieName = (name) => {
 
 //cookie设置类型
 const SET_TYPE = {
-  delete: (ctx, key, data, options={}) => {
+  set: (ctx, key, data, options={}) => {
     ctx.cookies.set(key, data, {
       maxAge: 1000 * 60 * 60 * 24,
       domain: 'localhost',
@@ -57,7 +57,7 @@ const SET_TYPE = {
       ...options,
     })
   },
-  set: (ctx, key, data, options={}) => {
+  delete: (ctx, key, data, options={}) => {
     ctx.cookies.set(key, data, {
       ...options,
       maxAge: 0
@@ -93,7 +93,7 @@ const setCookie = async (ctx, { key, value, options, type }) => {
   // if(!needToEdit) return
   // const { action } = config
 
-  return SET_TYPE[type].action(ctx, getCookieName(key), value, options)
+  return SET_TYPE[type](ctx, getCookieName(key), value, options)
 }
 
 const getCookie = (ctx, key) => SET_TYPE.get(ctx, key)

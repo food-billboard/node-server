@@ -87,6 +87,9 @@ router
   .then(data => {
     const { avatar, _id, username, createdAt, updatedAt } = data
     const token = signToken({ mobile, id: _id })
+
+    //重置默认的koa状态码
+    ctx.status = 200
     //设置cookie
     //临时设置，需要修改
     setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set' })
