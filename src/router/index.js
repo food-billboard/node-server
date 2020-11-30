@@ -11,7 +11,7 @@ const router = new Router()
 router
 .use(async(ctx, next) => {
 
-  const { body: { _id:dataId } } = ctx.request
+  const { body: { _id:dataId }={} } = ctx.request
   const { _id:queryId } = ctx.query
   let valid = true
 

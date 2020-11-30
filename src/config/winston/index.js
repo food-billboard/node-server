@@ -353,7 +353,7 @@ const middleware4Uuid = async (ctx, next) => {
 
   if(token) {
     const { mobile } = token
-    uuid = mobile.toString()
+    id = mobile.toString()
   }
 
   ctx.request.__request_log_id__ = id

@@ -8,11 +8,12 @@ const Swiper = require('./routes/swiper')
 
 const router = new Router()
 
-router.use('/daily', Daily.routes(), Daily.allowedMethods())
-router.use('/hot', Hot.routes(), Hot.allowedMethods())
-router.use('/notice', Notice.routes(), Notice.allowedMethods())
-router.use('/rank', Rank.routes(), Rank.allowedMethods())
-router.use('/special', Special.routes(), Special.allowedMethods())
-router.use('/swiper', Swiper.routes(), Swiper.allowedMethods())
+router
+.use('/daily', Daily.routes(), Daily.allowedMethods())
+.use('/hot', Hot.routes(), Hot.allowedMethods())
+.use('/notice', Notice.routes(), Notice.allowedMethods())
+.use('/rank', Rank.routes(), Rank.allowedMethods())
+.use('/special', Special.routes(), Special.allowedMethods())
+.use('/swiper', Swiper.routes(), Swiper.allowedMethods())
 
 module.exports = router

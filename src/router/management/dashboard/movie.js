@@ -5,26 +5,6 @@ const Day = require('dayjs')
 
 const router = new Router()
 
-// "total",
-// "average": "人均搜索量",
-// "count_total_day": "日同比",
-// "count_average_day": "日同比",
-// total_chart: [{
-//   day,
-//   count
-// }]
-// average_chart: [{
-//   day,
-//   count
-// }]
-// data: [{
-//   _id,
-//   key_word: "关键字",
-//   count: 搜索数量,
-//   week_count: 周同比(较上周新增百分比),
-
-// }]
-
 router
 //热搜
 .get('/keyword', async(ctx) => {
