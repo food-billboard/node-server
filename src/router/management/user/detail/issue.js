@@ -22,13 +22,13 @@ router
     name: 'currPage',
     _default: 0,
     sanitizers: [
-      data => data >= 0 ? data : 0
+      data => data >= 0 ? +data : 0
     ]
   }, {
     name: 'pageSize',
     _default: 30,
     sanitizers: [
-      data => data >= 0 ? data : 30
+      data => data >= 0 ? +data : 30
     ]
   }, {
     name: '_id',

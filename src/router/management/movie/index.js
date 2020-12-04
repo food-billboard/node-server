@@ -158,13 +158,13 @@ router
     name: 'currPage',
     _default: 0,
     sanitizers: [
-      data => data >= 0 ? data : 0
+      data => data >= 0 ? +data : 0
     ]
   }, {
     name: 'pageSize',
     _default: 30,
     sanitizers: [
-      data => data >= 0 ? data : 30
+      data => data >= 0 ? +data : 30
     ]
   }, {
     name: 'classify',
@@ -231,6 +231,8 @@ router
       },
     }
   }
+
+  console.log(currPage, pageSize)
 
   const data = await Promise.all([
     //总数
@@ -313,34 +315,11 @@ router
       }
     ])
   ])
-  .then(([total_count, movie_data]) => {
+  .then(([total_count, movie_data=[]]) => {
 
     if(!Array.isArray(total_count) || !Array.isArray(movie_data)) return Promise.reject({ errMsg: 'data error', status: 404 })
 
     return {
-      // {
-      //   data: {
-      //     total,
-      //     list: [
-      //       {
-      //         _id
-      //         name
-      //         author
-      //         createdAt
-      //         updatedAt
-      //         glance
-      //         hot
-      //         rate_person
-      //         total_rate
-      //         source_type
-      //         stauts
-      //         comment_count,
-      //         tag_count,
-      //         barrage_count
-      //       }
-      //     ]
-      //   }
-      // }
       data: {
         total: total_count.length ? total_count[0].total || 0 : 0,
         list: movie_data
