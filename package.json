@@ -18,6 +18,7 @@
     "app-root-path": "^3.0.0",
     "dayjs": "^1.8.28",
     "elasticsearch": "^16.7.1",
+    "formidable": "^1.2.2",
     "ioredis": "^4.17.3",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.11.0",

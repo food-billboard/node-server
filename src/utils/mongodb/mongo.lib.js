@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
-const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS, COMMENT_SOURCE_TYPE } = require('../constant')
+const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS, COMMENT_SOURCE_TYPE, MEDIA_STATUS, MEDIA_AUTH } = require('../constant')
 
 function getMill(time) {
   return Day(time).valueOf()
@@ -1117,7 +1117,7 @@ const VideoSchema = new Schema({
   auth: {
     required: true,
     type: String,
-    enum: [ 'PUBLIC', 'PRIVATE' ],
+    enum: Object.keys(MEDIA_AUTH),
     uppercase: true,
     get: function(v) { return v ? v.toLowerCase() : v }
   },
@@ -1149,7 +1149,7 @@ const VideoSchema = new Schema({
     },
     status: {
       type: String,
-      enum: ['ERROR', 'COMPLETE', 'UPLOADING'],
+      enum: Object.keys(MEDIA_STATUS),
       uppercase: true,
       required: true,
       default: 'COMPLETE'
@@ -1182,7 +1182,7 @@ const ImageSchema = new Schema({
   auth: {
     required: true,
     type: String,
-    enum: [ 'PUBLIC', 'PRIVATE' ],
+    enum: Object.keys(MEDIA_AUTH),
     uppercase: true,
     get: function(v) { return v ? v.toLowerCase() : v }
   },
@@ -1212,7 +1212,7 @@ const ImageSchema = new Schema({
     },
     status: {
       type: String,
-      enum: ['ERROR', 'COMPLETE', 'UPLOADING'],
+      enum: Object.keys(MEDIA_STATUS),
       uppercase: true,
       required: true
     }
@@ -1244,7 +1244,7 @@ const OtherMediaSchema = new Schema({
   auth: {
     required: true,
     type: String,
-    enum: [ 'PUBLIC', 'PRIVATE' ],
+    enum: Object.keys(MEDIA_AUTH),
     uppercase: true,
     get: function(v) { return v ? v.toLowerCase() : v }
   },
@@ -1274,7 +1274,7 @@ const OtherMediaSchema = new Schema({
     },
     status: {
       type: String,
-      enum: ['ERROR', 'COMPLETE', 'UPLOADING'],
+      enum: Object.keys(MEDIA_STATUS),
       uppercase: true,
       required: true
     }

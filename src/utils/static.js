@@ -5,7 +5,6 @@ const { STATIC_FILE_PATH, MAX_FILE_SINGLE_RESPONSE_SIZE } = require('./constant'
 const fs = require('fs')
 const path = require('path')
 const Mime = require('mime')
-const Day = require('dayjs')
 
 const StaticMiddleware = async(ctx, next) => {
 

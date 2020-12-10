@@ -96,6 +96,17 @@ const COMMENT_SOURCE_TYPE = {
   comment: 'comment'
 }
 
+const MEDIA_STATUS = {
+  ERROR: 'ERROR', 
+  COMPLETE: 'COMPLETE', 
+  UPLOADING: 'UPLOADING'
+}
+
+const MEDIA_AUTH = {
+  PUBLIC: 'PUBLIC', 
+  PRIVATE: 'PRIVATE'
+}
+
 module.exports = {
   EMAIL_AUTH,
   EMAIL_REGEXP,
@@ -108,5 +119,7 @@ module.exports = {
   MOVIE_SOURCE_TYPE,
   ROLES_MAP,
   FEEDBACK_STATUS,
-  COMMENT_SOURCE_TYPE
+  COMMENT_SOURCE_TYPE,
+  MEDIA_STATUS,
+  MEDIA_AUTH
 }

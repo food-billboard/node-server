@@ -1,23 +1,13 @@
 const Router = require('@koa/router')
-const Url = require('url')
-const Validator = require('validator')
-const { Types: {  ObjectId } } = require('mongoose')
 const Chunk = require('./routes')
 const { 
   verifyTokenToData,
   responseDataDeal,
   dealErr,
   isType,
-  Params,
-  VideoModel,
-  ImageModel,
-  OtherMediaModel,
-  notFound,
-  MEDIA_STATUS
+  Params
 } = require('@src/utils')
 const { dealMedia, base64Size, base64Reg, randomName } = require('./util')
-
-const models = [ImageModel, VideoModel, OtherMediaModel]
 
 const router = new Router()
 
@@ -228,121 +218,5 @@ router
 
 })
 .use('/chunk', Chunk.routes(), Chunk.allowedMethods())
-//错误断点续传
-.head('/test', async(ctx) => {
-
-  const { request: { headers } } = ctx
-
-  //设置索引来帮助恢复上传
-  ctx.set('Upload-Offset', 0)
-  ctx.set('Tus-Resumable', headers['tus-resumable'])
-  ctx.set('Location', 'http://localhost:4000/api/swagger/test.html')
-
-  responseDataDeal({
-    ctx,
-    data: {},
-    needCache: false
-  })
-
-})
-//restore|load ?load=...
-.get('/', async(ctx) => {
-  const { request: { url } } = ctx
-  let data
-
-  const { query } = Url.parse(url)
-
-  if(!query) {
-    data = Promise.reject({
-      errMsg: 'bad request',
-      status: 400
-    })
-  }else {
-    data = Promise.resolve(query.split('&').slice(0, 1).reduce((acc, cur) => {
-      const [ key, value ] = cur.split('=').map(str => str.trim())
-      acc[key] = value
-      return acc
-    }, {}))
-  }
-
-  data = data
-  .then(query => {
-    const [ [ type, id ] ] = Object.entries(query)
-    if(!Validator.isMD5(id)) return Promise.reject({ status: 400, errMsg: 'bad request' })
-    
-    //文件查找
-    return Promise.allSettled(models.map(model => {
-      return model.findOne({
-        _id: ObjectId(id)
-      })
-      .select({
-        "info.status": 1,
-        "info.complete": 1,
-        "info.size": 1,
-        "info.chun_size": 1,
-        auth: 1,
-        white_list: 1,
-      })
-      .exec()
-      .then(data => !!data && data._doc)
-      .then(notFound)
-    }))
-    .then(results => ({ results, type }))
-    
-  })
-  .then(({
-    results,
-    type //load restore
-  }) => {
-
-    const index = results.findIndex(result => result.status === 'fulfilled')
-    if(!~index) return Promise.reject({ errMsg: 'not found', status: 404 })
-    const { info: { status } } = results[index]
-    if(status === MEDIA_STATUS.COMPLETE) {
-      return ''
-    }else {
-      return Promise.reject({ errMsg: '404', status: 404 })
-    }
-
-  })
-  .catch(dealErr(ctx))
-
-  responseDataDeal({
-    ctx,
-    data,
-    needCache: false
-  })
-
-})
-//文件检查 | 小文件上传
-.post('/', async(ctx) => {
-
-  const { request: { headers } } = ctx
-
-  //设置索引来帮助恢复上传
-  ctx.set('Upload-Offset', 0)
-  ctx.set('Tus-Resumable', headers['tus-resumable'])
-  ctx.set('Location', '/api/user/test')
-
-  responseDataDeal({
-    ctx,
-    data: {},
-    needCache: false
-  })
-
-})
-//删除--无用
-.delete('/', async(ctx) => {
-  responseDataDeal({
-    ctx,
-    data: {},
-    needCache: false
-  })
-})
-//分片上传
-.patch('/', async(ctx) => {
-  
-
-})
 
 module.exports = router
