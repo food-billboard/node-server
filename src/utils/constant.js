@@ -107,6 +107,11 @@ const MEDIA_AUTH = {
   PRIVATE: 'PRIVATE'
 }
 
+const MEDIA_ORIGIN_TYPE = {
+  USER: 'USER',
+  SYSTEM: 'SYSTEM'
+}
+
 module.exports = {
   EMAIL_AUTH,
   EMAIL_REGEXP,
@@ -121,5 +126,6 @@ module.exports = {
   FEEDBACK_STATUS,
   COMMENT_SOURCE_TYPE,
   MEDIA_STATUS,
-  MEDIA_AUTH
+  MEDIA_AUTH,
+  MEDIA_ORIGIN_TYPE
 }

@@ -139,7 +139,7 @@ router
     let chunkList = []
     let chunkIndexList = []
     try {
-      chunkList = getChunkFileList(path.resolve(STATIC_FILE_PATH, 'template', md5))
+      chunkList = await getChunkFileList(path.resolve(STATIC_FILE_PATH, 'template', md5))
       chunkIndexList = chunkList.map(chunk => Number(chunk.split('-')[1]))
     }catch(err) {}
 
@@ -331,7 +331,7 @@ router
   ])
   .then(data => !!data && data.some(item => !!item) && data)
   .then(notFound)
-  .then(data => {
+  .then(async (data) => {
     const index = data.findIndex(val => !!val)
 
     //合并文件
@@ -354,7 +354,7 @@ router
           break
       }
 
-      const [err, ] = mergeChunkFile({ name: md5, extname: type, mime: mime.toLowerCase(), auth })
+      const [err, ] = await mergeChunkFile({ name: md5, extname: type, mime: mime.toLowerCase(), auth })
       if(err) return Promise.reject({ errMsg: 'unkonown error', status: 500 })
       
       //修改数据库状态

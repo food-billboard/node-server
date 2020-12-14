@@ -420,26 +420,6 @@ const conserveBlob = (file, md5, index) => {
   }
 }
 
-//删除临时文件
-const removeTemplateFolder = (name) => {
-
-  const folder = path.join(STATIC_FILE_PATH, 'template', name)
-
-  return getChunkFileList(folder)
-  .then(fileList => Promise.all(fileList.map(file => {
-    return new Promise((resolve, reject) => {
-      fs.unlink(path.join(folder, file), (err) => {
-        if(err) reject(err)
-        resolve()
-      })
-    })
-  })))
-  .catch(err => {
-    console.log(err)
-  })
-
-}
-
 module.exports = {
   dealMedia,
   checkAndCreateDir,
@@ -454,5 +434,4 @@ module.exports = {
   ACCEPT_IMAGE_MIME,
   ACCEPT_VIDEO_MIME,
   MAX_FILE_SIZE,
-  headRequestDeal
 }

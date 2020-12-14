@@ -1,7 +1,9 @@
 const Router = require('@koa/router')
-const Url = require('url')
 const Validator = require('validator')
-const { Types: {  ObjectId } } = require('mongoose')
+const Mime = require('mime')
+const Url = require('url')
+const pick = require('lodash/pick')
+const { Types: { ObjectId } } = require('mongoose')
 const Chunk = require('./routes')
 const { 
   verifyTokenToData,
@@ -12,16 +14,19 @@ const {
   VideoModel,
   ImageModel,
   OtherMediaModel,
+  UserModel,
   notFound,
-  MEDIA_STATUS
+  MEDIA_STATUS,
+  MEDIA_AUTH
 } = require('@src/utils')
-const { dealMedia, base64Size, base64Reg, randomName } = require('./util')
+const { headRequestDeal, patchRequestDeal, MEDIA_TYPE } = require('./utils')
+const { dealMedia, base64Size, base64Reg, randomName, headRequestDeal } = require('./util')
 
 const models = [ImageModel, VideoModel, OtherMediaModel]
 
 const router = new Router()
 
-const MAX_FILE_SIZE = 1024 * 500
+const MAX_FILE_SIZE = 1024 * 1024 * 6
 
 router
 //token验证
@@ -228,21 +233,195 @@ router
 
 })
 .use('/chunk', Chunk.routes(), Chunk.allowedMethods())
-//错误断点续传
-.head('/test', async(ctx) => {
+
+.use(async(ctx, next) => {
+
+  const { request: { headers } } = ctx
+  const contentLength = headers['content-length'] || headers['Content-Length']
+
+  if(contentLength >= MAX_FILE_SIZE) {
+    responseDataDeal({
+      ctx,
+      data: dealErr(ctx)({ errMsg: 'request to large', status: 413 }),
+      needCache: false
+    })
+    return
+  }
+
+  return await next()
+
+})
+//断点续传预查
+.head('/', async(ctx) => {
+
+  //元数据验证获取
+  const METADATA = {
+    'md5': {
+      validator: data => Validator.isMD5(data),
+      sanitizers: data => data
+    },
+    'auth': {
+      validator: data => Object.keys(MEDIA_AUTH).includes(data),
+      sanitizers: data => data.toUpperCase()
+    },
+    'chunk': {
+      validator: data => {
+        const _data = parseInt(data)
+        return typeof _data === 'number' && _data > 0
+      },
+      sanitizers: data => parseInt(data)
+    },
+    'mime': {
+      validator: data => !!Mime.getType(data),
+      sanitizers: data => Mime.getType(data)
+    },
+    'size': {
+      validator: data => {
+        const _data = parseInt(data)
+        return typeof _data === 'number' && _data > 0
+      },
+      sanitizers: data => parseInt(data)
+    },
+    'name': {
+      validator: () => true,
+      sanitizers: data => data.slice(0, 20)
+    }
+  }
 
   const { request: { headers } } = ctx
 
-  //设置索引来帮助恢复上传
-  ctx.set('Upload-Offset', 0)
-  ctx.set('Tus-Resumable', headers['tus-resumable'])
-  ctx.set('Location', 'http://localhost:4000/api/swagger/test.html')
+  const metadataKey = Object.keys(METADATA)
 
-  responseDataDeal({
-    ctx,
-    data: {},
-    needCache: false
+  const check = Params.headers(ctx, {
+    name: 'Tus-Resumable',
+    validator: [
+      data => data === '1.0.0'
+    ]
+  }, {
+    name: 'Upload-Metadata',
+    validator: [
+      data => {
+        if(!!data) return false
+        return data.split(',').every(d => {
+          const [ key, value ] = d.split(' ')
+          return metadataKey.includes(key) && METADATA[key].validator(Buffer.from(value, 'base64'))
+        })
+      }
+    ]
   })
+
+  if(check) return
+
+  const [ , token ] = verifyTokenToData(ctx)
+  const { _id } = token
+
+  const [ metadata ] = Params.sanitizers(headers, {
+    name: 'Upload-Metadata',
+    sanitizers: [
+      data => {
+        return data.split(',').reduce((acc, cur) => {
+          const [ key, value ] = cur.split(' ')
+          acc[key] = Buffer.from(value, 'base64')
+          return acc
+        }, {})
+      }
+    ]
+  })
+
+  const data = await UserModel.findOne({
+    _id: ObjectId(_id)
+  })
+  .select({
+    roles: 1
+  })
+  .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => headRequestDeal({
+    metadata,
+    ctx,
+    user: {
+      _id: ObjectId(_id),
+      roles: data.roles
+    }
+  }))
+  .catch(err => {
+    console.log(err)
+    return false
+  })
+
+  if(typeof data !== 'number') return ctx.status = 500
+
+  const { offset, id, type } = data
+  //设置索引来帮助恢复上传
+  ctx.set('Upload-Offset', offset)
+  ctx.set('Tus-Resumable', headers['Tus-Resumable'] || '1.0.0')
+  ctx.set('Location', `/api/customer/upload?type=${type}&auth=${auth}&id=${id}`)
+  // ctx.set('Upload-Id', id)
+
+  ctx.status = 200
+
+})
+//分片上传
+.patch('/', async(ctx) => {
+
+  const { request: { headers } } = ctx
+  const check = Params.headers(ctx, {
+    name: 'Upload-Offset',
+    validator: [
+      data => {
+        const _data = parseInt(data)
+        return !Number.isNaN(_data) && _data >= 0
+      }
+    ]
+  }, {
+    name: 'Content-Type',
+    validator: [
+      data => data.toLowerCase() === 'application/offset+octet-stream'
+    ]
+  })
+
+  if(check) return
+
+  const [ , token ] = verifyTokenToData(ctx)
+  const { _id } = token
+
+  const { query } = Url.parse(ctx.request.method)
+  const metadata = query.split('&').reduce((acc, cur) => {
+    const [ key, value ] = cur.split('=')
+    acc[key] = value
+    return acc
+  }, {})
+  const { id, type } = metadata
+
+  const data = await ObjectId.isValid(id) && MEDIA_TYPE.includes(type) ? Promise.resolve() : Promise.reject(400)
+  .then(_ => UserModel.findOne({
+    _id: ObjectId(_id)
+  }))
+  .select({
+    roles: 1
+  })
+  .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => patchRequestDeal({
+    user: data,
+    ctx,
+    metadata
+  }))
+  .catch(err => {
+    console.log(err)
+    return false
+  })
+
+  if(typeof data !== 'number') return ctx.status = 500
+
+  //设置响应头
+  ctx.set({
+    'Upload-Offset': data
+  })
+
+  ctx.status = 204
 
 })
 //restore|load ?load=...
@@ -314,23 +493,6 @@ router
   })
 
 })
-//文件检查 | 小文件上传
-.post('/', async(ctx) => {
-
-  const { request: { headers } } = ctx
-
-  //设置索引来帮助恢复上传
-  ctx.set('Upload-Offset', 0)
-  ctx.set('Tus-Resumable', headers['tus-resumable'])
-  ctx.set('Location', '/api/user/test')
-
-  responseDataDeal({
-    ctx,
-    data: {},
-    needCache: false
-  })
-
-})
 //删除--无用
 .delete('/', async(ctx) => {
   responseDataDeal({
@@ -339,9 +501,55 @@ router
     needCache: false
   })
 })
-//分片上传
-.patch('/', async(ctx) => {
-  
+.post('/', async(ctx) => {
+
+  const { request: { headers } } = ctx
+
+  const { auth, md5, length, chunks, mime, size, name, offset } = pick(headers, [
+    'Upload-Auth',
+    'Upload-Md5',
+    'Upload-Length',
+    'Upload-Chunk',
+    'Upload-Mime',
+    'Upload-Size',
+    'Upload-Name',
+    'Upload-Offset'
+  ])
+
+  const validator = [
+    {
+      value: auth,
+      validator: () => isHash
+    }
+  ]
+
+  let data
+
+  //参数验证
+  if(
+    !Validator.isMD5(md5) ||
+    !Validator.isMimeType(mime) ||
+    !(typeof length !== 'number' || length <= 0) ||
+    !(typeof size !== 'number' || size <= 0)
+  ) {
+    
+    data = dealErr(ctx)({
+      errMsg: 'bad request',
+      status: 400
+    })
+
+  }else {
+
+    
+
+  }
+
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
+
 
 })
 
