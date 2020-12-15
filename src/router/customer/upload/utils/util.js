@@ -5,6 +5,7 @@ const Mime = require('mime')
 const { 
   ImageModel, 
   VideoModel, 
+  OtherMediaSchema,
   UserModel, 
   OtherMediaModel, 
   STATIC_FILE_PATH, 
@@ -19,7 +20,6 @@ const {
   ROLES_MAP,
   MEDIA_ORIGIN_TYPE
 } = require('@src/utils')
-const { OtherMediaSchema } = require('../../../utils/mongodb/mongo.lib')
 
 const ACCEPT_IMAGE_MIME = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp']
 const ACCEPT_VIDEO_MIME = ['avi', 'mp4', 'rmvb', 'mkv', 'f4v', 'wmv']

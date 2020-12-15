@@ -9,7 +9,6 @@ const {
   verifyTokenToData,
   responseDataDeal,
   dealErr,
-  isType,
   Params,
   VideoModel,
   ImageModel,
@@ -19,8 +18,8 @@ const {
   MEDIA_STATUS,
   MEDIA_AUTH
 } = require('@src/utils')
-const { headRequestDeal, patchRequestDeal, MEDIA_TYPE } = require('./utils')
-const { dealMedia, base64Size, base64Reg, randomName, headRequestDeal } = require('./util')
+const { headRequestDeal, patchRequestDeal } = require('./utils')
+const { dealMedia, base64Size, base64Reg, randomName } = require('./util')
 
 const models = [ImageModel, VideoModel, OtherMediaModel]
 
@@ -356,8 +355,7 @@ router
   //设置索引来帮助恢复上传
   ctx.set('Upload-Offset', offset)
   ctx.set('Tus-Resumable', headers['Tus-Resumable'] || '1.0.0')
-  ctx.set('Location', `/api/customer/upload?type=${type}&auth=${auth}&id=${id}`)
-  // ctx.set('Upload-Id', id)
+  ctx.set('Location', `/api/customer/upload`)
 
   ctx.status = 200
 
@@ -379,6 +377,11 @@ router
     validator: [
       data => data.toLowerCase() === 'application/offset+octet-stream'
     ]
+  }, {
+    name: 'Upload-Md5',
+    validator: [
+      data => Validator.isMD5(data)
+    ]
   })
 
   if(check) return
@@ -386,18 +389,13 @@ router
   const [ , token ] = verifyTokenToData(ctx)
   const { _id } = token
 
-  const { query } = Url.parse(ctx.request.method)
-  const metadata = query.split('&').reduce((acc, cur) => {
-    const [ key, value ] = cur.split('=')
-    acc[key] = value
-    return acc
-  }, {})
-  const { id, type } = metadata
+  const md5 = headers['Upload-Md5']
+  const offset = headers['Upload-Offset']
+  const length = headers['Content-Length']
 
-  const data = await ObjectId.isValid(id) && MEDIA_TYPE.includes(type) ? Promise.resolve() : Promise.reject(400)
-  .then(_ => UserModel.findOne({
+  const data = await UserModel.findOne({
     _id: ObjectId(_id)
-  }))
+  })
   .select({
     roles: 1
   })
@@ -407,7 +405,11 @@ router
   .then(data => patchRequestDeal({
     user: data,
     ctx,
-    metadata
+    metadata: {
+      md5,
+      offset,
+      length
+    }
   }))
   .catch(err => {
     console.log(err)
