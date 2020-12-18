@@ -1,8 +1,7 @@
-const fs = require('fs')
 const path = require('path')
 const Mime = require('mime')
-const { ImageModel, VideoModel, OtherMediaModel } = require('@src/utils')
-const { getChunkFileList } = require('./util')
+const { ImageModel, VideoModel, OtherMediaModel, MEDIA_AUTH, ROLES_MAP, MEDIA_ORIGIN_TYPE, findMostRole, MEDIA_STATUS } = require('@src/utils')
+const { getChunkFileList, unlink } = require('./util')
 
 //删除临时文件
 const removeTemplateFolder = (name) => {
@@ -11,12 +10,7 @@ const removeTemplateFolder = (name) => {
 
   return getChunkFileList(folder)
   .then(fileList => Promise.all(fileList.map(file => {
-    return new Promise((resolve, reject) => {
-      fs.unlink(path.join(folder, file), (err) => {
-        if(err) reject(err)
-        resolve()
-      })
-    })
+    return unlink(path.join(folder, file))
   })))
   .catch(err => {
     console.log(err)
@@ -37,7 +31,7 @@ const headRequestMediaDeal = {
   
     const defaultModel = {
       name: name || '',
-      src: path.join('static', auth.toLowerCase(), 'image', `${md5}.${Mime.getExtension(mime)}`),
+      src: path.join('static', 'image', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
       auth,
@@ -51,15 +45,26 @@ const headRequestMediaDeal = {
       },
     }
   
-    return ImageModel.findOne({
+    /*
+      如果用户上传一个已经存在且为私有的文件，
+      但当前为公开的话，文件即变为公开状态
+    */
+    return ImageModel.findOneAndUpdate({
       // auth,
       "info.md5": md5,
       "info.mime": mime,
       "info.size": size
     }, {
-      $addtoset: {
-        white_list: [ _id ]
-      }
+      $addToSet: {
+        white_list: _id
+      },
+      ...(
+        auth.toUpperCase() === MEDIA_AUTH.PUBLIC ? {
+          $set: {
+            auth: MEDIA_AUTH.PUBLIC
+          }
+        } : {}
+      )
     })
     .select({
       "info.chunk_size": 1,
@@ -70,11 +75,12 @@ const headRequestMediaDeal = {
     .then(data => {
       //文件存在则返回对应的offset
       if(!!data) {
-        const { info: { chunk_size, status, complete }, _id } = data
+        const { info: { chunk_size, status, complete, size }, _id } = data
         //完成
         if(status == MEDIA_STATUS.COMPLETE) return {
           offset: size,
-          id: _id.toString()
+          id: _id.toString(),
+          size
         }
   
         //分片与当前不同或状态为错误
@@ -83,24 +89,27 @@ const headRequestMediaDeal = {
           .then(_ => new ImageModel(defaultModel).save())
           .then(data => ({
             offset: 0,
-            id: data._id.toString()
+            id: data._id.toString(),
+            size
           }))
         }
   
         //部分完成
-        let unCompleteChunk = 0
-        complete.sort().some((com, index) => {
+        let unCompleteChunk = 0;
+        
+        ([...complete]).sort((a, b) => a - b).some((com, index) => {
           if(com != index) {
             unCompleteChunk = com
             return true
           }
           return false
         })
-        unCompleteChunk ++
+        // unCompleteChunk ++
         unCompleteChunk *= chunk_size
         return {
           offset: unCompleteChunk >= size ? size : unCompleteChunk,
-          id: _id.toString()
+          id: _id.toString(),
+          size
         }
   
       }
@@ -109,7 +118,8 @@ const headRequestMediaDeal = {
         return new ImageModel(defaultModel).save()
         .then(data => ({
           offset: 0,
-          id: data._id.toString()
+          id: data._id.toString(),
+          size
         }))
       }
     })
@@ -144,24 +154,25 @@ const headRequestMediaDeal = {
       },
     }
   
-    return VideoModel.findOne({
+    return VideoModel.findOneAndUpdate({
       "info.md5": md5,
       "info.mime": mime,
       "info.size": size
     }, {
-      $addtoset: {
-        white_list: [ _id ]
+      $addToSet: {
+        white_list: _id
       }
     })
     .select({
       "info.chunk_size": 1,
-      "info.status": 1
+      "info.status": 1,
+      "info.complete": 1,
     })
     .exec()
     .then(data => {
       //文件存在则返回对应的offset
       if(!!data) {
-        const { info: { chunk_size, status }, _id } = data
+        const { info: { chunk_size, status, complete }, _id } = data
         //完成
         if(status == MEDIA_STATUS.COMPLETE) return {
           offset: size,
@@ -179,15 +190,14 @@ const headRequestMediaDeal = {
         }
   
         //部分完成
-        let unCompleteChunk = 0
-        complete.sort().some((com, index) => {
+        let unCompleteChunk = 0;
+        ([...complete]).sort((a, b) => a - b).some((com, index) => {
           if(com != index) {
             unCompleteChunk = com
             return true
           }
           return false
         })
-        unCompleteChunk ++
         unCompleteChunk *= chunk_size
         return {
           offset: unCompleteChunk >= size ? size : unCompleteChunk,
@@ -234,24 +244,25 @@ const headRequestMediaDeal = {
       },
     }
   
-    return OtherMediaModel.findOne({
+    return OtherMediaModel.findOneAndUpdate({
       "info.md5": md5,
       "info.mime": mime,
       "info.size": size
     }, {
-      $addtoset: {
-        white_list: [ _id ]
+      $addToSet: {
+        white_list: _id
       }
     })
     .select({
       "info.chunk_size": 1,
-      "info.status": 1
+      "info.status": 1,
+      "info.complete": 1,
     })
     .exec()
     .then(data => {
       //文件存在则返回对应的offset
       if(!!data) {
-        const { info: { chunk_size, status }, _id } = data
+        const { info: { chunk_size, status, complete }, _id } = data
         //完成
         if(status == MEDIA_STATUS.COMPLETE) return {
           offset: size,
@@ -269,15 +280,15 @@ const headRequestMediaDeal = {
         }
   
         //部分完成
-        let unCompleteChunk = 0
-        complete.sort().some((com, index) => {
+        let unCompleteChunk = 0;
+        ([...complete]).sort((a, b) => a - b).some((com, index) => {
           if(com != index) {
             unCompleteChunk = com
             return true
           }
           return false
         })
-        unCompleteChunk ++
+        // unCompleteChunk ++
         unCompleteChunk *= chunk_size
         return {
           offset: unCompleteChunk >= size ? size : unCompleteChunk,
@@ -316,7 +327,7 @@ const headRequestDeal = async ({
     roles: role
   }
 
-  const mimeType = Mime.getType(mime)
+  const mimeType = mime.toLowerCase()
   if(/image\/.+/.test(mimeType)) {
     return headRequestMediaDeal.imageMediaDeal({
       ctx,
@@ -340,5 +351,6 @@ const headRequestDeal = async ({
 }
 
 module.exports = {
-  headRequestDeal
+  headRequestDeal,
+  removeTemplateFolder
 }

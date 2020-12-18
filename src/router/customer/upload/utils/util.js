@@ -42,24 +42,6 @@ const isFileExistsAndComplete = (name, type, size, auth="public") => {
   }
 }
 
-//查找分片文件
-const getChunkFileList = (_path) => {
-  if(!checkDir(_path)) {
-    return new Promise((resolve, reject) => {
-      fs.readdir(_path, (err, res) => {
-        let response = res
-        if(err) {
-          response = []
-        }
-        resolve(response)
-      })
-    })
-    .then(data => data.filter(f => path.extname(f) === '' && f.includes('-')))
-    .catch(_ => [])
-  } 
-  return Promise.resolve([])
-}
-
 //计算base64大小
 const base64Size = base64 => {
   let [, body] = base64.split(",")
@@ -71,8 +53,6 @@ const base64Size = base64 => {
   const length = body.length
   return parseInt( length - ( length / 8 ) * 2 )
 }
-
-const base64Reg = /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*?)\s*$/i
 
 //临时随机名称
 const randomName = () => `${Date.now()}${new Array(Math.ceil(Math.random() * 10)).fill(Math.ceil(Math.random() * 10)).map((i, j) => Math.abs(i - j)).join('')}`
@@ -327,111 +307,56 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
   }))
 }
 
-//文件合并
-/**
- * name 文件名
- * extname 文件类型
- * mime 后缀
- * auth 权限目录
- */
-const mergeChunkFile = async ( { name, extname, mime, auth } ) => {
-  mime = mime && mime.toLowerCase() && mime.split('/')[1]
-
-  //获取真实存储路径以及临时文件夹文件名称
-  let templatePath = path.resolve(STATIC_FILE_PATH, 'template')
-  let realPath = path.resolve(STATIC_FILE_PATH, auth)
-  checkAndCreateDir(templatePath, realPath)
-  realPath = path.resolve(realPath, extname)
-  checkAndCreateDir(realPath)
-  templatePath = path.resolve(templatePath, name)
-
-  //判断文件夹是否存在
-  if(checkDir(templatePath)) return ['not found', null]
-  //对文件进行合并
-  const chunkList = await getChunkFileList(templatePath).sort((suffixA, suffixB) => Number(suffixA.split('-')[1]) - Number(suffixB.split('-')[1]))
-
-  if(!chunkList.every((chunk, index) => index == Number(chunk.split('-')[1]))) return ['not complete', null]
-
-  realPath = path.resolve(realPath, name)
-
-  //创建空文件
-  fs.writeFileSync(realPath, '')
-
-  try {
-    chunkList.forEach(chunk => {
-      fs.appendFileSync(realPath, fs.readFileSync(path.resolve(templatePath, chunk)))
-      fs.unlinkSync(path.resolve(templatePath, chunk))
-    }) 
-  }catch(err) {
-    return [err, null]
-  }
-
-  //删除临时文件夹并重命名真实文件
-  fs.renameSync(realPath, `${realPath}.${mime}`)
-  fs.rmdirSync(templatePath)
-
-  return [null, name]
+const promiseAny = (tasks) => {
+  return Promise.allSettled(tasks)
+  .then(data => {
+    const target = data.find(task => task.status === 'fulfilled') 
+    if(!target) return Promise.reject()
+    return target.value
+  })
 }
 
-//blob文件保存
-const conserveBlob = (file, md5, index) => {
-
-  //将分片文件集中存储在临时文件夹中
-  checkAndCreateDir(STATIC_FILE_PATH)
-  let templatePath = path.resolve(STATIC_FILE_PATH, 'template')
-  checkAndCreateDir(templatePath)
-  templatePath = path.resolve(templatePath, md5)
-  checkAndCreateDir(templatePath)
-
-  //分片名称
-  const filename = path.resolve(templatePath, `${md5}-${index}`)
-
-  //存在分片则直接删除
-  if(fs.existsSync(filename)) return Promise.resolve({ name: md5, index })
-
-  //base64
-  if(typeof file === 'string') {
-    const base64Data = base64Reg.test(file) ? file.replace(/^data:.{1,10}\/.{1,10};base64,/i, '') : file
-
-    return new Promise((resolve, reject) => {
-      fs.writeFile(filename, base64Data, 'base64',function(err) {
-        if(err) return reject({ errMsg: 'write file error', status: 500 })
-        return resolve({ name: md5, index })
-      })
+const errFirstCallback = (callback, ...args) => {
+  return new Promise((resolve, reject) => {
+    callback(...args, (err, res) => {
+      if(err) reject(err)
+      resolve(res)
     })
-  }
-  //blob | file
-  else if(typeof file === 'object' && !!file.path){
-
-    const prevFilePath = file.path
-    //创建读写流
-    const readStream = fs.createReadStream(prevFilePath)
-    const writeStream = fs.createWriteStream(filename)
-    readStream.pipe(writeStream)
-    return new Promise((resolve, reject) => {
-      readStream.on('end', function(err, _) {
-        //删除临时文件
-        fs.unlinkSync(prevFilePath)
-        if(err) return reject({ errMsg: 'write blob error', status: 500 })
-        resolve({ name: md5, index })
-      })
-    })
-
-  }
+  })
 }
+
+const readFile = (...args) => errFirstCallback(fs.readFile, ...args)
+
+const appendFile = (...args) => errFirstCallback(fs.appendFile, ...args)
+
+const unlink = (...args) => errFirstCallback(fs.unlink, ...args)
+
+const rmdir = (...args) => errFirstCallback(fs.rmdir, ...args)
+
+const writeFile = (...args) => errFirstCallback(fs.writeFile, ...args)
+
+const readdir = (...args) => errFirstCallback(fs.readdir, ...args)
+
+const access = (...args) => errFirstCallback(fs.access, ...args)
+
 
 module.exports = {
   dealMedia,
   checkAndCreateDir,
-  mergeChunkFile,
   finalFilePath,
-  conserveBlob,
   isFileExistsAndComplete,
   base64Size,
-  getChunkFileList,
-  base64Reg,
   randomName,
   ACCEPT_IMAGE_MIME,
   ACCEPT_VIDEO_MIME,
   MAX_FILE_SIZE,
+
+  readFile,
+  appendFile,
+  unlink,
+  rmdir,
+  writeFile,
+  readdir,
+  access,
+  promiseAny
 }
