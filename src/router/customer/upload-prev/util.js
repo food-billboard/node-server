@@ -307,7 +307,7 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
  * mime 后缀
  * auth 权限目录
  */
-const mergeChunkFile = ( { name, extname, mime, auth } ) => {
+const mergeChunkFile = async ( { name, extname, mime, auth } ) => {
   mime = mime && mime.toLowerCase() && mime.split('/')[1]
 
   //获取真实存储路径以及临时文件夹文件名称

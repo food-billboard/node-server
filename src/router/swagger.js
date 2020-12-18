@@ -1,6 +1,8 @@
 const Router = require('@koa/router')
 const fs = require('fs')
 const path = require('path')
+const mime = require('mime')
+const { responseDataDeal, dealErr } = require('@src/utils')
 
 // const API_PATH = path.resolve(__dirname, '../assets/api')
 const API_PATH = path.resolve(__dirname, '../../public/api-docs')
@@ -8,7 +10,7 @@ const API_PATH = path.resolve(__dirname, '../../public/api-docs')
 const router = new Router()
 
 router
-.get('/:name', async(ctx) => {
+.get('/:name', async (ctx) => {
   const { url } = ctx
   const [name] = url.match(/(?<=.+\/swagger\/).+$/)
   const extname = path.extname(name)
@@ -20,15 +22,26 @@ router
     const isExists = fs.existsSync(filePath)
     stat = fs.statSync(filePath)
     if(!isExists || !stat.isFile()) {
-      ctx.status = 404
-      ctx.body = 'not Found'
-      return
+      throw new Error()
     }
-  }catch(_) {}
+  }catch(_) {
+    const data = dealErr(ctx)({
+      status: 404,
+      errMsg: 'not Found'
+    })
+    responseDataDeal({
+      ctx,
+      data,
+      needCache: false
+    })
+    return
+  }
 
   //查询文件的修改时间、缓存
   const { request: { headers } } = ctx
   const { mtime } = stat
+  const _mime = mime.getType(extname)
+  ctx.set('Content-Type', `${_mime};charset=utf-8`)
   //304
   const modified = headers['If-Modified-Since'] || headers['if-modified-since']
   if(mtime == modified) {
@@ -48,7 +61,6 @@ router
   })
 
   const data = fs.readFileSync(path.resolve(API_PATH, name))
-  ctx.set('Content-Type', `text/${extname.slice(1)};charset=utf-8`)
   ctx.body = data
 })
 
