@@ -113,25 +113,25 @@ router
   })
 
 })
-//get参数校验
-.use(async (ctx, next) => {
-  const { request: { method } } = ctx
-  const _method = method.toLowerCase()
-  if(_method !== 'get') return await next()
-  const { _id, content } = ctx.query
-  if(!ObjectId.isValid(_id) && (typeof content !== 'string' || !content)) {
-    const data = dealErr(ctx)({
-      errMsg: 'bad request',
-      status: 400
-    })
-    responseDataDeal({
-      ctx,
-      data
-    })
-    return
-  }
-  return await next()
-})
+// get参数校验
+// .use(async (ctx, next) => {
+//   const { request: { method } } = ctx
+//   const _method = method.toLowerCase()
+//   if(_method !== 'get') return await next()
+//   const { _id, content } = ctx.query
+//   if(!ObjectId.isValid(_id) && (typeof content !== 'string' || !content)) {
+//     const data = dealErr(ctx)({
+//       errMsg: 'bad request',
+//       status: 400
+//     })
+//     responseDataDeal({
+//       ctx,
+//       data
+//     })
+//     return
+//   }
+//   return await next()
+// })
 .use('/language', Language.routes(), Language.allowedMethods())
 .use('/actor', Actor.routes(), Actor.allowedMethods())
 .use('/district', District.routes(), District.allowedMethods())

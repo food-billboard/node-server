@@ -1,7 +1,8 @@
 const path = require('path')
 const Mime = require('mime')
+const fs = require('fs').promises
 const { ImageModel, VideoModel, OtherMediaModel, MEDIA_AUTH, ROLES_MAP, MEDIA_ORIGIN_TYPE, findMostRole, MEDIA_STATUS } = require('@src/utils')
-const { getChunkFileList, unlink } = require('./util')
+const { getChunkFileList } = require('./util')
 
 //删除临时文件
 const removeTemplateFolder = (name) => {
@@ -10,7 +11,7 @@ const removeTemplateFolder = (name) => {
 
   return getChunkFileList(folder)
   .then(fileList => Promise.all(fileList.map(file => {
-    return unlink(path.join(folder, file))
+    return fs.unlink(path.join(folder, file))
   })))
   .catch(err => {
     console.log(err)
@@ -140,7 +141,7 @@ const headRequestMediaDeal = {
   
     const defaultModel = {
       name: name || '',
-      src: path.join('static', auth.toLowerCase(), 'video', `${md5}.${Mime.getExtension(mime)}`),
+      src: path.join('static', 'video', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
       auth,
@@ -230,7 +231,7 @@ const headRequestMediaDeal = {
   
     const defaultModel = {
       name: name || '',
-      src: path.join('static', auth.toLowerCase(), 'video', `${md5}.${Mime.getExtension(mime)}`),
+      src: path.join('static', 'video', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
       auth,

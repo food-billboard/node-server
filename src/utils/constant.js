@@ -13,7 +13,7 @@ const EMAIL_REGEXP = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
 
 //最大单次发送文件大小
-const MAX_FILE_SINGLE_RESPONSE_SIZE = 1024 * 500
+const MAX_FILE_SINGLE_RESPONSE_SIZE = 1024 * 1024 * 5
 
 const DIR_LIST = {
   dir: 'static',

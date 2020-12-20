@@ -51,7 +51,7 @@ router
     query = {
       _id: ObjectId(_id)
     }
-  }else {
+  }else if(typeof content === 'string' && !!content){
     query = {
       name: {
         $regex: content,

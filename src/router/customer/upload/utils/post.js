@@ -1,6 +1,6 @@
 const Mime = require('mime')
 const path = require('path')
-const { ImageModel, VideoModel, OtherMediaModel, findMostRole, ROLES_MAP, MEDIA_ORIGIN_TYPE, MEDIA_STATUS, MEDIA_AUTH } = require('@src/utils')
+const { ImageModel, VideoModel, OtherMediaModel, findMostRole, ROLES_MAP, MEDIA_ORIGIN_TYPE, MEDIA_STATUS } = require('@src/utils')
 const { removeTemplateFolder } = require('./head')
 
 const postRequestMediaDeal = {

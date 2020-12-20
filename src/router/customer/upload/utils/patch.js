@@ -1,16 +1,17 @@
 const path = require('path')
-const fs = require('fs')
+const fs = require('fs').promises
+const fsSync = require('fs')
 const Mime = require('mime')
 const formidable = require('formidable')
 const { ImageModel, VideoModel, OtherMediaModel, notFound, STATIC_FILE_PATH, MEDIA_STATUS, checkAndCreateDir, checkDir } = require('@src/utils')
-const { readFile, appendFile, rmdir, unlink, writeFile, readdir, access, promiseAny } = require('./util')
+const { promiseAny } = require('./util')
 
 const base64Reg = /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*?)\s*$/i
 
 //获取分片文件
 const getChunkFileList = (chunk_path) => {
   if(!checkDir(chunk_path)) {
-    return readdir(chunk_path)
+    return fs.readdir(chunk_path)
     .then(data => data.filter(f => path.extname(f) === '' && f.includes('-')))
     .catch(_ => [])
   } 
@@ -29,7 +30,9 @@ const conserveBlob = async ({
   let templatePath = folder
 
   try {
-    await access(folder)
+    await fs.access(folder)
+    //存在分片则直接删除
+    if(fsSync.existsSync(filePath)) return Promise.resolve({ name: md5, index })
   }catch(err) {
     //将分片文件集中存储在临时文件夹中
     checkAndCreateDir(STATIC_FILE_PATH)
@@ -38,9 +41,6 @@ const conserveBlob = async ({
     templatePath = path.resolve(templatePath, md5)
     checkAndCreateDir(templatePath)
   }
-
-  //存在分片则直接删除
-  if(fs.existsSync(filePath)) return Promise.resolve({ name: md5, index })
 
   //base64
   if(typeof file === 'string') {
@@ -65,9 +65,13 @@ const conserveBlob = async ({
       readStream.on('end', function(err, _) {
         if(err) return reject({ errMsg: 'write blob error', status: 500 })
         //删除临时文件
-        unlink(prevFilePath)
+        fs.unlink(prevFilePath)
         .then(_ => {
           resolve({ name: md5, index })
+        })
+        .catch(err => {
+          console.log(err)
+          reject({ errMsg: 'unlink error', status: 500 })
         })
       })
     })
@@ -97,15 +101,15 @@ const mergeChunkFile = async ({
   const mergeTasks = async () => {
     for(let i = 0; i < chunkList.length; i ++) {
       const chunk = chunkList[i]
-      await readFile(path.resolve(templateFolder, chunk))
-      .then(data => appendFile(realFilePath, data))
-      .then(_ => unlink(path.resolve(templateFolder, chunk)))
+      await fs.readFile(path.resolve(templateFolder, chunk))
+      .then(data => fs.appendFile(realFilePath, data))
+      .then(_ => fs.unlink(path.resolve(templateFolder, chunk)))
     }
   }
 
-  return writeFile(realFilePath, '')
+  return fs.writeFile(realFilePath, '')
   .then(_ => mergeTasks())
-  .then(_ => rmdir(templateFolder))
+  .then(_ => fs.rmdir(templateFolder))
   .catch(err => {
     console.log(err)
     return {

@@ -1,11 +1,9 @@
 const { Types: { ObjectId } } = require('mongoose')
 const path = require('path')
-const fs = require('fs')
-const Mime = require('mime')
+const fs = require('fs').promises
 const { 
   ImageModel, 
   VideoModel, 
-  OtherMediaSchema,
   UserModel, 
   OtherMediaModel, 
   STATIC_FILE_PATH, 
@@ -14,11 +12,6 @@ const {
   notFound, 
   merge, 
   checkAndCreateDir, 
-  checkDir, 
-  findMostRole,
-  MEDIA_STATUS,
-  ROLES_MAP,
-  MEDIA_ORIGIN_TYPE
 } = require('@src/utils')
 
 const ACCEPT_IMAGE_MIME = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp']
@@ -316,29 +309,6 @@ const promiseAny = (tasks) => {
   })
 }
 
-const errFirstCallback = (callback, ...args) => {
-  return new Promise((resolve, reject) => {
-    callback(...args, (err, res) => {
-      if(err) reject(err)
-      resolve(res)
-    })
-  })
-}
-
-const readFile = (...args) => errFirstCallback(fs.readFile, ...args)
-
-const appendFile = (...args) => errFirstCallback(fs.appendFile, ...args)
-
-const unlink = (...args) => errFirstCallback(fs.unlink, ...args)
-
-const rmdir = (...args) => errFirstCallback(fs.rmdir, ...args)
-
-const writeFile = (...args) => errFirstCallback(fs.writeFile, ...args)
-
-const readdir = (...args) => errFirstCallback(fs.readdir, ...args)
-
-const access = (...args) => errFirstCallback(fs.access, ...args)
-
 
 module.exports = {
   dealMedia,
@@ -350,13 +320,6 @@ module.exports = {
   ACCEPT_IMAGE_MIME,
   ACCEPT_VIDEO_MIME,
   MAX_FILE_SIZE,
-
-  readFile,
-  appendFile,
-  unlink,
-  rmdir,
-  writeFile,
-  readdir,
-  access,
+  
   promiseAny
 }

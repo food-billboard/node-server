@@ -61,68 +61,6 @@ const METADATA = {
 }
 
 router
-// //token验证
-// .use(async (ctx, next) => {
-//   const [, token] = verifyTokenToData(ctx)
-
-//   if(!token) {
-//     const data = dealErr(ctx)({ errMsg: '未登录或登录过期', status: 401 })
-//     responseDataDeal({
-//       ctx,
-//       data
-//     })
-//     return 
-//   }
-
-//   return await next()
-// })
-// //检查参数格式是否正确
-// .use(async(ctx, next) => {
-//   const { body: { files:base64Files=[] }, files={}, method } = ctx.request
-//   const _method = method.toLowerCase()
-//   if(_method == 'get' || _method == 'put') return await next() 
-
-//   let errRes
-
-//   //是否为空
-//   if(!base64Files.length && !Object.values(files).length) {
-//     errRes = {
-//       errMsg: 'bad request with empty file list', 
-//       status: 400
-//     }
-//   }
-//   //base64文件格式是否正确
-//   else if(!base64Files.every(item => {
-//     const { file } = item
-    
-//     return typeof file === 'string' && (/^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/.test(file) || base64Reg.test(file))})) {//base64Reg
-//       errRes = {
-//         errMsg: 'bad request with base64 file type', 
-//         status: 400
-//       }
-//   }
-//   //file格式是否正确
-//   else if(!!Object.values(files).length && !Object.values(files).every(item => typeof item === 'object' && !!item.path && !!item.size)) {
-//     errRes = {
-//       errMsg: 'bad request with file type', 
-//       status: 400
-//     }
-//   }
-
-//   if(errRes) {
-//     const data = dealErr(ctx)(errRes)
-//     responseDataDeal({
-//       ctx,
-//       data,
-//       needCache: false
-//     })
-//     return
-//   }
-
-//   return await next()
-
-// })
-
 .use(async(ctx, next) => {
 
   const { request: { headers } } = ctx
@@ -218,6 +156,7 @@ router
   ctx.set('Tus-Resumable', headers['tus-resumable'] || '1.0.0')
   ctx.set('Location', `/api/customer/upload`)
   ctx.set('Upload-Length', metadata.size)
+  ctx.set('Upload-Id', id)
 
   ctx.status = 200
 
@@ -319,6 +258,7 @@ router
 })
 //restore|load ?load=...
 .get('/', async(ctx) => {
+
   const { request: { url } } = ctx
   let data
 
@@ -472,7 +412,6 @@ router
   //设置索引来帮助恢复上传
   ctx.set('Tus-Resumable', headers['tus-resumable'] || '1.0.0')
   ctx.set('Location', `/api/customer/upload`)
-  // ctx.set('Upload-Length', metadata.size)
 
   ctx.status = 201
 

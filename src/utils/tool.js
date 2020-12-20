@@ -187,5 +187,5 @@ module.exports = {
   initStaticFileDir,
   checkDir,
   checkAndCreateDir,
-  findMostRole
+  findMostRole,
 }
