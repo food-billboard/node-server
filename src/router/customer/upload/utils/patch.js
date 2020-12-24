@@ -58,8 +58,8 @@ const conserveBlob = async ({
 
     const prevFilePath = file.path
     //创建读写流
-    const readStream = fs.createReadStream(prevFilePath)
-    const writeStream = fs.createWriteStream(filePath)
+    const readStream = fsSync.createReadStream(prevFilePath)
+    const writeStream = fsSync.createWriteStream(filePath)
     readStream.pipe(writeStream)
     return new Promise((resolve, reject) => {
       readStream.on('end', function(err, _) {
@@ -86,7 +86,7 @@ const mergeChunkFile = async ({
 }) => {
 
   try {
-    if(!fs.existsSync(templateFolder)) return Promise.reject({ errMsg: 'not found', status: 404 })
+    if(!fsSync.existsSync(templateFolder)) return Promise.reject({ errMsg: 'not found', status: 404 })
   }catch(err) {
     console.log(err)
     return Promise.reject({ errMsg: 'not found', status: 404 })
@@ -138,7 +138,7 @@ const findUnCompleteIndex = ({
   const chunkLength = Math.ceil(size / chunk_size)
 
   const sortComplete = [...complete].sort((a, b) => a - b)
-  let minUnComplete
+  let minUnComplete = -1
   sortComplete.some((item, idx) => {
     if(item != idx) {
       minUnComplete = idx
@@ -148,7 +148,7 @@ const findUnCompleteIndex = ({
   })
 
   //全部完成
-  if(!minUnComplete && index == chunkLength - 1) return size
+  if(!~minUnComplete && index == chunkLength - 1) return size
 
   return minUnComplete * chunk_size
 
@@ -453,6 +453,8 @@ const patchRequestDeal = (options) => {
   }) => {
     //文件获取
     return new Promise((resolve, reject) => {
+      const { request: { files } } = ctx
+      if(!!files.file) return resolve(files.file)
       form.parse(ctx.req, (err, _, files) => {
         console.log(err)
         if(err) return reject(500)
@@ -462,7 +464,6 @@ const patchRequestDeal = (options) => {
     })
     //文件保存及合并
     .then(file => {
-
       const { metadata: { md5 } } = options
 
       return conserveBlob({

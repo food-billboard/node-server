@@ -1,6 +1,5 @@
 const Router = require('@koa/router')
 const Validator = require('validator')
-const Mime = require('mime')
 const Url = require('url')
 const pick = require('lodash/pick')
 const { Types: { ObjectId } } = require('mongoose')
@@ -18,7 +17,6 @@ const {
   MEDIA_AUTH
 } = require('@src/utils')
 const { headRequestDeal, patchRequestDeal, postMediaDeal } = require('./utils')
-const { dealMedia, base64Size, base64Reg, randomName } = require('./utils/util')
 
 const models = [ImageModel, VideoModel, OtherMediaModel]
 
@@ -64,7 +62,7 @@ router
 .use(async(ctx, next) => {
 
   const { request: { headers } } = ctx
-  const contentLength = headers['content-length'] || headers['Content-Length']
+  const contentLength = headers['content-length']
 
   if(contentLength >= MAX_FILE_SIZE) {
     responseDataDeal({
@@ -83,7 +81,7 @@ router
 
   const { request: { headers } } = ctx
 
-  const metadataKey = Object.keys(METADATA)
+  const metadataKey = Object.keys(pick(METADATA, ['md5', 'auth', 'chunk', 'mime', 'size', 'name']))
 
   const check = Params.headers(ctx, {
     name: 'tus-resumable',
@@ -97,15 +95,18 @@ router
     validator: [
       data => {
         if(!data) return false
-        return (data.endsWith(',') ? data.slice(0, -1) : data).every(d => {
+        return (data.endsWith(',') ? data.slice(0, -1) : data).split(',').every(d => {
           const [ key, value ] = d.split(' ')
-          return metadataKey.includes(key) && METADATA[key].validator(Buffer.from(value, 'base64').toString())
+          const index = metadataKey.indexOf(key)
+          if(!~index) return true
+          if(!!~index) metadataKey.splice(index, 1)
+          return METADATA[key].validator(Buffer.from(value, 'base64').toString())
         })
       }
     ]
   })
 
-  if(check) {
+  if(check || !!metadataKey.length) {
     ctx.status = 404
     return
   }
@@ -117,7 +118,7 @@ router
     name: 'upload-metadata',
     sanitizers: [
       data => {
-        return (data.endsWith(',') ? data.slice(0, -1) : data).reduce((acc, cur) => {
+        return (data.endsWith(',') ? data.slice(0, -1) : data).split(',').reduce((acc, cur) => {
           const [ key, value ] = cur.split(' ')
           acc[key] = Buffer.from(value, 'base64').toString()
           return acc
@@ -166,7 +167,7 @@ router
 
   const { request: { headers } } = ctx
 
-  const metadataKey = Object.keys(METADATA)
+  const metadataKey = Object.keys(pick(METADATA, ['md5']))
 
   const check = Params.headers(ctx, {
     name: 'upload-offset',
@@ -177,24 +178,22 @@ router
       }
     ]
   }, {
-    name: 'content-type',
-    validator: [
-      data => data.toLowerCase() === 'application/offset+octet-stream'
-    ]
-  }, {
     name: 'upload-metadata',
     validator: [
       data => {
         if(!data) return false
-        return data.split(',').every(d => {
+        return (data.endsWith(',') ? data.slice(0, -1) : data).split(',').every(d => {
           const [ key, value ] = d.split(' ')
-          return metadataKey.includes(key) && METADATA[key].validator(Buffer.from(value, 'base64').toString())
+          const index = metadataKey.indexOf(key)
+          if(!~index) return true
+          if(!!~index) metadataKey.splice(index, 1)
+          return METADATA[key].validator(Buffer.from(value, 'base64').toString())
         })
       }
     ]
   })
 
-  if(check) return
+  if(check || !!metadataKey.length) return
 
   const [ , token ] = verifyTokenToData(ctx)
   const { id: _id } = token
@@ -242,8 +241,6 @@ router
     return false
   })
 
-  console.log(data)
-
   if(!data) return ctx.status = 500
 
   const { status, success, offset:nextOffset } = data
@@ -280,7 +277,7 @@ router
   data = data
   .then(query => {
     const [ [ type, id ] ] = Object.entries(query)
-    if(!Validator.isMD5(id)) return Promise.reject({ status: 400, errMsg: 'bad request' })
+    if(!ObjectId.isValid(id)) return Promise.reject({ status: 400, errMsg: 'bad request' })
     
     //文件查找
     return Promise.allSettled(models.map(model => {
@@ -328,11 +325,7 @@ router
 })
 //删除--无用
 .delete('/', async(ctx) => {
-  responseDataDeal({
-    ctx,
-    data: {},
-    needCache: false
-  })
+  ctx.status = 200
 })
 //新增
 .post('/', async(ctx) => {
@@ -340,8 +333,6 @@ router
   const { request: { headers } } = ctx
 
   const metadataKey = Object.keys(METADATA)
-
-  console.log(metadataKey)
 
   const check = Params.headers(ctx, {
     name: 'tus-resumable',
@@ -357,13 +348,16 @@ router
         if(!data) return false
         return (data.endsWith(',') ? data.slice(0, -1) : data).split(',').every(d => {
           const [ key, value ] = d.split(' ')
-          return metadataKey.includes(key) && METADATA[key].validator(Buffer.from(value, 'base64').toString())
+          const index = metadataKey.indexOf(key)
+          if(!~index) return true
+          if(!!~index) metadataKey.splice(index, 1)
+          return !!~index && METADATA[key].validator(Buffer.from(value, 'base64').toString())
         })
       }
     ]
   })
 
-  if(check) {
+  if(check || !!metadataKey.length) {
     ctx.status = 404
     return
   }
@@ -408,10 +402,12 @@ router
 
   if(!data) return ctx.status = 500
 
-  const { offset, id, type } = data
+  const { id, type } = data
   //设置索引来帮助恢复上传
   ctx.set('Tus-Resumable', headers['tus-resumable'] || '1.0.0')
   ctx.set('Location', `/api/customer/upload`)
+  ctx.set('Upload-Length', metadata.size)
+  ctx.set('Upload-Id', id)
 
   ctx.status = 201
 

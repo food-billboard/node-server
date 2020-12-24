@@ -163,11 +163,6 @@ const readFile = async ({
 
 }
 
-readFile({
-  path: '/static/video/581147cb51c9ee6e0e2f23b791ff9f58.mp4',
-  ctx: {}
-})
-
 const StaticMiddleware = async (ctx, next) => {
 
   const { request: { url } } = ctx
