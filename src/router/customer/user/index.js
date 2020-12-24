@@ -59,7 +59,7 @@ router
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
 
-  const { mobile } = token
+  const { id } = token
   const check = Params.query(ctx, {
     name: '_id',
     type: ['isMongoId']
@@ -76,7 +76,7 @@ router
   let data = await UserModel.find({
     $or: [
       {
-        mobile: Number(mobile),
+        _id: ObjectId(id),
       },
       {
         _id: ObjectId(_id)

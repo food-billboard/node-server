@@ -21,7 +21,7 @@ router
   })
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await ImageModel.findOne({
     _id
@@ -34,7 +34,7 @@ router
   .then(notFound)
   .then(_ => {
     return UserModel.updateOne({
-      mobile: Number(mobile)
+      _id: ObjectId(id)
     }, {
       $set: { avatar: _id }
     })

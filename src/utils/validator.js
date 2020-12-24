@@ -63,6 +63,18 @@ const Params = {
     const data = this.validate(origin, ...validators)
     return data
   },
+  headers(ctx, ...validators) {
+    const { request: { headers } } = ctx
+    const data = this.validate(headers, ...validators)
+    if(data) {
+      responseDataDeal({
+        ctx,
+        data: TEMPLATE_ERROR(ctx)
+      })
+      return true
+    }
+    return data
+  },
   query(ctx, ...validators) {
     const { query } = ctx
     const data = this.validate(query, ...validators)

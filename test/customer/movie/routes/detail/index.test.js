@@ -140,20 +140,11 @@ describe(`${COMMON_API} test`, function() {
         src: COMMON_API,
         poster: imageId,
       })
-      const { model: director } = mockCreateDirector({
-        name: COMMON_API
-      })
       const { model: classify } = mockCreateClassify({
         name: COMMON_API
       })
       const { model: district } = mockCreateDistrict({
         name: COMMON_API
-      })
-      const { model: actor } = mockCreateActor({
-        name: COMMON_API,
-        other: {
-          avatar: imageId
-        }
       })
       const { model: language } = mockCreateLanguage({
         name: COMMON_API
@@ -161,26 +152,44 @@ describe(`${COMMON_API} test`, function() {
       const { model: tag } = mockCreateTag({
         text: COMMON_API
       })
-      const { model: user, token, signToken: getToken } = mockCreateUser({
+      const { model: user, signToken: getToken } = mockCreateUser({
         username: COMMON_API
       })
-      selfToken = token
+
       signToken = getToken
 
       return Promise.all([
         video.save(),
-        director.save(),
         classify.save(),
         district.save(),
-        actor.save(),
         language.save(),
         tag.save(),
         user.save()
       ])
     })
-    .then(([video, director, classify, district, actor, language, tag, user]) => {
+    .then(data => {
+      const [ ,,district ] = data
+      const { model: actor } = mockCreateActor({
+        name: COMMON_API,
+        other: {
+          avatar: imageId
+        },
+        country: district._id
+      })
+      const { model: director } = mockCreateDirector({
+        name: COMMON_API,
+        country: district._id
+      })
+      return Promise.all([
+        actor.save(),
+        director.save(),
+        ...data
+      ])
+    })
+    .then(([actor, director, video, classify, district, language, tag, user]) => {
       userId = user._id
       videoId = video._id
+      selfToken = signToken(userId)
       const { model } = mockCreateMovie({
         video: videoId,
         info: {
@@ -443,7 +452,7 @@ describe(`${COMMON_API} test`, function() {
     describe(`get the movie detail info with self info fail test -> ${COMMON_API}`, function() {
 
       beforeEach(function(done) {
-        selfToken = signToken()
+        selfToken = signToken(userId)
         done()
       })
 

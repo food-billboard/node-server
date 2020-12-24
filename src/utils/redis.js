@@ -41,6 +41,8 @@ const redisDisConnect = () => {
 const AccessLimitCheck = async(ctx, next) => {
   let isLimit = await isAcessLimit(ctx)
 
+  return await next()
+
   if(isLimit) {
     const data = dealErr(ctx)({ errMsg: 'please visit this server later', status: 429 })
     responseDataDeal({

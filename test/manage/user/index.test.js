@@ -46,6 +46,7 @@ describe(`${COMMON_API} test`, function() {
   let userInfo 
   let selfToken
   let imageId
+  let getToken
 
   before(function(done) {
 
@@ -57,18 +58,19 @@ describe(`${COMMON_API} test`, function() {
     .then(data => {
       imageId = data._id
 
-      const { model, token } = mockCreateUser({
+      const { model, signToken } = mockCreateUser({
         username: COMMON_API,
         // avatar: imageId
       })
 
-      selfToken = token
+      getToken = signToken
 
       return model.save()
 
     })
     .then(data => {
       userInfo = data
+      selfToken = getToken(userInfo._id)
       done()
     })
     .catch(err => {

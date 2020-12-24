@@ -158,13 +158,13 @@ router
     name: 'currPage',
     _default: 0,
     sanitizers: [
-      data => data >= 0 ? data : 0
+      data => data >= 0 ? +data : 0
     ]
   }, {
     name: 'pageSize',
     _default: 30,
     sanitizers: [
-      data => data >= 0 ? data : 30
+      data => data >= 0 ? +data : 30
     ]
   }, {
     name: 'classify',
@@ -231,6 +231,8 @@ router
       },
     }
   }
+
+  console.log(currPage, pageSize)
 
   const data = await Promise.all([
     //总数
@@ -313,34 +315,11 @@ router
       }
     ])
   ])
-  .then(([total_count, movie_data]) => {
+  .then(([total_count, movie_data=[]]) => {
 
     if(!Array.isArray(total_count) || !Array.isArray(movie_data)) return Promise.reject({ errMsg: 'data error', status: 404 })
 
     return {
-      // {
-      //   data: {
-      //     total,
-      //     list: [
-      //       {
-      //         _id
-      //         name
-      //         author
-      //         createdAt
-      //         updatedAt
-      //         glance
-      //         hot
-      //         rate_person
-      //         total_rate
-      //         source_type
-      //         stauts
-      //         comment_count,
-      //         tag_count,
-      //         barrage_count
-      //       }
-      //     ]
-      //   }
-      // }
       data: {
         total: total_count.length ? total_count[0].total || 0 : 0,
         list: movie_data
@@ -364,7 +343,7 @@ router
   if(_method === 'post') return await next()
 
   const [ , token ] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   let _id
   let movieData
@@ -392,21 +371,14 @@ router
     const { author } = data
 
     let query = {
-      $or: [
-        {
-          _id: author
-        },
-        {
-          mobile: Number(mobile)
-        }
-      ]
+      _id: { $in: [ author, ObjectId(id) ] }
     }
 
     return UserModel.find(query)
     .select({
       _id: 1,
       roles: 1,
-      mobile
+      mobile: 1
     })
     .exec()
   })
@@ -414,7 +386,7 @@ router
   .then(notFound)
   .then(data => {
     if(data.length == 1) {
-      if(data[0].mobile != mobile) return Promise.reject({ errMsg: 'not found', status: 404 })
+      if(!data[0]._id.equals(id)) return Promise.reject({ errMsg: 'not found', status: 404 })
     }else {
       let manageRoles
       let userRoles 
@@ -422,7 +394,7 @@ router
       //查找对应的用户
       data.forEach(item => {
         const { mobile: _mobile, _id, roles } = item
-        if(mobile == _mobile) {
+        if(_id.equals(id)) {
           manageRoles = roles
         }else if(_id.equals(author)) {
           userRoles = roles
@@ -439,6 +411,7 @@ router
         }
       }else {
         if(maxManageRole >= maxUserRole) {
+          if(_method == 'get' && maxManageRole == maxUserRole) return true
           return false
         }
       }
@@ -481,10 +454,10 @@ router
 
   const { body: { name, alias, description } } = ctx.request
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   })
   .select({
     _id: 1,
@@ -628,6 +601,61 @@ router
   })
 
 })
+//详情
+.get('/edit', async(ctx) => {
 
+  const check = Params.query(ctx, {
+    name: '_id',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  })
+
+  if(check) return
+
+  const [ _id ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
+
+  const data = await MovieModel.findOne({
+    _id
+  })
+  .select({
+    name: 1,
+    info: 1,
+    video: 1,
+    images: 1,
+    poster: 1,
+    author_description: 1,
+    author_rate: 1,
+  })
+  .exec()
+  .then(data => !!data && data._doc)
+  .then(notFound)
+  .then(data => {
+    const { info: { another_name: alias, ...nextInfo }, images, poster, video, ...nextData } = data
+    return {
+      data: {
+        ...nextData,
+        ...nextInfo,
+        poster: poster.src,
+        video: video.src,
+        images: images.map(item => item.src),
+        alias
+      }
+    }
+  })
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
+
+})
 
 module.exports = router

@@ -15,6 +15,7 @@ const {
 const { mergeChunkFile, finalFilePath, conserveBlob, isFileExistsAndComplete, ACCEPT_IMAGE_MIME, ACCEPT_VIDEO_MIME, MAX_FILE_SIZE } = require('../util')
 const path = require('path')
 const fs = require('fs')
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
@@ -94,7 +95,7 @@ router
   })
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
   let model
   let Model
   
@@ -110,8 +111,6 @@ router
     Model = OtherMediaModel
   }
 
-  let userId
-
   // //获取来源用户id
   // const _id = await UserModel.findOne({
   //   mobile: Number(mobile)
@@ -123,28 +122,16 @@ router
   // .then(data => !!data && data._id)
 
   //查找文件是否存在于数据库
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
+  const data = await Model
+  .findOneAndUpdate({
+    "info.md5": md5
+  }, {
+    $addToSet: { white_list: ObjectId(id) }
   })
   .select({
-    _id: 1
+    info: 1,
   })
   .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then(data => {
-    userId = data
-    return Model
-    .findOneAndUpdate({
-      "info.md5": md5
-    }, {
-      $addToSet: { white_list: userId }
-    })
-    .select({
-      info: 1,
-    })
-    .exec()
-  })
   .then(data => !!data && data._doc)
   .then(async (data) => {
 
@@ -152,7 +139,7 @@ router
     let chunkList = []
     let chunkIndexList = []
     try {
-      chunkList = getChunkFileList(path.resolve(STATIC_FILE_PATH, 'template', md5))
+      chunkList = await getChunkFileList(path.resolve(STATIC_FILE_PATH, 'template', md5))
       chunkIndexList = chunkList.map(chunk => Number(chunk.split('-')[1]))
     }catch(err) {}
 
@@ -163,7 +150,7 @@ router
         name: filename || md5,
         src: path.resolve(finalFilePath(auth, model)),
         origin_type: "USER",
-        white_list: [userId],
+        white_list: [ ObjectId(id) ],
         auth,
         info: {
           md5,
@@ -248,7 +235,7 @@ router
 
   const { body: { index, name: md5, files:base64Files=[] }, files={} } = ctx.request
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   let file
 
@@ -272,36 +259,24 @@ router
     return
   }
 
-  //上传用户用户查询
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._doc._id)
-  .then(notFound)
-  .then(id => {
-    const commonQuery = {
-      "info.md5": md5,
-      white_list: { $in: [ id ] }
-    }
-    //保存文件
-    return conserveBlob(file, md5, index)
-    //更新数据库
-    .then(_ => Promise.all([
-      ImageModel.updateOne(commonQuery, {
-        $addToSet: { "info.complete": index }
-      }),
-      VideoModel.updateOne(commonQuery, {
-        $addToSet: { "info.complete": index }
-      }),
-      OtherMediaModel.updateOne(commonQuery, {
-        $addToSet: { "info.complete": index }
-      }),
-    ]))
-  })
+  const commonQuery = {
+    "info.md5": md5,
+    white_list: { $in: [ ObjectId(id) ] }
+  }
+
+  const data = await conserveBlob(file, md5, index)
+  //更新数据库
+  .then(_ => Promise.all([
+    ImageModel.updateOne(commonQuery, {
+      $addToSet: { "info.complete": index }
+    }),
+    VideoModel.updateOne(commonQuery, {
+      $addToSet: { "info.complete": index }
+    }),
+    OtherMediaModel.updateOne(commonQuery, {
+      $addToSet: { "info.complete": index }
+    }),
+  ]))
   .then(data => {
     if(!data.filter(d => d.n == 1).length) return Promise.reject({ errMsg: 'database wirte forbidden', status: 403 })
     return {
@@ -326,47 +301,37 @@ router
 
   const { body: { name: md5 } } = ctx.request
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._doc._id)
-  .then(notFound)
-  .then(id => {
-    //查询文件是否存在且完整
-    const commonQuery = {
-      "info.md5": md5,
-      white_list: { $in: [id] }
-    }
-    const commonSelect = {
-      info: 1,
-      auth: 1,
-    }
+  
+  //查询文件是否存在且完整
+  const commonQuery = {
+    "info.md5": md5,
+    white_list: { $in: [ ObjectId(id) ] }
+  }
+  const commonSelect = {
+    info: 1,
+    auth: 1,
+  }
 
-    //查询文件是否存在且完整
-    return Promise.all([
-      VideoModel.findOne(commonQuery)
-      .select(commonSelect)
-      .exec()
-      .then(data => !!data && data._doc),
-      ImageModel.findOne(commonQuery)
-      .select(commonSelect)
-      .exec()
-      .then(data => !!data && data._doc),
-      OtherMediaModel.findOne(commonQuery)
-      .select(commonSelect)
-      .exec()
-      .then(data => !!data && data._doc),
-    ])
-  })
+  //查询文件是否存在且完整
+  const data = await Promise.all([
+    VideoModel.findOne(commonQuery)
+    .select(commonSelect)
+    .exec()
+    .then(data => !!data && data._doc),
+    ImageModel.findOne(commonQuery)
+    .select(commonSelect)
+    .exec()
+    .then(data => !!data && data._doc),
+    OtherMediaModel.findOne(commonQuery)
+    .select(commonSelect)
+    .exec()
+    .then(data => !!data && data._doc),
+  ])
   .then(data => !!data && data.some(item => !!item) && data)
   .then(notFound)
-  .then(data => {
+  .then(async (data) => {
     const index = data.findIndex(val => !!val)
 
     //合并文件
@@ -389,7 +354,7 @@ router
           break
       }
 
-      const [err, ] = mergeChunkFile({ name: md5, extname: type, mime: mime.toLowerCase(), auth })
+      const [err, ] = await mergeChunkFile({ name: md5, extname: type, mime: mime.toLowerCase(), auth })
       if(err) return Promise.reject({ errMsg: 'unkonown error', status: 500 })
       
       //修改数据库状态

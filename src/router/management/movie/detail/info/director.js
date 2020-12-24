@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { DirectorModel, UserModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { DirectorModel, UserModel, dealErr, notFound, Params, responseDataDeal, verifyTokenToData, ROLES_MAP, MOVIE_SOURCE_TYPE } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -15,11 +15,16 @@ const checkParams = (ctx, ...params) => {
     validator: [
       data => ObjectId.isValid(data)
     ]
+  }, {
+    name: 'country',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
   }, ...params)
 }
 
 const sanitizersParams = (ctx, ...params) => {
-  return Params.sanitizers(ctx.body, {
+  return Params.sanitizers(ctx.request.body, {
     name: 'avatar',
     sanitizers: [  
       data => ObjectId(data)
@@ -29,58 +34,66 @@ const sanitizersParams = (ctx, ...params) => {
     sanitizers: [
       data => typeof data === 'string' && !!data.length ? data : undefined
     ]
+  }, {
+    name: 'country',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
   }, ...params)
 }
 
 router
 .get('/', async(ctx) => {
   
-  const [ _id ] = Params.sanitizers(ctx.query, {
-    name: '_id',
-    sanitizers: [
-      data => ObjectId(data)
-    ]
-  })
+  const { _id, content } = ctx.query
+  let query = {}
+  if(ObjectId.isValid(_id)) {
+    query = {
+      _id: ObjectId(_id)
+    }
+  }else if(typeof content === 'string' && !!content){
+    query = {
+      name: {
+        $regex: content,
+        $options: 'gi'
+      }
+    }
+  }
 
-  const data = await DirectorModel.findOne({
-    _id
-  })
+  const data = await DirectorModel.find(query)
   .select({
     _id: 1,
     other: 1,
     name: 1,
     createdAt: 1,
     updatedAt: 1,
-    source_type: 1
+    source_type: 1,
+    country: 1
+  })
+  .populate({
+    path: 'country',
+    select: {
+      name: 1,
+      _id: 1
+    }
   })
   .exec()
-  .then(data => !!data && data._doc)
-  .then(notFound)
   .then(data => {
-    const { name, other: { another_name, avatar }, createdAt, updatedAt, source_type } = data
-
-    // {
-    //   data: {
-    //     name,
-    //     another_name,
-    //     avatar,
-    //     _id,
-    //     createdAt,
-    //     updatedAt,
-    //     source_type
-    //   }
-    // }
 
     return {
-      data: {
-        name,
-        another_name,
-        avatar: avatar ? avatar.src : null,
-        _id,
-        createdAt,
-        updatedAt,
-        source_type
-      }
+      data: data.map(item => {
+        const { name, other: { another_name, avatar }, country, createdAt, updatedAt, source_type, _id } = item
+        return {
+          name,
+          another_name,
+          avatar: avatar ? avatar.src : null,
+          _id,
+          createdAt,
+          updatedAt,
+          source_type,
+          country
+        }
+      })
     }
   })
   .catch(dealErr(ctx))
@@ -97,14 +110,14 @@ router
   const check = checkParams(ctx)
   if(check) return
 
-  const [avatar, alias] = sanitizersParams(ctx)
+  const [avatar, alias, country] = sanitizersParams(ctx)
   const { request: { body: { name } } } = ctx
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   })
   .select({
     _id: 1,
@@ -117,6 +130,7 @@ router
     const { _id, roles } = data
     const model = new DirectorModel({
       name,
+      country,
       other: {
         another_name: alias || '',
         avatar
@@ -149,7 +163,7 @@ router
   const check = checkParams(ctx)
   if(check) return
 
-  const [ avatar, alias, _id ] = sanitizersParams(ctx, {
+  const [ avatar, alias, country, _id ] = sanitizersParams(ctx, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
@@ -162,6 +176,7 @@ router
   }, {
     $set: {
       name,
+      country,
       "other.avatar": avatar,
       ...(alias ? { "other.another_name": alias } : {})
     }
@@ -196,7 +211,7 @@ router
     _id
   })
   .then(data => {
-    if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+    if(data.deletedCount == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
     return {
       data: {
         data: null

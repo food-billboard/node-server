@@ -17,7 +17,6 @@ function responseExpect(res, validate=[]) {
   commonValidate.number(target.hot)
   commonValidate.date(target.updatedAt)
   expect(target.token).to.be.satisfies(function(target) {
-    console.log(getToken(target)[0])
     return !!!getToken(target)[0]
   })
   commonValidate.string(target.username)

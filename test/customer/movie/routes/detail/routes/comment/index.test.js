@@ -81,6 +81,7 @@ describe(`${COMMON_API} test`, function() {
   let commentDatabase
   let movieDatabase
   let result
+  let getToken
 
   before(async function() {
 
@@ -98,13 +99,13 @@ describe(`${COMMON_API} test`, function() {
         src: COMMON_API,
         poster: imageId
       })
-      const { model: user, token } = mockCreateUser({
+      const { model: user, signToken } = mockCreateUser({
         username: COMMON_API,
         avatar: imageId,
       })
-
+      
+      getToken = signToken
       videoDatabase = video
-      selfToken = token
       userDatabase = user
 
       return Promise.all([
@@ -115,7 +116,7 @@ describe(`${COMMON_API} test`, function() {
     .then(([video, user]) => {
       videoId = video._id
       userId = user._id
-      
+      selfToken = getToken(userId)
       const { model: movie } = mockCreateMovie({
         name: COMMON_API,
         author: userId,

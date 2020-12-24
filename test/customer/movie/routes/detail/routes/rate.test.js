@@ -17,14 +17,12 @@ describe(`${COMMON_API} test`, function() {
 
   before(function(done) {
 
-    const { model: user, token } = mockCreateUser({
+    const { model: user, signToken } = mockCreateUser({
       username: COMMON_API
     })
     const { model: movie } = mockCreateMovie({
       name: COMMON_API
     })
-
-    selfToken = token
 
     Promise.all([
       user.save(),
@@ -33,7 +31,7 @@ describe(`${COMMON_API} test`, function() {
     .then(([user, movie]) => {
       userId = user._id
       movieId = movie._id
-      
+      selfToken = signToken(userId)
       done()
 
     })

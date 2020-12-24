@@ -52,16 +52,7 @@ router
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
-
-  const mineId = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._doc._id)
+  const { id } = token
 
   const data = await BarrageModel.find({
     origin: _id,
@@ -90,7 +81,7 @@ router
         return {
           ...nextItem,
           hot: like_users.length,
-          like: !!~like_users.indexOf(mineId)
+          like: !!~like_users.indexOf(ObjectId(id))
         }
       })
     }
@@ -128,7 +119,7 @@ router
   if(check) return
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
   const [ _id, content, time ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
@@ -145,27 +136,17 @@ router
     type: ['toInt']
   })
 
-  const data = await Promise.all([
-    MovieModel.findOne({
-      _id
-    })
-    .select({_id: 1})
-    .exec()
-    .then(data => !!data)
-    .then(notFound),
-    UserModel.findOne({
-      mobile: Number(mobile)
-    })
-    .select({
-      _id: 1
-    })
-    .exec()
-    .then(data => !!data && data._doc._id)
-  ])
-  .then(([_, user]) => {
+  const data = await MovieModel.findOne({
+    _id
+  })
+  .select({_id: 1})
+  .exec()
+  .then(data => !!data)
+  .then(notFound)
+  .then(_ => {
     const newModel = new BarrageModel({
       origin: _id,
-      user,
+      user: ObjectId(id),
       like_users: [],
       time_line: time,
       content
@@ -191,7 +172,7 @@ router
   if(check) return
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
   const [ _id ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
@@ -199,20 +180,11 @@ router
     ]
   })
 
-  const mineId = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._doc._id)
-
   const data = await BarrageModel.findOneAndUpdate({
     _id,
-    like_users: { $nin: [mineId] }
+    like_users: { $nin: [ ObjectId(id) ] }
   }, {
-    $push: { like_users: mineId }
+    $push: { like_users: ObjectId(id) }
   })
   .select({
     user: 1,
@@ -225,7 +197,7 @@ router
     UserModel.updateOne({
       _id: user
     }, {
-      $push: { hot_history: { _id: mineId, timestamps: Date.now(), origin_type: 'barrage', origin_id: _id } },
+      $push: { hot_history: { _id: ObjectId(id), timestamps: Date.now(), origin_type: 'barrage', origin_id: _id } },
       $inc: { hot: 1 }
     })
 
@@ -250,7 +222,7 @@ router
   if(check) return
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
   const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
@@ -258,20 +230,13 @@ router
     ]
   })
 
-  const mineId = await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._doc._id)
+  console.log(id)
 
   const data = await BarrageModel.findOneAndUpdate({
     origin: _id,
-    like_users: { $in: [ mineId ] }
+    like_users: { $in: [ ObjectId(id) ] }
   }, {
-    $pull: { like_users: mineId }
+    $pull: { like_users: ObjectId(id) }
   })
   .select({
     user: 1

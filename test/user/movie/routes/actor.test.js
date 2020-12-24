@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateActor, Request, commonValidate, createEtag } = require('@test/utils')
-const { ActorModel } = require('@src/utils')
+const { mockCreateActor, mockCreateDistrict, Request, commonValidate, createEtag } = require('@test/utils')
+const { ActorModel, DistrictModel } = require('@src/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/actor'
@@ -35,11 +35,19 @@ describe(`${COMMON_API} test`, function() {
       let result
   
       before(function(done) {
-        const { model } = mockCreateActor({
+
+        const { model } = mockCreateDistrict({
           name: COMMON_API
         })
 
         model.save()
+        .then(data => {
+          const { model } = mockCreateActor({
+            name: COMMON_API,
+            country: data._id
+          })
+          return model.save()
+        })
         .then(function(data) {
           result = data
           done()
@@ -50,9 +58,14 @@ describe(`${COMMON_API} test`, function() {
       })
   
       after(function(done) {
-        ActorModel.deleteOne({
-          name: COMMON_API
-        })
+        Promise.all([
+          ActorModel.deleteOne({
+            name: COMMON_API
+          }),
+          DistrictModel.deleteMany({
+            name: COMMON_API
+          })
+        ])
         .then(function() {
           done()
         })

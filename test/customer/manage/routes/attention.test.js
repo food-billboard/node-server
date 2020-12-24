@@ -41,12 +41,10 @@ describe(`${COMMON_API} test`, function() {
       mobile: 15874996521
     })
   
-    const { model: self, token } = mockCreateUser({
+    const { model: self, signToken } = mockCreateUser({
       username: COMMON_API,
       mobile: 15789665412
     })
-
-    selfToken = token
 
     await Promise.all([
       self.save(),
@@ -55,6 +53,7 @@ describe(`${COMMON_API} test`, function() {
     .then(([self, user]) => {
       userId = user._id
       result = self
+      selfToken = signToken(self._id)
       return Promise.all([
         UserModel.updateOne({
           mobile: 15789665412,

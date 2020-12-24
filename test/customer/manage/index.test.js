@@ -38,17 +38,17 @@ describe(`${COMMON_API} test`, function() {
 
   before(async function() {
 
-    const { model:self, token, signToken:getToken } = mockCreateUser({
+    const { model:self, signToken:getToken } = mockCreateUser({
       username: COMMON_API,
     })
 
-    selfToken = token
     signToken = getToken
 
     await self.save()
     .then(self => {
       result = self
       userId = self._id
+      selfToken = signToken(userId)
     })
     .catch(err => {
       console.log('oops: ', err)
@@ -74,7 +74,7 @@ describe(`${COMMON_API} test`, function() {
   describe(`pre check params test -> ${COMMON_API}`, function() {
 
     beforeEach(function(done) {
-      selfToken = signToken()
+      selfToken = signToken(userId)
       done()
     })
 

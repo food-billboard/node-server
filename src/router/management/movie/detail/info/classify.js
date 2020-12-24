@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { ClassifyModel, UserModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { ClassifyModel, UserModel, dealErr, notFound, Params, responseDataDeal, verifyTokenToData, ROLES_MAP, MOVIE_SOURCE_TYPE } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -19,7 +19,7 @@ const checkParams = (ctx, ...params) => {
 }
 
 const sanitizersParams = (ctx, ...params) => {
-  return Params.sanitizers(ctx.body, {
+  return Params.sanitizers(ctx.request.body, {
     name: 'icon',
     sanitizers: [  
       data => ObjectId(data)
@@ -30,16 +30,22 @@ const sanitizersParams = (ctx, ...params) => {
 router
 .get('/', async(ctx) => {
 
-  const [ _id ] = Params.sanitizers(ctx.query, {
-    name: '_id',
-    sanitizers: [
-      data => ObjectId(data)
-    ]
-  })
+  const { _id, content } = ctx.query
+  let query = {}
+  if(ObjectId.isValid(_id)) {
+    query = {
+      _id: ObjectId(_id)
+    }
+  }else if(typeof content === 'string' && !!content){
+    query = {
+      name: {
+        $regex: content,
+        $options: 'gi'
+      }
+    }
+  }
 
-  const data = await ClassifyModel.findOne({
-    _id
-  })
+  const data = await ClassifyModel.find(query)
   .select({
     _id: 1,
     name: 1,
@@ -50,33 +56,21 @@ router
     source_type: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
-  .then(notFound)
   .then(data => {
-    const { name, icon, glance, createdAt, updatedAt, source_type } = data
-
-    // {
-    //   data: {
-    //     name,
-    //     glance,
-    //     icon,
-    //     _id,
-    //     createdAt,
-    //     updatedAt,
-    //     source_type
-    //   }
-    // }
 
     return {
-      data: {
-        name,
-        glance,
-        icon: icon ? icon.src : null,
-        _id,
-        createdAt,
-        updatedAt,
-        source_type
-      }
+      data: data.map(item => {
+        const { name, icon, glance, createdAt, updatedAt, source_type, _id } = item
+        return {
+          name,
+          glance,
+          icon: icon ? icon.src : null,
+          _id,
+          createdAt,
+          updatedAt,
+          source_type
+        }
+      })
     }
   })
   .catch(dealErr(ctx))
@@ -96,10 +90,10 @@ router
   const { request: { body: { name } } } = ctx
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   })
   .select({
     _id: 1,
@@ -187,7 +181,7 @@ router
     _id
   })
   .then(data => {
-    if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+    if(data.deletedCount == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
     return {
       data: {
         data: null

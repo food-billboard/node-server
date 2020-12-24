@@ -19,16 +19,16 @@ describe(`${COMMON_API} test`, function() {
 
   before(function(done) {
 
-    const { model, token } = mockCreateUser({
+    const { model, signToken } = mockCreateUser({
       username: COMMON_API
     })
 
     userDatabase = model
-    selfToken = token
 
     userDatabase.save()
     .then(data => {
       userId = data._id
+      selfToken = signToken(userId)
       const { model } = mockCreateComment({
         user_info: userId,
         source_type: 'comment',

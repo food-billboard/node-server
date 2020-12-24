@@ -26,11 +26,11 @@ router.put('/', async (ctx) => {
     type: [ 'toInt' ]
   })
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await Promise.all([
     UserModel.findOne({
-      mobile: Number(mobile)
+      _id: ObjectId(id)
     })
     .select({
       rate: 1
@@ -55,7 +55,7 @@ router.put('/', async (ctx) => {
     if(rateValue) {
       return Promise.all([
         UserModel.updateOne({
-          mobile: Number(mobile),
+          _id: ObjectId(id),
           "rate._id": _id
         }, {
           $set: { "rate.$.rate": value }
@@ -69,7 +69,7 @@ router.put('/', async (ctx) => {
     }else {
       return Promise.all([
         UserModel.updateOne({
-          mobile: Number(mobile)
+          _id: ObjectId(id)
         }, {
           $push: { rate: { _id, rate:value } }
         }),

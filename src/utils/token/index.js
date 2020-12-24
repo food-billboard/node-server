@@ -6,7 +6,9 @@ try {
   console.log('不支持 crypto');
 }
 const { Types: { ObjectId } } = require('mongoose')
-const { RoomModel } = require('../mongodb/mongo.lib');
+const { RoomModel } = require('../mongodb/mongo.lib')
+const cookie = require('./cookie')
+const { getCookie, TOKEN_COOKIE } = cookie 
 
 //秘钥
 const SECRET = "________SE__C_R__E_T"
@@ -34,13 +36,14 @@ const fileEncoded = (str) => {
 }
 
 //创建token
-const signToken = ({ mobile, password, roles }, options={expiresIn: '1d'}, callback=(err, token)=>{}) => {
+const signToken = ({ id, mobile }, options={expiresIn: '1d'}, callback=(err, token)=>{}) => {
   let newOptions = options, newCallback = callback
   if(typeof options === 'function') {
     newOptions = {}
     newCallback = options
   }
   return jwt.sign({
+    id,
     mobile,
     middel: MIDDEL,
   }, SECRET, newOptions)
@@ -130,7 +133,8 @@ const middlewareVerifyTokenForSocketIo = socket => async (packet, next) => {
 //token验证并返回内容
 const verifyTokenToData = (ctx) => {
   const { header: { authorization } } = ctx.request
-  return getToken(authorization)
+  const token = getCookie(ctx, TOKEN_COOKIE)
+  return getToken(token || authorization)
 }
 
 //socket验证token
@@ -158,16 +162,6 @@ const getToken = (authorization) => {
   }
 }
 
-const otherToken = (token) => {
-  try { 
-    const { middel, ...nextToken } = verifyToken(token)
-    if(middel !== MIDDEL) return ['401', null]
-    return [null, nextToken]
-  }catch(err) {
-    return [err, null]
-  }
-}
-
 module.exports = {
   encoded,
   signToken,
@@ -175,7 +169,7 @@ module.exports = {
   middlewareVerifyTokenForSocketIo,
   verifyTokenToData,
   verifySocketIoToken,
-  otherToken,
   fileEncoded,
-  getToken
+  getToken,
+  ...cookie
 }

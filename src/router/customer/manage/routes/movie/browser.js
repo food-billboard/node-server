@@ -1,5 +1,6 @@
 const Router = require('@koa/router')
 const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
@@ -20,10 +21,10 @@ router.get('/', async (ctx) => {
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   const data = await UserModel.findOne({
-    mobile: Number(mobile)
+    _id: ObjectId(id)
   })
   .select({
     glance: 1,

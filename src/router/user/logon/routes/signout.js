@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, dealErr, UserModel, RoomModel, notFound, responseDataDeal } = require("@src/utils")
+const { verifyTokenToData, dealErr, UserModel, RoomModel, notFound, responseDataDeal, setCookie, TOKEN_COOKIE } = require("@src/utils")
 
 const router = new Router()
 
@@ -41,8 +41,15 @@ router
     .exec()
   })
   .then(data => !!data && data._id)
-  .then(data => {
+  .then(_ => {
     // if(!data) return Promise.reject({errMsg: '服务器错误', status: 500})
+
+    //重置默认的koa状态码
+    ctx.status = 200
+    //设置cookie
+    //临时设置，需要修改
+    setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'delete' })
+
     return {
       data: {}
     }

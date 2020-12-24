@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateDirector, Request, commonValidate, createEtag } = require('@test/utils')
-const { DirectorModel } = require('@src/utils')
+const { mockCreateDirector, mockCreateDistrict, Request, commonValidate, createEtag } = require('@test/utils')
+const { DirectorModel, DistrictModel } = require('@src/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/user/movie/director'
@@ -33,13 +33,23 @@ describe(`${COMMON_API} test`, function() {
     describe(`get director list success test -> ${COMMON_API}`, function() {
 
       let result
+      let districtId
   
       before(function(done) {
-        const { model } = mockCreateDirector({
+
+        const { model } = mockCreateDistrict({
           name: COMMON_API
         })
 
         model.save()
+        .then(data => {
+          districtId = data._id
+          const { model } = mockCreateDirector({
+            name: COMMON_API,
+            country: districtId
+          })
+          return model.save()
+        })
         .then(function(data) {
           result = data
           done()
@@ -50,9 +60,14 @@ describe(`${COMMON_API} test`, function() {
       })
   
       after(function(done) {
-        DirectorModel.deleteOne({
-          name: COMMON_API
-        })
+        Promise.all([
+          DirectorModel.deleteOne({
+            name: COMMON_API
+          }),
+          DistrictModel.deleteMany({
+            name: COMMON_API
+          })
+        ])
         .then(function() {
           done()
         })

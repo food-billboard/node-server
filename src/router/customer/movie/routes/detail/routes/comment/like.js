@@ -58,38 +58,27 @@ router
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
+  const data = await CommentModel.findOneAndUpdate({
+    _id,
+    like_person: { $nin: [ ObjectId(id) ] } 
+  }, {
+    $inc: { total_like: 1 },
+    $addToSet: { like_person: ObjectId(id) }
   })
   .select({
-    _id: 1
+    _id: 0,
+    user_info: 1
   })
   .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then(id => {
-    return CommentModel.findOneAndUpdate({
-      _id,
-      like_person: { $nin: [id] } 
-    }, {
-      $inc: { total_like: 1 },
-      $addToSet: { like_person: id }
-    })
-    .select({
-      _id: 0,
-      user_info: 1
-    })
-    .exec()
-    .then(data => !!data && data.user_info)
-    .then(data => {
-      if(!data) {
-        ctx.status = 403
-        return Promise.reject({ err: true, errMsg: 'already liked before', status: 403 })
-      }
-      return data
-    })
+  .then(data => !!data && data.user_info)
+  .then(data => {
+    if(!data) {
+      ctx.status = 403
+      return Promise.reject({ err: true, errMsg: 'already liked before', status: 403 })
+    }
+    return data
   })
   .then(userId => {
     return UserModel.updateOne({
@@ -116,38 +105,27 @@ router
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
+  const data = await CommentModel.findOneAndUpdate({
+    _id,
+    like_person: { $in: [ ObjectId(id) ] } 
+  }, {
+    $inc: { total_like: -1 },
+    $pull: { like_person: ObjectId(id) }
   })
   .select({
-    _id: 1
+    _id: 0,
+    user_info: 1
   })
   .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then(id => {
-    return CommentModel.findOneAndUpdate({
-      _id,
-      like_person: { $in: [ id ] } 
-    }, {
-      $inc: { total_like: -1 },
-      $pull: { like_person: id }
-    })
-    .select({
-      _id: 0,
-      user_info: 1
-    })
-    .exec()
-    .then(data => !!data && data.user_info)
-    .then(data => {
-      if(!data) {
-        ctx.status = 403
-        return Promise.reject({ err: true, errMsg: 'not liked before', status: 403 })
-      }
-      return data
-    })
+  .then(data => !!data && data.user_info)
+  .then(data => {
+    if(!data) {
+      ctx.status = 403
+      return Promise.reject({ err: true, errMsg: 'not liked before', status: 403 })
+    }
+    return data
   })
   .then(userId => {
     return UserModel.updateOne({

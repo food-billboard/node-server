@@ -88,7 +88,6 @@ describe(`${COMMON_API} test`, function() {
       name: COMMON_API,
       // roles: [ 'CUSTOMER' ]
     })
-    selfToken = token
     getToken = signToken
 
     Promise.all([
@@ -102,6 +101,7 @@ describe(`${COMMON_API} test`, function() {
       classifyId = classify._id
       otherUserId = otherUser._id
       imageId = image._id
+      selfToken = getToken(userInfo._id)
 
       newMovie = {
         ...newMovie,
@@ -158,7 +158,7 @@ describe(`${COMMON_API} test`, function() {
   })
 
   beforeEach(function(done) {
-    selfToken = getToken()
+    selfToken = getToken(userInfo._id)
     done()
   })
 
@@ -541,8 +541,6 @@ describe(`${COMMON_API} test`, function() {
       })
 
       it(`delete the movie success`, function(done) {
-
-        console.log(statusId)
 
         Request
         .delete(COMMON_API)

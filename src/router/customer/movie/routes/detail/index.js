@@ -35,12 +35,12 @@ router
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
   let store = true
 
   const data = await UserModel.findOneAndUpdate({
-    mobile: Number(mobile),
+    _id: ObjectId(id),
     // store: { $in: [_id] }
   }, {
     $pull: { glance: { _id } },
@@ -143,7 +143,7 @@ router
     const rate = total_rate / rate_person
 
     UserModel.updateOne({
-      mobile: Number(mobile),
+      _id: ObjectId(id),
     }, {
       $push: { glance: { _id, timestamps: Date.now() } }
     })

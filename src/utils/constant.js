@@ -13,47 +13,23 @@ const EMAIL_REGEXP = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
 
 //最大单次发送文件大小
-const MAX_FILE_SINGLE_RESPONSE_SIZE = 1024 * 500
+const MAX_FILE_SINGLE_RESPONSE_SIZE = 1024 * 1024 * 5
 
 const DIR_LIST = {
   dir: 'static',
   path: STATIC_FILE_PATH,
   children: [
     {
-      dir: 'public',
-      path: path.resolve(STATIC_FILE_PATH, 'public'),
-      children: [
-        {
-          dir: 'image',
-          path: path.resolve(STATIC_FILE_PATH, 'public/image'),
-        },
-        {
-          dir: 'video',
-          path: path.resolve(STATIC_FILE_PATH, 'public/video'),
-        },
-        {
-          dir: 'other',
-          path: path.resolve(STATIC_FILE_PATH, 'public/other'),
-        }
-      ]
+      dir: 'image',
+      path: path.resolve(STATIC_FILE_PATH, 'image'),
     },
     {
-      dir: 'private',
-      path: path.resolve(STATIC_FILE_PATH, 'private'),
-      children: [
-        {
-          dir: 'image',
-          path: path.resolve(STATIC_FILE_PATH, 'private/image'),
-        },
-        {
-          dir: 'video',
-          path: path.resolve(STATIC_FILE_PATH, 'private/video'),
-        },
-        {
-          dir: 'other',
-          path: path.resolve(STATIC_FILE_PATH, 'private/other'),
-        }
-      ]
+      dir: 'video',
+      path: path.resolve(STATIC_FILE_PATH, 'video'),
+    },
+    {
+      dir: 'other',
+      path: path.resolve(STATIC_FILE_PATH, 'other'),
     },
     {
       dir: 'template',
@@ -96,6 +72,22 @@ const COMMENT_SOURCE_TYPE = {
   comment: 'comment'
 }
 
+const MEDIA_STATUS = {
+  ERROR: 'ERROR', 
+  COMPLETE: 'COMPLETE', 
+  UPLOADING: 'UPLOADING'
+}
+
+const MEDIA_AUTH = {
+  PUBLIC: 'PUBLIC', 
+  PRIVATE: 'PRIVATE'
+}
+
+const MEDIA_ORIGIN_TYPE = {
+  USER: 'USER',
+  SYSTEM: 'SYSTEM'
+}
+
 module.exports = {
   EMAIL_AUTH,
   EMAIL_REGEXP,
@@ -108,5 +100,8 @@ module.exports = {
   MOVIE_SOURCE_TYPE,
   ROLES_MAP,
   FEEDBACK_STATUS,
-  COMMENT_SOURCE_TYPE
+  COMMENT_SOURCE_TYPE,
+  MEDIA_STATUS,
+  MEDIA_AUTH,
+  MEDIA_ORIGIN_TYPE
 }

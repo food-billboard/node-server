@@ -9,30 +9,17 @@ router
   const { url } = ctx
 
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
-  let data = await UserModel.findOne({
-    mobile: Number(mobile)
+  let data = await FeedbackModel.findOne({
+    user_info: ObjectId(id),
+    createdAt: { $gt: formatISO(Date.now() - NUM_DAY(1)) }
   })
   .select({
-    _id: 1
+    _id: 1,
+    createdAt: 1,
   })
   .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then(id => {
-    userId = id
-    return FeedbackModel.findOne({
-      user_info: userId,
-      createdAt: { $gt: formatISO(Date.now() - NUM_DAY(1)) }
-    })
-    .select({
-      _id: 1,
-      createdAt: 1,
-
-    })
-    .exec()
-  })
   .then(data => !!data && data)
   .then(data => {
     if(!!data) return Promise.reject({ errMsg: 'frequent', status: 503 })
@@ -100,32 +87,18 @@ router
     ]
   })
   const [, token] = verifyTokenToData(ctx)
-  const { mobile } = token
+  const { id } = token
 
-  const data = await UserModel.findOne({
-    mobile: Number(mobile)
+  const comment = new FeedbackModel({
+    user_info: ObjectId(id),
+    content: {
+      text,
+      video,
+      image
+    }
   })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then((userId) => {
-    const comment = new FeedbackModel({
-      user_info: userId,
-      content: {
-        text,
-        video,
-        image
-      }
-    })
 
-    return comment
-  })
-  .then(comment => {
-    return comment.save()
-  })
+  const data = await comment.save()
   .then(_ => true)
   .catch(dealErr(ctx))
 
