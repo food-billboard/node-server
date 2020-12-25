@@ -1480,39 +1480,6 @@
         "tags": [
           "upload"
         ],
-        "summary": "小文件上传",
-        "description": "",
-        "operationId": "customer_upload_post_file",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "auth",
-            "in": "body",
-            "description": "资源访问权限(PUBLIC, PRIVATE)",
-            "type": "string",
-            "enum": [ "PUBLIC", "PRIVATE" ]
-          },
-          {
-            "name": "file",
-            "type":"file",
-            "in": "body",
-            "description": "文件"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功"
-          }
-        },
-        "deprecated": true
-      },
-      "post": {
-        "tags": [
-          "upload"
-        ],
         "summary": "创建文件信息",
         "description": "上传前在服务端创建副本",
         "operationId": "customer_upload_post_file",
@@ -1548,8 +1515,7 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       },
       "head": {
         "tags": [
@@ -1602,8 +1568,7 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       },
       "get": {
         "tags": [
@@ -1628,8 +1593,7 @@
           "200": {
             "description": "成功"
           }
-        },
-        "deprecated": true
+        }
       },
       "delte": {
         "tags": [
@@ -1649,8 +1613,7 @@
           "200": {
             "description": "成功"
           }
-        },
-        "deprecated": true
+        }
       },
       "patch": {
         "tags": [

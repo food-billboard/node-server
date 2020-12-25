@@ -41,7 +41,7 @@ const mediaDeal = {
     .exec()
     .then(data => !!data && data._doc)
     .then(notFound)
-    .then(data => ({ ...data, path: `/image/${md5}.${Mime.getExtension(data.mime)}` }))
+    .then(data => ({ ...data, path: `/image/${md5}.${Mime.getExtension(data.info.mime)}` }))
   },
   video: ({
     md5,
@@ -58,7 +58,7 @@ const mediaDeal = {
     .exec()
     .then(data => !!data && data._doc)
     .then(notFound)
-    .then(data => ({ ...data, path: `/video/${md5}.${Mime.getExtension(data.mime)}` }))
+    .then(data => ({ ...data, path: `/video/${md5}.${Mime.getExtension(data.info.mime)}` }))
   },
   other: ({
     md5,
@@ -75,34 +75,40 @@ const mediaDeal = {
     .exec()
     .then(data => !!data && data._doc)
     .then(notFound)
-    .then(data => ({ ...data, path: `/other/${md5}.${Mime.getExtension(data.mime)}` }))
+    .then(data => ({ ...data, path: `/other/${md5}.${Mime.getExtension(data.info.mime)}` }))
   }
 }
 
-const isValid = ({
-  auth,
-  info: {
-    status,
-    mime
-  },
-  white_list,
-  token
-}) => {
+const isValid = (fileInfo) => {
+  // {
+  //   auth,
+  //   info: {
+  //     status,
+  //     mime
+  //   },
+  //   white_list,
+  //   token
+  // }
+
+  const { info: { mime, status }, auth, token, white_list } = fileInfo
+
   if(auth.toUpperCase() === MEDIA_AUTH.PUBLIC) return Promise.resolve({
+    ...fileInfo,
     mime: mime.toLowerCase()
   })
   if(!token || status.toUpperCase() !== MEDIA_STATUS.COMPLETE || !white_list.some(user => user.equals(token._id))) return Promise.reject({ errMsg: 'forbidden', status: 403 })
   return Promise.resolve({
-    mime: mime.toLowerCase()
+    ...fileInfo,
+    mime: mime.toLowerCase(),
   })
 }
 
-const readFileRange = (ctx) => {
+const readFileRange = (ctx, size) => {
   const { request: { headers } } = ctx
   let range = headers['range'] //bytes=range-start-range-end, ...
   let start = 0
   let end = MAX_FILE_SINGLE_RESPONSE_SIZE
-  const valid = !!ranage
+  const valid = !!range
   if(valid) {
     range = range.trim()
     try {
@@ -130,24 +136,30 @@ const readFileRange = (ctx) => {
 }
 
 const readFile = async ({
-  path: relativePath,
+  path,
   ctx
 }) => {
 
-  const range = readFileRange(ctx)
-  if(!range) return Promise.reject({ errMsg: 'range error', status: 416 })
-
-  const absolutePath = path.join(STATIC_FILE_PATH, '../', relativePath)
-  const { start, end, valid } = range
-  let fileBuffer = Buffer.alloc(end - start)
-  let fileHandle
   let size
 
   try {
-    fileHandle = await fs.open(absolutePath, 'r', fsSync.constants.S_IRUSR)
-    fileHandle.read(fileBuffer, 0, fileBuffer.byteLength, start)
-    const stat = fsSync.statSync(absolutePath)
+    const stat = fsSync.statSync(path)
     size = stat.size
+  }catch(err) {
+    console.log(err)
+    return Promise.reject({ errMsg: 'range error', status: 404 })
+  }
+
+  const range = readFileRange(ctx, size)
+  if(!range) return Promise.reject({ errMsg: 'range error', status: 416 })
+
+  const { start, end, valid } = range
+  let fileBuffer = Buffer.alloc(end - start)
+  let fileHandle
+
+  try {
+    fileHandle = await fs.open(path, 'r', fsSync.constants.S_IRUSR)
+    fileHandle.read(fileBuffer, 0, fileBuffer.byteLength, start)
   }catch(err) {
     console.log(err)
   }finally {
@@ -180,14 +192,20 @@ const StaticMiddleware = async (ctx, next) => {
 
   let filePath
 
-  const data = await !!mediaDeal[type] ? mediaDeal[type]({ md5 }) : Promise.reject()
+  const data = await new Promise((resolve, reject) => {
+    if(!!mediaDeal[type]) {
+      resolve(mediaDeal[type]({ md5 }))
+    }else {
+      reject()
+    }
+  })
   .then(data => isValid({
     ...data,
     token
   }))
   .then((data) => {
     mime = data.mime
-    filePath = path.join(STATIC_FILE_PATH, '../', data.path)
+    filePath = path.join(STATIC_FILE_PATH, data.path)
     return fs.stat(filePath)
   })
   .then(stat => {
@@ -199,7 +217,6 @@ const StaticMiddleware = async (ctx, next) => {
 
     //是否未更改
     if(!!lastModified && Day(lastModified).valueOf() === mtimeMs) return true
-
     //读取部分文件
     return readFile({
       path: filePath,

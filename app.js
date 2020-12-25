@@ -4,11 +4,12 @@ const Router = require('./src/index')
 const Cors = require('koa-cors')
 const KoaStatic = require('koa-static')
 const KoaBody = require('koa-body')
-const app = new Koa()
+const Compress = require('koa-compress')
 const path = require('path')
+const morgan = require('koa-morgan')
+const app = new Koa()
 const { MongoDB, StaticMiddleware, initStaticFileDir, AccessLimitCheck, redisConnect, authMiddleware, notes_customer_behaviour_middleware } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
-const morgan = require('koa-morgan')
 
 //数据库启动
 MongoDB()
@@ -23,6 +24,20 @@ app.use(Cors())
 .use(morgan('combined', {
   stream: request.stream,
   skip: function (req, res) { return res.statusCode < 300 }
+}))
+//压缩
+.use(Compress({
+  filter (content_type) {
+  	return /json/i.test(content_type)
+  },
+  threshold: 2048,
+  br: false,
+  gzip: {
+    flush: require('zlib').constants.Z_SYNC_FLUSH
+  },
+  deflate: {
+    flush: require('zlib').constants.Z_SYNC_FLUSH,
+  },
 }))
 // app.use(bodyParser())
 //请求速率限制
@@ -43,10 +58,10 @@ app.use(Cors())
 //api访问权限
 .use(authMiddleware)
 //静态资源访问权限
-.use(StaticMiddleware)
+// .use(StaticMiddleware)
 //用户行为记录
 .use(notes_customer_behaviour_middleware)
-.use(KoaStatic(path.resolve(__dirname, 'static'), {
+.use(KoaStatic(path.resolve(__dirname), {
   setHeaders: (res, path, stats) => {
 
   },
