@@ -6,6 +6,7 @@ const { createHook, executionAsyncId, executionAsyncResource } = async_hooks
 const path = require('path')
 const { timestamp, label, combine, simple, splat, prettyPrint, printf, json, ms } = format
 const Day = require('dayjs')
+const chalk = require('chalk')
 const fs = require('fs')
 const { verifyTokenToData } = require('@src/utils/token')
 const { isType, uuid } = require('@src/utils/tool')
@@ -283,7 +284,7 @@ request.stream = {
 const log4Error = (ctx, error) => {
   const { __request_log_id__ } = ctx
   if(process.env.NODE_ENV !== 'production' || !__request_log_id__) {
-    console.log(error)
+    console.log(chalk.red('error', error))
     return
   }
 
@@ -301,7 +302,7 @@ const log4Error = (ctx, error) => {
       uuid: __request_log_id__
     }
   }else {
-    console.log(error)
+    console.log(chalk.red('error', error))
     return
   }
 
