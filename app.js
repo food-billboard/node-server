@@ -69,7 +69,7 @@ app.use(Cors())
 //api访问权限
 .use(authMiddleware)
 //静态资源访问权限
-// .use(StaticMiddleware)
+.use(StaticMiddleware)
 //用户行为记录
 .use(notes_customer_behaviour_middleware)
 .use(KoaStatic(path.resolve(__dirname), {

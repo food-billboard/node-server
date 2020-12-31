@@ -88,7 +88,10 @@ const MEDIA_ORIGIN_TYPE = {
   SYSTEM: 'SYSTEM'
 }
 
+const NETWORK = 'localhost'
+
 module.exports = {
+  NETWORK,
   EMAIL_AUTH,
   EMAIL_REGEXP,
   STATIC_FILE_PATH,

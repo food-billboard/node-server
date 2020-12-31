@@ -5,6 +5,9 @@ const chalk = require('chalk')
 const { log4Error } = require('@src/config/winston')
 const { STATIC_FILE_PATH, MEDIA_STATUS } = require('../constant')
 const { ImageModel, VideoModel, OtherMediaModel } = require('../mongodb/mongo.lib')
+const { rmdir } = require('../tool')
+
+const MAX_KEEP_FILE_MILL = 30 * 24 * 60 * 60 * 1000
 
 const mediaDeal = async ({
   path: folder,
@@ -17,6 +20,8 @@ const mediaDeal = async ({
   .then(fileList => {
     files = fileList.map(file => path.join(folder, file))
 
+    const now = new Date()
+
     return   model.deleteMany({
       $or: [
         {
@@ -24,6 +29,18 @@ const mediaDeal = async ({
         },
         {
           src: { $nin: files }
+        },
+        {
+          $and: [
+            {
+              "info.status": MEDIA_STATUS.UPLOADING,
+            },
+            {
+              updatedAt: {
+                $lte: new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
+              }
+            }
+          ]
         }
       ]
     })
@@ -58,6 +75,30 @@ const mediaDeal = async ({
 
 }
 
+//删除过期的临时文件
+const templateFileDeal = async () => {
+  const folder = path.join(STATIC_FILE_PATH, 'template')
+
+  return fs.readdir(folder)
+  .then(folderList => {
+    
+    return Promise.allSettled(folderList.map(subFolder => {
+      return fs.stat(subFolder)
+      .then(({  isFile, mtimeMs }) => {
+        //文件直接删除
+        if(isFile()) return fs.unlink(subFolder)
+
+        const now = Date.now()
+
+        return now - MAX_KEEP_FILE_MILL > mtimeMs ? Promise.resolve() : rmdir(subFolder)
+        
+      })
+    }))
+
+  })
+
+}
+
 const mediaSchedule = () => {
 
   const schedule = nodeSchedule.scheduleJob('*  *  20  *  *  7', function() {
@@ -81,6 +122,9 @@ const mediaSchedule = () => {
       path: path.join(STATIC_FILE_PATH, 'other'),
       model: OtherMediaModel
     })
+
+    //临时文件过期删除
+    templateFileDeal()
 
   })
 
