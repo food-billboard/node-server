@@ -1,14 +1,20 @@
 module.exports = {
   name: "app",
-  script: "./app.js",
-  apps : [{
-    name: 'app',
-    script: 'app.js',
-    watch: '.',
-    env: {
-      NODE_ENV: "production"
-    },
-  }],
+  // script: "./app.js",
+  apps : [
+    {
+      name: 'app',
+      script: 'app.js',
+      watch: '.',
+      env: {
+        NODE_ENV: "production"
+      },
+    }, 
+    {
+      name: 'media',
+      script: 'media.js',
+    }
+  ],
 
   deploy : {
     production : {

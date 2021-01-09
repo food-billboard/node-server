@@ -16,7 +16,8 @@ const {
   redisConnect, 
   authMiddleware, 
   notes_customer_behaviour_middleware,
-  mediaSchedule
+  mediaSchedule,
+  tagSchedule
 } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
 
@@ -28,6 +29,8 @@ initStaticFileDir()
 redisConnect()
 //媒体资源定时器
 mediaSchedule()
+//数据标签定时器
+tagSchedule()
 
 app.use(Cors())
 //请求前植入uuid来进行全链路的日志记录

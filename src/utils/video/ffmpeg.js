@@ -1,6 +1,9 @@
 const FfmpegCommand = require('fluent-ffmpeg')
 const chalk = require('chalk')
 const { NETWORK, STATIC_FILE_PATH } = require('../constant')
+const path = require('path')
+
+const sleep = (time=2000) => new Promise((resolve) => setTimeout(resolve, time))
 
 const createHls = async (filePath) => {
 
@@ -11,7 +14,7 @@ const createHls = async (filePath) => {
     // [ videoName ] = videoName.split('.')
     videoName = videoName.split('.')[0]
   }catch(err) {
-    console.log(chalk.red('文件地址错误'), err)
+    console.log(chalk.red('文件地址错误'), JSON.stringify(err))
     throw new Error({
       err: 'not found'
     })
@@ -52,12 +55,15 @@ const createHls = async (filePath) => {
       reject()
       console.log('an error happened: ' + err)
     })
-    .output(`rtmp://${NETWORK}:1935/live/${videoName}`, { end: true })
+    .output(`rtmp://${NETWORK}/live/${videoName}`, { end: true })
     .run()
   })
+  .then(_ => sleep())
   .then(_ => `http://${NETWORK}:8000/live/${videoName}/index.m3u8`)
 
 }
+
+// createHls(path.join(STATIC_FILE_PATH, '/video/273dbc82f45552ff7b98d36bf1ad86a8.mp4'))
 
 module.exports = {
   createHls

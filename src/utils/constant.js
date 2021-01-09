@@ -90,6 +90,9 @@ const MEDIA_ORIGIN_TYPE = {
 
 const NETWORK = 'localhost'
 
+//关键词抽取个数
+const EXTRACT_KEYWORD_TOP_N = 1
+
 module.exports = {
   NETWORK,
   EMAIL_AUTH,
@@ -106,5 +109,6 @@ module.exports = {
   COMMENT_SOURCE_TYPE,
   MEDIA_STATUS,
   MEDIA_AUTH,
-  MEDIA_ORIGIN_TYPE
+  MEDIA_ORIGIN_TYPE,
+  EXTRACT_KEYWORD_TOP_N
 }
