@@ -59,6 +59,19 @@ const METADATA = {
 }
 
 router
+.use(async (ctx, next) => {
+  const [, token] = verifyTokenToData(ctx)
+  if(!token) {
+    const data = dealErr(ctx)({ errMsg: 'forbidden', status: 403 })
+    responseDataDeal({
+      ctx,
+      data,
+      needCache: false
+    })
+    return 
+  }
+  return await next()
+})
 .use(async(ctx, next) => {
 
   const { request: { headers } } = ctx

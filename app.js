@@ -8,7 +8,17 @@ const Compress = require('koa-compress')
 const path = require('path')
 const morgan = require('koa-morgan')
 const app = new Koa()
-const { MongoDB, StaticMiddleware, initStaticFileDir, AccessLimitCheck, redisConnect, authMiddleware, notes_customer_behaviour_middleware } = require("@src/utils")
+const { 
+  MongoDB, 
+  StaticMiddleware, 
+  initStaticFileDir, 
+  AccessLimitCheck, 
+  redisConnect, 
+  authMiddleware, 
+  notes_customer_behaviour_middleware,
+  mediaSchedule,
+  tagSchedule
+} = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
 
 //数据库启动
@@ -17,6 +27,10 @@ MongoDB()
 initStaticFileDir()
 //redis服务启动
 redisConnect()
+//媒体资源定时器
+mediaSchedule()
+//数据标签定时器
+tagSchedule()
 
 app.use(Cors())
 //请求前植入uuid来进行全链路的日志记录
@@ -58,7 +72,7 @@ app.use(Cors())
 //api访问权限
 .use(authMiddleware)
 //静态资源访问权限
-// .use(StaticMiddleware)
+.use(StaticMiddleware)
 //用户行为记录
 .use(notes_customer_behaviour_middleware)
 .use(KoaStatic(path.resolve(__dirname), {

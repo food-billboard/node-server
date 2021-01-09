@@ -5,6 +5,8 @@ const { Types: { ObjectId } } = require('mongoose')
 const fs = require('fs')
 const { DIR_LIST, ROLES_MAP } = require('./constant')
 
+const fsPromise = fs.promises
+
 Day.extend(isoWeek)
 
 //检查是否存在文件夹
@@ -174,6 +176,24 @@ const findMostRole = (roles) => {
   return targetRole
 }
 
+//删除文件夹
+const rmdir = (path) => {
+  return fsPromise.stat(path)
+  .then(({
+    isFile
+  }) => {
+
+    if(isFile()) return fsPromise.unlink(path)
+
+    return fsPromise.readdir(path)
+    .then(fileList => {
+      return Promise.all(fileList.map(file => rmdir(file)))
+    })
+    .then(_ => fsPromise.rmdir(path))
+
+  })
+}
+
 module.exports = {
   isType,
   isEmpty,
@@ -188,4 +208,5 @@ module.exports = {
   checkDir,
   checkAndCreateDir,
   findMostRole,
+  rmdir
 }

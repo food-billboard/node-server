@@ -9,6 +9,7 @@ const Email = require('./email')
 const Auth = require('./auth')
 const CustomerOperation = require('./customer-operation')
 const Constant = require('./constant')
+const Schedule = require('./schedule')
 
 module.exports = {
   ...MongoDB,
@@ -21,5 +22,6 @@ module.exports = {
   ...Email,
   ...Auth,
   ...CustomerOperation,
-  ...Constant
+  ...Constant,
+  ...Schedule
 }

@@ -8,6 +8,7 @@ const { ImageModel, VideoModel, OtherMediaModel } = require('./mongodb/mongo.lib
 const { verifyTokenToData, fileEncoded } = require('./token')
 const { dealErr, notFound } = require('./error-deal')
 const { STATIC_FILE_PATH, MAX_FILE_SINGLE_RESPONSE_SIZE, MEDIA_AUTH, MEDIA_STATUS } = require('./constant')
+const { createHlsVideo } = require('./video')
 
 const getEndPath = (path, index) => {
   let list = path.split('/')
@@ -192,6 +193,9 @@ const StaticMiddleware = async (ctx, next) => {
 
   let filePath
 
+  //非图片视频先懒得处理了
+  if(type === 'other') return await next()
+
   const data = await new Promise((resolve, reject) => {
     if(!!mediaDeal[type]) {
       resolve(mediaDeal[type]({ md5 }))
@@ -206,44 +210,52 @@ const StaticMiddleware = async (ctx, next) => {
   .then((data) => {
     mime = data.mime
     filePath = path.join(STATIC_FILE_PATH, data.path)
-    return fs.stat(filePath)
+    // return fs.stat(filePath)
+    if(type === 'image') return 
+    return filePath
   })
-  .then(stat => {
-    const { size, mtimeMs } = stat
-    const lastModified = headers['last-modified']
+  // .then(stat => {
+  //   const { size, mtimeMs } = stat
+  //   const lastModified = headers['last-modified']
 
-    //小文件由其他中间件处理
-    if(size <= MAX_FILE_SINGLE_RESPONSE_SIZE) return
+  //   视频
+  //   小文件由其他中间件处理
+  //   if(size <= MAX_FILE_SINGLE_RESPONSE_SIZE) return
 
-    //是否未更改
-    if(!!lastModified && Day(lastModified).valueOf() === mtimeMs) return true
-    //读取部分文件
-    return readFile({
-      path: filePath,
-      ctx
-    })
+  //   是否未更改
 
-  })
+  //   if(!!lastModified && Day(lastModified).valueOf() === mtimeMs) return true
+  //   //读取部分文件
+  //   return readFile({
+  //     path: filePath,
+  //     ctx
+  //   })
+
+  // })
   .catch(dealErr(ctx))
 
   if(typeof data === 'undefined') return await next()
 
-  if(data === true) return ctx.status = 304
+  // if(data === true) return ctx.status = 304
 
   if(data.status) return ctx.status = data.status
 
-  const { start, end, size, file } = data
-  let status = 206
-  let responseHeaders = {
-    'Content-Type': mime,
-    'Content-Range': `bytes ${start}-${end}/${size}`,
-    // 'Content-Length': end - start
-  }
-  ctx.set(responseHeaders)
-  if(end === size) status = 200
+  //----------视频处理----------------
+  return await createHlsVideo(ctx, filePath)
 
-  ctx.status = status
-  ctx.body = file
+  // const { start, end, size, file } = data
+  // let status = 206
+  // let responseHeaders = {
+  //   'Content-Type': mime,
+  //   'Content-Range': `bytes ${start}-${end}/${size}`,
+  //   'Accept-Ranges': 'bytes'
+  //   // 'Content-Length': end - start
+  // }
+  // ctx.set(responseHeaders)
+  // if(end === size) status = 200
+
+  // ctx.status = status
+  // ctx.body = file
 
 }
 
