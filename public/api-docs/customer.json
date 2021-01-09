@@ -1480,8 +1480,8 @@
         "tags": [
           "upload"
         ],
-        "summary": "小文件上传",
-        "description": "",
+        "summary": "创建文件信息",
+        "description": "上传前在服务端创建副本",
         "operationId": "customer_upload_post_file",
         "produces": [
           "application/xml",
@@ -1489,11 +1489,149 @@
         ],
         "parameters": [
           {
-            "name": "auth",
-            "in": "body",
-            "description": "资源访问权限(PUBLIC, PRIVATE)",
-            "type": "string",
-            "enum": [ "PUBLIC", "PRIVATE" ]
+            "name": "upload-metadata",
+            "in": "header",
+            "description": "上传相关信息，以','分隔的 'key value' 格式的字符串，value用base64编码，当前包括( md5-文件加密标识符, auth-权限, size-文件大小, mime-文件类型, name-文件名称, chunk-分片大小 )",
+            "type": "string"
+          },
+          {
+            "name": "tus-resumable",
+            "type":"string",
+            "in": "header",
+            "description": "tus版本"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "headers": {
+              "tus-resumable": {
+                "type": "string",
+                "description": "tus版本"
+              },
+              "location": {
+                "type": "string",
+                "description": "文件上传地址"
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "恢复文件上传",
+        "description": "恢复之前已经上传部分的文件",
+        "operationId": "customer_upload_head_file",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "upload-metadata",
+            "in": "header",
+            "description": "上传相关信息，以','分隔的 'key value' 格式的字符串，value用base64编码，当前包括( md5-文件加密标识符, auth-权限, size-文件大小, mime-文件类型, name-文件名称, chunk-分片大小 )",
+            "type": "string"
+          },
+          {
+            "name": "tus-resumable",
+            "type":"string",
+            "in": "header",
+            "description": "tus版本"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "headers": {
+              "tus-resumable": {
+                "type": "string",
+                "description": "tus版本"
+              },
+              "location": {
+                "type": "string",
+                "description": "文件上传地址"
+              },
+              "upload-offset": {
+                "type": "integer",
+                "description": "下一分片索引"
+              },
+              "upload-length": {
+                "type": "integer",
+                "description": "文件大小"
+              },
+              "upload-id": {
+                "type": "string",
+                "description": "文件id"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "已上传文件信息获取",
+        "description": "",
+        "operationId": "customer_upload_get_file",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "load",
+            "in": "path",
+            "description": "文件id",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delte": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "文件删除",
+        "description": "无实际作用",
+        "operationId": "customer_upload_delete_file",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "文件上传",
+        "description": "",
+        "operationId": "customer_upload_patch_file",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "upload-metadata",
+            "in": "header",
+            "description": "上传相关信息，以','分隔的 'key value' 格式的字符串，value用base64编码，当前包括( md5-文件加密标识符, offset-分片索引 )",
+            "type": "string"
           },
           {
             "name": "file",
@@ -1503,8 +1641,14 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "成功"
+          "204": {
+            "description": "成功",
+            "headers": {
+              "upload-offset": {
+                "type": "integer",
+                "description": "下一份片索引"
+              }
+            }
           }
         }
       }
@@ -1577,7 +1721,8 @@
               "$ref": "#/definitions/customer_upload_get_chunk"
             }
           }
-        }
+        },
+        "deprecated": true
       },
       "post": {
         "tags": [
@@ -1616,7 +1761,8 @@
           "200": {
             "description": "成功"
           }
-        }
+        },
+        "deprecated": true
       },
       "put": {
         "tags": [
@@ -1642,7 +1788,8 @@
           "200": {
             "description": "成功"
           }
-        }
+        },
+        "deprecated": true
       }
     }
   },

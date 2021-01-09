@@ -88,7 +88,13 @@ const MEDIA_ORIGIN_TYPE = {
   SYSTEM: 'SYSTEM'
 }
 
+const NETWORK = 'localhost'
+
+//关键词抽取个数
+const EXTRACT_KEYWORD_TOP_N = 1
+
 module.exports = {
+  NETWORK,
   EMAIL_AUTH,
   EMAIL_REGEXP,
   STATIC_FILE_PATH,
@@ -103,5 +109,6 @@ module.exports = {
   COMMENT_SOURCE_TYPE,
   MEDIA_STATUS,
   MEDIA_AUTH,
-  MEDIA_ORIGIN_TYPE
+  MEDIA_ORIGIN_TYPE,
+  EXTRACT_KEYWORD_TOP_N
 }

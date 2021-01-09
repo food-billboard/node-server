@@ -78,7 +78,7 @@ const headRequestMediaDeal = {
       if(!!data) {
         const { info: { chunk_size, status, complete, size }, _id } = data
         //完成
-        if(status == MEDIA_STATUS.COMPLETE) return {
+        if(status == MEDIA_STATUS.COMPLETE && complete.length == Math.ceil(size / chunk_size)) return {
           offset: size,
           id: _id.toString(),
           size
@@ -96,7 +96,7 @@ const headRequestMediaDeal = {
         }
   
         //部分完成
-        let unCompleteChunk = 0;
+        let unCompleteChunk = -1;
         
         ([...complete]).sort((a, b) => a - b).some((com, index) => {
           if(com != index) {
@@ -105,6 +105,8 @@ const headRequestMediaDeal = {
           }
           return false
         })
+
+        if(!~unCompleteChunk) unCompleteChunk = complete.length
         // unCompleteChunk ++
         unCompleteChunk *= chunk_size
         return {
@@ -174,8 +176,9 @@ const headRequestMediaDeal = {
       //文件存在则返回对应的offset
       if(!!data) {
         const { info: { chunk_size, status, complete }, _id } = data
+
         //完成
-        if(status == MEDIA_STATUS.COMPLETE) return {
+        if(status == MEDIA_STATUS.COMPLETE && complete.length == Math.ceil(size / chunk_size)) return {
           offset: size,
           id: _id.toString()
         }
@@ -191,7 +194,8 @@ const headRequestMediaDeal = {
         }
   
         //部分完成
-        let unCompleteChunk = 0;
+        let unCompleteChunk = -1;
+
         ([...complete]).sort((a, b) => a - b).some((com, index) => {
           if(com != index) {
             unCompleteChunk = com
@@ -199,6 +203,9 @@ const headRequestMediaDeal = {
           }
           return false
         })
+
+        if(!~unCompleteChunk) unCompleteChunk = complete.length
+
         unCompleteChunk *= chunk_size
         return {
           offset: unCompleteChunk >= size ? size : unCompleteChunk,
@@ -265,7 +272,7 @@ const headRequestMediaDeal = {
       if(!!data) {
         const { info: { chunk_size, status, complete }, _id } = data
         //完成
-        if(status == MEDIA_STATUS.COMPLETE) return {
+        if(status == MEDIA_STATUS.COMPLETE && complete.length == Math.ceil(size / chunk_size)) return {
           offset: size,
           id: _id.toString()
         }
@@ -281,7 +288,7 @@ const headRequestMediaDeal = {
         }
   
         //部分完成
-        let unCompleteChunk = 0;
+        let unCompleteChunk = -1;
         ([...complete]).sort((a, b) => a - b).some((com, index) => {
           if(com != index) {
             unCompleteChunk = com
@@ -290,6 +297,7 @@ const headRequestMediaDeal = {
           return false
         })
         // unCompleteChunk ++
+        if(!~unCompleteChunk) unCompleteChunk = complete.length
         unCompleteChunk *= chunk_size
         return {
           offset: unCompleteChunk >= size ? size : unCompleteChunk,
@@ -327,7 +335,7 @@ const headRequestDeal = async ({
     ...user,
     roles: role
   }
-
+  console.log(mime)
   const mimeType = mime.toLowerCase()
   if(/image\/.+/.test(mimeType)) {
     return headRequestMediaDeal.imageMediaDeal({

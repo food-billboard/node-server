@@ -752,6 +752,13 @@ const TagSchema = new Schema({
     unique: true,
     default: '默认内容',
   },
+  weight: {
+    type: Number
+  },
+  source: {
+    type: ObjectId,
+    ref: 'movie'
+  },
   other: {}
 }, {
   ...defaultConfig,
