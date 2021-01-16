@@ -7,6 +7,7 @@ const KoaBody = require('koa-body')
 const Compress = require('koa-compress')
 const path = require('path')
 const morgan = require('koa-morgan')
+const chalk = require('chalk')
 const app = new Koa()
 const { 
   MongoDB, 
@@ -85,7 +86,7 @@ app.use(Cors())
 .use(Router.routes()).use(Router.allowedMethods())
 
 app.listen( process.env.PORT || 4000, () => {
-  console.log('Server is run in port 4000')
+  console.log(chalk.bgCyan('Koa Server is run in port 4000'))
 })
 
 module.exports = app

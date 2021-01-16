@@ -767,7 +767,7 @@
         }
       }
     },
-    "/api/user/logon/sendmail": {
+    "/api/user/logon/email": {
       "post": {
         "tags": [
           "logon"
@@ -790,7 +790,7 @@
           {
             "in": "body",
             "name": "type",
-            "description": "验证码类型",
+            "description": "验证码类型(forget | register)",
             "enum": ["forget", "register"],
             "required": true,
             "type": "string"
@@ -1356,6 +1356,29 @@
             "description": "成功",
             "schema": {
               "$ref": "#/definitions/user_setting_get_info"
+            }
+          }
+        }
+      }
+    },
+    "/api/user/setting/info/notice": {
+      "get": {
+        "tags": [
+          "setting"
+        ],
+        "summary": "小程序跑马灯信息",
+        "description": "",
+        "operationId": "user_setting_get_info_notice",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/user_setting_get_info_notice"
             }
           }
         }
@@ -2755,6 +2778,31 @@
               "type": "object",
               "properties": {
                 "info": {
+                  "type":"string",
+                  "description": "内容"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "user_setting_get_info"
+      }
+    },
+    "user_setting_get_info_notice": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "notice": {
                   "type":"string",
                   "description": "内容"
                 }
