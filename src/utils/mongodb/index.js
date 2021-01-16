@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const chalk = require('chalk')
 const Lib = require("./mongo.lib")
 const { initAuthMapData } = require('../auth')
 
@@ -14,9 +15,11 @@ function MongoDB(url="mongodb://localhost:27017/movie") {
     })
     .then(_ => {
       // initAuthMapData()
+      console.log(chalk.bgGreen('the mongodb server is run in port 27017'))
     })
     .catch(err => {
-      
+      console.log(chalk.bgRed('the mongodb server is run in error'))
+      console.log(err)
     })
   }
 }

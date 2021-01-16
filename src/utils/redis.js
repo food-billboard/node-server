@@ -1,5 +1,7 @@
-const { dealErr, responseDataDeal } = require('./error-deal')
 const Redis = require('ioredis')
+const chalk = require('chalk')
+const { dealErr, responseDataDeal } = require('./error-deal')
+
 
 let client
 const LIMIT_ACCESS_SECONDS = 10
@@ -10,11 +12,6 @@ const redisConnect = ({ port=6379, host='localhost', options={
   // connectTimeout
 } }={}) => {
 
-  if(process.env.NODE_ENV !== 'production') {
-    console.log("development environment not run the redis default, you can run the command 'npm run prod' to start the redis server")
-    return
-  }
-
   const _port = process.env.REDIS_PORT || port
   const _host = process.env.REDIS_HOST || host
   client = new Redis(
@@ -24,10 +21,10 @@ const redisConnect = ({ port=6379, host='localhost', options={
   )
 
   client.on('connect', function () {
-    console.log(`redis is connected and run in host: ${_host} port: ${_port}`)
+    console.log(chalk.bgBlue(`redis is connected and run in host: ${_host} port: ${_port}`))
   })
   client.on('error', function() {
-    console.log('redis connect error')
+    console.log(chalk.bgRed('redis connect error'))
     redisDisConnect()
   })
 
