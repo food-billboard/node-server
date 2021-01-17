@@ -454,7 +454,7 @@ const patchRequestDeal = (options) => {
     //文件获取
     return new Promise((resolve, reject) => {
       const { request: { files } } = ctx
-      if(!!files.file) return resolve(files.file)
+      if(!!files && !!files.file) return resolve(files.file)
       form.parse(ctx.req, (err, _, files) => {
         console.log(err)
         if(err) return reject(500)

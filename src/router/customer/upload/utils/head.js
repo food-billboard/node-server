@@ -31,8 +31,8 @@ const headRequestMediaDeal = {
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.SYSTEM : MEDIA_ORIGIN_TYPE.USER
   
     const defaultModel = {
-      name: name || '',
-      src: path.join('static', 'image', `${md5}.${Mime.getExtension(mime)}`),
+      name: name || md5,
+      src: path.join('/static', 'image', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
       auth,
@@ -140,10 +140,10 @@ const headRequestMediaDeal = {
     const { md5, auth, size, mime, name, chunk } = metadata
     const { roles, _id } = user
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.SYSTEM : MEDIA_ORIGIN_TYPE.USER
-  
+
     const defaultModel = {
-      name: name || '',
-      src: path.join('static', 'video', `${md5}.${Mime.getExtension(mime)}`),
+      name: name || md5,
+      src: path.join('/static', 'video', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
       auth,
@@ -237,8 +237,8 @@ const headRequestMediaDeal = {
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.SYSTEM : MEDIA_ORIGIN_TYPE.USER
   
     const defaultModel = {
-      name: name || '',
-      src: path.join('static', 'video', `${md5}.${Mime.getExtension(mime)}`),
+      name: name || md5,
+      src: path.join('/static', 'video', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
       auth,
@@ -335,7 +335,6 @@ const headRequestDeal = async ({
     ...user,
     roles: role
   }
-  console.log(mime)
   const mimeType = mime.toLowerCase()
   if(/image\/.+/.test(mimeType)) {
     return headRequestMediaDeal.imageMediaDeal({

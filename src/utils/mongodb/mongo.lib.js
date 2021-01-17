@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
-const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS, COMMENT_SOURCE_TYPE, MEDIA_STATUS, MEDIA_AUTH } = require('../constant')
+const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS, COMMENT_SOURCE_TYPE, MEDIA_STATUS, MEDIA_AUTH, NETWORK } = require('../constant')
 
 function getMill(time) {
   return Day(time).valueOf()

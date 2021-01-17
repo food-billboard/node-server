@@ -94,7 +94,7 @@ router
 
   const { request: { headers } } = ctx
 
-  const metadataKey = Object.keys(pick(METADATA, ['md5', 'auth', 'chunk', 'mime', 'size', 'name']))
+  const metadataKey = Object.keys(pick(METADATA, ['md5', 'auth', 'chunk', 'mime', 'size']))
 
   const check = Params.headers(ctx, {
     name: 'tus-resumable',
@@ -274,6 +274,8 @@ router
 
   const { query } = Url.parse(url)
 
+  console.log(query, 11111)
+
   if(!query) {
     data = Promise.reject({
       errMsg: 'bad request',
@@ -290,6 +292,7 @@ router
   data = data
   .then(query => {
     const [ [ type, id ] ] = Object.entries(query)
+    console.log(type, id, 222222)
     if(!ObjectId.isValid(id)) return Promise.reject({ status: 400, errMsg: 'bad request' })
     
     //文件查找
