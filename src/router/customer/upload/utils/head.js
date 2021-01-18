@@ -76,9 +76,9 @@ const headRequestMediaDeal = {
     .then(data => {
       //文件存在则返回对应的offset
       if(!!data) {
-        const { info: { chunk_size, status, complete, size }, _id } = data
+        const { info: { chunk_size, status, complete }, _id } = data
         //完成
-        if(status == MEDIA_STATUS.COMPLETE && complete.length == Math.ceil(size / chunk_size)) return {
+        if(status == MEDIA_STATUS.COMPLETE && !complete.length) return {
           offset: size,
           id: _id.toString(),
           size
@@ -176,15 +176,15 @@ const headRequestMediaDeal = {
       //文件存在则返回对应的offset
       if(!!data) {
         const { info: { chunk_size, status, complete }, _id } = data
-
+  
         //完成
-        if(status == MEDIA_STATUS.COMPLETE && complete.length == Math.ceil(size / chunk_size)) return {
+        if(status == MEDIA_STATUS.COMPLETE && !complete.length) return {
           offset: size,
           id: _id.toString()
         }
-  
         //分片与当前不同或状态为错误
         if(chunk != chunk_size || status == MEDIA_STATUS.ERROR) {
+
           return removeTemplateFolder(md5)
           .then(_ => new VideoModel(defaultModel).save())
           .then(data => ({
@@ -272,7 +272,7 @@ const headRequestMediaDeal = {
       if(!!data) {
         const { info: { chunk_size, status, complete }, _id } = data
         //完成
-        if(status == MEDIA_STATUS.COMPLETE && complete.length == Math.ceil(size / chunk_size)) return {
+        if(status == MEDIA_STATUS.COMPLETE && !complete.length) return {
           offset: size,
           id: _id.toString()
         }

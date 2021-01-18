@@ -164,7 +164,10 @@ router
 
   if(!data) return ctx.status = 500
 
+  console.log(data)
+
   const { offset, id, type } = data
+  console.log(offset)
   //设置索引来帮助恢复上传
   ctx.set('Upload-Offset', offset)
   ctx.set('Tus-Resumable', headers['tus-resumable'] || '1.0.0')
@@ -274,8 +277,6 @@ router
 
   const { query } = Url.parse(url)
 
-  console.log(query, 11111)
-
   if(!query) {
     data = Promise.reject({
       errMsg: 'bad request',
@@ -292,14 +293,22 @@ router
   data = data
   .then(query => {
     const [ [ type, id ] ] = Object.entries(query)
-    console.log(type, id, 222222)
-    if(!ObjectId.isValid(id)) return Promise.reject({ status: 400, errMsg: 'bad request' })
+    let params
+    if(ObjectId.isValid(id)) {
+      params = {
+        _id: ObjectId(id)
+      }
+    }else if(typeof id === 'string' && /\/static\/(image|video|other)\/.+/.test(decodeURIComponent(id))) {
+      params = {
+        src: decodeURIComponent(id)
+      }
+    }else {
+      return Promise.reject({ status: 400, errMsg: 'bad request' })
+    }
     
     //文件查找
     return Promise.allSettled(models.map(model => {
-      return model.findOne({
-        _id: ObjectId(id)
-      })
+      return model.findOne(params)
       .select({
         "info.status": 1,
         "info.complete": 1,
@@ -322,7 +331,7 @@ router
 
     const index = results.findIndex(result => result.status === 'fulfilled')
     if(!~index) return Promise.reject({ errMsg: 'not found', status: 404 })
-    const { info: { status } } = results[index]
+    const { value: { info: { status }={} } } = results[index]
     if(status === MEDIA_STATUS.COMPLETE) {
       return ''
     }else {
@@ -332,11 +341,13 @@ router
   })
   .catch(dealErr(ctx))
 
-  responseDataDeal({
-    ctx,
-    data,
-    needCache: false
-  })
+  ctx.status = 200
+
+  // responseDataDeal({
+  //   ctx,
+  //   data,
+  //   needCache: false
+  // })
 
 })
 //删除--无用

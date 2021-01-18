@@ -129,7 +129,7 @@ const sanitizersParams = (ctx, ...sanitizers) => {
   }, {
     name: 'author_description',
     sanitizers: [
-      data => typeof data === 'string' ? data.length > 30 > data.slice(0, 30) : ''
+      data => typeof data === 'string' ? data.slice(0, 30) : ''
     ]
   }, {
     name: 'author_rate',
@@ -232,8 +232,6 @@ router
     }
   }
 
-  console.log(currPage, pageSize)
-
   const data = await Promise.all([
     //总数
     MovieModel.aggregate([
@@ -315,7 +313,7 @@ router
       }
     ])
   ])
-  .then(([total_count, movie_data=[]]) => {
+  .then(([total_count, movie_data]) => {
 
     if(!Array.isArray(total_count) || !Array.isArray(movie_data)) return Promise.reject({ errMsg: 'data error', status: 404 })
 
@@ -641,9 +639,9 @@ router
       data: {
         ...nextData,
         ...nextInfo,
-        poster: poster.src,
-        video: video.src,
-        images: images.map(item => item.src),
+        poster: poster._id,
+        video: video._id,
+        images: images.map(item => item && item._id),
         alias
       }
     }

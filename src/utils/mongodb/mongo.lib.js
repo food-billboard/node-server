@@ -101,7 +101,7 @@ const PRE_USER_FIND = [
    path: 'avatar',
    select: {
     src: 1,
-    _id: 0
+    _id: 1
    }
  }, 
 ]
@@ -111,7 +111,7 @@ const PRE_ROOM_FIND = [
     path: 'info.avatar',
     select: {
       src: 1,
-      _id: 0
+      _id: 1
     }
   }
 ]
@@ -119,14 +119,14 @@ const PRE_MESSAGE_FIND = [
   {
     path: 'content.image',
     select: {
-      _id: 0,
+      _id: 1,
       src: 1
     }
   },
   {
     path: 'content.video',
     select: {
-      _id: 0,
+      _id: 1,
       src: 1
     }
   }
@@ -135,7 +135,7 @@ const PRE_MOVIE_FIND = [
   {
     path: 'video',
     select: {
-      _id: 0,
+      _id: 1,
       src: 1,
       poster: 1
     }
@@ -143,14 +143,14 @@ const PRE_MOVIE_FIND = [
   {
     path: 'images',
     select: {
-      _id: 0,
+      _id: 1,
       src: 1
     }
   },
   {
     path: 'poster',
     select: {
-      _id: 0,
+      _id: 1,
       src: 1
     }
   },
@@ -158,7 +158,7 @@ const PRE_MOVIE_FIND = [
     path: 'tag',
     select: {
       text: 1,
-      _id: 0
+      _id: 1
     }
   }
 ]
@@ -167,7 +167,7 @@ const PRE_SPECIAL_FIND = [
   {
     path: 'poster',
     select: {
-      _id: 0,
+      _id: 1,
       src: 1
     }
   }
@@ -176,7 +176,7 @@ const PRE_ACTOR_FIND = [
   {
     path: 'other.avatar',
     select: {
-      _id: 0,
+      _id: 1,
       src: 1
     }
   }
@@ -185,7 +185,7 @@ const PRE_DIRECTOR_FIND = [
   {
     path: 'other.avatar',
     select: {
-      _id: 0,
+      _id: 1,
       src: 1
     }
   }
@@ -197,14 +197,14 @@ const PRE_COMMENT_FIND = [
     path: 'content.image',
     select: {
       src: 1,
-      _id: 0
+      _id: 1
     }
   }, 
   {
     path: 'content.video',
     select: {
       src: 1,
-      _id: 0
+      _id: 1
     }
   },
   {
@@ -226,7 +226,7 @@ const PRE_RANK_FIND = [
   {
     path: 'icon',
     select: {
-      _id: 0,
+      _id: 1,
       src: 1
     }
   }
@@ -235,7 +235,7 @@ const PRE_CLASSIFY_FIND = [
   {
     path: 'icon',
     select: {
-      _id: 0,
+      _id: 1,
       src: 1
     }
   }
