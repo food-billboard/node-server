@@ -280,7 +280,7 @@ const pathMediaDeal = {
       })
 
       const update = (config) => {
-        return ImageModel.updateOne({
+        return VideoModel.updateOne({
           "info.md5": md5
         }, config)
       }
@@ -294,6 +294,7 @@ const pathMediaDeal = {
         current: numberOffset,
         index: multiple
       })
+
       const isComplete = nextOffset === size
 
       //返回文件相关信息
@@ -371,7 +372,7 @@ const pathMediaDeal = {
       })
 
       const update = (config) => {
-        return ImageModel.updateOne({
+        return OtherMediaModel.updateOne({
           "info.md5": md5
         }, config)
       }
@@ -454,7 +455,7 @@ const patchRequestDeal = (options) => {
     //文件获取
     return new Promise((resolve, reject) => {
       const { request: { files } } = ctx
-      if(!!files.file) return resolve(files.file)
+      if(!!files && !!files.file) return resolve(files.file)
       form.parse(ctx.req, (err, _, files) => {
         console.log(err)
         if(err) return reject(500)

@@ -101,7 +101,7 @@ const templateFileDeal = async () => {
 
 const mediaSchedule = () => {
 
-  const schedule = nodeSchedule.scheduleJob('*  *  20  *  *  7', function() {
+  const schedule = nodeSchedule.scheduleJob('0  0  20  *  *  7', function() {
 
     console.log(chalk.yellow('媒体资源定时审查'))
 

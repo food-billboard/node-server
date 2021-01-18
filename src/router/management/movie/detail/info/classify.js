@@ -65,6 +65,7 @@ router
           name,
           glance,
           icon: icon ? icon.src : null,
+          icon_id: icon ? icon._id : null,
           _id,
           createdAt,
           updatedAt,

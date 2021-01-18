@@ -87,6 +87,7 @@ router
           name,
           another_name,
           avatar: avatar ? avatar.src : null,
+          avatar_id: avatar ? avatar._id : null,
           _id,
           createdAt,
           updatedAt,

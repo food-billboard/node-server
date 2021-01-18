@@ -31,8 +31,8 @@ const headRequestMediaDeal = {
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.SYSTEM : MEDIA_ORIGIN_TYPE.USER
   
     const defaultModel = {
-      name: name || '',
-      src: path.join('static', 'image', `${md5}.${Mime.getExtension(mime)}`),
+      name: name || md5,
+      src: path.join('/static', 'image', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
       auth,
@@ -76,9 +76,9 @@ const headRequestMediaDeal = {
     .then(data => {
       //文件存在则返回对应的offset
       if(!!data) {
-        const { info: { chunk_size, status, complete, size }, _id } = data
+        const { info: { chunk_size, status, complete }, _id } = data
         //完成
-        if(status == MEDIA_STATUS.COMPLETE && complete.length == Math.ceil(size / chunk_size)) return {
+        if(status == MEDIA_STATUS.COMPLETE && !complete.length) return {
           offset: size,
           id: _id.toString(),
           size
@@ -140,10 +140,10 @@ const headRequestMediaDeal = {
     const { md5, auth, size, mime, name, chunk } = metadata
     const { roles, _id } = user
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.SYSTEM : MEDIA_ORIGIN_TYPE.USER
-  
+
     const defaultModel = {
-      name: name || '',
-      src: path.join('static', 'video', `${md5}.${Mime.getExtension(mime)}`),
+      name: name || md5,
+      src: path.join('/static', 'video', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
       auth,
@@ -176,15 +176,15 @@ const headRequestMediaDeal = {
       //文件存在则返回对应的offset
       if(!!data) {
         const { info: { chunk_size, status, complete }, _id } = data
-
+  
         //完成
-        if(status == MEDIA_STATUS.COMPLETE && complete.length == Math.ceil(size / chunk_size)) return {
+        if(status == MEDIA_STATUS.COMPLETE && !complete.length) return {
           offset: size,
           id: _id.toString()
         }
-  
         //分片与当前不同或状态为错误
         if(chunk != chunk_size || status == MEDIA_STATUS.ERROR) {
+
           return removeTemplateFolder(md5)
           .then(_ => new VideoModel(defaultModel).save())
           .then(data => ({
@@ -237,8 +237,8 @@ const headRequestMediaDeal = {
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.SYSTEM : MEDIA_ORIGIN_TYPE.USER
   
     const defaultModel = {
-      name: name || '',
-      src: path.join('static', 'video', `${md5}.${Mime.getExtension(mime)}`),
+      name: name || md5,
+      src: path.join('/static', 'video', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
       auth,
@@ -272,7 +272,7 @@ const headRequestMediaDeal = {
       if(!!data) {
         const { info: { chunk_size, status, complete }, _id } = data
         //完成
-        if(status == MEDIA_STATUS.COMPLETE && complete.length == Math.ceil(size / chunk_size)) return {
+        if(status == MEDIA_STATUS.COMPLETE && !complete.length) return {
           offset: size,
           id: _id.toString()
         }
@@ -335,7 +335,6 @@ const headRequestDeal = async ({
     ...user,
     roles: role
   }
-  console.log(mime)
   const mimeType = mime.toLowerCase()
   if(/image\/.+/.test(mimeType)) {
     return headRequestMediaDeal.imageMediaDeal({

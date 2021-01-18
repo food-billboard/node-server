@@ -86,7 +86,7 @@ const updateMovieTag = (tagList) => {
 
 const tagSchedule = () => {
 
-  const schedule = nodeSchedule.scheduleJob('*  *  20  *  *  6', function() {
+  const schedule = nodeSchedule.scheduleJob('0  0  20  *  *  6', function() {
 
     console.log(chalk.magenta('数据标签tag定时审查'))
 
