@@ -293,6 +293,9 @@ router
   data = data
   .then(query => {
     const [ [ type, id ] ] = Object.entries(query)
+<<<<<<< HEAD
+    if(!ObjectId.isValid(id)) return Promise.reject({ status: 400, errMsg: 'bad request' })
+=======
     let params
     if(ObjectId.isValid(id)) {
       params = {
@@ -305,6 +308,7 @@ router
     }else {
       return Promise.reject({ status: 400, errMsg: 'bad request' })
     }
+>>>>>>> 1cce330de87bd05104f25857481ebeaffaf93fcf
     
     //文件查找
     return Promise.allSettled(models.map(model => {
