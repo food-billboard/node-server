@@ -35,7 +35,7 @@ const Params = {
         }else {
           result = origin[name]
         }
-        if(result === undefined) console.warn('attentions! name is not defined')
+        // if(result === undefined) console.warn('attentions! name is not defined')
         //自定义
         let realSan = Array.isArray(sanitizers) ? sanitizers.filter(san => isType(san, 'function')) : []
         type.forEach(t => {
