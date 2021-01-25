@@ -5,14 +5,16 @@ module.exports = {
     {
       name: 'app',
       script: 'app.js',
-      watch: '.',
+      // watch: '.',
       env: {
         NODE_ENV: "production"
       },
+      exec_mode: "cluster_mode"
     }, 
     {
       name: 'media',
       script: 'media.js',
+      exec_mode: "cluster_mode"
     }
   ],
 

@@ -130,7 +130,7 @@ const findUnCompleteIndex = ({
 }) => {
 
   if(!complete.length) {
-    if(chunk_size >= size) return size
+    if(chunk_size * index >= size) return size
     const nextOffset = (index + 1) * chunk_size
     return nextOffset >= size ? size : nextOffset
   }
@@ -148,7 +148,12 @@ const findUnCompleteIndex = ({
   })
 
   //全部完成
-  if(!~minUnComplete && index == chunkLength - 1) return size
+  if(!~minUnComplete) {
+    if(index == chunkLength - 1) {
+      return size
+    }
+    return (index + 1) * chunk_size
+  }
 
   return minUnComplete * chunk_size
 
@@ -457,8 +462,10 @@ const patchRequestDeal = (options) => {
       const { request: { files } } = ctx
       if(!!files && !!files.file) return resolve(files.file)
       form.parse(ctx.req, (err, _, files) => {
-        console.log(err)
-        if(err) return reject(500)
+        if(err) {
+          console.log(err)
+          return reject(500)
+        }
         if(!files.file) return reject(404)
         resolve(files.file)
       })

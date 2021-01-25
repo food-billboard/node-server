@@ -164,8 +164,6 @@ router
 
   if(!data) return ctx.status = 500
 
-  console.log(data)
-
   const { offset, id, type } = data
   console.log(offset)
   //设置索引来帮助恢复上传
