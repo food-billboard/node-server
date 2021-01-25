@@ -2,22 +2,29 @@ const Router = require('@koa/router')
 const fs = require('fs')
 const path = require('path')
 const mime = require('mime')
-const { responseDataDeal, dealErr } = require('@src/utils')
+const { path: root } = require('app-root-path')
 
-// const API_PATH = path.resolve(__dirname, '../assets/api')
-const API_PATH = path.resolve(__dirname, '../../public/manage')
+const API_PATH = path.join(root, 'public')
 
 const router = new Router()
 
 router
-.get('/:name', async (ctx, _) => {
-  const { url, request: { method } } = ctx
-  if(method.toLowerCase() !== 'get') {
+.get('/:path(.*)', async (ctx, _) => {
+  const { url } = ctx
+  let name 
+  const backendMatch = url.match(/(?<=.+\/backend\/).+$/)
+  const swaggerMatch = url.match(/(?<=.+\/swagger\/).+$/)
+  let filePath = API_PATH
+  if(swaggerMatch) {
+    [name] = swaggerMatch
+    filePath = path.join(filePath, 'api-docs', name)
+  }else if(backendMatch) {
+    [name] = backendMatch
+    filePath = path.join(filePath, 'manage', name)
+  }else {
     return ctx.status = 404
   }
-  const [name] = url.match(/(?<=.+\/backend\/).+$/)
   const extname = path.extname(name)
-  const filePath = path.resolve(API_PATH, name)
 
   let stat
   //判断文件是否存在
@@ -29,16 +36,7 @@ router
     }
   }catch(_) {
     console.log(_)
-    const data = dealErr(ctx)({
-      status: 404,
-      errMsg: 'not Found'
-    })
-    responseDataDeal({
-      ctx,
-      data,
-      needCache: false
-    })
-    return
+    return ctx.status = 404
   }
 
   //查询文件的修改时间、缓存
@@ -53,10 +51,6 @@ router
     ctx.set({
       'Last-Modified': new Date(mtime)
     })
-    ctx.body = JSON.stringify({
-      success: true,
-      data: {}
-    })
     return 
   }
 
@@ -64,7 +58,7 @@ router
     'Last-Modified': new Date(mtime)
   })
 
-  const data = fs.readFileSync(path.resolve(API_PATH, name))
+  const data = fs.readFileSync(filePath)
   ctx.body = data
 })
 

@@ -2,7 +2,6 @@ const Router = require('@koa/router')
 const User = require('./user')
 const Customer = require('./customer')
 const Management = require('./management')
-const Swagger = require('./swagger')
 const Manage = require('./manage')
 const { Types: { ObjectId } } = require('mongoose')
 const { dealErr, responseDataDeal } = require('@src/utils')
@@ -42,7 +41,6 @@ router
 .use('/user', User.routes(), User.allowedMethods())
 .use('/customer', Customer.routes(), Customer.allowedMethods())
 .use('/manage', Management.routes(), Management.allowedMethods())
-.use('/swagger', Swagger.routes(), Swagger.allowedMethods())
 .use('/backend', Manage.routes(), Manage.allowedMethods())
 
 module.exports = router

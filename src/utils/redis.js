@@ -5,7 +5,7 @@ const { dealErr, responseDataDeal } = require('./error-deal')
 
 let client
 const LIMIT_ACCESS_SECONDS = 10
-const LIMIT_ACCESS_TIMES = 5
+const LIMIT_ACCESS_TIMES = 20
 
 const redisConnect = ({ port=6379, host='localhost', options={
   // password

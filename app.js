@@ -18,7 +18,7 @@ const {
   authMiddleware, 
   notes_customer_behaviour_middleware,
   mediaSchedule,
-  tagSchedule,
+  // tagSchedule,
   movieSchedule
 } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
@@ -32,7 +32,7 @@ redisConnect()
 //媒体资源定时器
 mediaSchedule()
 //数据标签定时器
-tagSchedule()
+// tagSchedule()
 //无用数据删除
 movieSchedule()
 
@@ -83,7 +83,9 @@ app.use(Cors())
   setHeaders: (res, path, stats) => {
 
   },
-  extensions: true
+  extensions: true,
+  maxage: 1000 * 60 * 60 * 24,
+  gzip: true
 }))
 //路由地址
 .use(Router.routes()).use(Router.allowedMethods())
