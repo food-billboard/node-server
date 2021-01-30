@@ -4,12 +4,14 @@
   "description": "电影小程序后端api接口服务，包含mocha单元测试",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js --config ./src/config/nodemon/index.prod.json",
+    "dev": "nodemon app.js --config ./src/config/nodemon/index.dev.json",
+    "dev_prod": "nodemon app.js --config ./src/config/nodemon/index.prod.json",
     "prod": "pm2 start ecosystem.config.js",
     "stop": "pm2 stop app & pm2 stop media",
     "delete": "pm2 delete app & pm2 delete media",
     "restart": "pm2 restart app & pm2 restart media",
     "test": "mocha --recursive --timeout 10000",
+    "coverage": "nyc npm run test",
     "socket": "nodemon ./src/chat/index.js"
   },
   "author": "GLF",
@@ -53,7 +55,12 @@
     "chai": "^4.2.0",
     "co-mocha": "^1.2.2",
     "co-supertest": "0.0.10",
+    "grunt": "^1.3.0",
+    "grunt-contrib-jshint": "^3.0.0",
+    "grunt-contrib-nodeunit": "^2.1.0",
+    "grunt-contrib-uglify": "^5.0.0",
     "mocha": "^8.1.1",
+    "nyc": "^15.1.0",
     "supertest": "^4.0.2"
   }
 }

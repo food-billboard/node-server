@@ -17,3 +17,25 @@
 `pm2 logs <name>` 查看指定进程之日  
 `pm2 restart <name>` 重启指定进程  
 `pm2 restart all` 重启所有进程  
+
+### 开发
+1. 测试 `npm run test`  
+2. 测试覆盖率 `npm run coverage`
+3. mongodb  
+- 安装
+- 启动
+4. redis  
+- 安装
+- 启动
+5. ffmpeg  
+- 安装
+- 启动
+6. 开发环境启动 `npm run dev`
+7. 开发生产环境启动  `npm run dev_prod`  
+8. 生产环境启动  `npm run prod`  
+9. 生产环境重启  `npm run restart`   
+
+### 构建
+1. grunt  
+- 更新npm `[sudo] npm update -g npm`  
+- 安装cli `[sudo] npm install -g grunt-cli`
