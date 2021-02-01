@@ -1,21 +1,15 @@
 nguage: node_js
 node_js:
 - '12'
-install:
-- npm install pm2 -g
-- npm install nodemon -g
-- npm install
 script:
 - npm run test
-- npm run prod
 addons:
   ssh_known_hosts: 47.111.229.250
 after_success:
 - echo 'I successfully done'
-- ssh root@47.111.229.250 'cat /etc/issue'
+# - ssh root@47.111.229.250 'cat /etc/issue'
+- npm i -g pm2 && pm2 deploy ecosystem.config.js prod update
 before_install:
-- openssl aes-256-cbc -K $encrypted_9b2d7e19d83c_key -iv $encrypted_9b2d7e19d83c_iv
-  -in id_rsa.enc -out ~/.ssh/id_rsa -d
 - openssl aes-256-cbc -K $encrypted_9b2d7e19d83c_key -iv $encrypted_9b2d7e19d83c_iv
   -in id_rsa.enc -out ~/.ssh/id_rsa -d
 - chmod 600 ~/.ssh/id_rsa
