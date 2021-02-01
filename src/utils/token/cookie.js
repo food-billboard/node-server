@@ -50,7 +50,7 @@ const SET_TYPE = {
   set: (ctx, key, data, options={}) => {
     ctx.cookies.set(key, data, {
       maxAge: 1000 * 60 * 60 * 24,
-      domain: 'localhost',
+      domain: '47.111.229.250',
       path: '/',
       secure: false,
       isHttpOnly: true,
