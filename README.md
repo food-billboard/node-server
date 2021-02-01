@@ -34,8 +34,3 @@
 7. 开发生产环境启动  `npm run dev_prod`  
 8. 生产环境启动  `npm run prod`  
 9. 生产环境重启  `npm run restart`   
-
-### 构建
-1. grunt  
-- 更新npm `[sudo] npm update -g npm`  
-- 安装cli `[sudo] npm install -g grunt-cli`
