@@ -194,6 +194,16 @@ const rmdir = (path) => {
   })
 }
 
+const getIp = (ctx) => {
+  const { req } = ctx
+  const ip = req.headers['x-forwarded-for'] || // 判断是否有反向代理 IP
+  req.connection.remoteAddress || // 判断 connection 的远程 IP
+  req.socket.remoteAddress || // 判断后端的 socket 的 IP
+  req.connection.socket.remoteAddress;
+
+  return ip == '::1' ? 'localhost' : ip
+}
+
 module.exports = {
   isType,
   isEmpty,
@@ -208,5 +218,6 @@ module.exports = {
   checkDir,
   checkAndCreateDir,
   findMostRole,
-  rmdir
+  rmdir,
+  getIp
 }

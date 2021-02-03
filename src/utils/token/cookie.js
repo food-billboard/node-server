@@ -1,4 +1,5 @@
 const Url = require('url')
+const { getIp } = require('../tool')
 let crypto;
 try {
   crypto = require('crypto');
@@ -48,9 +49,10 @@ const getCookieName = (name) => {
 //cookie设置类型
 const SET_TYPE = {
   set: (ctx, key, data, options={}) => {
+    const ip = getIp(ctx)
     ctx.cookies.set(key, data, {
       maxAge: 1000 * 60 * 60 * 24,
-      domain: process.env.NODE_ENV === 'production' ? '47.111.229.250' : 'localhost',
+      domain: ip,
       path: '/',
       secure: false,
       isHttpOnly: true,
