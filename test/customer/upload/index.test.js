@@ -750,7 +750,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`create the file upload task success test -> ${COMMON_API}`, function() {
 
-      before(function() {
+      before(function(done) {
 
         VideoModel.deleteMany({
           "info.md5": filename
