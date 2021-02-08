@@ -194,18 +194,18 @@ router
 //搜索种类电影热度占比(分类 日期)
 .get('/type', async(ctx) => {
 
-  const { start_date, end_date } = getDateParams(ctx)
+  // const { start_date, end_date } = getDateParams(ctx)
 
   const data = await Promise.all([
     MovieModel.aggregate([
-      {
-        $match: {
-          createdAt: {
-            $lte: end_date,
-            $gte: start_date
-          }
-        }
-      },
+      // {
+      //   $match: {
+      //     createdAt: {
+      //       $lte: end_date,
+      //       $gte: start_date
+      //     }
+      //   }
+      // },
       {
         $project: {
           _id: 0,
@@ -225,14 +225,14 @@ router
       }
     ]),
     MovieModel.aggregate([
-      {
-        $match: {
-          createdAt: {
-            $lte: end_date,
-            $gte: start_date
-          }
-        }
-      },
+      // {
+      //   $match: {
+      //     createdAt: {
+      //       $lte: end_date,
+      //       $gte: start_date
+      //     }
+      //   }
+      // },
       {
         $project: {
           createdAt: 1,
@@ -285,7 +285,6 @@ router
   ])
   .then(([total_count, classify_count]) => {
     if(!Array.isArray(total_count) || !Array.isArray(classify_count)) return Promise.reject({ errMsg: 'data error', status: 404 })
-
     const total = total_count.length ? total_count[0].total : 0
 
     let count = 0

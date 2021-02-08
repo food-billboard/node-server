@@ -635,12 +635,13 @@ router
   .then(notFound)
   .then(data => {
     const { info: { another_name: alias, ...nextInfo }, images, poster, video, ...nextData } = data
+
     return {
       data: {
         ...nextData,
         ...nextInfo,
-        poster: poster._id,
-        video: video._id,
+        poster: poster ? poster._id : null,
+        video: video ? video._id : null,
         images: images.map(item => item && item._id),
         alias
       }

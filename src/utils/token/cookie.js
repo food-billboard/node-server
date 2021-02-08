@@ -1,10 +1,8 @@
-const Url = require('url')
-const { getIp } = require('../tool')
 let crypto;
 try {
-  crypto = require('crypto');
+  crypto = require('crypto')
 } catch (err) {
-  console.log('不支持 crypto');
+  console.log('不支持 crypto')
 }
 
 //秘钥
@@ -49,10 +47,9 @@ const getCookieName = (name) => {
 //cookie设置类型
 const SET_TYPE = {
   set: (ctx, key, data, options={}) => {
-    const ip = getIp(ctx)
     ctx.cookies.set(key, data, {
       maxAge: 1000 * 60 * 60 * 24,
-      domain: ip,
+      // domain,
       path: '/',
       secure: false,
       isHttpOnly: true,
