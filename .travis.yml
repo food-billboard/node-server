@@ -1,15 +1,16 @@
-nguage: node_js
+language: node_js
 node_js:
 - '12'
+install:
+- npm install
 script:
 - npm run test
 addons:
   ssh_known_hosts: 47.111.229.250
 after_success:
 - echo 'I successfully done'
-# - ssh root@47.111.229.250 'cat /etc/issue'
 - npm i -g pm2 && pm2 deploy ecosystem.config.js prod update
 before_install:
-- openssl aes-256-cbc -K $encrypted_9b2d7e19d83c_key -iv $encrypted_9b2d7e19d83c_iv
+- openssl aes-256-cbc -K $encrypted_cee67c79dec3_key -iv $encrypted_cee67c79dec3_iv
   -in id_rsa.enc -out ~/.ssh/id_rsa -d
 - chmod 600 ~/.ssh/id_rsa
