@@ -19,7 +19,7 @@ addons:
   ssh_known_hosts: $ip
 before_script:
 - sleep 15
-- mongo mydb_test --eval "use movie"
+# - mongo mydb_test --eval "use movie"
 after_success:
 - echo 'I successfully done'
 - npm i -g pm2 && pm2 deploy ecosystem.config.js prod update
