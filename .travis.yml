@@ -26,6 +26,6 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_cee67c79dec3_key -iv $encrypted_cee67c79dec3_iv
   -in id_rsa.enc -out ~/.ssh/id_rsa -d
 - chmod 600 ~/.ssh/id_rsa
-- sudo redis-server --port 6379
-- sudo mongod
+# - sudo redis-server --port 6379
+# - sudo mongod
 - ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@$ip "cd /home/node-server;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
