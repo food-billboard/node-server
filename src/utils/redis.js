@@ -7,7 +7,7 @@ let client
 const LIMIT_ACCESS_SECONDS = 10
 const LIMIT_ACCESS_TIMES = 20
 
-const redisConnect = ({ port=6379, host='localhost', options={
+const redisConnect = ({ port=6379, host='127.0.0.1', options={
   // password
   // connectTimeout
 } }={}) => {

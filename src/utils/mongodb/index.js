@@ -5,7 +5,7 @@ const { initAuthMapData } = require('../auth')
 
 let instance = false
 
-function MongoDB(url="mongodb://localhost:27017/movie") {
+function MongoDB(url="mongodb://127.0.0.1:27017/movie") {
   if(!instance) {
     instance = true
     mongoose.connect(url, {
