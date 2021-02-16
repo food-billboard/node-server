@@ -10,8 +10,9 @@
     "stop": "pm2 stop app & pm2 stop media",
     "delete": "pm2 delete app & pm2 delete media",
     "restart": "pm2 restart app & pm2 restart media",
-    "test": "mocha --recursive --timeout 10000",
-    "coverage": "nyc npm run test",
+    "test": "echo hello node-server",
+    "internal_test": "mocha --recursive --timeout 10000",
+    "coverage": "nyc npm run internal_test",
     "socket": "nodemon ./src/chat/index.js"
   },
   "author": "GLF",

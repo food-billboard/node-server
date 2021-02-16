@@ -14,8 +14,8 @@ install:
   - npm install
   # 启动docker
   - docker build -t registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest .
-# script:
-#   - npm run test
+script:
+  - npm run test
 addons:
   ssh_known_hosts: $ip
 before_script:
