@@ -23,8 +23,8 @@ const redisConnect = ({ port=6379, host='localhost', options={
   client.on('connect', function () {
     console.log(chalk.bgBlue(`redis is connected and run in host: ${_host} port: ${_port}`))
   })
-  client.on('error', function() {
-    console.log(chalk.bgRed('redis connect error'))
+  client.on('error', function(e) {
+    console.log(chalk.bgRed('redis connect error: ' + JSON.stringify(e)))
     redisDisConnect()
   })
 

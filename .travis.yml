@@ -17,6 +17,9 @@ script:
 - npm run test
 addons:
   ssh_known_hosts: $ip
+before_script:
+- sleep 15
+- mongo --eval "use movie"
 after_success:
 - echo 'I successfully done'
 - npm i -g pm2 && pm2 deploy ecosystem.config.js prod update
@@ -27,5 +30,5 @@ after_success:
 before_install:
 - openssl aes-256-cbc -K $encrypted_cee67c79dec3_key -iv $encrypted_cee67c79dec3_iv
   -in id_rsa.enc -out ~/.ssh/id_rsa -d
-- sudo redis-server --port 6379
-- sudo mongod
+# - sudo redis-server --port 6379
+# - sudo mongod
