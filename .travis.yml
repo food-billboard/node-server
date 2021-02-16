@@ -1,34 +1,35 @@
-language: node_js
+language: 
+  node_js
 services:
-  docker
-  mongodb
-  redis-server
+  - docker
+  - mongodb
+  - redis-server
 node_js:
-- '12'
+  - '12'
 branches:
   only:
   - master
 install:
-- npm install -g mocha
-- npm install
-# 启动docker
-- docker build -t registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest .
+  - npm install -g mocha
+  - npm install
+  # 启动docker
+  - docker build -t registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest .
 script:
-- npm run test
+  - npm run test
 addons:
   ssh_known_hosts: $ip
 before_script:
-- sleep 15
+  - sleep 15
 # - mongo mydb_test --eval "use movie"
 after_success:
-- echo 'I successfully done'
-- npm i -g pm2 && pm2 deploy ecosystem.config.js prod update
-- docker login --username=伙食榜 -p=$aliyun_pwd registry.cn-hangzhou.aliyuncs.com
-- docker push registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
-- chmod 600 ~/.ssh/id_rsa
-- ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@$ip "cd /home/node-server;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
+  - echo 'I successfully done'
+  - npm i -g pm2 && pm2 deploy ecosystem.config.js prod update
+  - docker login --username=伙食榜 -p=$aliyun_pwd registry.cn-hangzhou.aliyuncs.com
+  - docker push registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
+  - chmod 600 ~/.ssh/id_rsa
+  - ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@$ip "cd /home/node-server;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
 before_install:
-- openssl aes-256-cbc -K $encrypted_cee67c79dec3_key -iv $encrypted_cee67c79dec3_iv
-  -in id_rsa.enc -out ~/.ssh/id_rsa -d
-# - sudo redis-server --port 6379
-# - sudo mongod
+  - openssl aes-256-cbc -K $encrypted_cee67c79dec3_key -iv $encrypted_cee67c79dec3_iv
+    -in id_rsa.enc -out ~/.ssh/id_rsa -d
+  # - sudo redis-server --port 6379
+  # - sudo mongod
