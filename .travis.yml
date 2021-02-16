@@ -1,16 +1,29 @@
 language: node_js
+services:
+  docker
 node_js:
 - '12'
+branches:
+  only:
+  - master
 install:
+- npm install -g mocha
 - npm install
+# 启动docker
+- docker build -t registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest .
 script:
 - npm run test
 addons:
-  ssh_known_hosts: 47.111.229.250
+  ssh_known_hosts: $ip
 after_success:
 - echo 'I successfully done'
 - npm i -g pm2 && pm2 deploy ecosystem.config.js prod update
+- docker login --username=伙食榜 -p=$aliyun_pwd registry.cn-hangzhou.aliyuncs.com
+- docker push registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
 before_install:
 - openssl aes-256-cbc -K $encrypted_cee67c79dec3_key -iv $encrypted_cee67c79dec3_iv
   -in id_rsa.enc -out ~/.ssh/id_rsa -d
 - chmod 600 ~/.ssh/id_rsa
+- sudo /usr/local/redis/src/redis-server /etc/redis/redis.conf --port 6379
+- sudo /usr/local/mongodb/bin/mongod --dbpath /usr/local/mongodb/database
+- ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@$ip "cd /home/node-server;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"

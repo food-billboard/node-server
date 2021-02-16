@@ -26,6 +26,8 @@ router
     type: ['toInt']
   })
 
+  const { env } = ctx.request.body
+
   const data = await UserModel.findOneAndUpdate({
     mobile,
     password: encoded(password)
@@ -56,7 +58,7 @@ router
     ctx.status = 200
     //设置cookie
     //临时设置，需要修改
-    setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set' })
+    setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set', options: { domain: env.toLowerCase() == 'prod' ? '47.111.229.250' : 'localhost' } })
 
     return {
       fans: fans.length,
