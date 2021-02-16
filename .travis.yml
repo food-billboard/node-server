@@ -28,4 +28,4 @@ before_install:
 - chmod 600 ~/.ssh/id_rsa
 # - sudo redis-server --port 6379
 # - sudo mongod
-- ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@$ip "cd /home/node-server;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
+- ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@$ip "cd /home/node-server;docker-compose -f /home/node-server/docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
