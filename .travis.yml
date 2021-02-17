@@ -27,7 +27,7 @@ after_success:
   - sudo  docker login --username=$username -p=$aliyun_pwd registry.cn-hangzhou.aliyuncs.com
   - sudo docker push registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
   - chmod 600 ~/.ssh/id_rsa
-  - ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@$ip "cd /home/node-server;mkdir travis-test;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
+  - ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@47.111.229.250 "cd /home/node-server;mkdir travis-test;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
 before_install:
   - openssl aes-256-cbc -K $encrypted_cee67c79dec3_key -iv $encrypted_cee67c79dec3_iv
     -in id_rsa.enc -out ~/.ssh/id_rsa -d
