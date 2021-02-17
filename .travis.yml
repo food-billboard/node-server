@@ -24,7 +24,7 @@ before_script:
 after_success:
   - echo 'I successfully done'
   - npm i -g pm2 && pm2 deploy ecosystem.config.js prod update
-  - sudo  docker login --username=$username -p=$aliyun_pwd registry.cn-hangzhou.aliyuncs.com
+  - sudo docker login --username=$username -p=$aliyun_pwd registry.cn-hangzhou.aliyuncs.com
   - sudo docker push registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
   - chmod 600 ~/.ssh/id_rsa
   - ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@ip "cd /home/node-server;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
