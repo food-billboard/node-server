@@ -23,6 +23,7 @@ before_script:
 # - mongo mydb_test --eval "use movie"
 after_success:
   - echo 'I successfully done'
+  - echo 'hello world'
   - npm i -g pm2 && pm2 deploy ecosystem.config.js production update
   - sudo docker login --username=$username -p=$aliyun_pwd registry.cn-hangzhou.aliyuncs.com
   - sudo docker push registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
