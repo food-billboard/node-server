@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon app.js --config ./src/config/nodemon/index.dev.json",
     "dev_prod": "nodemon app.js --config ./src/config/nodemon/index.prod.json",
-    "prod": "pm2 start ecosystem.config.js",
+    "prod": "pm2 start pm2.config.js",
     "stop": "pm2 stop app & pm2 stop media",
     "delete": "pm2 delete app & pm2 delete media",
     "restart": "pm2 restart app & pm2 restart media",

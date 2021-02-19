@@ -20,13 +20,17 @@ module.exports = {
     production : {
       key: "~/.ssh/id_rsa",
       user: "root",
-      host: ["47.111.229.250"],
+      host: "47.111.229.250",
       ssh_options: "StrictHostKeyChecking=no",
       ref: "origin/master",
-      repo: "git@github.com:food-billboard/node-server.git",
-      path: "/home/node-server",
+      // repo: "git@github.com:food-billboard/node-server.git",
+      repo: "https://github.com.cnpmjs.org/food-billboard/node-server",
+      path: "/home/server",
       "post-deploy":
-        "source ~/.nvm/nvm.sh && yarn install && pm2 startOrRestart ecosystem.config.js",
+        "source ~/.nvm/nvm.sh && npm install && pm2 startOrRestart pm2.config.js",
+      "env"  : {
+        "NODE_ENV": "production"
+      }
     }
   }
 };

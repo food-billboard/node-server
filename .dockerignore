@@ -1,6 +1,6 @@
 .git
-node_modules
-.static
+/node_modules
+/static
 .nyc_output
 /coverage/
 package-lock.json
