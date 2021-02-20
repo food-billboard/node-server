@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { TagModel, dealErr, responseDataDeal, Params } = require('@src/utils')
+const { MovieModel, dealErr, responseDataDeal, Params, MOVIE_STATUS } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -8,11 +8,6 @@ router
 .put('/', async(ctx) => {
 
   const check = Params.body(ctx, {
-    name: 'valid',
-    validator: [
-      data => typeof data === 'boolean'
-    ]
-  }, {
     name: '_id',
     validator: [
       data => ObjectId.isValid(data)
@@ -21,22 +16,17 @@ router
 
   if(check) return 
 
-  const [ _id, valid ] = Params.sanitizers(ctx.request.body, {
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
     ]
-  }, {
-    name: 'valid',
-    sanitizers: [
-      data => !!data
-    ]
   })
 
-  const data = TagModel.updateOne({
+  const data = MovieModel.updateOne({
     _id
   }, {
-    $set: { valid }
+    $set: { status: MOVIE_STATUS.COMPLETE }
   })
   .then(res => {
     if(res.nModified != 1) {
@@ -71,11 +61,15 @@ router
     ]
   })
 
-  const data = TagModel.deleteOne({
+  const data = MovieModel.updateOne({
     _id
+  }, {
+    $set: { status: MOVIE_STATUS.NOT_VERIFY }
   })
   .then(res => {
-    if(res.deletedCount != 1) return Promise.reject({ errMsg: 'not found', status: 400 })
+    if(res.nModified != 1) {
+      return Promise.reject({ errMsg: 'not found', status: 400 })
+    }
     return true
   })
   .catch(dealErr(ctx))

@@ -1,34 +1,32 @@
 require('module-alias/register')
-const { UserModel, TagModel } = require('@src/utils')
+const { UserModel, MovieModel, MOVIE_STATUS } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, mockCreateUser, mockCreateTag } = require('@test/utils')
+const { Request, mockCreateUser, mockCreateMovie } = require('@test/utils')
 
-const COMMON_API = '/api/manage/movie/detail/tag'
+const COMMON_API = '/api/manage/movie/detail/valid'
 
 describe(`${COMMON_API} test`, function() {
 
   let selfToken
   let userInfo
-  let tagId
+  let movieId
 
   before(function(done) {
 
     const { model: user, signToken } = mockCreateUser({
       username: COMMON_API
     })
-    const { model: tag } = mockCreateTag({
-      text: COMMON_API,
-      weight: 1,
-      valid: true,
+    const { model: movie } = mockCreateMovie({
+      name: COMMON_API
     })
 
     Promise.all([
       user.save(),
-      tag.save()
+      movie.save()
     ])
-    .then(([user, tag]) => {
+    .then(([user, movie]) => {
       userInfo = user
-      tagId = tag._id
+      movieId = movie._id
       selfToken = signToken(userInfo._id)
       done()
     })
@@ -44,8 +42,8 @@ describe(`${COMMON_API} test`, function() {
       UserModel.deleteMany({
         username: COMMON_API
       }),
-      TagModel.deleteMany({
-        text: COMMON_API
+      MovieModel.deleteMany({
+        name: COMMON_API
       }),
     ])
     .then(function() {
@@ -59,13 +57,13 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`${COMMON_API} success test`, function() {
 
-    describe(`put the tag status success -> ${COMMON_API}`, function() {
+    describe(`put the movie status success -> ${COMMON_API}`, function() {
 
       after(function(done) {
 
-        TagModel.findOne({
-          _id: tagId,
-          valid: false
+        MovieModel.findOne({
+          _id: movieId,
+          status: MOVIE_STATUS.COMPLETE
         })
         .select({
           _id: 1
@@ -83,7 +81,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`put the tag status success`, function(done) {
+      it(`put the movie status success`, function(done) {
 
         Request
         .put(COMMON_API)
@@ -92,8 +90,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          _id: tagId.toString(),
-          valid: false
+          _id: movieId.toString(),
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -106,12 +103,13 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    describe(`delete the tag success -> ${COMMON_API}`, function() {
+    describe(`forbidden movie success -> ${COMMON_API}`, function() {
 
       after(function(done) {
 
-        TagModel.findOne({
-          _id: tagId,
+        MovieModel.findOne({
+          _id: movieId,
+          status: MOVIE_STATUS.NOT_VERIFY
         })
         .select({
           _id: 1
@@ -119,7 +117,7 @@ describe(`${COMMON_API} test`, function() {
         .exec()
         .then(data => !!data)
         .then(data => {
-          expect(data).to.be.false
+          expect(data).to.be.true
           done()
         })
         .catch(err => {
@@ -129,7 +127,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`delete the tag success`, function(done) {
+      it(`forbidden the movie success`, function(done) {
 
         Request
         .delete(COMMON_API)
@@ -138,7 +136,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: tagId.toString(),
+          _id: movieId.toString(),
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -157,15 +155,12 @@ describe(`${COMMON_API} test`, function() {
 
     before(function(done) {
 
-      const { model: tag } = mockCreateTag({
-        text: COMMON_API,
-        weight: 1,
-        valid: true,
+      MovieModel.updateOne({
+        _id: movieId,
+      }, {
+        $set: { status: MOVIE_STATUS.VERIFY }
       })
-
-      tag.save()
-      .then(data => {
-        tagId = data._id
+      .then(_ => {
         done()
       })
       .catch(err => {
@@ -175,16 +170,13 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`put the tag status fail because lack of the id`, function(done) {
+    it(`put the movie status fail because lack of the id`, function(done) {
 
       Request
       .put(COMMON_API)
       .set({
         Accept: 'application/json',
         Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        valid: false
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -195,7 +187,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`put the tag status fail because the id not found`, function(done) {
+    it(`put the movie status fail because the id not found`, function(done) {
 
       Request
       .put(COMMON_API)
@@ -205,7 +197,6 @@ describe(`${COMMON_API} test`, function() {
       })
       .send({
         _id: "571094e2976aeb1df982ad5e",
-        valid: false
       })
       // .expect(400)
       .expect('Content-Type', /json/)
@@ -216,7 +207,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`put the tag status fail because the id not valid`, function(done) {
+    it(`put the movie status fail because the id not valid`, function(done) {
 
       Request
       .put(COMMON_API)
@@ -225,8 +216,7 @@ describe(`${COMMON_API} test`, function() {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: tagId.toString().slice(1),
-        valid: false
+        _id: movieId.toString().slice(1),
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -237,48 +227,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`put the tag status fail because lack of the valid`, function(done) {
-
-      Request
-      .put(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        _id: tagId.toString(),
-      })
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .end(function(err) {
-        if(err) return done(err)
-        done()
-      })
-
-    })
-
-    it(`put the tag status fail because the valid not valid`, function(done) {
-
-      Request
-      .put(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        _id: tagId.toString(),
-        valid: null
-      })
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .end(function(err) {
-        if(err) return done(err)
-        done()
-      })
-
-    })
-
-    it(`delete the tag fail because lack of the id`, function(done) {
+    it(`forbidden the movie fail because lack of the id`, function(done) {
 
       Request
       .delete(COMMON_API)
@@ -295,7 +244,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`delete the tag fail because the id not found`, function(done) {
+    it(`forbidden the movie fail because the id not found`, function(done) {
 
       Request
       .delete(COMMON_API)
@@ -315,7 +264,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`delete the tag fail because the id not valid`, function(done) {
+    it(`forbidden the movie fail because the id not valid`, function(done) {
 
       Request
       .delete(COMMON_API)
@@ -324,7 +273,7 @@ describe(`${COMMON_API} test`, function() {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: tagId.toString().slice(1),
+        _id: movieId.toString().slice(1),
       })
       .expect(400)
       .expect('Content-Type', /json/)

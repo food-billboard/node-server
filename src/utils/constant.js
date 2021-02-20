@@ -88,7 +88,7 @@ const MEDIA_ORIGIN_TYPE = {
   SYSTEM: 'SYSTEM'
 }
 
-const NETWORK = 'http://47.111.229.250'
+const NETWORK = process.env.NODE_ENV !== 'production' ? 'localhost' : '47.111.229.250'
 
 //关键词抽取个数
 const EXTRACT_KEYWORD_TOP_N = 1

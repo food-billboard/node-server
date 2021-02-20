@@ -3,7 +3,7 @@ const chalk = require('chalk')
 const { NETWORK, STATIC_FILE_PATH } = require('../constant')
 const path = require('path')
 
-const sleep = (time=2000) => new Promise((resolve) => setTimeout(resolve, time))
+const sleep = (time=4000) => new Promise((resolve) => setTimeout(resolve, time))
 
 const createHls = async (filePath) => {
 

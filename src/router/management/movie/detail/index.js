@@ -3,6 +3,7 @@ const Comment = require('./comment')
 const User = require('./user')
 const Info = require('./info')
 const Tag = require('./tag')
+const Valid = require('./valid')
 const { MovieModel, dealErr, notFound, responseDataDeal, Params } = require('@src/utils')
 const { Types: { ObjectId }, Aggregate } = require('mongoose')
 
@@ -140,5 +141,6 @@ router
 .use('/user', User.routes(), User.allowedMethods())
 .use('/info', Info.routes(), Info.allowedMethods())
 .use('/tag', Tag.routes(), Tag.allowedMethods())
+.use('/valid', Valid.routes(), Valid.allowedMethods())
 
 module.exports = router

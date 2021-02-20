@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon app.js --config ./src/config/nodemon/index.dev.json",
     "dev_prod": "nodemon app.js --config ./src/config/nodemon/index.prod.json",
+    "media": "nodemon media.js --config ./src/config/nodemon/index.dev.json",
     "prod": "pm2 start pm2.config.js",
     "stop": "pm2 stop app & pm2 stop media",
     "delete": "pm2 delete app & pm2 delete media",

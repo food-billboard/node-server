@@ -944,6 +944,60 @@
         }
       }
     },
+    "/api/manage/movie/detail/valid": {
+      "put": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "通过电影审核",
+        "description": "",
+        "operationId": "manage_movie_detail_put_movie",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "movie id",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "不通过电影审核",
+        "description": "",
+        "operationId": "manage_movie_detail_delete_movie",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "movie id",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
     "/api/manage/movie/detail/user": {
       "get": {
         "tags": [
