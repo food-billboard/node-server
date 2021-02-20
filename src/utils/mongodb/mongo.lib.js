@@ -759,6 +759,11 @@ const TagSchema = new Schema({
     type: ObjectId,
     ref: 'movie'
   },
+  valid: {
+    type: Boolean,
+    default: true,
+    required: true
+  },
   other: {}
 }, {
   ...defaultConfig,

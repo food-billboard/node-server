@@ -331,22 +331,22 @@ describe(`${COMMON_API} test`, () => {
 
   describe(`get the district list fail test -> ${COMMON_API}`, function() {
 
-    it(`get the district list fail because lack of the params`, function(done) {
+    // it(`get the district list fail because lack of the params`, function(done) {
 
-      Request
-      .get(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .end(function(err, res) {
-        if(err) return done(err)
-        done()
-      })
+    //   Request
+    //   .get(COMMON_API)
+    //   .set({
+    //     Accept: 'application/json',
+    //     Authorization: `Basic ${selfToken}`
+    //   })
+    //   .expect(400)
+    //   .expect('Content-Type', /json/)
+    //   .end(function(err, res) {
+    //     if(err) return done(err)
+    //     done()
+    //   })
 
-    })
+    // })
 
   })
 

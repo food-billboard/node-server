@@ -883,6 +883,67 @@
         }
       }
     },
+    "/api/manage/movie/detail/tag": {
+      "put": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "修改tag状态",
+        "description": "",
+        "operationId": "manage_movie_detail_put_tag",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "tagid",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "valid",
+            "in": "body",
+            "description": "状态",
+            "type": "boolean",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "删除tag",
+        "description": "",
+        "operationId": "manage_movie_detail_delete_tag",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "tagid",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
     "/api/manage/movie/detail/user": {
       "get": {
         "tags": [

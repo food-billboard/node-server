@@ -2,6 +2,7 @@ const Router = require('@koa/router')
 const Comment = require('./comment')
 const User = require('./user')
 const Info = require('./info')
+const Tag = require('./tag')
 const { MovieModel, dealErr, notFound, responseDataDeal, Params } = require('@src/utils')
 const { Types: { ObjectId }, Aggregate } = require('mongoose')
 
@@ -138,5 +139,6 @@ router
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 .use('/user', User.routes(), User.allowedMethods())
 .use('/info', Info.routes(), Info.allowedMethods())
+.use('/tag', Tag.routes(), Tag.allowedMethods())
 
 module.exports = router

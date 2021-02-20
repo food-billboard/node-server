@@ -156,7 +156,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .get(COMMON_API)
         .query({
-          _id: movieId.toString()
+          _id: movieId.toString(),
         })
         .set({
           Accept: 'Application/json',
@@ -225,9 +225,33 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get the movie barrage list success test`, function() {
 
-      it(`success get test`, function(done) {
+      it(`get the movie barrage list success`, function(done) {
 
-        done()
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${userToken}`
+        })
+        .query({
+          _id: movieId.toString(),
+          timeStart: 0,
+          process: 20
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          expect(obj.res.data.length).to.be.eql(0)
+          done()
+        })
 
       })
 
@@ -473,6 +497,67 @@ describe(`${COMMON_API} test`, function() {
   describe(`post like the barrage test -> ${COMMON_API}`, function() {
 
     describe(`post like the barrage success test -> ${COMMON_API}`, function() {
+
+      before(function(done) {
+
+        BarrageModel.updateOne({
+          origin: movieId
+        }, {
+          like_users: []
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+
+      })
+
+      after(function(done) {
+
+        BarrageModel.findOne({
+          origin: movieId
+        })
+        .select({
+          like_users: 1
+        })
+        .exec()
+        .then(data => {
+          const { _doc: { like_users } } = data
+          expect(like_users.some(user => user.equals(userId)))
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+
+      })
+
+      it(`post like the barrage success`, function(done) {
+
+        Request
+        .post(`${COMMON_API}/like`)
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${userToken}`
+        })
+        .send({
+          _id: result._id.toString()
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+
+      })
+
+    })
+
+    describe(`post like the barrage fail test -> ${COMMON_API}`, function() {
 
       before(function(done) {
 

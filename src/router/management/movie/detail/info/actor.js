@@ -79,7 +79,7 @@ router
   })
   .exec()
   .then(data => {
-
+    
     return {
       data: data.map(item => {
         const { name, other: { another_name, avatar }, createdAt, country, updatedAt, source_type, _id } = item

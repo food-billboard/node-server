@@ -90,7 +90,7 @@ const tagSchedule = () => {
 
     console.log(chalk.magenta('数据标签tag定时审查'))
 
-    //当前简单实用评论当做tag
+    //当前简单使用评论当做tag
     cleanTag()
     .then(collecteComment)
     .then(setTag)

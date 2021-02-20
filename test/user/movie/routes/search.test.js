@@ -165,7 +165,9 @@ describe(`get the search result test -> ${ COMMON_API }`, function() {
         Request
         .get(COMMON_API)
         .query({
-          content: COMMON_API
+          content: COMMON_API,
+          currPage: 0,
+          pageSize: 30
         })
         .set({
           Accept: 'Application/json'

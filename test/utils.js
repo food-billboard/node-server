@@ -134,6 +134,7 @@ function mockCreateComment(values={}) {
 function mockCreateTag(values={}) {
   let baseModel = {
     text: '测试标签内容',
+    valid: true
   }
   baseModel = mergeConfig(baseModel, values, true)
 

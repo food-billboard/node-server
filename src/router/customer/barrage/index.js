@@ -1,6 +1,7 @@
 const Router = require('@koa/router')
 const { verifyTokenToData, UserModel, MovieModel, BarrageModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
+const { merge } = require('lodash')
 
 const router = new Router()
 
@@ -33,14 +34,12 @@ router
 
   const [ timeStart, process, _id ] = Params.sanitizers(ctx.query, {
     name: 'timeStart',
-    _default: 0,
     type: ['toInt'],
     sanitizers: [
       data => data >= 0 ? data : -1
     ]
   }, {
     name: 'process',
-    _default: 1000 * 60 * 2,
     type: ['toInt'],
     sanitizers: [
       data => data >= 0 ? data : -1
@@ -54,13 +53,17 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
-  const data = await BarrageModel.find({
+  let query = {
     origin: _id,
-    ...(timeStart >= 0 ? { 
-      $gt: { time_line: timeStart },
-      ...(process >= 0 ? { $lt: { time_line: process + timeStart } } : {})
-    } : {})
-  })
+  }
+  if(timeStart >= 0) {
+    query = merge(query, { time_line: { $gt: timeStart } })
+  }
+  if(process >= 0) {
+    query = merge(query, { time_line: { ...query.time_line || {}, $lt: process + timeStart } })
+  }
+
+  const data = await BarrageModel.find(query)
   .select({
     like_users:1,
     content: 1,
