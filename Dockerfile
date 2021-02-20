@@ -5,6 +5,7 @@ RUN mkdir -p /app
 COPY ./ /app
 # 指定接下来的工作路径为/app。
 WORKDIR /app/
+RUN npm install -g pm2
 # 在/app目录下，运行npm install命令安装依赖。注意，安装后所有的依赖，都将打包进入 image 文件。
 RUN npm install --registry=https://registry.npm.taobao.org
 # 将容器 3000 端口暴露出来， 允许外部连接这个端口。
