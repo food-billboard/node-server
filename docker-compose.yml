@@ -25,7 +25,7 @@ services:
       - ./conf/redis.conf:/usr/local/redis/redis.conf
       - ./logs:/usr/local/redis/logs
     command:
-#      两个写入操作 只是为了解决启动后警告 可以去掉
+    # 两个写入操作 只是为了解决启动后警告 可以去掉
       /bin/bash -c "echo 511 > /proc/sys/net/core/somaxconn
       && echo never > /sys/kernel/mm/transparent_hugepage/enabled
       && redis-server /usr/local/etc/redis/redis.conf"
@@ -37,7 +37,7 @@ services:
     container_name: nginx-alpine
     restart: always
     privileged: true
-    environment:
+    # environment:
       # - TZ=Asia/Shanghai 
     ports:
       - 8080:80
@@ -51,14 +51,15 @@ services:
       - ./dist:/home/node-server/public/manage
     networks:
       - nginx_bridge
-  # web:
-  #   container_name: node-server
-  #   image: registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
-  #   ports:
-  #     - 8080:80
-  #   restart: always
-  #   depends_on:
-  #     - java
-  #   volumes:
-  #     - /mydockerdata/nginx/etc/nginx.conf:/etc/nginx/nginx.conf
-  #     - /mydockerdata/nginx/log/:/var/log/nginx
+  web:
+    container_name: node-server
+    image: registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
+    ports:
+      - 4000:4000
+    restart: always
+    depends_on:
+      - mongodb
+      - redis
+      # - nginx
+    volumes:
+      - .:/home/server/source
