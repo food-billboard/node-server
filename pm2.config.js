@@ -22,7 +22,7 @@ module.exports = {
       user: "root",
       host: "47.111.229.250",
       ssh_options: "StrictHostKeyChecking=no",
-      ref: "origin/master",
+      ref: "master",
       // repo: "git@github.com:food-billboard/node-server.git",
       repo: "https://github.com.cnpmjs.org/food-billboard/node-server",
       path: "/home/server",
