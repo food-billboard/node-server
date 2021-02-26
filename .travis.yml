@@ -13,7 +13,7 @@ install:
   - npm install -g mocha
   - npm install
   # 启动docker
-  - docker build -t registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest .
+  # - docker build -t registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest .
 script:
   - npm run test
 addons:
