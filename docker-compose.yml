@@ -15,15 +15,15 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - ./mongodb/data:/usr/local/mongodb/database
-      - ./mongodb/logs:/usr/local/mongodb/log
+      - /usr/local/mongodb/database:/usr/local/mongodb/database
+      - /usr/local/mongodb/log:/usr/local/mongodb/log
   redis:
     image: redis
     container_name: docker_redis
     volumes:
-      - ./datadir:/usr/local/redis/dump.rdb
-      - ./conf/redis.conf:/usr/local/redis/redis.conf
-      - ./logs:/usr/local/redis/logs
+      - /usr/local/redis/dump.rdb:/usr/local/redis/dump.rdb
+      - /usr/local/redis/redis.conf:/usr/local/redis/redis.conf
+      - /usr/local/redis/logs:/usr/local/redis/logs
     command:
     # 两个写入操作 只是为了解决启动后警告 可以去掉
       /bin/bash -c "echo 511 > /proc/sys/net/core/somaxconn
