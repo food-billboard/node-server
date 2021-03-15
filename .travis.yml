@@ -4,6 +4,9 @@ services:
   - docker
   # - mongodb
   # - redis-server
+cache:
+  directories:
+    - node_modules # 缓存node_modules文档夹
 node_js:
   - '12'
 branches:
