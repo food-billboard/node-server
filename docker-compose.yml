@@ -3,12 +3,12 @@ networks:
   nginx_bridge:
     driver: bridge
 services:
-  mongodb:
-    container_name: mongodb
+  mongo:
+    container_name: mongo
     image: mongo:latest
     restart: always
     # command: --config /etc/mongo/mongod.conf
-    environment:
+    # environment:
       # - MONGO_DATA_DIR=/usr/local/mongodb/database
       # - MONGO_LOG_DIR=/usr/local/mongodb/log
       # - MONGO_INITDB_ROOT_USERNAME=admin
@@ -25,48 +25,48 @@ services:
       # - /usr/local/redis/dump.rdb:/usr/local/redis/dump.rdb
       - /usr/local/redis/redis.conf:/usr/local/etc/redis/redis.conf
       # - /usr/local/redis/logs:/usr/local/redis/logs
-    command:
-    # 两个写入操作 只是为了解决启动后警告 可以去掉
-      /bin/bash -c "echo 511 > /proc/sys/net/core/somaxconn
-      && echo never > /sys/kernel/mm/transparent_hugepage/enabled
-      && redis-server /usr/local/etc/redis/redis.conf"
+    # command:
+    # # 两个写入操作 只是为了解决启动后警告 可以去掉
+    #   /bin/bash -c "echo 511 > /proc/sys/net/core/somaxconn
+    #   && echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    #   && redis-server /usr/local/etc/redis/redis.conf"
     ports:
       - 6379:6379
-  nginx:
-    image: nginx:stable-alpine
-    #image: nginx:1.19.1-alpine
-    container_name: nginx-alpine
-    restart: always
-    privileged: true
-    # environment:
-      # - TZ=Asia/Shanghai 
-    ports:
-      - 8080:80
-      - 80:80
-      - 443:443
-    volumes:
-      # - /etc/localtime:/etc/localtime:ro
-      - /usr/local/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      # - ./conf.d:/etc/nginx/conf.d
-      - ./log:/usr/local/nginx/logs
-      # - ./dist:/home/node-server/public/manage
-      - /home/node-server/public/manage:/usr/share/nginx/html:ro
-    networks:
-      - nginx_bridge
+  # nginx:
+  #   image: nginx:stable-alpine
+  #   #image: nginx:1.19.1-alpine
+  #   container_name: nginx-alpine
+  #   restart: always
+  #   privileged: true
+  #   # environment:
+  #     # - TZ=Asia/Shanghai 
+  #   ports:
+  #     - 8080:80
+  #     - 80:80
+  #     - 443:443
+  #   volumes:
+  #     # - /etc/localtime:/etc/localtime:ro
+  #     # - /usr/local/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - /usr/local/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     # - ./conf.d:/etc/nginx/conf.d
+  #     - ./src/logs:/usr/local/nginx/logs
+  #     # - ./dist:/home/node-server/public/manage
+  #     # - /home/node-server/public/manage:/usr/share/nginx/html:ro
+  #     - ./public/manage:/user/share/nginx/html:ro
+  #   networks:
+  #     - nginx_bridge
   web:
     container_name: node-server
     image: registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
-    # links:
-    #   - nginx
-    #   - redis
-    #   - mongodb
+    # image: test-web-image
     ports:
       - 4000:4000
     restart: always
     depends_on:
-      - mongodb
+      - mongo
       - redis
-      - nginx
+      # - nginx
     volumes:
       - /home/server/source:/app
+      # - /Users/mac/Developments/node-server:/app
     command: npm run prod:docker

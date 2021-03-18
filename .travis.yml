@@ -21,6 +21,8 @@ before_install:
 install:
   # - npm install -g mocha
   # - npm install
+  - npm i -g pm2
+  - pm2 deploy pm2.config.js production update
   # 启动docker
   - docker build -t registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest .
 before_script:
@@ -29,8 +31,6 @@ script:
   - npm run test
 after_success:
   - echo 'I successfully done'
-  # - npm i -g pm2
-  # - pm2 deploy pm2.config.js production update
   - sudo docker login --username=$username -p=$aliyun_pwd registry.cn-hangzhou.aliyuncs.com
   - sudo docker push registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
   - ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@$ip "cd /home/server/source;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
