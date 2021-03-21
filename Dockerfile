@@ -1,6 +1,6 @@
 # 该 image 文件继承官方的 node image，冒号表示标签，这里标签是8.4，即8.4版本的 node。
 FROM node:12.14.1
-RUN mkdir -P /movie_server
+RUN mkdir -p /movie_server
 RUN mkdir -p /movie_server/app
 RUN mkdir -P /movie_server/app/static
 # 将当前目录下的所有文件（除了.dockerignore排除的路径），都拷贝进入 image 文件的/app目录。
