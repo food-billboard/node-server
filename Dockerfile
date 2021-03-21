@@ -2,7 +2,7 @@
 FROM node:12.14.1
 RUN mkdir -p /movie_server
 RUN mkdir -p /movie_server/app
-RUN mkdir -P /movie_server/app/static
+RUN mkdir -p /movie_server/app/static
 # 将当前目录下的所有文件（除了.dockerignore排除的路径），都拷贝进入 image 文件的/app目录。
 # RUN yum -y install git
 # RUN git reset --hard
