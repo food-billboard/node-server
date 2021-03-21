@@ -20,7 +20,7 @@ services:
       - /usr/local/mongodb/log:/var/log/mongodb
   redis:
     image: redis
-    container_name: docker_redis
+    container_name: redis
     volumes:
       # - /usr/local/redis/dump.rdb:/usr/local/redis/dump.rdb
       - /usr/local/redis/redis.conf:/usr/local/etc/redis/redis.conf
@@ -67,6 +67,9 @@ services:
       - redis
       # - nginx
     volumes:
-      - /home/server/source:/app
-      # - /Users/mac/Developments/node-server:/app
-    command: npm run prod:docker
+      - /home/server/source:/movie_server/app
+      - /home/server/source/static:/movie_server/app/static
+      # - /Users/daniel/Development/project/mine/movie-weapp/server:/app
+    command: 
+      - echo 'I run the docker web image'
+      - npm run prod:docker

@@ -32,6 +32,9 @@
 
 ## docker常用命令
 1. 停止镜像 `docker stop docker_id`  
-2. 删除镜像 `docker rm docker_id`  
-3. 正在运行的镜像 `docker ps`  
-4. 所有镜像 `docker ps -a`
+2. 删除容器 `docker rm docker_id`  
+3. 正在运行的容器 `docker ps`  
+4. 所有容器 `docker ps -a`  
+5. 删除镜像 `docker rmi docker_id`  
+6. 查看镜像 `docker images`
+7. 查看容器运行日志 `docker logs docker_id`
