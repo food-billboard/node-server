@@ -1,31 +1,39 @@
 const Redis = require('ioredis')
 const chalk = require('chalk')
 const { dealErr, responseDataDeal } = require('./error-deal')
+const { connectTry } = require('./tool')
 
 
 let client
 const LIMIT_ACCESS_SECONDS = 10
 const LIMIT_ACCESS_TIMES = 20
 
-const redisConnect = ({ port=6379, host='127.0.0.1', options={
+const redisConnect = async ({ port=6379, host='127.0.0.1', options={
   // password
   // connectTimeout
 } }={}) => {
 
-  const _port = process.env.REDIS_PORT || port
-  const _host = process.env.REDIS_HOST || host
-  client = new Redis(
-    _port,
-    _host,
-    options
-  )
+  return new Promise((resolve, reject) => {
 
-  client.on('connect', function () {
-    console.log(chalk.bgBlue(`redis is connected and run in host: ${_host} port: ${_port}`))
-  })
-  client.on('error', function(e) {
-    console.log(chalk.bgRed('redis connect error: ' + JSON.stringify(e)))
-    redisDisConnect()
+    const _port = process.env.REDIS_PORT || port
+    const _host = process.env.REDIS_HOST || host
+    client = new Redis(
+      _port,
+      _host,
+      options
+    )
+
+    client.on('connect', function () {
+      console.log(chalk.bgBlue(`redis is connected and run in host: ${_host} port: ${_port}`))
+      resolve()
+    })
+
+    client.on('error', function(e) {
+      console.log(chalk.bgRed('redis connect error: ' + JSON.stringify(e)))
+      reject('redis connect error')
+      redisDisConnect()
+    })
+
   })
 
 }
@@ -93,7 +101,7 @@ const dealRedis = async (opera) => {
 
 module.exports = {
   AccessLimitCheck,
-  redisConnect,
+  redisConnect: connectTry(redisConnect),
   redisDisConnect,
   dealRedis
 }

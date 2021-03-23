@@ -2,13 +2,14 @@ const mongoose = require("mongoose")
 const chalk = require('chalk')
 const Lib = require("./mongo.lib")
 const { initAuthMapData } = require('../auth')
+const { connectTry } = require('../tool')
 
 let instance = false
 
-function MongoDB(url="mongodb://127.0.0.1:27017/movie") {
+async function MongoDB(url="mongodb://127.0.0.1:27017/movie") {
   if(!instance) {
     instance = true
-    mongoose.connect(url, {
+    return mongoose.connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       autoIndex: false
@@ -17,15 +18,18 @@ function MongoDB(url="mongodb://127.0.0.1:27017/movie") {
       // initAuthMapData()
       console.log(chalk.bgGreen('the mongodb server is run in port 27017'))
     })
-    .catch(err => {
-      console.log(chalk.bgRed('the mongodb server is run in error'))
-      console.log(err)
-    })
+    // .catch(err => {
+    //   console.log(chalk.bgRed('the mongodb server is run in error'))
+    //   console.log(err)
+    // })
   }
+  return Promise.resolve()
 }
 
 module.exports = {
   ...Lib,
-  MongoDB
+  MongoDB: connectTry(MongoDB, {
+    msg: 'the mongodb server is run in error'
+  })
 }
 

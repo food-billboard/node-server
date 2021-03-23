@@ -16,4 +16,4 @@ RUN npm install
 # 将容器 4000 端口暴露出来， 允许外部连接这个端口。
 EXPOSE 4000
 # 这一行表示等运行image时在shell中自动输入的命令，不用我们自己再去node文件了。
-# CMD [ "npm", "prod" ]
+CMD [ "npm", "prod:docker" ]

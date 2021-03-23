@@ -69,7 +69,8 @@ services:
     volumes:
       - /home/server/source:/movie_server/app
       - /home/server/source/static:/movie_server/app/static
-      # - /Users/daniel/Development/project/mine/movie-weapp/server:/app
-    command: 
-      - echo 'I run the docker web image'
-      - npm run prod:docker
+      # - /Users/mac/Developments/node-server:/movie_server/app
+      # - /Users/mac/Developments/node-server/static:/movie_server/app/static
+    # command: 
+    #   # - echo 'I run the docker web image'
+    #   # - bash -c "npm run prod:docker"
