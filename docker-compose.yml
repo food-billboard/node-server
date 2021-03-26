@@ -32,29 +32,26 @@ services:
     #   && redis-server /usr/local/etc/redis/redis.conf"
     ports:
       - 6379:6379
-  # nginx:
-  #   image: nginx:stable-alpine
-  #   #image: nginx:1.19.1-alpine
-  #   container_name: nginx-alpine
-  #   restart: always
-  #   privileged: true
-  #   # environment:
-  #     # - TZ=Asia/Shanghai 
-  #   ports:
-  #     - 8080:80
-  #     - 80:80
-  #     - 443:443
-  #   volumes:
-  #     # - /etc/localtime:/etc/localtime:ro
-  #     # - /usr/local/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - /usr/local/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-  #     # - ./conf.d:/etc/nginx/conf.d
-  #     - ./src/logs:/usr/local/nginx/logs
-  #     # - ./dist:/home/node-server/public/manage
-  #     # - /home/node-server/public/manage:/usr/share/nginx/html:ro
-  #     - ./public/manage:/user/share/nginx/html:ro
-  #   networks:
-  #     - nginx_bridge
+  nginx:
+    image: nginx:1.19
+    container_name: nginx
+    restart: always
+    privileged: true
+    # environment:
+      # - TZ=Asia/Shanghai 
+    ports:
+      - 8080:80
+      - 80:80
+      - 443:443
+    volumes:
+      # - /etc/localtime:/etc/localtime:ro
+      # - /usr/local/etc/nginx:/etc/nginx/nginx.d:ro
+      - ./bin/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./bin/nginx/logs.log:/etc/nginx/logs/log.log
+      - ./public:/movie/server/public:ro
+      - /Users/mac/Developments/node-server/static:/movie/server/static:ro
+    networks:
+      - nginx_bridge
   web:
     container_name: node-server
     image: registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
