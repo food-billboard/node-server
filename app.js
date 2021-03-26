@@ -18,7 +18,7 @@ const {
   authMiddleware, 
   notes_customer_behaviour_middleware,
   mediaSchedule,
-  tagSchedule,
+  // tagSchedule,
   movieSchedule
 } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
@@ -32,7 +32,7 @@ redisConnect()
 //媒体资源定时器
 mediaSchedule()
 //数据标签定时器
-tagSchedule()
+// tagSchedule()
 //无用数据删除
 movieSchedule()
 
