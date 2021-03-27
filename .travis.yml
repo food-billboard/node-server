@@ -21,8 +21,11 @@ before_install:
 install:
   # - npm install -g mocha
   # - npm install
+  - echo 'start install'
   - npm i -g pm2
-  - pm2 deploy pm2.config.js production update
+  # 在首次部署时，我们需要先在远程服务器初始化项目。
+  pm2 deploy pm2.config.js production setup
+  # - pm2 deploy pm2.config.js production update
   # 启动docker
   - docker build -t registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest .
 before_script:

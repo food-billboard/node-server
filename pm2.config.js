@@ -25,7 +25,7 @@ module.exports = {
       ref: "master",
       repo: "git@github.com:food-billboard/node-server.git",
       // repo: "https://github.com.cnpmjs.org/food-billboard/node-server",
-      path: "/home/server",
+      path: "/home",
       "post-deploy":
         "git pull origin master && source ~/.nvm/nvm.sh && npm install", //&& pm2 startOrRestart pm2.config.js 
       "env"  : {
