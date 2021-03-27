@@ -1,22 +1,15 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, mockCreateImage, Request, mockCreateVideo } = require('@test/utils')
+const { mockCreateUser, mockCreateImage, Request, mockCreateVideo, generateTemplateFile } = require('@test/utils')
 const { ImageModel, fileEncoded, UserModel, VideoModel, STATIC_FILE_PATH } = require('@src/utils')
 const fs = require('fs')
 const path = require('path')
 
 const templatePath = path.resolve(__dirname, 'assets')
-const littleFile = fs.readFileSync(path.resolve(templatePath, 'test-image.png'))
-const bigFile = fs.readFileSync(path.resolve(templatePath, 'test-video.mp4'))
-const littleFileName = fileEncoded(littleFile)
-const bigFileName = fileEncoded(bigFile)
-const littleFileStat = fs.statSync(path.resolve(templatePath, 'test-image.png'))
-const bigFileStat = fs.statSync(path.resolve(templatePath, 'test-video.mp4'))
-const COMMON_API = ''
-const LITTLE_PUBLIC_COMMON_API = `${COMMON_API}/public/image/${littleFileName}.png`
-const LITTLE_PRIVATE_COMMON_API = `${COMMON_API}/private/image/${littleFileName}.png`
-const LARGE_PUBLIC_COMMON_API = `${COMMON_API}/public/video/${bigFileName}.mp4`
-const LARGE_PRIVATE_COMMON_API = `${COMMON_API}/private/video/${bigFileName}.mp4`
+let LITTLE_PUBLIC_COMMON_API = 'little-public';
+let LITTLE_PRIVATE_COMMON_API = 'little-private';
+let LARGE_PUBLIC_COMMON_API = 'large-public';
+let LARGE_PRIVATE_COMMON_API = 'large-private';
 
 function responseExpect(res, validate=[]) {
 
@@ -37,7 +30,27 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
   let selfToken
   let signToken
 
+  let littleFile;
+  let bigFile;
+  let littleFileName;
+  let bigFileName;
+  let littleFileStat;
+  let bigFileStat;
+  let COMMON_API;
+
   before(async function() {
+
+    await generateTemplateFile()
+    littleFile = fs.readFileSync(path.resolve(templatePath, 'test-image.png'))
+    bigFile = fs.readFileSync(path.resolve(templatePath, 'test-video.mp4'))
+    littleFileName = fileEncoded(littleFile)
+    bigFileName = fileEncoded(bigFile)
+    littleFileStat = fs.statSync(path.resolve(templatePath, 'test-image.png'))
+    bigFileStat = fs.statSync(path.resolve(templatePath, 'test-video.mp4'))
+    LITTLE_PUBLIC_COMMON_API = `${COMMON_API}/public/image/${littleFileName}.png`
+    LITTLE_PRIVATE_COMMON_API = `${COMMON_API}/private/image/${littleFileName}.png`
+    LARGE_PUBLIC_COMMON_API = `${COMMON_API}/public/video/${bigFileName}.mp4`
+    LARGE_PRIVATE_COMMON_API = `${COMMON_API}/private/video/${bigFileName}.mp4`
 
     let res = true
 

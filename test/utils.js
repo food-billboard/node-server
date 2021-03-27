@@ -23,10 +23,14 @@ const {
   BehaviourModel,
   mergeConfig
 } = require('@src/utils')
+const { merge } = require('lodash')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
 const { expect } = require('chai')
 const mongoose = require('mongoose')
+const path = require('path')
+const fs = require('fs')
+const fsPromise = fs.promises
 const { Types: { ObjectId } } = mongoose
 
 //用户创建
@@ -407,6 +411,49 @@ const commonValidate = {
   }
 }
 
+//生成临时静态文件
+async function generateTemplateFile(files=[
+  {
+    size: 1024 * 1024 * 1.6,
+    type: 'mp4',
+    name: 'test-video.mp4'
+  }, 
+  {
+    size: 1024 * 3,
+    type: 'png',
+    name: 'test-image.png'
+  }, 
+  {
+    size: 1024 * 1024 * 2.3,
+    type: 'jpg',
+    name: 'test-big.jpg'
+  }
+]) {
+  const dir = path.join(__dirname, 'assets')
+  for(let i = 0; i < files.length; i ++) {
+    const [ fileName, info ] = files[i] 
+    const { size, type } = info
+    const filePath = path.join(dir, `${fileName}.${type}`)
+    try {
+      const exists = fs.existsSync(filePath)
+      if(!exists) {
+        await fsPromise.writeFile(filePath, '')
+        const writeStream = fs.createWriteStream(filePath)
+        await new Promise((resolve, reject) => {
+          writeStream.on('finish', resolve)
+          const buffer = Buffer.alloc(size, 'a')
+          writeStream.write(buffer)
+        })
+      }
+    }catch(err) {
+      console.error(err)
+    }
+  }
+  
+  return files
+
+}
+
 module.exports = {
   mockCreateUser,
   mockCreateMovie,
@@ -428,5 +475,6 @@ module.exports = {
   Request,
   createEtag,
   commonValidate,
-  mockCreateFeedback
+  mockCreateFeedback,
+  generateTemplateFile
 }

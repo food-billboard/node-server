@@ -1,6 +1,6 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, Request, mockCreateVideo } = require('@test/utils')
+const { mockCreateUser, Request, mockCreateVideo, generateTemplateFile } = require('@test/utils')
 const { VideoModel, UserModel, fileEncoded, STATIC_FILE_PATH } = require('@src/utils')
 const fs = require('fs')
 const root = require('app-root-path')
@@ -18,24 +18,38 @@ describe(`${COMMON_API} test`, function() {
   let userId
   let selfToken
   let signToken
-  let mediaPath = path.resolve(root.path, 'test/assets/test-video.mp4')
-  let file = fs.readFileSync(mediaPath)
-  let filename = fileEncoded(file)
-  let size = fs.statSync(mediaPath).size
-  const originName = 'test-video.mp4'
-  const templatePath = path.resolve(STATIC_FILE_PATH, 'template', filename)
-  const realFilePath = path.resolve(STATIC_FILE_PATH, 'video', `${filename}.mp4`)
-  const chunkSize = 1024 * 1024 * 5
-  let chunksLength = Math.ceil(size / chunkSize)
-  let slice = Uint8Array.prototype.slice
-  let chunks = new Array(chunksLength).fill(0).map((_, index) => {
-    if(index + 1 === chunksLength) return slice.call(file, index * chunkSize )
-    return slice.call(file, index * chunkSize, (index + 1) * chunkSize)
-  })
+  let mediaPath;
+  let file;
+  let filename;
+  let size;
+  let originName;
+  let templatePath;
+  let realFilePath;
+  const chunkSize = 1024 * 1024 * 5;
+  let chunksLength;
+  let slice = Uint8Array.prototype.slice;
+  let chunks;
   const suffix = 'video/mp4'
   const auth = 'PUBLIC'
 
-  before(function(done) {
+  before(async function() {
+
+    let err = false 
+
+    await generateTemplateFile()
+
+    mediaPath = path.resolve(root.path, 'test/assets/test-video.mp4')
+    file = fs.readFileSync(mediaPath)
+    filename = fileEncoded(file)
+    size = fs.statSync(mediaPath).size
+    originName = 'test-video.mp4'
+    templatePath = path.resolve(STATIC_FILE_PATH, 'template', filename)
+    realFilePath = path.resolve(STATIC_FILE_PATH, 'video', `${filename}.mp4`)
+    chunksLength = Math.ceil(size / chunkSize)
+    chunks = new Array(chunksLength).fill(0).map((_, index) => {
+      if(index + 1 === chunksLength) return slice.call(file, index * chunkSize )
+      return slice.call(file, index * chunkSize, (index + 1) * chunkSize)
+    })
 
     const { model, signToken: getToken } = mockCreateUser({
       username: COMMON_API
@@ -43,15 +57,16 @@ describe(`${COMMON_API} test`, function() {
 
     signToken = getToken
 
-    model.save()
+    await model.save()
     .then(data => {
       userId = data._id
       selfToken = signToken(userId)
-      done()
     })
     .catch(err => {
       console.log('oops: ', err)
     })
+
+    return err ? Promise.reject() : Promise.resolve()
 
   })
 

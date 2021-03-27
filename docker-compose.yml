@@ -5,7 +5,7 @@ networks:
 services:
   mongo:
     container_name: mongo
-    image: mongo:latest
+    image: mongo:3.6
     restart: always
     # command: --config /etc/mongo/mongod.conf
     # environment:
@@ -16,7 +16,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - /usr/local/mongodb/database:/data/db
+      - /home/movie/mongodb/data:/data/db
       - /usr/local/mongodb/log:/var/log/mongodb
   redis:
     image: redis
@@ -53,20 +53,20 @@ services:
     network_mode: host
     # networks:
     #   - nginx_bridge
-  web:
-    container_name: node-server
-    image: registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
-    # image: test-web-image
-    ports:
-      - 4000:4000
-    restart: always
-    depends_on:
-      - mongo
-      - redis
-      # - nginx
-    volumes:
-      - .:/movie_server/app
-      - ./static:/movie_server/app/static
+  # web:
+  #   container_name: node-server
+  #   image: registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
+  #   # image: test-web-image
+  #   ports:
+  #     - 4000:4000
+  #   restart: always
+  #   depends_on:
+  #     - mongo
+  #     - redis
+  #     # - nginx
+  #   volumes:
+  #     - .:/movie_server/app
+  #     - ./static:/movie_server/app/static
       # - /Users/mac/Developments/node-server:/movie_server/app
       # - /Users/mac/Developments/node-server/static:/movie_server/app/static
     # command: 

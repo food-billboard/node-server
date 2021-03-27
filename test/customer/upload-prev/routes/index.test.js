@@ -1,6 +1,6 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, Request, mockCreateVideo } = require('@test/utils')
+const { mockCreateUser, Request, mockCreateVideo, generateTemplateFile } = require('@test/utils')
 const { VideoModel, UserModel, fileEncoded, STATIC_FILE_PATH } = require('@src/utils')
 // const { MAX_FILE_SIZE } = require('@src/router/customer/upload/util')
 const fs = require('fs')
@@ -18,22 +18,33 @@ describe.skip(`${COMMON_API} test`, function() {
   let selfToken
   let signToken
   let mediaPath = path.resolve(root.path, 'test/assets/test-video.mp4')
-  let file = fs.readFileSync(mediaPath)
-  let filename = fileEncoded(file)
-  let size = fs.statSync(mediaPath).size
-  const templatePath = path.resolve(STATIC_FILE_PATH, 'template', filename)
-  const realFilePath = path.resolve(STATIC_FILE_PATH, 'public/video', `${filename}.mp4`)
-  const chunkSize = 1024 * 500
-  let chunksLength = Math.ceil(size / chunkSize)
-  let slice = Uint8Array.prototype.slice
-  let chunks = new Array(chunksLength).fill(0).map((_, index) => {
-    if(index + 1 === chunksLength) return slice.call(file, index * chunkSize )
-    return slice.call(file, index * chunkSize, (index + 1) * chunkSize)
-  })
+  let file;
+  let filename;
+  let size;
+  let templatePath;
+  let realFilePath;
+  const chunkSize = 1024 * 500;
+  let chunksLength = Math.ceil(size / chunkSize);
+  let slice = Uint8Array.prototype.slice;
+  let chunks;
   const suffix = 'video/mp4'
   const auth = 'PUBLIC'
 
-  before(function(done) {
+  before(async function() {
+
+    let error = false 
+
+    await generateTemplateFile()
+
+    file = fs.readFileSync(mediaPath)
+    filename = fileEncoded(file)
+    size = fs.statSync(mediaPath).size
+    templatePath = path.resolve(STATIC_FILE_PATH, 'template', filename)
+    realFilePath = path.resolve(STATIC_FILE_PATH, 'public/video', `${filename}.mp4`)
+    chunks = new Array(chunksLength).fill(0).map((_, index) => {
+      if(index + 1 === chunksLength) return slice.call(file, index * chunkSize )
+      return slice.call(file, index * chunkSize, (index + 1) * chunkSize)
+    })
 
     if(!fs.existsSync(STATIC_FILE_PATH)) fs.mkdirSync(STATIC_FILE_PATH)
     if(!fs.existsSync(path.resolve(STATIC_FILE_PATH, 'template'))) fs.mkdirSync(path.resolve(STATIC_FILE_PATH, 'template'))
@@ -50,15 +61,17 @@ describe.skip(`${COMMON_API} test`, function() {
 
     signToken = getToken
 
-    model.save()
+    await model.save()
     .then(data => {
       userId = data._id
       selfToken = signToken(userId)
-      done()
     })
     .catch(err => {
       console.log('oops: ', err)
+      error = true 
     })
+
+    return error ? Promise.reject() : Promise.resolve()
 
   })
 

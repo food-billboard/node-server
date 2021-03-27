@@ -2,6 +2,7 @@
 node_modules
 /dist
 /static
+/test/assets/
 
 # local env files
 .env.local

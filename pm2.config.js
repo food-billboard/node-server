@@ -28,7 +28,7 @@ module.exports = {
       path: "/home",
       "post-deploy":
         "git pull origin master && source ~/.nvm/nvm.sh && yarn install", //&& pm2 startOrRestart pm2.config.js 
-      "env"  : {
+      "env": {
         "NODE_ENV": "production"
       }
     }

@@ -2,8 +2,6 @@ language:
   node_js
 services:
   - docker
-  # - mongodb
-  # - redis-server
 cache:
   directories:
     - node_modules # 缓存node_modules文档夹
@@ -20,20 +18,20 @@ before_install:
   - chmod 600 ~/.ssh/id_rsa
 install:
   # - npm install -g mocha
-  # - npm install
-  - echo 'start install'
   - npm i -g pm2
+  - npm i -g yarn
   # 在首次部署时，我们需要先在远程服务器初始化项目。
   # - pm2 deploy pm2.config.js production setup
   - pm2 deploy pm2.config.js production update
   # 启动docker
-  - docker build -t registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest .
+  # - docker build -t registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest .
 before_script:
   - sleep 15
 script:
   - npm run test
 after_success:
   - echo 'I successfully done'
-  - sudo docker login --username=$username -p=$aliyun_pwd registry.cn-hangzhou.aliyuncs.com
-  - sudo docker push registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
-  - ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@$ip "cd /home/server/source;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
+  # - sudo docker login --username=$username -p=$aliyun_pwd registry.cn-hangzhou.aliyuncs.com
+  # - sudo docker push registry.cn-hangzhou.aliyuncs.com/movie-node/node-server:latest
+  - ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@$ip "cd /home/source;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
+  - pm2 startOrRestart pm2.config.json
