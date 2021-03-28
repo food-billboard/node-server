@@ -66,6 +66,10 @@ const ROLES_DATABASE_MAP = [
         {
           methods: '*',
           url: `${PREFIX_URL}manage\\/admin.?`
+        },
+        {
+          methods: '*',
+          url: `${PREFIX_URL}manage\\/instance\\/info`
         }
       ]
     }
@@ -118,6 +122,10 @@ const ROLES_DATABASE_MAP = [
         {
           methods: '*',
           url: `${PREFIX_URL}manage\\/admin.?`
+        },
+        {
+          methods: [ 'get', 'post', 'put' ],
+          url: `${PREFIX_URL}manage\\/instance\\/info`
         }
       ]
     }
@@ -170,6 +178,10 @@ const ROLES_DATABASE_MAP = [
         {
           methods: '*',
           url: `${PREFIX_URL}manage\\/admin.?`
+        },
+        {
+          methods: [ 'get' ],
+          url: `${PREFIX_URL}manage\\/instance\\/info`
         }
       ]
     }

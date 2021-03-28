@@ -437,6 +437,10 @@ const GlobalSchema = new Schema({
   visit_count: {
     type: Number,
     min: 0
+  },
+  valid: {
+    type: Boolean,
+    default: false 
   }
 }, {
   ...defaultConfig
@@ -1005,6 +1009,23 @@ const RankSchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
+  match_pattern: [{
+    origin_id: {
+      type: ObjectId
+    },
+    origin: {
+      type: String,
+      required: true
+    },
+    field: {
+      type: String,
+      required: true
+    },
+    op: {
+      type: Number,
+      default: 1
+    }
+  }],
   match_field: {
     _id: {
       type: ObjectId,
@@ -1020,10 +1041,6 @@ const RankSchema = new Schema({
       }
     }
   },
-  // match: [{
-  //   type: ObjectId,
-  //   ref: 'movie'
-  // }],
   glance: {
     type: Number,
     default: 0
@@ -1049,12 +1066,6 @@ const ClassifySchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
-  // match: [
-  //   {
-  //     type: ObjectId,
-  //     ref: 'movie'
-  //   }
-  // ],
   glance: {
     type: Number,
     default: 0

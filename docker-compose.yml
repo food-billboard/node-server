@@ -3,9 +3,14 @@ networks:
   nginx_bridge:
     driver: bridge
 services:
+  ffmpeg:
+    image: jrottenberg/ffmpeg:3.4
+    container_name: ffmpeg_video
+    restart: always
+
   mongo:
     container_name: mongo
-    image: mongo:3.6
+    image: mongo:4.0.3
     restart: always
     # command: --config /etc/mongo/mongod.conf
     # environment:

@@ -51,6 +51,14 @@
         "description": "Find out more about our store",
         "url": "http://swagger.io"
       }
+    },
+    {
+      "name": "instance",
+      "description": "实例相关",
+      "externalDocs": {
+        "description": "Find out more about our store",
+        "url": "http://swagger.io"
+      }
     }
   ],
   "schemes": [
@@ -1239,7 +1247,7 @@
         }
       }
     },
-    "/api/manage/movie/detail/info/direcotr": {
+    "/api/manage/movie/detail/info/director": {
       "get": {
         "tags": [
           "movie"
@@ -1897,7 +1905,7 @@
             "type": "string"
           },
           {
-            "name":"descritpion",
+            "name":"description",
             "in": "body",
             "required": true,
             "description": "描述",
@@ -1999,7 +2007,7 @@
             "type": "string"
           },
           {
-            "name":"descritpion",
+            "name":"description",
             "in": "body",
             "required": true,
             "description": "描述",
@@ -2555,6 +2563,152 @@
           }
         }
       }
+    },
+    "/api/manage/instance/info": {
+      "get": {
+        "tags": [
+          "instance"
+        ],
+        "summary": "实例信息列表",
+        "description": "",
+        "operationId": "manage_instance_get_info",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_instance_get_info"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "instance"
+        ],
+        "summary": "新增实例",
+        "description": "",
+        "operationId": "manage_instance_post_info",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "info",
+            "in": "body",
+            "description": "信息",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "notice",
+            "in": "body",
+            "description": "跑马灯",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "valid",
+            "in": "body",
+            "description": "是否禁用",
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "instance"
+        ],
+        "summary": "修改实例",
+        "description": "",
+        "operationId": "manage_instance_put_info",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "info",
+            "in": "body",
+            "description": "信息",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "notice",
+            "in": "body",
+            "description": "跑马灯",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "valid",
+            "in": "body",
+            "description": "是否禁用",
+            "type": "boolean"
+          },
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "实例id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "instance"
+        ],
+        "summary": "删除实例",
+        "description": "",
+        "operationId": "manage_instance_delete_info",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "实例id",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
@@ -3049,7 +3203,7 @@
                         "description": "电影来源类型",
                         "enum": [ "ORIGIN", "USER" ]
                       },
-                      "stauts": {
+                      "status": {
                         "type": "string",
                         "description": "电影状态",
                         "enum": [ "VERIFY", "COMPLETE", "NOT_VERIFY" ]
@@ -3952,11 +4106,11 @@
                         "description": "人气"
                       },
                       "source": {
-                        "tyep": "string",
+                        "type": "string",
                         "description": "来源id"
                       },
                       "source_type": {
-                        "tyep": "string",
+                        "type": "string",
                         "description": "来源类型",
                         "enum": [ "comment", "movie" ]
                       },
@@ -4139,7 +4293,7 @@
                         "type": "integer",
                         "description": "总评分值"
                       },
-                      "stauts": {
+                      "status": {
                         "type": "string",
                         "description": "电影状态",
                         "enum": [ "VERIFY", "COMPLETE", "NOT_VERIFY" ]
@@ -4424,11 +4578,11 @@
                         "description": "人气"
                       },
                       "source": {
-                        "tyep": "string",
+                        "type": "string",
                         "description": "来源id"
                       },
                       "source_type": {
-                        "tyep": "string",
+                        "type": "string",
                         "description": "来源类型",
                         "enum": [ "comment", "movie" ]
                       },
@@ -4464,8 +4618,67 @@
       "xml": {
         "name": "manage_user_detail_get_comment"
       }
+    },
+    "manage_instance_get_info": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "description": "总数"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "info": {
+                        "type": "string",
+                        "description": "信息"
+                      },
+                      "notice": {
+                        "type": "string",
+                        "description": "跑马灯"
+                      },
+                      "visit_count": {
+                        "type": "integer",
+                        "description": "访问次数"
+                      },
+                      "valid": {
+                        "type": "boolean",
+                        "description": "是否禁用"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_instance_get_info"
+      }
     }
-
   },
   "externalDocs": {
     "description": "Find out more about Swagger",

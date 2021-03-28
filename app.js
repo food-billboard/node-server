@@ -19,7 +19,8 @@ const {
   notes_customer_behaviour_middleware,
   mediaSchedule,
   // tagSchedule,
-  movieSchedule
+  movieSchedule,
+  rankSchedule
 } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
 
@@ -35,6 +36,8 @@ mediaSchedule()
 // tagSchedule()
 //无用数据删除
 movieSchedule()
+//排行榜资源更新
+rankSchedule()
 
 app.use(Cors())
 //请求前植入uuid来进行全链路的日志记录

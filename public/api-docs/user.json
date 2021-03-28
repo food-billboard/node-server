@@ -1095,6 +1095,36 @@
             "in": "query",
             "description": "每页数量",
             "type": "integer"
+          },
+          {
+            "name": "glance",
+            "in": "query",
+            "description": "浏览量(排序 1 | -1)",
+            "type": "integer"
+          },
+          {
+            "name": "author_rate",
+            "in": "query",
+            "description": "作者评分(排序 1 | -1)",
+            "type": "integer"
+          },
+          {
+            "name": "hot",
+            "in": "query",
+            "description": "点赞(排序 1 | -1)",
+            "type": "integer"
+          },
+          {
+            "name": "rate_person",
+            "in": "query",
+            "description": "评分数量(排序 1 | -1)",
+            "type": "integer"
+          },
+          {
+            "name": "total_rate",
+            "in": "query",
+            "description": "总评分(排序 1 | -1)",
+            "type": "integer"
           }
         ],
         "responses": {
