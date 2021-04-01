@@ -734,7 +734,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "电影id",
+            "description": "电影id(多个用,分隔)",
             "type": "string",
             "required": true
           }
@@ -940,7 +940,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "tagid",
+            "description": "tagid(多个用,分隔)",
             "type": "string",
             "required": true
           }
@@ -968,7 +968,7 @@
           {
             "name": "_id",
             "in": "body",
-            "description": "movie id",
+            "description": "movie id(多个用,分隔)",
             "type": "string",
             "required": true
           }
@@ -1235,7 +1235,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "演员id",
+            "description": "演员id(多个用,分隔)",
             "type": "string",
             "required": true
           }
@@ -1398,7 +1398,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "导演id",
+            "description": "导演id(多个用,分隔)",
             "type": "string",
             "required": true
           }
@@ -1519,7 +1519,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "地区id",
+            "description": "地区id(多个用,分隔)",
             "type": "string",
             "required": true
           }
@@ -1640,7 +1640,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "语言id",
+            "description": "语言id(多个用,分隔)",
             "type": "string",
             "required": true
           }
@@ -1775,7 +1775,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "分类id",
+            "description": "分类id(多个用,分隔)",
             "type": "string",
             "required": true
           }
@@ -1941,7 +1941,7 @@
           {
             "name":"_id",
             "in": "query",
-            "description": "用户id",
+            "description": "用户id(多个用,分隔)",
             "type": "string"
           }
         ],
@@ -2149,7 +2149,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "评论id",
+            "description": "评论id(多个用,分隔)",
             "required": true,
             "type": "string"
           }
@@ -2278,7 +2278,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "反馈id",
+            "description": "反馈id(多个用,分隔)",
             "required": true,
             "type": "string"
           }
@@ -2654,15 +2654,13 @@
             "name": "info",
             "in": "body",
             "description": "信息",
-            "type": "string",
-            "required": true
+            "type": "string"
           },
           {
             "name": "notice",
             "in": "body",
             "description": "跑马灯",
-            "type": "string",
-            "required": true
+            "type": "string"
           },
           {
             "name": "valid",
@@ -2699,7 +2697,176 @@
           {
             "name": "_id",
             "in": "query",
+            "description": "实例id(多个用,分隔)",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/manage/instance/special": {
+      "get": {
+        "tags": [
+          "instance"
+        ],
+        "summary": "专题信息列表",
+        "description": "",
+        "operationId": "manage_instance_get_special",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_instance_get_special"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "instance"
+        ],
+        "summary": "新增专题",
+        "description": "",
+        "operationId": "manage_instance_post_special",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "movie",
+            "in": "body",
+            "description": "电影id集合(至少3个)",
+            "type": "array",
+            "required": true
+          },
+          {
+            "name": "poster",
+            "in": "body",
+            "description": "海报id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "valid",
+            "in": "body",
+            "description": "是否启用",
+            "type": "boolean"
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "description": "名称",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "description": "描述",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "instance"
+        ],
+        "summary": "修改专题",
+        "description": "",
+        "operationId": "manage_instance_put_special",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "movie",
+            "in": "body",
+            "description": "电影id集合(至少3个)",
+            "type": "array"
+          },
+          {
+            "name": "poster",
+            "in": "body",
+            "description": "海报id",
+            "type": "string"
+          },
+          {
+            "name": "valid",
+            "in": "body",
+            "description": "是否启用",
+            "type": "boolean"
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "description": "名称",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "description": "描述",
+            "type": "string"
+          },
+          {
+            "name": "_id",
+            "in": "body",
             "description": "实例id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "instance"
+        ],
+        "summary": "删除实例",
+        "description": "",
+        "operationId": "manage_instance_delete_info",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "实例id(多个用,分隔)",
             "type": "string"
           }
         ],
@@ -4677,6 +4844,90 @@
       },
       "xml": {
         "name": "manage_instance_get_info"
+      }
+    },
+    "manage_instance_get_special": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "description": "总数"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "名称"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "movie": {
+                        "type": "array",
+                        "description": "电影列表",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "_id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "名称"
+                            },
+                            "poster": {
+                              "type": "string",
+                              "description": "海报"
+                            }
+                          }
+                        }
+                      },
+                      "poster": {
+                        "type": "string",
+                        "description": "海报"
+                      },
+                      "glance": {
+                        "type": "integer",
+                        "description": "访问次数"
+                      },
+                      "valid": {
+                        "type": "boolean",
+                        "description": "是否启用"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_instance_get_special"
       }
     }
   },

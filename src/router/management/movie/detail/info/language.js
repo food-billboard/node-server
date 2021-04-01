@@ -102,17 +102,17 @@ router
   const check = checkParams(ctx)
   if(check) return
 
-  const [ _id ] = Params.sanitizers(ctx.request.body, {
+  const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item.trim()))
     ]
   })
 
   const { request: { body: { name } } } = ctx
   
-  const data = await LanguageModel.updateOne({
-    _id
+  const data = await LanguageModel.deleteMany({
+    _id: { $in: _ids }
   }, {
     $set: {
       name

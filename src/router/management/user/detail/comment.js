@@ -262,21 +262,21 @@ router
   const check = Params.query(ctx, {
     name: '_id',
     validator: [
-      data => ObjectId.isValid(data)
+      data => data.split(',').map(item => ObjectId.isValid(item))
     ]
   })
 
   if(check) return
   
-  const [ _id ] = Params.sanitizers(ctx.query, {
+  const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item))
     ]
   })
 
-  const data = await CommentModel.deleteOne({
-    _id
+  const data = await CommentModel.deleteMany({
+    _id: { $in: _ids }
   })
   .then(data => {
     if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })

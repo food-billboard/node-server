@@ -15,8 +15,8 @@ router
   const { _id:queryId } = ctx.query
   let valid = true
 
-  const isValidData = ObjectId.isValid(dataId)
-  const isValidQuery = ObjectId.isValid(queryId)
+  const isValidData = (dataId || '').split(',').every(item => ObjectId.isValid(item.trim()))
+  const isValidQuery = (queryId || '').split(',').every(item => ObjectId.isValid(item.trim()))
 
   if(dataId || queryId) {
     if(dataId && queryId) {

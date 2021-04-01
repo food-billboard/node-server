@@ -24,7 +24,7 @@ function responseExpect(res, validate=[]) {
   }
 }
 
-describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE_PUBLIC_COMMON_API} or ${LARGE_PRIVATE_COMMON_API} test`, function() {
+describe.skip(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE_PUBLIC_COMMON_API} or ${LARGE_PRIVATE_COMMON_API} test`, function() {
 
   let userId
   let selfToken
@@ -47,18 +47,18 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
     bigFileName = fileEncoded(bigFile)
     littleFileStat = fs.statSync(path.resolve(templatePath, 'test-image.png'))
     bigFileStat = fs.statSync(path.resolve(templatePath, 'test-video.mp4'))
-    LITTLE_PUBLIC_COMMON_API = `${COMMON_API}/public/image/${littleFileName}.png`
-    LITTLE_PRIVATE_COMMON_API = `${COMMON_API}/private/image/${littleFileName}.png`
-    LARGE_PUBLIC_COMMON_API = `${COMMON_API}/public/video/${bigFileName}.mp4`
-    LARGE_PRIVATE_COMMON_API = `${COMMON_API}/private/video/${bigFileName}.mp4`
+    LITTLE_PUBLIC_COMMON_API = `${COMMON_API}/image/${littleFileName}.png`
+    LITTLE_PRIVATE_COMMON_API = `${COMMON_API}/image/${littleFileName}.png`
+    LARGE_PUBLIC_COMMON_API = `${COMMON_API}/video/${bigFileName}.mp4`
+    LARGE_PRIVATE_COMMON_API = `${COMMON_API}/video/${bigFileName}.mp4`
 
     let res = true
 
     //测试文件写入
     //public
-    fs.writeFileSync(path.resolve(STATIC_FILE_PATH, 'public/image', `${littleFileName}.png`), littleFile)
+    fs.writeFileSync(path.resolve(STATIC_FILE_PATH, 'image', `${littleFileName}.png`), littleFile)
     const publicReadStream = fs.createReadStream(path.resolve(templatePath, 'test-video.mp4'))
-    const publicWriteStream = fs.createWriteStream(path.resolve(STATIC_FILE_PATH, 'public/video', `${bigFileName}.mp4`))
+    const publicWriteStream = fs.createWriteStream(path.resolve(STATIC_FILE_PATH, 'video', `${bigFileName}.mp4`))
     publicReadStream.pipe(publicWriteStream)
     await new Promise((resolve, reject) => {
       publicReadStream.on('end', function(err, res) {
@@ -71,9 +71,9 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
       res = false
     })
     //private
-    fs.writeFileSync(path.resolve(STATIC_FILE_PATH, 'private/image', `${littleFileName}.png`), littleFile)
+    fs.writeFileSync(path.resolve(STATIC_FILE_PATH, 'image', `${littleFileName}.png`), littleFile)
     const privateReadStream = fs.createReadStream(path.resolve(templatePath, 'test-video.mp4'))
-    const privateWriteStream = fs.createWriteStream(path.resolve(STATIC_FILE_PATH, 'private/video', `${bigFileName}.mp4`))
+    const privateWriteStream = fs.createWriteStream(path.resolve(STATIC_FILE_PATH, 'video', `${bigFileName}.mp4`))
     privateReadStream.pipe(privateWriteStream)
     await new Promise((resolve, reject) => {
       privateReadStream.on('end', function(err, res) {
@@ -129,10 +129,10 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
     })
 
     try {
-      const staticVPubPath = path.resolve(STATIC_FILE_PATH, 'public/video', `${bigFileName}.mp4`)
-      const staticVPriPath = path.resolve(STATIC_FILE_PATH, 'private/video', `${bigFileName}.mp4`)
-      const staticIPubPath = path.resolve(STATIC_FILE_PATH, 'public/image', `${littleFileName}.png`)
-      const staticIPriPath = path.resolve(STATIC_FILE_PATH, 'private/image', `${littleFileName}.png`)
+      const staticVPubPath = path.resolve(STATIC_FILE_PATH, 'video', `${bigFileName}.mp4`)
+      const staticVPriPath = path.resolve(STATIC_FILE_PATH, 'video', `${bigFileName}.mp4`)
+      const staticIPubPath = path.resolve(STATIC_FILE_PATH, 'image', `${littleFileName}.png`)
+      const staticIPriPath = path.resolve(STATIC_FILE_PATH, 'image', `${littleFileName}.png`)
       if(fs.existsSync(staticVPubPath)) {
         fs.unlinkSync(staticVPubPath)
       }
@@ -167,7 +167,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
 
         let res = true
 
-        const filePath = path.resolve(STATIC_FILE_PATH, 'public/image', `${littleFileName}.png`)
+        const filePath = path.resolve(STATIC_FILE_PATH, 'image', `${littleFileName}.png`)
 
         try {
           if(!fs.existsSync(filePath)) {
@@ -292,7 +292,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
 
         let res = true
 
-        const filePath = path.resolve(STATIC_FILE_PATH, 'private', `${littleFileName}.png`)
+        const filePath = path.resolve(STATIC_FILE_PATH, 'image', `${littleFileName}.png`)
 
         try {
           if(fs.existsSync(filePath)) {
@@ -398,7 +398,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
     describe(`get the little file fail test -> ${LITTLE_PRIVATE_COMMON_API}`, function() {
 
       beforeEach(function(done) {
-        const filePath = path.resolve(STATIC_FILE_PATH, 'private', `${littleFileName}.png`)
+        const filePath = path.resolve(STATIC_FILE_PATH, 'image', `${littleFileName}.png`)
         try {
           if(fs.existsSync(filePath)) {
             fs.writeFileSync(filePath, littleFile)
@@ -569,7 +569,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
 
       it(`get the large file success and return the status of 304`, function(done) {
 
-        const stat = fs.statSync(path.join(STATIC_FILE_PATH, 'public/video', `${bigFileName}.mp4`))
+        const stat = fs.statSync(path.join(STATIC_FILE_PATH, 'video', `${bigFileName}.mp4`))
 
         Request
         .get(LARGE_PUBLIC_COMMON_API)
@@ -591,7 +591,7 @@ describe(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${LARGE
 
       it(`get the large file success and hope return the status of 304 but the file is updated`, function(done) {
 
-        const stat = fs.statSync(path.join(STATIC_FILE_PATH, 'public/video', `${bigFileName}.mp4`))
+        const stat = fs.statSync(path.join(STATIC_FILE_PATH, 'video', `${bigFileName}.mp4`))
         
         Request
         .get(LARGE_PUBLIC_COMMON_API)

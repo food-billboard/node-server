@@ -1,7 +1,8 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, Request, commonValidate } = require('@test/utils')
-const { getToken, UserModel, dealRedis } = require('@src/utils')
+const { Types: { ObjectId } } = require('mongoose')
+const { mockCreateUser, Request, commonValidate, mockCreateImage } = require('@test/utils')
+const { getToken, UserModel, dealRedis, ImageModel } = require('@src/utils')
 const { email_type } = require('@src/router/user/logon/map')
 
 const COMMON_API = '/api/user/logon/register'
@@ -21,6 +22,7 @@ function responseExpect(res, validate=[]) {
     return !!getToken(target)[1]
   })
   commonValidate.string(target.username)
+  expect(target.username).to.be.equal(COMMON_API)
   commonValidate.objectId(target._id)
 
   if(Array.isArray(validate)) {
@@ -35,12 +37,46 @@ function responseExpect(res, validate=[]) {
 describe(`${COMMON_API} test`, function() {
 
   describe(`post the info for register and verify test -> ${COMMON_API}`, function() {
+
+    let avatar
+
+    before(function(done) {
+      const { model } = mockCreateImage({
+        src: COMMON_API
+      })
+
+      model.save()
+      .then(data => {
+        avatar = data._id
+        done()
+      })
+      .catch(err => {
+        console.log('oops: ', err)
+        done(err)
+      })
+      
+    })
+
+    after(function(done) {
+      ImageModel.deleteMany({
+        src: COMMON_API
+      })
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        console.log('oops: ', err)
+        done(err)
+      })
+    })
     
     describe(`post the info for register and verify success test -> ${COMMON_API}`, function() {
 
       let mobile = 18368003190
       let email = `${mobile}@qq.com`
       let captcha = '123456'
+      let description = COMMON_API
+      let username = COMMON_API
 
       let redisKey = `${email}-${email_type[1]}`
 
@@ -81,7 +117,10 @@ describe(`${COMMON_API} test`, function() {
           mobile,
           password: '1234567890',
           email,
-          captcha
+          captcha,
+          username,
+          description,
+          avatar: avatar.toString()
         })
         .set({ Accept: 'Application/json' })
         .expect(200)

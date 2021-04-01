@@ -91,8 +91,6 @@ router
   if(avatar) updateField = { ...updateField, avatar: ObjectId(avatar) }
   if(description) updateField = { ...updateField, description }
 
-  console.log(updateField)
-
   const data = await UserModel.findOneAndUpdate({
     _id: ObjectId(id)
   }, {

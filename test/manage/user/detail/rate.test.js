@@ -9,8 +9,6 @@ const COMMON_API = '/api/manage/user/detail/rate'
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
-  console.log(target)
-
   expect(target).to.be.a('object').and.that.include.all.keys('total', 'list')
   commonValidate.number(target.total)
   expect(target.list).to.be.a('array')

@@ -161,7 +161,6 @@ describe(`send mail test -> ${COMMON_API}`, function() {
       let res = true
 
       await dealRedis(function(redis) {
-        console.log(redisKey)
         return redis.set(redisKey, type, 'EX', 10)
       })
       .catch(err => {

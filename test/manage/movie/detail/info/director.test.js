@@ -290,46 +290,61 @@ describe(`${COMMON_API} test`, () => {
 
   describe(`delete the director success test -> ${COMMON_API}`, function() {
 
-    let directorId
+    let directorIdA
+    let directorIdB
 
     before(function(done) {
 
-      const { model } = mockCreateDirector({
+      const { model: directorA } = mockCreateDirector({
         name: COMMON_API.slice(22),
         source: anotherUserId,
         country: districtId
       })
 
+      const { model: directorB } = mockCreateDirector({
+        name: COMMON_API.slice(23),
+        source: anotherUserId,
+        country: districtId
+      })
+
       Promise.all([
-        model.save(),
+        directorA.save(),
+        directorB.save(),
         UserModel.updateOne({
           _id: anotherUserId
         }, {
           $set: { roles: [ 'CUSTOMER' ] }
         })
       ])
-      .then(([data]) => {
-        directorId = data._id
+      .then(([directorA, directorB]) => {
+        directorIdA = directorA._id
+        directorIdB = directorB._id
         done()
       })
       .catch(err => {
         console.log('oops: ', err)
+        done(err)
       })
 
     })
 
     after(function(done) {
 
-      DirectorModel.findOne({
-        _id: directorId.toString()
+      DirectorModel.find({
+        _id: { $in: [ directorIdA, directorIdB ] }
       })
       .select({
         _id: 1
       })
       .exec()
       .then(data => {
-        expect(!!data).to.be.false
+        expect(!!data.length).to.be.false
         done()
+      })
+      .catch(async (err) => {
+        console.log('oops: ', err)
+        await DirectorModel.deleteMany({ _id: { $in: [ directorIdA, directorIdB ] } })
+        done(err)
       })
 
     })
@@ -343,7 +358,7 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: directorId.toString()
+        _id: `${directorIdA.toString()},${directorIdB.toString()}`
       })
       .expect(200)
       .expect('Content-Type', /json/)

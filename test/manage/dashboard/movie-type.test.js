@@ -8,7 +8,6 @@ const COMMON_API = '/api/manage/dashboard/search/type'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
-  console.log(target)
   expect(target).to.be.a('object').and.that.include.all.keys('data', 'total')
   commonValidate.number(target.total)
   expect(target.data).to.be.a('array')

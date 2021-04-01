@@ -194,8 +194,6 @@ describe(`${COMMON_API} test`, function() {
           _id: result._id.toString()
         }
 
-        console.log(updatedAt.toString(), 22222222)
-
         const etag = createEtag(query)
 
         Request

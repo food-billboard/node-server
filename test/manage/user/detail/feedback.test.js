@@ -321,21 +321,44 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`delete the user feedback success test -> ${COMMON_API}`, function() {
 
+      let feedbackIdA
+      let feedbackIdB 
+      
+      before(function(done) {
+        const { model: feedbackA } = mockCreateFeedback()
+        const { model: feedbackB } = mockCreateFeedback()
+
+        Promise.all([
+          feedbackA.save(),
+          feedbackB.save(),
+        ])
+        .then(([feedbackA, feedbackB]) => {
+          feedbackIdA = feedbackA._id
+          feedbackIdB = feedbackB._id
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+      })
+
       after(function(done) {
 
-        FeedbackModel.findOne({
-          _id: threeFeedId
+        FeedbackModel.find({
+          _id: { $in: [ feedbackIdA, feedbackIdB ] }
         })
         .select({
           _id: 1
         })
         .exec()
         .then(data => {
-          expect(!!data).to.be.false
+          expect(!!data.length).to.be.false
           done()
         })
-        .catch(err => {
+        .catch(async (err) => {
           console.log('oops: ', err)
+          await FeedbackModel.deleteMany({ _id: { $in: [ feedbackIdA, feedbackIdB ] } })
           done(err)
         })
 
@@ -350,7 +373,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: threeFeedId.toString()
+          _id: `${feedbackIdA.toString()},${feedbackIdB.toString()}`
         })
         .expect(200)
         .expect('Content-Type', /json/)

@@ -260,7 +260,7 @@ describe(`${COMMON_API} test`, function() {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: `${id.slice(0, -1)}${Math.ceil(10 / (parseInt(id.slice(-1)) + 5))}`,
+        _id: `${Math.floor((+id[0] + 1) / 10)}${id.slice(1)}`
       })
       .expect(200)
       .expect('Content-Type', /json/)

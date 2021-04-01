@@ -519,18 +519,46 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`delete the movie success -> ${COMMON_API}`, function() {
 
+      let movieIdA 
+      let movieIdB 
+
+      before(function(done) {
+        const { model: modelA } = mockCreateMovie({
+          ...newMovie,
+          name: COMMON_API + '1'
+        })
+        const { model: modelB } = mockCreateMovie({
+          ...newMovie,
+          name: COMMON_API + '2'
+        })
+
+        Promise.all([
+          modelA.save(),
+          modelB.save()
+        ])
+        .then(([movieA, movieB]) => {
+          movieIdA = movieA._id 
+          movieIdB = movieB._id 
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+
+      })
+
       after(function(done) {
         
-        MovieModel.findOne({
-          _id: statusId
+        MovieModel.find({
+          _id: { $in: [movieIdB, movieIdA] }
         })
         .select({
           _id: 1
         })
         .exec()
         .then(data => {
-          console.log(data)
-          expect(!!data).to.be.false
+          expect(!!data.length).to.be.false
           done()
         })
         .catch(err => {
@@ -545,7 +573,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .delete(COMMON_API)
         .query({
-          _id: statusId.toString()
+          _id: `${movieIdB.toString()},${movieIdA.toString()}`
         })
         .set({
           Accept: 'application/json',

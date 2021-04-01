@@ -108,10 +108,40 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`delete the tag success -> ${COMMON_API}`, function() {
 
+      let tagIdA 
+      let tagIdB 
+      before(function() {
+        const { model: tagA } = mockCreateTag({
+          text: COMMON_API + '1',
+          weight: 1,
+          valid: true,
+        })
+        const { model: tagB } = mockCreateTag({
+          text: COMMON_API + '2',
+          weight: 1,
+          valid: true,
+        })
+
+        Promise.all([
+          tagA.save(),
+          tagB.save()
+        ])
+        .then(([tagA, tagB]) => {
+          tagIdA = tagA._id 
+          tagIdB = tagB._id 
+          done()
+        })
+        .catch(err => {
+          done(err)
+          console.log('oops: ', err)
+        })
+
+      })
+
       after(function(done) {
 
-        TagModel.findOne({
-          _id: tagId,
+        TagModel.find({
+          _id: { $in: [tagIdA, tagIdB] },
         })
         .select({
           _id: 1
@@ -119,7 +149,7 @@ describe(`${COMMON_API} test`, function() {
         .exec()
         .then(data => !!data)
         .then(data => {
-          expect(data).to.be.false
+          expect(!!data.length).to.be.false
           done()
         })
         .catch(err => {
@@ -138,7 +168,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: tagId.toString(),
+          _id: `${tagIdA.toString()},${tagIdB.toString()}`,
         })
         .expect(200)
         .expect('Content-Type', /json/)

@@ -171,15 +171,15 @@ router
 })
 .delete('/', async(ctx) => {
   
-  const [ _id ] = Params.sanitizers(ctx.query, {
+  const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item.trim()))
     ]
   })
 
-  const data = await ClassifyModel.deleteOne({
-    _id
+  const data = await ClassifyModel.deleteMany({
+    _id: { $in: _ids }
   })
   .then(data => {
     if(data.deletedCount == 0) return Promise.reject({ errMsg: 'not found', status: 404 })

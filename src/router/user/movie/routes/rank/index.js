@@ -126,8 +126,8 @@ router
 			...(!!total_rate ? { total_rate: 1 } : {}),
 			...sort
 		})
+		.exec()
 	})
-  .exec()
 	.then(data => !!data && data)
 	.then(notFound)
 	.then(data => {

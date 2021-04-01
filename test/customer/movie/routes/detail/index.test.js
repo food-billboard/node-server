@@ -62,7 +62,6 @@ function responseExpect(res, validate=[]) {
     commonValidate.string(name)
     if(other && other.avatar != undefined) {
       expect(other).to.be.a('object').and.that.includes.all.keys('avatar')
-      console.log(other.avatar)
       commonValidate.poster(other.avatar)
     }
   })

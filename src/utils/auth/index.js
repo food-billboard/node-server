@@ -42,12 +42,11 @@ const initAuthMapData = () => {
 }
 
 const authMiddleware = async (ctx, next) => {
-  
   if(process.env.NODE_ENV !== 'production') return await next()
   const { request: { method, url } } = ctx
   const { pathname } = Url.parse(url)
   //不在限制范围内
-  if(!PREFIX.every(prefix => prefix.startsWith(url))) return await next()
+  if(!PREFIX.every(prefix => url.startsWith(prefix))) return await next()
   const [, token] = verifyTokenToData(ctx)
   let data 
   let roles = []
@@ -62,7 +61,7 @@ const authMiddleware = async (ctx, next) => {
         actions.every(action => {
           const { url, methods } = action
           const reg = new RegExp(url)
-          if(role.includes('SUPER_ADMIN') || (reg.test(pathname) && (methods == '*' || (Array.isArray(methods) && methods.includes(method.toLowerCase()))))) {
+          if(_role.includes('SUPER_ADMIN') || (reg.test(pathname) && (methods == '*' || (Array.isArray(methods) && methods.includes(method.toLowerCase()))))) {
             roles = [ ...new Set([ ...roles, ..._role ]) ]
             return false
           }
@@ -102,6 +101,7 @@ const authMiddleware = async (ctx, next) => {
       }
       return true
     })
+
     if(result) return Promise.reject({ errMsg: 'forbidden', status: 403 })
   })
   .catch(dealErr(ctx))

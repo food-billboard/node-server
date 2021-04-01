@@ -699,6 +699,21 @@
             "name": "captcha",
             "description": "验证码",
             "required": true
+          },
+          {
+            "in": "body",
+            "name": "username",
+            "description": "用户民"
+          },
+          {
+            "in": "body",
+            "name": "description",
+            "description": "描述"
+          },
+          {
+            "in": "body",
+            "name": "avatar",
+            "description": "头像(图片id)"
           }
         ],
         "responses": {

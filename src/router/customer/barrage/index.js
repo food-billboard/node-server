@@ -233,8 +233,6 @@ router
     ]
   })
 
-  console.log(id)
-
   const data = await BarrageModel.findOneAndUpdate({
     origin: _id,
     like_users: { $in: [ ObjectId(id) ] }

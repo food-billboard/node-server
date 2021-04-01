@@ -264,45 +264,58 @@ describe(`${COMMON_API} test`, () => {
 
   describe(`delete the language success test -> ${COMMON_API}`, function() {
 
-    let languageId
+    let languageIdA
+    let languageIdB
 
     before(function(done) {
 
-      const { model } = mockCreateLanguage({
+      const { model: languageA } = mockCreateLanguage({
         name: COMMON_API.slice(22),
+        source: anotherUserId
+      })
+      const { model: languageB } = mockCreateLanguage({
+        name: COMMON_API.slice(23),
         source: anotherUserId
       })
 
       Promise.all([
-        model.save(),
+        languageA.save(),
+        languageB.save(),
         UserModel.updateOne({
           _id: anotherUserId
         }, {
           $set: { roles: [ 'CUSTOMER' ] }
         })
       ])
-      .then(([data]) => {
-        languageId = data._id
+      .then(([languageA, languageB]) => {
+        languageIdA = languageA._id
+        languageIdB = languageB._id
         done()
       })
       .catch(err => {
         console.log('oops: ', err)
+        done(err)
       })
 
     })
 
     after(function(done) {
 
-      LanguageModel.findOne({
-        _id: languageId.toString()
+      LanguageModel.find({
+        _id: { $in: [ languageIdA, languageIdB ] }
       })
       .select({
         _id: 1
       })
       .exec()
       .then(data => {
-        expect(!!data).to.be.false
+        expect(!!data.length).to.be.false
         done()
+      })
+      .catch(async (err) => {
+        console.log('oops: ', err)
+        await LanguageModel.deleteMany({ _id: { $in: [ languageIdA, languageIdB ] } })
+        done(err)
       })
 
     })
@@ -316,7 +329,7 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: languageId.toString()
+        _id: `${languageIdA.toString()},${languageIdB.toString()}`
       })
       .expect(200)
       .expect('Content-Type', /json/)

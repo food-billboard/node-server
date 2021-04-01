@@ -1,11 +1,12 @@
 const Router = require('@koa/router')
+const { Types: { ObjectId } } = require('mongoose')
 const { encoded, signToken, Params, UserModel, RoomModel, responseDataDeal, dealErr, dealRedis, EMAIL_REGEXP, setCookie, TOKEN_COOKIE } = require('@src/utils')
 const { email_type } = require('../map')
 
 const router = new Router()
 
-function createInitialUserInfo({ mobile, password, ...nextData }) {
-  return {
+function createInitialUserInfo({ mobile, password, username, avatar, description, ...nextData }) {
+  let defaultModel = {
     mobile,
     password: encoded(password),
     fans: [],
@@ -19,6 +20,10 @@ function createInitialUserInfo({ mobile, password, ...nextData }) {
     status: 'SIGNIN',
     ...nextData
   }
+  if(ObjectId.isValid(avatar)) defaultModel.avatar = avatar 
+  if(!!username) defaultModel.username = username 
+  if(!!description) defaultModel.description = description
+  return defaultModel
 }
 
 router
@@ -49,7 +54,7 @@ router
     name: 'mobile',
     type: ['toInt']
   })
-  const { request: { body: { email, captcha } } } = ctx
+  const { request: { body: { email, captcha, username, description, avatar } } } = ctx
 
   //判断账号是否存在
   const data = await UserModel.findOne({
@@ -69,7 +74,6 @@ router
   .then(data => !!data)
   .then(data => {
     if(data) return Promise.reject({errMsg: '账号已存在', status: 403})
-
     return dealRedis(function(redis) {
       return redis.get(`${email}-${email_type[1]}`)
     })
@@ -80,7 +84,7 @@ router
 
     //创建用户
     const account = new UserModel({
-      ...createInitialUserInfo({ mobile, password, email })
+      ...createInitialUserInfo({ mobile, password, email, username, description, avatar })
     })
     return account.save()
   })

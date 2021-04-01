@@ -58,24 +58,24 @@ router
   const check = Params.query(ctx, {
     name: '_id',
     validator: [
-      data => ObjectId.isValid(data)
+      data => data.split(',').every(item => ObjectId.isValid(item.trim()))
     ]
   })
 
   if(check) return 
 
-  const [ _id ] = Params.sanitizers(ctx.query, {
+  const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item.trim()))
     ]
   })
 
-  const data = TagModel.deleteOne({
-    _id
+  const data = TagModel.deleteMany({
+    _id: { $in: _ids }
   })
   .then(res => {
-    if(res.deletedCount != 1) return Promise.reject({ errMsg: 'not found', status: 400 })
+    if(res.deletedCount == 0) return Promise.reject({ errMsg: 'not found', status: 400 })
     return true
   })
   .catch(dealErr(ctx))

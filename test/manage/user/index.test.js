@@ -412,18 +412,27 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`delete the user success test -> ${COMMON_API}`, function() {
 
-      let userId
+      let userIdA
+      let userIdB
 
       before(function(done) {
 
-        const { model } = mockCreateUser({
+        const { model: userA } = mockCreateUser({
           username: COMMON_API.slice(1),
           roles: [ 'CUSTOMER' ]
         })
+        const { model: userB } = mockCreateUser({
+          username: COMMON_API.slice(2),
+          roles: [ 'CUSTOMER' ]
+        })
 
-        model.save()
-        .then(data => {
-          userId = data._id
+        Promise.all([
+          userA.save(),
+          userB.save()
+        ])
+        .then(([ userA, userB ]) => {
+          userIdA = userA._id
+          userIdB = userB._id
           done()
         })
         .catch(err => {
@@ -434,19 +443,21 @@ describe(`${COMMON_API} test`, function() {
 
       after(function(done) {
 
-        UserModel.findOne({
-          _id: userId,
+        UserModel.find({
+          _id: { $in: [ userIdA, userIdB ] },
         })
         .select({
           _id: 1
         })
         .exec()
         .then(data => {
-          expect(!!data).to.be.false
+          expect(!!data.length).to.be.false
           done()
         })
-        .catch(err => {
+        .catch(async (err) => {
           console.log('oops: ', err)
+          await UserModel.deleteMany({ _id: { $in: [ userIdA, userIdB ] } })
+          done(err)
         })
 
       })
@@ -460,7 +471,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: userId.toString()
+          _id: `${userIdA.toString()},${userIdB.toString()}`
         })
         .expect(200)
         .expect('Content-Type', /json/)

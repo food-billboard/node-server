@@ -19,6 +19,7 @@ const defaultConfig = {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   },
+  usePushEach: true
 }
 
 const isZero = fields => {
@@ -441,7 +442,12 @@ const GlobalSchema = new Schema({
   valid: {
     type: Boolean,
     default: false 
-  }
+  },
+  origin: {
+    type: ObjectId,
+    ref: 'user',
+    required: true
+  },
 }, {
   ...defaultConfig
 })
@@ -801,7 +807,17 @@ const SpecialSchema = new Schema({
     timestamps: {
       type: Number
     }
-  }]
+  }],
+  valid: {
+    type: Boolean,
+    default: false,
+    required: true
+  },
+  origin: {
+    type: ObjectId,
+    ref: 'user',
+    require: true
+  }
 }, {
   ...defaultConfig
 })

@@ -407,23 +407,23 @@ router
 
   const check = Params.query(ctx, {
     name: '_id',
-    type: [ 'isMongoId' ]
+    validator: [data => data.split(',').every(item => ObjectId.isValid(item))]
   })
 
   if(check) return
 
-  const [ _id ] = Params.sanitizers(ctx.query, {
+  const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item))
     ]
   })
 
-  const data = await UserModel.deleteOne({
-    _id
+  const data = await UserModel.deleteMany({
+    _id: { $in: _ids }
   })
   .then(data => {
-    if(data.deletedCount != 1) return Promise.reject({ errMsg: 'error', status: 500 })
+    if(data.deletedCount != _ids.length) return Promise.reject({ errMsg: 'error', status: 500 })
     return {
       data: {
         _id

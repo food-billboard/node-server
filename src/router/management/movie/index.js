@@ -576,20 +576,20 @@ router
 //删除
 .delete('/', async(ctx) => {
 
-  const [ _id ] = Params.sanitizers(ctx.query, {
+  const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item.trim()))
     ]
   })
 
-  const data = await MovieModel.deleteOne({
-    _id
+  const data = await MovieModel.deleteMany({
+    _id: { $in: _ids }
   })
   .then(data => {
     return data
   })
-  .then(_ => ({ data: _id }))
+  .then(_ => ({ data: _ids }))
   .catch(dealErr(ctx))
 
   responseDataDeal({

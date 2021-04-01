@@ -5,7 +5,6 @@ const { VideoModel, UserModel, fileEncoded, STATIC_FILE_PATH } = require('@src/u
 const fs = require('fs')
 const root = require('app-root-path')
 const path = require('path')
-const { Types: { ObjectId } } = require('mongoose')
 
 const strToBase = (str) => {
   return Buffer.from(str).toString('base64')
@@ -25,7 +24,7 @@ describe(`${COMMON_API} test`, function() {
   let originName;
   let templatePath;
   let realFilePath;
-  const chunkSize = 1024 * 1024 * 5;
+  const chunkSize = 1024 * 1024 * 1;
   let chunksLength;
   let slice = Uint8Array.prototype.slice;
   let chunks;
@@ -95,9 +94,15 @@ describe(`${COMMON_API} test`, function() {
         if(fs.existsSync(realFilePath)) {
           fs.unlinkSync(realFilePath)
         }
-      }finally {
-        return true
-      }
+      }catch(err) {}
+    })
+    .then(_ => {
+      const files = fs.readdirSync(__dirname)
+      files.forEach(item => {
+        const name = path.extname(item)
+        if(!name) fs.unlinkSync(path.join(__dirname, item))
+      })
+      return true 
     })
     .catch(err => {
       console.log('oops: ', err)
@@ -623,6 +628,7 @@ describe(`${COMMON_API} test`, function() {
           "Tus-Resumable": '1.0.0',
           'Upload-Offset': (chunksLength - 1) * chunkSize
         })
+        .expect(204)
         .expect('Upload-Offset', '0')
 
         if(fs.existsSync(uploadFileChunk)) {

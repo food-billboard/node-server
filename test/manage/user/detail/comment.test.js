@@ -336,21 +336,44 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`delete the user comment success test -> ${COMMON_API}`, function() {
 
+      let commentIdA
+      let commentIdB
+
+      before(function(done) {
+        const { model: commentA } = mockCreateComment()
+        const { model: commentB } = mockCreateComment()
+
+        Promise.all([
+          commentA.save(),
+          commentB.save(),
+        ])
+        .then(([commentA, commentB]) => {
+          commentIdA = commentA._id
+          commentIdB = commentB._id
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+
+      })
+
       after(function(done) {
 
-        CommentModel.findOne({
-          _id: threeCommentId
+        CommentModel.find({
+          _id: { $in: [ commentIdA, commentIdB ] }
         })
         .select({
           _id: 1
         })
         .exec()
         .then(data => {
-          expect(!!data).to.be.false
+          expect(!!data.length).to.be.false
           done()
         })
-        .catch(err => {
+        .catch(async (err) => {
           console.log('oops: ', err)
+          await CommentModel.deleteMany({ _id: { $in: [ commentIdA, commentIdB ] } })
           done(err)
         })
 
@@ -365,7 +388,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: threeCommentId.toString()
+          _id: `${commentIdA.toString()},${commentIdB.toString()}`
         })
         .expect(200)
         .expect('Content-Type', /json/)
