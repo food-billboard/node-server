@@ -27,7 +27,7 @@ router
       if(!isValidQuery) valid = false
     }
   }
-
+  
   if(valid) return await next()
   
   const data = dealErr(ctx)({ errMsg: 'bad request', status: 400 })

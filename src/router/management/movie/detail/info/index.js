@@ -30,10 +30,10 @@ router
     body = ctx.request.body
   }
 
-  const [ _id ] = Params.sanitizers(body, {
+  const [ _ids ] = Params.sanitizers(body, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item.trim()))
     ]
   })
 
@@ -58,8 +58,8 @@ router
       .exec()
       .then(data => !!data && data._doc)
       .then(notFound),
-      model.findOne({
-        _id
+      model.find({
+        _id: { $in: _ids }
       })
       .select({
         source: 1,

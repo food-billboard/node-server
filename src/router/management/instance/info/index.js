@@ -115,7 +115,7 @@ router
     name: '_id',
     validator: [
       data => {
-        if(typeof data !== 'string' || data.length > 0) return false 
+        if(typeof data !== 'string' || !data.length) return false 
         const lists = data.split(',')
         return lists.every(item => ObjectId.isValid(item.trim()))
       }

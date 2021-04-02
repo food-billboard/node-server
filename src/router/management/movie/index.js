@@ -3,6 +3,7 @@ const Detail = require('./detail')
 const { MovieModel, UserModel, verifyTokenToData, dealErr, notFound, Params, responseDataDeal, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, findMostRole } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
+const { sanitizersNameParams } = require('./utils')
 
 const router = new Router()
 
@@ -194,10 +195,7 @@ router
   })
   const { query: { content='' } } = ctx
 
-  const reg = {
-    $regex: content,
-    $options: 'gi'
-  }
+  const contentMatch = sanitizersNameParams(content)
   
   let match = {
     source_type: {
@@ -210,17 +208,7 @@ router
       $lte: end_date,
       ...(!!start_date ? { $gte: start_date } : {})
     },
-    $or: [
-      {
-        name: reg
-      },
-      {
-        "info.description": reg
-      },
-      {
-        author_description: reg
-      },
-    ]
+    contentMatch,
   }
 
   if(!!classify) {

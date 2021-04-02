@@ -25,7 +25,7 @@ router
 
   const { name, sort, valid } = ctx.query
   let matchFields = {}
-  let sortFields = {}
+  let sortFields = { $sort: {} }
   let limitFields = { $limit: pageSize }
   let skipFields = { $skip: pageSize * currPage }
   if(typeof name == 'string' && name.length) {
@@ -36,7 +36,7 @@ router
   }
   if(typeof valid === 'boolean') matchFields.valid = valid
   if(typeof sort == 'string' && sort.length) {
-    sortFields = sort.split(',').reduce((acc, cur) => {
+    sortFields.$sort = sort.split(',').reduce((acc, cur) => {
       const [ key, value ] = cur.split('=').map(item => item.trim())
       if(SORT_MAP.includes(key) && !Number.isNaN(+value)) acc[key] = +value > 0 ? 1 : -1
       return acc 
@@ -63,10 +63,11 @@ router
   ])
   const data = await SpecialModel.aggregate([
     {
-      $match: match
+      $match: matchFields
     },
     skipFields,
     limitFields,
+    sortFields,
     {
       $lookup: {
         from: 'images', 
@@ -196,7 +197,7 @@ router
     name: '_id',
     validator: [
       data => {
-        if(typeof data !== 'string' || data.length > 0) return false 
+        if(typeof data !== 'string' || !data.length) return false 
         const lists = data.split(',')
         return lists.every(item => ObjectId.isValid(item.trim()))
       }

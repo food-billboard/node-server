@@ -1,7 +1,8 @@
 require('module-alias/register')
 const { SpecialModel, UserModel, MovieModel, ImageModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateSpecial, mockcreateMovie, mockCreateImage } = require('@test/utils')
+const { Types: { ObjectId } } = require('mongoose')
+const { Request, commonValidate, mockCreateUser, mockCreateSpecial, mockCreateMovie, mockCreateImage } = require('@test/utils')
 
 const COMMON_API = '/api/manage/instance/special'
 
@@ -82,7 +83,7 @@ describe(`${COMMON_API} test`, function() {
       imageId = image._id
       return Promise.all(
         new Array(3).fill(0).map((_, index) => {
-          const { model } = mockcreateMovie({
+          const { model } = mockCreateMovie({
             author_description: COMMON_API,
             name: COMMON_API + index
           })
@@ -276,11 +277,12 @@ describe(`${COMMON_API} test`, function() {
             if(err) return done(err)
             const { res: { text } } = res
             let obj
+            console.log(text)
             try{
               obj = JSON.parse(text)
             }catch(_) {
-              console.log(_)
               done(err)
+              return 
             }
             responseExpect(obj, target => {
               expect(target.list.length).to.not.be.equals(0)

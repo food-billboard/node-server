@@ -199,6 +199,99 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
+      it(`get the movie list success width name`, function(done) {
+        Request
+        .get(COMMON_API)
+        .query({
+          content: `in: name ${COMMON_API}`
+        })
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            expect(list.length).to.not.be.equals(0)
+            const exists = list.some(item => classifyMovieId.equals(item._id))
+            expect(exists).to.be.true
+          })
+          done()
+        })
+      })
+
+      it(`get the movie list suuccess with description`, function(done) {
+        Request
+        .get(COMMON_API)
+        .query({
+          content: `in: description ${COMMON_API}`
+        })
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            expect(list.length).to.not.be.equals(0)
+            const exists = list.some(item => classifyMovieId.equals(item._id))
+            expect(exists).to.be.true
+          })
+          done()
+        })
+      })
+
+      it(`get the movie list suuccess with author_description`, function(done) {
+        Request
+        .get(COMMON_API)
+        .query({
+          content: `in: author_description ${COMMON_API}`
+        })
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            expect(list.length).to.not.be.equals(0)
+            const exists = list.some(item => classifyMovieId.equals(item._id))
+            expect(exists).to.be.true
+          })
+          done()
+        })
+      })
+
     })
 
     describe(`get the movie list success with status -> ${COMMON_API}`, function() {

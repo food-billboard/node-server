@@ -152,6 +152,7 @@ function mockCreateSpecial(values={}) {
     description: '关于测试专题的内容介绍',
     name: '测试专题名称',
     origin: ObjectId('5edb3c7b4f88da14ca419e61'),
+    poster: ObjectId('5edb3c7b4f88da14ca419e61'),
     valid: false,
   }
   baseModel = mergeConfig(baseModel, values)
