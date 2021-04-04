@@ -161,21 +161,6 @@ const initStaticFileDir = (dirList=DIR_LIST) => {
   })
 }
 
-//角色查找
-const findMostRole = (roles) => {
-  const maxRoleAuth = Object.keys(ROLES_MAP).length - 1
-  const minRoleAuth = 0
-  let targetRole = maxRoleAuth
-  roles.forEach(role => {
-      const _role = Number(ROLES_MAP[role])
-      if(!Number.isNaN(_role) && _role <= maxRoleAuth && _role >= minRoleAuth && _role < targetRole ) {
-          targetRole = _role
-      }
-  })
-
-  return targetRole
-}
-
 //删除文件夹
 const rmdir = (path) => {
   return fsPromise.stat(path)
@@ -233,7 +218,6 @@ module.exports = {
   initStaticFileDir,
   checkDir,
   checkAndCreateDir,
-  findMostRole,
   rmdir,
   getIp,
   connectTry

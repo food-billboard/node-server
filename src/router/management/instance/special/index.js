@@ -23,11 +23,12 @@ router
     ]
   })
 
-  const { name, sort, valid } = ctx.query
+  const { name, sort, valid, _id } = ctx.query
   let matchFields = {}
   let sortFields = { $sort: {} }
   let limitFields = { $limit: pageSize }
   let skipFields = { $skip: pageSize * currPage }
+  if(ObjectId.isValid(_id)) matchFields._id = ObjectId(_id)
   if(typeof name == 'string' && name.length) {
     matchFields.name = {
       $regex: name,

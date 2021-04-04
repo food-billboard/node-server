@@ -527,7 +527,6 @@ describe(`${COMMON_API} test`, function() {
       before(function(done) {
 
         const { model, token } = mockCreateUser({
-          mobile: 15985669863,
           username: COMMON_API
         })
         selfToken = token
@@ -561,7 +560,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`pre check the token fail becuase the token is unverify or delay`, async function() {
+      it(`pre check the token fail because the token is unverify or delay`, async function() {
 
         const res = await new Promise((resolve) => {
           setTimeout(() => {

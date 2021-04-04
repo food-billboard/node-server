@@ -120,19 +120,3 @@ router
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 
 module.exports = router
-
-/**
- * {
-  username,
-  avatar,
-  hot,
-  fans: number,
-  attentions: number,
-  createdAt,
-  updatedAt
-  _id,
-}
- */
-/**
- * _id
- */

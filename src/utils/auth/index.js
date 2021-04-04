@@ -3,6 +3,7 @@ const { AuthModel, ApisModel, UserModel } = require('../mongodb/mongo.lib')
 const { log4Error } = require('@src/config/winston')
 const { verifyTokenToData } = require('../token')
 const { responseDataDeal, dealErr, notFound } = require('../error-deal')
+const { ROLES_MAP, MOVIE_SOURCE_TYPE } = require('../constant')
 const Url = require('url')
 
 //暂时定义管理后台api前缀且现在只管理它
@@ -116,7 +117,38 @@ const authMiddleware = async (ctx, next) => {
 
 }
 
+//角色查找
+const findMostRole = (roles) => {
+  const maxRoleAuth = Object.keys(ROLES_MAP).length - 1
+  const minRoleAuth = 0
+  let targetRole = maxRoleAuth
+  roles.forEach(role => {
+    const _role = Number(ROLES_MAP[role])
+    if(!Number.isNaN(_role) && _role <= maxRoleAuth && _role >= minRoleAuth && _role < targetRole ) {
+        targetRole = _role
+    }
+  })
+  return targetRole
+}
+
+function rolesAuthMapValidator({
+  userRoles,
+  opRoles
+}) {
+  let operationRoles = Array.isArray(opRoles) ? opRoles : [opRoles]
+  const maxUserRole = findMostRole(userRoles)
+  const isSuperAdminUser = maxUserRole === ROLES_MAP.ORIGIN
+  return operationRoles.every(item => {
+    const { source_type, roles } = item 
+    if(source_type === MOVIE_SOURCE_TYPE.ORIGIN) return isSuperAdminUser
+    const maxRole = findMostRole(roles)
+    return maxUserRole <= maxRole
+  })
+}
+
 module.exports = {
   // initAuthMapData,
-  authMiddleware
+  authMiddleware,
+  rolesAuthMapValidator,
+  findMostRole
 }

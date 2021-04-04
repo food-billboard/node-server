@@ -2732,6 +2732,30 @@
             "in": "query",
             "description": "每页数量",
             "type": "integer"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "名称",
+            "type": "string"
+          },
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "专题id",
+            "type": "string"
+          },
+          {
+            "name": "valid",
+            "in": "query",
+            "description": "是否启用",
+            "type": "boolean"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "排序(,分隔, 支持date/hot data=1,hot=-1)",
+            "type": "string"
           }
         ],
         "responses": {

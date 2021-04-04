@@ -3,6 +3,7 @@ const Detail = require('./detail')
 const { MovieModel, UserModel, verifyTokenToData, dealErr, notFound, Params, responseDataDeal, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, findMostRole } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
+const { Auth } = require('./auth')
 const { sanitizersNameParams } = require('./utils')
 
 const router = new Router()
@@ -138,17 +139,6 @@ const sanitizersParams = (ctx, ...sanitizers) => {
       data => parseInt(data)
     ]
   }, ...sanitizers)
-}
-
-//获取最高角色
-const getRoles = (roles) => {
-  let role = 99
-  roles.forEach(item => {
-    if(ROLES_MAP[item] < role) {
-      role = ROLES_MAP[item]
-    }
-  })
-  return role
 }
 
 router
@@ -322,102 +312,7 @@ router
 })
 .use('/detail', Detail.routes(), Detail.allowedMethods())
 //权限判断
-.use(async (ctx, next) => {
-  const { request: { method } } = ctx
-  const _method = method.toLowerCase()
-
-  if(_method === 'post') return await next()
-
-  const [ , token ] = verifyTokenToData(ctx)
-  const { id } = token
-
-  let _id
-  let movieData
-
-  try {
-    _id = _method == 'put' ? ctx.request.body._id : ctx.query._id
-  }catch(err) {}
-
-  const data = await (ObjectId.isValid(_id) ? Promise.resolve() : Promise.reject({ errMsg: 'bad request', status: 400 }))
-  .then(_ => {
-    return MovieModel.findOne({
-      _id
-    })
-    .select({
-      source_type: 1,
-      author: 1
-    })
-    .exec()
-  })
-  .then(data => !!data && data._doc)
-  .then(data => {
-    if(!data) return Promise.reject({ errMsg: 'not found', status: 404 })
-
-    movieData = data
-    const { author } = data
-
-    let query = {
-      _id: { $in: [ author, ObjectId(id) ] }
-    }
-
-    return UserModel.find(query)
-    .select({
-      _id: 1,
-      roles: 1,
-      mobile: 1
-    })
-    .exec()
-  })
-  .then(data => !!data && !!data.length && data)
-  .then(notFound)
-  .then(data => {
-    if(data.length == 1) {
-      if(!data[0]._id.equals(id)) return Promise.reject({ errMsg: 'not found', status: 404 })
-    }else {
-      let manageRoles
-      let userRoles 
-      const { author, source_type } = movieData
-      //查找对应的用户
-      data.forEach(item => {
-        const { mobile: _mobile, _id, roles } = item
-        if(_id.equals(id)) {
-          manageRoles = roles
-        }else if(_id.equals(author)) {
-          userRoles = roles
-        }
-      })
-
-      const maxManageRole = findMostRole(manageRoles)
-      const maxUserRole = findMostRole(userRoles)
-
-      //权限判断
-      if(source_type === 'ORIGIN') {
-        if(maxManageRole > ROLES_MAP.SUPER_ADMIN) {
-          return false
-        }
-      }else {
-        if(maxManageRole >= maxUserRole) {
-          if(_method == 'get' && maxManageRole == maxUserRole) return true
-          return false
-        }
-      }
-    }
-    return true
-  })
-  .then(data => {
-    if(!data) return Promise.reject({ errMsg: 'forbidden', status: 403 })
-  })
-  .catch(dealErr(ctx))
-
-  if(!data) return await next()
-
-  responseDataDeal({
-    ctx,
-    data,
-    needCache: false
-  })
-
-})
+.use(Auth)
 //新增
 .post('/', async(ctx) => {
 
@@ -454,7 +349,7 @@ router
   .then(notFound)
   .then(({ _id, roles }) => {
 
-    const role = getRoles(roles)
+    const role = findMostRole(roles)
 
     const model = new MovieModel({
       name,
