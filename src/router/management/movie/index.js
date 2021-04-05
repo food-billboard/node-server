@@ -142,7 +142,7 @@ const sanitizersParams = (ctx, ...sanitizers) => {
 }
 
 router
-//搜索(筛选)-分类-日期-状态-来源分类(系统、用户)
+//搜索(筛选)-分类-日期-状态-来源分类(系统、用户)-id(可多个)
 .get('/', async(ctx) => {
 
   const [ currPage, pageSize, classify, status, source_type, end_date, start_date ] = Params.sanitizers(ctx.query, {
@@ -183,7 +183,7 @@ router
       data => ((typeof data === 'string' && (new Date(data)).toString() == 'Invalid Date') || typeof data === 'undefined') ? undefined : Day().toDate()
     ]
   })
-  const { query: { content='' } } = ctx
+  const { query: { content='', _id } } = ctx
 
   const contentMatch = sanitizersNameParams(content)
   
@@ -208,6 +208,13 @@ router
         $in: [ classify ]
       },
     }
+  }
+  if(typeof _id === 'string') {
+    const ids = _id.split(',').reduce((acc, cur) => {
+      if(ObjectId.isValid(cur.trim())) acc.push(ObjectId(cur))
+      return acc 
+    }, [])
+    if(ids.length) match._id = { $in: ids }
   }
 
   const data = await Promise.all([

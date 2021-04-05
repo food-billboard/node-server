@@ -400,6 +400,12 @@
             "description": "结束时间",
             "type": "string",
             "format":"date-time"
+          },
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "电影id",
+            "type": "string"
           }
         ],
         "responses": {
