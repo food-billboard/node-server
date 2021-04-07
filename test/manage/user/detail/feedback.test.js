@@ -325,8 +325,22 @@ describe(`${COMMON_API} test`, function() {
       let feedbackIdB 
       
       before(function(done) {
-        const { model: feedbackA } = mockCreateFeedback()
-        const { model: feedbackB } = mockCreateFeedback()
+        const { model: feedbackA } = mockCreateFeedback({
+          content: {
+            text: COMMON_API,
+            image: [ imageId ],
+            video: []
+          },
+          user_info: userInfo._id,
+        })
+        const { model: feedbackB } = mockCreateFeedback({
+          content: {
+            text: COMMON_API,
+            image: [ imageId ],
+            video: []
+          },
+          user_info: userInfo._id,
+        })
 
         Promise.all([
           feedbackA.save(),
@@ -621,9 +635,19 @@ describe(`${COMMON_API} test`, function() {
         let res = true
 
         await UserModel.updateOne({
+          _id: userInfo._id
+        }, {
+          $set: { roles: [ "ADMIN" ] }
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          res = false
+        })
+
+        await UserModel.updateOne({
           _id: otherUserId
         }, {
-          $set: { roles: [ 'SUPER_ADMIN' ] }
+          $set: { roles: [ "SUPER_ADMIN" ] }
         })
         .catch(err => {
           console.log('oops: ', err)
@@ -643,7 +667,7 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
 
         await UserModel.updateOne({
-          _id: otherUserId
+          _id: userInfo._id
         }, {
           $set: { roles: [ 'SUPER_ADMIN' ] }
         })

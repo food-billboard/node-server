@@ -60,7 +60,7 @@ router
         ...data,
         comment: comment.map(c => {
           const { _doc: { user_info, ...nextC } } = c
-          const { _doc: { avatar, ...nextInfo } } = user_info
+          const { _doc: { avatar, roles, ...nextInfo } } = user_info
           return {
             ...nextC,
             user_info: {

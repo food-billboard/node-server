@@ -137,7 +137,7 @@ function rolesAuthMapValidator({
 }) {
   let operationRoles = Array.isArray(opRoles) ? opRoles : [opRoles]
   const maxUserRole = findMostRole(userRoles)
-  const isSuperAdminUser = maxUserRole === ROLES_MAP.ORIGIN
+  const isSuperAdminUser = maxUserRole === ROLES_MAP.SUPER_ADMIN
   return operationRoles.every(item => {
     const { source_type, roles } = item 
     if(source_type === MOVIE_SOURCE_TYPE.ORIGIN) return isSuperAdminUser

@@ -1,5 +1,5 @@
 const { Types: { ObjectId } } = require('mongoose')
-const { verifyTokenToData, UserModel, rolesAuthMapValidator, responseDataDeal, dealErr } = require('@src/utils')
+const { verifyTokenToData, UserModel, rolesAuthMapValidator, responseDataDeal, dealErr, notFound, findMostRole, ROLES_MAP } = require('@src/utils')
 
 async function Auth(ctx, next) {
   const { request: { method } } = ctx
@@ -7,9 +7,7 @@ async function Auth(ctx, next) {
   const { id: opUserId } = token
   const _method = method.toLowerCase()
 
-  if(_method === 'post') return await next()
-
-  let _id
+  let _id = []
 
   try {
     if(_method === 'delete') {
@@ -47,12 +45,19 @@ async function Auth(ctx, next) {
       opUser: null,
       toOpUsers: []
     })
-    const forbidden = rolesAuthMapValidator({
+    
+    const maxOpRole = findMostRole(opUser)
+    let customValid = true 
+    if(_method === 'post' || _method === 'put') {
+      const role = ctx.request.body.role 
+      if(role && typeof ROLES_MAP[role] === 'number' && ROLES_MAP[role] < maxOpRole) customValid = false
+    }
+
+    const valid = rolesAuthMapValidator({
       userRoles: opUser,
       opRoles: toOpUsers
     })
-
-    if(!forbidden) return Promise.reject({ errMsg: 'forbidden', status: 403 })
+    if(!valid || !customValid) return Promise.reject({ errMsg: 'forbidden', status: 403 })
   })
   .catch(dealErr(ctx))
 

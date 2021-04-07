@@ -326,7 +326,9 @@ router
 
   const check = Params.query(ctx, {
     name: '_id',
-    validator: [data => data.split(',').every(item => ObjectId.isValid(item))]
+    validator: [
+      data => data.split(',').every(item => ObjectId.isValid(item))
+    ]
   })
 
   if(check) return
@@ -342,10 +344,10 @@ router
     _id: { $in: _ids }
   })
   .then(data => {
-    if(data.deletedCount != _ids.length) return Promise.reject({ errMsg: 'error', status: 500 })
+    if(data.deletedCount != _ids.length) return Promise.reject({ errMsg: 'error', status: 404 })
     return {
       data: {
-        _id
+        _id: _ids
       }
     }
   })

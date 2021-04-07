@@ -102,17 +102,17 @@ router
   const check = checkParams(ctx)
   if(check) return
 
-  const [ _ids ] = Params.sanitizers(ctx.query, {
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
-      data => data.split(',').map(item => ObjectId(item.trim()))
+      data => ObjectId(data)
     ]
   })
 
   const { request: { body: { name } } } = ctx
   
-  const data = await LanguageModel.deleteMany({
-    _id: { $in: _ids }
+  const data = await LanguageModel.updateOne({
+    _id
   }, {
     $set: {
       name
@@ -138,15 +138,15 @@ router
 })
 .delete('/', async(ctx) => {
   
-  const [ _id ] = Params.sanitizers(ctx.query, {
+  const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item.trim()))
     ]
   })
 
-  const data = await LanguageModel.deleteOne({
-    _id
+  const data = await LanguageModel.deleteMany({
+    _id: { $in: _ids }
   })
   .then(data => {
     if(data.deletedCount == 0) return Promise.reject({ errMsg: 'not found', status: 404 })

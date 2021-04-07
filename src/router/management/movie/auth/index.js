@@ -24,11 +24,12 @@ async function Auth(ctx, next) {
   }catch(err) {}
 
   function formatId(id) {
+    if(!id) return Promise.reject({ errMsg: 'bad request', status: 400 })
     let ids = id.split(',')
     const prevLen = ids.length
     ids = ids.filter(item => ObjectId.isValid(item))
     if(prevLen !== ids.length) return Promise.reject({ errMsg: 'bad request', status: 400 })
-    return ids.map(item => ObjectId(item))
+    return Promise.resolve(ids.map(item => ObjectId(item)))
   }
 
   const data = await formatId(_id)

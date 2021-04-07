@@ -1,7 +1,7 @@
 require('module-alias/register')
-const { UserModel, ClassifyModel, ImageModel } = require('@src/utils')
+const { UserModel, ClassifyModel, ImageModel, DistrictModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateClassify, mockCreateImage } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateClassify, mockCreateImage, mockCreateDistrict } = require('@test/utils')
 
 const COMMON_API = '/api/manage/movie/detail/info/classify'
 
@@ -38,6 +38,7 @@ describe(`${COMMON_API} test`, () => {
   let imageId
   let classifyId
   let getToken
+  let districtId
 
   before(function(done) {
 
@@ -58,18 +59,24 @@ describe(`${COMMON_API} test`, () => {
         username: COMMON_API,
       })
 
+      const { model: district } = mockCreateDistrict({
+        name: COMMON_API,
+      })
+
       getToken = signToken
 
       return Promise.all([
         user.save(),
-        other.save()
+        other.save(),
+        district.save()
       ])
 
     })
-    .then(([user, other]) => {
+    .then(([user, other, district]) => {
       userInfo = user
       anotherUserId = other._id
       selfToken = getToken(userInfo._id)
+      districtId = district._id
       const { model } = mockCreateClassify({
         name: COMMON_API,
         icon: imageId,
@@ -99,6 +106,9 @@ describe(`${COMMON_API} test`, () => {
       }),
       ClassifyModel.deleteMany({
         source: { $in: [ userInfo._id, anotherUserId ] }
+      }),
+      DistrictModel.deleteMany({
+        name: COMMON_API
       })
     ])
     .then(_ => {

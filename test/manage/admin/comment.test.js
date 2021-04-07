@@ -19,7 +19,6 @@ function responseExpect(res, validate=[]) {
     commonValidate.number(item.total_like)
     expect(item.content).to.be.a('object').and.that.include.all.keys('text', 'image', 'video')
     commonValidate.string(item.content.text)
-    console.log(item.content.image)
     expect(item.content.image).to.be.a('array')
     item.content.image.forEach(img => commonValidate.string(img))
     expect(item.content.video).to.be.a('array')

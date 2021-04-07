@@ -159,9 +159,7 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
         }catch(_) {
           console.log(_)
         }
-        console.log(obj)
         responseExpectUser(obj, target => {
-          console.log(target)
           expect(target.data.length).to.not.be.equals(0)
           expect(target.rank.length).to.not.be.equals(0)
         })
@@ -193,7 +191,9 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectUser(obj, target => {
-          expect(target.data.length + target.rank.length).to.be.equals(25)
+          expect(target.data.length).to.be.equals(24)
+          const rankUsers = target.rank.filter(item => item.name === COMMON_API_USER) 
+          expect(rankUsers.length).to.be.eq(1)
         })
         done()
       })

@@ -1,11 +1,20 @@
 const { Types: { ObjectId } } = require('mongoose')
-const { Params, verifyTokenToData, FeedbackModel, UserModel, rolesAuthMapValidator, responseDataDeal, dealErr } = require('@src/utils')
+const { Params, verifyTokenToData, FeedbackModel, UserModel, rolesAuthMapValidator, responseDataDeal, dealErr, notFound } = require('@src/utils')
 
 async function Auth(ctx, next) {
+
+  const check = Params.query(ctx, {
+    name: '_id',
+    validator: [
+      data => data.split(',').every(item => ObjectId.isValid(item))
+    ]
+  })
+  if(check) return 
+
   const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => data.split(',').map(item => ObjectId(data))
+      data => data.split(',').map(item => ObjectId(item))
     ]
   })
 
@@ -37,7 +46,7 @@ async function Auth(ctx, next) {
       roles: 1
     })
     .exec()
-    .then(data => !!data && !!data.length && data)
+    .then(data => !!data && data._doc)
     .then(notFound)
   ])
   .then(([feedback_data, user_data]) => {
@@ -45,6 +54,7 @@ async function Auth(ctx, next) {
       userRoles: user_data.roles,
       opRoles: feedback_data.map(item => ({ roles: item.user_info.roles }))
     })
+
     return valid
   })
   .then(valid => {

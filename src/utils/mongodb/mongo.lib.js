@@ -212,7 +212,8 @@ const PRE_COMMENT_FIND = [
     path: 'user_info',
     select: {
       avatar: 1,
-      username: 1
+      username: 1,
+      roles: 1
     }
   },
   {

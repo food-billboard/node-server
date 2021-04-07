@@ -340,8 +340,26 @@ describe(`${COMMON_API} test`, function() {
       let commentIdB
 
       before(function(done) {
-        const { model: commentA } = mockCreateComment()
-        const { model: commentB } = mockCreateComment()
+        const { model: commentA } = mockCreateComment({
+          source_type: 'movie',
+          source: ObjectId('571094e2976aeb1df982ad4e'),
+          content: {
+            text: COMMON_API,
+            image: [ imageId ],
+            video: []
+          },
+          user_info: userInfo._id,
+        })
+        const { model: commentB } = mockCreateComment({
+          source_type: 'movie',
+          source: ObjectId('571094e2976aeb1df982ad4e'),
+          content: {
+            text: COMMON_API,
+            image: [ imageId ],
+            video: []
+          },
+          user_info: userInfo._id,
+        })
 
         Promise.all([
           commentA.save(),
@@ -350,6 +368,7 @@ describe(`${COMMON_API} test`, function() {
         .then(([commentA, commentB]) => {
           commentIdA = commentA._id
           commentIdB = commentB._id
+          done()
         })
         .catch(err => {
           console.log('oops: ', err)

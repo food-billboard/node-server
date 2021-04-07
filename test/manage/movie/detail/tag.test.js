@@ -110,7 +110,7 @@ describe(`${COMMON_API} test`, function() {
 
       let tagIdA 
       let tagIdB 
-      before(function() {
+      before(function(done) {
         const { model: tagA } = mockCreateTag({
           text: COMMON_API + '1',
           weight: 1,

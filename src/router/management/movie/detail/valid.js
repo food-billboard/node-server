@@ -57,7 +57,7 @@ router
   const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => data.split(',').every(item => ObjectId(item.trim()))
+      data => data.split(',').map(item => ObjectId(item.trim()))
     ]
   })
 

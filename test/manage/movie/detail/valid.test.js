@@ -140,7 +140,7 @@ describe(`${COMMON_API} test`, function() {
           _id: 1
         })
         .exec()
-        .then(data => !!data)
+        .then(data => !!data && data)
         .then(data => {
           expect(data.length).to.be.equal(2)
         })

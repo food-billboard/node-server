@@ -4,7 +4,10 @@ const { SpecialModel, responseDataDeal, dealErr, notFound, Params, verifyTokenTo
 
 const router = new Router()
 
-const SORT_MAP = [ 'date', 'hot' ]
+const SORT_MAP = {
+  date: 'createdAt',
+  hot: 'glance'
+} 
 
 router
 .get('/', async (ctx) => {
@@ -24,30 +27,34 @@ router
   })
 
   const { name, sort, valid, _id } = ctx.query
-  let matchFields = {}
+  let matchFields = { $match: {} }
   let sortFields = { $sort: {} }
   let limitFields = { $limit: pageSize }
   let skipFields = { $skip: pageSize * currPage }
-  if(ObjectId.isValid(_id)) matchFields._id = ObjectId(_id)
+  let initAggregate = [
+    skipFields,
+    limitFields,
+  ]
+  if(ObjectId.isValid(_id)) matchFields.$match._id = ObjectId(_id)
   if(typeof name == 'string' && name.length) {
-    matchFields.name = {
+    matchFields.$match.name = {
       $regex: name,
       $options: 'gi'
     }
   }
-  if(typeof valid === 'boolean') matchFields.valid = valid
+  if(typeof valid === 'boolean' || valid === 'true' || valid === 'false') matchFields.$match.valid = valid === 'false' ? false : !!valid
   if(typeof sort == 'string' && sort.length) {
     sortFields.$sort = sort.split(',').reduce((acc, cur) => {
-      const [ key, value ] = cur.split('=').map(item => item.trim())
-      if(SORT_MAP.includes(key) && !Number.isNaN(+value)) acc[key] = +value > 0 ? 1 : -1
+      const [ key, value ] = cur.split('_').map(item => item.trim())
+      if(SORT_MAP[key] && !Number.isNaN(+value)) acc[SORT_MAP[key]] = +value > 0 ? 1 : -1
       return acc 
     }, {})
   }
+  if(!!Object.keys(matchFields.$match).length) initAggregate.unshift(matchFields)
+  if(!!Object.keys(sortFields.$sort).length) initAggregate.push(sortFields)
 
   const total = await SpecialModel.aggregate([
-    {
-      $match: matchFields
-    },
+    ...(!!Object.keys(matchFields.$match).length ? [matchFields] : []),
     {
       $project: {
         _id: 1
@@ -63,12 +70,7 @@ router
     }
   ])
   const data = await SpecialModel.aggregate([
-    {
-      $match: matchFields
-    },
-    skipFields,
-    limitFields,
-    sortFields,
+    ...initAggregate,
     {
       $lookup: {
         from: 'images', 
@@ -78,22 +80,28 @@ router
       }
     },
     {
-      $unwind: "poster"
+      $unwind: "$poster"
     },
     {
       $lookup: {
         from: 'movies', 
-        localField: 'movie', 
-        foreignField: '_id', 
-        as: 'movie'
-      }
-    },
-    {
-      $lookup: {
-        from: 'images', 
-        localField: 'movie.poster', 
-        foreignField: '_id', 
-        as: 'poster'
+        // localField: 'movie', 
+        // foreignField: '_id', 
+        // let: { movie: "$movie" },
+        pipeline: [
+          {
+            $lookup: {
+              from: 'images',
+              as: 'poster',
+              foreignField: "_id",
+              localField: "poster"
+            }
+          },
+          {
+            $unwind: "$poster"
+          }
+        ],
+        as: 'movie',
       }
     },
     {
@@ -102,9 +110,15 @@ router
         description: 1,
         poster: "$poster.src",
         movie: {
-          name: "$movie.name",
-          _id: "$movie._id",
-          poster: "$mo"
+          $map: {
+            input: "$movie",
+            as: 'value',
+            in: {
+              name: "$$value.name",
+              _id: "$$value._id",
+              poster: "$$value.poster.src"
+            }
+          }
         },
         createdAt: 1,
         updatedAt: 1,
@@ -138,16 +152,18 @@ router
   const check = Params.body(ctx, {
     name: 'movie',
     validator: [
-      data => Array.isArray(data) && data.length >= 3
+      data => Array.isArray(data) && data.length >= 3 && data.every(item => ObjectId.isValid(item))
     ]
   },
   {
     name: 'poster',
-    type: ['isMongoId']
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
   }, {
     name: 'name',
     validator: [
-      data => typeof data === 'string' && data.length >0
+      data => typeof data === 'string' && data.length > 0
     ]
   })
 

@@ -73,8 +73,6 @@ describe(`${COMMON_API} test`, function() {
         imageId = image._id
         classifyId = classify._id
 
-        console.log(classify)
-
         const { model: movie } = mockCreateMovie({
           name: COMMON_API,
           info: {

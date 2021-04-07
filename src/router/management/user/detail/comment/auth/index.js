@@ -1,4 +1,4 @@
-const { Params, verifyTokenToData, CommentModel, UserModel, rolesAuthMapValidator, dealErr, responseDataDeal } = require('@src/utils')
+const { Params, verifyTokenToData, CommentModel, UserModel, rolesAuthMapValidator, dealErr, responseDataDeal, notFound } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 async function Auth(ctx, next) {
@@ -13,18 +13,16 @@ async function Auth(ctx, next) {
   const { id: opUser } = token
 
   const data = await Promise.all([
-    CommentModel.findOne({
-      _id: { $in: ids }
+    CommentModel.find({
+      _id: { $in: _ids }
     })
     .select({
       user_info: 1,
       source_type: 1,
-      _id: 0
     })
     .populate({
       path: 'user_info',
       select: {
-        _id: 1,
         roles: 1
       }
     })

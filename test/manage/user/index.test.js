@@ -811,48 +811,68 @@ describe(`${COMMON_API} test`, function() {
 
       it(`post the user fail because the user is not the auth`, function(done) {
 
-        Request
-        .post(COMMON_API)
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
+        UserModel.updateOne({
+          _id: userInfo._id 
+        }, {
+          $set: {
+            roles: [ "ADMIN" ]
+          }
         })
-        .send(otherUserInfo)
-        .expect(403)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if(err) return done(err)
+        .then(_ => {
+          return Request
+          .post(COMMON_API)
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .send(otherUserInfo)
+          .expect(403)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return UserModel.updateOne({
+            _id: userInfo._id 
+          }, {
+            $set: {
+              roles: [ "SUPER_ADMIN" ]
+            }
+          })
+        })
+        .then(_ => {
           done()
+        })
+        .catch(err => {
+          done(err)
         })
 
       })
 
-      it(`post the user fail because the new user is exists already`, function(done) {
+      // it(`post the user fail because the new user is exists already`, function(done) {
 
-        Request
-        .post(COMMON_API)
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .send({
-          ...otherUserInfo,
-          mobile: userInfo.mobile
-        })
-        .expect(403)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if(err) return done(err)
-          done()
-        })
+      //   Request
+      //   .post(COMMON_API)
+      //   .set({
+      //     Accept: 'Application/json',
+      //     Authorization: `Basic ${selfToken}`
+      //   })
+      //   .send({
+      //     ...otherUserInfo,
+      //     mobile: userInfo.mobile
+      //   })
+      //   .expect(403)
+      //   .expect('Content-Type', /json/)
+      //   .end(function(err, res) {
+      //     if(err) return done(err)
+      //     done()
+      //   })
 
-      })
+      // })
 
     })
 
     describe(`put the user fail test -> ${COMMON_API}`, function() {
 
-      let userInfo
+      let toPutUserInfo
       let send
 
       before(function(done) {
@@ -863,15 +883,15 @@ describe(`${COMMON_API} test`, function() {
 
         model.save()
         .then(data => {
-          userInfo = data
+          toPutUserInfo = data
           send = {
-            _id: userInfo._id,
-            mobile: userInfo.mobile,
+            _id: toPutUserInfo._id,
+            mobile: toPutUserInfo.mobile,
             password: 'shenjing8',
-            email: userInfo.email,
-            username: userInfo.username,
-            description: userInfo.description,
-            avatar: userInfo.avatar,
+            email: toPutUserInfo.email,
+            username: toPutUserInfo.username,
+            description: toPutUserInfo.description,
+            avatar: toPutUserInfo.avatar,
             role: 'USER'
           }
           done()
@@ -900,7 +920,15 @@ describe(`${COMMON_API} test`, function() {
 
         let res = true
 
-        await Request
+        await UserModel.updateOne({
+          _id: userInfo._id
+        }, {
+          $set: {
+            roles: [ "ADMIN" ]
+          }
+        })
+        
+        Request
         .put(COMMON_API)
         .set({
           Accept: 'Application/json',
@@ -915,6 +943,14 @@ describe(`${COMMON_API} test`, function() {
         
         await UserModel.updateOne({
           _id: userInfo._id
+        }, {
+          $set: {
+            roles: [ "SUPER_ADMIN" ]
+          }
+        })
+
+        await UserModel.updateOne({
+          _id: toPutUserInfo._id
         }, {
           $set: {
             roles: [ 'CUSTOMER' ]
@@ -964,7 +1000,7 @@ describe(`${COMMON_API} test`, function() {
           ...send,
           _id: `${id.slice(1)}${Math.floor(10 / (parseInt(id.slice(0, 1)) + 5))}`
         })
-        .expect(500)
+        .expect(404)
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
@@ -977,7 +1013,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`delete the user fail test -> ${COMMON_API}`, function() {
 
-      let userInfo
+      let toDeleteUserInfo
 
       before(function(done) {
 
@@ -987,7 +1023,7 @@ describe(`${COMMON_API} test`, function() {
 
         model.save()
         .then(data => {
-          userInfo = data
+          toDeleteUserInfo = data
           done()
         })
         .catch(err => {
@@ -1012,20 +1048,36 @@ describe(`${COMMON_API} test`, function() {
 
       it(`delete the user fail because the user is not the auth`, function(done) {
 
-        Request
-        .delete(COMMON_API)
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
+        UserModel.updateOne({
+          _id: userInfo._id 
+        }, {
+          roles: [ 'ADMIN' ]
         })
-        .query({
-          _id: userInfo._id.toString()
+        .then(_ => {
+          return Request
+          .delete(COMMON_API)
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .query({
+            _id: toDeleteUserInfo._id.toString()
+          })
+          .expect(403)
+          .expect('Content-Type', /json/)
         })
-        .expect(403)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if(err) return done(err)
+        .then(_ => {
+          return UserModel.updateOne({
+            _id: userInfo._id 
+          }, {
+            roles: [ 'SUPER_ADMIN' ]
+          })
+        })
+        .then(_ => {
           done()
+        })
+        .catch(err => {
+          done(err)
         })
 
       })
@@ -1039,7 +1091,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: userInfo._id.toString().slice(1)
+          _id: toDeleteUserInfo._id.toString().slice(1)
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -1054,10 +1106,10 @@ describe(`${COMMON_API} test`, function() {
         
         let res = true
 
-        const id = userInfo._id.toString()
+        const id = toDeleteUserInfo._id.toString()
 
         await UserModel.updateOne({
-          _id: userInfo._id
+          _id: toDeleteUserInfo._id
         }, {
           $set: { roles: [ 'CUSTOMER' ] }
         })
@@ -1075,7 +1127,7 @@ describe(`${COMMON_API} test`, function() {
         .query({
           _id: `${id.slice(1)}${Math.floor(10 / (parseInt(id.slice(0, 1)) + 5))}`
         })
-        .expect(500)
+        .expect(404)
         .expect('Content-Type', /json/)
 
         return res ? Promise.resolve() : Promise.reject(COMMON_API)

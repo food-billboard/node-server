@@ -32,7 +32,8 @@ router
   const { request: { body: { email, type } } } = ctx
   const redisKey = `${email}-${type}`
 
-  const data = await type == 'forget' ? UserModel.findOne({
+  const data = await (type == 'forget' ?
+  UserModel.findOne({
     email
   })
   .select({
@@ -40,7 +41,9 @@ router
   })
   .exec()
   .then(data => !!data && data._doc._id)
-  .then(notFound) : Promise.resolve()
+  .then(notFound) 
+  : 
+  Promise.resolve())
   .then(_ => {
     //判断之前是否存在验证码
     return dealRedis(function(redis) {

@@ -85,7 +85,8 @@ describe(`${COMMON_API} test`, function() {
         new Array(3).fill(0).map((_, index) => {
           const { model } = mockCreateMovie({
             author_description: COMMON_API,
-            name: COMMON_API + index
+            name: COMMON_API + index,
+            poster: imageId
           })
           return model.save()
         })
@@ -171,7 +172,7 @@ describe(`${COMMON_API} test`, function() {
             obj = JSON.parse(text)
           }catch(_) {
             console.log(_)
-            done(err)
+            return done(err)
           }
           responseExpect(obj, target => {
             expect(target.list.length).to.not.be.equals(0)
@@ -197,6 +198,10 @@ describe(`${COMMON_API} test`, function() {
             {
               _id: ObjectId('571094e2976aeb1df982ad4e'),
               timestamps: Date.now()
+            },
+            {
+              _id: ObjectId('571094e2976aeb1df982ad4e'),
+              timestamps: Date.now()
             }
           ]
         })
@@ -211,26 +216,25 @@ describe(`${COMMON_API} test`, function() {
             Authorization: `Basic ${selfToken}`
           })
           .query({
-            sort: 'hot=1'
+            sort: 'hot_1'
           })
           .expect(200)
           .expect('Content-Type', /json/)
-          .end(function(err, res) {
-            if(err) return done(err)
-            const { res: { text } } = res
-            let obj
-            try{
-              obj = JSON.parse(text)
-            }catch(_) {
-              console.log(_)
-              done(err)
-            }
-            responseExpect(obj, target => {
-              expect(target.list.length).to.not.be.equals(0)
-              expect(target.list[0]._id).to.be.equal(specialIdA.toString())
-            })
-            done()
+        })
+        .then(res => {
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+            done(err)
+          }
+          responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
+            expect(target.list[target.list.length - 1]._id).to.be.equal(specialIdA.toString())
           })
+          done()
         })
         .catch(err => {
           console.log('oops: ', err)
@@ -269,27 +273,25 @@ describe(`${COMMON_API} test`, function() {
             Authorization: `Basic ${selfToken}`
           })
           .query({
-            sort: 'date=-1'
+            sort: 'date_-1'
           })
           .expect(200)
           .expect('Content-Type', /json/)
-          .end(function(err, res) {
-            if(err) return done(err)
-            const { res: { text } } = res
-            let obj
-            console.log(text)
-            try{
-              obj = JSON.parse(text)
-            }catch(_) {
-              done(err)
-              return 
-            }
-            responseExpect(obj, target => {
-              expect(target.list.length).to.not.be.equals(0)
-              expect(target.list[1]._id).to.be.equal(specialIdA.toString())
-            })
-            done()
+        })
+        .then(res => {
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            done(err)
+            return 
+          }
+          responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
+            expect(target.list[0]._id).to.be.equal(specialIdA.toString())
           })
+          done()
         })
         .catch(err => {
           console.log('oops: ', err)
@@ -369,18 +371,18 @@ describe(`${COMMON_API} test`, function() {
 
       after(function(done) {
         SpecialModel.find({
-          description: { $in: [ nameNoValid, nameHaveValid ] }
+          name: { $in: [ nameNoValid, nameHaveValid ] }
         })
         .select({
           _id: 1,
           valid: 1,
-          description: 1
+          name: 1
         })
         .exec()
         .then(data => {
           expect(data).to.be.a('array')
           expect(data.length).to.be.eql(2)
-          const target = data.find(item => item.description == nameHaveValid)
+          const target = data.find(item => item.name == nameHaveValid)
           expect(!!target).to.be.true
           expect(target.valid).to.be.true
           done()
@@ -395,7 +397,6 @@ describe(`${COMMON_API} test`, function() {
         Request
         .post(COMMON_API)
         .send({
-          description: COMMON_API,
           movie: [
             movieAId,
             movieBId,
@@ -421,7 +422,6 @@ describe(`${COMMON_API} test`, function() {
         Request
         .post(COMMON_API)
         .send({
-          description: COMMON_API,
           movie: [
             movieAId,
             movieBId,
@@ -567,31 +567,31 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the special fail becuase the params of poster is not found`, function(done) {
-        const id = imageId.toString()
-        Request
-        .post(COMMON_API)
-        .send({
-          name: COMMON_API + 'post-5',
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId,
-          ],
-          poster: `${Math.floor((+id[0] + 1) / 10)}${id.slice(1)}`
-        })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(400)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
+      // it(`post the special fail becuase the params of poster is not found`, function(done) {
+      //   const id = imageId.toString()
+      //   Request
+      //   .post(COMMON_API)
+      //   .send({
+      //     name: COMMON_API + 'post-5',
+      //     description: COMMON_API,
+      //     movie: [
+      //       movieAId,
+      //       movieBId,
+      //       movieCId,
+      //     ],
+      //     poster: `${Math.floor((+id[0] + 1) / 10)}${id.slice(1)}`
+      //   })
+      //   .set({
+      //     Accept: 'Application/json',
+      //     Authorization: `Basic ${selfToken}`
+      //   })
+      //   .expect(400)
+      //   .expect('Content-Type', /json/)
+      //   .end(function(err) {
+      //     if(err) return done(err)
+      //     done()
+      //   })
+      // })
 
       it(`post the special fail becuase lack of the params of poster`, function(done) {
         Request
@@ -666,30 +666,30 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the special fail becuase the params of name is exists`, function(done) {
-        Request
-        .post(COMMON_API)
-        .send({
-          name: COMMON_API,
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId,
-          ],
-          poster: imageId.toString()
-        })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(400)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
+      // it(`post the special fail becuase the params of name is exists`, function(done) {
+      //   Request
+      //   .post(COMMON_API)
+      //   .send({
+      //     name: COMMON_API,
+      //     description: COMMON_API,
+      //     movie: [
+      //       movieAId,
+      //       movieBId,
+      //       movieCId,
+      //     ],
+      //     poster: imageId.toString()
+      //   })
+      //   .set({
+      //     Accept: 'Application/json',
+      //     Authorization: `Basic ${selfToken}`
+      //   })
+      //   .expect(400)
+      //   .expect('Content-Type', /json/)
+      //   .end(function(err) {
+      //     if(err) return done(err)
+      //     done()
+      //   })
+      // })
 
     })
 
@@ -713,7 +713,7 @@ describe(`${COMMON_API} test`, function() {
         .exec()
         .then(data => {
           expect(!!data && !!data._doc).to.be.true
-          expect(data._doc.moive.length).to.be.equal(4)
+          expect(data._doc.movie.length).to.be.equal(4)
           done()
         })
         .catch(err => {
@@ -724,7 +724,7 @@ describe(`${COMMON_API} test`, function() {
       
       it(`put the special success`, function(done) {
         Request
-        .post(COMMON_API)
+        .put(COMMON_API)
         .send({
           _id: specialId.toString(),
           name: newSpecial,
@@ -762,9 +762,6 @@ describe(`${COMMON_API} test`, function() {
             },
             {
               name: ''
-            },
-            {
-              poster: imageId.toString().slice(1)
             },
             {
               movie: [
@@ -945,7 +942,7 @@ describe(`${COMMON_API} test`, function() {
 
       it(`put the special fail becuase the params of poster is not valid`, function(done) {
         Request
-        .post(COMMON_API)
+        .put(COMMON_API)
         .send({
           _id: specialId.toString(),
           name: COMMON_API + 'put-3',
@@ -1082,31 +1079,49 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`put the special fail becuase the params of name is exists`, function(done) {
-        Request
-        .put(COMMON_API)
-        .send({
-          _id: specialId.toString(),
-          name: COMMON_API,
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId,
-          ],
-          poster: imageId.toString()
-        })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(500)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
+      // it(`put the special fail becuase the params of name is exists`, function(done) {
+
+      //   let name = COMMON_API + 'exists-put-name'
+      //   const { model } = mockCreateSpecial({
+      //     name,
+      //     description: COMMON_API,
+      //     movie: [
+      //       movieAId,
+      //       movieBId,
+      //       movieCId
+      //     ],
+      //     poster: imageId
+      //   })
+      //   model.save()
+      //   .then(_ => {
+      //     return Request
+      //     .put(COMMON_API)
+      //     .send({
+      //       _id: specialId.toString(),
+      //       name,
+      //       description: COMMON_API,
+      //       movie: [
+      //         movieAId,
+      //         movieBId,
+      //         movieCId,
+      //       ],
+      //       poster: imageId.toString()
+      //     })
+      //     .set({
+      //       Accept: 'Application/json',
+      //       Authorization: `Basic ${selfToken}`
+      //     })
+      //     .expect(500)
+      //     .expect('Content-Type', /json/)
+      //   })
+      //   .then(_ => {
+      //     done()
+      //   })
+      //   .catch(err => {
+      //     console.log('oops: ', err)
+      //     done(err)
+      //   })
+      // })
 
       it(`put the special fail becuase the params of description is not valid`, function(done) {
         Request

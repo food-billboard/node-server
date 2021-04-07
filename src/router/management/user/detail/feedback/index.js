@@ -152,6 +152,11 @@ router
     validator:[
       data => typeof data === 'string' && data.length > 0
     ]
+  }, {
+    name: '_id',
+    validator:[
+      data => ObjectId.isValid(data)
+    ]
   })
 
   if(check) return

@@ -12,8 +12,6 @@ const {
   verifyTokenToData, 
   UserModel, 
   notFound, 
-  ROLES_MAP, 
-  MOVIE_SOURCE_TYPE,
   rolesAuthMapValidator
 } = require('@src/utils')
 
@@ -78,7 +76,7 @@ async function Auth(ctx, next) {
         }
       })
       .exec()
-      .then(data => !!data && data._doc)
+      .then(data => !!data && !!data.length && data)
       .then(notFound)
     ])
   })

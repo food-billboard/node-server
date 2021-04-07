@@ -2760,7 +2760,7 @@
           {
             "name": "sort",
             "in": "query",
-            "description": "排序(,分隔, 支持date/hot data=1,hot=-1)",
+            "description": "排序(,分隔, 支持date/hot data_1,hot_-1)",
             "type": "string"
           }
         ],

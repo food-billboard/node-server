@@ -9,6 +9,15 @@ router
 //电影评分列表
 .get('/', async(ctx) => {
 
+  const check = Params.query(ctx, {
+    name: '_id',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  })
+
+  if(check) return 
+
   const [ currPage, pageSize, _id, end_date, start_date, value ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,

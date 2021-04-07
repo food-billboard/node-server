@@ -1,5 +1,9 @@
 
-const FIELDS_MAP = [ "name", "description", "author_description" ]
+const FIELDS_MAP = {
+  name: "name", 
+  description: "info.description", 
+  author_description: "author_description"
+}
 
 function sanitizersNameParams(originName) {
   const match = originName.match(/(?<=in:) (name|description|author_description) .+/)
@@ -9,15 +13,17 @@ function sanitizersNameParams(originName) {
       $options: 'gi'
     }
   }
+
   if(Array.isArray(match)) {
     const [ target ] = match 
     const [ key, value ] = target.trim().split(' ').filter(item => !!item)
-    if(FIELDS_MAP.includes(key)) {
+    if(FIELDS_MAP[key]) {
       return {
-        [key]: reg(value)
+        [FIELDS_MAP[key]]: reg(value)
       }
     }
   }
+
   return {
     $or: [
       {

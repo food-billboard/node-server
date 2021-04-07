@@ -198,7 +198,7 @@ router
       $lte: end_date,
       ...(!!start_date ? { $gte: start_date } : {})
     },
-    contentMatch,
+    ...contentMatch,
   }
 
   if(!!classify) {
@@ -209,7 +209,7 @@ router
       },
     }
   }
-  if(typeof _id === 'string') {
+  if(typeof _id === 'string' && !!_id) {
     const ids = _id.split(',').reduce((acc, cur) => {
       if(ObjectId.isValid(cur.trim())) acc.push(ObjectId(cur))
       return acc 
@@ -236,11 +236,6 @@ router
       {
         $match: match
       },
-      // {
-      //   $sort: {
-
-      //   }
-      // },
       {
         $skip: currPage * pageSize
       },  
@@ -301,7 +296,6 @@ router
   .then(([total_count, movie_data]) => {
 
     if(!Array.isArray(total_count) || !Array.isArray(movie_data)) return Promise.reject({ errMsg: 'data error', status: 404 })
-
     return {
       data: {
         total: total_count.length ? total_count[0].total || 0 : 0,
@@ -475,9 +469,6 @@ router
 
   const data = await MovieModel.deleteMany({
     _id: { $in: _ids }
-  })
-  .then(data => {
-    return data
   })
   .then(_ => ({ data: _ids }))
   .catch(dealErr(ctx))
