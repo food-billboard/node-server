@@ -3,6 +3,7 @@ const Detail = require('./detail')
 const { UserModel, verifyTokenToData, dealErr, notFound, Params, responseDataDeal, ROLES_MAP, USER_STATUS, findMostRole, EMAIL_REGEXP } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
+const { Auth } = require('./auth')
 
 const router = new Router()
 
@@ -198,89 +199,7 @@ router
 })
 .use('/detail', Detail.routes(), Detail.allowedMethods())
 //预查角色分配相关
-.use(async (ctx, next) => {
-  const { request: { method } } = ctx
-  const [ , token ] = verifyTokenToData(ctx)
-  const { id } = token
-  const _method = method.toLowerCase()
-
-  let _id
-
-  try {
-    if(_method === 'delete') {
-      _id = ctx.query._id
-    }else if(_method === 'put') {
-      _id = ctx.request.body._id
-    }
-  }catch(err){}
-
-  const data = await UserModel.find(
-    (_method === 'delete' || _method === 'put') ?
-    {
-      _id: { $in: [ ObjectId(_id), ObjectId(id) ] }
-    }
-    :
-    {
-      _id: ObjectId(id)
-    }
-  )
-  .select({
-    _id: 1,
-    mobile: 1,
-    roles: 1
-  })
-  .exec()
-  .then(data => !!data && data)
-  .then(notFound)
-  .then(data => {
-    const maxRoleAuth = Object.keys(ROLES_MAP).length - 1
-    const minRoleAuth = 0
-    let forbidden = false
-    //删除
-    if(_method === 'delete') {
-      if(data.length != 2) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-      const [ self ] = data.filter(item => item._id.equals(id))
-      const [ target ] = data.filter(item => item._id.equals(_id))
-      const targetRole = findMostRole(target.roles)
-      const selfRole = findMostRole(self.roles)
-
-      if(selfRole > ROLES_MAP.DEVELOPMENT || selfRole >= targetRole) forbidden = true
-
-    }
-    //编辑
-    else if(_method === 'put') {
-      if(data.length != 2) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-      const [self] = data.filter(item => item._id.equals(id))
-      const [ target ] = data.filter(item => item._id.equals(_id))
-      const selfRole = findMostRole(self.roles)
-      const targetRole = findMostRole(target.roles)
-      if(selfRole > ROLES_MAP.DEVELOPMENT || selfRole >= targetRole) forbidden = true
-    }
-    //新增
-    else if(_method === 'post') {
-        if(data.length != 1) return Promise.reject({ errMsg: 'unknown error', status: 500 })
-        const { roles } = data[0]
-        const targetRole = findMostRole(roles)
-        let newUserRole = Number(ROLES_MAP[ctx.request.body.role])
-        newUserRole = (Number.isNaN(newUserRole) || newUserRole > maxRoleAuth || newUserRole < minRoleAuth) ? maxRoleAuth : newUserRole
-        if(targetRole > ROLES_MAP.DEVELOPMENT || targetRole >= newUserRole) {
-          forbidden = true
-        }
-    }
-
-    if(forbidden) return Promise.reject({ errMsg: 'forbidden', status: 403 })
-  })
-  .catch(dealErr(ctx))
-
-  if(!data) return await next()
-
-  responseDataDeal({
-    ctx,
-    data,
-    needCache: false
-  })
-
-})
+.use(Auth)
 //新增
 .post('/', async(ctx) => {
 
@@ -407,26 +326,28 @@ router
 
   const check = Params.query(ctx, {
     name: '_id',
-    type: [ 'isMongoId' ]
+    validator: [
+      data => data.split(',').every(item => ObjectId.isValid(item))
+    ]
   })
 
   if(check) return
 
-  const [ _id ] = Params.sanitizers(ctx.query, {
+  const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item))
     ]
   })
 
-  const data = await UserModel.deleteOne({
-    _id
+  const data = await UserModel.deleteMany({
+    _id: { $in: _ids }
   })
   .then(data => {
-    if(data.deletedCount != 1) return Promise.reject({ errMsg: 'error', status: 500 })
+    if(data.deletedCount != _ids.length) return Promise.reject({ errMsg: 'error', status: 404 })
     return {
       data: {
-        _id
+        _id: _ids
       }
     }
   })

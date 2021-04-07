@@ -654,7 +654,6 @@ describe(`${COMMON_API} test`, function() {
           like_users: [ userId ]
         })
         .then(function(data) {
-          console.log(data)
           done()
         })
         .catch(err => {

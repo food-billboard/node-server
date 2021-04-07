@@ -41,7 +41,6 @@ function responseExpect(res, validate=[]) {
     expect(item.like).to.be.a('boolean')
     expect(item.source.content).to.be.satisfies(function(target) {
       return typeof target == 'string' || target == null
-      console.log(target, item.source.type.toLowerCase() == 'movie' ? target == null : typeof target === 'string')
       return item.source.type.toLowerCase() == 'movie' ? target == null : typeof target === 'string'
     })
     //total_like

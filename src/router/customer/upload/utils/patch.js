@@ -274,7 +274,7 @@ const pathMediaDeal = {
     .then(notFound)
     .then(data => {
       const { info: { complete, chunk_size, size, mime:upperMime }, auth } = data
-      
+
       const mime = upperMime.toLowerCase()
       const numberOffset = parseInt(offset)
       const multiple = numberOffset / chunk_size
@@ -439,7 +439,7 @@ const pathMediaDeal = {
   }
 }
 
-const patchRequestDeal = (options) => {
+const patchRequestDeal = async (options) => {
 
   const form = formidable({ multiples: true })
   const { ctx } = options

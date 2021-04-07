@@ -34,8 +34,6 @@ router.get('/', async (ctx) => {
     ]
   })
 
-  console.log(_id, id, 22222222)
-
   const data = await UserModel.find({
     _id: { $in: [ _id, ObjectId(id) ] }
   })

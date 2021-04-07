@@ -25,7 +25,7 @@ function responseExpectUser(res, validate=[]) {
     expect(item).to.be.a('object').and.that.include.all.keys('name', 'count', '_id', 'hot')
     commonValidate.string(item.name)
     commonValidate.number(item.count)
-    commonValidate.string(item._id)
+    commonValidate.objectId(item._id)
     commonValidate.number(item.hot)
   })
 
@@ -191,7 +191,9 @@ describe(`${COMMON_API_USER} and ${COMMON_API_MOVIE} and ${COMMON_API_VISIT} tes
           console.log(_)
         }
         responseExpectUser(obj, target => {
-          expect(target.data.length + target.rank.length).to.be.equals(25)
+          expect(target.data.length).to.be.equals(24)
+          const rankUsers = target.rank.filter(item => item.name === COMMON_API_USER) 
+          expect(rankUsers.length).to.be.eq(1)
         })
         done()
       })

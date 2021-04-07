@@ -62,7 +62,6 @@ function responseExpect(res, validate=[]) {
     commonValidate.string(name)
     if(other && other.avatar != undefined) {
       expect(other).to.be.a('object').and.that.includes.all.keys('avatar')
-      console.log(other.avatar)
       commonValidate.poster(other.avatar)
     }
   })
@@ -528,7 +527,6 @@ describe(`${COMMON_API} test`, function() {
       before(function(done) {
 
         const { model, token } = mockCreateUser({
-          mobile: 15985669863,
           username: COMMON_API
         })
         selfToken = token
@@ -562,7 +560,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`pre check the token fail becuase the token is unverify or delay`, async function() {
+      it(`pre check the token fail because the token is unverify or delay`, async function() {
 
         const res = await new Promise((resolve) => {
           setTimeout(() => {

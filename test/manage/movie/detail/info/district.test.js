@@ -264,45 +264,58 @@ describe(`${COMMON_API} test`, () => {
 
   describe(`delete the district success test -> ${COMMON_API}`, function() {
 
-    let districtId
+    let districtIdA
+    let districtIdB
 
     before(function(done) {
 
-      const { model } = mockCreateDistrict({
+      const { model: districtA } = mockCreateDistrict({
         name: COMMON_API.slice(22),
+        source: anotherUserId
+      })
+      const { model: districtB } = mockCreateDistrict({
+        name: COMMON_API.slice(23),
         source: anotherUserId
       })
 
       Promise.all([
-        model.save(),
+        districtA.save(),
+        districtB.save(),
         UserModel.updateOne({
           _id: anotherUserId
         }, {
           $set: { roles: [ 'CUSTOMER' ] }
         })
       ])
-      .then(([data]) => {
-        districtId = data._id
+      .then(([districtA, districtB]) => {
+        districtIdA = districtA._id
+        districtIdB = districtB._id
         done()
       })
       .catch(err => {
         console.log('oops: ', err)
+        done(err)
       })
 
     })
 
     after(function(done) {
 
-      DistrictModel.findOne({
-        _id: districtId.toString()
+      DistrictModel.find({
+        _id: { $in: [ districtIdA, districtIdB ] }
       })
       .select({
         _id: 1
       })
       .exec()
       .then(data => {
-        expect(!!data).to.be.false
+        expect(!!data.length).to.be.false
         done()
+      })
+      .catch(async (err) => {
+        console.log('oops: ', err)
+        await DistrictModel.deleteMany({ _id: { $in: [ districtIdA, districtIdB ] } })
+        done(err)
       })
 
     })
@@ -316,7 +329,7 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: districtId.toString()
+        _id: `${districtIdB.toString()},${districtIdA.toString()}`
       })
       .expect(200)
       .expect('Content-Type', /json/)

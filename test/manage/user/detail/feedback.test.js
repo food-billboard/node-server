@@ -321,21 +321,58 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`delete the user feedback success test -> ${COMMON_API}`, function() {
 
+      let feedbackIdA
+      let feedbackIdB 
+      
+      before(function(done) {
+        const { model: feedbackA } = mockCreateFeedback({
+          content: {
+            text: COMMON_API,
+            image: [ imageId ],
+            video: []
+          },
+          user_info: userInfo._id,
+        })
+        const { model: feedbackB } = mockCreateFeedback({
+          content: {
+            text: COMMON_API,
+            image: [ imageId ],
+            video: []
+          },
+          user_info: userInfo._id,
+        })
+
+        Promise.all([
+          feedbackA.save(),
+          feedbackB.save(),
+        ])
+        .then(([feedbackA, feedbackB]) => {
+          feedbackIdA = feedbackA._id
+          feedbackIdB = feedbackB._id
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+      })
+
       after(function(done) {
 
-        FeedbackModel.findOne({
-          _id: threeFeedId
+        FeedbackModel.find({
+          _id: { $in: [ feedbackIdA, feedbackIdB ] }
         })
         .select({
           _id: 1
         })
         .exec()
         .then(data => {
-          expect(!!data).to.be.false
+          expect(!!data.length).to.be.false
           done()
         })
-        .catch(err => {
+        .catch(async (err) => {
           console.log('oops: ', err)
+          await FeedbackModel.deleteMany({ _id: { $in: [ feedbackIdA, feedbackIdB ] } })
           done(err)
         })
 
@@ -350,7 +387,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: threeFeedId.toString()
+          _id: `${feedbackIdA.toString()},${feedbackIdB.toString()}`
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -598,9 +635,19 @@ describe(`${COMMON_API} test`, function() {
         let res = true
 
         await UserModel.updateOne({
+          _id: userInfo._id
+        }, {
+          $set: { roles: [ "ADMIN" ] }
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          res = false
+        })
+
+        await UserModel.updateOne({
           _id: otherUserId
         }, {
-          $set: { roles: [ 'SUPER_ADMIN' ] }
+          $set: { roles: [ "SUPER_ADMIN" ] }
         })
         .catch(err => {
           console.log('oops: ', err)
@@ -620,7 +667,7 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
 
         await UserModel.updateOne({
-          _id: otherUserId
+          _id: userInfo._id
         }, {
           $set: { roles: [ 'SUPER_ADMIN' ] }
         })

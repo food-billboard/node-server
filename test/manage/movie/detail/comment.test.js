@@ -247,7 +247,6 @@ describe(`${COMMON_API} test`, function() {
         }
         responseExpect(obj, (target) => {
           const { list } = target
-          console.log(list)
           const { _id } = list[0]
           expect(oneCommentId.equals(_id)).to.be.true
         })

@@ -1,7 +1,7 @@
 require('module-alias/register')
-const { UserModel, ClassifyModel, ImageModel } = require('@src/utils')
+const { UserModel, ClassifyModel, ImageModel, DistrictModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateClassify, mockCreateImage } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateClassify, mockCreateImage, mockCreateDistrict } = require('@test/utils')
 
 const COMMON_API = '/api/manage/movie/detail/info/classify'
 
@@ -38,6 +38,7 @@ describe(`${COMMON_API} test`, () => {
   let imageId
   let classifyId
   let getToken
+  let districtId
 
   before(function(done) {
 
@@ -58,18 +59,24 @@ describe(`${COMMON_API} test`, () => {
         username: COMMON_API,
       })
 
+      const { model: district } = mockCreateDistrict({
+        name: COMMON_API,
+      })
+
       getToken = signToken
 
       return Promise.all([
         user.save(),
-        other.save()
+        other.save(),
+        district.save()
       ])
 
     })
-    .then(([user, other]) => {
+    .then(([user, other, district]) => {
       userInfo = user
       anotherUserId = other._id
       selfToken = getToken(userInfo._id)
+      districtId = district._id
       const { model } = mockCreateClassify({
         name: COMMON_API,
         icon: imageId,
@@ -99,6 +106,9 @@ describe(`${COMMON_API} test`, () => {
       }),
       ClassifyModel.deleteMany({
         source: { $in: [ userInfo._id, anotherUserId ] }
+      }),
+      DistrictModel.deleteMany({
+        name: COMMON_API
       })
     ])
     .then(_ => {
@@ -269,25 +279,35 @@ describe(`${COMMON_API} test`, () => {
 
   describe(`delete the classify success test -> ${COMMON_API}`, function() {
 
-    let classifyId
+    let classifyIdA
+    let classifyIdB
 
     before(function(done) {
 
-      const { model } = mockCreateClassify({
+      const { model: classifyA } = mockCreateClassify({
         name: COMMON_API.slice(22),
-        source: anotherUserId
+        source: anotherUserId,
+        country: districtId,
+      })
+
+      const { model: classifyB } = mockCreateClassify({
+        name: COMMON_API.slice(23),
+        source: anotherUserId,
+        country: districtId,
       })
 
       Promise.all([
-        model.save(),
+        classifyA.save(),
+        classifyB.save(),
         UserModel.updateOne({
           _id: anotherUserId
         }, {
           $set: { roles: [ 'CUSTOMER' ] }
         })
       ])
-      .then(([data]) => {
-        classifyId = data._id
+      .then(([classifyA, classifyB]) => {
+        classifyIdA = classifyA._id
+        classifyIdB = classifyB._id
         done()
       })
       .catch(err => {
@@ -298,16 +318,21 @@ describe(`${COMMON_API} test`, () => {
 
     after(function(done) {
 
-      ClassifyModel.findOne({
-        _id: classifyId.toString()
+      ClassifyModel.find({
+        _id: { $in: [classifyIdA, classifyIdB] }
       })
       .select({
         _id: 1
       })
       .exec()
       .then(data => {
-        expect(!!data).to.be.false
+        expect(!!data.length).to.be.false
         done()
+      })
+      .catch(async (err) => {
+        console.log('oops: ', err)
+        await ClassifyModel.deleteMany({ _id: { $in: [ classifyIdA, classifyIdB ] } })
+        done(err)
       })
 
     })
@@ -321,7 +346,7 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: classifyId.toString()
+        _id: `${classifyIdA.toString()},${classifyIdB.toString()}`
       })
       .expect(200)
       .expect('Content-Type', /json/)

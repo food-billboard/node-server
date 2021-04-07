@@ -8,18 +8,20 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`post for logout test -> ${COMMON_API}`, function() {
 
-    let another
+    let getToken
     let result
+    let selfToken 
 
     before(function(done) {
-      const { model, ...nextData } = mockCreateUser({
+      const { model, signToken } = mockCreateUser({
         username: COMMON_API
       })
-      another = nextData
+      getToken = signToken
 
       model.save()
       .then(function(data) {
         result = data
+        selfToken = getToken(result._id)
         done()
       })
       .catch(err => {
@@ -38,6 +40,10 @@ describe(`${COMMON_API} test`, function() {
         console.log('oops: ', err)
       })
     })
+
+    beforeEach(() => {
+
+    })
     
     describe(`post for logout success test -> ${COMMON_API}`, function() {
 
@@ -47,7 +53,7 @@ describe(`${COMMON_API} test`, function() {
         .post(COMMON_API)
         .set({ 
           Accept: 'Application/json',
-          Authorization: `Basic ${another.token}`
+          Authorization: `Basic ${selfToken}`
         })
         .expect(200)
         .expect('Content-Type', /json/)

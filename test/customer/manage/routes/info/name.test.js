@@ -61,7 +61,6 @@ describe(`${COMMON_API} test`, function() {
         .exec()
         .then(data => !!data && data._doc.username)
         .then(data => {
-          console.log(data)
           return data === COMMON_API.slice(0, 10)
         })
         .catch(err => {

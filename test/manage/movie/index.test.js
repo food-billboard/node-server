@@ -109,10 +109,14 @@ describe(`${COMMON_API} test`, function() {
         images: new Array(6).fill(imageId)
       }
       return Promise.all(['classify', 'status', 'sourceType'].map(item => {
+        let info = {
+          description: COMMON_API
+        }
+        if(item === 'classify') info.classify = [ classifyId ]
         const { model } = mockCreateMovie({
           name: `${COMMON_API}-${item}`,
           author: userInfo._id,
-          ...(item == 'classify' ? { info: { classify: [ classifyId ] } } : {}),
+          info,
           ...(item === 'status' ? { status: 'NOT_VERIFY' } : {}),
           ...(item === 'sourceType' ? { source_type: 'USER' } : {}),
           author_description: COMMON_API
@@ -197,6 +201,130 @@ describe(`${COMMON_API} test`, function() {
           done()
         })
 
+      })
+
+      it(`get the movie list success width name`, function(done) {
+        Request
+        .get(COMMON_API)
+        .query({
+          content: `in: name ${COMMON_API}`
+        })
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            expect(list.length).to.not.be.equals(0)
+            const exists = list.some(item => classifyMovieId.equals(item._id))
+            expect(exists).to.be.true
+          })
+          done()
+        })
+      })
+
+      it(`get the movie list suuccess with description`, function(done) {
+        Request
+        .get(COMMON_API)
+        .query({
+          content: `in: description ${COMMON_API}`
+        })
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            expect(list.length).to.not.be.equals(0)
+            const exists = list.some(item => classifyMovieId.equals(item._id))
+            expect(exists).to.be.true
+          })
+          done()
+        })
+      })
+
+      it(`get the movie list suuccess with author_description`, function(done) {
+        Request
+        .get(COMMON_API)
+        .query({
+          content: `in: author_description ${COMMON_API}`
+        })
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            expect(list.length).to.not.be.equals(0)
+            const exists = list.some(item => classifyMovieId.equals(item._id))
+            expect(exists).to.be.true
+          })
+          done()
+        })
+      })
+
+      it(`get the movie list success with id`, function(done) {
+        Request
+        .get(COMMON_API)
+        .query({
+          _id: `${classifyMovieId.toString()},${sourceTypeId.toString()}`
+        })
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            expect(list.length).to.not.be.equals(0)
+            const exists = list.some(item => classifyMovieId.equals(item._id))
+            expect(exists).to.be.true
+          })
+          done()
+        })
       })
 
     })
@@ -519,18 +647,53 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`delete the movie success -> ${COMMON_API}`, function() {
 
+      let movieIdA 
+      let movieIdB 
+
+      before(function(done) {
+        const { model: modelA } = mockCreateMovie({
+          ...newMovie,
+          name: COMMON_API + '1',
+          author: userInfo._id
+        })
+        const { model: modelB } = mockCreateMovie({
+          ...newMovie,
+          name: COMMON_API + '2',
+          author: userInfo._id
+        })
+
+        Promise.all([
+          modelA.save(),
+          modelB.save(),
+          UserModel.updateOne({
+            _id: userInfo._id
+          }, {
+            $set: { roles: [ 'SUPER_ADMIN' ] }
+          })
+        ])
+        .then(([movieA, movieB]) => {
+          movieIdA = movieA._id 
+          movieIdB = movieB._id 
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+
+      })
+
       after(function(done) {
         
-        MovieModel.findOne({
-          _id: statusId
+        MovieModel.find({
+          _id: { $in: [movieIdB, movieIdA] }
         })
         .select({
           _id: 1
         })
         .exec()
         .then(data => {
-          console.log(data)
-          expect(!!data).to.be.false
+          expect(!!data.length).to.be.false
           done()
         })
         .catch(err => {
@@ -545,7 +708,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .delete(COMMON_API)
         .query({
-          _id: statusId.toString()
+          _id: `${movieIdB.toString()},${movieIdA.toString()}`
         })
         .set({
           Accept: 'application/json',
@@ -833,7 +996,16 @@ describe(`${COMMON_API} test`, function() {
       before(function(done) {
         Promise.all([
           UserModel.updateMany({
-            username: COMMON_API
+            $and: [
+              {
+                username: COMMON_API
+              },
+              {
+                _id: {
+                  $ne: otherUserId
+                }
+              }
+            ]
           }, {
             $set: { roles: [ 'DEVELOPMENT' ] }
           }),

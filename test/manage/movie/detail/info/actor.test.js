@@ -290,26 +290,34 @@ describe(`${COMMON_API} test`, () => {
 
   describe(`delete the actor success test -> ${COMMON_API}`, function() {
 
-    let actorId
+    let actorIdA
+    let actorIdB
 
     before(function(done) {
 
-      const { model } = mockCreateActor({
+      const { model: actorA } = mockCreateActor({
         name: COMMON_API.slice(22),
+        source: anotherUserId,
+        country: districtId,
+      })
+      const { model: actorB } = mockCreateActor({
+        name: COMMON_API.slice(23),
         source: anotherUserId,
         country: districtId,
       })
 
       Promise.all([
-        model.save(),
+        actorA.save(),
+        actorB.save(),
         UserModel.updateOne({
           _id: anotherUserId
         }, {
           $set: { roles: [ 'CUSTOMER' ] }
         })
       ])
-      .then(([data]) => {
-        actorId = data._id
+      .then(([actorA, actorB]) => {
+        actorIdA = actorA._id
+        actorIdB = actorB._id
         done()
       })
       .catch(err => {
@@ -320,16 +328,21 @@ describe(`${COMMON_API} test`, () => {
 
     after(function(done) {
 
-      ActorModel.findOne({
-        _id: actorId.toString()
+      ActorModel.find({
+        _id: { $in: [actorIdA, actorIdB] }
       })
       .select({
         _id: 1
       })
       .exec()
       .then(data => {
-        expect(!!data).to.be.false
+        expect(!!data.length).to.be.false
         done()
+      })
+      .catch(async (err) => {
+        console.log('oops: ', err)
+        await ActorModel.deleteMany({ _id: { $in: [ actorIdA, actorIdB ] } })
+        done(err)
       })
 
     })
@@ -343,7 +356,7 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: actorId.toString()
+        _id: `${actorIdA.toString()},${actorIdB.toString()}`
       })
       .expect(200)
       .expect('Content-Type', /json/)

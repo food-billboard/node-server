@@ -15,8 +15,8 @@ router
   const { _id:queryId } = ctx.query
   let valid = true
 
-  const isValidData = ObjectId.isValid(dataId)
-  const isValidQuery = ObjectId.isValid(queryId)
+  const isValidData = (dataId || '').split(',').every(item => ObjectId.isValid(item.trim()))
+  const isValidQuery = (queryId || '').split(',').every(item => ObjectId.isValid(item.trim()))
 
   if(dataId || queryId) {
     if(dataId && queryId) {
@@ -27,7 +27,7 @@ router
       if(!isValidQuery) valid = false
     }
   }
-
+  
   if(valid) return await next()
   
   const data = dealErr(ctx)({ errMsg: 'bad request', status: 400 })

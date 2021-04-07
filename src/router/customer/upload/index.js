@@ -165,7 +165,7 @@ router
   if(!data) return ctx.status = 500
 
   const { offset, id, type } = data
-  console.log(offset)
+
   //设置索引来帮助恢复上传
   ctx.set('Upload-Offset', offset)
   ctx.set('Tus-Resumable', headers['tus-resumable'] || '1.0.0')

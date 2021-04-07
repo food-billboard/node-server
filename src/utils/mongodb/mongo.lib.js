@@ -19,6 +19,7 @@ const defaultConfig = {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   },
+  usePushEach: true
 }
 
 const isZero = fields => {
@@ -211,7 +212,8 @@ const PRE_COMMENT_FIND = [
     path: 'user_info',
     select: {
       avatar: 1,
-      username: 1
+      username: 1,
+      roles: 1
     }
   },
   {
@@ -437,7 +439,16 @@ const GlobalSchema = new Schema({
   visit_count: {
     type: Number,
     min: 0
-  }
+  },
+  valid: {
+    type: Boolean,
+    default: false 
+  },
+  origin: {
+    type: ObjectId,
+    ref: 'user',
+    required: true
+  },
 }, {
   ...defaultConfig
 })
@@ -797,7 +808,17 @@ const SpecialSchema = new Schema({
     timestamps: {
       type: Number
     }
-  }]
+  }],
+  valid: {
+    type: Boolean,
+    default: false,
+    required: true
+  },
+  origin: {
+    type: ObjectId,
+    ref: 'user',
+    require: true
+  }
 }, {
   ...defaultConfig
 })
@@ -1005,6 +1026,23 @@ const RankSchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
+  match_pattern: [{
+    origin_id: {
+      type: ObjectId
+    },
+    origin: {
+      type: String,
+      required: true
+    },
+    field: {
+      type: String,
+      required: true
+    },
+    op: {
+      type: Number,
+      default: 1
+    }
+  }],
   match_field: {
     _id: {
       type: ObjectId,
@@ -1020,10 +1058,6 @@ const RankSchema = new Schema({
       }
     }
   },
-  // match: [{
-  //   type: ObjectId,
-  //   ref: 'movie'
-  // }],
   glance: {
     type: Number,
     default: 0
@@ -1049,12 +1083,6 @@ const ClassifySchema = new Schema({
     type: ObjectId,
     ref: 'image'
   },
-  // match: [
-  //   {
-  //     type: ObjectId,
-  //     ref: 'movie'
-  //   }
-  // ],
   glance: {
     type: Number,
     default: 0

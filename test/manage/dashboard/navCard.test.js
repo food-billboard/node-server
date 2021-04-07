@@ -129,7 +129,7 @@ describe(`${COMMON_API} test`, function() {
         description: COMMON_API
       }),
       GlobalModel.deleteMany({
-        notice: COMMON_API
+        notice: COMMON_API,
       }),
       BehaviourModel.deleteMany({
         user: ObjectId('8f63270f005f1c1a0d9448ca')

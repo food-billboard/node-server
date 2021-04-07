@@ -23,7 +23,6 @@ const {
   BehaviourModel,
   mergeConfig
 } = require('@src/utils')
-const { merge } = require('lodash')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
 const { expect } = require('chai')
@@ -39,7 +38,6 @@ function mockCreateUser(values={}) {
   const mobile = values.mobile || parseInt(`13${new Array(9).fill(0).map(_ => Math.floor(Math.random() * 10)).join('')}`)
   const encodedPwd = encoded(password)
   // const token = signToken({ mobile, id }, {expiresIn: '5s'})
-
   let baseModel = {
     mobile,
     email: `${mobile}@163.com`,
@@ -153,6 +151,9 @@ function mockCreateSpecial(values={}) {
     movie: [],
     description: '关于测试专题的内容介绍',
     name: '测试专题名称',
+    origin: ObjectId('5edb3c7b4f88da14ca419e61'),
+    poster: ObjectId('5edb3c7b4f88da14ca419e61'),
+    valid: false,
   }
   baseModel = mergeConfig(baseModel, values)
 
@@ -279,7 +280,9 @@ function mockCreateGlobal(values={}) {
   let baseModel = {
     notice: '测试的首页notice内容',
     info: '测试的小程序相关信息内容',
-    visit_count: 0
+    visit_count: 0,
+    valid: false,
+    origin: ObjectId('571094e2976aeb1df982ad4e')
   }
 
   baseModel = mergeConfig(baseModel, values, true)
@@ -414,7 +417,7 @@ const commonValidate = {
 //生成临时静态文件
 async function generateTemplateFile(files=[
   {
-    size: 1024 * 1024 * 1.6,
+    size: 1024 * 1024 * 6,
     type: 'mp4',
     name: 'test-video.mp4'
   }, 
@@ -430,20 +433,23 @@ async function generateTemplateFile(files=[
   }
 ]) {
   const dir = path.join(__dirname, 'assets')
+  if(!fs.existsSync(dir)) fs.mkdirSync(dir)
   for(let i = 0; i < files.length; i ++) {
-    const [ fileName, info ] = files[i] 
-    const { size, type } = info
-    const filePath = path.join(dir, `${fileName}.${type}`)
+    const { size, type, name: fileName } = files[i]
+    const filePath = path.join(dir, `${fileName}`)
     try {
       const exists = fs.existsSync(filePath)
       if(!exists) {
-        await fsPromise.writeFile(filePath, '')
-        const writeStream = fs.createWriteStream(filePath)
-        await new Promise((resolve, reject) => {
-          writeStream.on('finish', resolve)
-          const buffer = Buffer.alloc(size, 'a')
-          writeStream.write(buffer)
-        })
+        const buffer = Buffer.alloc(size, 'a')
+        await fsPromise.writeFile(filePath, buffer)
+        // const writeStream = fs.createWriteStream(filePath)
+        // await new Promise((resolve, reject) => {
+        //   writeStream.on('finish', resolve)
+        //   writeStream.on('error', reject)
+        //   writeStream.on('close', resolve)
+        //   const buffer = Buffer.alloc(size, 'a')
+        //   writeStream.write(buffer)
+        // })
       }
     }catch(err) {
       console.error(err)

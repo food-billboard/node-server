@@ -93,7 +93,6 @@ describe(`${COMMON_API} test`, function() {
         userResult = user
         userId = user._id
         movieId = movie._id
-        console.log
         selfToken = signToken(self._id)
 
         const { model } = mockCreateComment({
@@ -125,7 +124,7 @@ describe(`${COMMON_API} test`, function() {
           UserModel.updateOne({
             mobile: 15856998742
           }, {
-            $pushAll: { comment: [comment._id, origin._id] }
+            $set: { comment: [comment._id, origin._id] }
           }),
           CommentModel.updateOne({
             user_info: userId,

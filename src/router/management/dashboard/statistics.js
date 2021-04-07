@@ -85,26 +85,6 @@ router
     }, [])
 
     return {
-      
-      // {
-      //   data: {
-      //     data: [
-      //       {
-      //         day: '',
-      //         count: ''
-      //       }
-      //     ],
-      //     rank: [
-      //       {
-      //         name,
-      //         _id,
-      //         count,
-      //         hot
-      //       }
-      //     ]
-      //   }
-      // }
-
       data: {
         data: templateList.map(item => {
           const { date, count } = item

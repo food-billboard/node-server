@@ -3,6 +3,7 @@ const { AuthModel, ApisModel, UserModel } = require('../mongodb/mongo.lib')
 const { log4Error } = require('@src/config/winston')
 const { verifyTokenToData } = require('../token')
 const { responseDataDeal, dealErr, notFound } = require('../error-deal')
+const { ROLES_MAP, MOVIE_SOURCE_TYPE } = require('../constant')
 const Url = require('url')
 
 //暂时定义管理后台api前缀且现在只管理它
@@ -42,12 +43,11 @@ const initAuthMapData = () => {
 }
 
 const authMiddleware = async (ctx, next) => {
-  
   if(process.env.NODE_ENV !== 'production') return await next()
   const { request: { method, url } } = ctx
   const { pathname } = Url.parse(url)
   //不在限制范围内
-  if(!PREFIX.every(prefix => prefix.startsWith(url))) return await next()
+  if(!PREFIX.every(prefix => url.startsWith(prefix))) return await next()
   const [, token] = verifyTokenToData(ctx)
   let data 
   let roles = []
@@ -62,7 +62,7 @@ const authMiddleware = async (ctx, next) => {
         actions.every(action => {
           const { url, methods } = action
           const reg = new RegExp(url)
-          if(role.includes('SUPER_ADMIN') || (reg.test(pathname) && (methods == '*' || (Array.isArray(methods) && methods.includes(method.toLowerCase()))))) {
+          if(_role.includes('SUPER_ADMIN') || (reg.test(pathname) && (methods == '*' || (Array.isArray(methods) && methods.includes(method.toLowerCase()))))) {
             roles = [ ...new Set([ ...roles, ..._role ]) ]
             return false
           }
@@ -102,6 +102,7 @@ const authMiddleware = async (ctx, next) => {
       }
       return true
     })
+
     if(result) return Promise.reject({ errMsg: 'forbidden', status: 403 })
   })
   .catch(dealErr(ctx))
@@ -116,7 +117,38 @@ const authMiddleware = async (ctx, next) => {
 
 }
 
+//角色查找
+const findMostRole = (roles) => {
+  const maxRoleAuth = Object.keys(ROLES_MAP).length - 1
+  const minRoleAuth = 0
+  let targetRole = maxRoleAuth
+  roles.forEach(role => {
+    const _role = Number(ROLES_MAP[role])
+    if(!Number.isNaN(_role) && _role <= maxRoleAuth && _role >= minRoleAuth && _role < targetRole ) {
+        targetRole = _role
+    }
+  })
+  return targetRole
+}
+
+function rolesAuthMapValidator({
+  userRoles,
+  opRoles
+}) {
+  let operationRoles = Array.isArray(opRoles) ? opRoles : [opRoles]
+  const maxUserRole = findMostRole(userRoles)
+  const isSuperAdminUser = maxUserRole === ROLES_MAP.SUPER_ADMIN
+  return operationRoles.every(item => {
+    const { source_type, roles } = item 
+    if(source_type === MOVIE_SOURCE_TYPE.ORIGIN) return isSuperAdminUser
+    const maxRole = findMostRole(roles)
+    return maxUserRole <= maxRole
+  })
+}
+
 module.exports = {
   // initAuthMapData,
-  authMiddleware
+  authMiddleware,
+  rolesAuthMapValidator,
+  findMostRole
 }

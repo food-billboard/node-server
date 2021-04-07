@@ -3,6 +3,8 @@ const Detail = require('./detail')
 const { MovieModel, UserModel, verifyTokenToData, dealErr, notFound, Params, responseDataDeal, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, findMostRole } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
+const { Auth } = require('./auth')
+const { sanitizersNameParams } = require('./utils')
 
 const router = new Router()
 
@@ -139,19 +141,8 @@ const sanitizersParams = (ctx, ...sanitizers) => {
   }, ...sanitizers)
 }
 
-//获取最高角色
-const getRoles = (roles) => {
-  let role = 99
-  roles.forEach(item => {
-    if(ROLES_MAP[item] < role) {
-      role = ROLES_MAP[item]
-    }
-  })
-  return role
-}
-
 router
-//搜索(筛选)-分类-日期-状态-来源分类(系统、用户)
+//搜索(筛选)-分类-日期-状态-来源分类(系统、用户)-id(可多个)
 .get('/', async(ctx) => {
 
   const [ currPage, pageSize, classify, status, source_type, end_date, start_date ] = Params.sanitizers(ctx.query, {
@@ -192,12 +183,9 @@ router
       data => ((typeof data === 'string' && (new Date(data)).toString() == 'Invalid Date') || typeof data === 'undefined') ? undefined : Day().toDate()
     ]
   })
-  const { query: { content='' } } = ctx
+  const { query: { content='', _id } } = ctx
 
-  const reg = {
-    $regex: content,
-    $options: 'gi'
-  }
+  const contentMatch = sanitizersNameParams(content)
   
   let match = {
     source_type: {
@@ -210,17 +198,7 @@ router
       $lte: end_date,
       ...(!!start_date ? { $gte: start_date } : {})
     },
-    $or: [
-      {
-        name: reg
-      },
-      {
-        "info.description": reg
-      },
-      {
-        author_description: reg
-      },
-    ]
+    ...contentMatch,
   }
 
   if(!!classify) {
@@ -230,6 +208,13 @@ router
         $in: [ classify ]
       },
     }
+  }
+  if(typeof _id === 'string' && !!_id) {
+    const ids = _id.split(',').reduce((acc, cur) => {
+      if(ObjectId.isValid(cur.trim())) acc.push(ObjectId(cur))
+      return acc 
+    }, [])
+    if(ids.length) match._id = { $in: ids }
   }
 
   const data = await Promise.all([
@@ -251,11 +236,6 @@ router
       {
         $match: match
       },
-      // {
-      //   $sort: {
-
-      //   }
-      // },
       {
         $skip: currPage * pageSize
       },  
@@ -316,7 +296,6 @@ router
   .then(([total_count, movie_data]) => {
 
     if(!Array.isArray(total_count) || !Array.isArray(movie_data)) return Promise.reject({ errMsg: 'data error', status: 404 })
-
     return {
       data: {
         total: total_count.length ? total_count[0].total || 0 : 0,
@@ -334,102 +313,7 @@ router
 })
 .use('/detail', Detail.routes(), Detail.allowedMethods())
 //权限判断
-.use(async (ctx, next) => {
-  const { request: { method } } = ctx
-  const _method = method.toLowerCase()
-
-  if(_method === 'post') return await next()
-
-  const [ , token ] = verifyTokenToData(ctx)
-  const { id } = token
-
-  let _id
-  let movieData
-
-  try {
-    _id = _method == 'put' ? ctx.request.body._id : ctx.query._id
-  }catch(err) {}
-
-  const data = await (ObjectId.isValid(_id) ? Promise.resolve() : Promise.reject({ errMsg: 'bad request', status: 400 }))
-  .then(_ => {
-    return MovieModel.findOne({
-      _id
-    })
-    .select({
-      source_type: 1,
-      author: 1
-    })
-    .exec()
-  })
-  .then(data => !!data && data._doc)
-  .then(data => {
-    if(!data) return Promise.reject({ errMsg: 'not found', status: 404 })
-
-    movieData = data
-    const { author } = data
-
-    let query = {
-      _id: { $in: [ author, ObjectId(id) ] }
-    }
-
-    return UserModel.find(query)
-    .select({
-      _id: 1,
-      roles: 1,
-      mobile: 1
-    })
-    .exec()
-  })
-  .then(data => !!data && !!data.length && data)
-  .then(notFound)
-  .then(data => {
-    if(data.length == 1) {
-      if(!data[0]._id.equals(id)) return Promise.reject({ errMsg: 'not found', status: 404 })
-    }else {
-      let manageRoles
-      let userRoles 
-      const { author, source_type } = movieData
-      //查找对应的用户
-      data.forEach(item => {
-        const { mobile: _mobile, _id, roles } = item
-        if(_id.equals(id)) {
-          manageRoles = roles
-        }else if(_id.equals(author)) {
-          userRoles = roles
-        }
-      })
-
-      const maxManageRole = findMostRole(manageRoles)
-      const maxUserRole = findMostRole(userRoles)
-
-      //权限判断
-      if(source_type === 'ORIGIN') {
-        if(maxManageRole > ROLES_MAP.SUPER_ADMIN) {
-          return false
-        }
-      }else {
-        if(maxManageRole >= maxUserRole) {
-          if(_method == 'get' && maxManageRole == maxUserRole) return true
-          return false
-        }
-      }
-    }
-    return true
-  })
-  .then(data => {
-    if(!data) return Promise.reject({ errMsg: 'forbidden', status: 403 })
-  })
-  .catch(dealErr(ctx))
-
-  if(!data) return await next()
-
-  responseDataDeal({
-    ctx,
-    data,
-    needCache: false
-  })
-
-})
+.use(Auth)
 //新增
 .post('/', async(ctx) => {
 
@@ -466,7 +350,7 @@ router
   .then(notFound)
   .then(({ _id, roles }) => {
 
-    const role = getRoles(roles)
+    const role = findMostRole(roles)
 
     const model = new MovieModel({
       name,
@@ -576,20 +460,17 @@ router
 //删除
 .delete('/', async(ctx) => {
 
-  const [ _id ] = Params.sanitizers(ctx.query, {
+  const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item.trim()))
     ]
   })
 
-  const data = await MovieModel.deleteOne({
-    _id
+  const data = await MovieModel.deleteMany({
+    _id: { $in: _ids }
   })
-  .then(data => {
-    return data
-  })
-  .then(_ => ({ data: _id }))
+  .then(_ => ({ data: _ids }))
   .catch(dealErr(ctx))
 
   responseDataDeal({

@@ -105,19 +105,51 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`forbidden movie success -> ${COMMON_API}`, function() {
 
+      let movieIdA 
+      let movieIdB
+      before(function(done) {
+        const { model: movieA } = mockCreateMovie({
+          name: COMMON_API + '1'
+        })
+        const { model: movieB } = mockCreateMovie({
+          name: COMMON_API + '2'
+        })
+
+        Promise.all([
+          movieA.save(),
+          movieB.save(),
+        ])
+        .then(([movieA, movieB]) => {
+          movieIdA = movieA._id 
+          movieIdB = movieB._id 
+          done()
+        })
+        .catch(err => {
+          done(err)
+          console.log('oops: ', err)
+        })
+      })
+
       after(function(done) {
 
-        MovieModel.findOne({
-          _id: movieId,
+        MovieModel.find({
+          _id: { $in: [movieIdA, movieIdB] },
           status: MOVIE_STATUS.NOT_VERIFY
         })
         .select({
           _id: 1
         })
         .exec()
-        .then(data => !!data)
+        .then(data => !!data && data)
         .then(data => {
-          expect(data).to.be.true
+          expect(data.length).to.be.equal(2)
+        })
+        .then(_ => {
+          return MovieModel.deleteMany({
+            _id: { $in: [movieIdA, movieIdB] }
+          }) 
+        })
+        .then(_ => {
           done()
         })
         .catch(err => {
@@ -136,7 +168,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: movieId.toString(),
+          _id: `${movieIdA.toString()},${movieIdB.toString()}`,
         })
         .expect(200)
         .expect('Content-Type', /json/)

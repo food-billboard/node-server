@@ -9,30 +9,6 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router
-.use(async (ctx, next) => {
-  const { request: { method } } = ctx
-  const _method = method.toLowerCase()
-
-  let body
-
-  if(_method == 'get' || _method == 'delete') {
-    body = 'query'
-  }else {
-    body = 'body'
-  }
-
-  const check = Params[body](ctx, {
-    name: '_id',
-    validator: [
-      data => ObjectId.isValid(data)
-    ]
-  })
-
-  if(check) return
-
-  return await next()
-
-})
 //用户详细信息
 .get('/', async(ctx) => {
 

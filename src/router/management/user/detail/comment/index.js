@@ -2,6 +2,7 @@ const Router = require('@koa/router')
 const { Types: { ObjectId }, Aggregate } = require('mongoose')
 const { UserModel, CommentModel, dealErr, verifyTokenToData, responseDataDeal, Params, COMMENT_SOURCE_TYPE, notFound, findMostRole, ROLES_MAP } = require('@src/utils')
 const Day = require('dayjs')
+const { Auth } = require('./auth')
 
 const router = new Router()
 
@@ -194,89 +195,28 @@ router
 
 })
 //权限判断
-.use(async (ctx, next) => {
-
-  const [ _id ] = Params.sanitizers(ctx.query, {
-    name: '_id',
-    sanitizers: [
-      data => ObjectId(data)
-    ]
-  })
-
-  const [ , token ] = verifyTokenToData(ctx)
-
-  const { id } = token
-
-  let userMaxRole = 100
-  let selfMaxRole = 100
-
-  const data = await CommentModel.findOne({
-    _id
-  })
-  .select({
-    user_info: 1,
-    _id: 0
-  })
-  .exec()
-  .then(data => !!data && data._doc)
-  .then(notFound)
-  .then(data => {
-    const { user_info } = data
-    userMaxRole = user_info
-    return UserModel.find({
-      _id: { $in: [ user_info, ObjectId(id) ] }
-    })
-    .select({
-      roles: 1
-    })
-    .exec()
-  })
-  .then(data => !!data && !!(data.length == 2) && data)
-  .then(notFound)
-  .then(data => {
-    data.forEach(d => {
-      const { _id, roles } = d
-      if(_id.equals(userMaxRole)) {
-        userMaxRole = findMostRole(roles)
-      }else {
-        selfMaxRole = findMostRole(roles)
-      }
-    })
-    if(userMaxRole == ROLES_MAP.SUPER_ADMIN || selfMaxRole >= userMaxRole) return Promise.reject({ errMsg: 'forbidden', status: 403 })
-    return
-  })
-  .catch(dealErr(ctx))
-
-  if(!data) return await next()
-
-  responseDataDeal({
-    ctx, 
-    data,
-    needCache: false
-  })
-
-})
+.use(Auth)
 //删除评论
 .delete('/', async(ctx) => {
 
   const check = Params.query(ctx, {
     name: '_id',
     validator: [
-      data => ObjectId.isValid(data)
+      data => data.split(',').map(item => ObjectId.isValid(item))
     ]
   })
 
   if(check) return
   
-  const [ _id ] = Params.sanitizers(ctx.query, {
+  const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item))
     ]
   })
 
-  const data = await CommentModel.deleteOne({
-    _id
+  const data = await CommentModel.deleteMany({
+    _id: { $in: _ids }
   })
   .then(data => {
     if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })

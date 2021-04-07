@@ -128,7 +128,6 @@ describe(`${COMMON_API} test`, function() {
       describe(`post the feedback fail because the feedback is frequently -> ${COMMON_API}`, function() {
 
         before(async function() {
-          console.log(userId)
           const { model } = mockCreateFeedback({
             user_info: userId,
             content: {

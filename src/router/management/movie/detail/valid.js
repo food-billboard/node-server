@@ -48,26 +48,26 @@ router
   const check = Params.query(ctx, {
     name: '_id',
     validator: [
-      data => ObjectId.isValid(data)
+      data => data.split(',').every(item => ObjectId.isValid(item.trim()))
     ]
   })
 
   if(check) return 
 
-  const [ _id ] = Params.sanitizers(ctx.query, {
+  const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').map(item => ObjectId(item.trim()))
     ]
   })
 
-  const data = MovieModel.updateOne({
-    _id
+  const data = MovieModel.updateMany({
+    _id: { $in: _ids }
   }, {
     $set: { status: MOVIE_STATUS.NOT_VERIFY }
   })
   .then(res => {
-    if(res.nModified != 1) {
+    if(res.nModified != _ids.length) {
       return Promise.reject({ errMsg: 'not found', status: 400 })
     }
     return true

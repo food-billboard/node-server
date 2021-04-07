@@ -2,6 +2,7 @@ const Router = require('@koa/router')
 const SpecDropList = require('./specDropList')
 const { RankModel, dealErr, notFound, Params, MovieModel, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
+const { rankOperation } = require('./utils')
 
 const router = new Router()
 
@@ -87,18 +88,16 @@ router
 		$inc: { glance: 1 }
 	})
 	.select({
-		match_field:1,
+		match_pattern:1,
 		updatedAt: 1,
 		_id: 0
 	})
 	.exec()
-	.then(data => !!data && data._doc.match_field)
+	.then(data => !!data && data._doc.match_pattern)
 	.then(notFound)
 	.then(data => {
-		const { field, _id } = data
-		return MovieModel.find({
-			[`info.${field}`]: { $in: [ _id ] }
-		})
+		const { filter, sort } = rankOperation(data)
+		return MovieModel.find(filter)
 		.select({
 			"info.classify": 1,
 			"info.description": 1,
@@ -125,6 +124,7 @@ router
 			...(!!hot ? { hot: 1 } : {}),
 			...(!!rate_person ? { rate_person: 1 } : {}),
 			...(!!total_rate ? { total_rate: 1 } : {}),
+			...sort
 		})
 		.exec()
 	})
