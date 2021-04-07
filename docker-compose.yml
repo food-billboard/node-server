@@ -3,10 +3,10 @@ networks:
   nginx_bridge:
     driver: bridge
 services:
-  ffmpeg:
-    image: jrottenberg/ffmpeg:3.4
-    container_name: ffmpeg_video
-    restart: always
+  # ffmpeg:
+  #   image: jrottenberg/ffmpeg:3.4
+  #   container_name: ffmpeg_video
+  #   restart: always
 
   mongo:
     container_name: mongo
