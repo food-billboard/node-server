@@ -23,6 +23,10 @@
 ```
   docker exec -it con_Id mongo --host 127.0.0.1 --port 27017
 ```
+7. 文件复制  
+```
+  docker cp con_Id:con_path host_path
+```
 
 ## 访问Docker容器内的Redis  
 1. 外部执行  

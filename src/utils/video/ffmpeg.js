@@ -52,8 +52,8 @@ const createHls = async (filePath) => {
       console.log('file has been converted succesfully')
     })
     .on('error', function(err) {
-      reject()
       console.log('an error happened: ' + err)
+      reject(err)
     })
     .output(`rtmp://${NETWORK}/live/${videoName}`, { end: true })
     .run()

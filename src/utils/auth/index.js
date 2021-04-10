@@ -72,7 +72,6 @@ const authMiddleware = async (ctx, next) => {
 
     })
   }
-
   roles = !!roles.length ? roles : false
 
   //若包含最低访问权限则直接放行

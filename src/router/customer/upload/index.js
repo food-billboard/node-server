@@ -288,7 +288,7 @@ router
     }, {}))
   }
 
-  data = data
+  data = await data
   .then(query => {
     const [ [ type, id ] ] = Object.entries(query)
     let params
@@ -329,23 +329,24 @@ router
 
     const index = results.findIndex(result => result.status === 'fulfilled')
     if(!~index) return Promise.reject({ errMsg: 'not found', status: 404 })
-    const { value: { info: { status }={} } } = results[index]
+    const { value: { info: { status }={}, _id } } = results[index]
     if(status === MEDIA_STATUS.COMPLETE) {
-      return ''
+      return {
+        data: _id.toString()
+      }
     }else {
       return Promise.reject({ errMsg: '404', status: 404 })
     }
-
   })
   .catch(dealErr(ctx))
 
-  ctx.status = 200
+  // ctx.status = 200
 
-  // responseDataDeal({
-  //   ctx,
-  //   data,
-  //   needCache: false
-  // })
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 
 })
 //删除--无用

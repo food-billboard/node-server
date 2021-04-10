@@ -7,7 +7,7 @@ const DEFAULT_ROLES_DATABASE = {
   where: [],
 }
 
-const PREFIX_URL = '\\/api\\/manage\\/'
+const PREFIX_URL = '\\/api\\/'
 
 
 const ROLES_DATABASE_MAP = [
