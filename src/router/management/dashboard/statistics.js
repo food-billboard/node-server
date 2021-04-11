@@ -40,6 +40,7 @@ router
     UserModel.aggregate([
       {
         $project: {
+          _id: 1,
           username: 1,
           issue_count: {
             $size: {
