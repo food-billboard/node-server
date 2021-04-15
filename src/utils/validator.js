@@ -17,7 +17,34 @@ const TEMPLATE_ERROR = ctx => {
 
 const Params = {
   sanitizers(origin, ...target) {
-    return target.map(san => {
+    let realTarget = target
+    let returnData = []
+    let pushFn = (acc, _, data) => {
+      acc.push(data)
+    }
+    const targets = target.slice(0, -1)
+    const [ abandon ] = target.slice(-1)
+    const isAbandon = abandon === true
+    if(isAbandon) {
+      realTarget = targets
+      returnData = {}
+      pushFn = (acc, key, data) => {
+        if(data === undefined) return 
+        acc[key] = data
+      }
+    }
+
+    function abandonFn(callback, result) {
+      if(isAbandon) {
+        if(result.done) return false
+        callback(result.data)
+      }else {
+        callback(result)
+      }
+      return true
+    }
+
+    return realTarget.reduce((acc, san) => {
       if(!isType(san, 'object')) return san
       const { name, _default, type=[], sanitizers=[] } = san
       let result
@@ -48,16 +75,24 @@ const Params = {
           Validator[method](...(params ? [ result, ...params.split(',').map(p => p.trim()) ] : [result])) : 
           result
         })
-        realSan.forEach(san => {
-          result = san(result)
+        const _result = realSan.every(san => {
+          const _result = san(result)
+          return abandonFn((data) => {
+            result = data
+          }, _result)
         })
-        return result
+        if(!_result) result = {
+          done: false,
+          data: null
+        }
       }catch(err) {
         if(_default) result = _default
-
-        return result
+      }finally {
+        abandonFn(pushFn.bind(null, acc, name), result)
       }
-    })
+
+      return acc
+    }, returnData)
   },
   bodyUnStatus(origin, ...validators) {
     const data = this.validate(origin, ...validators)

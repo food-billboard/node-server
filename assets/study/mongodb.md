@@ -50,3 +50,14 @@
     }
   }
 ```
+4. $unwind  
+ - 避免`null`情况出现导致字段丢失  
+```javascript
+  //比如 unwind country 但是他为空
+  {
+    $unwind: {
+      path: "$country",
+      preserveNullAndEmptyArrays: true 
+    }
+  }
+```

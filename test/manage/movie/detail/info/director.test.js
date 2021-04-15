@@ -189,6 +189,49 @@ describe(`${COMMON_API} test`, () => {
 
     })
 
+    it(`get the director success and with all`, function(done) {
+      const { model } = mockCreateDirector({
+        name: COMMON_API,
+        other: {
+          avatar: imageId
+        },
+        country: districtId,
+        source: userInfo._id
+      })
+
+      model.save()
+      .then(_ => {
+        return Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          currPage: 0,
+          pageSize: 1,
+          all: 1
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+      })
+      .then(function(res) {
+        if(err) return done(err)
+        const { res: { text } } = res
+        let obj
+        try{
+          obj = JSON.parse(text)
+        }catch(_) {
+          console.log(_)
+        }
+        responseExpect(obj, (target) => {
+          expect(target.length > 1).to.be.true
+        })
+        done()
+      })
+
+    })
+
   })
 
   describe(`post new director success test -> ${COMMON_API}`, function() {

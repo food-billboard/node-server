@@ -137,23 +137,6 @@ router
     if(!Array.isArray(total_count) || !Array.isArray(rate_data)) return Promise.reject({ errMsg: 'data error', status: 404 })
 
     return {
-      // {
-      //   data: {
-      //     total,
-      //     list:[{
-      //       value,
-      //       createdAt,
-      //       movie: {
-      //         _id,
-      //         name,
-      //         author_rate,
-      //         rate_person,
-      //         total_rate,
-      //         source_type,
-      //       }
-      //     }]
-      //   }
-      // }
       data: {
         total: !!total_count.length ? total_count[0].total || 0 : 0,
         list: rate_data

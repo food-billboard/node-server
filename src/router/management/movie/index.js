@@ -63,7 +63,7 @@ const checkParams = (ctx, ...validator) => {
   }, {
     name: 'images',
     validator: [
-      data => Array.isArray(data) && data.length == 6 && data.every(d => ObjectId.isValid(d))
+      data => Array.isArray(data) && data.length >= 6 && data.every(d => ObjectId.isValid(d))
     ]
   }, {
     name: 'poster',
@@ -254,12 +254,27 @@ router
         $unwind: "$author"
       },
       {
+        $lookup: {
+          from: 'images', 
+          localField: 'poster', 
+          foreignField: '_id', 
+          as: 'poster'
+        }
+      },
+      {
+        $unwind: {
+          path: "$poster",
+          preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
         $project: {
           name: 1,
           author: {
             _id: "$author._id",
             username: "$author.username"
           },
+          poster: "$poster.src",
           createdAt: 1,
           updatedAt: 1,
           glance: 1,

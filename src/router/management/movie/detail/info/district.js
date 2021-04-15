@@ -16,6 +16,25 @@ const checkParams = (ctx, ...params) => {
 router
 .get('/', async(ctx) => {
 
+  const [ currPage, pageSize, all ] = Params.sanitizers(ctx.query, {
+    name: 'currPage',
+    _default: 0,
+    sanitizers: [
+      data => data >= 0 ? +data : 0
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    sanitizers: [
+      data => data >= 0 ? +data : 30
+    ]
+  }, {
+    name: 'all',
+    sanitizers: [
+      data => data == 1 ? true : false
+    ]
+  })
+
   const { _id, content } = ctx.query
   let query = {}
   if(ObjectId.isValid(_id)) {
@@ -31,16 +50,53 @@ router
     }
   }
 
-  const data = await DistrictModel.find(query)
-  .select({
-    _id: 1,
-    name: 1,
-    createdAt: 1,
-    updatedAt: 1,
-    source_type: 1
+  let aggregate = [
+    {
+      $match: query,
+    },
+    ...(all ? [] : [
+      {
+        $skip: pageSize * currPage
+      },
+      {
+        $limit: pageSize
+      }
+    ]),
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        source_type: 1,
+      }
+    }
+  ]
+
+  const data = await Promise.all([
+    DistrictModel.aggregate([
+      {
+        $match: query
+      },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1
+          }
+        }
+      }
+    ]),
+    DistrictModel.aggregate(aggregate)
+  ])
+  .then(([total, data]) => {
+    return {
+      data: {
+        list: data,
+        total: !!total.length ? total[0].total || 0 : 0,
+      }
+    }
   })
-  .exec()
-  .then(data => ({ data }))
   .catch(dealErr(ctx))
 
   responseDataDeal({

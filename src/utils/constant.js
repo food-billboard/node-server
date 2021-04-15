@@ -83,10 +83,7 @@ const MEDIA_AUTH = {
   PRIVATE: 'PRIVATE'
 }
 
-const MEDIA_ORIGIN_TYPE = {
-  USER: 'USER',
-  SYSTEM: 'SYSTEM'
-}
+const MEDIA_ORIGIN_TYPE = MOVIE_SOURCE_TYPE
 
 const NETWORK = process.env.NODE_ENV !== 'production' ? 'localhost' : '47.111.229.250'
 

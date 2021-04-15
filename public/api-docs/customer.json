@@ -599,7 +599,7 @@
           },
           {
             "name": "images",
-            "description": "电影截图(6张)",
+            "description": "电影截图(最少6张)",
             "type": "array",
             "required": true,
             "items": {
@@ -743,7 +743,7 @@
           },
           {
             "name": "images",
-            "description": "电影截图(6张)",
+            "description": "电影截图(最少6张)",
             "type": "array",
             "required": true,
             "items": {

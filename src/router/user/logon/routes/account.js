@@ -1,4 +1,5 @@
 const Router = require('@koa/router')
+const { omit } = require('lodash')
 const { signToken, encoded, dealErr, UserModel, RoomModel, Params, responseDataDeal, setCookie, TOKEN_COOKIE } = require("@src/utils")
 
 const router = new Router()
@@ -66,12 +67,20 @@ router
       token,
       avatar: avatar ? avatar.src : null,
       _id,
+      roles,
       ...nextData
     }
   })
   .then(async (data) => {
-    const { _id } = data
+    const { _id, roles } = data
     await Promise.all([
+      ...(!roles.length ? [
+        UserModel.updateOne({
+          _id
+        }, {
+          $set: { roles: [ 'USER' ] }
+        })
+      ] : []),
       ...(uid ? [RoomModel.updateOne({
         origin: false,
         "members.sid": uid,
@@ -88,7 +97,7 @@ router
       })
     ])
     return {
-      data
+      data: omit(data, ['roles'])
     }
   })
   .catch(dealErr(ctx))

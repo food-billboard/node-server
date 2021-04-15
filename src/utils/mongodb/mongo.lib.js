@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
-const { EMAIL_REGEXP, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS, COMMENT_SOURCE_TYPE, MEDIA_STATUS, MEDIA_AUTH, NETWORK } = require('../constant')
+const { EMAIL_REGEXP, MEDIA_ORIGIN_TYPE, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS, COMMENT_SOURCE_TYPE, MEDIA_STATUS, MEDIA_AUTH, NETWORK } = require('../constant')
 
 function getMill(time) {
   return Day(time).valueOf()
@@ -1144,9 +1144,13 @@ const VideoSchema = new Schema({
   origin_type: {
     required: true,
     type: String,
-    enum: [ 'USER', 'SYSTEM' ],
+    enum: Object.keys(MEDIA_ORIGIN_TYPE),
     uppercase: true,
     get: function(v) { return v ? v.toLowerCase() : v }
+  },
+  origin: {
+    type: ObjectId,
+    ref: 'user'
   },
   white_list: [
     {
@@ -1213,6 +1217,10 @@ const ImageSchema = new Schema({
     uppercase: true,
     get: function(v) { return v ? v.toLowerCase() : v }
   },
+  origin: {
+    type: ObjectId,
+    ref: 'user'
+  },
   white_list: [
     {
       type: ObjectId,
@@ -1274,6 +1282,10 @@ const OtherMediaSchema = new Schema({
     enum: [ 'SYSTEM', 'USER' ],
     uppercase: true,
     get: function(v) { return v ? v.toLowerCase() : v }
+  },
+  origin: {
+    type: ObjectId,
+    ref: 'user'
   },
   white_list: [
     {

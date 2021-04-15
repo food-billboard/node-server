@@ -44,6 +44,25 @@ const sanitizersParams = (ctx, ...params) => {
 
 router
 .get('/', async(ctx) => {
+
+  const [ currPage, pageSize, all ] = Params.sanitizers(ctx.query, {
+    name: 'currPage',
+    _default: 0,
+    sanitizers: [
+      data => data >= 0 ? +data : 0
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    sanitizers: [
+      data => data >= 0 ? +data : 30
+    ]
+  }, {
+    name: 'all',
+    sanitizers: [
+      data => data == 1 ? true : false
+    ]
+  })
   
   const { _id, content } = ctx.query
   let query = {}
@@ -60,41 +79,82 @@ router
     }
   }
 
-  const data = await DirectorModel.find(query)
-  .select({
-    _id: 1,
-    other: 1,
-    name: 1,
-    createdAt: 1,
-    updatedAt: 1,
-    source_type: 1,
-    country: 1
-  })
-  .populate({
-    path: 'country',
-    select: {
-      name: 1,
-      _id: 1
-    }
-  })
-  .exec()
-  .then(data => {
-
-    return {
-      data: data.map(item => {
-        const { name, other: { another_name, avatar }, country, createdAt, updatedAt, source_type, _id } = item
-        return {
-          name,
-          another_name,
-          avatar: avatar ? avatar.src : null,
-          avatar_id: avatar ? avatar._id : null,
-          _id,
-          createdAt,
-          updatedAt,
-          source_type,
-          country
+  let aggregate = [
+    {
+      $match: query,
+    },
+    ...(all ? [] : [
+      {
+        $skip: pageSize * currPage
+      },
+      {
+        $limit: pageSize
+      }
+    ]),
+    {
+      $lookup: {
+        from: 'districts',
+        localField: 'country',
+        foreignField: '_id',
+        as: 'country'
+      }
+    },
+    {
+      $unwind: "$country"
+    },
+    {
+      $lookup: {
+        from: 'images',
+        localField: 'other.avatar',
+        foreignField: '_id',
+        as: 'avatar'
+      }
+    },
+    {
+      $unwind:{
+        path:'$avatar',
+        preserveNullAndEmptyArrays: true
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        source_type: 1,
+        avatar: "$avatar.src",
+        avatar_id: "$avatar._id",
+        country: {
+          name: "$country.name",
+          _id: "$country._id"
         }
-      })
+      }
+    }
+  ]
+
+  const data = await Promise.all([
+    DirectorModel.aggregate([
+      {
+        $match: query
+      },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1
+          }
+        }
+      }
+    ]),
+    DirectorModel.aggregate(aggregate)
+  ])
+  .then(([total, data]) => {
+    return {
+      data: {
+        list: data,
+        total: !!total.length ? total[0].total || 0 : 0,
+      }
     }
   })
   .catch(dealErr(ctx))

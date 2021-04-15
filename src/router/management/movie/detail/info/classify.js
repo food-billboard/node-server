@@ -30,6 +30,25 @@ const sanitizersParams = (ctx, ...params) => {
 router
 .get('/', async(ctx) => {
 
+  const [ currPage, pageSize, all ] = Params.sanitizers(ctx.query, {
+    name: 'currPage',
+    _default: 0,
+    sanitizers: [
+      data => data >= 0 ? +data : 0
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    sanitizers: [
+      data => data >= 0 ? +data : 30
+    ]
+  }, {
+    name: 'all',
+    sanitizers: [
+      data => data == 1 ? true : false
+    ]
+  })
+
   const { _id, content } = ctx.query
   let query = {}
   if(ObjectId.isValid(_id)) {
@@ -45,33 +64,68 @@ router
     }
   }
 
-  const data = await ClassifyModel.find(query)
-  .select({
-    _id: 1,
-    name: 1,
-    icon: 1,
-    glance: 1,
-    createdAt: 1,
-    updatedAt: 1,
-    source_type: 1
-  })
-  .exec()
-  .then(data => {
+  let aggregate = [
+    {
+      $match: query,
+    },
+    ...(all ? [] : [
+      {
+        $skip: pageSize * currPage
+      },
+      {
+        $limit: pageSize
+      }
+    ]),
+    {
+      $lookup: {
+        from: 'images',
+        localField: 'icon',
+        foreignField: '_id',
+        as: 'icon'
+      }
+    },
+    {
+      $unwind:{
+        path:'$icon',
+        preserveNullAndEmptyArrays: true
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        glance: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        source_type: 1,
+        icon: "$icon.src",
+        icon_id: "$icon._id",
+      }
+    }
+  ]
 
-    return {
-      data: data.map(item => {
-        const { name, icon, glance, createdAt, updatedAt, source_type, _id } = item
-        return {
-          name,
-          glance,
-          icon: icon ? icon.src : null,
-          icon_id: icon ? icon._id : null,
-          _id,
-          createdAt,
-          updatedAt,
-          source_type
+  const data = await Promise.all([
+    ClassifyModel.aggregate([
+      {
+        $match: query
+      },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1
+          }
         }
-      })
+      }
+    ]),
+    ClassifyModel.aggregate(aggregate)
+  ])
+  .then(([total, data]) => {
+    return {
+      data: {
+        list: data,
+        total: !!total.length ? total[0].total || 0 : 0,
+      }
     }
   })
   .catch(dealErr(ctx))

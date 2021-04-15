@@ -69,7 +69,7 @@ const ROLES_DATABASE_MAP = [
         },
         {
           methods: '*',
-          url: `${PREFIX_URL}manage\\/instance\\/(info|special)`
+          url: `${PREFIX_URL}manage\\/media(\\/valid)?`
         }
       ]
     }
@@ -126,6 +126,10 @@ const ROLES_DATABASE_MAP = [
         {
           methods: [ 'get', 'post', 'put' ],
           url: `${PREFIX_URL}manage\\/instance\\/(info|special)`
+        },
+        {
+          methods: [ 'get' ],
+          url: `${PREFIX_URL}manage\\/media(\\/valid)?`
         }
       ]
     }

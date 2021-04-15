@@ -5,6 +5,7 @@ const Error = require('./error')
 const Movie = require('./movie')
 const User = require('./user')
 const Instance = require('./instance')
+const Media = require('./media')
 const { verifyTokenToData, dealErr, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
@@ -33,5 +34,6 @@ router
 .use('/movie', Movie.routes(), Movie.allowedMethods())
 .use('/user', User.routes(), User.allowedMethods())
 .use('/instance', Instance.routes(), Instance.allowedMethods())
+.use('/media', Media.routes(), Media.allowedMethods())
 
 module.exports = router
