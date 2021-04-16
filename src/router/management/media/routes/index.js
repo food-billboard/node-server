@@ -1,18 +1,14 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const fs = require('fs')
-const path = require('path')
-const { ImageModel, VideoModel, OtherMediaModel, dealErr, responseDataDeal, Params, MEDIA_AUTH, MEDIA_STATUS, MEDIA_ORIGIN_TYPE, STATIC_FILE_PATH} = require('@src/utils')
+const { MEDIA_MAP } = require('../utils')
+const { Auth } = require('../auth')
+const { dealErr, responseDataDeal, Params, MEDIA_AUTH, MEDIA_STATUS, MEDIA_ORIGIN_TYPE, STATIC_FILE_PATH, notFound } = require('@src/utils')
 
 const router = new Router()
 
-const MEDIA_MAP = {
-  0: ImageModel,
-  1: VideoModel,
-  2: OtherMediaModel
-}
-
 router
+//权限判断
+.use(Auth)
 .get('/', async (ctx) => {
 
   const check = Params.query(ctx, {
@@ -29,7 +25,7 @@ router
     name: '_id',
     sanitizers: [
       data => {
-        if(data.every(item => ObjectId.isValid(item.trim()))) return {
+        if(data.split(',').every(item => ObjectId.isValid(item.trim()))) return {
           done: true,
           data: {
             _id: { $in: data.split(',').map(item => ObjectId(item.trim())) }
@@ -88,10 +84,10 @@ router
     name: 'origin_type',
     sanitizers: [
       data => {
-        if(typeof data === 'string' && !!MEDIA_ORIGIN_TYPE[data.trim().toLowerCase()]) return {
+        if(typeof data === 'string' && !!MEDIA_ORIGIN_TYPE[data.trim().toUpperCase()]) return {
           done: true,
           data: {
-            origin_type: data.trim().toLowerCase()
+            origin_type: data.trim().toUpperCase()
           }
         }
         return {
@@ -103,10 +99,10 @@ router
     name: 'auth',
     sanitizers: [
       data => {
-        if(typeof data === 'string' && !!MEDIA_AUTH[data.trim().toLowerCase()]) return {
+        if(typeof data === 'string' && !!MEDIA_AUTH[data.trim().toUpperCase()]) return {
           done: true,
           data: {
-            auth: data.trim().toLowerCase()
+            auth: data.trim().toUpperCase()
           }
         }
         return {
@@ -118,10 +114,10 @@ router
     name: 'status',
     sanitizers: [
       data => {
-        if(typeof data === 'string' && !!MEDIA_STATUS[data.trim().toLowerCase()]) return {
+        if(typeof data === 'string' && !!MEDIA_STATUS[data.trim().toUpperCase()]) return {
           done: true,
           data: {
-            "info.status": data.trim().toLowerCase()
+            "info.status": data.trim().toUpperCase()
           }
         }
         return {
@@ -138,10 +134,10 @@ router
           done: false,
           data: null
         }
-        if(typeof data === 'number') {
+        if(typeof data === 'number' || typeof data === 'string' && !data.includes(',') && !Number.isNaN(parseInt(data))) {
           result.done = true 
           result.data = {
-            "info.size": data
+            "info.size": parseInt(data)
           }
         }else if(typeof data === 'string') {
           const [ min, max ] = data.split(',').map(item => parseInt(item.trim()))
@@ -176,7 +172,7 @@ router
         data: data >= 0 ? +data : 30
       })
     ]
-  })
+  }, true)
 
   const query = Object.values(nextParams).reduce((acc, cur) => {
     acc = {
@@ -262,12 +258,7 @@ router
   responseDataDeal({
     ctx,
     needCache: true,
-    data: {
-      data: {
-        total: (total[0] || { total: 0 }).total,
-        list: data
-      }
-    }
+    data
   })
 
 })
@@ -286,7 +277,7 @@ router
   if(check) return 
   const { request: { body: { type } } } = ctx
   const model = MEDIA_MAP[type]
-  const setFields = Params.sanitizers(ctx.request.body, {
+  const { _id, ...setFields } = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => ({
@@ -300,7 +291,9 @@ router
       data => {
         if(typeof data === 'string' && !!data.length) return {
           done: true,
-          data
+          data: {
+            name: data
+          }
         }
         return {
           done: false
@@ -313,7 +306,9 @@ router
       data => {
         if(typeof data === 'string' && !!MEDIA_AUTH[data]) return {
           done: true,
-          data
+          data: {
+            auth: data
+          }
         }
         return {
           done: false
@@ -326,7 +321,9 @@ router
       data => {
         if(typeof data === 'string' && !!MEDIA_STATUS[data]) return {
           done: true,
-          data
+          data: {
+            "info.status": data
+          }
         }
         return {
           done: false
@@ -338,7 +335,13 @@ router
   const data = await model.findOneAndUpdate({
     _id
   }, {
-    $set: setFields
+    $set: Object.values(setFields).reduce((acc, cur) => {
+      acc = {
+        ...acc,
+        ...cur
+      }
+      return acc 
+    }, {})
   })
   .select({
     _id: 1
@@ -392,96 +395,6 @@ router
   })
   .catch(dealErr(ctx))
 
-  responseDataDeal({
-    ctx,
-    data,
-    needCache: false
-  })
-
-})
-.get('/valid', async (ctx) => {
-
-  const check = Params.query(ctx, {
-    name: '_id',
-    validator: [
-      data => data.split(',').every(item => ObjectId.isValid(item.trim()))
-    ]
-  }, {
-    name: 'type',
-    validator: [
-      data => !!MEDIA_MAP[data]
-    ]
-  })
-  if(check) return 
-
-  const { type, isdelete } = ctx.query
-  const [ _ids ] = Params.sanitizers(ctx.query, {
-    name: '_id',
-    sanitizers: [
-      data => data.split(',').map(item => ObjectId(item.trim()))
-    ]
-  })
-  const _isdelete = typeof isdelete === 'boolean' ? isdelete : false 
-  const model = MEDIA_MAP[type]
-  let logs = {
-    databaseExists: false ,
-    databaseStatus: null,
-    exists: false 
-  }
-  let filePath = null 
-
-  const data = await model.findOne({
-    _id,
-    "info.status": MEDIA_STATUS.UPLOADING
-  })
-  .select({
-    _id: 1,
-    src: 1,
-    "info.status": 1
-  })
-  .exec()
-  .then(data => !!data && data._doc)
-  .then(data => {
-    if(!data) return false 
-    logs.databaseExists = true 
-    const { src, info: { status } } = data
-    logs.databaseStatus = status 
-    const [ ,, type, fileName ] = src.split('/')
-    let isExists = false 
-    filePath = path.join(STATIC_FILE_PATH, type, fileName)
-    try {
-      isExists = fs.existsSync(filePath)
-    }finally {
-      logs.exists = isExists
-    }
-
-    let result = {
-      complete: false,
-      error: true
-    }
-
-    if(logs.databaseExists || logs.databaseStatus === MEDIA_STATUS.ERROR || !logs.exists) return result 
-    result.complete = logs.databaseStatus === MEDIA_STATUS.COMPLETE 
-    result.complete = false 
-    return result 
-  })
-  .then(result => {
-    if(result.error && _isdelete) {
-      return Promise.all([
-        model.deleteOne({
-          _id,
-        }),
-        fs.promises.unlink(filePath)
-      ])
-      .then(_ => ({ data: result }))
-    }
-
-    return {
-      data: result
-    } 
-  })
-  .catch(dealErr(ctx))
-  
   responseDataDeal({
     ctx,
     data,

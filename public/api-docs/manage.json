@@ -3220,6 +3220,127 @@
           }
         }
       }
+    },
+    "/api/manage/media/person": {
+      "delete": {
+        "tags": [
+          "media"
+        ],
+        "summary": "删除指定媒体白名单用户",
+        "description": "",
+        "operationId": "manage_media_delete_person",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "资源id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "媒体类型(图片，视频，其他)",
+            "type": "string",
+            "enum":[ "0", "1", "2" ],
+            "required": true
+          },
+          {
+            "name": "users",
+            "in": "query",
+            "description": "用户id(多个用,分隔)",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "media"
+        ],
+        "summary": "媒体白名单列表",
+        "description": "",
+        "operationId": "manage_media_get_person",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "资源id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "媒体类型(图片，视频，其他)",
+            "type": "string",
+            "enum":[ "0", "1", "2" ],
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_media_get_person"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "media"
+        ],
+        "summary": "媒体白名单新增",
+        "description": "",
+        "operationId": "manage_media_post_person",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "资源id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "description": "媒体类型(图片，视频，其他)",
+            "type": "string",
+            "enum":[ "0", "1", "2" ],
+            "required": true
+          },
+          {
+            "name": "user",
+            "in": "body",
+            "description": "用户id(多个用,分隔)",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
@@ -5430,6 +5551,10 @@
                 "error": {
                   "type": "boolean",
                   "description": "是否出错"
+                },
+                "exists": {
+                  "type": "boolean",
+                  "description": "是否存在"
                 }
               }
             }
@@ -5438,6 +5563,77 @@
       },
       "xml": {
         "name": "manage_media_get_valid"
+      }
+    },
+    "manage_media_get_person": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "description": "总数"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string",
+                        "description": "用户名"
+                      },
+                      "mobile": {
+                        "type": "integer",
+                        "description": "手机"
+                      },
+                      "email": {
+                        "type": "string",
+                        "description": "邮箱"
+                      },
+                      "roles": {
+                        "type": "array",
+                        "description": "角色",
+                        "items": {
+                          "type": "string",
+                          "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+                        }
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "用户状态",
+                        "enum": [
+                          "SIGNIN", "SIGNOUT", "FREEZE"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_media_get_person"
       }
     }
   },

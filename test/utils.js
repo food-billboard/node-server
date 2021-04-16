@@ -226,10 +226,12 @@ function mockCreateImage(values={}) {
     src: '测试地址' + Math.random(),
     auth: 'PUBLIC',
     origin_type: 'USER',
+    origin: ObjectId('8f63270f005f1c1a0d9448ca'),
     info: {
       mime: 'jpg',
       status: 'COMPLETE',
-      md5: '测试md5'
+      md5: '测试md5',
+      size: 100
     },
   }
 
@@ -247,10 +249,12 @@ function mockCreateVideo(values={}) {
     src: '',
     auth: 'PUBLIC',
     origin_type: 'USER',
+    origin: ObjectId('8f63270f005f1c1a0d9448ca'),
     info: {
       mime: 'mp4',
       status: 'COMPLETE',
-      md5: '测试md5'
+      md5: '测试md5',
+      size: 1024 * 1024
     },
   }
   baseModel = mergeConfig(baseModel, values, true)

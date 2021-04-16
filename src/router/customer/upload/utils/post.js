@@ -18,6 +18,7 @@ const postRequestMediaDeal = {
       name: name || '',
       src: path.join('static', 'image', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
+      origin: _id,
       white_list: [_id],
       auth,
       info: {
@@ -57,6 +58,7 @@ const postRequestMediaDeal = {
       origin_type,
       white_list: [_id],
       auth,
+      origin: _id,
       info: {
         md5,
         complete: [],
@@ -94,6 +96,7 @@ const postRequestMediaDeal = {
       origin_type,
       white_list: [_id],
       auth,
+      origin: _id,
       info: {
         md5,
         complete: [],

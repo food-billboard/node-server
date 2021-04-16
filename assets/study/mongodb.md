@@ -61,3 +61,16 @@
     }
   }
 ```
+
+5. $addToSet  
+- 向数据库中批量添加数据  
+```javascript 
+{
+  $addToSet: {
+    fields: {
+      $each: [ item1, item2 ]
+    }
+  }
+}
+
+```

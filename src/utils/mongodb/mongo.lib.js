@@ -1245,11 +1245,13 @@ const ImageSchema = new Schema({
     }],
     chunk_size: {
       type: Number,
-      min: 1
+      min: 1,
+      default: 1
     },
     size: {
       type: Number,
-      min: 1
+      min: 1,
+      default: 1
     },
     mime: {
       type: String,

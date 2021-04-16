@@ -34,10 +34,10 @@ const Params = {
       }
     }
 
-    function abandonFn(callback, result) {
+    function abandonFn(callback, result, getData=true) {
       if(isAbandon) {
-        if(result.done) return false
-        callback(result.data)
+        if(!result || !result.done || result.data === undefined) return false
+        callback(getData ? result.data : result)
       }else {
         callback(result)
       }
@@ -75,22 +75,26 @@ const Params = {
           Validator[method](...(params ? [ result, ...params.split(',').map(p => p.trim()) ] : [result])) : 
           result
         })
-        const _result = realSan.every(san => {
+        const _result = realSan.every((san, index) => {
           const _result = san(result)
           return abandonFn((data) => {
             result = data
-          }, _result)
+          }, _result, index != realSan.length - 1)
         })
-        if(!_result) result = {
-          done: false,
-          data: null
+        if(!_result) {
+          result = undefined 
         }
       }catch(err) {
-        if(_default) result = _default
+        if(_default !== undefined) result = isAbandon ? {
+          done: true,
+          data: _default
+        } : _default
       }finally {
-        abandonFn(pushFn.bind(null, acc, name), result)
+        const realResult = ((!!result && typeof result === 'object' && result.done !== undefined && result.data !== undefined) || !isAbandon) ? result : { done: true, data: result }
+        abandonFn((data) => {
+          pushFn(acc, name, data)
+        }, realResult, true)
       }
-
       return acc
     }, returnData)
   },

@@ -1,7 +1,7 @@
 require('module-alias/register')
-const { UserModel, ImageModel } = require('@src/utils')
+const { UserModel, ImageModel, MEDIA_ORIGIN_TYPE, MEDIA_AUTH, MEDIA_STATUS } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateImage, MEDIA_ORIGIN_TYPE, MEDIA_AUTH, MEDIA_STATUS } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateImage } = require('@test/utils')
 
 const COMMON_API = '/api/manage/media'
 
@@ -22,7 +22,11 @@ function responseExpect(res, validate=[]) {
     commonValidate.string(item.origin_type, (target) => {
       return !!MEDIA_ORIGIN_TYPE[target]
     })
-    expect(item.origin).to.be.a('object').and.that.include.all.keys('_id', 'name')
+    expect(item.origin).to.be.a('object')
+
+    const { _id, name } = item.origin
+    if(!!_id) commonValidate.objectId(_id)
+    if(!!name) commonValidate.string(name)
     commonValidate.string(item.auth, (target) => {
       return !!MEDIA_AUTH[target]
     })
@@ -51,12 +55,17 @@ describe(`${COMMON_API} test`, () => {
   let selfToken
   let imageId
   let getToken
+  const imageSize = 1024
 
   before(function(done) {
 
     const { model } = mockCreateImage({
       src: COMMON_API,
-      name: COMMON_API
+      name: COMMON_API,
+      auth: MEDIA_AUTH.PUBLIC,
+      info: {
+        size: imageSize
+      }
     })
 
     model.save()
@@ -84,10 +93,16 @@ describe(`${COMMON_API} test`, () => {
       userInfo = user
       anotherUserId = other._id
       selfToken = getToken(userInfo._id)
+      return ImageModel.updateOne({
+        origin: userInfo._id
+      })
+    })
+    .then(_ => {
       done()
     })
     .catch(err => {
       console.log('oops: ', err)
+      done(err)
     })
 
   })
@@ -129,7 +144,8 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: actorId.toString(),
+        type: 0,
+        _id: imageId.toString(),
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -159,6 +175,7 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .query({
+        type: 0,
         content: COMMON_API
       })
       .expect(200)
@@ -181,32 +198,19 @@ describe(`${COMMON_API} test`, () => {
     })
 
     it(`get the media success and with origin_type`, function(done) {
-      const { model } = mockCreateActor({
-        name: COMMON_API + 'limit',
-        other: {
-          avatar: imageId
-        },
-        country: districtId,
-        source: userInfo._id
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
       })
-
-      model.save()
-      .then(_ => {
-        return Request
-        .get(COMMON_API)
-        .set({
-          Accept: 'application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .query({
-          currPage: 0,
-          pageSize: 1,
-          all: 1
-        })
-        .expect(200)
-        .expect('Content-Type', /json/)
+      .query({
+        type: 0,
+        origin_type: MEDIA_ORIGIN_TYPE.USER
       })
-      .then(function(res) {
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
         if(err) return done(err)
         const { res: { text } } = res
         let obj
@@ -216,7 +220,7 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length > 1).to.be.true
+          expect(target.list.length > 1).to.be.true
         })
         done()
       })
@@ -224,32 +228,20 @@ describe(`${COMMON_API} test`, () => {
     })
 
     it(`get the media success and with auth`, function(done) {
-      const { model } = mockCreateActor({
-        name: COMMON_API + 'limit',
-        other: {
-          avatar: imageId
-        },
-        country: districtId,
-        source: userInfo._id
-      })
 
-      model.save()
-      .then(_ => {
-        return Request
-        .get(COMMON_API)
-        .set({
-          Accept: 'application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .query({
-          currPage: 0,
-          pageSize: 1,
-          all: 1
-        })
-        .expect(200)
-        .expect('Content-Type', /json/)
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
       })
-      .then(function(res) {
+      .query({
+        type: 0,
+        auth: MEDIA_AUTH.PRIVATE
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
         if(err) return done(err)
         const { res: { text } } = res
         let obj
@@ -259,7 +251,11 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length > 1).to.be.true
+          const allNotEq = target.list.every(item => {
+            const _id = item._id.toString()
+            return _id != imageId.toString()
+          })
+          expect(allNotEq).to.be.true
         })
         done()
       })
@@ -267,32 +263,19 @@ describe(`${COMMON_API} test`, () => {
     })
 
     it(`get the media success and with status`, function(done) {
-      const { model } = mockCreateActor({
-        name: COMMON_API + 'limit',
-        other: {
-          avatar: imageId
-        },
-        country: districtId,
-        source: userInfo._id
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
       })
-
-      model.save()
-      .then(_ => {
-        return Request
-        .get(COMMON_API)
-        .set({
-          Accept: 'application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .query({
-          currPage: 0,
-          pageSize: 1,
-          all: 1
-        })
-        .expect(200)
-        .expect('Content-Type', /json/)
+      .query({
+        type: 0,
+        status: MEDIA_STATUS.ERROR
       })
-      .then(function(res) {
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
         if(err) return done(err)
         const { res: { text } } = res
         let obj
@@ -302,7 +285,11 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length > 1).to.be.true
+          const allNotEq = target.list.every(item => {
+            const _id = item._id.toString()
+            return _id != imageId.toString()
+          })
+          expect(allNotEq).to.be.true
         })
         done()
       })
@@ -310,32 +297,19 @@ describe(`${COMMON_API} test`, () => {
     })
 
     it(`get the media success and with size of number`, function(done) {
-      const { model } = mockCreateActor({
-        name: COMMON_API + 'limit',
-        other: {
-          avatar: imageId
-        },
-        country: districtId,
-        source: userInfo._id
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
       })
-
-      model.save()
-      .then(_ => {
-        return Request
-        .get(COMMON_API)
-        .set({
-          Accept: 'application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .query({
-          currPage: 0,
-          pageSize: 1,
-          all: 1
-        })
-        .expect(200)
-        .expect('Content-Type', /json/)
+      .query({
+        type: 0,
+        size: imageSize
       })
-      .then(function(res) {
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
         if(err) return done(err)
         const { res: { text } } = res
         let obj
@@ -345,7 +319,11 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length > 1).to.be.true
+          const allNotEq = target.list.some(item => {
+            const _id = item._id.toString()
+            return _id == imageId.toString()
+          })
+          expect(allNotEq).to.be.true
         })
         done()
       })
@@ -353,32 +331,19 @@ describe(`${COMMON_API} test`, () => {
     })
 
     it(`get the media success and with size of number,number`, function(done) {
-      const { model } = mockCreateActor({
-        name: COMMON_API + 'limit',
-        other: {
-          avatar: imageId
-        },
-        country: districtId,
-        source: userInfo._id
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
       })
-
-      model.save()
-      .then(_ => {
-        return Request
-        .get(COMMON_API)
-        .set({
-          Accept: 'application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .query({
-          currPage: 0,
-          pageSize: 1,
-          all: 1
-        })
-        .expect(200)
-        .expect('Content-Type', /json/)
+      .query({
+        type: 0,
+        size: `0,${imageSize}`
       })
-      .then(function(res) {
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
         if(err) return done(err)
         const { res: { text } } = res
         let obj
@@ -388,7 +353,11 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length > 1).to.be.true
+          const allNotEq = target.list.some(item => {
+            const _id = item._id.toString()
+            return _id == imageId.toString()
+          })
+          expect(allNotEq).to.be.true
         })
         done()
       })
@@ -396,32 +365,19 @@ describe(`${COMMON_API} test`, () => {
     })
 
     it(`get the media success and with size of number,`, function(done) {
-      const { model } = mockCreateActor({
-        name: COMMON_API + 'limit',
-        other: {
-          avatar: imageId
-        },
-        country: districtId,
-        source: userInfo._id
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
       })
-
-      model.save()
-      .then(_ => {
-        return Request
-        .get(COMMON_API)
-        .set({
-          Accept: 'application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .query({
-          currPage: 0,
-          pageSize: 1,
-          all: 1
-        })
-        .expect(200)
-        .expect('Content-Type', /json/)
+      .query({
+        type: 0,
+        size: `${imageSize},`
       })
-      .then(function(res) {
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
         if(err) return done(err)
         const { res: { text } } = res
         let obj
@@ -431,7 +387,11 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length > 1).to.be.true
+          const allNotEq = target.list.some(item => {
+            const _id = item._id.toString()
+            return _id == imageId.toString()
+          })
+          expect(allNotEq).to.be.true
         })
         done()
       })
@@ -442,12 +402,12 @@ describe(`${COMMON_API} test`, () => {
 
   describe(`put the media success test -> ${COMMON_API}`, function() {
 
-    let name = COMMON_API.slice(21)
+    let status = MEDIA_STATUS.UPLOADING
 
     after(function(done) {
 
       ImageModel.findOne({
-        name
+        "info.status": status
       })
       .select({
         _id: 1
@@ -472,11 +432,11 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: actorId.toString(),
-        name,
-        alias: name,
-        avatar: imageId.toString(),
-        country: districtId.toString()
+        type: 0,
+        _id: imageId.toString(),
+        name: COMMON_API,
+        auth: MEDIA_AUTH.PUBLIC,
+        status
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -496,29 +456,32 @@ describe(`${COMMON_API} test`, () => {
 
     before(function(done) {
 
-      const { model: actorA } = mockCreateImage({
-        name: COMMON_API.slice(22),
-        source: anotherUserId,
-        country: districtId,
+      const { model: imageA } = mockCreateImage({
+        src: COMMON_API + 'delete-s-1',
+        name: COMMON_API,
+        auth: MEDIA_AUTH.PUBLIC,
+        info: {
+          size: imageSize
+        },
+        origin: userInfo._id
       })
-      const { model: actorB } = mockCreateImage({
-        name: COMMON_API.slice(23),
-        source: anotherUserId,
-        country: districtId,
+      const { model: imageB } = mockCreateImage({
+        src: COMMON_API + 'delete-s-2',
+        name: COMMON_API,
+        auth: MEDIA_AUTH.PUBLIC,
+        info: {
+          size: imageSize
+        },
+        origin: userInfo._id
       })
 
       Promise.all([
-        actorA.save(),
-        actorB.save(),
-        UserModel.updateOne({
-          _id: anotherUserId
-        }, {
-          $set: { roles: [ 'CUSTOMER' ] }
-        })
+        imageA.save(),
+        imageB.save()
       ])
-      .then(([actorA, actorB]) => {
-        actorIdA = actorA._id
-        actorIdB = actorB._id
+      .then(([imageA, imageB]) => {
+        imageIdA = imageA._id
+        imageIdB = imageB._id
         done()
       })
       .catch(err => {
@@ -529,8 +492,8 @@ describe(`${COMMON_API} test`, () => {
 
     after(function(done) {
 
-      ActorModel.find({
-        _id: { $in: [actorIdA, actorIdB] }
+      ImageModel.find({
+        _id: { $in: [imageIdA, imageIdB] }
       })
       .select({
         _id: 1
@@ -542,7 +505,7 @@ describe(`${COMMON_API} test`, () => {
       })
       .catch(async (err) => {
         console.log('oops: ', err)
-        await ActorModel.deleteMany({ _id: { $in: [ actorIdA, actorIdB ] } })
+        await ImageModel.deleteMany({ _id: { $in: [ imageIdA, imageIdB ] } })
         done(err)
       })
 
@@ -557,7 +520,8 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: `${actorIdA.toString()},${actorIdB.toString()}`
+        type: 0,
+        _id: `${imageIdA.toString()},${imageIdB.toString()}`
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -597,6 +561,9 @@ describe(`${COMMON_API} test`, () => {
         Accept: 'application/json',
         Authorization: `Basic ${selfToken}`
       })
+      .query({
+        type: 3
+      })
       .expect(400)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
@@ -610,7 +577,33 @@ describe(`${COMMON_API} test`, () => {
 
   describe(`put the media fail test -> ${COMMON_API}`, function() {
 
-    let name = COMMON_API.slice(24)
+    after(function(done) {
+      ImageModel.findOne({
+        $or: [
+          {
+            name: ''
+          },
+          {
+            auth: ''
+          },
+          {
+            "info.status": ''
+          }
+        ]
+      })
+      .select({
+        _id: 1
+      })
+      .exec()
+      .then(data => {
+        expect(!!data).to.be.false 
+        done()
+      })
+      .catch(err => {
+        console.log('oops: ', err)
+        done(err)
+      })
+    })
 
     it(`put the media list fail because lack of the type params`, function(done) {
 
@@ -619,6 +612,12 @@ describe(`${COMMON_API} test`, () => {
       .set({
         Accept: 'application/json',
         Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        _id: imageId.toString(),
+        name: COMMON_API,
+        auth: MEDIA_AUTH.PUBLIC,
+        status: MEDIA_STATUS.COMPLETE
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -636,6 +635,13 @@ describe(`${COMMON_API} test`, () => {
       .set({
         Accept: 'application/json',
         Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        type: 3,
+        _id: imageId.toString(),
+        name: COMMON_API,
+        auth: MEDIA_AUTH.PUBLIC,
+        status: MEDIA_STATUS.COMPLETE
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -655,13 +661,13 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: actorId.toString(),
-        name: name.repeat(5),
-        alias: name,
-        avatar: imageId.toString(),
-        country: districtId.toString()
+        type: 0,
+        _id: imageId.toString(),
+        name: '',
+        auth: MEDIA_AUTH.PUBLIC,
+        status: MEDIA_STATUS.COMPLETE
       })
-      .expect(400)
+      .expect(200)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if(err) return done(err)
@@ -679,13 +685,13 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: actorId.toString(),
-        name: name,
-        alias: name,
-        avatar: imageId.toString(),
-        country: districtId.toString().slice(1),
+        type: 0,
+        _id: imageId.toString(),
+        name: COMMON_API,
+        auth: '',
+        status: MEDIA_STATUS.COMPLETE
       })
-      .expect(400)
+      .expect(200)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if(err) return done(err)
@@ -703,13 +709,13 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: actorId.toString(),
-        name: name,
-        alias: name,
-        avatar: imageId.toString(),
-        country: districtId.toString().slice(1),
+        type: 0,
+        _id: imageId.toString(),
+        name: COMMON_API,
+        auth: MEDIA_AUTH.PUBLIC,
+        status: ''
       })
-      .expect(400)
+      .expect(200)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if(err) return done(err)
@@ -727,12 +733,12 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: actorId.toString(),
-        alias: name,
-        avatar: imageId.toString(),
-        country: districtId.toString()
+        type: 0,
+        _id: imageId.toString(),
+        auth: MEDIA_AUTH.PUBLIC,
+        status: MEDIA_STATUS.COMPLETE
       })
-      .expect(400)
+      .expect(200)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if(err) return done(err)
@@ -750,12 +756,12 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: actorId.toString(),
-        alias: name,
-        avatar: imageId.toString(),
-        country: districtId.toString()
+        type: 0,
+        _id: imageId.toString(),
+        name: COMMON_API,
+        status: MEDIA_STATUS.COMPLETE
       })
-      .expect(400)
+      .expect(200)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if(err) return done(err)
@@ -773,12 +779,12 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: actorId.toString(),
-        alias: name,
-        avatar: imageId.toString(),
-        country: districtId.toString()
+        type: 0,
+        _id: imageId.toString(),
+        name: COMMON_API,
+        auth: MEDIA_AUTH.PUBLIC,
       })
-      .expect(400)
+      .expect(200)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if(err) return done(err)
@@ -796,11 +802,11 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        name: name,
-        alias: name,
-        avatar: imageId.toString(),
-        _id: actorId.toString().slice(1),
-        country: districtId.toString()
+        type: 0,
+        _id: '',
+        name: COMMON_API,
+        auth: MEDIA_AUTH.PUBLIC,
+        status: MEDIA_STATUS.COMPLETE
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -820,12 +826,12 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        name: name,
-        alias: name,
-        avatar: imageId.toString(),
-        country: districtId.toString()
+        type: 0,
+        name: COMMON_API,
+        auth: MEDIA_AUTH.PUBLIC,
+        status: MEDIA_STATUS.COMPLETE
       })
-      .expect(404)
+      .expect(400)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if(err) return done(err)
@@ -855,11 +861,11 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: actorId.toString(),
-        name: name,
-        alias: name,
-        avatar: imageId.toString(),
-        country: districtId.toString()
+        type: 0,
+        _id: imageId.toString(),
+        name: COMMON_API,
+        auth: MEDIA_AUTH.PUBLIC,
+        status: MEDIA_STATUS.COMPLETE
       })
       .expect(403)
       .expect('Content-Type', /json/)
@@ -882,13 +888,17 @@ describe(`${COMMON_API} test`, () => {
 
   describe(`delete the media fail test -> ${COMMON_API}`, function() {
 
-    let actorId
+    let imageId
 
     before(function(done) {
-      const { model } = mockCreateActor({
+      const { model } = mockCreateImage({
+        src: COMMON_API,
         name: COMMON_API,
-        source: anotherUserId,
-        country: districtId,
+        auth: MEDIA_AUTH.PUBLIC,
+        info: {
+          size: imageSize
+        },
+        origin: anotherUserId
       })
 
       Promise.all([
@@ -900,7 +910,7 @@ describe(`${COMMON_API} test`, () => {
         model.save()
       ])
       .then(([, data]) => {
-        actorId = data._id
+        imageId = data._id
         done()
       })
       .catch(err => {
@@ -916,6 +926,9 @@ describe(`${COMMON_API} test`, () => {
       .set({
         Accept: 'application/json',
         Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        _id: imageId.toString()
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -933,6 +946,10 @@ describe(`${COMMON_API} test`, () => {
       .set({
         Accept: 'application/json',
         Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        _id: imageId.toString(),
+        type: 3
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -952,7 +969,8 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: actorId.toString().slice(1),
+        type: 0,
+        _id: imageId.toString().slice(1),
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -971,7 +989,10 @@ describe(`${COMMON_API} test`, () => {
         Accept: 'application/json',
         Authorization: `Basic ${selfToken}`
       })
-      .expect(404)
+      .query({
+        type: 0
+      })
+      .expect(400)
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if(err) return done(err)
@@ -1001,7 +1022,8 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: actorId.toString(),
+        type: 0,
+        _id: imageId.toString(),
       })
       .expect(403)
       .expect('Content-Type', /json/)
