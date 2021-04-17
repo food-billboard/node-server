@@ -28,7 +28,8 @@ const headRequestMediaDeal = {
   
     const { md5, auth, size, mime, name, chunk } = metadata
     const { roles, _id } = user
-    const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.SYSTEM : MEDIA_ORIGIN_TYPE.USER
+    const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
+
   
     const defaultModel = {
       name: name || md5,
@@ -139,7 +140,7 @@ const headRequestMediaDeal = {
   }) => {
     const { md5, auth, size, mime, name, chunk } = metadata
     const { roles, _id } = user
-    const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.SYSTEM : MEDIA_ORIGIN_TYPE.USER
+    const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
 
     const defaultModel = {
       name: name || md5,
@@ -234,7 +235,7 @@ const headRequestMediaDeal = {
   }) => {
     const { md5, auth, size, mime, name, chunk } = metadata
     const { roles, _id } = user
-    const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.SYSTEM : MEDIA_ORIGIN_TYPE.USER
+    const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
   
     const defaultModel = {
       name: name || md5,

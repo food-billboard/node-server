@@ -3794,6 +3794,10 @@
                         "type": "string",
                         "description": "名称"
                       },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
                       "author": {
                         "type": "object",
                         "properties": {
@@ -5467,6 +5471,10 @@
                       "name": {
                         "type": "string",
                         "description": "名称"
+                      },
+                      "white_list_count": {
+                        "type": "integer",
+                        "description": "白名单数量"
                       },
                       "createdAt": {
                         "type": "string",

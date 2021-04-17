@@ -1213,7 +1213,7 @@ const ImageSchema = new Schema({
   origin_type: {
     required: true,
     type: String,
-    enum: [ 'USER', 'SYSTEM' ],
+    enum: Object.keys(MEDIA_ORIGIN_TYPE),
     uppercase: true,
     get: function(v) { return v ? v.toLowerCase() : v }
   },
@@ -1281,7 +1281,7 @@ const OtherMediaSchema = new Schema({
   origin_type: {
     required: true,
     type: String,
-    enum: [ 'SYSTEM', 'USER' ],
+    enum: Object.keys(MEDIA_ORIGIN_TYPE),
     uppercase: true,
     get: function(v) { return v ? v.toLowerCase() : v }
   },

@@ -215,6 +215,13 @@ router
         name: 1,
         origin_type: 1,
         auth: 1,
+        white_list_count: {
+          $size: {
+            $ifNull: [
+              "$white_list", []
+            ]
+          }
+        },
         info: {
           md5: "$info.md5",
           status: "$info.status",

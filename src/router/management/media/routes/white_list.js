@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
 const { MEDIA_MAP } = require('../utils')
-const { dealErr, responseDataDeal, Params } = require('@src/utils')
+const { dealErr, responseDataDeal, Params, notFound } = require('@src/utils')
 
 const router = new Router()
 
@@ -23,7 +23,7 @@ router
   const { type } = ctx.query
   const model = MEDIA_MAP[type]
 
-  const { currPage, pageSize, _id } = Params.sanitizers(ctx.query, {
+  const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
     sanitizers: [
@@ -44,7 +44,7 @@ router
 
   const aggregate = [
     {
-      match: {
+      $match: {
         _id
       }
     },
@@ -55,14 +55,31 @@ router
       $limit: pageSize
     },
     {
+      $lookup: {
+        from: 'users',
+        localField: 'white_list',
+        foreignField: '_id',
+        as: 'white_list'
+      }
+    },
+    {
       $project: {
-        createdAt: 1,
-        updatedAt: 1,
-        username: 1,
-        mobile: 1,
-        email: 1,
-        status: 1,
-        roles: 1,
+        data: {
+          $map: {
+            input: "$white_list",
+            as: 'white_list',
+            in: {
+              createdAt: "$$white_list.createdAt",
+              updatedAt: "$$white_list.updatedAt",
+              username: "$$white_list.username",
+              mobile: "$$white_list.mobile",
+              email: "$$white_list.email",
+              status: "$$white_list.status",
+              roles: "$$white_list.roles",
+              _id: "$$white_list._id",
+            }
+          }
+        }
       }
     }
   ]
@@ -70,7 +87,7 @@ router
   const data = await Promise.all([
     model.aggregate([
       {
-        match: {
+        $match: {
           _id
         }
       },
@@ -86,9 +103,10 @@ router
     model.aggregate(aggregate)
   ])
   .then(([total, data]) => {
+    const list = Array.isArray(data) && data.length == 1 ? data[0].data : []
     return {
       data: {
-        list: data,
+        list,
         total: !!total.length ? total[0].total || 0 : 0,
       }
     }
@@ -124,7 +142,7 @@ router
   const { type } = ctx.query
   const model = MEDIA_MAP[type]
 
-  const { _id, users } = Params.sanitizers(ctx.query, {
+  const [ _id, users ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
@@ -150,6 +168,7 @@ router
   })
   .exec()
   .then(data => !!data && data._doc)
+  .then(notFound)
   .then(data => ({ data: data._id }))
   .catch(dealErr(ctx))
 

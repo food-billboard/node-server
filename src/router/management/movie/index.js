@@ -283,6 +283,7 @@ router
           total_rate: 1,
           source_type: 1,
           status: 1,
+          description: "$info.description",
           comment_count: {
             $size: {
               $ifNull: [
