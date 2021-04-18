@@ -3,16 +3,16 @@ networks:
   nginx_bridge:
     driver: bridge
 services:
-  node-media-server:
-    image: illuspas/node-media-server:latest
-    container_name: ffmpeg_video 
-    restart: always
-    ports:
-      - 1935:1935
-      - 8000:8000
-    volumes: 
-      - ./static:/usr/src/app/media
-      - ./bin/media/app.js:/usr/src/app/app.js
+  # node-media-server:
+  #   image: illuspas/node-media-server:latest
+  #   container_name: ffmpeg_video 
+  #   restart: always
+  #   ports:
+  #     - 1935:1935
+  #     - 8000:8000
+  #   volumes: 
+  #     - ./static:/usr/src/app/media
+  #     - ./bin/media/app.js:/usr/src/app/app.js
   # ffmpeg:
   #   image: jrottenberg/ffmpeg:4.1
   #   container_name: ffmpeg_video
