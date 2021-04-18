@@ -13,17 +13,21 @@ router.get('/', async(ctx) => {
     ]
   })
 
-  const data = await MovieModel.find({})
-  .select({
-    name: 1,
-  })
-  .sort({
-    hot: -1
-  })
-  .limit(count)
-  .exec()
-  .then(data => !!data && { data })
-  .then(notFound)
+  const data = await MovieModel.aggregate([
+    {
+      $sort: {
+        hot: -1
+      }
+    },
+    {
+      $limit: count
+    },
+    {
+      $project: {
+        name: 1,
+      }
+    }
+  ])
   .catch(dealErr(ctx))
 
   responseDataDeal({

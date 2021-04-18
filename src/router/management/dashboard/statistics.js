@@ -187,25 +187,6 @@ router
     }, [])
 
     return {
-
-      // {
-      //   data: {
-      //     data: [
-      //       {
-      //         day: '',
-      //         count: ''
-      //       }
-      //     ],
-      //     rank: [
-      //       {
-      //         name,
-      //         _id,
-      //         count,
-      //       }
-      //     ]
-      //   }
-      // }
-
       data: {
         data: templateList.map(item => {
           const { date, count } = item
@@ -274,14 +255,6 @@ router
     }, [])
 
     return {
-
-      // [
-      //   {
-      //     day
-      //     count
-      //   }
-      // ]
-
       data: templateList.map(item => {
         const { date, count } = item
         const [target={}] = data.filter(item => item.day == date)

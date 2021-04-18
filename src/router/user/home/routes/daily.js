@@ -14,27 +14,39 @@ router
     ]
   })
 
-  const data = await MovieModel.find({})
-  .select({
-    name: 1, 
-    poster: 1,
-  })
-  .sort({
-    createdAt: -1
-  })
-  .limit(count)
-  .exec()
-  .then(data => !!data && data)
-  .then(notFound)
+  const data = await MovieModel.aggregate([
+    {
+      $sort: {
+        createdAt: -1
+      }
+    },
+    {
+      $limit: count
+    },
+    {
+      $lookup: {
+        from: 'images',
+        localField: 'poster',
+        foreignField: '_id',
+        as: 'poster'
+      }
+    },
+    {
+      $unwind: {
+        path: "$poster",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
+      $project: {
+        name: 1,
+        poster: "$poster.src"
+      }
+    }
+  ])
   .then(data => {
     return {
-      data: data.map(d => {
-        const { _doc: { poster, ...nextD } } = d
-        return {
-          ...nextD,
-          poster: poster ? poster.src : null
-        }
-      })
+      data
     }
   })
   .catch(dealErr(ctx))
