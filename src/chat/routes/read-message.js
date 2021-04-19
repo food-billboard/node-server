@@ -4,7 +4,9 @@ const { Types: { ObjectId } } = require('mongoose')
 const readMessage = socket => async (data) => {
   const check = Params.bodyUnStatus(data, {
     name: '_id',
-    type: [ 'isMongoId' ]
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   })
   const [, token] = verifySocketIoToken(data.token)
   if(check || !data) {

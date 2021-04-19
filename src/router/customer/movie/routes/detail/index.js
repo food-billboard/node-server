@@ -24,7 +24,9 @@ router
 .get('/', async (ctx) => {
   const check = Params.query(ctx, {
     name: "_id",
-    type: [ 'isMongoId' ]
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   })
   if(check) return
 

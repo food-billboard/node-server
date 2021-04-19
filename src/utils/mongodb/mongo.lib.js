@@ -659,7 +659,8 @@ const MovieSchema = new Schema({
   },
   video: {
     type: ObjectId,
-    ref: 'video'
+    ref: 'video',
+    required: true
   },
   images: [{
     type: ObjectId,

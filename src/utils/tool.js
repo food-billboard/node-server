@@ -205,6 +205,10 @@ const connectTry = (method, errMsg, times=5, interval=6000) => {
   }
 }
 
+const avatarGet = (value, field='src') => {
+  return value ? value[field] : null
+}
+
 module.exports = {
   isType,
   isEmpty,
@@ -220,5 +224,6 @@ module.exports = {
   checkAndCreateDir,
   rmdir,
   getIp,
-  connectTry
+  connectTry,
+  avatarGet
 }

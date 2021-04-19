@@ -20,48 +20,69 @@ const handle = {
         ) return Reflect.get(target, prop)
       //为空或过时
       const [ movieData, specialData ] = await Promise.all([
-        MovieModel.find({})
-        .sort({
-          createdAt: -1
-        })
-        .select({
-          poster: 1 
-        })
-        .limit(3)
-        .exec()
-        .then(data => !!data && data),
+        MovieModel.aggregate([
+          {
+            $sort: {
+              createdAt: -1
+            },
+          },
+          {
+            $lookup: {
+              from: 'images',
+              localField: 'poster',
+              foreignField: '_id',
+              as: 'poster'
+            },
+          },
+          {
+            $unwind: "$poster"
+          },
+          {
+            $limit: 3
+          },
+          {
+            $project: {
+              poster: "$poster.src",
+              _id: 1
+            }
+          }
+        ]),
 
-        SpecialModel.find()
-        .sort({
-          createdAt: -1
-        })
-        .select({
-          poster: 1 
-        })
-        .limit(3)
-        .exec()
-        .then(data => !!data && data),
+        SpecialModel.aggregate([
+          {
+            $sort: {
+              createdAt: -1
+            },
+          },
+          {
+            $lookup: {
+              from: 'images',
+              localField: 'poster',
+              foreignField: '_id',
+              as: 'poster'
+            },
+          },
+          {
+            $unwind: "$poster"
+          },
+          {
+            $limit: 3
+          },
+          {
+            $project: {
+              poster: "$poster.src",
+              _id: 1
+            }
+          }
+        ]),
       ])
       .catch(err => {
         return false
       })
       const result = [ 
-        ...(movieData ? movieData.map(m => {
-          const { _doc: { poster, ...nextM } } = m
-          return {
-            ...nextM,
-            type: "MOVIE",
-            poster: poster? poster.src : null
-          }
-        }) : [] ), 
-        ...(specialData ? specialData.map(s => {
-          const { _doc: { poster, ...nextS } } = s
-          return {
-            ...nextS,
-            type: "SPECIAL",
-            poster: poster? poster.src : null
-          }
-        }) : []) ]
+        ...(movieData || [] ).map(item => ({ ...item, type: "MOVIE" })), 
+        ...(specialData || []).map(item => ({ type: "SPECIAL", ...item })) 
+      ]
       Reflect.set(target, 'data', result)
       Reflect.set(target, 'expire', Date.now())
       Reflect.set(target, 'max-age', 1000 * 60 * 60 * 24)

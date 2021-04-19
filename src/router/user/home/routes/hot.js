@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { SearchModel, dealErr, notFound, Params, responseDataDeal, MovieModel } = require('@src/utils')
+const { dealErr, Params, responseDataDeal, MovieModel } = require('@src/utils')
 
 const router = new Router()
 
@@ -28,6 +28,7 @@ router.get('/', async(ctx) => {
       }
     }
   ])
+  .then(data => ({ data }))
   .catch(dealErr(ctx))
 
   responseDataDeal({

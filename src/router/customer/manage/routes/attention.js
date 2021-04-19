@@ -17,7 +17,9 @@ router
 
   const check = Params[_method](ctx, {
     name: '_id',
-    type: ['isMongoId']
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   })
   if(check) return
 

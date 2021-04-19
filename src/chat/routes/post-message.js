@@ -18,7 +18,9 @@ const sendMessage = socket => async (data) => {
     ]
   }, {
     name: '_id',
-    type: [ 'isMongoId' ]
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   })
 
   const [, token] = verifyTokenToData(data.token)

@@ -7,7 +7,9 @@ const router = new Router()
 router.put('/', async (ctx) => {
   const check = Params.body(ctx, {
     name: '_id',
-    type: [ 'isMongoId' ]
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   }, {
     name: 'value',
     validator: [

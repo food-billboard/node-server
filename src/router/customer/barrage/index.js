@@ -28,7 +28,9 @@ router
   //参数验证
   const check = Params.query(ctx, {
     name: '_id',
-    type: ['isMongoId']
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   })
   if(check) return
 
@@ -103,7 +105,9 @@ router
   //参数验证
   const check = Params.body(ctx, {
     name: '_id',
-    type: ['isMongoId']
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   },
   {
     name: 'content',
@@ -170,7 +174,9 @@ router
   //参数验证
   const check = Params.body(ctx, {
     name: '_id',
-    type: ['isMongoId']
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   })
   if(check) return
 
@@ -220,7 +226,9 @@ router
   //参数验证
   const check = Params.query(ctx, {
     name: '_id',
-    type: ['isMongoId']
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   })
   if(check) return
 

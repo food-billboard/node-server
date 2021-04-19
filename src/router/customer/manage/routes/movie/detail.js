@@ -8,7 +8,9 @@ router
 .use(async(ctx, next) => {
   const check = Params.query(ctx, {
     name: '_id',
-    type: ['isMongoId']
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   })
   if(check) return
 

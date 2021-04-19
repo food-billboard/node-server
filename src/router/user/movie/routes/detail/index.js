@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Simple = require('./routes/simple')
-const { MovieModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const { MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -10,7 +10,9 @@ router
 .get('/', async (ctx) => {
   const check = Params.query(ctx, {
     name: "_id",
-    type: ['isMongoId']
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   })
   if(check) return
 
@@ -29,11 +31,21 @@ router
     $inc: { glance: 1 }
   })
   .select({
-    source_type: 0,
-    stauts: 0,
-    related_to: 0,
-    barrage: 0,
-    __v: 0
+    name: 1,
+    info: 1,
+    video: 1,
+    images: 1,
+    poster: 1,
+    tag: 1,
+    comment: 1,
+    author: 1,
+    glance: 1,
+    author_description: 1,
+    author_rate: 1,
+    hot: 1,
+    rate_person: 1,
+    total_rate: 1,
+    same_film: 1,
   })
   .populate({
     path: 'comment',
@@ -109,9 +121,8 @@ router
   .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
-    const { ...nextData } = data
     let newData = {  
-      ...nextData,
+      ...data,
       store: false
     }
     const {
@@ -122,7 +133,7 @@ router
       total_rate,
       rate_person,
       same_film,
-      video: { _doc: { updatedAt, ...nextVideo } }={},
+      video,
       ...nextNewData
     } = newData
     const {
@@ -143,12 +154,12 @@ router
         info: {
           ...nextInfo,
           actor: actor.map(item => {
-            const { other: { avatar, ...nextOther }, ...nextImte } = item
+            const { other: { avatar, ...nextOther }, ...nextItem } = item
             return {
-              ...nextInfo,
+              ...nextItem,
               other: {
                 ...nextOther,
-                avatar: !!avatar ? avatar.src : null
+                avatar: avatarGet(avatar)
               }
             }
           }),
@@ -157,7 +168,7 @@ router
           classify,
           language
         },
-        video: nextVideo,
+        video: avatarGet(avatarGet(video, '_doc'), 'src'),
         comment: comment.map(c => {
           const { _doc: { user_info, ...nextC } } = c
           const { _doc: { avatar, ...nextUserInfo } } = user_info
@@ -165,7 +176,7 @@ router
             ...nextC,
             user_info: {
               ...nextUserInfo,
-              avatar: avatar ? avatar.src : null
+              avatar: avatarGet(avatar)
             }
           }
         }),
@@ -174,13 +185,12 @@ router
         same_film: same_film.map(s => {
           const { _doc: { film, ...nextS } } = s
           return {
-            name: film ? film.name : null,
+            name: avatarGet(film, 'name'),
             ...nextS
           }
         })
       }
     }
-
   })
   .catch(dealErr(ctx))
 

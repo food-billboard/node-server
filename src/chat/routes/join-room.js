@@ -220,7 +220,9 @@ const leaveRoom = socket => async (data) => {
   const [, token] = verifySocketIoToken(data.token)
   const check = Params.bodyUnStatsu(data, {
     name: '_id',
-    type: [ 'isMongoId' ]
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   })
   if(check) {
     socket.emit("leave", JSON.stringify({

@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { ClassifyModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { ClassifyModel, dealErr, Params, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
@@ -13,26 +13,31 @@ router.get('/', async (ctx) => {
     ]
 	})
 
-  const data = await ClassifyModel.find({})
-  .select({
-    name: 1,
-		poster: 1
-  })
-  .limit(count)
-  .exec()
-  .then(data => !!data && data)
-  .then(notFound)
-  .then(data => {
-    return {
-      data: data.map(d => {
-        const { _doc: { poster, ...nextD } } = d
-        return {
-          ...nextD,
-          poster: poster ? poster.src : null
-        }
-      })
+  const data = await ClassifyModel.aggregate([
+    {
+      $limit: count
+    },
+    {
+      $lookup: {
+        from: 'images',
+        as: 'icon',
+        foreignField: "_id",
+        localField: "icon"
+      }
+    },
+    {
+      $unwind: "$icon"
+    },
+    {
+      $project: {
+        _id: 1,
+        icon: "$icon.src",
+        name: 1,
+        updatedAt: 1
+      }
     }
-  })
+  ])
+  .then(data => ({ data }))
   .catch(dealErr(ctx))
 
   responseDataDeal({

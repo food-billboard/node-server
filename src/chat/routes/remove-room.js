@@ -5,7 +5,9 @@ const removieRoom = socket => async(data) => {
   const [, token] = verifySocketIoToken(data.token)
   const check = Params.bodyUnStatus(data, {
     name: '_id',
-    type: [ 'isMongoId' ]
+    validator: [
+			data => ObjectId.isValid(data)
+		]
   })
   if(check && !token) {
     socket.emit("delete", JSON.stringify({

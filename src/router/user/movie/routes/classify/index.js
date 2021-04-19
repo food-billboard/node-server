@@ -10,11 +10,11 @@ router
 
 	const check = Params.query(ctx, {
     name: "_id",
-    type: ['isMongoId']
+		validator: [
+			data => ObjectId.isValid(data)
+		]
 	})
 	if(check) return
-
-	// const { sort={} } = ctx.query
 
 	//参数处理
 	const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {

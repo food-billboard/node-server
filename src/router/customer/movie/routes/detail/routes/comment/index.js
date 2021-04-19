@@ -24,7 +24,9 @@ router
   let validate = [
     {
       name: '_id',
-      type: [ 'isMongoId' ]
+      validator: [
+        data => ObjectId.isValid(data)
+      ]
     }
   ]
 
