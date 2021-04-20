@@ -1,6 +1,7 @@
 const Router = require('@koa/router')
+const { pick, merge } = require('lodash')
 const SpecDropList = require('./sepcDropList')
-const { ClassifyModel, MovieModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { ClassifyModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -55,7 +56,9 @@ router
 			"info.classify": 1,
 			"info.screen_time": 1,
 			hot: 1,
-			// author_rate: 1,
+			author: 1,
+			author_rate: 1,
+			author_description: 1
 		})
 		.skip((currPage >= 0 && pageSize >= 0) ? pageSize * currPage : 0)
 		.limit(pageSize >= 0 ? pageSize: 10)
@@ -66,6 +69,19 @@ router
 				_id: 0
 			}
 		})
+		.populate({
+			path: 'author',
+			select: {
+				username: 1,
+				avatar: 1
+			},
+			populate: {
+				path: 'avatar',
+				select: {
+					src: 1
+				}
+			}
+		})
 		.exec()
 	])
 	.then(([_, data]) => !!data && data)
@@ -73,13 +89,16 @@ router
 	.then(data => {
 		return {
 			data: data.map(item => {
-				const { _doc: { poster: { src }, info: { screen_time, classify }, ...nextM } } = item
-					return {
-						...nextM,
-						poster: src,
-						publish_time: screen_time,
-						classify,
-					}
+				const { _doc: { poster, info: { screen_time, classify }, author, author_rate, ...nextM } } = item
+				const { avatar, ...nextAuthor } = pick(author, ['username', '_id', 'avatar'])
+				return {
+					...nextM,
+					rate: author_rate,
+					author: merge({}, nextAuthor, { avatar: avatarGet(avatar) }),
+					poster: avatarGet(poster),
+					publish_time: screen_time,
+					classify: classify.map(item => pick(item, ['name'])),
+				}
 			})
 		}
 	})

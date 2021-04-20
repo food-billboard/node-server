@@ -1,4 +1,5 @@
 const Router = require('@koa/router')
+const { pick, merge } = require('lodash')
 const Comment = require('./routes/comment')
 const Simple = require('./routes/simple')
 const { MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
@@ -71,7 +72,7 @@ router
     path: 'author',
     select: {
       username: 1,
-      _id: 0
+      _id: 1
     }
   })
   .populate({
@@ -87,7 +88,7 @@ router
       name: 1,
       "other.avatar": 1,
       _id: 0
-    }
+    },
   })
   .populate({
     path: 'info.director',
@@ -134,6 +135,7 @@ router
       rate_person,
       same_film,
       video,
+      author,
       ...nextNewData
     } = newData
     const {
@@ -150,23 +152,20 @@ router
     return {
       data: {
         ...nextNewData,
+        author: pick(author, ['username', '_id']),
         rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
         info: {
           ...nextInfo,
           actor: actor.map(item => {
-            const { other: { avatar, ...nextOther }, ...nextItem } = item
-            return {
-              ...nextItem,
-              other: {
-                ...nextOther,
-                avatar: avatarGet(avatar)
-              }
-            }
+            const { avatar } = pick(item.other, ['avatar']) || {}
+            return merge({}, pick(item, ['name', 'updatedAt']), {
+              avatar: avatarGet(avatar)
+            })
           }),
-          director,
-          district,
-          classify,
-          language
+          director: director.map(item => pick(item, ['name'])),
+          district: district.map(item => pick(item, ['name'])),
+          classify: classify.map(item => pick(item, ['name'])),
+          language: language.map(item => pick(item, ['name'])),
         },
         video: avatarGet(avatarGet(video, '_doc'), 'src'),
         comment: comment.map(c => {
@@ -181,7 +180,7 @@ router
           }
         }),
         images: images.map(i => i && i.src),
-        poster: poster ? poster.src : null,
+        poster: avatarGet(poster),
         same_film: same_film.map(s => {
           const { _doc: { film, ...nextS } } = s
           return {

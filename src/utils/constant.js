@@ -1,5 +1,8 @@
 const path = require('path')
 
+const API_DOMAIN = 'http://localhost:4000'
+// const API_DOMAIN = 'http://47.111.229.250'
+
 const EMAIL_AUTH = {
   pass: 'hgldcifqqwmlbajd',
   username: 'G',
@@ -107,5 +110,6 @@ module.exports = {
   MEDIA_STATUS,
   MEDIA_AUTH,
   MEDIA_ORIGIN_TYPE,
-  EXTRACT_KEYWORD_TOP_N
+  EXTRACT_KEYWORD_TOP_N,
+  API_DOMAIN
 }

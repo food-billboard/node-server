@@ -1,4 +1,4 @@
-const { isType } = require('./tool')
+const { isType, formatMediaUrl } = require('./tool')
 const { encoded } = require('./token')
 const { log4Error, log4RequestAndResponse } = require('@src/config/winston')
 const { Types: { ObjectId } } = require('mongoose')
@@ -138,6 +138,22 @@ const filterField = (data, field='updatedAt', compare=null) => {
 
 }
 
+//静态资源路径处理
+const mediaDeal = (data) => {
+  if(Array.isArray(data)) {
+    return data.map(mediaDeal)
+  }else if(isType(data, 'object') && !ObjectId.isValid(data)) {
+    return Object.entries(data).reduce((acc, cur) => {
+      const [ key, value ] = cur
+      acc[key] = mediaDeal(value)
+      return acc 
+    }, {})
+  }else if(typeof data === 'string' && /^\/static\/(image|video|other)\/.+/.test(data)) {
+    return formatMediaUrl(data)
+  }
+  return data 
+}
+
 //响应数据处理
 const responseDataDeal = ({
   ctx,
@@ -211,7 +227,7 @@ const responseDataDeal = ({
 
   log4RequestAndResponse(ctx, response)
 
-  ctx.body = response
+  ctx.body = mediaDeal(response)
 
 }
 

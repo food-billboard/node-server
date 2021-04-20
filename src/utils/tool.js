@@ -3,7 +3,7 @@ const Day = require('dayjs')
 var isoWeek = require('dayjs/plugin/isoWeek')
 const { Types: { ObjectId } } = require('mongoose')
 const fs = require('fs')
-const { DIR_LIST, ROLES_MAP } = require('./constant')
+const { DIR_LIST, ROLES_MAP, API_DOMAIN } = require('./constant')
 
 const fsPromise = fs.promises
 
@@ -209,6 +209,11 @@ const avatarGet = (value, field='src') => {
   return value ? value[field] : null
 }
 
+function formatMediaUrl(url) {
+  if(typeof url !== 'string') return url
+  return url.startsWith('http') ? url : (url.startsWith('/') ? `${API_DOMAIN}${url}` : `${API_DOMAIN}/${url}`)
+}
+
 module.exports = {
   isType,
   isEmpty,
@@ -225,5 +230,6 @@ module.exports = {
   rmdir,
   getIp,
   connectTry,
-  avatarGet
+  avatarGet,
+  formatMediaUrl
 }

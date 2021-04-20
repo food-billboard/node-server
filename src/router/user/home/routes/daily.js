@@ -40,7 +40,8 @@ router
     {
       $project: {
         name: 1,
-        poster: "$poster.src"
+        poster: "$poster.src",
+        _id: 1
       }
     }
   ])
