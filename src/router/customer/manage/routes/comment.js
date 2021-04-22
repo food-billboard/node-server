@@ -4,6 +4,12 @@ const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
+function getSourceContent(contnet) {
+  if(typeof content === 'string') return contnet 
+  const { text } = contnet || {}
+  return text || ''
+}
+
 router.get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
@@ -93,7 +99,7 @@ router.get('/', async (ctx) => {
             source: {
               ...nextSoruce,
               type: source_type,
-              content: name ? name : ( content || null )
+              content: name ? name : getSourceContent(content)
             },
             like,
             user_info: {

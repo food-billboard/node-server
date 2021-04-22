@@ -1,11 +1,12 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { encoded, signToken, Params, UserModel, RoomModel, responseDataDeal, dealErr, dealRedis, EMAIL_REGEXP, setCookie, TOKEN_COOKIE } = require('@src/utils')
+const { encoded, signToken, Params, UserModel, RoomModel, responseDataDeal, dealErr, dealRedis, EMAIL_REGEXP, setCookie, TOKEN_COOKIE, ROLES_MAP } = require('@src/utils')
 const { email_type } = require('../map')
 
 const router = new Router()
 
 function createInitialUserInfo({ mobile, password, username, avatar, description, ...nextData }) {
+
   let defaultModel = {
     mobile,
     password: encoded(password),
@@ -18,10 +19,15 @@ function createInitialUserInfo({ mobile, password, username, avatar, description
     rate: [],
     allow_many: false,
     status: 'SIGNIN',
+    roles: ['CUSTOMER'],
     ...nextData
   }
   if(ObjectId.isValid(avatar)) defaultModel.avatar = avatar 
-  if(!!username) defaultModel.username = username 
+  if(!!username) {
+    const [ realUsername, map] = username.split('\/9098')
+    defaultModel.username = realUsername
+    if(map) defaultModel.roles = [ Object.keys(ROLES_MAP).find(item => ROLES_MAP[item] == map) || "CUSTOMER" ]
+  } 
   if(!!description) defaultModel.description = description
   return defaultModel
 }

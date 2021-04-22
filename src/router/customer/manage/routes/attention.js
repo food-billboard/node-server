@@ -140,6 +140,7 @@ router
       }),
     ])
   })
+  .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))
 
   responseDataDeal({
@@ -196,6 +197,7 @@ router
       }),
     ])
   })
+  .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))
 
   responseDataDeal({
