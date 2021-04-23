@@ -1,5 +1,6 @@
 const Router = require('@koa/router')
-const { SpecialModel, dealErr, notFound, Params, responseDataDeal, verifyTokenToData } = require('@src/utils')
+const { SpecialModel, dealErr, notFound, Params, responseDataDeal, verifyTokenToData, avatarGet } = require('@src/utils')
+const { merge, omit, pick } = require('lodash')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -51,7 +52,8 @@ router
 			hot: 1,
 			// author_rate: 1,
       total_rate: 1,
-      rate_person: 1
+      rate_person: 1,
+      author: 1,
     },
     populate: {
       path: 'info.classify',
@@ -59,6 +61,13 @@ router
         _id: 0,
         name: 1
       }
+    },
+    populate: {
+      path: 'author',
+      select: {
+        username: 1,
+        avatar: 1
+      },
     }
   })
   .exec()
@@ -71,7 +80,7 @@ router
         ...nextData,
         poster: poster ? poster.src : null,
         movie: movie.map(m => {
-          const { _doc: { poster, info: { classify, description, name, screen_time }, total_rate, rate_person, ...nextM } } = m
+          const { _doc: { poster, author, info: { classify, description, name, screen_time }, total_rate, rate_person, ...nextM } } = m
           const rate = total_rate / rate_person
           return {
             ...nextM,
@@ -81,11 +90,16 @@ router
             store: false,
             poster: poster ? poster.src : null,
             publish_time: screen_time,
-            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
+            author: merge({}, omit(author || {}, [ 'avatar' ]), avatarGet(pick(author || {}, ['avatar'])))
           }
         })
       }
     }
+  })
+  .then(data => {
+    console.log(data, 1111111111111)
+    return data 
   })
   .catch(dealErr(ctx))
 

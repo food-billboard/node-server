@@ -4,6 +4,7 @@ const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
 const { EMAIL_REGEXP, MEDIA_ORIGIN_TYPE, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS, COMMENT_SOURCE_TYPE, MEDIA_STATUS, MEDIA_AUTH, NETWORK } = require('../constant')
+const { formatMediaUrl } = require('../tool')
 
 function getMill(time) {
   return Day(time).valueOf()
@@ -1136,7 +1137,8 @@ const VideoSchema = new Schema({
   src: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    get: formatMediaUrl
   },
   poster: {
     type: ObjectId,
@@ -1209,7 +1211,8 @@ const ImageSchema = new Schema({
   src: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    get: formatMediaUrl
   },
   origin_type: {
     required: true,
@@ -1277,7 +1280,8 @@ const OtherMediaSchema = new Schema({
   src: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    get: formatMediaUrl
   },
   origin_type: {
     required: true,
