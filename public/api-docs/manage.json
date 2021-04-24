@@ -964,6 +964,64 @@
             "description": "成功"
           }
         }
+      },
+      "get": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "获取tag列表",
+        "description": "",
+        "operationId": "manage_movie_detail_get_tag",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "tagid",
+            "type": "string"
+          },
+          {
+            "name": "valid",
+            "in": "query",
+            "description": "状态",
+            "type": "boolean"
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "内容",
+            "type": "string"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "description": "创建时间(YYYY-MM-DD)",
+            "type": "string"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "description": "创建时间(YYYY-MM-DD)",
+            "type": "string"
+          },
+          {
+            "name": "weight",
+            "in": "query",
+            "description": "权重",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema":{
+              "$ref":"#/definitions/manage_movie_detail_get_tag"
+            }
+          }
+        }
       }
     },
     "/api/manage/movie/detail/valid": {
@@ -2019,7 +2077,7 @@
             "name":"role",
             "in": "body",
             "required": true,
-            "description": "角色",
+            "description": "角色, 多个用,分隔",
             "type": "string",
             "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
           }
@@ -2121,7 +2179,7 @@
             "name":"role",
             "in": "body",
             "required": true,
-            "description": "角色",
+            "description": "角色,多个用,分隔",
             "type": "string",
             "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
           }
@@ -5642,6 +5700,75 @@
       },
       "xml": {
         "name": "manage_media_get_person"
+      }
+    },
+    "manage_movie_detail_get_tag": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "description": "总数"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string",
+                        "description": "内容"
+                      },
+                      "weight": {
+                        "type": "integer",
+                        "description": "权重"
+                      },
+                      "valid": {
+                        "type": "boolean",
+                        "description": "是否启用"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "source": {
+                        "type": "object",
+                        "description": "源数据信息",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type":"string",
+                            "description":"名称"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_movie_detail_get_tag"
       }
     }
   },
