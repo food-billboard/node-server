@@ -72,7 +72,6 @@ router
     },
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { comment, avatar, ...nextData } = data
@@ -83,8 +82,8 @@ router
           avatar: avatar ? avatar.src : null
         },
         data: comment.map(c => {
-          const { _doc: { content: { image, video, ...nextContent }, source_type, source={}, ...nextC } } = c
-          const { _doc: { name, content, ...nextSource }={} } = source
+          const { content: { image, video, ...nextContent }, source_type, source={}, ...nextC } = c
+          const { name, content, ...nextSource } = source || {}
           return {
             ...nextC,
             source: {

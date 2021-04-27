@@ -155,7 +155,6 @@ router
     roles: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { _id, roles } = data

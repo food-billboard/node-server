@@ -103,7 +103,7 @@ router
     let fans = []
     let found = false
     data.forEach(d => {
-      const { _doc: { _id:id, avatar, ...nextD } } = d 
+      const { _id:id, avatar, ...nextD } = d 
       if(id.equals(_id)) {
         found = true
         const { fans:userFans, attentions } = nextD

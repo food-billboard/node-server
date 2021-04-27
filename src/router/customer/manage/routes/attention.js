@@ -65,7 +65,6 @@ router
     }
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { attentions } = data
@@ -73,7 +72,7 @@ router
       data: {
         ...data,
         attentions: attentions.map(a => {
-          const { _doc: { _id: { _doc: { avatar, ...nextData } }, timestamps } } = a
+          const { _id: { avatar, ...nextData }, timestamps } = a
           return {
             ...nextData,
             avatar: avatar ? avatar.src : null,
@@ -110,8 +109,8 @@ router
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._doc._id)
   .then(notFound)
+  .then(data => data._id)
   .then(id => {
     return UserModel.findOne({
       _id,
@@ -121,7 +120,6 @@ router
       _id: 1
     })
     .exec()
-    .then(data => !!data && data._doc._id)
   })
   .then(notFound)
   .then(_ => {
@@ -169,8 +167,8 @@ router
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._doc._id)
   .then(notFound)
+  .then(data => data._id)
   .then(id => {
     return UserModel.findOne({
       _id,
@@ -180,9 +178,9 @@ router
       _id: 1
     })
     .exec()
-    .then(data => !!data && data._doc._id)
   })
   .then(notFound)
+  .then(data => data._id)
   .then((userId) => {
     return Promise.all([
       UserModel.updateOne({

@@ -58,7 +58,7 @@ const staticDeal = (rankList) => {
   let add = []
 
   STATIC_RANK_MAP.forEach(rank => {
-    const { name, field } = STATIC_RANK_MAP
+    const { name, field } = rank
     const target = rankList.find(rank => rank.name == name)
     if(!target) add.push({
       name,

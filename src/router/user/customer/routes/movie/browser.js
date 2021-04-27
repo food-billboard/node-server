@@ -71,7 +71,6 @@ router
     }
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { glance, ...nextData } = data
@@ -79,7 +78,7 @@ router
       data: {
         ...nextData,
         glance: glance.map(g => {
-          const { _doc: { _id: { _doc: { info: { description, name, classify, screen_time }, poster, rate_person, total_rate,  ...nextD } } } } = g
+          const { _id: { info: { description, name, classify, screen_time }, poster, rate_person, total_rate,  ...nextD } } = g
           const rate = total_rate / rate_person
           return {
             ...nextD,

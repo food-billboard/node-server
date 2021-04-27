@@ -60,7 +60,6 @@ async function Auth(ctx, next) {
         roles: 1
       })
       .exec()
-      .then(data => !!data && data._doc)
       .then(notFound),
       model.find({
         _id: { $in: _ids }

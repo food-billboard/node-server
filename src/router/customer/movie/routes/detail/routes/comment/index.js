@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Like = require('./like')
 const Detail = require('./detail')
-const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, notFound, Params, responseDataDeal, ImageModel, VideoModel } = require("@src/utils")
+const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, notFound, Params, responseDataDeal, ImageModel, VideoModel, parseData } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -76,7 +76,8 @@ router
     _id: 1
   })
   .exec()
-  .then(data => !!data && !!data._doc._id)
+  .then(parseData)
+  .then(data => !!data._id)
   .then(data => {
     if(data) return true
     return MovieModel.findOne({
@@ -86,7 +87,8 @@ router
       _id: 1
     })
     .exec()
-    .then(data => !!data && !!data._doc._id)
+    .then(parseData)
+    .then(data => !!data._id)
   })
   .catch(err => {
 
@@ -207,7 +209,6 @@ router
     },
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { comment } = data
@@ -216,12 +217,12 @@ router
       data: {
         ...data,
         comment: comment.map(c => {
-          const { _doc: { comment_users, like_person, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextC } } = c
+          const { comment_users, like_person, content: { image, video, ...nextContent }, user_info: { avatar, ...nextInfo }, ...nextC } = c
           return {
             ...nextC,
             like: like_person.some(person => person.equals(id)),
             comment_users: comment_users.map(com => {
-              const { _doc: { avatar, ...nextCom } } = com
+              const { avatar, ...nextCom } = com
               return {
                 ...nextCom,
                 avatar: avatar ? avatar.src : null

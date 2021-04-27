@@ -51,7 +51,7 @@ router
     }, {})
   }
   if(!!Object.keys(matchFields.$match).length) initAggregate.unshift(matchFields)
-  if(!!Object.keys(sortFields.$sort).length) initAggregate.push(sortFields)
+  if(!!Object.keys(sortFields.$sort).length) initAggregate.unshift(sortFields)
 
   const total = await SpecialModel.aggregate([
     ...(!!Object.keys(matchFields.$match).length ? [matchFields] : []),
@@ -70,7 +70,7 @@ router
     }
   ])
   const data = await SpecialModel.aggregate([
-    ...initAggregate,
+    ...initAggregate.slice(0, 1),
     {
       $lookup: {
         from: 'images', 
@@ -131,7 +131,8 @@ router
         },
         valid: 1
       }
-    }
+    },
+    ...initAggregate.slice(1)
   ])
   .catch(dealErr(ctx))
 
@@ -148,7 +149,6 @@ router
 
 })
 .post('/', async (ctx) => {
-
   const check = Params.body(ctx, {
     name: 'movie',
     validator: [
@@ -286,7 +286,6 @@ router
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => ({ data: { _id: data._id } }))
   .catch(dealErr(ctx))

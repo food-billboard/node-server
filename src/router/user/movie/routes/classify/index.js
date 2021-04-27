@@ -89,7 +89,7 @@ router
 	.then(data => {
 		return {
 			data: data.map(item => {
-				const { _doc: { poster, info: { screen_time, classify }, author, author_rate, ...nextM } } = item
+				const { poster, info: { screen_time, classify }, author, author_rate, ...nextM } = item
 				const { avatar, ...nextAuthor } = pick(author, ['username', '_id', 'avatar'])
 				return {
 					...nextM,

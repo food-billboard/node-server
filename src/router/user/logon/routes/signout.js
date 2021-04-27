@@ -26,8 +26,8 @@ router
     })
     .exec()
   })
-  .then(data => !!data && !!data._doc && data._doc._id)
   .then(notFound)
+  .then(data => data._id)
   .then(userId => {
     return RoomModel.findOneAndUpdate({
       origin: true,

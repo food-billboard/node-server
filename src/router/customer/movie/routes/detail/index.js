@@ -52,7 +52,6 @@ router
     store: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     if(!data.store.some(item => item._id.equals(_id))) store = false
@@ -135,7 +134,6 @@ router
       }
     })
     .exec()
-    .then(data => !!data && data._doc)
     .then(notFound)
   })
   .then(data => {
@@ -159,8 +157,8 @@ router
         poster: poster ? poster.src : null,
         images: images.filter(i => i && !!i.src).map(i => i.src),
         comment: comment.map(com => {
-          const { _doc: { user_info, content: { text }, ...nextC } } = com
-          const { _doc: { avatar, ...nextUserInfo } } = user_info
+          const { user_info, content: { text }, ...nextC } = com
+          const { avatar, ...nextUserInfo } = user_info
           return {
             ...nextC,
             content: {
@@ -173,7 +171,7 @@ router
           }
         }),
         same_film: same_film.map(same => {
-          const { _doc: { film: { name, _id }, ...nextS } } = same
+          const { film: { name, _id }, ...nextS } = same
           return {
             name,
             _id,
@@ -184,7 +182,7 @@ router
         info: {
           ...nextInfo,
           actor: actor.map(item => {
-            const { _doc: { other: { avatar, ...nextOther }={}, ...nextItem } } = item
+            const { other: { avatar, ...nextOther }={}, ...nextItem } = item
             return {
               ...nextItem,
               other: {

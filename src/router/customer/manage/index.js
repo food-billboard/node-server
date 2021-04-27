@@ -53,7 +53,6 @@ router
     updatedAt: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { fans, attentions, ...nextData } = data

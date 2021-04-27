@@ -84,29 +84,29 @@ const updateMovieTag = (tagList) => {
 
 }
 
+function scheduleMethod() {
+  console.log(chalk.magenta('数据标签tag定时审查'))
+
+  //当前简单使用评论当做tag
+  cleanTag()
+  .then(collecteComment)
+  .then(setTag)
+  .then(updateMovieTag)
+  .then(results => {
+    const errors = results.filter(result => result.status === "rejected")
+    if(!!errors.length) return Promise.reject({ errMsg: 'tag设置部分错误', list: errors })
+  })
+  .catch(err => {
+    console.log(chalk.red('tag定时获取失败: ', JSON.stringify(err)))
+    log4Error({
+      __request_log_id__: '数据tag定时审查'
+    }, err)
+  })
+}
+
 const tagSchedule = () => {
 
-  const schedule = nodeSchedule.scheduleJob('0  0  20  *  *  6', function() {
-
-    console.log(chalk.magenta('数据标签tag定时审查'))
-
-    //当前简单使用评论当做tag
-    cleanTag()
-    .then(collecteComment)
-    .then(setTag)
-    .then(updateMovieTag)
-    .then(results => {
-      const errors = results.filter(result => result.status === "rejected")
-      if(!!errors.length) return Promise.reject({ errMsg: 'tag设置部分错误', list: errors })
-    })
-    .catch(err => {
-      console.log(chalk.red('tag定时获取失败: ', JSON.stringify(err)))
-      log4Error({
-        __request_log_id__: '数据tag定时审查'
-      }, err)
-    })
-
-  })
+  const schedule = nodeSchedule.scheduleJob('0  0  20  *  *  6', scheduleMethod)
 }
 
 module.exports = {

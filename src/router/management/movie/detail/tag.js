@@ -83,7 +83,7 @@ router
     sanitizers: [
       data => {
         const _data = parseInt(data)
-        if(typeof _data === 'number' && Number.isNaN(_data) && _data >= 0) return {
+        if(typeof _data === 'number' && !Number.isNaN(_data) && _data >= 0) return {
           done: true,
           data: {
             auth: _data
@@ -164,9 +164,9 @@ router
         createdAt: 1,
         updatedAt: 1,
         valid: 1,
-        origin: {
-          _id: "$origin._id",
-          name: "$origin.username"
+        source: {
+          _id: "$source._id",
+          name: "$source.name"
         }
       }
     }

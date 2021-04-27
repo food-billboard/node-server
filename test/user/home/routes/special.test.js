@@ -18,7 +18,6 @@ function responseExpect(res, validate=[]) {
   expect(target.movie).to.be.a('array')
 
   target.movie.forEach(item => {
-
     expect(item).to.be.a('object').and.to.includes.all.keys('name', 'poster', '_id', 'hot', 'description', 'store', 'rate', 'publish_time', 'classify')
     commonValidate.string(item.name)
     commonValidate.poster(item.poster)
@@ -70,7 +69,8 @@ describe(`${COMMON_API} test`, function() {
           poster: imageId,
           info: {
             classify: [ classify._id ]
-          }
+          },
+          images: [imageId]
         })
 
         return model.save()

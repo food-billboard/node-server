@@ -4,7 +4,8 @@ const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
-router.get('/', async (ctx) => {
+router
+.get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
   const check = Params.query(ctx, {
@@ -86,10 +87,10 @@ router.get('/', async (ctx) => {
     const index = data.findIndex(d => d._id.equals(_id))
     if(!~index) return Promise.reject({errMsg: 'not Found', status: 404})
     result = {
-      ...data[index]._doc
+      ...data[index]
     } 
     mine = {
-      ...data[(index + 1) % 2]._doc
+      ...data[(index + 1) % 2]
     }
     const { _id:mineId } = mine
     const { comment, updatedAt } = result
@@ -98,14 +99,13 @@ router.get('/', async (ctx) => {
       data: {
         ...result,
         comment: comment.map(c => {
-          const { _doc: { 
-            like_person, 
+          const { like_person, 
             source_type,
             source: { name, content, _id }={}, 
             content: { image, video, ...nextContent }, 
-            user_info: { _doc: { avatar, ...nextUserInfo } },
-            ...nextC 
-          } } = c
+            user_info: { avatar, ...nextUserInfo },
+            ...nextC  
+          } = c
 
           like = false
           if(like_person.some(l => l.equals(mineId))) like = true

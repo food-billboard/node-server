@@ -3,7 +3,21 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
-const { EMAIL_REGEXP, MEDIA_ORIGIN_TYPE, METHOD_MAP, USER_STATUS, MOVIE_STATUS, MOVIE_SOURCE_TYPE, ROLES_MAP, FEEDBACK_STATUS, COMMENT_SOURCE_TYPE, MEDIA_STATUS, MEDIA_AUTH, NETWORK } = require('../constant')
+const { 
+  BEHAVIOUR_URL_TYPE_MAP, 
+  EMAIL_REGEXP, 
+  MEDIA_ORIGIN_TYPE, 
+  METHOD_MAP, 
+  USER_STATUS, 
+  MOVIE_STATUS, 
+  MOVIE_SOURCE_TYPE, 
+  ROLES_MAP, 
+  FEEDBACK_STATUS, 
+  COMMENT_SOURCE_TYPE, 
+  MEDIA_STATUS, 
+  MEDIA_AUTH, 
+  NETWORK 
+} = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
 function getMill(time) {
@@ -245,7 +259,9 @@ const PRE_CLASSIFY_FIND = [
 ]
 const PRE_LANGUAGE_FIND = []
 const PRE_VIDEO_FIND = []
-const PRE_IMAGE_FIND = []
+const PRE_IMAGE_FIND = [
+
+]
 const PRE_OTHER_FIND = []
 const PRE_BARRAGE_FIND = [
   {
@@ -1203,7 +1219,7 @@ const VideoSchema = new Schema({
     }
   },
 }, {
-  ...defaultConfig
+  ...defaultConfig,
 })
 
 const ImageSchema = new Schema({
@@ -1272,7 +1288,7 @@ const ImageSchema = new Schema({
     }
   },
 }, {
-  ...defaultConfig
+  ...defaultConfig,
 })
 
 const OtherMediaSchema = new Schema({
@@ -1435,31 +1451,18 @@ const BehaviourSchema = new Schema({
   url_type: {
     type: String,
     required: true,
-    enum: [ 'LOGIN_IN', 'LOGOUT', 'MOVIE_GET', 'MOVIE_POST', 'COMMENT', 'SEARCH', 'RANK_GET', 'CLASSIFY', 'USER_GET' ]
+    enum: Object.keys(BEHAVIOUR_URL_TYPE_MAP)
   },
   user: {
     type: ObjectId,
     ref: 'user'
   },
   target: {
-    type: ObjectId
+    type: ObjectId,
   }
 }, {
   ...defaultConfig
 })
-
-// const ApisSchema = new Schema({
-//   url: {
-//     type: String
-//   },
-//   roles: [{
-//     type: String,
-//     enum: ROLES_MAP,
-//     set: (v) => {
-//       return v.toUpperCase()
-//     }
-//   }]
-// })
 
 const FIND_OPERATION_LIB = [
   'find',
@@ -1541,7 +1544,6 @@ const OtherMediaModel = model('other_media', OtherMediaSchema)
 const FeedbackModel = model('feedback', FeedbackSchema)
 const BarrageModel = model('barrage', BarrageSchema)
 const AuthModel = model('auth', AuthSchema)
-// const ApisModel = model('api', ApisSchema)
 const BehaviourModel = model('behaviour', BehaviourSchema)
 
 module.exports = {
@@ -1566,7 +1568,6 @@ module.exports = {
   FeedbackModel,
   BarrageModel,
   AuthModel,
-  // ApisModel,
   BehaviourModel,
   UserSchema,
   GlobalSchema,
@@ -1589,6 +1590,5 @@ module.exports = {
   FeedbackSchema,
   BarrageSchema,
   AuthSchema,
-  // ApisSchema,
   BehaviourSchema,
 }

@@ -1,6 +1,7 @@
 const CUSTOMER_PREFIX = '\\/api\\/customer'
 const USER_PREFIX = '/api/user'
 const { Types: { ObjectId } } = require('mongoose')
+const { BEHAVIOUR_URL_TYPE_MAP } = require('../constant')
 
 const toId = (target) => ObjectId.isValid(target) ? ObjectId(target) : target
 
@@ -10,7 +11,7 @@ const user_behaviour = {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
-      url_type: 'LOGIN_IN',
+      url_type: BEHAVIOUR_URL_TYPE_MAP.LOGIN_IN,
       user: toId(user),
       target: toId(target),
     })
@@ -20,7 +21,7 @@ const user_behaviour = {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
-      url_type: 'LOGOUT',
+      url_type: BEHAVIOUR_URL_TYPE_MAP.LOGOUT,
       user: toId(user),
       target: toId(target),
     })
@@ -30,7 +31,7 @@ const user_behaviour = {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
-      url_type: 'USER_GET',
+      url_type: BEHAVIOUR_URL_TYPE_MAP.USER_GET,
       user: toId(user),
       target: toId(target),
     })
@@ -40,7 +41,7 @@ const user_behaviour = {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
-      url_type: 'SPECIAL_GET',
+      url_type: BEHAVIOUR_URL_TYPE_MAP.SPECIAL_GET,
       user: toId(user),
       target: toId(target),
     })
@@ -50,7 +51,7 @@ const user_behaviour = {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
-      url_type: 'RANK_GET',
+      url_type: BEHAVIOUR_URL_TYPE_MAP.RANK_GET,
       user: toId(user),
       target: toId(target),
     })
@@ -60,7 +61,7 @@ const user_behaviour = {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
-      url_type: 'MOVIE_GET',
+      url_type: BEHAVIOUR_URL_TYPE_MAP.MOVIE_GET,
       user: toId(user),
       target: toId(target),
     })
@@ -70,7 +71,7 @@ const user_behaviour = {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
-      url_type: 'SEARCH',
+      url_type: BEHAVIOUR_URL_TYPE_MAP.SEARCH,
       user: toId(user),
       target: toId(target),
     })
@@ -83,7 +84,7 @@ const customer_behaviour = {
     method: 'post',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
-      url_type: 'MOVIE_POST',
+      url_type: BEHAVIOUR_URL_TYPE_MAP.MOVIE_POST,
       user: toId(user),
       target: toId(target),
     })
@@ -93,7 +94,7 @@ const customer_behaviour = {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
-      url_type: 'MOVIE_GET',
+      url_type: BEHAVIOUR_URL_TYPE_MAP.MOVIE_GET,
       user: toId(user),
       target: toId(target),
     })
@@ -103,7 +104,7 @@ const customer_behaviour = {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
-      url_type: 'USER_GET',
+      url_type: BEHAVIOUR_URL_TYPE_MAP.USER_GET,
       user: toId(user),
       target: toId(target),
     })

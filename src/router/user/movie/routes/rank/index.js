@@ -95,8 +95,8 @@ router
 		_id: 0
 	})
 	.exec()
-	.then(data => !!data && data._doc.match_pattern)
 	.then(notFound)
+	.then(data => data.match_pattern)
 	.then(data => {
 		const { filter, sort } = rankOperation(data)
 		return MovieModel.find(filter)
@@ -135,7 +135,7 @@ router
 	.then(data => {
 		return {
 			data: data.map(m => {
-				const { _doc: { poster, info: { classify, description, name, screen_time }, total_rate, rate_person, ...nextM } } = m
+				const { poster, info: { classify, description, name, screen_time }, total_rate, rate_person, ...nextM } = m
 				const rate = total_rate / rate_person
 				return {
 					...nextM,

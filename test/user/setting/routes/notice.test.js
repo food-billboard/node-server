@@ -80,7 +80,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    describe(`get the mini app info notice success test -> ${COMMON_API}`, function() {
+    describe.skip(`get the mini app info notice success test -> ${COMMON_API}`, function() {
 
       it(`get the mini app info notice fail because the database is not found the data`, function(done) {
 

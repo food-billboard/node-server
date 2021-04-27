@@ -1,4 +1,4 @@
-const { RankModel, ClassifyModel } = require('../../mongodb/mongo.lib')
+const { ClassifyModel } = require('../../mongodb/mongo.lib')
 
 const classifyDeal = async (rankList) => {
 

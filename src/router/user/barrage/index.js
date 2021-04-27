@@ -1,5 +1,6 @@
 const Router = require('@koa/router')
 const { BarrageModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const { merge } = require('lodash')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -36,38 +37,45 @@ router
     ]
   })
 
-  const data = await BarrageModel.find({
+  let query = {
     origin: _id,
-    ...(timeStart >= 0 ? { 
-      $gt: { time_line: timeStart },
-      ...(process >= 0 ? { $lt: { time_line: process + timeStart } } : {})
-    } : {})
-  })
-  .select({
-    like_users: 1,
-    content: 1,
-    time_line: 1,
-    updatedAt: 1,
-  })
-  .limit(1000)
-  .sort({
-    time_line: 1
-  })
-  .exec()
-  .then(data => !!data && data)
-  .then(notFound)
-  .then(data => {
-    return {
-      data: data.map(item => {
-        const { _doc: { like_users, ...nextItem } } = item
-        return {
-          ...nextItem,
-          hot: like_users.length,
-          like: false
-        }
-      })
+  }
+  if(timeStart >= 0) {
+    query.time_line = {
+      $gt: timeStart
     }
-  })
+    if(process >= 0) query.time_line.$lte = process + timeStart
+  }
+
+  const data = await BarrageModel.aggregate([
+    {
+      $match: query
+    },
+    {
+      $sort: {
+        time_line: 1
+      }
+    },
+    {
+      $limit: 1000
+    },
+    {
+      $project: {
+        hot: {
+          $size: {
+            $ifNull: [
+              "$like_users", []
+            ]
+          }
+        },
+        content: 1,
+        time_line: 1,
+        updatedAt: 1,
+        // like: false
+      }
+    }
+  ])
+  .then(data => ({ data: data.map(item => merge({}, item, { like: false })) }))
   .catch(dealErr(ctx))
 
   responseDataDeal({

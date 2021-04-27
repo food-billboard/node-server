@@ -93,6 +93,19 @@ const NETWORK = process.env.NODE_ENV !== 'production' ? 'localhost' : '47.111.22
 //关键词抽取个数
 const EXTRACT_KEYWORD_TOP_N = 1
 
+const BEHAVIOUR_URL_TYPE_MAP = {
+  LOGIN_IN: 'LOGIN_IN', 
+  LOGOUT: 'LOGOUT', 
+  MOVIE_GET: 'MOVIE_GET', 
+  MOVIE_POST: 'MOVIE_POST', 
+  COMMENT: 'COMMENT', 
+  SEARCH: 'SEARCH', 
+  RANK_GET: 'RANK_GET', 
+  CLASSIFY: 'CLASSIFY', 
+  USER_GET: 'USER_GET',
+  SPECIAL_GET: 'SPECIAL_GET'
+}
+
 module.exports = {
   NETWORK,
   EMAIL_AUTH,
@@ -111,5 +124,6 @@ module.exports = {
   MEDIA_AUTH,
   MEDIA_ORIGIN_TYPE,
   EXTRACT_KEYWORD_TOP_N,
-  API_DOMAIN
+  API_DOMAIN,
+  BEHAVIOUR_URL_TYPE_MAP
 }

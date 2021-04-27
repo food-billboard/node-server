@@ -13,7 +13,8 @@ const {
   notFound, 
   Params,
   NUM_DAY,
-  responseDataDeal
+  responseDataDeal,
+  parseData
 } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -400,7 +401,7 @@ router
     name: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
+  .then(parseData)
   .then(data => {
     if(data) return Promise.reject({ errMsg: '存在相类似的作品', status: 403 })
     return true
@@ -592,7 +593,7 @@ router
     _id: 1,
   })
   .exec()
-  .then(data => !!data && data._doc)
+  .then(parseData)
   .then(data => {
     if(!data) return Promise.reject({status: 403, errMsg: '非本人发布电影'})
   })
@@ -607,7 +608,6 @@ router
       same_film: 1
     })
     .exec()
-    .then(data => !!data && data._doc)
   })
   .then(notFound)
   .then(async (data) => {
@@ -762,7 +762,6 @@ router
     }
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { issue } = data
@@ -770,7 +769,7 @@ router
       data: {
         ...data,
         issue: issue.map(s => {
-          const { _doc: { _id: { _doc: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } } } = s
+          const { _id: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
           const rate = total_rate / rate_person
           return {
             ...nextS,

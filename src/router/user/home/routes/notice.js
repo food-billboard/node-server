@@ -14,7 +14,6 @@ router.get('/', async(ctx) => {
     updatedAt: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => ({ data }))
   .catch(dealErr(ctx))

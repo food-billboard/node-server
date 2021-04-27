@@ -30,9 +30,21 @@ const dealErr = (ctx) => {
   }
 }
 
+const parseData = (data) => {
+  function parse(data) {
+    return (typeof data.toObject === 'function' ? data.toObject() : JSON.parse(JSON.stringify(data)))
+  }
+  try {
+    return !!data && (Array.isArray(data) ? data.map(parse) : parse(data))
+  }catch(err) {
+    return false 
+  }
+}
+
 const notFound = (data) => {
-  if(!data) return Promise.reject({ errMsg: 'not Found', status: 404 })
-  return data
+  const response = parseData(data)
+  if(!response) return Promise.reject({ errMsg: 'not Found', status: 404 })
+  return response
 }
 
 const withTry = (callback) => {
@@ -107,12 +119,14 @@ const _etagValidate = (ctx, etag) => {
 
 }
 
+// function stopNext(key) {
+//   return key != "connections" && key != "base" && key != '$__'/**阻止继续向内部访问mongoose对象 */
+// }
+
 //去除updatedAt
 const filterField = (data, field='updatedAt', compare=null) => {
 
   let origin
-
-  let index = 0
 
   function filter(data) {
     if(Array.isArray(data)) {
@@ -121,7 +135,7 @@ const filterField = (data, field='updatedAt', compare=null) => {
       })
     }else if(isType(data, 'object')) {
       Object.keys(data).forEach(key => {
-        if(Array.isArray(data[key]) || (isType(data[key], 'object') && !ObjectId.isValid(data[key]) && key != '$__'/**阻止继续向内部访问mongoose对象 */)) {
+        if(Array.isArray(data[key]) || (isType(data[key], 'object') && !ObjectId.isValid(data[key]) )) {
           filter(data[key])
         }else if(key === field){
           const target = data[key]
@@ -227,8 +241,8 @@ const responseDataDeal = ({
 
   log4RequestAndResponse(ctx, response)
 
-  // ctx.body = mediaDeal(response)
-  ctx.body = response
+  ctx.body = mediaDeal(response)
+  // ctx.body = response
 
 }
 
@@ -237,5 +251,6 @@ module.exports = {
   dealErr,
   withTry,
   judgeCache,
-  responseDataDeal
+  responseDataDeal,
+  parseData
 }

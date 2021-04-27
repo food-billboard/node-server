@@ -203,7 +203,7 @@ router
 
     return {
       data: data.map(item => {
-        const { _doc: { info: { screen_time, ...nextInfo }, total_rate, rate_person, poster, ...nextItem } } = item
+        const { info: { screen_time, ...nextInfo }, total_rate, rate_person, poster, ...nextItem } = item
         const rate = total_rate / rate_person
         return {
           ...nextItem,

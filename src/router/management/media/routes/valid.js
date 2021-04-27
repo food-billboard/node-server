@@ -3,7 +3,7 @@ const { Types: { ObjectId } } = require('mongoose')
 const fs = require('fs')
 const path = require('path')
 const { MEDIA_MAP } = require('../utils')
-const { dealErr, responseDataDeal, Params, MEDIA_STATUS, STATIC_FILE_PATH } = require('@src/utils')
+const { dealErr, responseDataDeal, Params, MEDIA_STATUS, STATIC_FILE_PATH, parseData } = require('@src/utils')
 
 const router = new Router()
 
@@ -48,7 +48,7 @@ router
     "info.status": 1
   })
   .exec()
-  .then(data => !!data && data._doc)
+  .then(parseData)
   .then(data => {
     if(!data) return {
       complete: false,

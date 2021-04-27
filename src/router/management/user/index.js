@@ -221,8 +221,7 @@ router
   const [ role ] = Params.sanitizers(ctx.body, {
     name: 'role',
     sanitizers: [
-      data => Number.isNaN(Number(data)) ? data: 
-      data => typeof data === 'string' ? data.split(',') : ROLES_MAP.USER
+      data => typeof data === 'string' ? data.split(',') : "USER"
     ]
   })
   const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'role' ]
@@ -231,10 +230,10 @@ router
 
   userModel = Object.keys(body).reduce((acc, cur) => {
     if(params.includes(cur)) {
-      if(typeof body[cur] == 'undefined' && cur == 'role') {
-          acc[cur] = role
+      if(cur === 'role') {
+        acc.roles = role
       }else if(typeof body[cur] != 'undefined') {
-          acc[cur] = body[cur]
+        acc[cur] = body[cur]
       }
     }
     return acc
@@ -297,8 +296,7 @@ router
   }, {
     name: 'role',
     sanitizers: [
-      data => Number.isNaN(Number(data)) ? data: 
-      data => typeof data === 'string' ? data.split(',') : ROLES_MAP.USER
+      data => typeof data === 'string' ? data.split(',').map(item => item.trim()) : "USER"
     ]
   })
   const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'role' ]
@@ -306,7 +304,9 @@ router
 
   editModel = Object.keys(body).reduce((acc, cur) => {
     if(params.includes(cur)) {
-      if(typeof body[cur] != 'undefined') {
+      if(cur == 'role') {
+        acc.roles = role
+      }else if(typeof body[cur] != 'undefined') {
         acc[cur] = body[cur]
       }
     }

@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
-const { mockCreateUser, Request, commonValidate, mockCreateImage } = require('@test/utils')
+const { mockCreateUser, Request, commonValidate, mockCreateImage, createMobile } = require('@test/utils')
 const { getToken, UserModel, dealRedis, ImageModel } = require('@src/utils')
 const { email_type } = require('@src/router/user/logon/map')
 
@@ -72,7 +72,7 @@ describe(`${COMMON_API} test`, function() {
     
     describe(`post the info for register and verify success test -> ${COMMON_API}`, function() {
 
-      let mobile = 18368003190
+      let mobile = createMobile()
       let email = `${mobile}@qq.com`
       let captcha = '123456'
       let description = COMMON_API
@@ -141,6 +141,83 @@ describe(`${COMMON_API} test`, function() {
       })
 
     })
+
+    describe(`post the info for registe and register some role`, function() {
+
+      let mobile = createMobile()
+      let email = `${mobile}@qq.com`
+      let captcha = '123456'
+      let description = COMMON_API
+      let username = `${COMMON_API}\/90980`
+
+      let redisKey = `${email}-${email_type[1]}`
+
+      before(function(done) {
+        dealRedis(function(redis) {
+          redis.set(redisKey, captcha)
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+      })
+
+      after(function(done) {
+        Promise.all([
+          UserModel.findOne({
+            mobile,
+            roles: ["SUPER_ADMIN"]
+          }),
+          dealRedis(function(redis) {
+            redis.del(redisKey)
+          })
+        ])
+        .then(([data]) => {
+          expect(!!data).to.be.true
+          return UserModel.deleteOne({
+            mobile
+          })
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+      })
+
+      it(`post the info for register and verify success and try to register SUPER_ADMIN role`, function(done) {
+        Request
+        .post(COMMON_API)
+        .send({
+          mobile,
+          password: '1234567890',
+          email,
+          captcha,
+          username,
+          description,
+          avatar: avatar.toString()
+        })
+        .set({ Accept: 'Application/json' })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj)
+          done()
+        })
+      })
+
+    }) 
 
     describe(`post the info for register and verify fail test -> ${COMMON_API}`, function() {
 

@@ -9,7 +9,7 @@ router.get('/', async(ctx) => {
     _default: 3,
     type: ['toInt'],
     sanitizers: [
-      data => data > 0 ? data : 0
+      data => data > 0 ? data : 3
     ]
   })
 
@@ -27,11 +27,9 @@ router.get('/', async(ctx) => {
   })
   .limit(8)
   .exec()
-  .then(data => !!data && data)
   .then(notFound)
   .then(data => {
     result = data
-
     return MovieModel.find({
       $or: [
         {
@@ -55,16 +53,14 @@ router.get('/', async(ctx) => {
   .then(data => {
     return {
       data: result.map(item => {
-
-        const { _doc: { icon, match_field: { field, _id }, ...nextD } } = item
-  
+        const { icon, match_field: { field, _id }, ...nextD } = item
         const filter = data.filter(item => {
           const { info } = item
           return info[field].some(fd => fd.equals(_id))
         })
         .slice(0, count)
         .map(m => {
-          const { _doc: { poster, info, ...nextM } } = m
+          const { poster, info, ...nextM } = m
             return {
               ...nextM,
               match_field: field,
@@ -87,6 +83,40 @@ router.get('/', async(ctx) => {
     ctx,
     data,
     needCache: false
+  })
+
+})
+.get('/test', async(ctx) => {
+  const [ count ] = Params.sanitizers(ctx.query, {
+    name: 'count',
+    _default: 3,
+    type: ['toInt'],
+    sanitizers: [
+      data => data > 0 ? data : 3
+    ]
+  })
+
+  let result 
+  const data = await RankModel.aggregate([
+    {
+      $sort: {
+        glance: -1
+      }
+    },
+    {
+      $limit: 8
+    },
+    {
+      match_pattern:1,
+      updatedAt: 1,
+      _id: 1
+    }
+  ])
+  .then(data => {
+    result = data 
+    return MovieModel.aggregate([
+
+    ])
   })
 
 })

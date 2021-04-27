@@ -32,10 +32,14 @@ const fs = require('fs')
 const fsPromise = fs.promises
 const { Types: { ObjectId } } = mongoose
 
+function createMobile() {
+  return parseInt(`13${new Array(9).fill(0).map(_ => Math.floor(Math.random() * 10)).join('')}`)
+}
+
 //用户创建
 function mockCreateUser(values={}) {
   const password = '1234567890'
-  const mobile = values.mobile || parseInt(`13${new Array(9).fill(0).map(_ => Math.floor(Math.random() * 10)).join('')}`)
+  const mobile = values.mobile || createMobile()
   const encodedPwd = encoded(password)
   // const token = signToken({ mobile, id }, {expiresIn: '5s'})
   let baseModel = {
@@ -87,6 +91,7 @@ function mockCreateMovie(values={}) {
       language: []
     },
     images: new Array(6).fill(ObjectId('8f63270f005f1c1a0d9448ca')),
+    video: ObjectId('8f63270f005f1c1a0d9448ca'),
     tag: [],
     comment: [],
     glance: 0,
@@ -155,8 +160,7 @@ function mockCreateSpecial(values={}) {
     poster: ObjectId('5edb3c7b4f88da14ca419e61'),
     valid: false,
   }
-  baseModel = mergeConfig(baseModel, values)
-
+  baseModel = mergeConfig(baseModel, values, true)
   const model = new SpecialModel(baseModel)
 
   return { model }
@@ -486,5 +490,6 @@ module.exports = {
   createEtag,
   commonValidate,
   mockCreateFeedback,
-  generateTemplateFile
+  generateTemplateFile,
+  createMobile
 }

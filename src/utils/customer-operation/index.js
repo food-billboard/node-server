@@ -2,6 +2,7 @@ const { verifyTokenToData } = require('../token')
 const url_map = require('./url-map')
 const { BehaviourModel, GlobalModel } = require('../mongodb')
 const Url = require('url')
+const { pickBy, identity } = require('lodash')
 
 const NEED_DEAL_ROLE = [ 'CUSTOMER', 'USER' ]
 
@@ -36,7 +37,7 @@ const notes_customer_behaviour_middleware = async (ctx, next) => {
   }
 
   new Promise((resolve, reject) => {
-    const database = action({ user, target })
+    const database = pickBy(action({ user, target }), identity)
     const model = new BehaviourModel(database)
     model.save(function(err) {
       if(err) reject(err)

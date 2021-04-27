@@ -25,7 +25,7 @@ router.get('/', async (ctx) => {
   .then(data => {
     return {
       data: data.map(d => {
-        const { _doc: { icon, ...nextD } } = d
+        const { icon, ...nextD } = d
         return {
           ...nextD,
           icon: icon ? icon.src : null

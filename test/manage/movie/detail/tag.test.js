@@ -1,35 +1,75 @@
 require('module-alias/register')
-const { UserModel, TagModel } = require('@src/utils')
+const { UserModel, TagModel, MovieModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, mockCreateUser, mockCreateTag } = require('@test/utils')
+const Day = require('dayjs')
+const { Request, mockCreateUser, mockCreateTag, commonValidate, mockCreateMovie } = require('@test/utils')
 
 const COMMON_API = '/api/manage/movie/detail/tag'
+
+function responseExpect(res, validate=[]) {
+  const { res: { data: target } } = res
+
+  expect(target).to.be.a('object').and.that.include.all.keys('total', 'list')
+  commonValidate.number(target.total)
+  expect(target.list).to.be.a('array')
+
+  target.list.forEach(item => {
+    expect(item).to.be.a('object').that.includes.all.keys('_id', 'text', 'weight', 'valid', 'source', 'createdAt', 'updatedAt')
+    commonValidate.objectId(item._id)
+    expect(item.source).to.be.a('object').that.includes.all.keys('_id', 'name')
+    commonValidate.objectId(item.source._id)
+    commonValidate.string(item.source.name)
+    commonValidate.string(item.text)
+    commonValidate.number(item.weight)
+    commonValidate.date(item.createdAt)
+    commonValidate.date(item.updatedAt)
+    expect(item.valid).to.be.a('boolean')
+  })
+
+  if(Array.isArray(validate)) {
+    validate.forEach(valid => {
+      typeof valid == 'function' && valid(target)
+    })
+  }else if(typeof validate === 'function') {
+    validate(target)
+  }
+}
 
 describe(`${COMMON_API} test`, function() {
 
   let selfToken
   let userInfo
   let tagId
+  let movieId 
 
   before(function(done) {
 
     const { model: user, signToken } = mockCreateUser({
       username: COMMON_API
     })
-    const { model: tag } = mockCreateTag({
-      text: COMMON_API,
-      weight: 1,
-      valid: true,
+    const { model: movie } = mockCreateMovie({
+      name: COMMON_API
     })
 
     Promise.all([
       user.save(),
-      tag.save()
+      movie.save()
     ])
-    .then(([user, tag]) => {
+    .then(([user, movie]) => {
       userInfo = user
-      tagId = tag._id
+      movieId = movie._id
+      const { model: tag } = mockCreateTag({
+        text: COMMON_API,
+        weight: 1,
+        valid: true,
+        source: movieId
+      })
+      
       selfToken = signToken(userInfo._id)
+      return tag.save()
+    })
+    .then(data => {
+      tagId = data._id
       done()
     })
     .catch(err => {
@@ -47,6 +87,9 @@ describe(`${COMMON_API} test`, function() {
       TagModel.deleteMany({
         text: COMMON_API
       }),
+      MovieModel.deleteMany({
+        name: COMMON_API
+      })
     ])
     .then(function() {
       done()
@@ -58,6 +101,227 @@ describe(`${COMMON_API} test`, function() {
   })
 
   describe(`${COMMON_API} success test`, function() {
+
+    describe(`get the tag status success -> ${COMMON_API}`, function() {
+
+      it(`get the tag success`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj)
+          done()
+        })
+  
+      })
+
+      it(`get the tag success width _id`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: tagId.toString(),
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            const { _id } = list[0]
+            expect(tagId.equals(_id)).to.be.true
+          })
+          done()
+        })
+  
+      })
+
+      it(`get the tag success with content`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          content: COMMON_API.slice(1),
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            const exists = list.some(item => tagId.equals(item._id))
+            expect(exists).to.be.true
+          })
+          done()
+        })
+  
+      })
+
+      it(`get the tag success with valid`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          valid: true
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            const exists = list.some(item => tagId.equals(item._id))
+            expect(exists).to.be.true
+          })
+          done()
+        })
+  
+      })
+
+      it(`get the tag success with start_date`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          start_date: Day(Date.now() + 24 * 1000 * 60 * 60).format('YYYY-MM-DD')
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            const exists = list.some(item => tagId.equals(item._id))
+            expect(exists).to.be.false
+          })
+          done()
+        })
+  
+      })
+
+      it(`get the tag success with end_date`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          end_date: Day(Date.now() - 1000 * 60 * 60 * 24).format('YYYY-MM-DD')
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            const exists = list.some(item => tagId.equals(item._id))
+            expect(exists).to.be.false
+          })
+          done()
+        })
+  
+      })
+
+      it(`get the tag success with weight`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          weight: 0
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            const exists = list.some(item => tagId.equals(item._id))
+            expect(exists).to.be.false
+          })
+          done()
+        })
+  
+      })
+
+    })
 
     describe(`put the tag status success -> ${COMMON_API}`, function() {
 

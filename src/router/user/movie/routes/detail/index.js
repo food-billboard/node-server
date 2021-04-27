@@ -47,6 +47,8 @@ router
     rate_person: 1,
     total_rate: 1,
     same_film: 1,
+    createdAt: 1,
+    updatedAt: 1,
   })
   .populate({
     path: 'comment',
@@ -119,7 +121,6 @@ router
     }
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     let newData = {  
@@ -167,10 +168,10 @@ router
           classify: classify.map(item => pick(item, ['name'])),
           language: language.map(item => pick(item, ['name'])),
         },
-        video: avatarGet(avatarGet(video, '_doc'), 'src'),
+        video: avatarGet(video, 'src'),
         comment: comment.map(c => {
-          const { _doc: { user_info, ...nextC } } = c
-          const { _doc: { avatar, ...nextUserInfo } } = user_info
+          const { user_info, ...nextC } = c
+          const { avatar, ...nextUserInfo } = user_info
           return {
             ...nextC,
             user_info: {
@@ -182,7 +183,7 @@ router
         images: images.map(i => i && i.src),
         poster: avatarGet(poster),
         same_film: same_film.map(s => {
-          const { _doc: { film, ...nextS } } = s
+          const { film, ...nextS } = s
           return {
             name: avatarGet(film, 'name'),
             ...nextS

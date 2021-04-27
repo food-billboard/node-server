@@ -362,7 +362,6 @@ router
     roles: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(({ _id, roles }) => {
 
@@ -528,7 +527,6 @@ router
     author_rate: 1,
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { info: { another_name: alias, ...nextInfo }, images, poster, video, ...nextData } = data

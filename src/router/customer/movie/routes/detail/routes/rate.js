@@ -38,7 +38,6 @@ router.put('/', async (ctx) => {
       rate: 1
     })
     .exec()
-    .then(data => !!data && data._doc)
     .then(notFound),
     MovieModel.findOne({
       _id
@@ -47,8 +46,8 @@ router.put('/', async (ctx) => {
       _id: 1
     })
     .exec()
-    .then(data => !!data && data._doc._id)
     .then(notFound)
+    .then(data => data._id)
   ])
   .then(([user, _]) => {
     const { rate } = user

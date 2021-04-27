@@ -37,21 +37,29 @@ router
     }
   ])
 
-  const data = await GlobalModel.find({})
-  .select({
-    notice: 1,
-    visit_count: 1,
-    createdAt: 1,
-    updatedAt: 1,
-    info: 1,
-    valid: 1
-  })
-  .sort({
-    createdAt: 1
-  })
-  .skip(currPage * pageSize)
-  .limit(pageSize)
-  .exec()
+  const data = await GlobalModel.aggregate([
+    {
+      $sort: {
+        createdAt: 1
+      }
+    },
+    {
+      $skip: currPage * pageSize
+    },
+    {
+      $limit: pageSize
+    },
+    {
+      $project: {
+        notice: 1,
+        visit_count: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        info: 1,
+        valid: 1
+      }
+    }
+  ])
   .catch(dealErr(ctx))
 
   responseDataDeal({
@@ -185,7 +193,6 @@ router
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => ({ data: { _id: data._id } }))
   .catch(dealErr(ctx))

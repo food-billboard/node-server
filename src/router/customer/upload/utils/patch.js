@@ -178,7 +178,6 @@ const pathMediaDeal = {
       "info.mime": 1,
       auth: 1
     })
-    .then(data => !!data && data._doc)
     .then(notFound)
     .then(data => {
       const { info: { complete, chunk_size, size, mime:upperMime }, auth } = data
@@ -270,7 +269,6 @@ const pathMediaDeal = {
       "info.mime": 1,
       auth: 1
     })
-    .then(data => !!data && data._doc)
     .then(notFound)
     .then(data => {
       const { info: { complete, chunk_size, size, mime:upperMime }, auth } = data
@@ -363,7 +361,6 @@ const pathMediaDeal = {
       "info.mime": 1,
       auth: 1
     })
-    .then(data => !!data && data._doc)
     .then(notFound)
     .then(data => {
       const { info: { complete, chunk_size, size, mime: upperMime }, auth } = data

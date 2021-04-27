@@ -33,7 +33,6 @@ router
     mobile: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { fans, attentions, issue, comment, store, ...nextData } = data
@@ -100,7 +99,6 @@ router
     _id: 1,
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => ({
     data: {

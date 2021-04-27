@@ -40,10 +40,6 @@ describe(`${COMMON_API} test`, function() {
         console.log('oops: ', err)
       })
     })
-
-    beforeEach(() => {
-
-    })
     
     describe(`post for logout success test -> ${COMMON_API}`, function() {
 

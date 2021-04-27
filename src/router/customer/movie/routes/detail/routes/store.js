@@ -50,8 +50,8 @@ router
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._doc._id)
   .then(notFound)
+  .then(data => data._id)
   .then(_id => {
     return UserModel.updateOne({
       _id: ObjectId(id),
@@ -95,8 +95,8 @@ router
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._doc._id)
   .then(notFound)
+  .then(data => data._id)
   .then(_id => {
     return UserModel.updateOne({
       _id: ObjectId(id),

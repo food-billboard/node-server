@@ -57,7 +57,6 @@ router
     }
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { attentions, ...nextData } = data
@@ -65,7 +64,7 @@ router
       data: {
         ...nextData,
         attentions: attentions.map(a => {
-          const { _doc: { _id: { _doc: { avatar, ...nextA } } } } = a
+          const { _id: { avatar, ...nextA } } = a
           return {
             ...nextA,
             avatar: avatar ? avatar.src : null

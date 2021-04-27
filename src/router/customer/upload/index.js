@@ -147,7 +147,6 @@ router
     roles: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => headRequestDeal({
     metadata,
@@ -239,7 +238,6 @@ router
     roles: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => patchRequestDeal({
     user: data,
@@ -316,7 +314,6 @@ router
         white_list: 1,
       })
       .exec()
-      .then(data => !!data && data._doc)
       .then(notFound)
     }))
     .then(results => ({ results, type }))
@@ -411,7 +408,6 @@ router
     roles: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => postMediaDeal({
     metadata,

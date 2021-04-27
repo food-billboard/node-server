@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const { omit } = require('lodash')
-const { signToken, encoded, dealErr, UserModel, RoomModel, Params, responseDataDeal, setCookie, TOKEN_COOKIE } = require("@src/utils")
+const { signToken, encoded, dealErr, UserModel, RoomModel, Params, responseDataDeal, setCookie, TOKEN_COOKIE, notFound, parseData } = require("@src/utils")
 
 const router = new Router()
 
@@ -46,7 +46,7 @@ router
     roles: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
+  .then(parseData)
   .then(data => {
     if(!data) return Promise.reject({ errMsg: '账号或密码错误', status: 403 })
     return data

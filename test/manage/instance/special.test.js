@@ -232,7 +232,9 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, target => {
             expect(target.list.length).to.not.be.equals(0)
-            expect(target.list[target.list.length - 1]._id).to.be.equal(specialIdA.toString())
+            const indexThan = target.list.findIndex(item => specialIdA.equals(item._id))
+            const indexLess = target.list.findIndex(item => specialId.equals(item._id))
+            expect(indexThan > indexLess).to.be.true
           })
           done()
         })
@@ -352,7 +354,8 @@ describe(`${COMMON_API} test`, function() {
             done(err)
           }
           responseExpect(obj, target => {
-            expect(target.list.length).to.be.equals(0)
+            const index = target.list.findIndex(item => specialId.equals(item._id))
+            expect(index).to.be.equals(-1)
           })
           done()
         })
@@ -381,7 +384,7 @@ describe(`${COMMON_API} test`, function() {
         .exec()
         .then(data => {
           expect(data).to.be.a('array')
-          expect(data.length).to.be.eql(2)
+          expect(data.length >= 2).to.be.true
           const target = data.find(item => item.name == nameHaveValid)
           expect(!!target).to.be.true
           expect(target.valid).to.be.true

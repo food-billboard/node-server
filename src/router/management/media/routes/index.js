@@ -354,7 +354,6 @@ router
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => ({ data: { _id: data._id } }))
   .catch(dealErr(ctx))

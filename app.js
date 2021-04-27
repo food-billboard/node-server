@@ -1,4 +1,7 @@
 const Koa = require('koa')
+const Day = require('dayjs')
+const Utc = require('dayjs/plugin/utc')
+const Timezone = require('dayjs/plugin/timezone')
 require('module-alias/register')
 const Router = require('./src/index')
 const Cors = require('koa-cors')
@@ -23,6 +26,11 @@ const {
   rankSchedule
 } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
+
+//时区设置
+Day.extend(Utc)
+Day.extend(Timezone)
+Day.tz.setDefault("China/BeiJing")
 
 //数据库启动
 MongoDB()
@@ -60,7 +68,6 @@ app.use(Cors())
     flush: require('zlib').constants.Z_SYNC_FLUSH,
   },
 }))
-// app.use(bodyParser())
 //请求速率限制
 .use(AccessLimitCheck)
 .use(KoaBody({

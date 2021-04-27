@@ -70,12 +70,11 @@ function responseExpect(res, validate=[]) {
   commonValidate.time(screen_time)
   expect(actor).to.be.a('array').and.that.lengthOf.above(0)
   actor.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('name', 'other')
-    const { name, other } = item
+    expect(item).to.be.a('object').and.that.includes.any.keys('name', 'avatar')
+    const { name, avatar } = item
     commonValidate.string(name)
-    expect(other).to.be.a('object')
-    if(other.avatar != undefined) {
-      commonValidate.poster(other.avatar)
+    if(avatar != undefined) {
+      commonValidate.string(avatar)
     }
 
   })
@@ -117,8 +116,7 @@ function responseExpect(res, validate=[]) {
   target.tag.forEach(item => {
     expect(item).to.be.a('object').and.that.have.a.property('text').that.is.a('string').and.that.lengthOf.above(0)
   })
-  expect(target.video).to.be.a('object').and.that.have.property('src')
-  commonValidate.poster(target.video.src)
+  commonValidate.string(target.video)
   commonValidate.objectId(target._id)
 
   if(Array.isArray(validate)) {

@@ -32,7 +32,6 @@ router.get('/', async (ctx) => {
     "info.description": 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { poster, info: { description }, ...nextData } = data

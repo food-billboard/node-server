@@ -11,7 +11,9 @@ const getDateParams = (ctx) => {
   }, {
     name: 'start_date',
     sanitizers: [
-      data => (typeof data === 'string' && /\d{4}-\d{2}-\d{2}(-\d{2})?/.test(data)) ? Day(data) : undefined
+      data => {
+        return (typeof data === 'string' && /\d{4}-\d{2}-\d{2}(-\d{2})?/.test(data)) ? Day(data) : undefined
+      }
     ]
   }, {
     name: 'end_date',
@@ -44,8 +46,8 @@ const getDateParams = (ctx) => {
   let sort = {
     "_id.year": 1
   }
-  let _start_date = start_date
-  let _end_date = end_date
+  let _start_date = start_date.utcOffset(8)
+  let _end_date = end_date.utcOffset(8)
 
   if(dateType == 'year') {
     group = {
@@ -67,7 +69,7 @@ const getDateParams = (ctx) => {
     const endYear = _end_date.year()
     let startMonth = _start_date.month()
     const endMonth = _end_date.month()
-    while(startYear != endYear || startMonth != endMonth) {
+    while((startYear != endYear || startMonth != endMonth) && startYear <= endYear) {
       templateList.push({
         year: startYear,
         month: startMonth + 1,
@@ -112,7 +114,7 @@ const getDateParams = (ctx) => {
     const endMonth = _end_date.month()
     let startDate = _start_date.date()
     const endDate = _end_date.date()
-    while(startYear != endYear || startMonth != endMonth || startDate != endDate) {
+    while((startYear != endYear || startMonth != endMonth || startDate != endDate) && startYear <= endYear) {
       templateList.push({
         year: startYear,
         month: startMonth + 1,
@@ -163,7 +165,7 @@ const getDateParams = (ctx) => {
     const endMonth = _end_date.month()
     let startDate = _start_date.date()
     const endDate = _end_date.date()
-    while(startYear != endYear || startMonth != endMonth || startDate != endDate) {
+    while((startYear != endYear || startMonth != endMonth || startDate != endDate) && startYear <= endYear) {
       templateList.push({
         year: startYear,
         month: startMonth + 1,
@@ -217,7 +219,7 @@ const getDateParams = (ctx) => {
     let startHour = _start_date.hour()
     const endHour = _end_date.hour()
 
-    while(startYear != endYear || startMonth != endMonth || startDate != endDate || startHour != endHour) {
+    while((startYear != endYear || startMonth != endMonth || startDate != endDate || startHour != endHour) && startYear <= endYear) {
       templateList.push({
         year: startYear,
         month: startMonth + 1,

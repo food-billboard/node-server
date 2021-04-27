@@ -80,8 +80,8 @@ const dealMedia = async (mobile, origin, auth='PUBLIC', ...files) => {
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._doc._id)
   .then(notFound)
+  .then(data => data._id)
   .catch(err => {
     return false
   })

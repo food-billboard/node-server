@@ -8,9 +8,9 @@ const COMMON_API = '/api/manage/movie/detail/info/district'
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('array')
+  expect(target).to.be.a('object').and.that.includes.all.keys('total', 'list')
 
-  target.forEach(item => {
+  target.list.forEach(item => {
     expect(item).to.be.a('object').that.includes.all.keys('_id', 'name', 'createdAt', 'updatedAt', 'source_type')
     commonValidate.objectId(item._id)
     commonValidate.string(item.name)
@@ -132,7 +132,7 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length).to.be.not.equals(0)
+          expect(target.list.length).to.be.not.equals(0)
         })
         done()
       })
@@ -162,7 +162,7 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length).to.be.not.equals(0)
+          expect(target.list.length).to.be.not.equals(0)
         })
         done()
       })
@@ -192,7 +192,6 @@ describe(`${COMMON_API} test`, () => {
         .expect('Content-Type', /json/)
       })
       .then(function(res) {
-        if(err) return done(err)
         const { res: { text } } = res
         let obj
         try{
@@ -201,9 +200,12 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length > 1).to.be.true
+          expect(target.list.length > 1).to.be.true
         })
         done()
+      })
+      .catch(err => {
+        console.log('oops: ', err)
       })
 
     })

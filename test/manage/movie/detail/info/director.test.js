@@ -8,14 +8,17 @@ const COMMON_API = '/api/manage/movie/detail/info/director'
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('array')
+  expect(target).to.be.a('object').and.that.includes.all.keys('total', 'list')
 
-  target.forEach(item => {
-    expect(item).to.be.a('object').that.includes.all.keys('_id', 'another_name', 'name', 'createdAt', 'updatedAt', 'avatar', 'source_type', 'country')
+  target.list.forEach(item => {
+    expect(item).to.be.a('object').that.includes.any.keys('_id', 'another_name', 'name', 'createdAt', 'updatedAt', 'avatar', 'avatar_id', 'source_type', 'country')
     commonValidate.objectId(item._id)
     commonValidate.string(item.another_name)
     commonValidate.string(item.name)
-    commonValidate.poster(item.avatar)
+    if(item.avatar) {
+      commonValidate.poster(item.avatar)
+      commonValidate.poster(item.avatar_id)
+    }
     commonValidate.string(item.source_type)
     commonValidate.date(item.createdAt)
     commonValidate.date(item.updatedAt)
@@ -152,7 +155,7 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length).to.be.not.equals(0)
+          expect(target.list.length).to.be.not.equals(0)
         })
         done()
       })
@@ -182,7 +185,7 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length).to.be.not.equals(0)
+          expect(target.list.length).to.be.not.equals(0)
         })
         done()
       })
@@ -216,7 +219,6 @@ describe(`${COMMON_API} test`, () => {
         .expect('Content-Type', /json/)
       })
       .then(function(res) {
-        if(err) return done(err)
         const { res: { text } } = res
         let obj
         try{
@@ -225,9 +227,12 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.length > 1).to.be.true
+          expect(target.list.length > 1).to.be.true
         })
         done()
+      })
+      .catch(err => {
+        console.log('oops: ', err)
       })
 
     })

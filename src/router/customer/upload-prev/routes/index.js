@@ -3,13 +3,12 @@ const {
   VideoModel, 
   ImageModel, 
   OtherMediaModel, 
-  UserModel, 
   notFound, 
   dealErr, 
   verifyTokenToData,
   Params,
   responseDataDeal,
-  isType,
+  parseData,
   STATIC_FILE_PATH
 } = require('@src/utils')
 const { mergeChunkFile, finalFilePath, conserveBlob, isFileExistsAndComplete, ACCEPT_IMAGE_MIME, ACCEPT_VIDEO_MIME, MAX_FILE_SIZE } = require('../util')
@@ -132,7 +131,6 @@ router
     info: 1,
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(async (data) => {
 
     let isExits = isFileExistsAndComplete(`${md5}.${/[a-zA-Z]{1,20}\/[a-zA-Z]{1,20}/.test(suffix) ? suffix.split('/')[1] : suffix}`, model, size, auth)
@@ -319,15 +317,15 @@ router
     VideoModel.findOne(commonQuery)
     .select(commonSelect)
     .exec()
-    .then(data => !!data && data._doc),
+    .then(parseData),
     ImageModel.findOne(commonQuery)
     .select(commonSelect)
     .exec()
-    .then(data => !!data && data._doc),
+    .then(parseData),
     OtherMediaModel.findOne(commonQuery)
     .select(commonSelect)
     .exec()
-    .then(data => !!data && data._doc),
+    .then(parseData),
   ])
   .then(data => !!data && data.some(item => !!item) && data)
   .then(notFound)

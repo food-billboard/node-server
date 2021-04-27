@@ -57,19 +57,18 @@ router
     },
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     id = ObjectId(id)
-    const { sub_comments, like_person, comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextUserInfo } }, ...nextComment } = data
+    const { sub_comments, like_person, comment_users, content: { image, video, ...nextContent }, user_info: { avatar, ...nextUserInfo }, ...nextComment } = data
     return {
       data: {
         sub: [...sub_comments.map(sub => {
-          const { _doc: { comment_users, like_person, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextSub } } = sub
+          const { comment_users, like_person, content: { image, video, ...nextContent }, user_info: { avatar, ...nextInfo }, ...nextSub } = sub
           return {
             ...nextSub,
             comment_users: comment_users.map(com => {
-              const { _doc: { avatar, ...nextCom } } = com
+              const { avatar, ...nextCom } = com
               return {
                 ...nextCom,
                 avatar: avatar ? avatar.src : null

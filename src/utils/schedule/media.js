@@ -99,34 +99,34 @@ const templateFileDeal = async () => {
 
 }
 
+function scheduleMethod() {
+  console.log(chalk.yellow('媒体资源定时审查'))
+
+  //图片
+  mediaDeal({
+    path: path.join('static', 'image'),
+    model: ImageModel
+  })
+
+  //视频
+  mediaDeal({
+    path: path.join(STATIC_FILE_PATH, 'video'),
+    model: VideoModel
+  })
+
+  //其他
+  mediaDeal({
+    path: path.join(STATIC_FILE_PATH, 'other'),
+    model: OtherMediaModel
+  })
+
+  //临时文件过期删除
+  templateFileDeal()
+}
+
 const mediaSchedule = () => {
 
-  const schedule = nodeSchedule.scheduleJob('0  0  20  *  *  7', function() {
-
-    console.log(chalk.yellow('媒体资源定时审查'))
-
-    //图片
-    mediaDeal({
-      path: path.join('static', 'image'),
-      model: ImageModel
-    })
-
-    //视频
-    mediaDeal({
-      path: path.join(STATIC_FILE_PATH, 'video'),
-      model: VideoModel
-    })
-
-    //其他
-    mediaDeal({
-      path: path.join(STATIC_FILE_PATH, 'other'),
-      model: OtherMediaModel
-    })
-
-    //临时文件过期删除
-    templateFileDeal()
-
-  })
+  const schedule = nodeSchedule.scheduleJob('0  0  20  *  *  7', scheduleMethod)
 
 }
 

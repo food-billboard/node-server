@@ -40,7 +40,6 @@ router
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._doc._id)
   .then(notFound) 
   : 
   Promise.resolve())

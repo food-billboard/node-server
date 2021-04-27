@@ -64,7 +64,6 @@ router.get('/', async (ctx) => {
     },
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { comment, _id: userId, avatar, ...nextData } = data
@@ -74,17 +73,15 @@ router.get('/', async (ctx) => {
         comment: comment.map(c => {
           like = false
           const { 
-            _doc: { 
-              like_person, 
-              content: { image, video, ...nextContent }, 
-              source={}, 
-              source_type,
-              comment_users,
-              ...nextC 
-            } 
+            like_person, 
+            content: { image, video, ...nextContent }, 
+            source={}, 
+            source_type,
+            comment_users,
+            ...nextC 
           } = c
 
-          const { _doc: { name, content, ...nextSoruce } } = source
+          const { name, content, ...nextSoruce } = source
           if(like_person.some(l => l.equals(userId))) {
             like = true
           }

@@ -36,7 +36,6 @@ router
     _id: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .catch(dealErr(ctx))
 

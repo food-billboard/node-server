@@ -1,5 +1,6 @@
 const Router = require('@koa/router')
-const { MovieModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { omit } = require('lodash')
+const { MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -64,7 +65,6 @@ router.get('/', async (ctx) => {
     },
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { comment } = data
@@ -72,32 +72,35 @@ router.get('/', async (ctx) => {
       data: {
         ...data,
         comment: comment.map(c => {
-          const { _doc: { comment_users, content: { image, video, ...nextContent }, user_info: { _doc: { avatar, ...nextInfo } }, ...nextC } } = c
+          const { comment_users, content: { image, video, ...nextContent }, user_info, ...nextC } = c
           return {
             ...nextC,
             like: false,
             comment_users: comment_users.map(com => {
-              const { _doc: { avatar, ...nextCom } } = com
+              const { avatar, ...nextCom } = com
               return {
                 ...nextCom,
-                avatar: avatar ? avatar.src : null
+                avatar: avatarGet(avatar)
               }
             }),
             content: {
               ...nextContent,
-              image: image.filter(i => i && !!i.src).map(i => i.src),
-              video: video.filter(v => v &&!!v.src).map(v => v.src),
+              image: image.filter(i => i && !!i.src).map(i => avatarGet(i)),
+              video: video.filter(v => v &&!!v.src).map(v => avatarGet(v)),
             },
             user_info: {
-              ...nextInfo,
-              avatar: avatar ? avatar.src : null
+              ...omit(user_info || {}, ['avatar']),
+              avatar: avatarGet((user_info || {}).avatar || {})
             }
           }
         })
       }
     }
   })
-  .catch(dealErr(ctx))
+  .catch(err => {
+    console.log(err)
+    return dealErr(ctx)(err)
+  })
 
   responseDataDeal({
     ctx,

@@ -4,7 +4,7 @@ const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const { Types: { ObjectId } } = require("mongoose")
-const { UserModel, dealErr, Params, responseDataDeal } = require("@src/utils")
+const { UserModel, dealErr, Params, responseDataDeal, parseData } = require("@src/utils")
 
 const router = new Router()
 
@@ -42,7 +42,7 @@ router
     updatedAt: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
+  .then(parseData)
   .then(data => {
     if(!data) return Promise.reject({ errMsg: 'not found', status: 404 })
     const { avatar, attentions, fans, ...nextData } = data

@@ -43,7 +43,6 @@ router
     }
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { fans, _id, ...nextData } = data
@@ -51,7 +50,7 @@ router
       data: {
         ...nextData,
         fans: fans.map(f => {
-          const { _doc: { _id: { _doc: { avatar, ...nextF } } } } = f
+          const { _id: { avatar, ...nextF } } = f
           return {
             avatar: avatar ? avatar.src : null,
             ...nextF

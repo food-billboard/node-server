@@ -126,12 +126,13 @@ describe(`${COMMON_API} test`, function() {
         .then(data => {
           const { _doc: { username, avatar, description } } = data
           expect(username).to.be.equals(newUserName)
-          expect(avatar.src == (COMMON_API)).to.be.true
+          expect(avatar._id.toString() == (newAvatar.toString())).to.be.true
           expect(description).to.be.equals(newDescription)
           done()
         })
         .catch(err => {
           console.log('oops: ', err)
+          done(err)
         })
       })
 

@@ -21,15 +21,6 @@
 ### 开发
 1. 测试 `npm run test`  
 2. 测试覆盖率 `npm run coverage`
-3. mongodb  
-- 安装
-- 启动
-4. redis  
-- 安装
-- 启动
-5. ffmpeg  
-- 安装
-- 启动
 6. 开发环境启动 `npm run dev`
 7. 开发生产环境启动  `npm run dev_prod`  
 8. 生产环境启动  `npm run prod`  

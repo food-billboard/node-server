@@ -123,6 +123,7 @@ router
         createdAt: 1,
         updatedAt: 1,
         source_type: 1,
+        another_name: "$other.another_name",
         avatar: "$avatar.src",
         avatar_id: "$avatar._id",
         country: {
@@ -185,7 +186,6 @@ router
     roles: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { _id, roles } = data

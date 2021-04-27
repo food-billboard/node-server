@@ -53,7 +53,6 @@ router
       }
     }
   })
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { comment } = data
@@ -61,8 +60,8 @@ router
       data: {
         ...data,
         comment: comment.map(c => {
-          const { _doc: { user_info, ...nextC } } = c
-          const { _doc: { avatar, roles, ...nextInfo } } = user_info
+          const { user_info, ...nextC } = c
+          const { avatar, roles, ...nextInfo } = user_info
           return {
             ...nextC,
             user_info: {

@@ -74,7 +74,6 @@ router
     }
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { issue } = data
@@ -82,7 +81,7 @@ router
       data: {
         ...data,
         issue: issue.map(s => {
-          const { _doc: { _id: { _doc: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } } } = s
+          const { _id: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
           const rate = total_rate / rate_person
           return {
             ...nextS,

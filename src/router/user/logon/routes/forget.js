@@ -38,7 +38,6 @@ router
     })
     .exec()
   })
-  .then(data => !!data && data._doc._id)
   .then(notFound)
   .then(_ => {
     return {

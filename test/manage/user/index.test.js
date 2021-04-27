@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { UserModel, ImageModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateImage } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateImage, createMobile } = require('@test/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/manage/user'
@@ -13,7 +13,7 @@ function responseExpect(res, validate=[]) {
   commonValidate.number(target.total)
   expect(target.list).to.be.a('array')
   target.list.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'createdAt', 'updatedAt', 'username', 'mobile', 'email', 'hot', 'status', 'roles', 'fans_count', 'attentions_count', 'issue_count', 'comment_count', 'store_count')
+    expect(item).to.be.a('object').and.that.include.any.keys('_id', 'avatar', 'createdAt', 'updatedAt', 'username', 'mobile', 'email', 'hot', 'status', 'roles', 'fans_count', 'attentions_count', 'issue_count', 'comment_count', 'store_count')
 
     commonValidate.objectId(item._id)
     commonValidate.date(item.createdAt)
@@ -23,6 +23,9 @@ function responseExpect(res, validate=[]) {
     commonValidate.string(item.email)
     commonValidate.number(item.hot)
     commonValidate.string(item.status)
+    if(item.avatar) {
+      commonValidate.poster(item.avatar)
+    }
     expect(item.roles).to.be.a('array')
     item.roles.forEach(role => commonValidate.string(role))
     commonValidate.number(item.fans_count)
@@ -159,7 +162,7 @@ describe(`${COMMON_API} test`, function() {
             console.log(_)
           }
           responseExpect(obj, target => {
-            expect(target.list.length).to.be.equals(0)
+            expect(target.list.some(item => userInfo._id.equals(item._id))).to.be.false
           })
           done()
         })
@@ -293,18 +296,22 @@ describe(`${COMMON_API} test`, function() {
       after(function(done) {
 
         UserModel.deleteOne({
-          username: COMMON_API.slice(1)
+          username: COMMON_API.slice(1),
+          roles: ["USER", 'CUSTOMER']
         })
         .then(_ => {
           done()
         })
         .catch(err => {
           console.log('oops: ', err)
+          done(err)
         })
 
       })
 
       it(`post the user success`, function(done) {
+
+        const mobile = createMobile()
 
         Request
         .post(COMMON_API)
@@ -313,13 +320,13 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          mobile: 13111111111,
+          mobile: mobile,
           password: 'shenjing8',
-          email: '13111111111@163.com',
+          email: `${mobile}@163.com`,
           username: COMMON_API.slice(1),
           description: COMMON_API,
           avatar: imageId.toString(),
-          role: 'USER'
+          role: 'USER,CUSTOMER'
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -358,10 +365,11 @@ describe(`${COMMON_API} test`, function() {
 
         UserModel.findOne({
           _id: userInfo._id,
-          username: COMMON_API.slice(2)
+          username: COMMON_API.slice(2),
+          roles: ["USER", "CUSTOMER"]
         })
         .select({
-          _id: 1
+          _id: 1,
         })
         .exec()
         .then(data => {
@@ -375,6 +383,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .catch(err => {
           console.log('oops: ', err)
+          done(err)
         })
 
       })
@@ -389,7 +398,7 @@ describe(`${COMMON_API} test`, function() {
           username: COMMON_API.slice(2),
           description: userInfo.description,
           avatar: imageId.toString(),
-          role: 'USER'
+          role: 'USER,CUSTOMER'
         }
 
         Request

@@ -36,7 +36,6 @@ async function Auth(ctx, next) {
       roles: 1
     })
     .exec()
-    .then(data => !!data && data._doc)
     .then(notFound)
   ])
   .then(([comment_data, userData]) => {

@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, MovieModel, BarrageModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const { verifyTokenToData, UserModel, MovieModel, BarrageModel, dealErr, notFound, Params, responseDataDeal, parseData } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 const { merge } = require('lodash')
 
@@ -77,12 +77,11 @@ router
     time_line: 1
   })
   .exec()
-  .then(data => !!data && data)
   .then(notFound)
   .then(data => {
     return {
       data: data.map(item => {
-        const { _doc: { like_users, ...nextItem } } = item
+        const { like_users, ...nextItem} = item
         return {
           ...nextItem,
           hot: like_users.length,
@@ -148,7 +147,6 @@ router
   })
   .select({_id: 1})
   .exec()
-  .then(data => !!data)
   .then(notFound)
   .then(_ => {
     const newModel = new BarrageModel({
@@ -160,6 +158,8 @@ router
     })
     return newModel.save()
   })
+  .then(parseData)
+  .then(data => ({ data }))
   .catch(dealErr(ctx))
 
   responseDataDeal({
@@ -199,7 +199,6 @@ router
     user: 1,
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { user, _id } = data
@@ -251,7 +250,6 @@ router
     user: 1
   })
   .exec()
-  .then(data => !!data && data._doc)
   .then(notFound)
   .then(data => {
     const { user, _id } = data
