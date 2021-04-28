@@ -3,7 +3,51 @@ const chalk = require('chalk')
 const { log4Error } = require('@src/config/winston')
 const { classifyDeal } = require('./classify')
 const { staticDeal } = require('./static')
-const { RankModel } = require('../../mongodb/mongo.lib')
+const { RankModel, MovieModel } = require('../../mongodb/mongo.lib')
+const { rankOperation } = require('./utils')
+const { parseData } = require('../../error-deal')
+
+function findMatchMovieData() {
+  let result 
+  return RankModel.aggregate([
+    {
+      $project: {
+        match_pattern:1,
+        _id: 1
+      }
+    }
+  ])
+  .then(data => {
+    result = data
+    return Promise.all(result.map(item => {
+      const { match_pattern } = item 
+      const { filter } = rankOperation(match_pattern)
+      return MovieModel.aggregate([
+        {
+          $match: filter
+        },
+        {
+          $project: {
+            _id: 1
+          }
+        }
+      ])
+      .then(parseData)
+    }))
+  })
+  .then(movieData => {
+    return Promise.all(result.map((item, index) => {
+      const { _id } = item 
+      return RankModel.updateOne({
+        _id,
+      }, {
+        $set: {
+          match: movieData[index]
+        }
+      })
+    }))
+  })
+}
 
 function scheduleMethod() {
 
@@ -40,7 +84,9 @@ function scheduleMethod() {
       RankModel.insertMany(add)
     ])
   })
+  .then(findMatchMovieData)
   .catch(err => {
+    console.log(err)
     log4Error({
       __request_log_id__: '排行榜资源定时更新'
     }, err)
@@ -49,9 +95,7 @@ function scheduleMethod() {
 }
 
 const rankSchedule = async () => {
-
   const schedule = nodeSchedule.scheduleJob('0  0  18  *  *  7', scheduleMethod)
-
 }
 
 module.exports = {

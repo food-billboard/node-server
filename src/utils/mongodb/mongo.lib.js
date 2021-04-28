@@ -1040,6 +1040,12 @@ const RankSchema = new Schema({
     unique: true,
   },
   other: {},
+  match: [
+    {
+      type: ObjectId,
+      ref: 'movie'
+    }
+  ],
   icon: {
     type: ObjectId,
     ref: 'image'

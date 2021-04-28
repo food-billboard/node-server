@@ -1,8 +1,7 @@
 const Router = require('@koa/router')
 const SpecDropList = require('./specDropList')
-const { RankModel, dealErr, notFound, Params, MovieModel, responseDataDeal } = require("@src/utils")
+const { RankModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
-const { rankOperation } = require('./utils')
 
 const router = new Router()
 
@@ -90,17 +89,13 @@ router
 		$inc: { glance: 1 }
 	})
 	.select({
-		match_pattern:1,
+		match: 1,
 		updatedAt: 1,
 		_id: 0
 	})
-	.exec()
-	.then(notFound)
-	.then(data => data.match_pattern)
-	.then(data => {
-		const { filter, sort } = rankOperation(data)
-		return MovieModel.find(filter)
-		.select({
+	.populate({
+		path: 'match',
+		select: {
 			"info.classify": 1,
 			"info.description": 1,
 			"info.name": 1,
@@ -110,37 +105,41 @@ router
 			author_rate: 1,
 			total_rate: 1,
 			rate_person: 1
-		})
-		.skip((currPage >= 0 && pageSize >= 0) ? pageSize * currPage : 0)
-		.limit(pageSize >= 0 ? pageSize : 0)
-		.populate({
-			path: 'info.classify',
-			select: {
-				_id: 0,
-				name: 1
+		},
+		options: {
+			sort: {
+				...(!!glance ? { glance: 1 } : {}),
+				...(!!author_rate ? { author_rate: 1 } : {}),
+				...(!!hot ? { hot: 1 } : {}),
+				...(!!rate_person ? { rate_person: 1 } : {}),
+				...(!!total_rate ? { total_rate: 1 } : {}),
+			},
+			skip: (currPage >= 0 && pageSize >= 0) ? pageSize * currPage : 0,
+			limit: pageSize >= 0 ? pageSize : 0
+		},
+		populate: [
+			{
+				path: 'info.classify',
+				select: {
+					_id: 0,
+					name: 1
+				}
 			}
-		})
-		.sort({
-			...(!!glance ? { glance: 1 } : {}),
-			...(!!author_rate ? { author_rate: 1 } : {}),
-			...(!!hot ? { hot: 1 } : {}),
-			...(!!rate_person ? { rate_person: 1 } : {}),
-			...(!!total_rate ? { total_rate: 1 } : {}),
-			...sort
-		})
-		.exec()
+		]
 	})
-	.then(data => !!data && data)
+	.exec()
 	.then(notFound)
 	.then(data => {
+		const { match } = data 
+		console.log(match, data)
 		return {
-			data: data.map(m => {
+			data: match.map(m => {
 				const { poster, info: { classify, description, name, screen_time }, total_rate, rate_person, ...nextM } = m
 				const rate = total_rate / rate_person
 				return {
 					...nextM,
 					store: false,
-					poster: poster ? poster.src : null,
+					poster: avatarGet(poster) ,
 					publish_time: screen_time,
 					classify,
 					name,

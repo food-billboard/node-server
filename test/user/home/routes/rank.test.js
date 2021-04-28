@@ -17,10 +17,13 @@ function responseExpect(res, validate=[]) {
          
   expect(target).to.be.a('array')
   target.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('icon', 'match', 'name', '_id')
+    expect(item).to.be.a('object').and.that.includes.any.keys('icon', 'match', 'name', '_id', 'updatedAt')
     commonValidate.objectId(item._id)
-    commonValidate.poster(item.icon)
+    if(item.icon) {
+      commonValidate.poster(item.icon)
+    }
     commonValidate.string(item.name)
+    commonValidate.date(item.updatedAt)
     // commonValidate.string(item.match_field, function(target) {
     //   return ['classify', 'district'].indexOf(target.toLowerCase())
     // })

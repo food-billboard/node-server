@@ -1,6 +1,4 @@
 const { merge } = require('lodash')
-const { MovieModel } = require('@src/utils')
-
 
 const staticDeal = (record) => {
 
@@ -17,6 +15,9 @@ const staticDeal = (record) => {
 const classifyDeal = (record) => {
   return record.reduce((acc, cur) => {
     const { origin_id } = cur
+    if(!acc.filter["info.classify"]) acc.filter["info.classify"] = {
+      $in: []
+    }
     acc.filter["info.classify"]["$in"].push(origin_id)
     return acc
   }, {
@@ -30,7 +31,7 @@ const RANK_TYPE_MAP = {
   classify: classifyDeal
 }
 
-const rankOperation = async (data) => {
+const rankOperation = (data) => {
 
   const { movie, classify } = data.reduce((acc, cur) => {
     const { origin } = cur
@@ -42,8 +43,7 @@ const rankOperation = async (data) => {
   })
 
   const filterFields = merge({}, RANK_TYPE_MAP.movie(movie), RANK_TYPE_MAP.classify(classify))
-
-  return MovieModel.find(filterFields)
+  return filterFields
 }
 
 module.exports = {

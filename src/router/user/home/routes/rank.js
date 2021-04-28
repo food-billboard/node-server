@@ -1,9 +1,10 @@
 const Router = require('@koa/router')
-const { RankModel, MovieModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { RankModel, dealErr, avatarGet, Params, responseDataDeal, parseData } = require('@src/utils')
 
 const router = new Router()
 
-router.get('/', async(ctx) => {
+router
+.get('/', async(ctx) => {
   const [ count ] = Params.sanitizers(ctx.query, {
     name: 'count',
     _default: 3,
@@ -13,67 +14,59 @@ router.get('/', async(ctx) => {
     ]
   })
 
-  let result
-
-  const data = await RankModel.find({})
+  const data = await RankModel.find()
   .select({
-    other: 0,
-    createdAt: 0,
-    updatedAt: 0,
-    glance: 0,
+    match: 1,
+    icon: 1,
+    updatedAt: 1,
+    _id: 1,
+    name: 1
   })
   .sort({
     glance: -1
   })
   .limit(8)
-  .exec()
-  .then(notFound)
-  .then(data => {
-    result = data
-    return MovieModel.find({
-      $or: [
-        {
-          "info.classify": { $in: [ ...result.filter(item => item.match_field && item.match_field.field === 'classify').map(item => item.match_field._id) ] }
-        },
-        {
-          "info.district": { $in: [ ...result.filter(item => item.match_field && item.match_field.field === 'district').map(item => item.match_field._id) ] }
-        }
-      ]
-    })
-    .select({
-      poster: 1, 
-      name: 1,
-      "info.classify": 1,
-      "info.district": 1
-    })
-    .exec()
+  .populate({
+    path: 'icon',
+    select: {
+      src: 1
+    }
   })
-  .then(data => !!data && data)
-  .then(notFound)
+  .populate({
+    path: 'match',
+    select: {
+      name: 1,
+      _id: 1,
+      poster: 1
+    },
+    options: {
+      limit: count,
+    },
+    populate: [
+      {
+        path: 'poster',
+        select: {
+          src: 1
+        }
+      }
+    ]
+  })
+  .exec()
+  .then(parseData)
   .then(data => {
     return {
-      data: result.map(item => {
-        const { icon, match_field: { field, _id }, ...nextD } = item
-        const filter = data.filter(item => {
-          const { info } = item
-          return info[field].some(fd => fd.equals(_id))
-        })
-        .slice(0, count)
-        .map(m => {
-          const { poster, info, ...nextM } = m
-            return {
-              ...nextM,
-              match_field: field,
-              poster: poster ? poster.src : null,
-            }
-        })
-  
+      data: data.map(item => {
+        const { match, icon,...nextItem } = item 
         return {
-          ...nextD,
-          icon: icon ? icon.src : null,
-          match: filter
+          ...nextItem,
+          icon: avatarGet(icon),
+          match: match.map(item => {
+            return {
+              ...item,
+              poster: avatarGet(item.poster)
+            }
+          })
         }
-  
       })
     }
   })
@@ -83,40 +76,6 @@ router.get('/', async(ctx) => {
     ctx,
     data,
     needCache: false
-  })
-
-})
-.get('/test', async(ctx) => {
-  const [ count ] = Params.sanitizers(ctx.query, {
-    name: 'count',
-    _default: 3,
-    type: ['toInt'],
-    sanitizers: [
-      data => data > 0 ? data : 3
-    ]
-  })
-
-  let result 
-  const data = await RankModel.aggregate([
-    {
-      $sort: {
-        glance: -1
-      }
-    },
-    {
-      $limit: 8
-    },
-    {
-      match_pattern:1,
-      updatedAt: 1,
-      _id: 1
-    }
-  ])
-  .then(data => {
-    result = data 
-    return MovieModel.aggregate([
-
-    ])
   })
 
 })
