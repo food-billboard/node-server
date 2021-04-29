@@ -13,7 +13,7 @@ function responseExpect(res, validate=[]) {
   commonValidate.number(target.total)
 
   target.list.forEach(item => {
-    expect(item).to.be.a('object').that.includes.any.keys('_id', 'avatar_id', 'another_name', 'name', 'createdAt', 'updatedAt', 'avatar', 'source_type', 'country')
+    expect(item).to.be.a('object').that.includes.any.keys('key', '_id', 'avatar_id', 'another_name', 'name', 'createdAt', 'updatedAt', 'avatar', 'source_type', 'country')
     commonValidate.objectId(item._id)
     commonValidate.string(item.another_name)
     commonValidate.string(item.name)
@@ -21,6 +21,7 @@ function responseExpect(res, validate=[]) {
       commonValidate.poster(item.avatar)
       commonValidate.objectId(item.avatar_id)
     }
+    commonValidate.string(item.key)
     commonValidate.string(item.source_type)
     commonValidate.date(item.createdAt)
     commonValidate.date(item.updatedAt)

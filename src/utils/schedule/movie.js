@@ -2,8 +2,8 @@ const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
 const { Types: { ObjectId } } = require('mongoose')
 const { log4Error } = require('@src/config/winston')
-const {  } = require('../constant')
-const { MovieModel, UserModel, BarrageModel, TagModel, SpecialModel, SearchModel, CommentModel, RankModel } = require('../mongodb/mongo.lib')
+const { parseData } = require('../error-deal')
+const { MovieModel, UserModel } = require('../mongodb/mongo.lib')
 
 const findUsers = async () => {
 
@@ -12,11 +12,12 @@ const findUsers = async () => {
     _id: 1
   })
   .exec()
-  .then(data => data.map(item => item._doc._id))
-  .catch(err => {
-    console.log(chalk.red('定时任务用户查找错误: ' + JSON.stringify(err)))
-    return []
-  })
+  .then(parseData)
+  .then(data => data.map(item => item._id))
+  // .catch(err => {
+  //   console.log(chalk.red('定时任务用户查找错误: ' + JSON.stringify(err)))
+  //   return []
+  // })
 
 }
 
@@ -27,7 +28,8 @@ const findMovies = async () => {
     _id: 1
   })
   .exec()
-  .then(data => data.map(item => item._doc._id))
+  .then(parseData)
+  .then(data => data.map(item => item._id))
   .catch(err => {
     console.log(chalk.red('定时任务电影查找错误: ' + JSON.stringify(err)))
     return []
@@ -52,7 +54,7 @@ function scheduleMethod() {
   //当前简单实用评论当做tag
   findUsers()
   .then(removeMovies)
-  .then(findMovies)
+  // .then(findMovies)
   // .then(removeMovieMapping)
   // .then(results => {
   //   const errors = results.filter(result => result.status === "rejected")

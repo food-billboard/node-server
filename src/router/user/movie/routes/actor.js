@@ -15,7 +15,8 @@ router.get('/', async(ctx) => {
 
   const data = await ActorModel.find()
   .select({
-    name: 1
+    name: 1,
+    key: 1
   })
   .limit(count)
   .exec()

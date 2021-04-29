@@ -18,11 +18,16 @@ const mediaDeal = async ({
 
   return fs.readdir(folder)
   .then(fileList => {
-    files = fileList.map(file => path.join(folder, file))
+    files = fileList.reduce((acc, file) => {
+      const completePath = path.join(folder, file)
+      const [ relativePath ] = completePath.match(/(?<=.+)\/static\/(image|video|other).+/) || []
+      if(relativePath) acc.push(relativePath)
+      return acc 
+    }, [])
 
     const now = new Date()
 
-    return   model.deleteMany({
+    return model.deleteMany({
       $or: [
         {
           "info.status": MEDIA_STATUS.ERROR
@@ -104,7 +109,7 @@ function scheduleMethod() {
 
   //图片
   mediaDeal({
-    path: path.join('static', 'image'),
+    path: path.join(STATIC_FILE_PATH, 'image'),
     model: ImageModel
   })
 

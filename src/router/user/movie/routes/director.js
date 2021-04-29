@@ -15,7 +15,8 @@ router.get('/', async(ctx) => {
 
   const data = await DirectorModel.find()
   .select({
-    name: 1
+    name: 1,
+    key: 1
   })
   .limit(count)
   .exec()

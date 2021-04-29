@@ -11,9 +11,10 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.a('object').and.that.includes.all.keys('total', 'list')
 
   target.list.forEach(item => {
-    expect(item).to.be.a('object').that.includes.any.keys('_id', 'name', 'createdAt', 'updatedAt', 'icon', 'source_type', 'glance')
+    expect(item).to.be.a('object').that.includes.any.keys('key', '_id', 'name', 'createdAt', 'updatedAt', 'icon', 'source_type', 'glance')
     commonValidate.objectId(item._id)
     commonValidate.number(item.glance)
+    commonValidate.string(item.key)
     commonValidate.string(item.name)
     if(item.icon) {
       commonValidate.poster(item.icon)

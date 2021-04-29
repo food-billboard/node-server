@@ -383,8 +383,13 @@ const UserSchema = new Schema({
     timestamps: {
       type: Number,
       min: 0
-    }
+    },
   }],
+  glance_count: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
   comment: [{
     type: ObjectId,
     ref: 'comment',
@@ -827,6 +832,11 @@ const SpecialSchema = new Schema({
       type: Number
     }
   }],
+  glance_count: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
   valid: {
     type: Boolean,
     default: false,
@@ -851,6 +861,12 @@ const ActorSchema = new Schema({
         return v.length < 100
       }
     }
+  },
+  key: {
+    type: String,
+    required: true,
+    default: 'A',
+    uppercase: true
   },
   // works: [{
   //   type: ObjectId,
@@ -895,6 +911,12 @@ const DirectorSchema = new Schema({
       }
     }
   },
+  key: {
+    type: String,
+    required: true,
+    default: 'A',
+    uppercase: true
+  },
   country: {
     type: ObjectId,
     ref: 'district',
@@ -937,6 +959,12 @@ const DistrictSchema = new Schema({
         return v.length < 100
       }
     }
+  },
+  key: {
+    type: String,
+    required: true,
+    default: 'A',
+    uppercase: true
   },
   other: {},
   source_type: {
@@ -1102,6 +1130,12 @@ const ClassifySchema = new Schema({
       }
     }
   },
+  key: {
+    type: String,
+    required: true,
+    default: 'A',
+    uppercase: true
+  },
   other: {},
   icon: {
     type: ObjectId,
@@ -1135,6 +1169,12 @@ const LanguageSchema = new Schema({
         return v.length < 100
       }
     }
+  },
+  key: {
+    type: String,
+    required: true,
+    default: 'A',
+    uppercase: true
   },
   other: {},
   source_type: {

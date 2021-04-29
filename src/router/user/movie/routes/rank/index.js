@@ -91,7 +91,6 @@ router
 	.select({
 		match: 1,
 		updatedAt: 1,
-		_id: 0
 	})
 	.populate({
 		path: 'match',
@@ -131,7 +130,6 @@ router
 	.then(notFound)
 	.then(data => {
 		const { match } = data 
-		console.log(match, data)
 		return {
 			data: match.map(m => {
 				const { poster, info: { classify, description, name, screen_time }, total_rate, rate_person, ...nextM } = m

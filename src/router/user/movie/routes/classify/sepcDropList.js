@@ -33,7 +33,8 @@ router.get('/', async (ctx) => {
         _id: 1,
         icon: "$icon.src",
         name: 1,
-        updatedAt: 1
+        updatedAt: 1,
+        key: 1
       }
     }
   ])

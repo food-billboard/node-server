@@ -46,12 +46,14 @@ const setTag = async (dataList) => {
   return Promise.all(dataList.map(data => {
     const { id, value } = data
     const [ keyword ] = extractWord(value)
+    if(!keyword) return false 
     return generateTagData({
       text: keyword.word,
       weight: keyword.weight,
       source: ObjectId(id)
     })
   }))
+  .then(result => result.filter(item => !!item))
 }
 
 const updateMovieTag = (tagList) => {

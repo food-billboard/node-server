@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -39,7 +39,6 @@ router.get('/', async (ctx) => {
 			poster: 1,
 			"info.screen_time": 1,
 			hot: 1,
-			// author_rate: 1,
       total_rate: 1,
       rate_person: 1
     },
@@ -67,7 +66,7 @@ router.get('/', async (ctx) => {
           const rate = total_rate /rate_person
           return {
             ...nextD,
-            poster: poster ? poster.src : null,
+            poster: avatarGet(poster),
             description,
             name,
             classify,

@@ -20,10 +20,7 @@ const {
   redisConnect, 
   authMiddleware, 
   notes_customer_behaviour_middleware,
-  mediaSchedule,
-  // tagSchedule,
-  movieSchedule,
-  rankSchedule
+  schedule
 } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
 
@@ -38,14 +35,8 @@ MongoDB()
 initStaticFileDir()
 //redis服务启动
 redisConnect()
-//媒体资源定时器
-mediaSchedule()
-//数据标签定时器
-// tagSchedule()
-//无用数据删除
-movieSchedule()
-//排行榜资源更新
-rankSchedule()
+//定时任务
+schedule()
 
 app.use(Cors())
 //请求前植入uuid来进行全链路的日志记录

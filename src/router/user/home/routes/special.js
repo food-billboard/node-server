@@ -26,13 +26,30 @@ router
   
   const [, token] = verifyTokenToData(ctx)
   let pushData = { timestamps: Date.now() }
-  if(token) pushData = { ...pushData, _id: token.id }
+  let update = {
+    $push: {
+      glance: pushData
+    },
+    $inc: {
+      glance_count: 1
+    }
+  }
+  if(token) {
+    const _id = ObjectId(token.id)
+    pushData = { ...pushData, _id }
+    update = {
+      $pull: {
+        glance: { _id }
+      },
+      $inc: {
+        glance_count: 1
+      }
+    }
+  }
 
   const data = await SpecialModel.findOneAndUpdate({
     _id
-  }, {
-    $push: { glance: pushData }
-  })
+  }, update)
   .select({
     movie: 1,
     poster: 1,
@@ -102,6 +119,16 @@ router
     ctx,
     data
   })
+
+  if(token) {
+    try {
+      await SpecialModel.updateOne({
+        _id
+      }, {
+        $push: { glance: pushData }
+      })
+    }catch(err) {}
+  }
 
 })
 module.exports = router

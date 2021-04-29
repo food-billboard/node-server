@@ -2,7 +2,7 @@ const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Rate = require('./routes/rate')
 const Store = require('./routes/store')
-const { verifyTokenToData, middlewareVerifyToken, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const { verifyTokenToData, middlewareVerifyToken, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -41,11 +41,18 @@ router
 
   let store = true
 
+  let pushData = { timestamps: Date.now() }
+  pushData = { ...pushData, _id}
+
   const data = await UserModel.findOneAndUpdate({
-    _id: ObjectId(id),
-    // store: { $in: [_id] }
+    _id: ObjectId(id)
   }, {
-    $pull: { glance: { _id } },
+    $pull: {
+      "glance": { _id }
+    },
+    $inc: {
+      glance_count: 1
+    }
   })
   .select({
     _id: 1,
@@ -142,12 +149,6 @@ router
 
     const rate = total_rate / rate_person
 
-    UserModel.updateOne({
-      _id: ObjectId(id),
-    }, {
-      $push: { glance: { _id, timestamps: Date.now() } }
-    })
-
     return {
       data: {
         ...nextData,
@@ -166,7 +167,7 @@ router
             },
             user_info: {
               ...nextUserInfo,
-              avatar: avatar ? avatar.src : null
+              avatar: avatarGet(avatar)
             }
           }
         }),
@@ -205,6 +206,16 @@ router
     ctx,
     data
   })
+
+  try {
+    await UserModel.updateOne({
+      _id: ObjectId(id)
+    }, {
+      $push: {
+        "glance": pushData
+      }
+    })
+  }catch(err) {}
 
 })
 .use(middlewareVerifyToken)

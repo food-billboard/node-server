@@ -81,7 +81,7 @@ router.get('/', async (ctx) => {
             ...nextC 
           } = c
 
-          const { name, content, ...nextSoruce } = source
+          const { name, content, ...nextSoruce } = source || {}
           if(like_person.some(l => l.equals(userId))) {
             like = true
           }

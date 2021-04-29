@@ -100,6 +100,7 @@ router
         source_type: 1,
         icon: "$icon.src",
         icon_id: "$icon._id",
+        key: 1
       }
     }
   ]

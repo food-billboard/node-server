@@ -69,6 +69,7 @@ router
         createdAt: 1,
         updatedAt: 1,
         source_type: 1,
+        key: 1
       }
     }
   ]

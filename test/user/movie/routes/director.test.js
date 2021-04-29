@@ -12,9 +12,10 @@ function responseExpect(res, validate=[]) {
 
   expect(target).to.be.a('array')
   target.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('name', '_id')
+    expect(item).to.be.a('object').and.that.includes.all.keys('name', '_id', 'key')
     commonValidate.string(item.name)
     commonValidate.objectId(item._id)
+    commonValidate.string(item.key)
   })
 
   if(Array.isArray(validate)) {

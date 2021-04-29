@@ -285,7 +285,9 @@ const log4Error = (ctx, error) => {
   const { __request_log_id__ } = ctx
   if(process.env.NODE_ENV !== 'production' || !__request_log_id__) {
     // console.log(chalk.red('error', JSON.stringify(error)))
-    console.log(chalk.red('error', JSON.stringify(error)))
+    let err = JSON.stringify(error)
+    err = err === '{}' ? error : err
+    console.log(chalk.red('error', err))
     return
   }
 

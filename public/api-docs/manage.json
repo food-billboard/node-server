@@ -4334,6 +4334,10 @@
                         "type": "string",
                         "description": "别名"
                       },
+                      "key": {
+                        "type": "string",
+                        "description": "首字母"
+                      },
                       "name": {
                         "type": "string",
                         "description": "名称"
@@ -4408,6 +4412,10 @@
                           "type": "string",
                           "description": "名称"
                         },
+                        "key": {
+                          "type": "string",
+                          "description": "首字母"
+                        },
                         "createdAt": {
                           "type": "string",
                           "format": "date-time"
@@ -4476,6 +4484,10 @@
                         "type": "string",
                         "description": "名称"
                       },
+                      "key": {
+                        "type": "string",
+                        "description": "首字母"
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time"
@@ -4527,6 +4539,10 @@
                       "name": {
                         "type": "string",
                         "description": "名称"
+                      },
+                      "key": {
+                        "type": "string",
+                        "description": "首字母"
                       },
                       "createdAt": {
                         "type": "string",
@@ -4581,6 +4597,10 @@
                     "name": {
                       "type": "string",
                       "description": "名称"
+                    },
+                    "key": {
+                      "type": "string",
+                      "description": "首字母"
                     },
                     "createdAt": {
                       "type": "string",

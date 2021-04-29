@@ -57,7 +57,7 @@ const user_behaviour = {
     })
   },
   //电影
-  '\\/movie\/detail\\/.?': {
+  '\\/movie\/detail.?': {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
@@ -90,7 +90,7 @@ const customer_behaviour = {
     })
   },
   //电影
-  '\\/movie\\/detail\\/.?': {
+  '\\/movie\\/detail.?': {
     method: 'get',
     action: ({ user, target }) => ({
       timestamps: Date.now(),
