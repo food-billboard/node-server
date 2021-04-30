@@ -106,6 +106,7 @@ router
           status: 1,
           createdAt: 1,
           updatedAt: 1,
+          source_type: 1,
           barrage_count: {
             $size: {
               $ifNull: [

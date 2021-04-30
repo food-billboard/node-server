@@ -12,7 +12,7 @@ function checkCh(str){
   return len == 2
 } 
 
-function getWordPinYin(word) {
+function internalGetWordPinYin(word) {
   if(typeof word !== 'string') return word
   const firstWord = word.slice(0, 1)
   if(!checkCh(firstWord)) return firstWord.toUpperCase()
@@ -20,6 +20,23 @@ function getWordPinYin(word) {
     style: pinyin.STYLE_INITIALS
   }) || []
   return typeof result === 'string' ? result.slice(0, 1).toUpperCase() : firstWord.toUpperCase()
+}
+
+const WORD_MAP = [
+  'A', 'B', 'C', 'D', 'E', 'F', 'G',
+  'H', 'I', 'J', 'K', 'L', 'M', 'N',
+  'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+  'V', 'W', 'X', 'Y', 'Z'
+]
+
+function getWordPinYin(word) {
+  let text = word 
+  let result = text
+  while(typeof text === 'string' && text.length && !WORD_MAP.includes(result)) {
+    result = internalGetWordPinYin(text)
+    text = text.slice(1)
+  }
+  return result
 }
 
 module.exports = {

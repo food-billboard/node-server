@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { DirectorModel, UserModel, dealErr, notFound, Params, responseDataDeal, verifyTokenToData, ROLES_MAP, MOVIE_SOURCE_TYPE } = require('@src/utils')
+const { DirectorModel, UserModel, dealErr, notFound, Params, responseDataDeal, verifyTokenToData, ROLES_MAP, MOVIE_SOURCE_TYPE, getWordPinYin } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -193,6 +193,7 @@ router
     const model = new DirectorModel({
       name,
       country,
+      key: getWordPinYin(name),
       other: {
         another_name: alias || '',
         avatar
@@ -238,6 +239,7 @@ router
   }, {
     $set: {
       name,
+      key: getWordPinYin(name),
       country,
       "other.avatar": avatar,
       ...(alias ? { "other.another_name": alias } : {})

@@ -14,7 +14,7 @@ function responseExpect(res, validate=[]) {
   expect(target.list).to.be.a('array')
 
   target.list.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'name', 'author', 'comment_count', 'total_rate', 'rate_person', 'createdAt', 'updatedAt', 'glance', 'hot', 'status', 'tag_count', 'barrage_count')
+    expect(item).to.be.a('object').and.that.include.all.keys('source_type', '_id', 'name', 'author', 'comment_count', 'total_rate', 'rate_person', 'createdAt', 'updatedAt', 'glance', 'hot', 'status', 'tag_count', 'barrage_count')
     commonValidate.objectId(item._id)
     commonValidate.string(item.name)
     expect(item.author).to.be.a('object').and.that.include.all.keys('_id', 'username')
@@ -30,6 +30,7 @@ function responseExpect(res, validate=[]) {
     commonValidate.number(item.tag_count)
     commonValidate.number(item.barrage_count)
     commonValidate.string(item.status)
+    commonValidate.string(item.source_type)
   })
 
   if(Array.isArray(validate)) {

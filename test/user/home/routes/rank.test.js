@@ -24,18 +24,16 @@ function responseExpect(res, validate=[]) {
     }
     commonValidate.string(item.name)
     commonValidate.date(item.updatedAt)
-    // commonValidate.string(item.match_field, function(target) {
-    //   return ['classify', 'district'].indexOf(target.toLowerCase())
-    // })
     expect(item.match).to.be.a('array')
     item.match.forEach(mt => {
-      expect(mt).to.be.a('object').and.that.includes.all.keys('name', 'poster', '_id', 'match_field')
+      expect(mt).to.be.a('object').and.that.includes.all.keys('name', 'poster', '_id', 'updatedAt')
       commonValidate.string(mt.name)
       commonValidate.poster(mt.poster)
       commonValidate.objectId(mt._id)
-      commonValidate.string(mt.match_field, function(target) {
-        return !!~['classify', 'district'].indexOf(target.toLowerCase())
-      })
+      commonValidate.date(mt.updatedAt)
+      // commonValidate.string(mt.match_field, function(target) {
+      //   return !!~['classify', 'district'].indexOf(target.toLowerCase())
+      // })
     })
 
   })

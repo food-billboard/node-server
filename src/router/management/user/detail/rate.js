@@ -120,14 +120,12 @@ router
         $project: {
           value: "$rate.rate",
           createdAt: "$rate.timestamps",
-          movie: {
-            _id: "$movie._id",
-            name: "$movie.name",
-            author_rate: "$movie.author_rate",
-            rate_person: "$movie.rate_person",
-            total_rate: "$movie.total_rate",
-            source_type: "$movie.source_type",
-          }
+          _id: "$movie._id",
+          name: "$movie.name",
+          author_rate: "$movie.author_rate",
+          rate_person: "$movie.rate_person",
+          total_rate: "$movie.total_rate",
+          source_type: "$movie.source_type",
         }
       }
     ]),

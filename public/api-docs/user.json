@@ -2163,6 +2163,10 @@
                   },
                   "_id": {
                     "type": "string"
+                  },
+                  "key": {
+                    "type":"string",
+                    "description": "首字母"
                   }
                 }
               }

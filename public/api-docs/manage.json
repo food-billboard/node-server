@@ -5106,34 +5106,29 @@
                         "type": "string",
                         "format": "date-time"
                       },
-                      "movie": {
-                        "type": "object",
-                        "properties": {
-                          "_id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string",
-                            "description": "名称"
-                          },
-                          "author_rate": {
-                            "type": "integer",
-                            "description": "作者评分"
-                          },
-                          "rate_person": {
-                            "type": "integer",
-                            "description": "评分人数"
-                          },
-                          "total_rate": {
-                            "type": "integer",
-                            "description": "总评分值"
-                          },
-                          "source_type": {
-                            "type": "string",
-                            "description": "来源类型",
-                            "enum": [ "ORIGIN", "USER" ]
-                          }
-                        }
+                      "_id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "名称"
+                      },
+                      "author_rate": {
+                        "type": "integer",
+                        "description": "作者评分"
+                      },
+                      "rate_person": {
+                        "type": "integer",
+                        "description": "评分人数"
+                      },
+                      "total_rate": {
+                        "type": "integer",
+                        "description": "总评分值"
+                      },
+                      "source_type": {
+                        "type": "string",
+                        "description": "来源类型",
+                        "enum": [ "ORIGIN", "USER" ]
                       }
                     }
                   }

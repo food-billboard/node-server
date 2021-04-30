@@ -108,8 +108,7 @@ describe(`${COMMON_API} test`, () => {
 
   })
 
-  after(function(done) {
-
+  after(function(done) {    
     Promise.all([
       ImageModel.deleteMany({
         src: COMMON_API

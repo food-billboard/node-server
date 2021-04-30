@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { ClassifyModel, UserModel, dealErr, notFound, Params, responseDataDeal, verifyTokenToData, ROLES_MAP, MOVIE_SOURCE_TYPE } = require('@src/utils')
+const { ClassifyModel, UserModel, dealErr, notFound, Params, responseDataDeal, verifyTokenToData, ROLES_MAP, MOVIE_SOURCE_TYPE, getWordPinYin } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -162,6 +162,7 @@ router
     const model = new ClassifyModel({
       name,
       icon,
+      key: getWordPinYin(name),
       source_type: roles.some(role => ROLES_MAP[role] === ROLES_MAP.SUPER_ADMIN) ? MOVIE_SOURCE_TYPE.ORIGIN : MOVIE_SOURCE_TYPE.USER,
       source: _id
     })
@@ -202,7 +203,8 @@ router
   }, {
     $set: {
       name,
-      icon
+      icon,
+      key: getWordPinYin(name),
     }
   })
   .then(data => {

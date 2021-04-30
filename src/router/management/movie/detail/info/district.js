@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { DistrictModel, UserModel, dealErr, notFound, Params, responseDataDeal, MOVIE_SOURCE_TYPE, ROLES_MAP, verifyTokenToData } = require('@src/utils')
+const { DistrictModel, UserModel, dealErr, notFound, Params, responseDataDeal, MOVIE_SOURCE_TYPE, ROLES_MAP, verifyTokenToData, getWordPinYin } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -130,6 +130,7 @@ router
     const { _id, roles } = data
     const model = new DistrictModel({
       name,
+      key: getWordPinYin(name),
       source_type: roles.some(role => ROLES_MAP[role] === ROLES_MAP.SUPER_ADMIN) ? MOVIE_SOURCE_TYPE.ORIGIN : MOVIE_SOURCE_TYPE.USER,
       source: _id
     })
@@ -171,7 +172,8 @@ router
     _id
   }, {
     $set: {
-      name
+      name,
+      key: getWordPinYin(name),
     }
   })
   .then(data => {

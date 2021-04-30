@@ -14,16 +14,15 @@ function responseExpect(res, validate=[]) {
   expect(target.list).to.be.a('array')
 
   target.list.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('value', 'createdAt', 'movie')
+    expect(item).to.be.a('object').and.that.include.all.keys('value', 'createdAt', '_id', 'name', 'author_rate', 'rate_person', 'total_rate', 'source_type')
     commonValidate.number(item.value)
     commonValidate.date(item.createdAt)
-    expect(item.movie).to.be.a('object').and.that.include.all.keys('_id', 'name', 'author_rate', 'rate_person', 'total_rate', 'source_type')
-    commonValidate.objectId(item.movie._id)
-    commonValidate.string(item.movie.name)
-    commonValidate.number(item.movie.author_rate)
-    commonValidate.number(item.movie.total_rate)
-    commonValidate.number(item.movie.rate_person)
-    commonValidate.string(item.movie.source_type)
+    commonValidate.objectId(item._id)
+    commonValidate.string(item.name)
+    commonValidate.number(item.author_rate)
+    commonValidate.number(item.total_rate)
+    commonValidate.number(item.rate_person)
+    commonValidate.string(item.source_type)
   })
 
   if(Array.isArray(validate)) {
