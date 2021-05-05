@@ -6,7 +6,7 @@ const { Types: { ObjectId } } = require('mongoose')
 const router = new Router()
 
 router
-//电影访问用户列表(分页 时间 用户状态)
+//收藏
 .get('/', async(ctx) => {
 
   const check = Params.query(ctx, {
@@ -60,8 +60,8 @@ router
   })
 
   const match = {
-    "glance._id": { $in: [ _id ] },
-    "glance.timestamps": {
+    "store._id": { $in: [ _id ] },
+    "store.timestamps": {
       $lte: end_date.getTime(),
       ...(!!start_date ? { $gte: start_date.getTime() } : {})
     },
@@ -87,19 +87,16 @@ router
     //数据
     UserModel.aggregate([
       {
-        $unwind: "$glance"
+        $unwind: "$store"
       },
       {
         $match: {
-          "glance._id": _id
+          "store._id": _id
         }
       },
       {
         $match: match
       },
-      // {
-      //   $sort: {}
-      // },
       {
         $skip: currPage * pageSize
       },
@@ -109,24 +106,13 @@ router
       {
         $lookup: {
           from: 'movies', 
-          localField: 'glance._id', 
+          localField: 'store._id', 
           foreignField: '_id', 
           as: 'movie',
-          // let: { 'glance._id': '$_id' },
-          // pipeline: [
-          //   {
-          //     $match: { _id }
-          //   },
-          //   {
-          //     $project: {
-          //       src: 1
-          //     }
-          //   }
-          // ],
         }
       },
       {
-        $unwind: "$glance"
+        $unwind: "$store"
       },
       {
         $unwind: '$movie'
@@ -147,6 +133,7 @@ router
       },
       {
         $project: {
+          avatar: "$avatar.src",
           username: 1,
           mobile: 1,
           email: 1,
@@ -155,9 +142,8 @@ router
           roles: 1,
           createdAt: 1,
           updatedAt: 1,
-          glance_date: "$glance.timestamps",
+          store_date: "$store.timestamps",
           movie_name: "$movie.name",
-          avatar: "$avatar.src",
           issue_count: {
             $size: {
               $ifNull: [

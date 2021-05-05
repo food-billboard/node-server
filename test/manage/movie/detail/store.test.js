@@ -4,7 +4,7 @@ const { expect } = require('chai')
 const { Request, commonValidate, mockCreateUser, mockCreateMovie, mockCreateImage } = require('@test/utils')
 const Day = require('dayjs')
 
-const COMMON_API = '/api/manage/movie/detail/store'
+const COMMON_API = '/api/manage/movie/detail/user'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
@@ -79,7 +79,7 @@ describe(`${COMMON_API} test`, function() {
       const { model: self, signToken } = mockCreateUser({
         username: COMMON_API,
         avatar: imageId,
-        store: [
+        glance: [
           {
             _id: movieId,
             timestamps: Date.now(),
@@ -90,7 +90,7 @@ describe(`${COMMON_API} test`, function() {
       const { model: other } = mockCreateUser({
         username: COMMON_API,
         avatar: imageId,
-        store: [
+        glance: [
           {
             _id: movieId,
             timestamps: Date.now() - 1000000,
@@ -146,7 +146,7 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`${COMMON_API} success test`, function() {
 
-    it(`get the store movie user list success`, function(done) {
+    it(`get the visit movie user list success`, function(done) {
 
       Request
       .get(COMMON_API)
@@ -176,7 +176,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`get the store movie user list filter with start_date`, function(done) {
+    it(`get the visit movie user list filter with start_date`, function(done) {
 
       Request
       .get(COMMON_API)
@@ -207,7 +207,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`get the store movie user list filter with end_date`, function(done) {
+    it(`get the visit movie user list filter with end_date`, function(done) {
 
       Request
       .get(COMMON_API)
@@ -238,7 +238,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`get the store movie user list with filter of status`, function(done) {
+    it(`get the visit movie user list with filter of status`, function(done) {
       
       Request
       .get(COMMON_API)
@@ -269,7 +269,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`get the store movie user list with filter of roles`, function(done) {
+    it(`get the visit movie user list with filter of roles`, function(done) {
       
       Request
       .get(COMMON_API)
@@ -304,7 +304,7 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`${COMMON_API} fail test`, function() {
     
-    it(`get the store movie user list fail because the movie id is not verify`, function(done) {
+    it(`get the visit movie user list fail because the movie id is not verify`, function(done) {
 
       Request
       .get(COMMON_API)
@@ -324,7 +324,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`get the store movie user list fail because lack of the movie id `, function(done) {
+    it(`get the visit movie user list fail because lack of the movie id `, function(done) {
 
       Request
       .get(COMMON_API)

@@ -1,5 +1,5 @@
 const { mediaSchedule } = require('./media')
-const { tagSchedule } = require('./tag')
+// const { tagSchedule } = require('./tag')
 const { movieSchedule } = require('./movie')
 const { rankSchedule } = require('./rank')
 const { browserSchedule } = require('./browser')
@@ -10,7 +10,7 @@ function schedule() {
   //媒体资源定时器
   mediaSchedule()
   //数据标签定时器
-  tagSchedule()
+  // tagSchedule()
   //无用数据删除
   movieSchedule()
   //排行榜资源更新

@@ -1,12 +1,11 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr, responseDataDeal, Params, USER_STATUS, ROLES_MAP } = require('@src/utils')
-const Day = require('dayjs')
+const { UserModel, dealErr, Params, responseDataDeal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
+const Day = require('dayjs')
 
 const router = new Router()
 
 router
-//电影访问用户列表(分页 时间 用户状态)
 .get('/', async(ctx) => {
 
   const check = Params.query(ctx, {
@@ -18,12 +17,7 @@ router
 
   if(check) return
 
-  const [ _id, currPage, pageSize, start_date, end_date, status, roles ] = Params.sanitizers(ctx.query, {
-    name: '_id',
-    sanitizers: [
-      data => ObjectId(data)
-    ]
-  }, {
+  const [ currPage, pageSize, role, start_date, end_date, status, _id ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
     sanitizers: [
@@ -36,6 +30,11 @@ router
       data => data >= 0 ? +data : 30
     ]
   }, {
+    name: 'role',
+    sanitizers: [
+      data => typeof data === 'string' ? [ data ] : Object.keys(ROLES_MAP)
+    ]
+  }, {
     name: 'start_date',
     sanitizers: [
       data => ((typeof data === 'string' && (new Date(data)).toString() == 'Invalid Date') || typeof data === 'undefined') ? undefined : Day(data).toDate()
@@ -45,38 +44,36 @@ router
     sanitizers: [
       data => ((typeof data === 'string' && (new Date(data)).toString() == 'Invalid Date') || typeof data === 'undefined') ? Day().toDate() : Day(data).toDate()
     ]
-  },
-  {
+  }, {
     name: 'status',
     sanitizers: [
       data => typeof data === 'string' ? [ data ] : USER_STATUS
     ]
-  },
-  {
-    name: 'roles',
+  }, {
+    name: '_id',
     sanitizers: [
-      data => typeof data === 'string' ? [ data ] : Object.keys(ROLES_MAP)
+      data => ObjectId(data)
     ]
   })
+  const { query: { content='' } } = ctx
+
+  const contentReg = {
+    $regex: content,
+    $options: 'ig'
+  }
 
   const match = {
-    "glance._id": { $in: [ _id ] },
-    "glance.timestamps": {
-      $lte: end_date.getTime(),
-      ...(!!start_date ? { $gte: start_date.getTime() } : {})
-    },
-    roles: { $in: roles },
-    status: { $in: status }
+    fans: { $in: [_id] }
   }
 
   const data = await Promise.all([
-    //统计总数
+    //用户总数
     UserModel.aggregate([
       {
         $match: match
       },
       {
-        $group: {
+        $project: {
           _id: null,
           total: {
             $sum: 1
@@ -84,22 +81,23 @@ router
         }
       }
     ]),
-    //数据
     UserModel.aggregate([
       {
-        $unwind: "$glance"
-      },
-      {
         $match: {
-          "glance._id": _id
+          ...match,
+          createdAt: {
+            $lte: end_date,
+            ...(!!start_date ? { $gte: start_date } : {})
+          },
+          roles: {
+            $in: role
+          },
+          status: {
+            $in: status
+          },
+          $or: [ 'username', 'email', 'mobile' ].map(item => ({ [item]: contentReg }))
         }
       },
-      {
-        $match: match
-      },
-      // {
-      //   $sort: {}
-      // },
       {
         $skip: currPage * pageSize
       },
@@ -108,37 +106,12 @@ router
       },
       {
         $lookup: {
-          from: 'movies', 
-          localField: 'glance._id', 
-          foreignField: '_id', 
-          as: 'movie',
-          // let: { 'glance._id': '$_id' },
-          // pipeline: [
-          //   {
-          //     $match: { _id }
-          //   },
-          //   {
-          //     $project: {
-          //       src: 1
-          //     }
-          //   }
-          // ],
-        }
-      },
-      {
-        $unwind: "$glance"
-      },
-      {
-        $unwind: '$movie'
-      },
-      {
-        $lookup: {
           from: 'images', 
           localField: 'avatar', 
           foreignField: '_id', 
-          as: 'avatar',
+          as: 'avatar'
         }
-      },  
+      },
       {
         $unwind: {
           path: "$avatar",
@@ -147,35 +120,52 @@ router
       },
       {
         $project: {
+          createdAt: 1,
+          updatedAt: 1,
           username: 1,
           mobile: 1,
           email: 1,
           hot: 1,
           status: 1,
           roles: 1,
-          createdAt: 1,
-          updatedAt: 1,
-          glance_date: "$glance.timestamps",
-          movie_name: "$movie.name",
           avatar: "$avatar.src",
-          issue_count: {
-            $size: {
-              $ifNull: [
-                "$issue", []
-              ]
-            }
-          },
           fans_count: {
             $size: {
               $ifNull: [
-                "$fans", []
+                "$fans",
+                []
               ]
             }
           },
           attentions_count: {
             $size: {
               $ifNull: [
-                "$attentions", []
+                "$attentions",
+                []
+              ]
+            }
+          },
+          issue_count: {
+            $size: {
+              $ifNull: [
+                "$issue",
+                []
+              ]
+            }
+          },
+          comment_count: {
+            $size: {
+              $ifNull: [
+                "$comment",
+                []
+              ]
+            }
+          },
+          store_count: {
+            $size: {
+              $ifNull: [
+                "$store",
+                []
               ]
             }
           },
@@ -184,6 +174,7 @@ router
     ])
   ])
   .then(([total_count, user_data]) => {
+
     if(!Array.isArray(total_count) || !Array.isArray(user_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
 
     return {
@@ -196,9 +187,9 @@ router
   .catch(dealErr(ctx))
 
   responseDataDeal({
-      ctx,
-      data,
-      needCache: false
+    ctx,
+    data,
+    needCache: false
   })
 
 })

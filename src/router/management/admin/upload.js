@@ -54,6 +54,28 @@ router
         $limit: pageSize
       },
       {
+        $lookup: {
+          from: 'images',
+          localField: 'images', 
+          foreignField: '_id', 
+          as: 'images',
+        }
+      },
+      {
+        $lookup: {
+          from: 'images',
+          localField: 'poster', 
+          foreignField: '_id', 
+          as: 'poster',
+        }
+      },
+      {
+        $unwind: {
+          path: "$poster",
+          preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
         $project: {
           name: 1,
           glance: 1,
@@ -63,6 +85,9 @@ router
           status: 1,
           createdAt: 1,
           updatedAt: 1,
+          poster: "$poster.src",
+          description: "$info.description",
+          images: "$images.src",
           barrage_count: {
             $size: {
               $ifNull: [

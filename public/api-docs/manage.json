@@ -1083,7 +1083,7 @@
         "tags": [
           "movie"
         ],
-        "summary": "电影访问收藏用户列表",
+        "summary": "电影访问用户列表",
         "description": "",
         "operationId": "manage_movie_detail_get_user",
         "produces": [
@@ -1144,6 +1144,84 @@
             "description": "成功",
             "schema": {
               "$ref":"#/definitions/manage_movie_detail_get_user"
+            }
+          }
+        }
+      }
+    },
+    "/api/manage/movie/detail/store": {
+      "get": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "电影收藏用户列表",
+        "description": "",
+        "operationId": "manage_movie_detail_get_store",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "电影id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "string"
+          },
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "电影id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "description": "开始日期",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "description": "结束日期",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "用户状态",
+            "type": "string",
+            "enum": [ "SIGNIN", "SIGNOUT", "FREEZE" ]
+          },
+          {
+            "name": "roles",
+            "in": "query",
+            "description": "角色",
+            "type": "string",
+            "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref":"#/definitions/manage_movie_detail_get_store"
             }
           }
         }
@@ -2579,6 +2657,160 @@
         }
       }
     },
+    "/api/manage/user/detail/fans": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "用户粉丝列表",
+        "description": "",
+        "operationId": "manage_user_detail_get_fans",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name":"currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name":"pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          },
+          {
+            "name":"start_date",
+            "in": "query",
+            "description": "起始时间",
+            "type": "string",
+            "format":"date-time"
+          },
+          {
+            "name":"end_end",
+            "in": "query",
+            "description": "结束时间",
+            "type": "string",
+            "format":"date-time"
+          },
+          {
+            "name":"role",
+            "in": "query",
+            "description": "角色",
+            "type": "string",
+            "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+          },
+          {
+            "name":"status",
+            "in": "query",
+            "description": "状态",
+            "type": "string",
+            "enum": [ "SIGNIN", "SIGNOUT", "FREEZE" ]
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "搜索信息",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_user_get"
+            }
+          }
+        }
+      }
+    },
+    "/api/manage/user/detail/attentions": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "用户关注列表",
+        "description": "",
+        "operationId": "manage_user_detail_get_fans",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name":"currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name":"pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          },
+          {
+            "name":"start_date",
+            "in": "query",
+            "description": "起始时间",
+            "type": "string",
+            "format":"date-time"
+          },
+          {
+            "name":"end_end",
+            "in": "query",
+            "description": "结束时间",
+            "type": "string",
+            "format":"date-time"
+          },
+          {
+            "name":"role",
+            "in": "query",
+            "description": "角色",
+            "type": "string",
+            "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+          },
+          {
+            "name":"status",
+            "in": "query",
+            "description": "状态",
+            "type": "string",
+            "enum": [ "SIGNIN", "SIGNOUT", "FREEZE" ]
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "搜索信息",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_user_get"
+            }
+          }
+        }
+      }
+    },
     "/api/manage/admin": {
       "get": {
         "tags": [
@@ -2633,6 +2865,26 @@
             "required": true,
             "description": "描述",
             "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "body",
+            "description": "密码",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "body",
+            "required": true,
+            "description": "邮箱",
+            "type": "string"
+          },
+          {
+            "name": "mobile",
+            "in": "body",
+            "required": true,
+            "description": "手机",
+            "type": "integer"
           }
         ],
         "responses": {
@@ -4248,6 +4500,10 @@
                   "type": "string",
                   "description": "用户名"
                 },
+                "avatar": {
+                  "type": "string",
+                  "description": "头像"
+                },
                 "mobile": {
                   "type": "integer",
                   "description": "手机"
@@ -4305,6 +4561,88 @@
       },
       "xml": {
         "name": "manage_movie_detail_get_user"
+      }
+    },
+    "manage_movie_detail_get_store": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "store_date": {
+                  "type":"string",
+                  "description": "收藏时间"
+                },
+                "_id": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string",
+                  "description": "用户名"
+                },
+                "avatar": {
+                  "type": "string",
+                  "description": "头像"
+                },
+                "mobile": {
+                  "type": "integer",
+                  "description": "手机"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "邮箱"
+                },
+                "hot": {
+                  "type": "integer",
+                  "description": "人气"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "用户状态",
+                  "enum": [ "SIGNIN", "SIGNOUT", "FREEZE" ]
+                },
+                "roles": {
+                  "type": "array",
+                  "description": "角色",
+                  "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+                },
+                "movie_name": {
+                  "type": "string",
+                  "description": "电影名称"
+                },
+                "issue_count": {
+                  "type": "integer",
+                  "description": "上传数量"
+                },
+                "fans_count": {
+                  "type": "integer",
+                  "description": "粉丝数量"
+                },
+                "attentions_count": {
+                  "type": "integer",
+                  "description": "关注人数"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_movie_detail_get_store"
       }
     },
     "manage_movie_detail_get_info_actor": {
@@ -5157,6 +5495,14 @@
                 "_id": {
                   "type": "string"
                 },
+                "avatar": {
+                  "type": "string",
+                  "description": "头像"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
+                },
                 "hot": {
                   "type": "integer",
                   "description": "人气"
@@ -5232,6 +5578,18 @@
               "properties": {
                 "_id": {
                   "type": "string"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
+                },
+                "poster": {
+                  "type": "string",
+                  "description": "海报"
+                },
+                "images": {
+                  "type": "array",
+                  "description": "截图"
                 },
                 "name": {
                   "type": "string",

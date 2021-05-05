@@ -155,7 +155,7 @@ router
           attentions_count: {
             $size: {
               $ifNull: [
-                "$attentons",
+                "$attentions",
                 []
               ]
             }
@@ -204,7 +204,7 @@ router
   responseDataDeal({
     ctx,
     data,
-    needCachme: false
+    needCache: false
   })
 })
 .use('/detail', Detail.routes(), Detail.allowedMethods())

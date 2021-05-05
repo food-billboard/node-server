@@ -1,5 +1,6 @@
 require('module-alias/register')
-const { UserModel, ImageModel } = require('@src/utils')
+const { omit } = require('lodash')
+const { UserModel, ImageModel, encoded } = require('@src/utils')
 const { expect } = require('chai')
 const { Request, commonValidate, mockCreateUser, mockCreateImage } = require('@test/utils')
 const { Types: { ObjectId } } = require("mongoose")
@@ -109,9 +110,22 @@ describe(`${COMMON_API} test`, function() {
     })
 
     describe(`put the admin info success -> ${COMMON_API}`, function() {
-
+      
       let newUserName = COMMON_API.slice(0, -1)
       let newDescription = COMMON_API.slice(0, -1)
+      let newAvatar = ObjectId('571094e2976aeb1df982ad4e')
+      const newMobile = 18368003193
+      const newEmail = '18368003192@163.com'
+      const newPassword = 'woshixiaoguiasd'
+
+      const newInfo = {
+        username: newUserName,
+        avatar: newAvatar.toString(),
+        description: newDescription,
+        mobile: newMobile,
+        email: newEmail,
+        password: newPassword
+      }
 
       after(function(done) {
         UserModel.findOne({
@@ -120,14 +134,20 @@ describe(`${COMMON_API} test`, function() {
         .select({
           username: 1,
           avatar: 1,
-          description: 1
+          description: 1,
+          mobile: 1,
+          password: 1,
+          email: 1
         })
         .exec()
         .then(data => {
-          const { _doc: { username, avatar, description } } = data
+          const { _doc: { username, avatar, description, email, mobile, password } } = data
           expect(username).to.be.equals(newUserName)
           expect(avatar._id.toString() == (newAvatar.toString())).to.be.true
           expect(description).to.be.equals(newDescription)
+          expect(email === newEmail).to.be.true
+          expect(mobile == newEmail).to.be.true
+          expect(password == encode(newPassword)).to.be.true
           done()
         })
         .catch(err => {
@@ -144,11 +164,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'application/json',
           Authorization: `Basic ${selfToken}`
         })
-        .send({
-          username: newUserName,
-          avatar: newAvatar.toString(),
-          description: newDescription
-        })
+        .send(newInfo)
         .expect(200)
         .expect('Content-Type', /json/)
         .end(function(err) {
@@ -164,11 +180,23 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`${COMMON_API} fail test`, function() {
     
-    describe(`put theadmin info fail -> ${COMMON_API}`, function() {
+    describe(`put the admin info fail -> ${COMMON_API}`, function() {
 
       let newUserName = COMMON_API.slice(0, -1)
       let newAvatar = ObjectId('571094e2976aeb1df982ad4e')
       let newDescription = COMMON_API
+      const newMobile = 18368003193
+      const newEmail = '18368003192@163.com'
+      const newPassword = 'woshixiaoguiasd'
+
+      const newInfo = {
+        username: newUserName,
+        avatar: newAvatar.toString(),
+        description: newDescription,
+        mobile: newMobile,
+        email: newEmail,
+        password: newPassword
+      }
 
       it(`put the admin info fail because the username's length is to long`, function(done) {
 
@@ -179,9 +207,8 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
+          ...omit(newInfo),
           username: newUserName.repeat(10),
-          avatar: newAvatar.toString(),
-          description: newDescription
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -201,9 +228,8 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
+          ...newInfo,
           username: '',
-          avatar: newAvatar.toString(),
-          description: newDescription
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -223,8 +249,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          username: newUserName,
-          avatar: newAvatar.toString(),
+          ...newInfo,
           description: newDescription.repeat(10)
         })
         .expect(400)
@@ -245,8 +270,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          username: newUserName,
-          avatar: newAvatar.toString(),
+          ...newInfo,
           description: ''
         })
         .expect(400)
@@ -267,9 +291,50 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          username: newUserName,
+          ...newInfo,
           avatar: newAvatar.toString().slice(1),
-          description: newDescription
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+
+      })
+
+      it(`put the admin info fail because the mobile is not verify`, function(done) {
+        
+        Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          ...newInfo,
+          mobile: 1122333
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+
+      })
+
+      it(`put the admin info fail because the email is not verify`, function(done) {
+        
+        Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          ...newInfo,
+          email: '222'
         })
         .expect(400)
         .expect('Content-Type', /json/)
