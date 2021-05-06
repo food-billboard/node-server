@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr, Params, responseDataDeal } = require('@src/utils')
+const { UserModel, dealErr, Params, responseDataDeal, ROLES_MAP, USER_STATUS } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
 
@@ -63,7 +63,7 @@ router
   }
 
   const match = {
-    attentions: { $in: [_id] }
+    "attentions._id": { $in: [_id] }
   }
 
   const data = await Promise.all([

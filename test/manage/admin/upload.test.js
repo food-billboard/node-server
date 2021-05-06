@@ -1,7 +1,7 @@
 require('module-alias/register')
-const { MovieModel, UserModel } = require('@src/utils')
+const { MovieModel, UserModel, ImageModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateMovie } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateMovie, mockCreateImage } = require('@test/utils')
 
 const COMMON_API = '/api/manage/admin/upload'
 
@@ -45,20 +45,32 @@ describe(`${COMMON_API} test`, function() {
 
   let userInfo
   let selfToken
+  let signToken
+  let imageId
 
   before(function(done) {
 
-    const { model, signToken } = mockCreateUser({
-      username: COMMON_API
+    const { model } = mockCreateImage({
+      src: COMMON_API
     })
 
     model.save()
+    .then(data => {
+      imageId = data._id
+      const { model, signToken: getToken } = mockCreateUser({
+        username: COMMON_API,
+        avatar: imageId
+      })
+      signToken = getToken
+      return model.save()
+    })
     .then(data => {
       userInfo = data
       selfToken = signToken(userInfo._id)
       const { model } = mockCreateMovie({
         name: COMMON_API,
-        author: userInfo._id
+        author: userInfo._id,
+        poster: imageId
       })
 
       return model.save()
@@ -89,6 +101,9 @@ describe(`${COMMON_API} test`, function() {
       }),
       MovieModel.deleteMany({
         name: COMMON_API
+      }),
+      ImageModel.deleteMany({
+        src: COMMON_API
       })
     ])
     .then(data => {

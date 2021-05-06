@@ -36,6 +36,12 @@ router
       }
     },  
     {
+      $unwind: {
+        path: "$avatar",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
       $project: {
         createdAt: 1,
         updatedAt: 1,

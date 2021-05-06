@@ -113,19 +113,10 @@ describe(`${COMMON_API} test`, function() {
       
       let newUserName = COMMON_API.slice(0, -1)
       let newDescription = COMMON_API.slice(0, -1)
-      let newAvatar = ObjectId('571094e2976aeb1df982ad4e')
+      // let newAvatar = ObjectId('571094e2976aeb1df982ad4e')
       const newMobile = 18368003193
       const newEmail = '18368003192@163.com'
       const newPassword = 'woshixiaoguiasd'
-
-      const newInfo = {
-        username: newUserName,
-        avatar: newAvatar.toString(),
-        description: newDescription,
-        mobile: newMobile,
-        email: newEmail,
-        password: newPassword
-      }
 
       after(function(done) {
         UserModel.findOne({
@@ -146,8 +137,8 @@ describe(`${COMMON_API} test`, function() {
           expect(avatar._id.toString() == (newAvatar.toString())).to.be.true
           expect(description).to.be.equals(newDescription)
           expect(email === newEmail).to.be.true
-          expect(mobile == newEmail).to.be.true
-          expect(password == encode(newPassword)).to.be.true
+          expect(mobile == newMobile).to.be.true
+          expect(password == encoded(newPassword)).to.be.true
           done()
         })
         .catch(err => {
@@ -157,6 +148,15 @@ describe(`${COMMON_API} test`, function() {
       })
 
       it(`put the admin info success`, function(done) {
+
+        const newInfo = {
+          username: newUserName,
+          avatar: newAvatar.toString(),
+          description: newDescription,
+          mobile: newMobile,
+          email: newEmail,
+          password: newPassword
+        }
 
         Request
         .put(COMMON_API)

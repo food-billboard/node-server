@@ -9,7 +9,7 @@ const COMMON_API = '/api/manage/user/detail'
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('object').and.that.include.all.keys('_id', 'createdAt', 'updatedAt', 'mobile', 'email', 'username', 'description', 'avatar', 'hot', 'status', 'roles', 'fans_count', 'attentions_count', 'issue_count', 'comment_count', 'store_count')
+  expect(target).to.be.a('object').and.that.include.any.keys('_id', 'createdAt', 'updatedAt', 'mobile', 'email', 'username', 'description', 'avatar', 'hot', 'status', 'roles', 'fans_count', 'attentions_count', 'issue_count', 'comment_count', 'store_count')
   commonValidate.objectId(target._id)
   commonValidate.date(target.createdAt)
   commonValidate.date(target.updatedAt)
@@ -17,7 +17,9 @@ function responseExpect(res, validate=[]) {
   commonValidate.string(target.email)
   commonValidate.string(target.username)
   commonValidate.string(target.description)
-  commonValidate.poster(target.avatar)
+  if(target.avatar) {
+    commonValidate.poster(target.avatar)
+  }
   commonValidate.number(target.hot)
   commonValidate.string(target.status)
   expect(target.roles).to.be.a('array')

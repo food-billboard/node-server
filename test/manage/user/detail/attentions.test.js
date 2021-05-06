@@ -4,7 +4,7 @@ const { expect } = require('chai')
 const { Request, commonValidate, mockCreateUser, mockCreateImage } = require('@test/utils')
 const Day = require('dayjs')
 
-const COMMON_API = '/api/manage/user/attentions'
+const COMMON_API = '/api/manage/user/detail/attentions'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
@@ -88,14 +88,22 @@ describe(`${COMMON_API} test`, function() {
           _id: userInfo._id
         }, {
           $set: {
-            attentions: [ otherUserId ]
+            attentions: [ {
+              _id: otherUserId,
+              timestamps: Date.now()
+            } ]
           }
         }),
         UserModel.updateOne({
           _id: otherUserId
         }, {
           $set: {
-            fans: [ userInfo._id ]
+            fans: [
+              {
+                _id: userInfo._id,
+                timestamps: Date.now()
+              }
+            ]
           }
         }),
       ])      
@@ -148,7 +156,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: userInfo._id
+          _id: userInfo._id.toString()
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -179,7 +187,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .query({
           role: 'USER',
-          _id: userInfo._id
+          _id: userInfo._id.toString()
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -210,7 +218,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .query({
           start_date: Day(Date.now() + 1000 * 24 * 60 * 60).format('YYYY-MM-DD'),
-          _id: userInfo._id
+          _id: userInfo._id.toString()
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -241,7 +249,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .query({
           end_date: '1970-11-1',
-          _id: userInfo._id
+          _id: userInfo._id.toString()
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -272,7 +280,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .query({
           content: '2019-11-1',
-          _id: userInfo._id
+          _id: userInfo._id.toString()
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -303,7 +311,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .query({
           status: 'FREEZE',
-          _id: userInfo._id
+          _id: userInfo._id.toString()
         })
         .expect(200)
         .expect('Content-Type', /json/)

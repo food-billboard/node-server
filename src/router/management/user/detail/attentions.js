@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr, Params, responseDataDeal } = require('@src/utils')
+const { UserModel, dealErr, Params, responseDataDeal, ROLES_MAP, USER_STATUS } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
 
@@ -32,7 +32,9 @@ router
   }, {
     name: 'role',
     sanitizers: [
-      data => typeof data === 'string' ? [ data ] : Object.keys(ROLES_MAP)
+      data => {
+        return (typeof data === 'string') ? [ data ] : Object.keys(ROLES_MAP)
+      }
     ]
   }, {
     name: 'start_date',
@@ -47,7 +49,7 @@ router
   }, {
     name: 'status',
     sanitizers: [
-      data => typeof data === 'string' ? [ data ] : USER_STATUS
+      data => (typeof data === 'string') ? [ data ] : USER_STATUS
     ]
   }, {
     name: '_id',
@@ -63,7 +65,7 @@ router
   }
 
   const match = {
-    fans: { $in: [_id] }
+    "fans._id": { $in: [_id] }
   }
 
   const data = await Promise.all([
@@ -174,7 +176,6 @@ router
     ])
   ])
   .then(([total_count, user_data]) => {
-
     if(!Array.isArray(total_count) || !Array.isArray(user_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
 
     return {
