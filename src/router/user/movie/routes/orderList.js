@@ -12,7 +12,9 @@ router.get('/', async(ctx) => {
 
   responseDataDeal({
     ctx,
-    data: sortList,
+    data: {
+      data: sortList
+    },
     needCache: false
   })
 

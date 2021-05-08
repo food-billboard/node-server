@@ -1383,6 +1383,28 @@
         }
       }
     },
+    "/api/user/movie/order": {
+      "get": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "电影排序字段列表",
+        "description": "",
+        "operationId": "user_movie_get_order",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/user_movie_get_order"
+            }
+          }
+        }
+      }
+    },
     "/api/user/setting/info": {
       "get": {
         "tags": [
@@ -2888,6 +2910,37 @@
       },
       "xml": {
         "name": "user_movie_get_search"
+      }
+    },
+    "user_movie_get_order": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "名称"
+                  },
+                  "_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "user_movie_get_rank_specDropList"
       }
     }
   },
