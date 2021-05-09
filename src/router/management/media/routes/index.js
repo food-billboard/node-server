@@ -10,7 +10,6 @@ router
 //权限判断
 .use(Auth)
 .get('/', async (ctx) => {
-
   const check = Params.query(ctx, {
     name: 'type',
     validator: [

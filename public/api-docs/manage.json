@@ -2152,7 +2152,7 @@
             "type": "string"
           },
           {
-            "name":"role",
+            "name":"roles",
             "in": "body",
             "required": true,
             "description": "角色, 多个用,分隔",
@@ -2254,7 +2254,7 @@
             "type": "string"
           },
           {
-            "name":"role",
+            "name":"roles",
             "in": "body",
             "required": true,
             "description": "角色,多个用,分隔",

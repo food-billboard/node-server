@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const Detail = require('./detail')
-const { UserModel, verifyTokenToData, dealErr, notFound, Params, responseDataDeal, ROLES_MAP, USER_STATUS, findMostRole, EMAIL_REGEXP } = require('@src/utils')
+const { UserModel, verifyTokenToData, dealErr, VALIDATOR_MAP, Params, responseDataDeal, ROLES_MAP, USER_STATUS, findMostRole, EMAIL_REGEXP } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
 const { Auth } = require('./auth')
@@ -35,7 +35,7 @@ const checkParams = (ctx, ...nextCheck) => {
       data => typeof data === 'string' ? ObjectId.isValid(data) : typeof data === 'undefined'
     ]
   }, {
-    name: 'role',
+    name: 'roles',
     validator: [
       data => typeof data === 'string' ? data.split(',').every(item => Object.keys(ROLES_MAP).includes(item.trim().toUpperCase()))  : typeof data === 'undefined'
     ]
@@ -45,7 +45,7 @@ const checkParams = (ctx, ...nextCheck) => {
 router
 .get('/', async(ctx) => {
 
-  const [ currPage, pageSize, role, start_date, end_date, status ] = Params.sanitizers(ctx.query, {
+  const [ currPage, pageSize, roles, start_date, end_date, status ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
     sanitizers: [
@@ -58,7 +58,7 @@ router
       data => data >= 0 ? +data : 30
     ]
   }, {
-    name: 'role',
+    name: 'roles',
     sanitizers: [
       data => typeof data === 'string' ? [ data ] : Object.keys(ROLES_MAP)
     ]
@@ -105,7 +105,7 @@ router
             ...(!!start_date ? { $gte: start_date } : {})
           },
           roles: {
-            $in: role
+            $in: roles
           },
           status: {
             $in: status
@@ -218,20 +218,20 @@ router
   if(check) return
 
   let userModel = {}
-  const [ role ] = Params.sanitizers(ctx.body, {
-    name: 'role',
+  const [ roles ] = Params.sanitizers(ctx.body, {
+    name: 'roles',
     sanitizers: [
       data => typeof data === 'string' ? data.split(',') : "USER"
     ]
   })
-  const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'role' ]
+  const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'roles' ]
   const { request: { body } } = ctx
   const { mobile: newUserMobile, email } = body
 
   userModel = Object.keys(body).reduce((acc, cur) => {
     if(params.includes(cur)) {
-      if(cur === 'role') {
-        acc.roles = role
+      if(cur === 'roles') {
+        acc.roles = roles
       }else if(typeof body[cur] != 'undefined') {
         acc[cur] = body[cur]
       }
@@ -278,7 +278,7 @@ router
 //修改
 .put('/', async(ctx) => {
 
-  const check = checkParams(ctx, {
+  const check = Params.body(ctx, {
     name: '_id',
     validator: [
 			data => ObjectId.isValid(data)
@@ -288,24 +288,30 @@ router
   if(check) return
 
   let editModel = {}
-  const [ _id, role ] = Params.sanitizers(ctx.request.body, {
+  const [ _id, roles ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
     ]
   }, {
-    name: 'role',
+    name: 'roles',
     sanitizers: [
-      data => typeof data === 'string' ? data.split(',').map(item => item.trim()) : "USER"
+      data => {
+        if(typeof data === 'string') return data.split(',').map(item => item.trim())
+        if(Array.isArray(data)) return data.map(item => item.toLowerCase())
+        return false 
+      }
     ]
   })
-  const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'role' ]
+  const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'roles' ]
   const { request: { body } } = ctx
 
   editModel = Object.keys(body).reduce((acc, cur) => {
     if(params.includes(cur)) {
-      if(cur == 'role') {
-        acc.roles = role
+      if(cur == 'roles') {
+        if(!!roles) acc.roles = roles
+      }else if(cur == 'avatar') {
+        if(VALIDATOR_MAP.objectId(body[cur])) acc[cur] = body[cur]
       }else if(typeof body[cur] != 'undefined') {
         acc[cur] = body[cur]
       }

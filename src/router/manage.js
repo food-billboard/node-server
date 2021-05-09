@@ -14,10 +14,14 @@ router
   let name 
   const backendMatch = url.match(/(?<=.+\/backend\/).+$/)
   const swaggerMatch = url.match(/(?<=.+\/swagger\/).+$/)
+  const testMatch = url.match(/(?<=.+\/test\/).+$/)
   let filePath = API_PATH
   if(swaggerMatch) {
     [name] = swaggerMatch
     filePath = path.join(filePath, 'api-docs', name)
+  }else if(testMatch) {
+    [name] = testMatch
+    filePath = path.join(filePath, 'test', name)
   }else if(backendMatch) {
     [name] = backendMatch
     filePath = path.join(filePath, 'manage', name)

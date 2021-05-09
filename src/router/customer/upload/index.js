@@ -24,6 +24,17 @@ const router = new Router()
 
 const MAX_FILE_SIZE = 1024 * 1024 * 6
 
+function parseUrl(url) {
+  if(!url.includes('http')) return url 
+  if(url.includes('localhost:4000')) {
+    const [ newUrl ] = url.match(/(?<=https?\:\/\/localhost\:4000).+/)
+    return newUrl
+  }else {
+    const [ newUrl ] = url.match(/(?<=https?\:\/\/47.111.229.250).+/)
+    return newUrl
+  }
+}
+
 //元数据验证获取
 const METADATA = {
   'md5': {
@@ -296,7 +307,7 @@ router
       }
     }else if(typeof id === 'string' && /\/static\/(image|video|other)\/.+/.test(decodeURIComponent(id))) {
       params = {
-        src: decodeURIComponent(id)
+        src: parseUrl(decodeURIComponent(id))
       }
     }else {
       return Promise.reject({ status: 400, errMsg: 'bad request' })

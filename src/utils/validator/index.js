@@ -1,6 +1,7 @@
 const Validator = require('validator')
-const { isType } = require('./tool')
-const { responseDataDeal } = require('./error-deal')
+const { isType } = require('../tool')
+const { responseDataDeal } = require('../error-deal')
+const VALIDATOR_MAP = require('./common-validator-map')
 
 const TEMPLATE_ERROR = ctx => {
   ctx.status = 400
@@ -219,5 +220,6 @@ const Params = {
 }
 
 module.exports = {
-  Params
+  Params,
+  VALIDATOR_MAP
 }

@@ -3,12 +3,11 @@ const fsSync = require('fs')
 const Url = require('url')
 const path = require('path')
 const Mime = require('mime')
-const Day = require('dayjs')
 const { ImageModel, VideoModel, OtherMediaModel } = require('./mongodb/mongo.lib')
-const { verifyTokenToData, fileEncoded } = require('./token')
+const { verifyTokenToData } = require('./token')
 const { dealErr, notFound } = require('./error-deal')
 const { STATIC_FILE_PATH, MAX_FILE_SINGLE_RESPONSE_SIZE, MEDIA_AUTH, MEDIA_STATUS } = require('./constant')
-const { createHlsVideo } = require('./video')
+const { videoDataParse } = require('./video')
 
 const getEndPath = (path, index) => {
   let list = path.split('/')
@@ -181,7 +180,7 @@ const StaticMiddleware = async (ctx, next) => {
   const { request: { url } } = ctx
 
   //非静态资源
-  if(!/\/(video|image|other)\/[0-9a-zA-Z]+\.[0-9a-zA-Z]+/.test(url)) return await next()
+  if(!/\/static\/(video|image|other)\/[0-9a-zA-Z]+\.[0-9a-zA-Z]+/.test(url)) return await next()
 
   const { request: { headers } } = ctx
   const [, token] = verifyTokenToData(ctx)
@@ -210,52 +209,17 @@ const StaticMiddleware = async (ctx, next) => {
   .then((data) => {
     mime = data.mime
     filePath = path.join(STATIC_FILE_PATH, data.path)
-    // return fs.stat(filePath)
     if(type === 'image') return 
     return filePath
   })
-  // .then(stat => {
-  //   const { size, mtimeMs } = stat
-  //   const lastModified = headers['last-modified']
-
-  //   视频
-  //   小文件由其他中间件处理
-  //   if(size <= MAX_FILE_SINGLE_RESPONSE_SIZE) return
-
-  //   是否未更改
-
-  //   if(!!lastModified && Day(lastModified).valueOf() === mtimeMs) return true
-  //   //读取部分文件
-  //   return readFile({
-  //     path: filePath,
-  //     ctx
-  //   })
-
-  // })
   .catch(dealErr(ctx))
 
   if(typeof data === 'undefined') return await next()
 
-  // if(data === true) return ctx.status = 304
-
   if(data.status) return ctx.status = data.status
 
   //----------视频处理----------------
-  return await createHlsVideo(ctx, filePath)
-
-  // const { start, end, size, file } = data
-  // let status = 206
-  // let responseHeaders = {
-  //   'Content-Type': mime,
-  //   'Content-Range': `bytes ${start}-${end}/${size}`,
-  //   'Accept-Ranges': 'bytes'
-  //   // 'Content-Length': end - start
-  // }
-  // ctx.set(responseHeaders)
-  // if(end === size) status = 200
-
-  // ctx.status = status
-  // ctx.body = file
+  return await videoDataParse(ctx, filePath)
 
 }
 
