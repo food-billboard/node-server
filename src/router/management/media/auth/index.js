@@ -80,7 +80,7 @@ async function Auth(ctx, next) {
     //获取待操作信息权限及操作用户权限
     const valid = rolesAuthMapValidator({
       userRoles: user_data.roles,
-      opRoles: media_data.map(item => {
+      opRoles: media_data.filter(item => !!item.origin).map(item => {
         const { origin: { roles }, origin_type } = item
         return {
           source_type: origin_type,

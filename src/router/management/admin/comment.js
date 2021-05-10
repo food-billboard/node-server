@@ -120,27 +120,6 @@ router
   .then(([total_count, comment_data]) => {
     if(!Array.isArray(total_count) || !Array.isArray(comment_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
     return {
-
-      // {
-      //   data: {
-      //     total,
-      //     list: [{
-      //       _id,
-      //       source_type,
-      //       source,
-      //       sub_comments,
-      //       total_like,
-      //       content: {
-      //         text,
-      //         video,
-      //         image
-      //       },
-      //       createdAt,
-      //       updatedAt
-      //     }]
-      //   }
-      // }
-
       data: {
         total: !!total_count.length ? total_count[0].total || 0 : 0,
         list: comment_data

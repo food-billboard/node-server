@@ -251,7 +251,10 @@ router
         }
       },
       {
-        $unwind: "$author"
+        $unwind: {
+          path: "$author",
+          preserveNullAndEmptyArrays: true 
+        }
       },
       {
         $lookup: {
@@ -393,7 +396,19 @@ router
   })
   .then(data => !!data && data._id)
   .then(notFound)
-  .then(data => ({ data: { _id: data } }))
+  .then(data => {
+    return Promise.all([
+      data,
+      UserModel.updateOne({
+        _id: ObjectId(id)
+      }, {
+        $addToSet: {
+          issue: data
+        }
+      })
+    ])
+  })
+  .then(([data]) => ({ data: { _id: data } }))
   .catch(dealErr(ctx))
   
 

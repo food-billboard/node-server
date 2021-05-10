@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const Detail = require('./detail')
-const { UserModel, verifyTokenToData, dealErr, VALIDATOR_MAP, Params, responseDataDeal, ROLES_MAP, USER_STATUS, findMostRole, EMAIL_REGEXP } = require('@src/utils')
+const { UserModel, verifyTokenToData, dealErr, VALIDATOR_MAP, Params, responseDataDeal, ROLES_MAP, USER_STATUS, encoded, EMAIL_REGEXP } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
 const { Auth } = require('./auth')
@@ -232,6 +232,8 @@ router
     if(params.includes(cur)) {
       if(cur === 'roles') {
         acc.roles = roles
+      }else if(cur === 'password') {
+        acc.password = encoded(body[cur])
       }else if(typeof body[cur] != 'undefined') {
         acc[cur] = body[cur]
       }
@@ -310,6 +312,8 @@ router
     if(params.includes(cur)) {
       if(cur == 'roles') {
         if(!!roles) acc.roles = roles
+      }else if(cur === 'password') {
+        if(VALIDATOR_MAP.password(body[cur])) acc[cur] = encoded(body[cur])
       }else if(cur == 'avatar') {
         if(VALIDATOR_MAP.objectId(body[cur])) acc[cur] = body[cur]
       }else if(typeof body[cur] != 'undefined') {

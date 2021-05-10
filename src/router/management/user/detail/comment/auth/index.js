@@ -41,7 +41,7 @@ async function Auth(ctx, next) {
   .then(([comment_data, userData]) => {
     const valid = rolesAuthMapValidator({
       userRoles: userData.roles,
-      opRoles: comment_data.map(item => ({ source_type: item.source_type, roles: item.user_info.roles }))
+      opRoles: comment_data.filter(item => !!item.user_info).map(item => ({ source_type: item.source_type, roles: item.user_info.roles }))
     })
     return valid
   })

@@ -63,7 +63,7 @@ async function Auth(ctx, next) {
   .then(([movieData, userData]) => {
     const valid = rolesAuthMapValidator({
       userRoles: userData.roles,
-      opRoles: movieData.map(item => ({ source_type: item.source_type, roles: item.author.roles }))
+      opRoles: movieData.filter(item => !!item.author).map(item => ({ source_type: item.source_type, roles: item.author.roles }))
     })
     return valid
   })

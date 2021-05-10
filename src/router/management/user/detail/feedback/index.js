@@ -25,7 +25,9 @@ router
   }, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => {
+        return ObjectId.isValid(data) ? ObjectId(data) : false 
+      }
     ]
   }, {
     name: 'start_date',
@@ -44,8 +46,7 @@ router
     ]
   })
 
-  const match = {
-    user_info: _id,
+  let match = {
     createdAt: {
       $lte: end_date,
       ...(!!start_date ? { $gte: start_date } : {})
@@ -54,6 +55,7 @@ router
       $in: status
     }
   }
+  if(_id) match.user_info = _id
 
   const data = await Promise.all([
     //总数
@@ -127,7 +129,6 @@ router
   ])
   .then(([total_count, feedback_data]) => {
     if(!Array.isArray(total_count) || !Array.isArray(feedback_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
-
     return {
       data: {
         total: !!total_count.length ? total_count[0].total || 0 : 0,

@@ -148,7 +148,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          role: 'USER'
+          roles: 'USER'
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -326,7 +326,7 @@ describe(`${COMMON_API} test`, function() {
           username: COMMON_API.slice(1),
           description: COMMON_API,
           avatar: imageId.toString(),
-          role: 'USER,CUSTOMER'
+          roles: 'USER,CUSTOMER'
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -398,7 +398,7 @@ describe(`${COMMON_API} test`, function() {
           username: COMMON_API.slice(2),
           description: userInfo.description,
           avatar: imageId.toString(),
-          role: 'USER,CUSTOMER'
+          roles: 'USER,CUSTOMER'
         }
 
         Request
@@ -514,7 +514,7 @@ describe(`${COMMON_API} test`, function() {
         username: COMMON_API.slice(1),
         description: COMMON_API,
         avatar: '571094e2976aeb1df982ad4e',
-        role: 'USER'
+        roles: 'USER'
       }
 
       it(`check the edit user info fail because mobile is not verify`, function(done) {
@@ -773,7 +773,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .send({
           ...userInfo,
-          role: ''
+          roles: ''
         })
         .expect(400)
         .expect('Content-Type', /json/)
@@ -815,7 +815,7 @@ describe(`${COMMON_API} test`, function() {
         username: COMMON_API.slice(1),
         description: COMMON_API,
         avatar: '571094e2976aeb1df982ad4e',
-        role: 'SUPER_ADMIN'
+        roles: 'SUPER_ADMIN'
       }
 
       it(`post the user fail because the user is not the auth`, function(done) {
@@ -901,7 +901,7 @@ describe(`${COMMON_API} test`, function() {
             username: toPutUserInfo.username,
             description: toPutUserInfo.description,
             avatar: toPutUserInfo.avatar,
-            role: 'USER'
+            roles: 'USER'
           }
           done()
         })
@@ -945,7 +945,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .send({
           ...send,
-          role: 'SUPER_ADMIN'
+          roles: 'SUPER_ADMIN'
         })
         .expect(403)
         .expect('Content-Type', /json/)

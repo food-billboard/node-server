@@ -36,6 +36,7 @@ const headRequestMediaDeal = {
       src: path.join('/static', 'image', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
+      origin: _id,
       auth,
       info: {
         md5,
@@ -147,6 +148,7 @@ const headRequestMediaDeal = {
       src: path.join('/static', 'video', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
+      origin: _id,
       auth,
       info: {
         md5,
@@ -242,6 +244,7 @@ const headRequestMediaDeal = {
       src: path.join('/static', 'video', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
+      origin: _id,
       auth,
       info: {
         md5,
