@@ -483,6 +483,7 @@ router
     poster: video.poster,
     images,
     author_rate,
+    rate_pserson: 1,
     author_description: author_description ? author_description : description,
   }
 
@@ -729,59 +730,91 @@ router
     ]
   })
 
-  const data = await UserModel.findOne({
-    _id: ObjectId(id)
-  })
-  .select({
-    issue: 1,
-    updatedAt: 1
-  })
-  .populate({
-    path: 'issue._id',
-    select: {
-      "info.classify": 1,
-			"info.description": 1,
-			"info.name": 1,
-			poster: 1,
-			"info.screen_time": 1,
-			hot: 1,
-			// author_rate: 1,
-      total_rate: 1,
-      rate_person: 1
+  const data = await MovieModel.aggregate([
+    {
+      $match: {
+        author: ObjectId(id)
+      }
     },
-    options: {
-      ...((pageSize >= 0 && currPage >= 0) ? { skip: pageSize * currPage, } : {}),
-      ...(pageSize >= 0 ? { limit: pageSize, } : {})
+    {
+      $skip: currPage * pageSize
     },
-    populate: {
-      path: 'info.classify',
-      select: {
-        name: 1,
-        _id: 0
+    {
+      $limit: pageSize
+    },
+    {
+      $lookup: {
+        from: 'classifies', 
+        localField: 'info.classify', 
+        foreignField: '_id', 
+        as: 'info.classify'
+      }
+    },
+    {
+      $lookup: {
+        from: 'users', 
+        localField: 'author', 
+        foreignField: '_id', 
+        as: 'author'
+      }
+    },
+    {
+      $unwind: {
+        path: "$author",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
+      $lookup: {
+        from: 'images', 
+        localField: 'poster', 
+        foreignField: '_id', 
+        as: 'poster'
+      }
+    },
+    {
+      $unwind: {
+        path: "$poster",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
+      $lookup: {
+        from: 'images', 
+        localField: 'author.avatar', 
+        foreignField: '_id', 
+        as: 'author.avatar'
+      }
+    },
+    {
+      $unwind: {
+        path: "$author.avatar",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
+      $project: {
+        classify: "$info.classify.name",
+        description: "$info.description",
+        name: "$info.name",
+        poster: "$poster.src",
+        publish_time: "$info.screen_time",
+        hot: 1,
+        author: {
+          _id: "$author._id",
+          username: "$author.username",
+          avatar: "$author.avatar.src"
+        },
+        rate: {
+          $divide: [ "$total_rate", "$rate_person" ]
+        }
       }
     }
-  })
-  .exec()
-  .then(notFound)
+  ])
   .then(data => {
-    const { issue } = data
     return {
       data: {
-        ...data,
-        issue: issue.map(s => {
-          const { _id: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
-          const rate = total_rate / rate_person
-          return {
-            ...nextS,
-            poster: poster ? poster.src : null,
-            description,
-            name,
-            classify,
-            store: false,
-            publish_time: screen_time,
-            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
-          }
-        })
+        issue: data
       }
     }
   })
@@ -795,7 +828,5 @@ router
 .use('/browser', Browse.routes(), Browse.allowedMethods())
 .use('/store', Store.routes(), Store.allowedMethods())
 .use('/detail', Detail.routes(), Detail.allowedMethods())
-
-//可以再添加一个删除的功能
 
 module.exports = router

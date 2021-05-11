@@ -214,6 +214,22 @@ function formatMediaUrl(url) {
   return url.startsWith('http') ? url : (url.startsWith('/') ? `${API_DOMAIN}${url}` : `${API_DOMAIN}/${url}`)
 }
 
+function parseUrl(url) {
+  if(!url.includes('http')) return url 
+  if(url.includes('localhost:4000')) {
+    const [ newUrl ] = url.match(/(?<=https?\:\/\/localhost\:4000).+/)
+    return newUrl
+  }else {
+    const [ newUrl ] = url.match(/(?<=https?\:\/\/47.111.229.250).+/)
+    return newUrl
+  }
+}
+
+function cookieDomainSet(env) {
+  const nodeEnv = env || (process.env.NODE_ENV === 'production' ? 'prod' : 'env')
+  return nodeEnv.toLowerCase() == 'prod' ? '47.111.229.250' : 'localhost'
+}
+
 module.exports = {
   isType,
   isEmpty,
@@ -231,5 +247,7 @@ module.exports = {
   getIp,
   connectTry,
   avatarGet,
-  formatMediaUrl
+  formatMediaUrl,
+  parseUrl,
+  cookieDomainSet
 }

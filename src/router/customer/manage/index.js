@@ -5,7 +5,7 @@ const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const Feedback = require('./routes/feedback')
 const Info = require('./routes/info')
-const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal, avatarGet } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -55,11 +55,12 @@ router
   .exec()
   .then(notFound)
   .then(data => {
-    const { fans, attentions, ...nextData } = data
+    const { fans, attentions, avatar, ...nextData } = data
     return {
       data: {
         ...nextData,
         fans: fans.length,
+        avatar: avatarGet(avatar),
         attentions: attentions.length
       }
     }

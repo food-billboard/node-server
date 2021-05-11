@@ -2149,13 +2149,7 @@
           "type": "array",
           "description": "分类",
           "items": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "分类名称"
-              }
-            }
+            "type": "string"
           }
         },
         "publish_time": {
@@ -2166,6 +2160,22 @@
         "hot": {
           "type": "integer",
           "description": "收藏人数"
+        },
+        "author": {
+          "type":"object",
+          "properties": {
+            "username": {
+              "type":"string",
+              "description":"用户名"
+            },
+            "_id": {
+              "type":"string"
+            },
+            "avatar":{
+              "type":"string",
+              "description": "头像"
+            }
+          }
         }
       }
     },

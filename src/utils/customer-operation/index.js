@@ -11,7 +11,13 @@ const notes_customer_behaviour_middleware = async (ctx, next) => {
   if(process.env.NODE_ENV !== 'production') return await next()
 
   const { request: { url, method } } = ctx
-  const { pathname } = Url.parse(url)
+  let pathname 
+  try {
+    pathname = new URL(url).pathname
+  }catch(err) {
+    pathname = Url.parse(url).pathname
+  }
+  
   let action
   //判断请求是否需要进行记录处理
   Object.keys(url_map).some(url => {

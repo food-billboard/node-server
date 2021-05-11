@@ -44,7 +44,12 @@ async function Auth(ctx, next) {
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
-  const { pathname } = Url.parse(url)
+  let pathname 
+  try {
+    pathname = new URL(url).pathname
+  }catch(err) {
+    pathname = Url.parse(url).pathname
+  }
   const mediaType = pathname.replace(/(\/.+)+\/(?=.+)/, '')
   const model = MEDIA_TYPE[mediaType]
   const data = await new Promise((resolve, reject) => {

@@ -1,7 +1,9 @@
 const Router = require('@koa/router')
+const Day = require('dayjs')
 const { dealErr, notFound, Params, MovieModel, responseDataDeal, SearchModel } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 const { sortList } = require('../orderList')
+const { sanitizersNameParams } = require('../../../../management/movie/utils')
 
 const elasticsearch = require('elasticsearch')
 
@@ -31,7 +33,7 @@ router
     return ObjectId.isValid(data) ? [ ObjectId(data) ] : undefined
   } 
 
-	const [ currPage, pageSize, content, district, director, actor, language, screen_time, sort ] = Params.sanitizers(ctx.query, {
+	const [ currPage, pageSize, content, district, director, actor, language, classify, screen_time, sort ] = Params.sanitizers(ctx.query, {
 		name: 'currPage',
 		_default: 0,
 		type: [ 'toInt' ],
@@ -49,7 +51,7 @@ router
 		name: 'content',
 		sanitizers: [
 			function(data) {
-				return typeof data == 'string' && !!data.length ? data : undefined
+				return typeof data == 'string' && !!data.length ? sanitizersNameParams(data) : {}
 			}
 		]
 	},
@@ -69,11 +71,23 @@ router
 		name: 'lang',
 		sanitizers: [ idDeal ]
 	},
+  {
+		name: 'classify',
+		sanitizers: [ idDeal ]
+	},
 	{
 		name: 'time',
 		sanitizers: [
 			function(data) {
-				return !!date ? new Date(data).toString() : new Date().toString()
+        let response = {}
+        if(typeof data !== 'string' || !data.length) {
+          response.$lte = new Date()
+        }else {
+          const [ start, end ] = data.split('_')
+          start && (response.$gte = Day(start).toDate())
+          response.$lte = Day(end ? end : new Date()).toDate()
+        }
+        return response
 			}
 		]
   },
@@ -92,82 +106,119 @@ router
 		]
   })
 
-  const reg = new RegExp(content)
-  
-  //数据库操作
-  const data = await MovieModel.find({
-    //内容搜索
-    ...(!!content ? {
-      $or: [
-        {
-          name: content
-        },
-        {
-          "info.another_name": { $in: [ content ] }
-        },
-        {
-          "info.description": content
-        },
-        {
-          author_description: content
-        },
-        // {
-        //   source_type: content
-        // },
-        // {
-        //   status: content
-        // }
-      ]
-    } : {} ),
-    ...(!!district ? {
-      "info.district": { $in: [ ...district ] }
-    } : {}),
-    ...(!!director ? {
-      "info.director": { $in: [ ...director ] }
-    } : {}),
-    ...(!!actor ? {
-      "info.actor": { $in: [ ...actor ] }
-    } : {}),
-    ...(!!language ? {
-      "info.language": { $in: [ ...language ] }
-    } : {}),
-    ...(!!screen_time ? {
-      "info.screen_time": screen_time
-    } : {})
-  })
-  .select({
-    "info.description": 1,
-    name: 1,
-    poster: 1,
-    "info.classify": 1,
-    "info.screen_time": 1,
-    hot: 1,
-    total_rate: 1,
-    rate_person: 1
-  })
-  .populate({
-    path: 'info.classify',
-    select: {
-      name: 1,
-      _id: 0
+  let match = {
+    "info.screen_time": screen_time,
+    ...content,
+  }
+
+  if(!!classify) {
+    match = { 
+      ...match,
+      "info.classify": {
+        $in: [ classify ]
+      },
     }
-  })
-  .sort({
-    ...(
-      Array.isArray(sort) ? 
-      sort.reduce((acc, cur) => {
-        acc[cur[0]] = cur[1]
-        return acc
-      }, {}) 
-      : 
-      {}
-    )
-  })
-  .skip((currPage >= 0 && pageSize >= 0) ? pageSize * currPage : 0)
-	.limit(pageSize >= 0 ? pageSize : 10)
-  .exec()
-  .then(data => !!data && data)
-  .then(notFound)
+  }
+  if(district) match["info.district"] = { $in: [ ...district ] }
+  if(director) match["info.director"] = { $in: [ ...director ] }
+  if(actor) match["info.actor"] = { $in: [ ...actor ] }
+  if(language) match["info.language"] = { $in: [ ...language ] }
+
+  const data = await MovieModel.aggregate([
+    {
+      $match: match
+    },
+    ...(Array.isArray(sort) ? 
+      [
+        {
+          $sort: sort.reduce((acc, cur) => {
+            acc[cur[0]] = cur[1]
+            return acc
+          }, {}) 
+        }
+      ]
+    : 
+    []),
+    {
+      $skip: currPage * pageSize
+    },  
+    {
+      $limit: pageSize
+    },
+    {
+      $lookup: {
+        from: 'users', 
+        localField: 'author', 
+        foreignField: '_id', 
+        as: 'author'
+      }
+    },
+    {
+      $unwind: {
+        path: "$author",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
+      $lookup: {
+        from: 'images', 
+        localField: 'author.avatar', 
+        foreignField: '_id', 
+        as: 'author.avatar'
+      }
+    },
+    {
+      $unwind: {
+        path: "$author.avatar",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
+      $lookup: {
+        from: 'images', 
+        localField: 'poster', 
+        foreignField: '_id', 
+        as: 'poster'
+      }
+    },
+    {
+      $unwind: {
+        path: "$poster",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
+      $lookup: {
+        from: 'classifies', 
+        localField: 'info.classify', 
+        foreignField: '_id', 
+        as: 'info.classify'
+      }
+    },
+    {
+      $project: {
+        name: 1,
+        author: {
+          _id: "$author._id",
+          username: "$author.username",
+          avatar: "$author.avatar.src"
+        },
+        publish_time: "$info.screen_time",
+        classify: "$info.classify.name",
+        poster: "$poster.src",
+        createdAt: 1,
+        updatedAt: 1,
+        glance: 1,
+        hot: 1,
+        source_type: 1,
+        status: 1,
+        description: "$info.description",
+        rate: {
+          $divide: [ "$total_rate", "$rate_person" ]
+        }
+      }
+    }
+  ])
   .then(data => {
 
     const movieIdList = data.map(item => ({ movie: item._id }))
@@ -200,20 +251,8 @@ router
       })
       .catch(err => {})
     }
-
     return {
-      data: data.map(item => {
-        const { info: { screen_time, ...nextInfo }, total_rate, rate_person, poster, ...nextItem } = item
-        const rate = total_rate / rate_person
-        return {
-          ...nextItem,
-          ...nextInfo,
-          publish_time: screen_time,
-          poster: poster && poster.src ? poster.src : null,
-          store: false,
-          rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
-        }
-      })
+      data
     }
   })
   .catch(dealErr(ctx))

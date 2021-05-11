@@ -100,7 +100,7 @@ function mockCreateMovie(values={}) {
     author: ObjectId('8f63270f005f1c1a0d9448ca'),
     poster: ObjectId('8f63270f005f1c1a0d9448ca'),
     hot:0,
-    rate_person: 0,
+    rate_person: 1,
     total_rate: 0,
     source_type: 'ORIGIN',
     status: 'COMPLETE',

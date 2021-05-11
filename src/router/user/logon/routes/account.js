@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const { omit } = require('lodash')
-const { signToken, encoded, dealErr, UserModel, RoomModel, Params, responseDataDeal, setCookie, TOKEN_COOKIE, notFound, parseData } = require("@src/utils")
+const { signToken, encoded, dealErr, UserModel, RoomModel, Params, responseDataDeal, setCookie, TOKEN_COOKIE, cookieDomainSet, parseData } = require("@src/utils")
 
 const router = new Router()
 
@@ -59,7 +59,7 @@ router
     ctx.status = 200
     //设置cookie
     //临时设置，需要修改
-    setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set', options: { domain: (env || 'dev').toLowerCase() == 'prod' ? '47.111.229.250' : 'localhost' } })
+    setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set', options: { domain: cookieDomainSet(env) } })
 
     return {
       fans: fans.length,

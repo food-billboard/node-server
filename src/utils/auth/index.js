@@ -45,7 +45,12 @@ const initAuthMapData = () => {
 const authMiddleware = async (ctx, next) => {
   if(process.env.NODE_ENV !== 'production') return await next()
   const { request: { method, url } } = ctx
-  const { pathname } = Url.parse(url)
+  let pathname 
+  try {
+    pathname = new URL(url).pathname
+  }catch(err) {
+    pathname = Url.parse(url).pathname
+  }
   //不在限制范围内
   if(!PREFIX.every(prefix => url.startsWith(prefix))) return await next()
   const [, token] = verifyTokenToData(ctx)

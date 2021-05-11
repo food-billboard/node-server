@@ -184,7 +184,12 @@ const StaticMiddleware = async (ctx, next) => {
 
   const { request: { headers } } = ctx
   const [, token] = verifyTokenToData(ctx)
-  const { pathname } = Url.parse(url)
+  let pathname 
+  try {
+    pathname = new URL(url).pathname
+  }catch(err) {
+    pathname = Url.parse(url).pathname
+  }
   let md5 = getEndPath(pathname)
   const type = getEndPath(pathname, -2).toLowerCase()
   md5 = md5.includes('.') ? md5.split('.')[0] : md5

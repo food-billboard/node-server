@@ -728,7 +728,7 @@ const MovieSchema = new Schema({
   },
   rate_person: {
     type: Number,
-    default: 0,
+    default: 1,
   },
 	total_rate: {
     type: Number,

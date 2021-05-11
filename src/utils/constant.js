@@ -1,7 +1,7 @@
 const path = require('path')
 
-const API_DOMAIN = 'http://localhost:4000'
-// const API_DOMAIN = 'http://47.111.229.250'
+const DEVELOPMENT_API_DOMAIN = 'http://localhost:4000'
+const PRODUCTION_API_DOMAIN = 'http://47.111.229.250'
 
 const EMAIL_AUTH = {
   pass: 'hgldcifqqwmlbajd',
@@ -124,6 +124,6 @@ module.exports = {
   MEDIA_AUTH,
   MEDIA_ORIGIN_TYPE,
   EXTRACT_KEYWORD_TOP_N,
-  API_DOMAIN,
+  API_DOMAIN: process.env.NODE_ENV === 'production' ? PRODUCTION_API_DOMAIN : DEVELOPMENT_API_DOMAIN,
   BEHAVIOUR_URL_TYPE_MAP
 }

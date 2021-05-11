@@ -61,8 +61,8 @@ router.get('/', async (ctx) => {
     return {
       data: {
         ...nextData,
-        glance: glance.map(g => {
-          const { _id: { info: { description, name, classify, screen_time }, poster, total_rate, rate_person, ...nextD } } = g
+        glance: glance.filter(item => !!item._id).map(g => {
+          const { _id: { info: { description, name, classify, screen_time }={}, poster, total_rate, rate_person, ...nextD }={} } = g
           const rate = total_rate /rate_person
           return {
             ...nextD,

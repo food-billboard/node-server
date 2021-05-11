@@ -1361,7 +1361,7 @@
           {
             "name": "time",
             "in": "query",
-            "description": "上映时间",
+            "description": "上映时间(start_end)",
             "type": "string",
             "format":"date-time"
           },
@@ -2902,7 +2902,77 @@
             "data": {
               "type": "array",
               "items": {
-                "$ref":"#/definitions/user_movie_list"
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type":"string"
+                  },
+                  "glance": {
+                    "type":"integer",
+                    "description": "浏览人数"
+                  },
+                  "hot": {
+                    "type":"integer",
+                    "description": "人气"
+                  },
+                  "name": {
+                    "type":"string",
+                    "description": "名称"
+                  },
+                  "source_type": {
+                    "type": "string",
+                    "description": "来源类型",
+                    "enum": [ "comment", "movie" ]
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "电影状态",
+                    "enum": [ "VERIFY", "COMPLETE", "NOT_VERIFY" ]
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "author": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string",
+                        "description": "作者用户名"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "头像"
+                      }
+                    }
+                  },
+                  "publish_time": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "classify": {
+                    "type": "array",
+                    "description": "分类",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "description": {
+                    "type":"string",
+                    "description": "描述"
+                  },
+                  "rate": {
+                    "type": "integer",
+                    "description": "评分"
+                  }
+                }
               }
             }
           }

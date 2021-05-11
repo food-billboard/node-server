@@ -5,14 +5,15 @@ const FIELDS_MAP = {
   author_description: "author_description"
 }
 
+function reg(content) {
+  return {
+    $regex: content,
+    $options: 'gi'
+  }
+}
+
 function sanitizersNameParams(originName) {
   const match = originName.match(/(?<=in:) (name|description|author_description) .+/)
-  function reg(content) {
-    return {
-      $regex: content,
-      $options: 'gi'
-    }
-  }
 
   if(Array.isArray(match)) {
     const [ target ] = match 
@@ -40,5 +41,6 @@ function sanitizersNameParams(originName) {
 }
 
 module.exports = {
-  sanitizersNameParams
+  sanitizersNameParams,
+  reg
 }
