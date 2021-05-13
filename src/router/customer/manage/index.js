@@ -4,6 +4,7 @@ const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const Feedback = require('./routes/feedback')
+const Black = require('./routes/black')
 const Info = require('./routes/info')
 const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal, avatarGet } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
@@ -79,6 +80,7 @@ router
 .use('/fans', Fans.routes(), Fans.allowedMethods())
 .use('/feedback', Feedback.routes(), Feedback.allowedMethods())
 .use('/info', Info.routes(), Info.allowedMethods())
+.use('/black', Black.routes(), Black.allowedMethods())
 
 
 module.exports = router

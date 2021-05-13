@@ -1,4 +1,5 @@
 const Router = require('@koa/router')
+const Day = require('dayjs')
 const Browse = require('./browser')
 const Store = require('./store')
 const Detail = require('./detail')
@@ -32,13 +33,6 @@ const TEMPLATE_MOVIE = {
     screen_time: Date.now(),
     language: []
   },
-  // rest: {
-  //   actor: [],
-  //   director: [],
-  //   district: [],
-  //   classify: [],
-  //   language: []
-  // },
   images: [],
   tag: [],
   comment: [],
@@ -313,7 +307,7 @@ router
   }, {
     name: 'info.screen_time',
     validator: [
-      data => !!data && ( typeof data === 'number' ? data > 0 : (typeof data === 'string' && new Date(data).toString() != 'Invalid Date') )
+      data => Day(data).isValid()
     ]
   }, {
     name: 'info.description',
@@ -475,7 +469,8 @@ router
     info: {
       ...info,
       ...nextData,
-      name
+      name,
+      screen_time: Day(screen_time).toDate()
     },
     // rest: { ...unValid },
     name,

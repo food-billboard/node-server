@@ -505,6 +505,10 @@ const patchRequestDeal = async (options) => {
 
 }
 
+const postRequstDeal = patchRequestDeal
+
 module.exports = {
-  patchRequestDeal
+  patchRequestDeal,
+  postRequstDeal,
+  getChunkFileList
 }

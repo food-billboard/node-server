@@ -15,8 +15,7 @@ const {
   FEEDBACK_STATUS, 
   COMMENT_SOURCE_TYPE, 
   MEDIA_STATUS, 
-  MEDIA_AUTH, 
-  NETWORK 
+  MEDIA_AUTH,  
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -345,6 +344,16 @@ const UserSchema = new Schema({
     default: 0,
     min: 0,
   },
+  black: [{
+    _id: {
+      type: ObjectId,
+      ref: 'user',
+    },
+    timestamps: {
+      type: Number,
+      min: 0
+    }
+  }],
   fans: [{
     _id: {
       type: ObjectId,
@@ -670,7 +679,7 @@ const MovieSchema = new Schema({
     }],
     screen_time: {
       type: Date,
-      default: Date.now(),
+      default: new Date(),
       get: getMill,
       set: setMill,
     },

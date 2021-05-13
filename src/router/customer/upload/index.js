@@ -17,7 +17,7 @@ const {
   MEDIA_AUTH,
   parseUrl
 } = require('@src/utils')
-const { headRequestDeal, patchRequestDeal, postMediaDeal } = require('./utils')
+const { headRequestDeal, patchRequestDeal, postMediaDeal, postRequstDeal } = require('./utils')
 
 const models = [ImageModel, VideoModel, OtherMediaModel]
 
@@ -59,126 +59,7 @@ const METADATA = {
   }
 }
 
-router
-.use(async (ctx, next) => {
-  const [, token] = verifyTokenToData(ctx)
-  if(!token) {
-    const data = dealErr(ctx)({ errMsg: 'forbidden', status: 403 })
-    responseDataDeal({
-      ctx,
-      data,
-      needCache: false
-    })
-    return 
-  }
-  return await next()
-})
-.use(async(ctx, next) => {
-
-  const { request: { headers } } = ctx
-  const contentLength = headers['content-length']
-
-  if(contentLength >= MAX_FILE_SIZE) {
-    responseDataDeal({
-      ctx,
-      data: dealErr(ctx)({ errMsg: 'request to large', status: 413 }),
-      needCache: false
-    })
-    return
-  }
-
-  return await next()
-
-})
-//断点续传预查
-.head('/', async(ctx) => {
-
-  const { request: { headers } } = ctx
-
-  const metadataKey = Object.keys(pick(METADATA, ['md5', 'auth', 'chunk', 'mime', 'size']))
-
-  const check = Params.headers(ctx, {
-    name: 'tus-resumable',
-    validator: [
-      data => {
-        return data === '1.0.0'
-      }
-    ]
-  }, {
-    name: 'upload-metadata',
-    validator: [
-      data => {
-        if(!data) return false
-        return (data.endsWith(',') ? data.slice(0, -1) : data).split(',').every(d => {
-          const [ key, value ] = d.split(' ')
-          const index = metadataKey.indexOf(key)
-          if(!~index) return true
-          if(!!~index) metadataKey.splice(index, 1)
-          return METADATA[key].validator(Buffer.from(value, 'base64').toString())
-        })
-      }
-    ]
-  })
-
-  if(check || !!metadataKey.length) {
-    ctx.status = 404
-    return
-  }
-
-  const [ , token ] = verifyTokenToData(ctx)
-  const { id: _id } = token
-
-  const [ metadata ] = Params.sanitizers(headers, {
-    name: 'upload-metadata',
-    sanitizers: [
-      data => {
-        return (data.endsWith(',') ? data.slice(0, -1) : data).split(',').reduce((acc, cur) => {
-          const [ key, value ] = cur.split(' ')
-          acc[key] = Buffer.from(value, 'base64').toString()
-          return acc
-        }, {})
-      }
-    ]
-  })
-
-  const data = await UserModel.findOne({
-    _id: ObjectId(_id)
-  })
-  .select({
-    roles: 1
-  })
-  .exec()
-  .then(notFound)
-  .then(data => headRequestDeal({
-    metadata,
-    ctx,
-    user: {
-      _id: ObjectId(_id),
-      roles: data.roles
-    }
-  }))
-  .catch(err => {
-    console.log(err)
-    return false
-  })
-
-  if(!data) return ctx.status = 500
-
-  const { offset, id, type } = data
-
-  //设置索引来帮助恢复上传
-  ctx.set('Upload-Offset', offset)
-  ctx.set('Tus-Resumable', headers['tus-resumable'] || '1.0.0')
-  ctx.set('Location', `/api/customer/upload`)
-  ctx.set('Upload-Length', metadata.size)
-  ctx.set('Upload-Id', id)
-
-  ctx.status = 200
-
-})
-//分片上传
-.patch('/', async(ctx) => {
-
+async function postFile(deal, ctx) {
   const { request: { headers } } = ctx
 
   const metadataKey = Object.keys(pick(METADATA, ['md5']))
@@ -240,7 +121,7 @@ router
   })
   .exec()
   .then(notFound)
-  .then(data => patchRequestDeal({
+  .then(data => deal({
     user: data,
     ctx,
     metadata: {
@@ -250,7 +131,6 @@ router
     }
   }))
   .catch(err => {
-    console.log(err)
     return false
   })
 
@@ -264,8 +144,128 @@ router
   })
 
   ctx.status = status
+}
+
+router
+.use(async (ctx, next) => {
+  const [, token] = verifyTokenToData(ctx)
+  if(!token) {
+    const data = dealErr(ctx)({ errMsg: 'forbidden', status: 403 })
+    responseDataDeal({
+      ctx,
+      data,
+      needCache: false
+    })
+    return 
+  }
+  return await next()
+})
+.use(async(ctx, next) => {
+
+  const { request: { headers } } = ctx
+  const contentLength = headers['content-length'] || headers['Content-Length']
+
+  if(contentLength >= MAX_FILE_SIZE) {
+    responseDataDeal({
+      ctx,
+      data: dealErr(ctx)({ errMsg: 'request to large', status: 413 }),
+      needCache: false
+    })
+    return
+  }
+
+  return await next()
 
 })
+//断点续传预查
+.head('/', async(ctx) => {
+
+  const { request: { headers } } = ctx
+
+  const metadataKey = Object.keys(pick(METADATA, ['md5', 'auth', 'chunk', 'mime', 'size']))
+
+  const check = Params.headers(ctx, {
+    name: 'tus-resumable',
+    validator: [
+      data => {
+        return data === '1.0.0'
+      }
+    ]
+  }, {
+    name: 'upload-metadata',
+    validator: [
+      data => {
+        if(!data) return false
+        return (data.endsWith(',') ? data.slice(0, -1) : data).split(',').every(d => {
+          const [ key, value ] = d.split(' ')
+          const index = metadataKey.indexOf(key)
+          if(!~index) return true
+          if(!!~index) metadataKey.splice(index, 1)
+          return METADATA[key].validator(Buffer.from(value, 'base64').toString())
+        })
+      }
+    ]
+  })
+
+  if(check || !!metadataKey.length) {
+    return ctx.status = 404
+  }
+
+  const [ , token ] = verifyTokenToData(ctx)
+  const { id: _id } = token
+
+  const [ metadata ] = Params.sanitizers(headers, {
+    name: 'upload-metadata',
+    sanitizers: [
+      data => {
+        return (data.endsWith(',') ? data.slice(0, -1) : data).split(',').reduce((acc, cur) => {
+          const [ key, value ] = cur.split(' ')
+          acc[key] = Buffer.from(value, 'base64').toString()
+          return acc
+        }, {})
+      }
+    ]
+  })
+
+  const data = await UserModel.findOne({
+    _id: ObjectId(_id)
+  })
+  .select({
+    roles: 1
+  })
+  .exec()
+  .then(notFound)
+  .then(data => headRequestDeal({
+    metadata,
+    ctx,
+    user: {
+      _id: ObjectId(_id),
+      roles: data.roles
+    }
+  }))
+  .catch(err => {
+    console.log(err)
+    return false
+  })
+
+  if(!data) return ctx.status = 500
+
+  const { offset, id, type } = data
+
+  //设置索引来帮助恢复上传
+  ctx.set('Upload-Offset', offset)
+  ctx.set('Tus-Resumable', headers['tus-resumable'] || '1.0.0')
+  ctx.set('Location', `/api/customer/upload`)
+  ctx.set('Upload-Length', metadata.size)
+  ctx.set('Upload-Id', id)
+
+  ctx.status = 200
+
+})
+//文件上传-小程序
+.post('/weapp', postFile.bind(this, postRequstDeal))
+//分片上传
+.patch('/', postFile.bind(this, patchRequestDeal))
 //restore|load ?load=...
 .get('/', async(ctx) => {
 
@@ -357,6 +357,8 @@ router
 })
 //新增
 .post('/', async(ctx) => {
+
+  console.log(22244433, 22)
 
   const { request: { headers } } = ctx
 

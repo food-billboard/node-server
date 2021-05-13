@@ -1,8 +1,8 @@
 const path = require('path')
 const Mime = require('mime')
 const fs = require('fs').promises
-const { ImageModel, VideoModel, OtherMediaModel, MEDIA_AUTH, ROLES_MAP, MEDIA_ORIGIN_TYPE, findMostRole, MEDIA_STATUS } = require('@src/utils')
-const { getChunkFileList } = require('./util')
+const { ImageModel, VideoModel, OtherMediaModel, MEDIA_AUTH, ROLES_MAP, MEDIA_ORIGIN_TYPE, findMostRole, MEDIA_STATUS, STATIC_FILE_PATH } = require('@src/utils')
+const { getChunkFileList } = require('./patch')
 
 //删除临时文件
 const removeTemplateFolder = (name) => {

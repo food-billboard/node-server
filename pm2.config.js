@@ -7,7 +7,9 @@ module.exports = {
       env: {
         NODE_ENV: "production"
       },
-      exec_mode: "cluster_mode"
+      exec_mode: "cluster_mode",
+      error_file: './src/logs/pm2/error.log',
+      out_file: './src/logs/pm2/output.log'
     }, 
     {
       name: 'media',

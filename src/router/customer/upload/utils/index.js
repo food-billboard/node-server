@@ -5,5 +5,5 @@ const Post = require('./post')
 module.exports = {
   ...Head,
   ...Patch,
-  ...Post
+  ...Post,
 }

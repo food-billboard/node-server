@@ -12,6 +12,7 @@ const {
   notFound, 
   merge, 
   checkAndCreateDir, 
+  checkDir
 } = require('@src/utils')
 
 const ACCEPT_IMAGE_MIME = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp']
@@ -309,6 +310,15 @@ const promiseAny = (tasks) => {
   })
 }
 
+//查找分片文件
+const getChunkFileList = (_path) => {
+  if(!checkDir(_path)) {
+    return fs.readdirSync(_path)
+    .filter(f => path.extname(f) === '' && f.includes('-'))
+  } 
+  return []
+}
+
 
 module.exports = {
   dealMedia,
@@ -320,6 +330,6 @@ module.exports = {
   ACCEPT_IMAGE_MIME,
   ACCEPT_VIDEO_MIME,
   MAX_FILE_SIZE,
-  
+  getChunkFileList,
   promiseAny
 }
