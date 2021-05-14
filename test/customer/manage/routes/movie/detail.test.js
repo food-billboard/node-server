@@ -170,7 +170,9 @@ describe(`${COMMON_API} test`, function() {
         return UserModel.updateOne({
           username: COMMON_API
         }, {
-          issue: [ { _id: movieId } ]
+          $set: {
+            issue: [ { _id: movieId } ]
+          }
         })
       })
       .catch(err => {
@@ -406,12 +408,16 @@ describe(`${COMMON_API} test`, function() {
             MovieModel.updateOne({
               name: COMMON_API
             }, {
-              author: ObjectId('53102b43bf1044ed8b0ba36b')
+              $set: {
+                author: ObjectId('53102b43bf1044ed8b0ba36b')
+              }
             }),
             UserModel.updateOne({
               username: COMMON_API
             }, {
-              issue: []
+              $set: {
+                issue: []
+              }
             })
           ])
           .then(_ => {

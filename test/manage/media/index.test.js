@@ -13,12 +13,15 @@ function responseExpect(res, validate=[]) {
   expect(target.list).to.be.a('array')
 
   target.list.forEach(item => {
-    expect(item).to.be.a('object').that.includes.all.keys('_id', 'src', 'name', 'createdAt', 'updatedAt', 'origin_type', 'origin', 'auth', 'info')
+    expect(item).to.be.a('object').that.includes.any.keys('_id', 'src', 'name', 'poster','createdAt', 'updatedAt', 'origin_type', 'origin', 'auth', 'info')
     commonValidate.objectId(item._id)
     commonValidate.string(item.src)
     commonValidate.string(item.name)
     commonValidate.date(item.createdAt)
     commonValidate.date(item.updatedAt)
+    if(item.poster) {
+      commonValidate.string(item.poster)
+    }
     commonValidate.string(item.origin_type, (target) => {
       return !!MEDIA_ORIGIN_TYPE[target]
     })

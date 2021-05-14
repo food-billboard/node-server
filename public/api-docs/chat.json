@@ -1,0 +1,520 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "这是某微信小程序的用户后端api接口文档，有兴趣可以去github上给个鼓励  github at [https://github.com/food-billboard?tab=repositories) ",
+    "version": "1.0.0",
+    "title": "小程序api文档",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host": "petstore.swagger.io",
+  "basePath": "/v2",
+  "tags": [
+    {
+      "name": "chat",
+      "description": "聊天相关",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/api/customer/barrage": {
+      "get": {
+        "tags": [
+          "barrage"
+        ],
+        "summary": "获取电影的弹幕列表",
+        "description": "",
+        "operationId": "customer_get_barrage",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "_id",
+            "description": "电影id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "timeStart",
+            "description": "弹幕出现在视频中的起始时间(ms)",
+            "type": "number"
+          },
+          {
+            "in": "query",
+            "name": "process",
+            "description": "获取的弹幕时长(ms)",
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "array",
+              "name": "response",
+              "items": {
+                "$ref": "#/definitions/customer_get_barrage"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "barrage"
+        ],
+        "summary": "发送电影弹幕",
+        "description": "",
+        "operationId": "customer_put_barrage",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "_id",
+            "description": "电影id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "content",
+            "description": "弹幕内容",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "time",
+            "description": "弹幕出现在视频中的时间",
+            "required": true,
+            "type": "string",
+            "format":"date-time"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "发送成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "barrage"
+        ],
+        "summary": "电影弹幕点赞",
+        "description": "",
+        "operationId": "customer_post_barrage",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "_id",
+            "description": "弹幕id",
+            "required": true,
+            "type":"string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "barrage"
+        ],
+        "summary": "电影弹幕取消点赞",
+        "description": "",
+        "operationId": "customer_delete_barrage",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in":"query",
+            "name": "_id",
+            "description": "弹幕id",
+            "required": true,
+            "type":"string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/customer/manage": {
+      "get": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "获取用户信息",
+        "description": "获取用户的基本信息",
+        "operationId": "customer_get_manage",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/customer_get_manage"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/customer/manage/attention": {
+      "get": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "用户关注",
+        "description": "获取用户关注的人员列表",
+        "operationId": "customer_get_manage_attention",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "object",
+              "$ref":"#/definitions/customer_get_manage_attention"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "关注用户",
+        "description": "关注用户",
+        "operationId": "customer_put_manage_attention",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "用户id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "取消关注用户",
+        "description": "取消关注用户",
+        "operationId": "customer_delete_manage_attention",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/customer/manage/black": {
+      "get": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "用户黑名单",
+        "description": "获取用户黑名单的人员列表",
+        "operationId": "customer_get_manage_black",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "object",
+              "$ref":"#/definitions/customer_get_manage_attention"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "拉黑用户",
+        "description": "拉黑用户",
+        "operationId": "customer_put_manage_black",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "用户id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "取消拉黑用户",
+        "description": "取消拉黑用户",
+        "operationId": "customer_delete_manage_black",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "petstore_auth": {
+      "type": "oauth2",
+      "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+      "flow": "implicit",
+      "scopes": {
+        "write:pets": "modify pets in your account",
+        "read:pets": "read your pets"
+      }
+    },
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "media_content": {
+      "type": "object",
+      "description": "评论内容",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "文字内容"
+        },
+        "image": {
+          "type":"array",
+          "description": "图片",
+          "items": {
+            "type":"string"
+          }
+        },
+        "video": {
+          "type":"array",
+          "description": "视频",
+          "items": {
+            "type":"string"
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  }
+}

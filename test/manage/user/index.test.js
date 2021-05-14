@@ -1060,7 +1060,9 @@ describe(`${COMMON_API} test`, function() {
         UserModel.updateOne({
           _id: userInfo._id 
         }, {
-          roles: [ 'ADMIN' ]
+          $set: {
+            roles: [ 'ADMIN' ]
+          }
         })
         .then(_ => {
           return Request
@@ -1079,7 +1081,9 @@ describe(`${COMMON_API} test`, function() {
           return UserModel.updateOne({
             _id: userInfo._id 
           }, {
-            roles: [ 'SUPER_ADMIN' ]
+            $set: {
+              roles: [ 'SUPER_ADMIN' ]
+            }
           })
         })
         .then(_ => {

@@ -36,6 +36,9 @@ function sanitizersNameParams(originName) {
       {
         author_description: reg(originName)
       },
+      {
+        "info.another_name": reg(originName)
+      }
     ]
   }
 }

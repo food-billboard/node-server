@@ -75,7 +75,7 @@ function scheduleMethod() {
     classifyDeal(data)
   ]))
   .then(([static, classify]) => {
-    remove.push(...static.remove, classify.remove)
+    remove.push(...static.remove, ...classify.remove)
     add.push(...static.add, ...classify.add)
     return Promise.all([
       RankModel.deleteMany({

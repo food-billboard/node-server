@@ -456,7 +456,9 @@ describe(`${COMMON_API} test`, function() {
         UserModel.updateOne({
           _id: userInfo
         }, {
-          roles: ['SUB_DEVELOPMENT']
+          $set: {
+            roles: ['SUB_DEVELOPMENT']
+          }
         })
         .then(envSet)
         .then(_ => {
@@ -483,7 +485,9 @@ describe(`${COMMON_API} test`, function() {
           return UserModel.updateOne({
             _id: userInfo
           }, {
-            roles: ['SUPER_ADMIN']
+            $set: {
+              roles: ['SUPER_ADMIN']
+            }
           })
         })
         .then(envUnSet)
@@ -800,7 +804,9 @@ describe(`${COMMON_API} test`, function() {
         UserModel.updateOne({
           _id: userInfo
         }, {
-          roles: ['SUB_DEVELOPMENT']
+          $set: {
+            roles: ['SUB_DEVELOPMENT']
+          }
         })
         .then(envSet)
         .then(_ => {
@@ -821,7 +827,9 @@ describe(`${COMMON_API} test`, function() {
           return UserModel.updateOne({
             _id: userInfo
           }, {
-            roles: ['SUPER_ADMIN']
+            $set: {
+              roles: ['SUPER_ADMIN']
+            }
           })
         })
         .then(envUnSet)
@@ -1265,7 +1273,9 @@ describe(`${COMMON_API} test`, function() {
         UserModel.updateOne({
           _id: userInfo
         }, {
-          roles: ['SUB_DEVELOPMENT']
+          $set: {
+            roles: ['SUB_DEVELOPMENT']
+          }
         })
         .then(envSet)
         .then(_ => {
@@ -1285,7 +1295,9 @@ describe(`${COMMON_API} test`, function() {
           return UserModel.updateOne({
             _id: userInfo
           }, {
-            roles: ['SUPER_ADMIN']
+            $set: {
+              roles: ['SUPER_ADMIN']
+            }
           })
         })
         .then(envUnSet)

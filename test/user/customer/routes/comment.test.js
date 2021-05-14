@@ -115,13 +115,17 @@ describe(`${COMMON_API} test`, function() {
             user_info: userResult._id,
             source_type: 'comment',
           }, {
-            source: comment._id
+            $set: {
+              source: comment._id
+            }
           }),
           CommentModel.updateOne({
             user_info: userResult._id,
             source_type: 'movie'
           }, {
-            sub_comments: [origin._id]
+            $set: {
+              sub_comments: [origin._id]
+            }
           })
         ])
       })

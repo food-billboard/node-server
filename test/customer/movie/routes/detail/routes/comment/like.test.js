@@ -145,8 +145,10 @@ describe(`${COMMON_API} test`, function() {
         CommentModel.updateOne({
           _id: commentId
         },{
-          total_like: 0,
-          like_person: []
+          $set: {
+            total_like: 0,
+            like_person: []
+          }
         })
         .then(function() {
           done()
@@ -215,8 +217,10 @@ describe(`${COMMON_API} test`, function() {
         CommentModel.updateOne({
           _id: commentId
         },{
-          total_like: 1,
-          like_person: [ userId ]
+          $set: {
+            total_like: 1,
+            like_person: [ userId ]
+          }
         })
         .then(function() {
           done()
@@ -289,8 +293,10 @@ describe(`${COMMON_API} test`, function() {
         CommentModel.updateOne({
           _id: commentId
         },{
-          like_person: [ userId ],
-          total_like: 1
+          $set: {
+            like_person: [ userId ],
+            total_like: 1
+          }
         })
         .then(function() {
           done()
@@ -359,8 +365,10 @@ describe(`${COMMON_API} test`, function() {
         CommentModel.updateOne({
           "content.text": COMMON_API
         },{
-          total_like: 0,
-          like_person: []
+          $set: {
+            total_like: 0,
+            like_person: []
+          }
         })
         .then(function() {
           done()

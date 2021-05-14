@@ -3,7 +3,7 @@ const fs = require('fs').promises
 const fsSync = require('fs')
 const Mime = require('mime')
 const formidable = require('formidable')
-const { ImageModel, VideoModel, OtherMediaModel, notFound, STATIC_FILE_PATH, MEDIA_STATUS, checkAndCreateDir, checkDir } = require('@src/utils')
+const { ImageModel, VideoModel, OtherMediaModel, notFound, STATIC_FILE_PATH, MEDIA_STATUS, checkAndCreateDir, checkDir, createPoster } = require('@src/utils')
 const { promiseAny } = require('./util')
 
 const base64Reg = /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*?)\s*$/i
@@ -299,12 +299,13 @@ const pathMediaDeal = {
       })
 
       const isComplete = nextOffset === size
+      const realFilePath = path.join(STATIC_FILE_PATH, 'video', `${md5}.${Mime.getExtension(mime)}`)
 
       //返回文件相关信息
       const result = {
         filePath: path.join(basePath, `${md5}-${multiple}`),
         folder: basePath,
-        realFilePath: path.join(STATIC_FILE_PATH, 'video', `${md5}.${Mime.getExtension(mime)}`),
+        realFilePath,
         model: VideoModel,
         type: 'video',
         complete: isComplete,
@@ -328,7 +329,12 @@ const pathMediaDeal = {
             }
           }
 
-          return update(updateConfig)
+          if(!isComplete) return update(updateConfig)
+          return createPoster(realFilePath)
+          .then(data => {
+            if(data) updateConfig.$set.poster = data 
+            return update(updateConfig)
+          })
         },
         error: () => update({
           $set: {

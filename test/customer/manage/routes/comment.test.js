@@ -109,7 +109,9 @@ describe(`${COMMON_API} test`, function() {
       return UserModel.updateOne({
         _id: userId
       }, {
-        comment: [ data._id ]
+        $set: {
+          comment: [ data._id ]
+        }
       })
     })
     .catch(err => {

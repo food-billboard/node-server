@@ -395,7 +395,6 @@ router
     return model.save()
   })
   .then(data => !!data && data._id)
-  .then(notFound)
   .then(data => {
     return Promise.all([
       data,

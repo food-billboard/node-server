@@ -127,7 +127,6 @@ const _etagValidate = (ctx, etag) => {
 const filterField = (data, field='updatedAt', compare=null) => {
 
   let origin
-
   function filter(data) {
     if(Array.isArray(data)) {
       data.forEach(item => {

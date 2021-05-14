@@ -181,6 +181,23 @@ router
     return acc 
   }, {})
 
+  let videoConfig = [
+    {
+      $lookup: {
+        from: 'images',
+        localField: 'poster',
+        foreignField: '_id',
+        as: 'poster'
+      }
+    },
+    {
+      $unwind: {
+        path: "$poster",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+  ]
+
   const aggregate = [
     {
       $match: query
@@ -205,6 +222,7 @@ router
         preserveNullAndEmptyArrays: true 
       }
     },
+    ...(type == 1) ? videoConfig : [],
     {
       $project: {
         _id: 1,
@@ -214,6 +232,9 @@ router
         name: 1,
         origin_type: 1,
         auth: 1,
+        ...(type == 1 ? {
+          poster: "$poster.src"
+        } : {}),
         white_list_count: {
           $size: {
             $ifNull: [

@@ -358,8 +358,6 @@ router
 //新增
 .post('/', async(ctx) => {
 
-  console.log(22244433, 22)
-
   const { request: { headers } } = ctx
 
   const metadataKey = Object.keys(METADATA)

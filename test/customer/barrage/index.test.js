@@ -84,7 +84,9 @@ describe(`${COMMON_API} test`, function() {
       return MovieModel.updateOne({
         name: COMMON_API
       }, {
-        barrage: [ data._id ]
+        $set: {
+          barrage: [ data._id ]
+        }
       })
     })
     .catch(err => {
@@ -503,7 +505,9 @@ describe(`${COMMON_API} test`, function() {
         BarrageModel.updateOne({
           origin: movieId
         }, {
-          like_users: []
+          $set: {
+            like_users: []
+          }
         })
         .then(function() {
           done()
@@ -564,7 +568,9 @@ describe(`${COMMON_API} test`, function() {
         BarrageModel.updateOne({
           origin: movieId
         }, {
-          like_users: []
+          $set: {
+            like_users: []
+          }
         })
         .then(function() {
           done()
@@ -651,7 +657,9 @@ describe(`${COMMON_API} test`, function() {
         BarrageModel.updateOne({
           origin: movieId
         }, {
-          like_users: [ userId ]
+          $set: {
+            like_users: [ userId ]
+          }
         })
         .then(function(data) {
           done()

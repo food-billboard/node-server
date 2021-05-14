@@ -146,7 +146,9 @@ describe(`${COMMON_API} test`, function() {
         MovieModel.updateOne({
           name: COMMON_API
         }, {
-          comment: [ commentId ]
+          $set: {
+            comment: [ commentId ]
+          }
         }),
         CommentModel.updateOne({
           "content.text": COMMON_API

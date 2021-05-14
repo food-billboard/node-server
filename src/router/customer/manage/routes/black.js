@@ -32,14 +32,14 @@ router
     _default: 0,
     type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 0
     ]
   }, {
     name: 'pageSize',
     _default: 30,
     type: ['toInt'],
     sanitizers: [
-      data => data >= 0 ? data : -1
+      data => data >= 0 ? data : 30
     ]
   })
 
@@ -50,8 +50,7 @@ router
     _id: ObjectId(id)
   })
   .select({
-    black: 1,
-    updatedAt: 1
+    black: 1
   })
   .populate({
     path: 'black._id',
@@ -60,8 +59,8 @@ router
       avatar: 1
     },
     options: {
-      ...(pageSize >= 0 ? { limit: pageSize } : {}),
-      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
+      limit: pageSize,
+      skip: pageSize * currPage
     }
   })
   .exec()
@@ -71,7 +70,7 @@ router
     return {
       data: {
         ...data,
-        black: black.map(a => {
+        black: black.filter(item => !!item._id).map(a => {
           const { _id: { avatar, ...nextData } } = a
           return {
             ...nextData,
@@ -110,33 +109,13 @@ router
   })
   .exec()
   .then(notFound)
-  .then(data => data._id)
-  .then(id => {
-    return UserModel.findOne({
-      _id,
-      "fans._id": { $nin: [ id ] }
-    })
-    .select({
-      _id: 1
-    })
-    .exec()
-  })
-  .then(notFound)
   .then(_ => {
-    return Promise.all([
-      UserModel.updateOne({
-        _id: id,
-        "attentions._id": { $nin: [ _id ] }
-      }, {
-        $push: { attentions: { _id, timestamps: Date.now() } }
-      }),
-      UserModel.updateOne({
-        _id,
-        "fans._id": { $nin: [ id ] }
-      }, {
-        $push: { fans: { _id: id, timestamps: Date.now() } }
-      }),
-    ])
+    return UserModel.updateOne({
+      _id: id,
+      "black._id": { $nin: [ _id ] }
+    }, {
+      $push: { black: { _id, timestamps: Date.now() } }
+    })
   })
   .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))
@@ -161,39 +140,19 @@ router
 
   const data = await UserModel.findOne({
     _id: ObjectId(id),
-    "attentions._id": { $in: [ _id ] }
+    "black._id": { $in: [ _id ] }
   })
   .select({
     _id: 1
   })
   .exec()
   .then(notFound)
-  .then(data => data._id)
-  .then(id => {
-    return UserModel.findOne({
-      _id,
-      "fans._id": { $in: [ id ] }
+  .then(() => {
+    return UserModel.updateOne({
+      _id: ObjectId(id)
+    }, {
+      $pull: { black: { _id } }
     })
-    .select({
-      _id: 1
-    })
-    .exec()
-  })
-  .then(notFound)
-  .then(data => data._id)
-  .then((userId) => {
-    return Promise.all([
-      UserModel.updateOne({
-        _id: ObjectId(id)
-      }, {
-        $pull: { attentions: { _id: userId } }
-      }),
-      UserModel.updateOne({
-        _id: userId
-      }, {
-        $pull: { fans: { _id: ObjectId(id) } }
-      }),
-    ])
   })
   .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))

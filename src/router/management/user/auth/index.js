@@ -17,7 +17,6 @@ async function Auth(ctx, next) {
     }
     _id = _id.split(',').map(item => ObjectId(item))
   }catch(err){}
-  
 
   const data = await UserModel.find({
     _id: { $in: [ ..._id, ObjectId(opUserId) ] }
@@ -31,7 +30,8 @@ async function Auth(ctx, next) {
   .then(data => !!data && !! data.length && data)
   .then(notFound)
   .then(data => {
-    const { opUser, toOpUsers } = data.reduce((acc, cur) => {
+
+    let { opUser, toOpUsers } = data.reduce((acc, cur) => {
       const { roles, _id } = cur
       if(_id.equals(opUserId)) {
         acc.opUser = roles 
@@ -46,18 +46,23 @@ async function Auth(ctx, next) {
       toOpUsers: []
     })
     
-    const maxOpRole = findMostRole(opUser)
-    let customValid = true 
+    // const maxOpRole = findMostRole(opUser)
+    // let customValid = true 
     if(_method === 'post' || _method === 'put') {
-      const role = ctx.request.body.role 
-      if(role && typeof ROLES_MAP[role] === 'number' && ROLES_MAP[role] < maxOpRole) customValid = false
+      const roles = ctx.request.body.roles 
+      if(!!roles && typeof roles === 'string') {
+        toOpUsers = [
+          {
+            roles: roles.split(',').map(item => (item.trim()))
+          }
+        ]
+      }
     }
-
     const valid = rolesAuthMapValidator({
       userRoles: opUser,
       opRoles: toOpUsers
     })
-    if(!valid || !customValid) return Promise.reject({ errMsg: 'forbidden', status: 403 })
+    if(!valid) return Promise.reject({ errMsg: 'forbidden', status: 403 })
   })
   .catch(dealErr(ctx))
 

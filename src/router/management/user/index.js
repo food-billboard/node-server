@@ -212,7 +212,6 @@ router
 .use(Auth)
 //新增
 .post('/', async(ctx) => {
-
   const check = checkParams(ctx)
 
   if(check) return

@@ -18,9 +18,11 @@ function responseExpect(res, validate=[]) {
     expect(item).to.be.a('object').and.that.include.any.keys('poster', 'description', '_id', 'name', 'author', 'comment_count', 'total_rate', 'rate_person', 'createdAt', 'updatedAt', 'source_type', 'glance', 'hot', 'status', 'tag_count', 'barrage_count')
     commonValidate.objectId(item._id)
     commonValidate.string(item.name)
-    expect(item.author).to.be.a('object').and.that.include.all.keys('_id', 'username')
-    commonValidate.objectId(item.author._id)
-    commonValidate.string(item.author.username)
+    if(!!item.author && Object.keys(item.author).length) {
+      expect(item.author).to.be.a('object').and.that.include.all.keys('_id', 'username')
+      commonValidate.objectId(item.author._id)
+      commonValidate.string(item.author.username)
+    }
     if(item.poster) {
       commonValidate.string(item.poster)
     }
@@ -358,7 +360,7 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, (target) => {
             const { list } = target
-            expect(list.length).to.be.equals(1)
+            expect(list.length >= 1).to.be.true
           })
           done()
         })
@@ -393,7 +395,7 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, (target) => {
             const { list } = target
-            expect(list.length).to.be.equals(1)
+            expect(list.length >= 1).to.be.true
           })
           done()
         })

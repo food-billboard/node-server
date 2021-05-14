@@ -5899,6 +5899,10 @@
                         "type": "string",
                         "description": "地址"
                       },
+                      "poster": {
+                        "type": "string",
+                        "description": "海报(视频专有)"
+                      },
                       "name": {
                         "type": "string",
                         "description": "名称"

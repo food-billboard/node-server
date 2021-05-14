@@ -307,7 +307,9 @@ router
   }, {
     name: 'info.screen_time',
     validator: [
-      data => Day(data).isValid()
+      data => {
+        return Day(data).isValid() 
+      }
     ]
   }, {
     name: 'info.description',
@@ -384,7 +386,7 @@ router
       { "info.another_name": { $in: [name] } }
     ],
     //上映时间类似
-    $and: [ { "info.screen_time": { $gte: screen_time - NUM_DAY(1) } }, { "info.screen_time": { $lte: screen_time + NUM_DAY(1) } } ], 
+    $and: [ { "info.screen_time": { $gte: Day(screen_time).valueOf() - NUM_DAY(1) } }, { "info.screen_time": { $lte: Day(screen_time).valueOf() + NUM_DAY(1) } } ], 
     //导演类似
     ...(validDirectorList.length ? { "info.director": { $in: [ ...validDirectorList ] } } : {}),
     //演员类似
@@ -412,7 +414,6 @@ router
 
 })
 .post('/', async (ctx) => {
-
   const [, token] = verifyTokenToData(ctx)
   let { id }  = token
 

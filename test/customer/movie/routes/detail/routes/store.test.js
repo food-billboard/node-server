@@ -140,12 +140,16 @@ describe(`${COMMON_API} test`, function() {
           MovieModel.updateOne({
             name: COMMON_API
           },{
-            hot: 0
+            $set: {
+              hot: 0
+            }
           }),
           UserModel.updateOne({
             username: COMMON_API
           },{
-            store: []
+            $set: {
+              store: []
+            }
           })
         ])
         .then(function() {
@@ -228,12 +232,16 @@ describe(`${COMMON_API} test`, function() {
           MovieModel.updateOne({
             name: COMMON_API
           },{
-            hot: 1
+            $set: {
+              hot: 1
+            }
           }),
           UserModel.updateOne({
             username: COMMON_API
           },{
-            store: [ { _id: movieId } ]
+            $set: {
+              store: [ { _id: movieId } ]
+            }
           })
         ])
         .then(function() {
@@ -320,12 +328,16 @@ describe(`${COMMON_API} test`, function() {
           MovieModel.updateOne({
             name: COMMON_API
           },{
-            hot: 1
+            $set: {
+              hot: 1
+            }
           }),
           UserModel.updateOne({
             username: COMMON_API
           },{
-            store: [ { _id: movieId } ]
+            $set: {
+              store: [ { _id: movieId } ]
+            }
           })
         ])
         .then(function() {
@@ -408,12 +420,16 @@ describe(`${COMMON_API} test`, function() {
           MovieModel.updateOne({
             name: COMMON_API
           },{
-            hot: 0
+            $set: {
+              hot: 0
+            }
           }),
           UserModel.updateOne({
             username: COMMON_API
           },{
-            store: []
+            $set: {
+              store: []
+            }
           })
         ])
         .then(function() {

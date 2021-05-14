@@ -410,7 +410,9 @@ describe.skip(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${
         ImageModel.updateOne({
           "info.md5": littleFileName
         }, {
-          white_list: [userId]
+          $set: {
+            white_list: [userId]
+          }
         })
         .then(_ => {
           done()
@@ -443,7 +445,9 @@ describe.skip(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${
         await ImageModel.updateOne({
           "info.md5": littleFileName
         }, {
-          white_list: []
+          $set: {
+            white_list: []
+          }
         })
         .catch(err => {
           console.log('oops: ', err)

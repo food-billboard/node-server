@@ -2,6 +2,7 @@ const chalk = require('chalk')
 const fs = require('fs')
 const Mime = require('mime')
 const { createHls } = require('./ffmpeg')
+const { createPoster } = require('./poster')
   
 //重定向
 //生成视频流
@@ -57,5 +58,6 @@ async function videoDataParse(ctx, filePath) {
 
 module.exports = {
   createHlsVideo,
-  videoDataParse
+  videoDataParse,
+  createPoster
 }

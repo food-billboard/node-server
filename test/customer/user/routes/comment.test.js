@@ -130,12 +130,16 @@ describe(`${COMMON_API} test`, function() {
             user_info: userId,
             total_like: 1
           }, {
-            source: origin._id
+            $set: {
+              source: origin._id
+            }
           }),
           MovieModel.updateOne({
             name: COMMON_API
           }, {
-            comment: [ origin._id ]
+            $set: {
+              comment: [ origin._id ]
+            }
           })
         ])
       })

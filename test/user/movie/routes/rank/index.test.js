@@ -201,7 +201,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get rank list success and return the status of 304`, function(done) {
+      it.skip(`get rank list success and return the status of 304`, function(done) {
 
         const query = {
           _id: rankId.toString()
@@ -225,7 +225,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get rank list success and hope return the status of 304 but the content has edited`, function(done) {
+      it.skip(`get rank list success and hope return the status of 304 but the content has edited`, function(done) {
 
         const query = {
           _id: rankId.toString()
@@ -249,7 +249,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get rank list success and hope return the status of 304 but the params of query is change`, function(done) {
+      it.skip(`get rank list success and hope return the status of 304 but the params of query is change`, function(done) {
 
         const query = {
           _id: rankId.toString()

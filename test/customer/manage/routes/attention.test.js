@@ -59,13 +59,17 @@ describe(`${COMMON_API} test`, function() {
           mobile: 15789665412,
           username: COMMON_API,
         }, {
-          attentions: [ { _id: userId, timestamps: Date.now() } ]
+          $set: {
+            attentions: [ { _id: userId, timestamps: Date.now() } ]
+          }
         }),
         UserModel.updateOne({
           username: COMMON_API,
           mobile: 15874996521
         }, {
-          fans: [ { _id: result._id, timestamps: Date.now() } ]
+          $set: {
+            fans: [ { _id: result._id, timestamps: Date.now() } ]
+          }
         })
       ])
     })
@@ -286,8 +290,10 @@ describe(`${COMMON_API} test`, function() {
         UserModel.updateMany({
           username: COMMON_API
         }, {
-          fans: [],
-          attentions: []
+          $set: {
+            fans: [],
+            attentions: []
+          }
         })
         .then(function() {
           done()
@@ -355,8 +361,10 @@ describe(`${COMMON_API} test`, function() {
         UserModel.updateMany({
           username: COMMON_API
         }, {
-          fans: [ { _id: result._id } ],
-          attentions: [ { _id: userId } ]
+          $set: {
+            fans: [ { _id: result._id } ],
+            attentions: [ { _id: userId } ]
+          }
         })
         .then(function() {
           done()
@@ -428,8 +436,10 @@ describe(`${COMMON_API} test`, function() {
         UserModel.updateMany({
           username: COMMON_API
         }, {
-          fans: [ { _id: result._id } ],
-          attentions: [ { _id: userId } ]
+          $set: {
+            fans: [ { _id: result._id } ],
+            attentions: [ { _id: userId } ]
+          }
         })
         .then(function() {
           done()
@@ -498,8 +508,10 @@ describe(`${COMMON_API} test`, function() {
         UserModel.updateMany({
           username: COMMON_API
         }, {
-          fans: [],
-          attentions: []
+          $set: {
+            fans: [],
+            attentions: []
+          }
         })
         .then(function() {
           done()

@@ -70,13 +70,17 @@ describe(`${COMMON_API} test`, function() {
           MovieModel.updateOne({
             name: COMMON_API
           }, {
-            total_rate: 0,
-            rate_person: 0
+            $set: {
+              total_rate: 0,
+              rate_person: 0
+            }
           }),
           UserModel.updateOne({
             username: COMMON_API
           }, {
-            rate: []
+            $set: {
+              rate: []
+            }
           })
         ])
         .then(function() {
@@ -166,18 +170,22 @@ describe(`${COMMON_API} test`, function() {
           MovieModel.updateOne({
             name: COMMON_API
           }, {
-            total_rate: 10,
-            rate_person: 1
+            $set: {
+              total_rate: 10,
+              rate_person: 1
+            }
           }),
           UserModel.updateOne({
             username: COMMON_API
           }, {
-            rate: [
-              {
-                _id: movieId,
-                rate: 10
-              }
-            ]
+            $set: {
+              rate: [
+                {
+                  _id: movieId,
+                  rate: 10
+                }
+              ]
+            }
           })
         ])
         .then(function() {

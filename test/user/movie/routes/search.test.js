@@ -23,17 +23,34 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.a('array')
 
   target.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('description', 'name', 'poster', '_id', 'classify', 'publish_time', 'hot', 'rate', 'store')
+    expect(item).to.be.a('object').and.that.include.any.keys(
+      'glance', 'source_type', 'description', 'name', 'poster', 
+      '_id', 'classify', 'publish_time', 'hot', 'rate',
+      'author', 'createdAt', 'updatedAt', 'status'
+    )
     commonValidate.string(item.description)
     commonValidate.string(item.name)
+    commonValidate.string(item.source_type)
+    commonValidate.string(item.status)
     commonValidate.poster(item.poster)
     commonValidate.objectId(item._id)
     expect(item.classify).to.be.a('array')
-    item.classify.forEach(cls => expect(cls).to.be.a('object').have.a.property('name').that.is.a('string').and.lengthOf.above(0))
+    item.classify.forEach(cls => commonValidate.string(cls))
     commonValidate.date(item.publish_time)
     commonValidate.number(item.hot)
+    commonValidate.number(item.glance)
     commonValidate.number(item.rate)
-    expect(item.store).to.be.a('boolean')
+    commonValidate.date(item.createdAt)
+    commonValidate.date(item.updatedAt)
+    if(!!item.author && Object.keys(item.author).length) {
+      expect(item.author).to.be.a('object').and.that.includes.all.keys('username', '_id', 'avatar')
+      if(item.author.avatar) {
+        commonValidate.poster(item.author.avatar)
+      }
+      commonValidate.objectId(item.author._id)
+      commonValidate.string(item.author.username)
+    }
+
   })
 
   if(Array.isArray(validate)) {

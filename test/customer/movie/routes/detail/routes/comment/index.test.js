@@ -173,12 +173,16 @@ describe(`${COMMON_API} test`, function() {
           "content.text": COMMON_API,
           source_type: 'movie'
         }, {
-          sub_comments: [ subCommentId ]
+          $set: {
+            sub_comments: [ subCommentId ]
+          }
         }),
         movieDatabase.updateOne({
           name: COMMON_API
         }, {
-          comment: [ commentId ]
+          $set: {
+            comment: [ commentId ]
+          }
         })
 
       ])

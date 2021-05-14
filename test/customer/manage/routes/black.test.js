@@ -1,17 +1,16 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, Request, createEtag, commonValidate } = require('@test/utils')
+const { mockCreateUser, Request, commonValidate } = require('@test/utils')
 const { UserModel } = require('@src/utils')
-const Day = require('dayjs')
 
-const COMMON_API = '/api/customer/manage/attention'
+const COMMON_API = '/api/customer/manage/black'
 
 function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('object').and.that.includes.all.keys('attentions')
-  target.attentions.forEach(item => {
+  expect(target).to.be.a('object').and.that.includes.all.keys('black')
+  target.black.forEach(item => {
     expect(item).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id')
     commonValidate.poster(item.avatar)
     commonValidate.string(item.username)
@@ -31,19 +30,17 @@ describe(`${COMMON_API} test`, function() {
 
   let result
   let selfToken
-  let updatedAt
   let userId
 
   before(async function() {
 
     const { model:user } = mockCreateUser({
       username: COMMON_API,
-      mobile: 15874996521
     })
   
     const { model: self, signToken } = mockCreateUser({
       username: COMMON_API,
-      mobile: 15789665412
+      description: COMMON_API
     })
 
     await Promise.all([
@@ -54,20 +51,14 @@ describe(`${COMMON_API} test`, function() {
       userId = user._id
       result = self
       selfToken = signToken(self._id)
-      return Promise.all([
-        UserModel.updateOne({
-          mobile: 15789665412,
-          username: COMMON_API,
-        }, {
-          attentions: [ { _id: userId, timestamps: Date.now() } ]
-        }),
-        UserModel.updateOne({
-          username: COMMON_API,
-          mobile: 15874996521
-        }, {
-          fans: [ { _id: result._id, timestamps: Date.now() } ]
-        })
-      ])
+      return UserModel.updateOne({
+        username: COMMON_API,
+        description: COMMON_API
+      }, {
+        $set: {
+          black: [ { _id: userId, timestamps: Date.now() } ]
+        }
+      })
     })
     .catch(err => {
       console.log('oops: ', err)
@@ -94,7 +85,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`pre check params fail test -> ${COMMON_API}`, function() {
 
-      it(`pre check params fail becasue of the movie id is not verify`, function(done) {
+      it(`pre check params fail becasue of the user id is not verify`, function(done) {
 
         Request
         .put(COMMON_API)
@@ -114,7 +105,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`pre check params fail becasue lack of the movie id`, function(done) {
+      it(`pre check params fail becasue lack of the user id`, function(done) {
 
         Request
         .delete(COMMON_API)
@@ -131,59 +122,15 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`pre check params fail because of the movie id is not found in database`, function(done) {
-
-        const id = userId.toString()
-
-        Request
-        .put(COMMON_API)
-        .send({
-          _id: `${(parseInt(id.slice(0, 1)) + 5) % 10}${id.slice(1)}`
-        })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(404)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-
-      })
-
     })
 
   })
 
-  describe(`get self attention list -> ${COMMON_API}`, function() {
+  describe(`get self black list -> ${COMMON_API}`, function() {
 
-    describe(`get self attentions list success test -> ${COMMON_API}`, function() {
-
-      beforeEach(async function() {
-
-        updatedAt = await UserModel.findOne({
-          _id: userId,   
-        })
-        .select({
-          _id: 0,
-          updatedAt: 1
-        })
-        .exec()
-        .then(data => {
-          return data._doc.updatedAt
-        })
-        .catch(err => {
-          console.log('oops: ', err)
-          return false
-        })
-
-        return !!updatedAt ? Promise.resolve() : Promise.reject(COMMON_API)
-
-      })
+    describe(`get self black list success test -> ${COMMON_API}`, function() {
       
-      it(`get self attentions list success`, function(done) {
+      it(`get self black list success`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -202,73 +149,9 @@ describe(`${COMMON_API} test`, function() {
           }catch(_) {
             console.log(_)
           }
-          responseExpect(obj)
-          done()
-        })
-
-      })
-
-      it(`get self attentions list success and return the status of 304`, function(done) {
-
-        Request
-        .get(COMMON_API)
-        .set({
-          Accept: 'Application/json',
-          'If-Modified-Since': updatedAt,
-          'If-None-Match': createEtag({}),
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(304)
-        .expect('Last-Modified', updatedAt.toString())
-        .expect('ETag', createEtag({}))
-        .end(function(err, _) {
-          if(err) return done(err)
-          done()
-        })
-
-      })
-
-      it(`get self attentions list success and hope return the status of 304 but the content has edited`, function(done) {
-
-
-        Request
-        .get(COMMON_API)
-        .set({
-          Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(updatedAt).valueOf - 10000000),
-          'If-None-Match': createEtag({}),
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(200)
-        .expect('Last-Modified', updatedAt.toString())
-        .expect('ETag', createEtag({}))
-        .end(function(err, _) {
-          if(err) return done(err)
-          done()
-        })
-
-      })
-
-      it(`get self attentions list success and hope return the status of 304 but the params of query is change`, function(done) {
-
-        const query = {
-          pageSize: 10
-        }
-
-        Request
-        .get(COMMON_API)
-        .query(query)
-        .set({
-          Accept: 'Application/json',
-          'If-Modified-Since': new Date(Day(updatedAt).valueOf - 10000000),
-          'If-None-Match': createEtag({}),
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(200)
-        .expect('Last-Modified', updatedAt.toString())
-        .expect('ETag', createEtag(query))
-        .end(function(err, _) {
-          if(err) return done(err)
+          responseExpect(obj, target => {
+            expect(target.black.length).not.be.equal(0)
+          })
           done()
         })
 
@@ -278,16 +161,15 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe(`put the new user for attention -> ${COMMON_API}`, function() {
+  describe(`put the new user for black -> ${COMMON_API}`, function() {
 
-    describe(`put the new user for attention success test -> ${COMMON_API}`, function() {
+    describe(`put the new user for black success test -> ${COMMON_API}`, function() {
 
       before(function(done) {
         UserModel.updateMany({
           username: COMMON_API
         }, {
-          fans: [],
-          attentions: []
+          black: []
         })
         .then(function() {
           done()
@@ -298,28 +180,17 @@ describe(`${COMMON_API} test`, function() {
       })
 
       after(function(done) {
-        Promise.all([
-          UserModel.findOne({
-            _id: result._id,
-            "attentions._id": { $in: [ userId ] }
-          })
-          .select({
-            _id: 0,
-            attentions: 1
-          })
-          .exec(),
-          UserModel.findOne({
-            _id: userId,
-            "fans._id": { $in: [ result._id ] }
-          })
-          .select({
-            _id: 0,
-            fans: 1
-          })
-          .exec(),
-        ])
-        .then(([self, user]) => {
-          return !!self && !!user
+        UserModel.findOne({
+          _id: result._id,
+          "black._id": { $in: [ userId ] }
+        })
+        .select({
+          _id: 0,
+          black: 1
+        })
+        .exec()
+        .then((user) => {
+          return !!user
         })
         .then(result => {
           if(result) return done()
@@ -327,7 +198,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`put the new user for attention success`, function(done) {
+      it(`put the new user for black success`, function(done) {
 
         Request
         .put(COMMON_API)
@@ -349,14 +220,14 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    describe(`put the new user for attention success but not write success test -> ${COMMON_API}`, function() {
+    describe(`put the new user for black success but not write success test -> ${COMMON_API}`, function() {
 
       before(function(done) {
         UserModel.updateMany({
-          username: COMMON_API
+          username: COMMON_API,
+          description: COMMON_API
         }, {
-          fans: [ { _id: result._id } ],
-          attentions: [ { _id: userId } ]
+          black: [ { _id: userId, timestamps: Date.now() } ]
         })
         .then(function() {
           done()
@@ -367,28 +238,17 @@ describe(`${COMMON_API} test`, function() {
       })
 
       after(function(done) {
-        Promise.all([
-          UserModel.findOne({
-            _id: result._id,
-            "attentions._id": { $in: [ userId ] }
-          })
-          .select({
-            _id: 0,
-            attentions: 1
-          })
-          .exec(),
-          UserModel.findOne({
-            _id: userId,
-            "fans._id": { $in: [ result._id ] }
-          })
-          .select({
-            _id: 0,
-            fans: 1
-          })
-          .exec(),
-        ])
-        .then(([self, user]) => {
-          return !!self && self.attentions.length == 1 && !!user && user.fans.length == 1
+        UserModel.findOne({
+          _id: result._id,
+          "black._id": { $in: [ userId ] }
+        })
+        .select({
+          _id: 0,
+          black: 1
+        })
+        .exec()
+        .then(user => {
+          return !!user && user.black.length == 1
         })
         .then(result => {
           if(result) return done()
@@ -396,7 +256,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`put the new user for attentions fail but the user is attentioned`, function(done) {
+      it(`put the new user for black fail but the user is blacked`, function(done) {
 
         Request
         .put(COMMON_API)
@@ -420,16 +280,19 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe(`cancel the user attention -> ${COMMON_API}`, function() {
+  describe(`cancel the user black -> ${COMMON_API}`, function() {
 
-    describe(`cancel the new user for attention success test -> ${COMMON_API}`, function() {
+    describe(`cancel the new user for black success test -> ${COMMON_API}`, function() {
 
       before(function(done) {
         UserModel.updateMany({
-          username: COMMON_API
+          _id: result._id,
+          username: COMMON_API,
+          description: COMMON_API
         }, {
-          fans: [ { _id: result._id } ],
-          attentions: [ { _id: userId } ]
+          $set: {
+            black: [ { _id: userId, timestamps: Date.now() } ]
+          }
         })
         .then(function() {
           done()
@@ -440,26 +303,17 @@ describe(`${COMMON_API} test`, function() {
       })
 
       after(async function() {
-        const res = await Promise.all([
-          UserModel.findOne({
-            _id: result._id,
-            attentions: []
-          })
-          .select({
-            _id: 1
-          })
-          .exec(),
-          UserModel.findOne({
-            _id: userId,
-            fans: []
-          })
-          .select({
-            _id: 1
-          })
-          .exec(),
-        ])
-        .then(([self, user]) => {
-          return !!self && !!user
+        const res = await UserModel.findOne({
+          _id: result._id,
+          black: []
+        })
+        .select({
+          _id: 1,
+          black: 1
+        })
+        .exec()
+        .then(user => {
+          return !!user
         })
         .catch(err => {
           console.log('oops: ', err)
@@ -470,7 +324,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`cancel the new user for attention success`, function(done) {
+      it(`cancel the new user for black success`, function(done) {
 
         Request
         .delete(COMMON_API)
@@ -492,14 +346,14 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    describe(`cancel the new user for attention success but not write database test -> ${COMMON_API}`, function() {
+    describe(`cancel the new user for black success but not write database test -> ${COMMON_API}`, function() {
 
       before(function(done) {
         UserModel.updateMany({
-          username: COMMON_API
+          username: COMMON_API,
+          description: COMMON_API
         }, {
-          fans: [],
-          attentions: []
+          black: []
         })
         .then(function() {
           done()
@@ -510,28 +364,17 @@ describe(`${COMMON_API} test`, function() {
       })
 
       after(function(done) {
-        Promise.all([
-          UserModel.findOne({
-            _id: result._id,
-            attentions: []
-          })
-          .select({
-            _id: 0,
-            attentions: 1
-          })
-          .exec(),
-          UserModel.findOne({
-            _id: userId,
-            fans: []
-          })
-          .select({
-            _id: 0,
-            fans: 1
-          })
-          .exec(),
-        ])
-        .then(([self, user]) => {
-          return !!self && !!user
+        UserModel.findOne({
+          _id: result._id,
+          black: []
+        })
+        .select({
+          _id: 0,
+          black: 1
+        })
+        .exec()
+        .then(user => {
+          return !!user
         })
         .then(result => {
           if(result) return done()
@@ -539,7 +382,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`cancel the new user for attentions fail because the user is not attentioned`, function(done) {
+      it(`cancel the new user for black fail because the user is not blacked`, function(done) {
         
         Request
         .delete(COMMON_API)

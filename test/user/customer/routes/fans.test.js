@@ -60,7 +60,9 @@ describe(`${COMMON_API} test`, function() {
         return UserModel.updateOne({
           mobile: 11256981236
         }, {
-          fans: [ { _id: data._id } ]
+          $set: {
+            fans: [ { _id: data._id } ]
+          }
         })
       })
       .then(data => {

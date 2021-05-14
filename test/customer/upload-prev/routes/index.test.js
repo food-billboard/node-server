@@ -888,7 +888,9 @@ describe.skip(`${COMMON_API} test`, function() {
         await VideoModel.updateOne({
           "info.md5": filename
         }, {
-          white_list: [ ObjectId('53102b43bf1044ed8b0ba36b') ]
+          $set: {
+            white_list: [ ObjectId('53102b43bf1044ed8b0ba36b') ]
+          }
         })
         .catch(err => {
           res = false
@@ -916,7 +918,9 @@ describe.skip(`${COMMON_API} test`, function() {
         await VideoModel.updateOne({
           "info.md5": filename
         }, {
-          white_list: [ userId ]
+          $set: {
+            white_list: [ userId ]
+          }
         })
         .catch(err => {
           res = false
@@ -1066,7 +1070,9 @@ describe.skip(`${COMMON_API} test`, function() {
         VideoModel.updateOne({
           "info.md5": filename
         }, {
-          "info.status": "UPLOADING" 
+          $set: {
+            "info.status": "UPLOADING" 
+          }
         })
         .then(function() {
           done()
@@ -1120,7 +1126,9 @@ describe.skip(`${COMMON_API} test`, function() {
         await VideoModel.updateOne({
           "info.md5": filename
         }, {
-          white_list: [ ObjectId('53102b43bf1044ed8b0ba36b') ]
+          $set: {
+            white_list: [ ObjectId('53102b43bf1044ed8b0ba36b') ]
+          }
         })
         .catch(err => {
           res = false
@@ -1142,7 +1150,9 @@ describe.skip(`${COMMON_API} test`, function() {
         await VideoModel.updateOne({
           "info.md5": filename
         }, {
-          white_list: [ userId ]
+          $set: {
+            white_list: [ userId ]
+          }
         })
         .catch(err => {
           res = false
