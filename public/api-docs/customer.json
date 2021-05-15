@@ -2542,6 +2542,9 @@
                     "username": {
                       "type":"string",
                       "description": "作者名称"
+                    },
+                    "_id": {
+                      "type":"string"
                     }
                   }
                 },

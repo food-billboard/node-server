@@ -122,7 +122,7 @@ router
       }
     })
     if(!found) return Promise.reject({ errMsg: 'not found', status: 404 })
-    if(mine && fans.some(f => f.equals(mine))) result.like = true
+    if(mine && fans.some(f => mine.equals(f))) result.like = true
     return {
       data: result
     }

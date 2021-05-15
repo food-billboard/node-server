@@ -74,7 +74,7 @@ router
     path: 'author',
     select: {
       username: 1,
-      _id: 1
+      _id: 1,
     }
   })
   .populate({

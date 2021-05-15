@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const { UserModel, dealErr, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -71,9 +71,9 @@ router
     }
   })
   .exec()
-  .then(notFound)
   .then(data => {
-    const { glance, ...nextData } = data
+    console.log(222222222, data)
+    const { glance, ...nextData } = data || { glance: [] }
     return {
       data: {
         ...nextData,

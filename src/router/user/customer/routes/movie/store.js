@@ -70,9 +70,8 @@ router
     }
   })
   .exec()
-  .then(notFound)
   .then(data => {
-    const { store } = data
+    const { store } = data || { store: [] }
     return {
       data: {
         ...data,
