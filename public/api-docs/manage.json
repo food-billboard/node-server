@@ -5511,6 +5511,10 @@
                   "type": "integer",
                   "description": "粉丝数量"
                 },
+                "friends": {
+                  "type": "integer",
+                  "description": "好友数量"
+                },
                 "issue": {
                   "type": "integer",
                   "description": "上传数量"

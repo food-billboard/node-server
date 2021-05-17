@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, FriendsModel, dealErr, FRIEND_STATUS, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
+const { verifyTokenToData, UserModel, FriendsModel, FRIEND_STATUS, dealErr, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -9,7 +9,7 @@ router
   const { method } = ctx
   if(method.toLowerCase() === 'get') return await next()
   let _method 
-  if(method.toLowerCase() === 'put') {
+  if(method.toLowerCase() === 'post') {
     _method = 'body'
   }else if(method.toLowerCase() === 'delete') {
     _method = 'query'
@@ -26,6 +26,7 @@ router
   return await next()
 })
 .get('/', async (ctx) => {
+  
   const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
@@ -41,12 +42,13 @@ router
       data => data >= 0 ? data : 30
     ]
   })
+
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
   const data = await FriendsModel.findOne({
     user: ObjectId(id),
-    "friends.status": FRIEND_STATUS.BLACK
+    "friends.status": FRIEND_STATUS.NORMAL
   })
   .select({
     friends: 1
@@ -69,7 +71,7 @@ router
     return {
       data: {
         ...data,
-        black: friends.filter(item => !!item._id).map(a => {
+        friends: friends.filter(item => !!item._id).map(a => {
           const { _id: { avatar, ...nextData } } = a
           return {
             ...nextData,
@@ -87,7 +89,7 @@ router
   })
 
 })
-.put('/', async (ctx) => {
+.post('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const [ _id ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
@@ -101,31 +103,35 @@ router
 
   const data = await FriendsModel.findOne({
     user: id,
-    friends: { 
-      $elemMatch: { 
-        status: FRIEND_STATUS.NORMAL,
-        _id
-      } 
-    }
   })
   .select({
-    _id: 1
+    _id: 1,
+    friends: 1
   })
   .exec()
+  .then(parseData)
+  .then(data => {
+    if(!!data) {
+      return data.friends.every(item => item._id != _id.toString())
+    } 
+    return true 
+  })
   .then(notFound)
   .then(_ => {
-    return FriendsModel.updateOne({
-      user: id,
-      friends: { 
-        $elemMatch: { 
-          _id
-        } 
-      }
-    }, {
-      $set: { 
-        "friends.$.status": FRIEND_STATUS.BLACK
-      }
-    })
+    return Promise.all([
+      UserModel.updateOne({
+        _id: id,
+      }, {
+        $inc: { friends: 1 }
+      }),
+      FriendsModel.updateOne({
+        user: id 
+      }, {
+        $push: { friends: { _id, timestamps: Date.now() } }
+      }, {
+        upsert: true 
+      })
+    ])
   })
   .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))
@@ -152,8 +158,7 @@ router
     user: ObjectId(id),
     friends: { 
       $elemMatch: { 
-        status: FRIEND_STATUS.BLACK,
-        _id
+        _id: _id
       } 
     }
   })
@@ -163,18 +168,18 @@ router
   .exec()
   .then(notFound)
   .then(() => {
-    return FriendsModel.updateOne({
-      user: ObjectId(id),
-      friends: { 
-        $elemMatch: { 
-          _id
-        } 
-      }
-    }, {
-      $set: { 
-        "friends.$.status": FRIEND_STATUS.NORMAL
-      }
-    })
+    return Promise.all([
+      UserModel.updateOne({
+        _id: ObjectId(id)
+      }, {
+        $inc: { friends: -1 }
+      }),
+      FriendsModel.updateOne({
+        user: ObjectId(id)
+      }, {
+        $pull: { friends: { _id } }
+      })
+    ])
   })
   .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))

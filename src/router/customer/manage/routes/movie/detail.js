@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -24,12 +24,14 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
-  const data = UserModel.findOne({
+  const data = await UserModel.findOne({
     _id: ObjectId(id),
     "issue._id": { $in: [ _id ] }
   })
   .select({
-    _id: 1
+    _id: 1,
+    issue: 1,
+    mobile: 1
   })
   .exec()
   .then(notFound)
@@ -95,9 +97,9 @@ router
     return {
       data: {
         ... nextData,
-        video: video ? video.src : null,
+        video: avatarGet(video),
         images: images.filter(i => i && !!i.src).map(i => i.src),
-        poster: poster ? poster.src : null,
+        poster: avatarGet(poster),
         info
       }
     }
@@ -106,7 +108,8 @@ router
 
   responseDataDeal({
     ctx,
-    data
+    data,
+    needCache: false 
   })
 
 })

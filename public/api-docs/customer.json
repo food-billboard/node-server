@@ -502,6 +502,117 @@
         ]
       }
     },
+    "/api/customer/manage/friends": {
+      "get": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "用户好友列表",
+        "description": "获取用户好友",
+        "operationId": "customer_get_manage_friends",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "object",
+              "$ref":"#/definitions/customer_get_manage_attention"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "新增用户",
+        "description": "新增用户",
+        "operationId": "customer_put_manage_friends",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "用户id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "删除用户",
+        "description": "删除用户",
+        "operationId": "customer_delete_manage_friends",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
     "/api/customer/manage/fans": {
       "get": {
         "tags": [
@@ -2113,6 +2224,10 @@
                 "attentions": {
                   "type": "integer",
                   "description": "关注人数"
+                },
+                "friends": {
+                  "type": "integer",
+                  "description": "好友人数"
                 },
                 "avatar": {
                   "type": "string",

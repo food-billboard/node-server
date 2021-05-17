@@ -33,6 +33,7 @@ router
     updatedAt: 1,
     mobile: 1,
     description: 1,
+    friends: 1
   })
   .populate({
     path: 'avatar',

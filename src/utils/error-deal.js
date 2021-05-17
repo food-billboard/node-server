@@ -239,8 +239,9 @@ const responseDataDeal = ({
   }
 
   log4RequestAndResponse(ctx, response)
-
-  ctx.body = mediaDeal(response)
+  
+  const mediaDealData = mediaDeal(response)
+  ctx.body = mediaDealData
   // ctx.body = response
 
 }

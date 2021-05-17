@@ -40,7 +40,7 @@ const TEMPLATE_MOVIE = {
   author_rate: '',
 	store: [],
   total_rate: 0,
-  rate_person: 0,
+  rate_person: 1,
   source_type: 'USER',
 	status: 'VERIFY',
 	related_to: [],

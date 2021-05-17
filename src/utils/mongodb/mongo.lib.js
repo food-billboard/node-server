@@ -16,6 +16,7 @@ const {
   COMMENT_SOURCE_TYPE, 
   MEDIA_STATUS, 
   MEDIA_AUTH,  
+  FRIEND_STATUS
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -344,16 +345,6 @@ const UserSchema = new Schema({
     default: 0,
     min: 0,
   },
-  black: [{
-    _id: {
-      type: ObjectId,
-      ref: 'user',
-    },
-    timestamps: {
-      type: Number,
-      min: 0
-    }
-  }],
   fans: [{
     _id: {
       type: ObjectId,
@@ -374,6 +365,10 @@ const UserSchema = new Schema({
       min: 0
     }
   }],
+  friends: {
+    type: Number,
+    default: 0
+  },
   issue: [{
     _id: {
       type: ObjectId,
@@ -1520,6 +1515,30 @@ const BehaviourSchema = new Schema({
   ...defaultConfig
 })
 
+const FriendsSchema = new Schema({
+  user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  friends: [{
+    _id: {
+      type: ObjectId,
+      ref: 'user'
+    },
+    timestamps: {
+      type: Number 
+    },
+    status: {
+      type: String,
+      enum: Object.keys(FRIEND_STATUS),
+      default: FRIEND_STATUS.NORMAL,
+      uppercase: true 
+    }
+  }]
+}, {
+  ...defaultConfig
+})
+
 const FIND_OPERATION_LIB = [
   'find',
   'findOne',
@@ -1601,6 +1620,7 @@ const FeedbackModel = model('feedback', FeedbackSchema)
 const BarrageModel = model('barrage', BarrageSchema)
 const AuthModel = model('auth', AuthSchema)
 const BehaviourModel = model('behaviour', BehaviourSchema)
+const FriendsModel = model('friend', FriendsSchema)
 
 module.exports = {
   UserModel,
@@ -1625,6 +1645,7 @@ module.exports = {
   BarrageModel,
   AuthModel,
   BehaviourModel,
+  FriendsModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1647,4 +1668,5 @@ module.exports = {
   BarrageSchema,
   AuthSchema,
   BehaviourSchema,
+  FriendsSchema
 }

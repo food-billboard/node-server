@@ -21,7 +21,8 @@ const {
   BarrageModel, 
   FeedbackModel,
   BehaviourModel,
-  mergeConfig
+  mergeConfig,
+  FriendsModel
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
@@ -365,6 +366,17 @@ function mockCreateBehaviour(values) {
   return { model }
 }
 
+function mockCreateFriends(values) {
+  let baseModel = {
+    user: ObjectId('8f63270f005f1c1a0d9448ca'),
+    friends: []
+  }
+
+  baseModel = mergeConfig(baseModel, values, true)
+  const model = new FriendsModel(baseModel)
+  return { model }
+}
+
 SearchModel
 //创建搜索
 function mockCreateSearch(values) {
@@ -491,5 +503,6 @@ module.exports = {
   commonValidate,
   mockCreateFeedback,
   generateTemplateFile,
-  createMobile
+  createMobile,
+  mockCreateFriends
 }
