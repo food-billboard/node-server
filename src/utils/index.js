@@ -12,6 +12,7 @@ const Constant = require('./constant')
 const Schedule = require('./schedule')
 const PinYin = require('./pinyin')
 const Video = require('./video')
+const Media = require('./media')
 
 module.exports = {
   ...MongoDB,
@@ -27,5 +28,6 @@ module.exports = {
   ...Constant,
   ...Schedule,
   ...PinYin,
-  ...Video
+  ...Video,
+  ...Media
 }

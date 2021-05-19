@@ -267,7 +267,7 @@ router
     _id,
     info: {
       author_description,
-      alias,
+      another_name,
       ...nextInfo
     },
   } = body 
@@ -382,7 +382,7 @@ router
     //名字类似
     $or: [
       { name },
-      { name: { $in: [...alias] } },
+      { name: { $in: [...another_name] } },
       { "info.another_name": { $in: [name] } }
     ],
     //上映时间类似
@@ -424,7 +424,6 @@ router
       name,
       author_rate,
       description,
-      alias,
       author_description,
       screen_time,
       ...nextData
@@ -471,7 +470,8 @@ router
       ...info,
       ...nextData,
       name,
-      screen_time: Day(screen_time).toDate()
+      screen_time: Day(screen_time).toDate(),
+      description
     },
     // rest: { ...unValid },
     name,
@@ -555,7 +555,6 @@ router
       author_rate,
       description,
       screen_time,
-      alias,
       ...nextInfo
     },
   } } = ctx.request

@@ -167,6 +167,10 @@ router
     _id: 1
   })
   .exec()
+  .then(data => {
+    console.log(data, 22222)
+    return data 
+  })
   .then(notFound)
   .then(data => data._id)
   .then(id => {

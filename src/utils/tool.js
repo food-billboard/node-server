@@ -1,6 +1,7 @@
 const path = require('path')
 const Day = require('dayjs')
 var isoWeek = require('dayjs/plugin/isoWeek')
+const { pick } = require('lodash')
 const { Types: { ObjectId } } = require('mongoose')
 const fs = require('fs')
 const { DIR_LIST, ROLES_MAP, API_DOMAIN } = require('./constant')
@@ -206,7 +207,10 @@ const connectTry = (method, errMsg, times=5, interval=6000) => {
 }
 
 const avatarGet = (value, field='src') => {
-  return value ? value[field] : null
+  const method = Array.isArray(field) ? () => {
+    return pick(value, field)
+  } : () => value[field]
+  return value ? method() : null
 }
 
 function formatMediaUrl(url) {

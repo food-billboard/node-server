@@ -1,10 +1,10 @@
 const Router = require('@koa/router')
+const { Types: { ObjectId } } = require('mongoose')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const Attention = require('./routes/attention')
 const Movie = require('./routes/movie')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
-const { Types: { ObjectId } } = require('mongoose')
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require('@src/utils')
 
 const router = new Router()
 
@@ -75,15 +75,8 @@ router
     ]
   })
 
-  let data = await UserModel.find({
-    $or: [
-      {
-        _id: ObjectId(id),
-      },
-      {
-        _id: ObjectId(_id)
-      }
-    ]
+  let data = await UserModel.findOne({
+    _id: ObjectId(_id)
   })
   .select({
     username: 1,
@@ -95,36 +88,17 @@ router
     updatedAt: 1,
   })
   .exec()
-  .then(data => !!data && data)
   .then(notFound)
   .then(data => {
-    let result = {}
-    let mine
-    let fans = []
-    let found = false
-    data.forEach(d => {
-      const { _id:id, avatar, ...nextD } = d 
-      if(id.equals(_id)) {
-        found = true
-        const { fans:userFans, attentions } = nextD
-        result = {
-          ...result,
-          ...nextD,
-          _id: id,
-          avatar: avatar ? avatar.src : null,
-          fans: userFans.length,
-          attentions: attentions.length,
-          like: false,
-        }
-        fans = [...userFans]
-      }else {
-        mine = id
-      }
-    })
-    if(!found) return Promise.reject({ errMsg: 'not found', status: 404 })
-    if(mine && fans.some(f => mine.equals(f))) result.like = true
+    const { fans, avatar, attentions, ...nextData } = data 
     return {
-      data: result
+      data: {
+        ...nextData,
+        fans: fans.length,
+        avatar: avatarGet(avatar),
+        attentions: attentions.length,
+        like: fans.some(item => item._id == id)
+      }
     }
   })
   .catch(dealErr(ctx))

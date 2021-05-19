@@ -97,9 +97,9 @@ router
     return {
       data: {
         ... nextData,
-        video: avatarGet(video),
-        images: images.filter(i => i && !!i.src).map(i => i.src),
-        poster: avatarGet(poster),
+        video: avatarGet(video, ['_id', 'src']),
+        images: images.filter(i => i && !!i.src).map(i => avatarGet(i, ['_id', 'src'])),
+        poster: avatarGet(poster, ['_id', 'src']),
         info
       }
     }
