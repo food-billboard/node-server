@@ -1488,7 +1488,17 @@
           "type":"array",
           "description": "视频",
           "items": {
-            "type":"string"
+            "type":"object",
+            "properties": {
+              "src": {
+                "type":"string",
+                "description": "地址"
+              },
+              "poster": {
+                "type":"string",
+                "description": "海报地址"
+              }
+            }
           }
         }
       }

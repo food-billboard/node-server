@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const { pick, merge } = require('lodash')
 const SpecDropList = require('./sepcDropList')
-const { ClassifyModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require('@src/utils')
+const { ClassifyModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet, MOVIE_STATUS } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -48,7 +48,8 @@ router
 			$inc: { glance: 1 }
 		}),
 		MovieModel.find({
-			"info.classify": { $in: [ _id ] }
+			"info.classify": { $in: [ _id ] },
+			status: MOVIE_STATUS.COMPLETE
 		})
 		.select({
 			poster: 1,

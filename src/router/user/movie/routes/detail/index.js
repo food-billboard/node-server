@@ -2,7 +2,7 @@ const Router = require('@koa/router')
 const { pick, merge } = require('lodash')
 const Comment = require('./routes/comment')
 const Simple = require('./routes/simple')
-const { MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
+const { MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet, MOVIE_STATUS } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -27,7 +27,8 @@ router
 	})
 
   const data = await MovieModel.findOneAndUpdate({
-    _id
+    _id,
+    status: MOVIE_STATUS.COMPLETE
   }, {
     $inc: { glance: 1 }
   })

@@ -86,7 +86,13 @@ router.get('/', async (ctx) => {
             content: {
               ...nextContent,
               image: image.filter(i => i && !!i.src).map(i => avatarGet(i)),
-              video: video.filter(v => v &&!!v.src).map(v => avatarGet(v)),
+              video: video.filter(v => v && !!v.src).map(v => {
+                const { src, poster } = v
+                return {
+                  src,
+                  poster: avatarGet(poster)
+                }
+              })
             },
             user_info: {
               ...omit(user_info || {}, ['avatar']),

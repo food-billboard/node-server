@@ -220,6 +220,7 @@ const PRE_COMMENT_FIND = [
     path: 'content.video',
     select: {
       src: 1,
+      poster: 1,
       _id: 1
     }
   },
@@ -258,7 +259,15 @@ const PRE_CLASSIFY_FIND = [
   }
 ]
 const PRE_LANGUAGE_FIND = []
-const PRE_VIDEO_FIND = []
+const PRE_VIDEO_FIND = [
+  {
+    path: 'poster',
+    select: {
+      _id: 1,
+      src: 1
+    }
+  }
+]
 const PRE_IMAGE_FIND = [
 
 ]

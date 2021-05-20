@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const SpecDropList = require('./specDropList')
-const { RankModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
+const { RankModel, dealErr, notFound, Params, responseDataDeal, avatarGet, MOVIE_STATUS } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -84,7 +84,8 @@ router
 	})
 
 	const data = await RankModel.findOneAndUpdate({
-		_id
+		_id,
+		status: MOVIE_STATUS.COMPLETE
 	}, {
 		$inc: { glance: 1 }
 	})

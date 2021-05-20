@@ -15,7 +15,8 @@ const {
   notFound,
   MEDIA_STATUS,
   MEDIA_AUTH,
-  parseUrl
+  parseUrl,
+  MEDIA_ORIGIN_TYPE
 } = require('@src/utils')
 const { headRequestDeal, patchRequestDeal, postMediaDeal, postRequstDeal } = require('./utils')
 
@@ -437,6 +438,81 @@ router
   ctx.set('Upload-Id', id)
 
   ctx.status = 201
+
+})
+//视频新增海报
+.put('/video/poster', async (ctx) => {
+  const check = Params.body(ctx, {
+    name: 'data',
+    validator: [
+      data => {
+        if(typeof data !== 'string' || !data) return false 
+        return data.split(',').every(item => {
+          const [ _id, poster ] = item.split('-')
+          return ObjectId.isValid(_id) && ObjectId.isValid(poster)
+        })
+      }
+    ]
+  })
+  if(check) return 
+
+  const [ , token ] = verifyTokenToData(ctx)
+  const { id: userId } = token 
+
+  const [ updateData ] = Params.sanitizers(ctx.request.body, {
+    name: 'data',
+    sanitizers: [
+      data => data.split(',').map(item => {
+        const [ _id, poster ] = item.split('-')
+        return {
+          _id: ObjectId(_id),
+          poster: ObjectId(poster)
+        }
+      })
+    ]
+  })
+
+  const data = await Promise.all(updateData.map(item => {
+    const { _id, poster } = item 
+    return VideoModel.updateOne({
+      _id,
+      // origin_type: {
+      //   $ne: MEDIA_ORIGIN_TYPE.ORIGIN
+      // },
+      $or: [
+        {
+          white_list: {
+            $in: [userId]
+          }
+        },
+        {
+          auth: MEDIA_AUTH.PUBLIC
+        }
+      ]
+    }, {
+      $set: {
+        poster
+      }
+    })
+    .then(data => {
+      if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+      return {
+        _id
+      }
+    })
+  }))
+  .then(_ => {
+    return {
+      data: {}
+    }
+  })
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    data,
+    needCache: false,
+    ctx
+  })
 
 })
 

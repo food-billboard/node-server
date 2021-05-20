@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { RankModel, dealErr, avatarGet, Params, responseDataDeal, parseData } = require('@src/utils')
+const { RankModel, dealErr, avatarGet, Params, responseDataDeal, parseData, MOVIE_STATUS } = require('@src/utils')
 
 const router = new Router()
 
@@ -38,6 +38,9 @@ router
       name: 1,
       _id: 1,
       poster: 1
+    },
+    match: {
+      status: MOVIE_STATUS.COMPLETE
     },
     options: {
       limit: count,

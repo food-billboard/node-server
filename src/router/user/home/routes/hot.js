@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { dealErr, Params, responseDataDeal, MovieModel } = require('@src/utils')
+const { dealErr, Params, responseDataDeal, MovieModel, MOVIE_STATUS } = require('@src/utils')
 
 const router = new Router()
 
@@ -14,6 +14,11 @@ router.get('/', async(ctx) => {
   })
 
   const data = await MovieModel.aggregate([
+    {
+      $match: {
+        status: MOVIE_STATUS.COMPLETE
+      }
+    },
     {
       $sort: {
         hot: -1

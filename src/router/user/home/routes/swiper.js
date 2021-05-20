@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { MovieModel, SpecialModel, isEmpty, Params, responseDataDeal } = require('@src/utils')
+const { MovieModel, SpecialModel, isEmpty, Params, responseDataDeal, MOVIE_STATUS } = require('@src/utils')
 const router = new Router()
 
 const cache = {}
@@ -21,6 +21,11 @@ const handle = {
       //为空或过时
       const [ movieData, specialData ] = await Promise.all([
         MovieModel.aggregate([
+          {
+            $match: {
+              status: MOVIE_STATUS.COMPLETE
+            }
+          },
           {
             $sort: {
               createdAt: -1
@@ -49,6 +54,11 @@ const handle = {
         ]),
 
         SpecialModel.aggregate([
+          {
+            $match: {
+              valid: true
+            }
+          },
           {
             $sort: {
               createdAt: -1

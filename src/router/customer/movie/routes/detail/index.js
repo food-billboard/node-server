@@ -2,7 +2,7 @@ const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Rate = require('./routes/rate')
 const Store = require('./routes/store')
-const { verifyTokenToData, middlewareVerifyToken, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
+const { verifyTokenToData, middlewareVerifyToken, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet, MOVIE_STATUS } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -45,7 +45,8 @@ router
   pushData = { ...pushData, _id}
 
   const data = await UserModel.findOneAndUpdate({
-    _id: ObjectId(id)
+    _id: ObjectId(id),
+    // status: MOVIE_STATUS.COMPLETE
   }, {
     $pull: {
       "glance": { _id }

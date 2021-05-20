@@ -48,7 +48,8 @@ router
   }
 
   const data = await SpecialModel.findOneAndUpdate({
-    _id
+    _id,
+    valid: true 
   }, update)
   .select({
     movie: 1,

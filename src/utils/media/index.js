@@ -1,6 +1,7 @@
 const { Types: { ObjectId } } = require('mongoose')
 const { ImageModel, VideoModel, OtherMediaModel } = require('../mongodb/mongo.lib')
 const { parseData } = require('../error-deal')
+const { DEVELOPMENT_API_DOMAIN, PRODUCTION_API_DOMAIN } = require('../constant')
 
 const MEDIA_MODEL_MAP = {
   image: ImageModel,
@@ -19,9 +20,16 @@ async function findMediaInfo(content, type, select) {
   const model = MEDIA_MODEL_MAP[type]
   if(!model) return {}
 
+  let srcContent = content
+  if(srcContent.startWidth(DEVELOPMENT_API_DOMAIN)) {
+    srcContent.replace(DEVELOPMENT_API_DOMAIN, '')
+  }else if(srcContent.startWidth(PRODUCTION_API_DOMAIN)) {
+    srcContent.replace(PRODUCTION_API_DOMAIN, '')
+  }
+
   let query = [
     {
-      src: reg(content)
+      src: reg(srcContent)
     },
     {
       "info.md5": reg(content)

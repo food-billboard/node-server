@@ -15,7 +15,8 @@ const {
   Params,
   NUM_DAY,
   responseDataDeal,
-  parseData
+  parseData,
+  MOVIE_STATUS
 } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -728,7 +729,8 @@ router
   const data = await MovieModel.aggregate([
     {
       $match: {
-        author: ObjectId(id)
+        author: ObjectId(id),
+        status: MOVIE_STATUS.COMPLETE
       }
     },
     {

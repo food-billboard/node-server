@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -91,7 +91,13 @@ router.get('/', async (ctx) => {
             content: {
               ...nextContent,
               image: image.filter(i => i && !!i.src).map(i => i.src),
-              video: video.filter(v => v && !!v.src).map(v => v.src)
+              video: video.filter(v => v && !!v.src).map(v => {
+                const { src, poster } = v
+                return {
+                  src,
+                  poster: avatarGet(poster)
+                }
+              })
             },
             source: {
               ...nextSoruce,

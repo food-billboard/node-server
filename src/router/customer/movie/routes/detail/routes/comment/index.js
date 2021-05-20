@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Like = require('./like')
 const Detail = require('./detail')
-const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, notFound, Params, responseDataDeal, ImageModel, VideoModel, parseData } = require("@src/utils")
+const { verifyTokenToData, UserModel, CommentModel, MovieModel, dealErr, notFound, Params, responseDataDeal, ImageModel, VideoModel, parseData, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -231,7 +231,13 @@ router
             content: {
               ...nextContent,
               image: image.filter(i => i && !!i.src).map(i => i.src),
-              video: video.filter(v => v &&!!v.src).map(v => v.src),
+              video: video.filter(v => v && !!v.src).map(v => {
+                const { src, poster } = v
+                return {
+                  src,
+                  poster: avatarGet(poster)
+                }
+              })
             },
             user_info: {
               ...nextInfo,

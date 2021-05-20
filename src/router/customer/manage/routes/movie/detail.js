@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
+const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet, MOVIE_STATUS } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -72,6 +72,7 @@ router
 
   const data = await MovieModel.findOne({
     _id,
+    status: MOVIE_STATUS.COMPLETE
   })
   .select({
     name: 1,

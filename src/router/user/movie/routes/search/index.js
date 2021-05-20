@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const Day = require('dayjs')
-const { dealErr, notFound, Params, MovieModel, responseDataDeal, SearchModel } = require("@src/utils")
+const { dealErr, notFound, Params, MovieModel, responseDataDeal, SearchModel, MOVIE_STATUS } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 const { sortList } = require('../orderList')
 const { sanitizersNameParams } = require('../../../../management/movie/utils')
@@ -109,6 +109,7 @@ router
   let match = {
     "info.screen_time": screen_time,
     ...content,
+    status: MOVIE_STATUS.COMPLETE
   }
 
   if(!!classify) {

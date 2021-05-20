@@ -1875,6 +1875,33 @@
         }
       }
     },
+    "/api/customer/upload/video/poster": {
+      "put": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "修改视频海报",
+        "description": "修改视频海报",
+        "operationId": "customer_upload_video_poster_put",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "description": "图片视频信息(videoId-posterId, 多个用,分隔)",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
     "/api/customer/upload/weapp": {
       "post": {
         "tags": [
@@ -2090,7 +2117,17 @@
           "type":"array",
           "description": "视频",
           "items": {
-            "type":"string"
+            "type":"object",
+            "properties": {
+              "src": {
+                "type":"string",
+                "description": "地址"
+              },
+              "poster": {
+                "type":"string",
+                "description": "海报"
+              }
+            }
           }
         }
       }
