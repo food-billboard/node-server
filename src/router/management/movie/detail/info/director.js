@@ -83,14 +83,6 @@ router
     {
       $match: query,
     },
-    ...(all ? [] : [
-      {
-        $skip: pageSize * currPage
-      },
-      {
-        $limit: pageSize
-      }
-    ]),
     {
       $lookup: {
         from: 'districts',
@@ -102,6 +94,14 @@ router
     {
       $unwind: "$country"
     },
+    ...(all ? [] : [
+      {
+        $skip: pageSize * currPage
+      },
+      {
+        $limit: pageSize
+      }
+    ]),
     {
       $lookup: {
         from: 'images',

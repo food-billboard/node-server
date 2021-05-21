@@ -44,23 +44,23 @@ router
   }
 
   //查询文件的修改时间、缓存
-  const { request: { headers } } = ctx
-  const { mtime } = stat
+  // const { request: { headers } } = ctx
+  // const { mtime } = stat
   const _mime = mime.getType(extname)
   ctx.set('Content-Type', `${_mime};charset=utf-8`)
-  //304
-  const modified = headers['If-Modified-Since'] || headers['if-modified-since']
-  if(mtime == modified) {
-    ctx.status = 304
-    ctx.set({
-      'Last-Modified': new Date(mtime)
-    })
-    return 
-  }
+  // //304
+  // const modified = headers['If-Modified-Since'] || headers['if-modified-since']
+  // if(mtime == modified) {
+  //   ctx.status = 304
+  //   ctx.set({
+  //     'last-modified': new Date(mtime)
+  //   })
+  //   return 
+  // }
 
-  ctx.set({
-    'Last-Modified': new Date(mtime)
-  })
+  // ctx.set({
+  //   'last-modified': new Date(mtime)
+  // })
 
   const data = fs.readFileSync(filePath)
   ctx.body = data

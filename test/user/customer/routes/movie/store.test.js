@@ -147,7 +147,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get another user store movie list without self info success and return the status 304`, function(done) {
+      it.skip(`get another user store movie list without self info success and return the status 304`, function(done) {
 
         const query = {
           _id: userId.toString()
@@ -183,10 +183,20 @@ describe(`${COMMON_API} test`, function() {
         .get(COMMON_API)
         .query({ _id: `${(parseInt(errorId.slice(0, 1)) + 5) % 10}${errorId.slice(1)}` })
         .set('Accept', 'Appication/json')
-        .expect(404)
+        .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err, _) {
+        .end(function(err, res) {
           if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, target => {
+            expect(target.store.length == 0).to.be.true 
+          })
           done()
         })
 

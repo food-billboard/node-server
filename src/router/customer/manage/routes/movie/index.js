@@ -268,7 +268,7 @@ router
     _id,
     info: {
       author_description,
-      another_name,
+      another_name=[],
       ...nextInfo
     },
   } = body 
@@ -383,7 +383,7 @@ router
     //名字类似
     $or: [
       { name },
-      { name: { $in: [...another_name] } },
+      { name: { $in: [...(Array.isArray(another_name) ? another_name : [])] } },
       { "info.another_name": { $in: [name] } }
     ],
     //上映时间类似
@@ -527,6 +527,9 @@ router
       }, {
         $addToSet: { issue: { _id: data._id, timestampes: Date.now() } }
       })
+      .then(_ => ({
+        data: { _id }
+      }))
     }
     return Promise.reject({ errMsg: 'something error', status: 500 })
   })

@@ -59,7 +59,8 @@ router
 			hot: 1,
 			author: 1,
 			author_rate: 1,
-			author_description: 1
+			author_description: 1,
+			images: 1
 		})
 		.skip((currPage >= 0 && pageSize >= 0) ? pageSize * currPage : 0)
 		.limit(pageSize >= 0 ? pageSize: 10)
@@ -90,7 +91,7 @@ router
 	.then(data => {
 		return {
 			data: data.map(item => {
-				const { poster, info: { screen_time, classify }, author, author_rate, ...nextM } = item
+				const { poster, info: { screen_time, classify }, author, author_rate, images, ...nextM } = item
 				const { avatar, ...nextAuthor } = pick(author, ['username', '_id', 'avatar'])
 				return {
 					...nextM,
@@ -99,6 +100,7 @@ router
 					poster: avatarGet(poster),
 					publish_time: screen_time,
 					classify: classify.map(item => pick(item, ['name'])),
+					images: images.map(item => avatarGet(item))
 				}
 			})
 		}

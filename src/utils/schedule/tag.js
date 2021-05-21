@@ -1,6 +1,11 @@
 const nodeSchedule = require('node-schedule')
-const nodejieba = require('nodejieba')
 const chalk = require('chalk')
+let nodejieba
+try {
+  nodejieba = require('nodejieba')
+}catch(err) {
+  console.log(chalk.red('当前不支持nodejieba包'))
+}
 const { Types: { ObjectId } } = require('mongoose')
 const { log4Error } = require('@src/config/winston')
 const { COMMENT_SOURCE_TYPE, EXTRACT_KEYWORD_TOP_N } = require('../constant')
@@ -87,6 +92,7 @@ const updateMovieTag = (tagList) => {
 }
 
 function scheduleMethod() {
+  if(!nodejieba) return 
   console.log(chalk.magenta('数据标签tag定时审查'))
 
   //当前简单使用评论当做tag

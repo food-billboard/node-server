@@ -2134,6 +2134,13 @@
                     "type": "integer",
                     "description": "人气"
                   },
+                  "images": {
+                    "type": "array",
+                    "description": "截图",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
                   "classify": {
                     "type": "array",
                     "items": {
@@ -2679,6 +2686,13 @@
                     "type": "integer",
                     "description": "综合评分"
                   },
+                  "images": {
+                    "type": "array",
+                    "description": "图片",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
                   "classify": {
                     "type": "array",
                     "description": "分类",
@@ -2946,6 +2960,12 @@
                   "updatedAt": {
                     "type": "string",
                     "format": "date-time"
+                  },
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   },
                   "author": {
                     "type": "object",

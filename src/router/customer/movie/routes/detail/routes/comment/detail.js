@@ -97,7 +97,13 @@ router
           content: {
             ...nextContent,
             image: image.filter(i => i && !!i.src).map(i => i.src),
-            video: image.filter(v => v && !!v.src).map(v => v.src),
+            video: video.filter(v => v && !!v.src).map(v => {
+              const { src, poster } = v
+              return {
+                src,
+                poster: avatarGet(poster)
+              }
+            })
           },
           user_info: {
             ...nextUserInfo,

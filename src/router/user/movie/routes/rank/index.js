@@ -85,7 +85,6 @@ router
 
 	const data = await RankModel.findOneAndUpdate({
 		_id,
-		status: MOVIE_STATUS.COMPLETE
 	}, {
 		$inc: { glance: 1 }
 	})
@@ -104,7 +103,8 @@ router
 			hot: 1,
 			author_rate: 1,
 			total_rate: 1,
-			rate_person: 1
+			rate_person: 1,
+			images: 1
 		},
 		options: {
 			sort: {
@@ -133,7 +133,7 @@ router
 		const { match } = data 
 		return {
 			data: match.map(m => {
-				const { poster, info: { classify, description, name, screen_time }, total_rate, rate_person, ...nextM } = m
+				const { poster, info: { classify, description, name, screen_time }, total_rate, rate_person, images, ...nextM } = m
 				const rate = total_rate / rate_person
 				return {
 					...nextM,
@@ -144,7 +144,8 @@ router
 					name,
 					description,
 					like: false,
-					rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+					rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
+					images: images.map(item => avatarGet(item))
 				}
 			})
 		}

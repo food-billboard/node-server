@@ -177,6 +177,14 @@ router
     {
       $lookup: {
         from: 'images', 
+        localField: 'images', 
+        foreignField: '_id', 
+        as: 'images'
+      }
+    },
+    {
+      $lookup: {
+        from: 'images', 
         localField: 'poster', 
         foreignField: '_id', 
         as: 'poster'
@@ -204,6 +212,7 @@ router
           username: "$author.username",
           avatar: "$author.avatar.src"
         },
+        images: "$images.src",
         publish_time: "$info.screen_time",
         classify: "$info.classify.name",
         poster: "$poster.src",

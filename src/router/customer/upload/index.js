@@ -1,6 +1,7 @@
 const Router = require('@koa/router')
 const Validator = require('validator')
 const Url = require('url')
+const merge = require('lodash/merge')
 const pick = require('lodash/pick')
 const { Types: { ObjectId } } = require('mongoose')
 const { 
@@ -16,7 +17,8 @@ const {
   MEDIA_STATUS,
   MEDIA_AUTH,
   parseUrl,
-  MEDIA_ORIGIN_TYPE
+  MEDIA_ORIGIN_TYPE,
+  ROLES_MAP
 } = require('@src/utils')
 const { headRequestDeal, patchRequestDeal, postMediaDeal, postRequstDeal } = require('./utils')
 
@@ -472,35 +474,53 @@ router
     ]
   })
 
-  const data = await Promise.all(updateData.map(item => {
-    const { _id, poster } = item 
-    return VideoModel.updateOne({
-      _id,
-      // origin_type: {
-      //   $ne: MEDIA_ORIGIN_TYPE.ORIGIN
-      // },
-      $or: [
-        {
-          white_list: {
-            $in: [userId]
+  const data = await UserModel.findOne({
+    _id: ObjectId(userId)
+  })
+  .select({
+    roles: 1
+  })
+  .exec()
+  .then(notFound)
+  .then(data => {
+    const curUserMaxRole = Math.min(...data.roles.map(item => ROLES_MAP[item]))
+    const MaxRole = Math.min(...Object.values(ROLES_MAP))
+
+    let query = {}
+    if(MaxRole < curUserMaxRole) {
+      query = merge({}, query, {
+        $or: [
+          {
+            white_list: {
+              $in: [ObjectId(userId)]
+            }
+          },
+          {
+            auth: MEDIA_AUTH.PUBLIC
           }
-        },
-        {
-          auth: MEDIA_AUTH.PUBLIC
+        ],
+        origin_type: {
+          $ne: MEDIA_ORIGIN_TYPE.ORIGIN
         }
-      ]
-    }, {
-      $set: {
-        poster
-      }
-    })
-    .then(data => {
-      if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
-      return {
-        _id
-      }
-    })
-  }))
+      })
+    }
+
+    return Promise.all(updateData.map(item => {
+      const { _id, poster } = item 
+      query._id = _id 
+      return VideoModel.updateOne(query, {
+        $set: {
+          poster
+        }
+      })
+      .then(data => {
+        if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+        return {
+          _id
+        }
+      })
+    }))
+  })
   .then(_ => {
     return {
       data: {}

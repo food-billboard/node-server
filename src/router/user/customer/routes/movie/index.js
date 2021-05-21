@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const Browse = require('./browser')
 const Store = require('./store')
-const { UserModel, dealErr, notFound, Params, responseDataDeal, MOVIE_STATUS } = require("@src/utils")
+const { UserModel, dealErr, parseData, Params, responseDataDeal, MOVIE_STATUS } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -75,9 +75,9 @@ router
     }
   })
   .exec()
-  .then(notFound)
+  .then(parseData)
   .then(data => {
-    const { issue } = data
+    const { issue } = data || { issue: [] }
     return {
       data: {
         ...data,

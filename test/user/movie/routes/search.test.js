@@ -26,7 +26,7 @@ function responseExpect(res, validate=[]) {
     expect(item).to.be.a('object').and.that.include.any.keys(
       'glance', 'source_type', 'description', 'name', 'poster', 
       '_id', 'classify', 'publish_time', 'hot', 'rate',
-      'author', 'createdAt', 'updatedAt', 'status'
+      'author', 'createdAt', 'updatedAt', 'status', "images"
     )
     commonValidate.string(item.description)
     commonValidate.string(item.name)
@@ -34,6 +34,8 @@ function responseExpect(res, validate=[]) {
     commonValidate.string(item.status)
     commonValidate.poster(item.poster)
     commonValidate.objectId(item._id)
+    expect(item.images).to.be.a('array')
+    item.images.forEach(img => commonValidate.string(img))
     expect(item.classify).to.be.a('array')
     item.classify.forEach(cls => commonValidate.string(cls))
     commonValidate.date(item.publish_time)

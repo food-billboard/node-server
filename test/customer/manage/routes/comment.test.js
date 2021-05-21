@@ -23,7 +23,13 @@ function responseExpect(res, validate=[]) {
     expect(item.content).to.be.a('object').and.includes.all.keys('text', 'image', 'video')
     commonValidate.string(item.content.text, function(target) { return true })
     item.content.image.forEach(item => commonValidate.poster(item))
-    item.content.video.forEach(item => commonValidate.poster(item))
+    item.content.video.forEach(item => {
+      expect(item).to.be.a('object').and.that.includes.any.keys('src', 'poster')
+      commonValidate.poster(item.src)
+      if(item.poster) {
+        commonValidate.poster(item.poster)
+      }
+    })
 
     commonValidate.time(item.createdAt)
     commonValidate.time(item.updatedAt)
@@ -198,7 +204,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`get self comment success and return the status of 304`, function(done) {
+    it.skip(`get self comment success and return the status of 304`, function(done) {
 
       Request
       .get(COMMON_API)
@@ -218,7 +224,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`get self comment success and hope return the status of 304 but the content has edited`, function(done) {
+    it.skip(`get self comment success and hope return the status of 304 but the content has edited`, function(done) {
 
       Request
       .get(COMMON_API)
@@ -238,7 +244,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    it(`get self comment success and hope return the status of 304 but the params of query is change`, function(done) {
+    it.skip(`get self comment success and hope return the status of 304 but the params of query is change`, function(done) {
 
       const query = {
         pageSize: 10

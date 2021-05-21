@@ -164,7 +164,7 @@ describe(`${COMMON_API} test`, function() {
         .exec()
         .then(data => {
           expect(data).to.be.a('array')
-          expect(data.length).to.be.eql(2)
+          expect(data.length >= 2).to.be.true
           const target = data.find(item => item.info == infoHaveValid)
           expect(!!target).to.be.true
           expect(target.valid).to.be.true

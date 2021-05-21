@@ -43,7 +43,9 @@ function responseExpect(res, validate=[]) {
   commonValidate.number(target.author_rate)
   expect(target.images).to.be.a('array')
   target.images.forEach(item => {
-    commonValidate.poster(item)
+    expect(item).to.be.a('object').and.that.includes.any.keys('src', '_id')
+    commonValidate.objectId(item._id)
+    commonValidate.poster(item.src)
   })
   expect(target.info).to.be.a('object').and.that.includes.all.keys('actor', 'another_name', 'classify', 'description', 'director', 'district', 'language', 'name', 'screen_time')
   const { another_name, name, screen_time, description, ...nextInfo } = target.info
@@ -59,8 +61,12 @@ function responseExpect(res, validate=[]) {
   commonValidate.string(name)
   commonValidate.time(screen_time)
   commonValidate.string(target.name)
-  commonValidate.poster(target.video)
-  commonValidate.poster(target.poster)
+  expect(target.video).to.be.a('object').and.that.includes.any.keys('src', '_id')
+  commonValidate.objectId(target.video._id)
+  commonValidate.poster(target.video.src)
+  expect(target.poster).to.be.a('object').and.that.includes.any.keys('src', '_id')
+  commonValidate.objectId(target.poster._id)
+  commonValidate.poster(target.poster.src)
   commonValidate.objectId(target._id)
 
   if(Array.isArray(validate)) {
@@ -274,7 +280,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the movie dtail success and return the status of 304`, function(done) {
+      it.skip(`get the movie dtail success and return the status of 304`, function(done) {
 
         const query = {
           _id: movieId.toString()
@@ -299,7 +305,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the movie dtail success and hope return the status of 304 but the content has edited`, function(done) {
+      it.skip(`get the movie dtail success and hope return the status of 304 but the content has edited`, function(done) {
 
         const query = {
           _id: movieId.toString()
@@ -324,7 +330,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the movie dtail success and hope return the status of 304 but the params of query is change`, function(done) {
+      it.skip(`get the movie dtail success and hope return the status of 304 but the params of query is change`, function(done) {
 
         const query = {
           pageSize: 10,

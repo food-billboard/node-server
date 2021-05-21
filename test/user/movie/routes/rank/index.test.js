@@ -19,7 +19,7 @@ function responseExpect(res, validate=[]) {
          
   expect(target).to.be.a('array')
   target.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('poster', 'classify', 'description', 'name', 'publish_time', 'hot', 'author_rate', 'rate', '_id', 'updatedAt')
+    expect(item).to.be.a('object').and.that.includes.all.keys('images', 'poster', 'classify', 'description', 'name', 'publish_time', 'hot', 'author_rate', 'rate', '_id', 'updatedAt')
     commonValidate.number(item.hot)
     expect(item.like).to.be.a('boolean')
     commonValidate.time(item.publish_time)
@@ -28,6 +28,9 @@ function responseExpect(res, validate=[]) {
     commonValidate.string(item.description)
     commonValidate.string(item.name)
     commonValidate.time(item.updatedAt)
+
+    expect(item.images).to.be.a('array')
+    item.images.forEach(img => commonValidate.string(img))
 
     expect(item.classify).to.be.a('array')
     item.classify.forEach(cls => expect(cls).to.be.a('object').and.that.have.a.property('name').that.is.a('string').and.that.lengthOf.above(0))
