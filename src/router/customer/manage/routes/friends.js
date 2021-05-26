@@ -57,7 +57,8 @@ router
     path: 'friends._id',
     select: {
       username: 1,
-      avatar: 1
+      avatar: 1,
+      description: 1
     },
     options: {
       limit: pageSize,

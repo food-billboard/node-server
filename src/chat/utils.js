@@ -1,27 +1,17 @@
-const { verifySocketIoToken, UserModel, RoomModel, notFound } = require("@src/utils")
+require('module-alias/register')
+const { Types: { ObjectId } } = require('mongoose')
+const { verifySocketIoToken, RoomModel } = require("@src/utils")
 
 const connection = async (socket, next) => {
   const { id } = socket
   const [, token] = verifySocketIoToken(socket)
-  let user = null
   if(token) {
-    const { mobile } = token
-    user = await UserModel.findOne({
-      mobile: Number(mobile)
-    })
-    .select({
-      _id: 1
-    })
-    .exec()
-    .then(data => !!data && data._id)
-    .then(notFound)
-    .then(userId => {
-      return RoomModel.updateOne({
-        origin: true,
-        "members.user": userId
-      }, {
-        $set: { "members.$.sid": id }
-      })
+    const { id: _id } = token
+    await RoomModel.updateOne({
+      origin: true,
+      "members.user": ObjectId(id)
+    }, {
+      $set: { "members.$.sid": id }
     })
     .catch(err => {
       console.log(err)

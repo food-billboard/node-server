@@ -1,5 +1,6 @@
-const { verifySocketIoToken, parseData, UserModel, RoomModel, Params, ROOM_TYPE, ROOM_USER_NET_STATUS } = require("@src/utils")
+const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
+const { verifyTokenToData, RoomModel, dealErr, Params, responseDataDeal, ROOM_TYPE, parseData } = require('@src/utils')
 
 async function joinSystemMethod(data, token) {
   await RoomModel.findOne({
@@ -224,72 +225,4 @@ const joinRoom = socket => async (data) => {
   }
 
   socket.emit("join", JSON.stringify(res))
-}
-
-//离开房间
-const leaveRoom = socket => async (data) => {
-  const [, token] = verifySocketIoToken(data.token)
-  const check = Params.bodyUnStatsu(data, {
-    name: '_id',
-    validator: [
-			data => ObjectId.isValid(data)
-		]
-  })
-  if(check) {
-    socket.emit("leave", JSON.stringify({
-      success: false,
-      res: {
-        errMsg: 'bad request'
-      }
-    }))
-    return
-  }
-
-  const [ _id ] = Params.sanitizers(data, {
-    name: '_id',
-    sanitizers: [
-      data => ObjectId(data)
-    ]
-  })
-
-  let res
-  if(token) {
-    const { id } = token
-    await RoomModel.updateOne({
-      _id,
-      "members.status": ROOM_USER_NET_STATUS.ONLINE,
-      "members.user": ObjectId(id)
-    }, {
-      $set: { "members.$.status": 'OFFLINE' }
-    })
-    .then(data => {
-      if(data && data.nModified == 0) return Promise.reject({ errMsg: '权限不足' })
-      res = {
-        success: true,
-        res: null
-      }
-    })
-    .catch(err => {
-      console.log(err)
-      res = {
-        success: false,
-        res: {
-          errMsg: err
-        }
-      }
-    })
-  }else {
-    res = {
-      success: true,
-      res: null
-    }
-  }
-
-  socket.leave(_id.toString())
-  socket.emit("leave", JSON.stringify(res))
-}
-
-module.exports = {
-  leaveRoom,
-  joinRoom
 }

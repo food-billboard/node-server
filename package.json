@@ -15,7 +15,8 @@
     "test": "echo hello node-server",
     "internal_test": "mocha --recursive --timeout 10000",
     "coverage": "nyc npm run internal_test",
-    "socket": "nodemon ./src/chat/index.js"
+    "socket:dev": "nodemon ./src/chat/index.js ./src/config/nodemon/index.dev.json",
+    "socket:prod": "nodemon ./src/chat/index.js ./src/config/nodemon/index.prod.json"
   },
   "author": "GLF",
   "license": "ISC",

@@ -16,7 +16,11 @@ const {
   COMMENT_SOURCE_TYPE, 
   MEDIA_STATUS, 
   MEDIA_AUTH,  
-  FRIEND_STATUS
+  FRIEND_STATUS,
+  ROOM_TYPE,
+  MESSAGE_TYPE,
+  ROOM_USER_NET_STATUS,
+  MESSAGE_MEDIA_TYPE
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -488,15 +492,35 @@ const GlobalSchema = new Schema({
   ...defaultConfig
 })
 
+const MemberSchema = new Schema({
+  user: {
+    type: ObjectId,
+    required: true,
+    ref: 'user'
+  },
+  sid: {
+    type: String,
+  },
+  status: {
+    enum: Object.keys(ROOM_USER_NET_STATUS),
+    uppercase: true,
+    type: String,
+    trim: true,
+    required: true
+  },
+}, {
+  ...defaultConfig
+})
+
 //room
 const RoomSchema = new Schema({
   type:  {
     type: String,
     required: true,
-    enum: [ "GROUP_CHAT", "CHAT", "SYSTEM" ],
+    enum: Object.keys(ROOM_TYPE),
     uppercase: true,
     trim: true,
-    default: "CHAT"
+    default: ROOM_TYPE.CHAT
   },
   origin: {
     type: Boolean,
@@ -507,6 +531,10 @@ const RoomSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   },
+  delete_users: [{
+    type: ObjectId,
+    ref: 'user'
+  }],
   info: {
     avatar: {
       type: ObjectId,
@@ -524,77 +552,61 @@ const RoomSchema = new Schema({
   },
   members: [
     {
-      user: {
-        type: ObjectId,
-        required: true,
-        ref: 'user'
-      },
-      sid: {
-        type: String,
-      },
-      status: {
-        enum: [ "ONLINE", "OFFLINE" ],
-        uppercase: true,
-        type: String,
-        trim: true,
-        required: true
-      },
-      message: [{
-        _id: {
-          type: ObjectId,
-          ref: 'message',
-          required: true
-        },
-        readed: {
-          type: Boolean,
-          default: false
-        }
-      }]
+      type: ObjectId,
+      ref: 'member'
     }
   ],
   message: [{
-    _id: {
-      type: ObjectId,
-      ref: 'message',
-      get: function(v) {
-        if(this.origin === true && this.type === 'SYSTEM') return v
-        return null
-      },
-      set: function(v) {
-        if(this.origin === true && this.type === 'SYSTEM') return v
-        return null
-      }
-    }
+    type: ObjectId,
+    ref: 'message',
+    // get: function(v) {
+    //   if(this.origin === true && this.type === 'SYSTEM') return v
+    //   return null
+    // },
+    // set: function(v) {
+    //   if(this.origin === true && this.type === 'SYSTEM') return v
+    //   return null
+    // }
   }]
 }, {
   ...defaultConfig
 })
 
 const MessageSchema = new Schema({
+  type: {
+    required: true,
+    enum: Object.keys(MESSAGE_TYPE),
+    type: String,
+    default: MESSAGE_TYPE.USER,
+    trim: true,
+    uppercase: true,
+  },
   user_info: {
-    type: {
-      required: true,
-      enum: [ "__ADMIN__", "USER" ],
-      type: String,
-      default: 'USER',
-      trim: true,
-      uppercase: true,
-    },
-    _id: {
-      type: ObjectId,
-      ref: 'user',
-      required: true,
-    },
+    type: ObjectId,
+    ref: 'user',
+    required: true,
   },
   point_to: {
     type: ObjectId,
     ref: 'user',
   },
+  readed: [
+    {
+      type: ObjectId,
+      ref: 'user'
+    }
+  ],
+  un_deleted: [
+    {
+      type: ObjectId,
+      ref: 'user'
+    }
+  ],
   type: {
     type: String,
     uppercase: true,
     trim: true,
-    enum: [ "IMAGE", "AUDIO", "TEXT", "VIDEO" ],
+    enum: Object.keys(MESSAGE_MEDIA_TYPE),
     required: true
   },
   room: {
@@ -613,6 +625,9 @@ const MessageSchema = new Schema({
     image: {
       type: ObjectId,
       ref: 'image'
+    },
+    audio: {
+      type: ObjectId
     }
   },
 }, {
@@ -1630,6 +1645,7 @@ const BarrageModel = model('barrage', BarrageSchema)
 const AuthModel = model('auth', AuthSchema)
 const BehaviourModel = model('behaviour', BehaviourSchema)
 const FriendsModel = model('friend', FriendsSchema)
+const MemberModel = model('member', MemberSchema)
 
 module.exports = {
   UserModel,
@@ -1677,5 +1693,6 @@ module.exports = {
   BarrageSchema,
   AuthSchema,
   BehaviourSchema,
-  FriendsSchema
+  FriendsSchema,
+  MemberSchema
 }

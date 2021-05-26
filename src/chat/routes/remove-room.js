@@ -1,4 +1,4 @@
-const { verifySocketIoToken, RoomModel, UserModel, notFound, Params } = require("@src/utils")
+const { verifySocketIoToken, RoomModel, ROOM_TYPE, Params, parseData } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const removieRoom = socket => async(data) => {
@@ -20,7 +20,8 @@ const removieRoom = socket => async(data) => {
   }
 
   let res
-  const { mobile } = token
+  const { id } = token
+  const userId = ObjectId(id)
   const [ _id ] = Params.sanitizers(data, {
     name: '_id',
     sanitizers: [
@@ -28,28 +29,44 @@ const removieRoom = socket => async(data) => {
     ]
   })
 
-  await UserModel.findOne({
-    mobile: Number(mobile)
+  await RoomModel.findOne({
+    _id,
   })
   .select({
-    _id: 1
+    type: 1,
+    create_user: 1,
+    members: 1,
+    delete_users: 1
   })
   .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then(data => RoomModel.remove({
-    "members.user": { $in: [ data ] },
-    _id,
-    origin: false,
-    type: 'GROUP_CHAT',
-    create_user: data
-  }, {
-    single: true
-  }))
-  .exec()
+  .then(parseData)
   .then(data => {
-    console.log(data)
-    if(data && data.nRemoved == 0) return Promise.reject({ errMsg: 'forbidden' })
+    const { members, create_user, type, delete_users } = data 
+    if(type === ROOM_TYPE.SYSTEM || create_user !== id ||!members.some(item => item.user === id)) return Promise.reject({
+      errMsg: 'forbidden'
+    })
+    if(type === ROOM_TYPE.CHAT && delete_users.length != 2) {
+      return RoomModel.updateOne({
+        _id,
+        origin: false,
+        type: ROOM_TYPE.CHAT,
+      }, {
+        $addToSet: {
+          delete_users: userId
+        }
+      })
+    }else {
+      return RoomModel.remove({
+        _id,
+        origin: false,
+        ...(type === ROOM_TYPE.CHAT ? {} : { create_user: data }),
+      }, {
+        single: true
+      })
+    }
+  })
+  .exec()
+  .then(_ => {
     res = {
       success: true,
       res: null

@@ -1,15 +1,15 @@
-const { verifySocketIoToken, RoomModel, notFound } = require("@src/utils")
+const { RoomModel, ROOM_TYPE, ROOM_USER_NET_STATUS, parseData } = require("@src/utils")
 
 const disconnection = socket => async (_) => {
   const { id } = socket
 
   await RoomModel.findOneAndUpdate({
     origin: true,
-    type: 'SYSTEM',
+    type: ROOM_TYPE.SYSTEM,
     "members.sid": id
   }, {
     $set: {
-      "members.$.status": "OFFLINE",
+      "members.$.status": ROOM_USER_NET_STATUS.OFFLINE,
       "members.$.sid": null
     }
   })
@@ -18,7 +18,7 @@ const disconnection = socket => async (_) => {
     "members.sid": 1
   })
   .exec()
-  .then(data => !!data && data._doc)
+  .then(parseData)
   .then(data => {
     if(!data) return
     const { members } = data
@@ -26,9 +26,9 @@ const disconnection = socket => async (_) => {
     const { user } = mine
     return RoomModel.updateMany({
       "members.user": user,
-      "members.status": "ONLINE"
+      "members.status": ROOM_USER_NET_STATUS.ONLINE
     }, {
-      $set: { "members.$.status": "OFFLINE" }
+      $set: { "members.$.status": ROOM_USER_NET_STATUS.OFFLINE }
     })
   })
   .catch(err => {

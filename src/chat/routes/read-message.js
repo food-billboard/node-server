@@ -1,11 +1,11 @@
-const { verifySocketIoToken, UserModel, RoomModel, Params } = require("@src/utils")
+const { verifySocketIoToken, MessageModel, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const readMessage = socket => async (data) => {
   const check = Params.bodyUnStatus(data, {
     name: '_id',
     validator: [
-			data => ObjectId.isValid(data)
+			data => data.split(',').every(item => ObjectId.isValid(item))
 		]
   })
   const [, token] = verifySocketIoToken(data.token)
@@ -21,43 +21,43 @@ const readMessage = socket => async (data) => {
   const [ _id ] = Param.sanitizers(data, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => data.split(',').every(item => ObjectId(item))
     ]
   })
-  const { mobile } = token
+  const { id } = token
   let errMsg
   let res
 
-  await UserModel.findOne({
-    mobile: Number(mobile)
+  await MessageModel.updateMany({
+    _id: {
+      $in: _id
+    },
+  }, {
+    $addToSet: {
+      readed: ObjectId(id)
+    }
   })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._id)
-  .then(userId => {
-    return RoomModel.updateOne({
-      _id
-    }, {
-      $set: { "members.$[message].message.$[user].readed": true }
-    }, {
-      arrayFilters: [
-        {
-          message: {
-            $type: 3
-          },
-          "message.user": userId
-        },
-        {
-          user: {
-            $type: 3
-          },
-          "user.readed": false
-        }
-      ]
-    })
-  })
+
+  // await RoomModel.updateOne({
+  //   _id
+  // }, {
+  //   $set: { "members.$[message].message.$[user].readed": true }
+  // }, {
+  //   arrayFilters: [
+  //     {
+  //       message: {
+  //         $type: 3
+  //       },
+  //       "message.user": ObjectId(id)
+  //     },
+  //     {
+  //       user: {
+  //         $type: 3
+  //       },
+  //       "user.readed": false
+  //     }
+  //   ]
+  // })
   .catch(err => {
     console.log(err)
     errMsg = err

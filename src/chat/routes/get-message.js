@@ -1,4 +1,69 @@
-const { MongoDB, verifySocketIoToken, UserModel, RoomModel, notFound, formatISO, formatMill, NUM_DAY } = require("@src/utils")
+const { Types: { ObjectId } } = require('mongoose')
+const { 
+  verifySocketIoToken, 
+  UserModel, 
+  MessageModel,
+  RoomModel, 
+  notFound, 
+  formatISO, 
+  formatMill, 
+  NUM_DAY, 
+  notFound,
+  ROOM_TYPE,
+  avatarGet
+} = require("@src/utils")
+
+function findMessage(userId) {
+  return RoomModel.aggregate([
+    {
+      $match: {
+        "members.user": {
+          $in: [userId]
+        }
+      }
+    },
+    {
+      $lookup: {
+        from: 'images',
+        localField: 'info.avatar',
+        foreignField: '_id',
+        as: 'info.avatar'
+      }
+    },
+    {
+      $unwind: {
+        path: "$info.avatar",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'members.user',
+        foreignField: '_id',
+        as: 'members.user'
+      }
+    },
+    {
+      $look: {
+        from: 'messages',
+        localField: 'message',
+        foreignField: '_id',
+        as: 'message'
+      }
+    },
+    {
+      $project: {
+        info: {
+          avatar: "$info.avatar.src",
+          description: "$info.description",
+          name: "$info.name"
+        },
+        // message
+      }
+    }
+  ])
+}
 
 const getMessageList = socket => async (data) => {
   const [, token] = verifySocketIoToken(data.token)
@@ -6,55 +71,43 @@ const getMessageList = socket => async (data) => {
   let res
   //已登录
   if(token) {
-    const { mobile } = token
-    let mine
+    const { id } = token
+    const mine = ObjectId(id)
 
-    await UserModel.findOne({
-      mobile: Number(mobile)
+    await RoomModel.find({
+      "members.user": { $in: [ mine ] },
     })
     .select({
-      _id: 1
+      // "members.message": 1,
+      info: 1,
+      type: 1
     })
+    .sort({
+      createdAt: -1
+    })
+    .populate({
+      path: "members.user",
+      select: {
+        avatar: 1,
+        username: 1,
+      }
+    })
+    // .populate({
+    //   path: 'members.message._id',
+    //   select: {
+    //     "content.text": 1,
+    //     createdAt: 1,
+    //     "user_info._id": 1
+    //   },
+    //   populate: {
+    //     path: 'user_info._id',
+    //     select: {
+    //       avatar: 1,
+    //       username: 1
+    //     }
+    //   }
+    // })
     .exec()
-    .then(data => !!data && data._id)
-    .then(notFound)
-    .then(id => {
-      mine = id
-      return RoomModel.find({
-        "members.user": { $in: [id] },
-      })
-      .select({
-        "members.message": 1,
-        info: 1,
-        type: 1
-      })
-      .sort({
-        createdAt: -1
-      })
-      .populate({
-        path: "members.user",
-        select: {
-          avatar: 1,
-          username: 1,
-        }
-      })
-      .populate({
-        path: 'members.message._id',
-        select: {
-          "content.text": 1,
-          createdAt: 1,
-          "user_info._id": 1
-        },
-        populate: {
-          path: 'user_info._id',
-          select: {
-            avatar: 1,
-            username: 1
-          }
-        }
-      })
-      .exec()
-    })
     .then((data) => {
       return data.filter(d => {
         const { members } = d
@@ -167,7 +220,7 @@ const getMessageList = socket => async (data) => {
   else {
     await RoomModel.findOne({
       origin: true,
-      type: 'SYSTEM'
+      type: ROOM_TYPE.SYSTEM
     })
     .select({
       message: 1,
@@ -176,7 +229,7 @@ const getMessageList = socket => async (data) => {
     .populate({
       path: 'message',
       match: {
-        createdAt: { $lt: formatISO(Date.now() - NUM_DAY(1)) }
+        createdAt: { $gte: formatISO(Date.now() - NUM_DAY(1)) }
       },
       select: {
         "content.text": 1,
@@ -184,15 +237,15 @@ const getMessageList = socket => async (data) => {
       }
     })
     .exec()
-    .then(data => !!data && data._doc)
+    .then(notFound)
     .then(data => {
       const { _id, info: { avatar, ...nextInfo }, message } = data
       const commonRes = {
         _id,
-        type: 'SYSTEM',
+        type: ROOM_TYPE.SYSTEM,
         info: {
           ...nextInfo,
-          avatar: avatar ? avatar.src : null,
+          avatar: avatarGet(avatar),
         }
       }
       if(message.length) {

@@ -12,9 +12,10 @@ function responseExpect(res, validate=[]) {
 
   expect(target).to.be.a('object').and.that.includes.all.keys('attentions')
   target.attentions.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id')
+    expect(item).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id', 'description')
     commonValidate.poster(item.avatar)
     commonValidate.string(item.username)
+    commonValidate.string(item.description)
     commonValidate.objectId(item._id)
   })
 
@@ -212,7 +213,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get self attentions list success and return the status of 304`, function(done) {
+      it.skip(`get self attentions list success and return the status of 304`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -232,7 +233,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get self attentions list success and hope return the status of 304 but the content has edited`, function(done) {
+      it.skip(`get self attentions list success and hope return the status of 304 but the content has edited`, function(done) {
 
 
         Request
@@ -253,7 +254,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get self attentions list success and hope return the status of 304 but the params of query is change`, function(done) {
+      it.skip(`get self attentions list success and hope return the status of 304 but the params of query is change`, function(done) {
 
         const query = {
           pageSize: 10

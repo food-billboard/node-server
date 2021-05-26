@@ -1,4 +1,4 @@
-const { verifySocketIoToken, RoomModel, UserModel, notFound, Params } = require("@src/utils")
+const { verifySocketIoToken, RoomModel, UserModel, ROOM_TYPE, Params } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 //可以在这里广播通知所有聊天室内用户有用户离开
@@ -21,7 +21,8 @@ const quitRoom = socket => async(data) => {
   }
 
   let res
-  const { mobile } = token
+  const { id } = token
+  const userId = ObjectId(id)
   const [ _id ] = Params.sanitizers(data, {
     name: '_id',
     sanitizers: [
@@ -29,24 +30,15 @@ const quitRoom = socket => async(data) => {
     ]
   })
 
-  await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then(data => RoomModel.findOneAndUpdate({
-    "members.user": data,
+  await RoomModel.findOneAndUpdate({
+    "members.user": userId,
     _id,
     origin: false,
-    type: 'GROUP_CHAT',
-    create_user: { $ne: data }
+    type: ROOM_TYPE.GROUP_CHAT,
+    create_user: { $ne: userId }
   }, {
-    $pull: { members: { user: data } }
-  }))
+    $pull: { members: { user: userId } }
+  })
   .select({
     _id: 1
   })

@@ -2308,6 +2308,10 @@
         "username": {
           "type": "string",
           "description": "用户名"
+        },
+        "description": {
+          "type": "string",
+          "description": "描述"
         }
       }
     },
@@ -3051,6 +3055,10 @@
                 "avatar": {
                   "type": "string",
                   "description": "头像"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
                 },
                 "fans": {
                   "type": "integer",

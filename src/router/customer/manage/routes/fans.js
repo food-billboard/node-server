@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -39,7 +39,8 @@ router
     },
     select: {
       username: 1,
-      avatar: 1
+      avatar: 1,
+      description: 1
     }
   })
   .exec()
@@ -52,7 +53,7 @@ router
         fans: fans.map(f => {
           const { _id: { avatar, ...nextF } } = f
           return {
-            avatar: avatar ? avatar.src : null,
+            avatar: avatarGet(avatar),
             ...nextF
           }
         })

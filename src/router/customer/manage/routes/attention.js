@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -57,7 +57,8 @@ router
     path: 'attentions._id',
     select: {
       username: 1,
-      avatar: 1
+      avatar: 1,
+      description: 1
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
@@ -72,10 +73,10 @@ router
       data: {
         ...data,
         attentions: attentions.map(a => {
-          const { _id: { avatar, ...nextData }, timestamps } = a
+          const { _id: { avatar, ...nextData } } = a
           return {
             ...nextData,
-            avatar: avatar ? avatar.src : null,
+            avatar: avatarGet(avatar),
           }
         })
       }
@@ -167,10 +168,6 @@ router
     _id: 1
   })
   .exec()
-  .then(data => {
-    console.log(data, 22222)
-    return data 
-  })
   .then(notFound)
   .then(data => data._id)
   .then(id => {

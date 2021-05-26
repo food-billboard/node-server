@@ -1651,6 +1651,10 @@
                 "username": {
                   "type": "string",
                   "description": "用户名"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
                 }
               }
             }
@@ -1685,6 +1689,10 @@
                   "username": {
                     "type": "string",
                     "description": "用户名"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "描述"
                   }
                 }
               }

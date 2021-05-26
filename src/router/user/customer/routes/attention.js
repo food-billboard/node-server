@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const { UserModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require("mongoose")
 
 const router = new Router()
@@ -53,7 +53,8 @@ router
     },
     select: {
       username: 1,
-      avatar: 1
+      avatar: 1,
+      description: 1
     }
   })
   .exec()
@@ -67,7 +68,7 @@ router
           const { _id: { avatar, ...nextA } } = a
           return {
             ...nextA,
-            avatar: avatar ? avatar.src : null
+            avatar: avatarGet(avatar)
           }
         })
       }

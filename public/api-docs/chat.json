@@ -26,71 +26,14 @@
     "http"
   ],
   "paths": {
-    "/api/customer/barrage": {
-      "get": {
-        "tags": [
-          "barrage"
-        ],
-        "summary": "获取电影的弹幕列表",
-        "description": "",
-        "operationId": "customer_get_barrage",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "_id",
-            "description": "电影id",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "timeStart",
-            "description": "弹幕出现在视频中的起始时间(ms)",
-            "type": "number"
-          },
-          {
-            "in": "query",
-            "name": "process",
-            "description": "获取的弹幕时长(ms)",
-            "type": "number"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "schema": {
-              "type": "array",
-              "name": "response",
-              "items": {
-                "$ref": "#/definitions/customer_get_barrage"
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
+    "read": {
       "put": {
         "tags": [
-          "barrage"
+          "chat"
         ],
-        "summary": "发送电影弹幕",
+        "summary": "读消息",
         "description": "",
-        "operationId": "customer_put_barrage",
+        "operationId": "chat_put_message",
         "consumes": [
           "application/json",
           "application/xml"
@@ -103,47 +46,103 @@
           {
             "in": "body",
             "name": "_id",
-            "description": "电影id",
+            "description": "消息id(多个用,分隔)",
             "required": true,
             "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "content",
-            "description": "弹幕内容",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "time",
-            "description": "弹幕出现在视频中的时间",
-            "required": true,
-            "type": "string",
-            "format":"date-time"
           }
         ],
         "responses": {
           "200": {
-            "description": "发送成功"
+            "description": "成功"
           }
-        },
-        "security": [
+        }
+      }
+    },
+    "delete": {
+      "delete": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "删除消息",
+        "description": "",
+        "operationId": "chat_delete_message",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "in": "body",
+            "name": "_id",
+            "description": "消息id(多个用,分隔)",
+            "required": true,
+            "type": "string"
           }
-        ]
-      },
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "join": {
       "post": {
         "tags": [
-          "barrage"
+          "chat"
         ],
-        "summary": "电影弹幕点赞",
-        "description": "",
-        "operationId": "customer_post_barrage",
+        "summary": "加入 | 创建 聊天室",
+        "description": "加入或创建，可 创建 单聊 和 群聊",
+        "operationId": "chat_join_room",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "type",
+            "description": "聊天室类型(CHAT | GROUP_CHAT | SYSTEM)",
+            "required": true,
+            "type": "string",
+            "enum": ["CHAT", "GROUP_CHAT", "SYSTEM"]
+          },
+          {
+            "in": "body",
+            "name": "_id",
+            "description": "聊天室id",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "members",
+            "description": "成员id(多个用,分隔)",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "leave": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "离开 聊天室",
+        "description": "离开聊天室",
+        "operationId": "chat_leave_room",
         "consumes": [
           "application/json",
           "application/xml"
@@ -156,32 +155,25 @@
           {
             "in": "body",
             "name": "_id",
-            "description": "弹幕id",
-            "required": true,
-            "type":"string"
+            "description": "聊天室id",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "成功"
           }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-      "delete": {
+        }
+      }
+    },
+    "quit": {
+      "post": {
         "tags": [
-          "barrage"
+          "chat"
         ],
-        "summary": "电影弹幕取消点赞",
-        "description": "",
-        "operationId": "customer_delete_barrage",
+        "summary": "退出聊天室",
+        "description": "退出聊天室",
+        "operationId": "chat_quit_room",
         "consumes": [
           "application/json",
           "application/xml"
@@ -192,299 +184,49 @@
         ],
         "parameters": [
           {
-            "in":"query",
-            "name": "_id",
-            "description": "弹幕id",
-            "required": true,
-            "type":"string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功"
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      }
-    },
-    "/api/customer/manage": {
-      "get": {
-        "tags": [
-          "manage"
-        ],
-        "summary": "获取用户信息",
-        "description": "获取用户的基本信息",
-        "operationId": "customer_get_manage",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/customer_get_manage"
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      }
-    },
-    "/api/customer/manage/attention": {
-      "get": {
-        "tags": [
-          "manage"
-        ],
-        "summary": "用户关注",
-        "description": "获取用户关注的人员列表",
-        "operationId": "customer_get_manage_attention",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "currPage",
-            "in": "query",
-            "description": "当前页",
-            "type": "integer"
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "description": "每页数量",
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "schema": {
-              "type": "object",
-              "$ref":"#/definitions/customer_get_manage_attention"
-            }
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "manage"
-        ],
-        "summary": "关注用户",
-        "description": "关注用户",
-        "operationId": "customer_put_manage_attention",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "_id",
             "in": "body",
-            "description": "用户id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功"
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "manage"
-        ],
-        "summary": "取消关注用户",
-        "description": "取消关注用户",
-        "operationId": "customer_delete_manage_attention",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
             "name": "_id",
-            "in": "query",
-            "description": "用户id",
-            "required": true
+            "description": "聊天室id",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "成功"
           }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
+        }
       }
     },
-    "/api/customer/manage/black": {
-      "get": {
+    "remove": {
+      "post": {
         "tags": [
-          "manage"
+          "chat"
         ],
-        "summary": "用户黑名单",
-        "description": "获取用户黑名单的人员列表",
-        "operationId": "customer_get_manage_black",
+        "summary": "删除聊天室",
+        "description": "删除聊天室",
+        "operationId": "chat_remove_room",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
         "produces": [
           "application/xml",
           "application/json"
         ],
         "parameters": [
           {
-            "name": "currPage",
-            "in": "query",
-            "description": "当前页",
-            "type": "integer"
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "description": "每页数量",
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "schema": {
-              "type": "object",
-              "$ref":"#/definitions/customer_get_manage_attention"
-            }
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "manage"
-        ],
-        "summary": "拉黑用户",
-        "description": "拉黑用户",
-        "operationId": "customer_put_manage_black",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "_id",
             "in": "body",
-            "description": "用户id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功"
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "manage"
-        ],
-        "summary": "取消拉黑用户",
-        "description": "取消拉黑用户",
-        "operationId": "customer_delete_manage_black",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
             "name": "_id",
-            "in": "query",
-            "description": "用户id",
-            "required": true
+            "description": "聊天室id",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "成功"
           }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
+        }
       }
-    }
-  },
-  "securityDefinitions": {
-    "petstore_auth": {
-      "type": "oauth2",
-      "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-      "flow": "implicit",
-      "scopes": {
-        "write:pets": "modify pets in your account",
-        "read:pets": "read your pets"
-      }
-    },
-    "api_key": {
-      "type": "apiKey",
-      "name": "api_key",
-      "in": "header"
     }
   },
   "definitions": {

@@ -78,7 +78,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`get home notice info success and return the status of 304`, function(done) {
+      it.skip(`get home notice info success and return the status of 304`, function(done) {
 
         Request
         .get(COMMON_API)

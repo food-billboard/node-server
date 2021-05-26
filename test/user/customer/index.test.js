@@ -106,7 +106,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get another userinfo and not self and without self info success and return status of 304`, function(done) {
+      it.skip(`get another userinfo and not self and without self info success and return status of 304`, function(done) {
 
         const query = {
           _id: result._id.toString()

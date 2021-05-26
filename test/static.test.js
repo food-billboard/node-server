@@ -571,7 +571,7 @@ describe.skip(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${
 
       })
 
-      it(`get the large file success and return the status of 304`, function(done) {
+      it.skip(`get the large file success and return the status of 304`, function(done) {
 
         const stat = fs.statSync(path.join(STATIC_FILE_PATH, 'video', `${bigFileName}.mp4`))
 
@@ -593,7 +593,7 @@ describe.skip(`${LITTLE_PUBLIC_COMMON_API} or ${LITTLE_PRIVATE_COMMON_API} or ${
 
       })
 
-      it(`get the large file success and hope return the status of 304 but the file is updated`, function(done) {
+      it.skip(`get the large file success and hope return the status of 304 but the file is updated`, function(done) {
 
         const stat = fs.statSync(path.join(STATIC_FILE_PATH, 'video', `${bigFileName}.mp4`))
         

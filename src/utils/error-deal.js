@@ -209,8 +209,8 @@ const responseDataDeal = ({
     else {
       // ctx.status = 200
 
-      //304
-      if(needCache) {
+      //304 暂不使用
+      if(false) {
 
         let cache = false
 
