@@ -508,6 +508,10 @@ const MemberSchema = new Schema({
     trim: true,
     required: true
   },
+  room: [{
+    type: ObjectId,
+    ref: 'room'
+  }]
 }, {
   ...defaultConfig
 })
@@ -529,11 +533,11 @@ const RoomSchema = new Schema({
   },
   create_user: {
     type: ObjectId,
-    ref: 'user'
+    ref: 'member'
   },
   delete_users: [{
     type: ObjectId,
-    ref: 'user'
+    ref: 'member'
   }],
   info: {
     avatar: {
@@ -573,7 +577,7 @@ const RoomSchema = new Schema({
 })
 
 const MessageSchema = new Schema({
-  type: {
+  message_type: {
     required: true,
     enum: Object.keys(MESSAGE_TYPE),
     type: String,
@@ -583,26 +587,26 @@ const MessageSchema = new Schema({
   },
   user_info: {
     type: ObjectId,
-    ref: 'user',
+    ref: 'member',
     required: true,
   },
   point_to: {
     type: ObjectId,
-    ref: 'user',
+    ref: 'member',
   },
   readed: [
     {
       type: ObjectId,
-      ref: 'user'
+      ref: 'member'
     }
   ],
-  un_deleted: [
+  deleted: [
     {
       type: ObjectId,
-      ref: 'user'
+      ref: 'member'
     }
   ],
-  type: {
+  media_type: {
     type: String,
     uppercase: true,
     trim: true,

@@ -5,6 +5,7 @@ const {
   GlobalModel,
   RoomModel,
   MessageModel,
+  MemberModel,
   MovieModel,
   TagModel,
   SpecialModel,
@@ -22,7 +23,9 @@ const {
   FeedbackModel,
   BehaviourModel,
   mergeConfig,
-  FriendsModel
+  FriendsModel,
+  ROOM_USER_NET_STATUS,
+  MESSAGE_MEDIA_TYPE
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
@@ -377,7 +380,54 @@ function mockCreateFriends(values) {
   return { model }
 }
 
-SearchModel
+//创建成员
+function mockCreateMember(values) {
+  let baseModel = {
+    user: ObjectId('8f63270f005f1c1a0d9448ca'),
+    status: ROOM_USER_NET_STATUS.OFFLINE,
+  }
+
+  baseModel = mergeConfig(baseModel, values, true)
+  const model = new MemberModel(baseModel)
+  return { model }
+}
+
+//创建消息
+function mockCreateMessage(values) {
+  let baseModel = {
+    message_type: MESSAGE_TYPE.USER,
+    user_info: ObjectId('8f63270f005f1c1a0d9448ca'),
+    point_to: ObjectId('8f63270f005f1c1a0d9448ca'),
+    media_type: MESSAGE_MEDIA_TYPE.TEXT,
+    room: ObjectId('8f63270f005f1c1a0d9448ca'),
+    content: {
+      text: '测试消息内容'
+    },
+  }
+
+  baseModel = mergeConfig(baseModel, values, true)
+  const model = new MessageModel(baseModel)
+  return { model }
+}
+
+//创建房间
+function mockCreateRoom(values) {
+  let baseModel = {
+    type:  ROOM_TYPE.CHAT,
+    origin: false,
+    create_user: ObjectId('8f63270f005f1c1a0d9448ca'),
+    info: {
+      avatar: ObjectId('5edb3c7b4f88da14ca419e61'),
+      name: '测试房间名称',
+      description: '测试房间描述'
+    },
+  }
+
+  baseModel = mergeConfig(baseModel, values, true)
+  const model = new RoomModel(baseModel)
+  return { model }
+}
+
 //创建搜索
 function mockCreateSearch(values) {
   let baseModel = {
@@ -504,5 +554,8 @@ module.exports = {
   mockCreateFeedback,
   generateTemplateFile,
   createMobile,
-  mockCreateFriends
+  mockCreateFriends,
+  mockCreateMember,
+  mockCreateMessage,
+  mockCreateRoom
 }

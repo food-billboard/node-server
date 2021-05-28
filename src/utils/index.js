@@ -13,6 +13,7 @@ const Schedule = require('./schedule')
 const PinYin = require('./pinyin')
 const Video = require('./video')
 const Media = require('./media')
+const Middleware = require('./middleware')
 
 module.exports = {
   ...MongoDB,
@@ -29,5 +30,6 @@ module.exports = {
   ...Schedule,
   ...PinYin,
   ...Video,
-  ...Media
+  ...Media,
+  ...Middleware
 }

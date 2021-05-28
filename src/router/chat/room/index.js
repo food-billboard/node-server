@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { verifyTokenToData, RoomModel, dealErr, Params, responseDataDeal, ROOM_TYPE, parseData } = require('@src/utils')
+const { verifyTokenToData, RoomModel, dealErr, Params, responseDataDeal, ROOM_TYPE, parseData, MemberModel,  } = require('@src/utils')
 const joinRoom = require('./utils/join')
 
 const router = new Router()
@@ -119,6 +119,20 @@ router
           name: "$info.name",
           description: "$info.description",
           avatar: "$info.avatar.src"
+        },
+        members: {
+          $size: {
+            $ifNull: [
+              "$members", []
+            ]
+          }
+        },
+        is_delete: {
+          $size: {
+            $ifNull: [
+              "$delete_users", []
+            ]
+          }
         }
       }
     }
@@ -136,10 +150,10 @@ router
   })
 
 })
-.put('/', joinRoom)
-.delete('/', async (ctx) => {
+.post('/', joinRoom)
+.put('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  const check = Params.query(ctx, {
+  const check = Params.body(ctx, {
     name: '_id',
     validator: [
 			data => ObjectId.isValid(data)
@@ -147,7 +161,7 @@ router
   })
   if(check) return 
 
-  const [ _id ] = Params.sanitizers(ctx.query, {
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
@@ -157,12 +171,12 @@ router
   const data = await new Promise((resolve) => {
     if(token) {
       const { id } = token
-      resolve(RoomModel.updateOne({
-        _id,
-        "members.status": ROOM_USER_NET_STATUS.ONLINE,
-        "members.user": ObjectId(id)
+      const userId = ObjectId(id)
+      resolve(MemberModel.updateOne({
+        status: ROOM_USER_NET_STATUS.ONLINE,
+        user: userId
       }, {
-        $set: { "members.$.status": 'OFFLINE' }
+        $set: { status: ROOM_USER_NET_STATUS.OFFLINE }
       })
       .then(data => {
         if(data && data.nModified == 0) return Promise.reject({ errMsg: '权限不足' })
@@ -172,6 +186,7 @@ router
       resolve(_id)
     }
   })
+  .then(data => ({ data }))
   .catch(dealErr(ctx))
 
   responseDataDeal({
@@ -197,7 +212,7 @@ router
   }
   return await next()
 })
-.delete('/room', async (ctx) => {
+.delete('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const check = Params.query(ctx, {
     name: '_id',
@@ -253,7 +268,15 @@ router
       })
     }
   })
-  .exec()
+  .then(_ => {
+    return MemberModel.updateOne({
+      user: userId,
+    }, {
+      $pull: {
+        room: _id
+      }
+    })
+  })
   .then(_ => {
     return {
       data: _id

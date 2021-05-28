@@ -1,59 +1,31 @@
-const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { verifyTokenToData, RoomModel, dealErr, Params, responseDataDeal, ROOM_TYPE, parseData } = require('@src/utils')
+const { 
+  verifyTokenToData, 
+  RoomModel, 
+  dealErr, 
+  Params, 
+  responseDataDeal, 
+  ROOM_TYPE, 
+  parseData, 
+  MemberModel, 
+  ROOM_USER_NET_STATUS 
+} = require('@src/utils')
 
-async function joinSystemMethod(data, token) {
-  await RoomModel.findOne({
-    origin: true
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._doc)
-  .then(data => {
-    const { _id } = data
-    if(data) {
-      socket.join(_id.toString())
-      res = {
-        success: true,
-        res: {
-          data: {
-            _id
-          }
-        }
-      }
-    }else {
-      res = {
-        success: false,
-        res: {
-          errMsg: '未登录'
-        }
-      }
-    }
-  })
-  .catch(err => {
-    console.log(err)
-    res = {
-      success: false,
-      res: {
-        errMsg: '未知错误'
-      }
-    }
-  })
-}
-
-async function roomExists(data, token) {
+async function roomExists(data, userId) {
   const { _id, members, type } = data
-  const { id: userId } = token
   if(ObjectId.isValid(_id) || ( !ObjectId.isValid(_id) && type === ROOM_TYPE.CHAT ) || type === ROOM_TYPE.SYSTEM) {
     let query = {}
     if(type === ROOM_TYPE.SYSTEM) {
       query = {
         type,
         origin: true,
-        "members.user": ObjectId(userId)
       }
+      if(ObjectId.isValid(userId)) query["members.user"] = userId
+    }else if(!ObjectId.isValid(userId)) {
+      return Promise.reject({
+        errMsg: 'not authorization',
+        status: 401
+      })
     }else if(!ObjectId.isValid(_id)) {
       query = {
         type,
@@ -77,59 +49,73 @@ async function roomExists(data, token) {
     .then(data => {
       if(data) {
         const { _id } = data
-        const roomId = _id.toString()
-        res = {
-          success: true,
-          res: {
-            _id: roomId
-          }
-        }
-        return res
+        return _id.toString()
       }else if(!_id) {
         return false
       }else {
-        return Promise.reject({errMsg: '权限不足或参数错误或已在房间中'})
+        return Promise.reject({errMsg: '权限不足或参数错误或已在房间中', status: 400})
       }
     })
   }
   return false
 }
 
-async function paramsValid(data, token) {
+async function paramsValid(data) {
+  const [, token] = verifyTokenToData(ctx)
   const { _id, members, type } = data
   if(type === ROOM_TYPE.SYSTEM) {
     return null 
   }
   if(!token) {
-    return {
-      errMsg: '未登录'
-    }
+    return Promise.reject({
+      errMsg: '未登录',
+      status: 401
+    })
   }
   if(!ObjectId.isValid(_id) && (!Array.isArray(members) || !members.length)) {
-    return {
-      errMsg: '成员参数不正确'
-    }
+    return Promise.reject({
+      errMsg: '成员参数不正确',
+      status: 400
+    })
   }
   if(type === ROOM_TYPE.CHAT && !!ObjectId.isValid(_id) && members.length != 1) {
-    return {
-      errMsg: "单聊参数不正确"
-    }
+    return Promise.reject({
+      errMsg: "单聊参数不正确",
+      status: 400
+    })
   } 
 }
 
-const joinRoom = socket => async (data) => {
-  const { type } = data
-  const [, token] = verifySocketIoToken(data.token)
-  const unValid = paramsValid(data, token)
-  if(unValid) {
-    socket.emit("join", JSON.stringify({
-      success: false,
-      res: unValid
-    }))
-    return 
-  }
+async function formatMembers(prevMemebers, userId) {
+  return MemberModel.findOne({
+    user: userId
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(notFound)
+  .then(data => {
+    const { _id } = data
+    if(!prevMemebers.some(item => item.equals(_id))) return {
+      mime: _id,
+      members: [
+        ...prevMemebers,
+        _id 
+      ] 
+    }
+    return {
+      mime: _id,
+      members: prevMemebers
+    }
+  })
+}
 
-  const [ type, newMembers ] = Params.sanitizers(data, {
+const joinRoom = async (ctx) => {
+  const { type } = data
+  const [, token] = verifyTokenToData(data.token)
+
+  let [ type, newMembers ] = Params.sanitizers(ctx.request.body, {
     name: 'type',
     _default: ROOM_TYPE.CHAT,
     sanitizers: [
@@ -148,81 +134,81 @@ const joinRoom = socket => async (data) => {
       }
     ]
   })
+  let mimeId 
 
-  let res 
-
-  //已登录
-  if(token) {
-    const { id } = token
-    if(!newMembers.some(item => item.equals(id))) newMembers.push(ObjectId(id))
-    await roomExists({
-      ...data,
-      members: newMembers
-    }, token)
-    .then(data => {
-      if(!data) return data 
-      const { res: { _id } } = data 
-      socket.join(_id)
-      return data 
-    })
-    .then(async (status) => {
-      //创建房间
-      if(!status && type !== ROOM_TYPE.SYSTEM) {
-        let info = {}
-        if(type === ROOM_TYPE.CHAT) {
-          info = {
-            ...info,
-            avatar: null,
-            name: null,
-            description: null
-          }
-        }else if(type === ROOM_TYPE.GROUP_CHAT){
-          info = {
-            ...info,
-            avatar: ObjectId('5edb3c7b4f88da14ca419e61'),
-            name: '这是一个默认的名字',
-            description: '群主什么都没有留下'
-          }
-        }
-        const room = new RoomModel({
-          type,
-          info,
-          members: newMembers.map(m => {
-            return {
-              user: m,
-              status: m.equals(id) ? ROOM_USER_NET_STATUS.ONLINE : ROOM_USER_NET_STATUS.OFFLINE,
-            }
-          })
-        })
-        return room.save()
-        .then(data => {
-          const { _id } = data
-          const roomId = _id.toString()
-          res = {
-            success: true,
-            res: {
-              _id: roomId
-            }
-          }
-          socket.join(roomId)
-        })
+  const data = await paramsValid(ctx)
+  .then(_ => {
+    if(token) {
+      return {
+        memebers,
+        mime: null
       }
-    })
-    .catch(err => {
-      console.log(err)
-      res = {
-        success: false,
-        res: {
-          errMsg: err
+    }
+    return formatMembers(newMembers, ObjectId(token._id))
+  })
+  .then(({ members, mime }) => {
+    mimeId = mime 
+    newMembers = members 
+    return roomExists({
+      ...ctx.request.body,
+      members: newMembers,
+    }, token || mimeId)
+  })
+  .then(async (status) => {
+    //创建房间
+    if(!status) {
+      if(type == ROOM_TYPE.SYSTEM) return Promise.reject({
+        errMsg: 'forbidden',
+        status: 403
+      })
+      let info = {}
+      if(type === ROOM_TYPE.CHAT) {
+        info = {
+          ...info,
+          avatar: null,
+          name: null,
+          description: null
+        }
+      }else if(type === ROOM_TYPE.GROUP_CHAT){
+        info = {
+          ...info,
+          avatar: ObjectId('5edb3c7b4f88da14ca419e61'),
+          name: '这是一个默认的名字',
+          description: '群主什么都没有留下'
         }
       }
-      return false
-    })
-  }
-  //未登录
-  else {
-    await joinSystemMethod(data, token)
-  }
+      const room = new RoomModel({
+        type,
+        info,
+        members: newMembers.map(m => {
+          const result = {
+            user: m,
+            status: ROOM_USER_NET_STATUS.OFFLINE
+          }
+          if(!token) return result 
+          return {
+            ...result,
+            status: m.equals(mimeId) ? ROOM_USER_NET_STATUS.ONLINE : ROOM_USER_NET_STATUS.OFFLINE,
+          }
+        })
+      })
+      return room.save()
+      .then(data => {
+        const { _id } = data
+        return _id 
+      })
+    }
+    return status
+  })
+  .then(data => ({ data }))
+  .catch(dealErr(ctx))
 
-  socket.emit("join", JSON.stringify(res))
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false 
+  })
+
 }
+
+module.exports = joinRoom

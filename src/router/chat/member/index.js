@@ -1,12 +1,112 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { verifyTokenToData, RoomModel, dealErr, Params, responseDataDeal, notFound } = require('@src/utils')
+const { verifyTokenToData, RoomModel, dealErr, Params, responseDataDeal, notFound, MemberModel } = require('@src/utils')
 
 const router = new Router()
 
 router 
 .get('/', async(ctx) => {
+  const check = Params.body(ctx, {
+    name: '_id',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  })
+  if(check) return 
+  const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
+    name: 'currPage',
+    _default: 0,
+    sanitizers: [
+      data => data >= 0 ? +data : 0
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    sanitizers: [
+      data => data >= 0 ? +data : 30
+    ]
+  }, {
+    name: '_id',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
 
+  let match = {
+    room: {
+      $in: [_id]
+    },
+  }
+  const [, token] = verifyTokenToData(ctx)
+  if(!token) {
+    match.type = ROOM_TYPE.SYSTEM
+    match.origin = true
+  }
+
+  const data = await MemberModel.aggregate([
+    {
+      $match: match
+    },
+    {
+      $skip: currPage * pageSize
+    },
+    {
+      $limit: pageSize
+    },
+    {
+      $lookup: {
+        from: 'users', 
+        let: { customFields: "$user" },
+        pipeline: [  
+          {
+            $lookup: {
+              from: 'images',
+              as: 'avatar',
+              foreignField: "_id",
+              localField: "avatar"
+            }
+          },
+          {
+            $unwind: {
+              path: "$poster",
+              preserveNullAndEmptyArrays: true 
+            }
+          }
+        ],
+        as: 'user',
+      }
+    },
+    {
+      $unwind: {
+        path: "$user",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
+      $project: {
+        user: {
+          username: "$user.username",
+          avatar: "$user.avatar.src",
+          _id: "$user._id"
+        },  
+        status: 1,
+        sid: 1,
+        createdAt: 1,
+        updatedAt: 1
+      }
+    }
+  ])
+  .then(data => {
+    return {
+      data
+    }
+  })
+
+  responseDataDeal({
+    data,
+    ctx,
+    needCache: false 
+  })
 })
 .use(async(ctx, next) => {
   const [, token] = verifyTokenToData(ctx)
@@ -98,13 +198,24 @@ router
     ]
   })
 
-  const data = await RoomModel.updateOne({
-    _id,
-  }, {
-    $pullAll: {
-      "members.user": members
-    }
-  })
+  const data = await Promise.all([
+    MemberModel.updateMany({
+      _id: {
+        $in: members
+      },
+    }, {
+      $pull: {
+        room: _id
+      }
+    }),
+    RoomModel.updateOne({
+      _id
+    }, {
+      $pullAll: {
+        members
+      }
+    })
+  ])
   .then(_ => {
     return {
       data: _id
@@ -132,13 +243,28 @@ router
     ]
   })
 
-  const data = await RoomModel.updateOne({
-    _id,
-  }, {
-    $pullAll: {
-      "members.user": members
-    }
-  })
+  const data = await Promise.all([
+    RoomModel.updateOne({
+      _id,
+    }, {
+      $addToSet: {
+        members: {
+          $each: members
+        }
+      }
+    }),
+    MemberModel.updateMany({
+      _id: {
+        $in: members
+      }
+    }, {
+      $addToSet: {
+        room: _id
+      }
+    }, {
+      upsert: true 
+    })
+  ])
   .then(_ => {
     return {
       data: _id
