@@ -112,8 +112,7 @@ async function formatMembers(prevMemebers, userId) {
 }
 
 const joinRoom = async (ctx) => {
-  const { type } = data
-  const [, token] = verifyTokenToData(data.token)
+  const [, token] = verifyTokenToData(ctx)
 
   let [ type, newMembers ] = Params.sanitizers(ctx.request.body, {
     name: 'type',

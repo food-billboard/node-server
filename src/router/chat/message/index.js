@@ -8,7 +8,7 @@ const {
   Params, 
   responseDataDeal, 
   ROOM_TYPE, 
-  authorizationMiddleware, 
+  Authorization, 
   MESSAGE_MEDIA_TYPE,
   notFound
 } = require('@src/utils')
@@ -476,7 +476,7 @@ router
   })
 
 })
-.use(authorizationMiddleware())
+.use(Authorization())
 .post('/', async(ctx) => {
   let templateMessage = {}
   const check = Params.body(ctx, {

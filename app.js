@@ -11,6 +11,7 @@ const Compress = require('koa-compress')
 const path = require('path')
 const morgan = require('koa-morgan')
 const chalk = require('chalk')
+const helmet = require('koa-helmet')
 const app = new Koa()
 const { 
   MongoDB, 
@@ -38,7 +39,9 @@ redisConnect()
 //定时任务
 schedule()
 
-app.use(Cors())
+app
+.use(Cors())
+.use(helmet())
 //请求前植入uuid来进行全链路的日志记录
 .use(middleware4Uuid)
 .use(morgan('combined', {

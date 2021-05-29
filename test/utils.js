@@ -25,7 +25,8 @@ const {
   mergeConfig,
   FriendsModel,
   ROOM_USER_NET_STATUS,
-  MESSAGE_MEDIA_TYPE
+  MESSAGE_MEDIA_TYPE,
+  ROOM_TYPE
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())

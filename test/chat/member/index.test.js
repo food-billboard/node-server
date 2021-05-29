@@ -3,31 +3,36 @@ const { expect } = require('chai')
 const { 
   Request, 
   mockCreateUser,
-  mockCreateBarrage,
-  mockCreateMovie,
-  commonValidate
+  commonValidate,
+  mockCreateRoom,
+  mockCreateMember
 } = require('@test/utils')
 const {
-  BarrageModel,
-  MovieModel, 
-  UserModel
+  MemberModel,
+  RoomModel, 
+  UserModel,
 } = require('@src/utils')
-const mongoose = require("mongoose")
-const { Types: { ObjectId } } = mongoose
 
 const COMMON_API = '/api/chat/member'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
-         
   expect(target).to.be.a('array')
   target.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('hot', 'like', 'time_line', '_id', 'content')
-    commonValidate.number(item.hot)
-    expect(item.like).to.be.a('boolean')
-    commonValidate.number(item.time_line)
+    expect(item).to.be.a('object').and.that.includes.any.keys('user', 'status', 'sid', 'createdAt', 'updatedAt', '_id')
+    commonValidate.string(item.status)
+    if(item.sid) {
+      commonValidate.string(item.sid)
+    }
     commonValidate.objectId(item._id)
-    commonValidate.string(item.content)
+    commonValidate.date(item.createdAt)
+    commonValidate.date(item.updatedAt)
+    expect(item.user).to.be.a('object').and.that.includes.any.keys('username', 'avatar', '_id')
+    commonValidate.string(item.user.username)
+    if(item.user.avatar) {
+      commonValidate.string(item.user.avatar)
+    }
+    commonValidate.objectId(item.user._id)
   })
 
   if(Array.isArray(validate)) {
@@ -41,51 +46,49 @@ function responseExpect(res, validate=[]) {
 
 describe(`${COMMON_API} test`, function() {
 
-  let result
   let userId
-  let movieId
+  let roomId
+  let memberId 
   let userToken
   let getToken
-  const values = {
-    origin: new ObjectId('56aa3554e90911b64c36a424'),
-    user: new ObjectId('56aa3554e90911b64c36a425')
-  }
 
   before(async function() {
 
-    const { model, token, signToken } = mockCreateUser({
+    const { model, signToken } = mockCreateUser({
       username: COMMON_API
     })
-    const { model: movie } = mockCreateMovie({
-      name: COMMON_API
+    const { model: room } = mockCreateRoom({
+      info: {
+        name: COMMON_API
+      }
     })
 
     getToken = signToken
 
     await Promise.all([
       model.save(),
-      movie.save()
+      room.save()
     ])
-    .then(([user, movie]) => {
+    .then(([user, room]) => {
       userId = user._id
       userToken = getToken(userId)
-      movieId = movie._id
-      const { model } = mockCreateBarrage({
-        ...values,
-        origin: movieId,
-        like_users: [ userId ],
-        content: COMMON_API
+      roomId = room._id
+      const { model } = mockCreateMember({
+        user: userId,
+        room: [roomId]
       })
 
       return model.save()
     })
     .then(data => {
-      result = data
-      return MovieModel.updateOne({
-        name: COMMON_API
+      memberId = data._id
+      return RoomModel.updateOne({
+        info: {
+          name: COMMON_API
+        }
       }, {
         $set: {
-          barrage: [ data._id ]
+          member: [ memberId ]
         }
       })
     })
@@ -102,11 +105,11 @@ describe(`${COMMON_API} test`, function() {
       UserModel.deleteMany({
         username: COMMON_API
       }),
-      BarrageModel.deleteMany({
-        origin: movieId
+      MemberModel.deleteMany({
+        user: userId
       }),
-      MovieModel.deleteMany({
-        name: COMMON_API
+      RoomModel.deleteMany({
+        "info.name": COMMON_API
       })
     ])
     .catch(err => {
@@ -130,9 +133,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${userToken}`
         })
         .query({
-          _id: movieId.toString(),
-          timeStart: 0,
-          process: 20
+          _id: roomId.toString(),
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -145,13 +146,40 @@ describe(`${COMMON_API} test`, function() {
           }catch(_) {
             console.log(_)
           }
-          expect(obj.res.data.length).to.be.eql(0)
+          responseExpect(obj, target => {
+            expect(target.some(item => item._id === memberId.toString())).to.be.true
+          })
           done()
         })
 
       })
 
       it(`get the member list success and not login`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'Application/json',
+        })
+        .query({
+          _id: roomId.toString(),
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, target => {
+            expect(target.some(item => item._id === memberId.toString())).to.be.false
+          })
+          done()
+        })
 
       })
 
@@ -178,7 +206,7 @@ describe(`${COMMON_API} test`, function() {
 
       it(`get member list fail because of the database can not find the room id`, function(done) {
 
-        const id = movieId.toString()
+        const id = roomId.toString()
 
         Request
         .get(COMMON_API)
@@ -212,7 +240,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .get(COMMON_API)
         .query({
-          _id: movieId.toString().slice(1)
+          _id: roomId.toString().slice(1)
         })
         .set({
           Accept: 'Application/json',

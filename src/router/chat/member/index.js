@@ -1,12 +1,12 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { verifyTokenToData, RoomModel, dealErr, Params, responseDataDeal, notFound, MemberModel } = require('@src/utils')
+const { verifyTokenToData, RoomModel, dealErr, Params, responseDataDeal, notFound, MemberModel, ROOM_TYPE } = require('@src/utils')
 
 const router = new Router()
 
 router 
 .get('/', async(ctx) => {
-  const check = Params.body(ctx, {
+  const check = Params.query(ctx, {
     name: '_id',
     validator: [
       data => ObjectId.isValid(data)
@@ -68,7 +68,7 @@ router
           },
           {
             $unwind: {
-              path: "$poster",
+              path: "$avatar",
               preserveNullAndEmptyArrays: true 
             }
           }
@@ -92,7 +92,8 @@ router
         status: 1,
         sid: 1,
         createdAt: 1,
-        updatedAt: 1
+        updatedAt: 1,
+        _id: 1
       }
     }
   ])

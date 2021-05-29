@@ -492,7 +492,7 @@ const GlobalSchema = new Schema({
   ...defaultConfig
 })
 
-const MemberSchema = new Schema({
+const MemberSchema = new Schema({ 
   user: {
     type: ObjectId,
     required: true,
@@ -1675,6 +1675,7 @@ module.exports = {
   AuthModel,
   BehaviourModel,
   FriendsModel,
+  MemberModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,

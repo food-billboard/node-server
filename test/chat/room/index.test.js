@@ -4,7 +4,7 @@ const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
 const { Request, commonValidate, mockCreateUser, mockCreateMember, mockCreateMessage, mockCreateImage, mockCreateRoom } = require('@test/utils')
 
-const COMMON_API = '/api/chat/message'
+const COMMON_API = '/api/chat/room'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
@@ -42,12 +42,7 @@ describe(`${COMMON_API} test`, function() {
 
   let userInfo
   let selfToken
-  let messageId 
-  let systemMessageId 
-  let imageMessageId 
-  let roomId 
-  let systemRoomId 
-  let memberId 
+  let specialId
   let imageId 
 
   before(function(done) {
@@ -67,105 +62,35 @@ describe(`${COMMON_API} test`, function() {
       userInfo = user._id 
       selfToken = signToken(userInfo)
       imageId = image._id
-      const { model: memeberModel } = mockCreateMember({
-        sid: COMMON_API,
-        user: userInfo._id 
-      })
-      return memeberModel.save()
+      return Promise.all(
+        new Array(3).fill(0).map((_, index) => {
+          const { model } = mockCreateMovie({
+            author_description: COMMON_API,
+            name: COMMON_API + index,
+            poster: imageId
+          })
+          return model.save()
+        })
+      )
     })
-    .then(member => {
-      memberId = member._id 
-      const { model: systemMessage } = mockCreateMessage({
-        content: {
-          text: COMMON_API,
-        }
+    .then(([movieA, movieB, movieC]) => {
+      movieAId = movieA._id 
+      movieBId = movieB._id 
+      movieCId = movieC._id 
+      const { model } = mockCreateSpecial({
+        name: COMMON_API,
+        description: COMMON_API,
+        movie: [
+          movieAId,
+          movieBId,
+          movieCId
+        ],
+        poster: imageId
       })
-      const { model: message } = mockCreateMessage({
-        content: {
-          text: COMMON_API,
-        }
-      })
-      const { model: mediaMessage } = mockCreateMessage({
-        content: {
-          text: COMMON_API,
-          image: imageId
-        },
-        media_type: MESSAGE_MEDIA_TYPE.IMAGE 
-      })
-      const { model: systemRoom } = mockCreateRoom({
-        info: {
-          name: COMMON_API,
-        },
-        origin: true,
-        type: ROOM_TYPE.SYSTEM,
-      })
-      const { model: userRoom } = mockCreateRoom({
-        info: {
-          name: COMMON_API,
-        },
-        origin: false,
-        type: ROOM_TYPE.USER
-      })
-      return Promise.all([
-        message.save(),
-        systemMessage.save(),
-        mediaMessage.save(),
-        systemRoom.save(),
-        userRoom.save()
-      ])
-    })
-    .then(([message, systemMessage, mediaMessage, system, user]) => {
-      messageId = message._id 
-      systemMessageId = systemMessage._id
-      imageMessageId = mediaMessage._id 
-      systemRoomId = system._id 
-      roomId = user._id 
-      return Promise.all([
-        RoomModel.updateOne({
-          _id: systemRoomId
-        }, {
-          $set: {
-            members: [memberId],
-            create_user: memberId,
-            message: [systemMessageId]
-          }
-        }),
-        RoomModel.updateOne({
-          _id: roomId
-        }, {
-          $set: {
-            members: [memberId],
-            create_user: memberId,
-            message: [messageId, imageMessageId]
-          }
-        }),
-        MessageModel.updateOne({
-          _id: messageId,
-        }, {
-          $set: {
-            room: roomId,
-            user_info: memberId,
-          }
-        }),
-        MessageModel.updateOne({
-          _id: systemMessageId,
-        }, {
-          $set: {
-            room: systemRoomId,
-            user_info: memberId,
-          }
-        }),
-        MessageModel.updateOne({
-          _id: imageMessageId,
-        }, {
-          $set: {
-            room: roomId,
-            user_info: memberId,
-          }
-        }),
-      ])
+      return model.save()
     })
     .then(special => {
+      specialId = special._id
       done()
     })
     .catch(err => {
@@ -177,17 +102,21 @@ describe(`${COMMON_API} test`, function() {
   after(function(done) {
 
     Promise.all([
-      MessageModel.deleteMany({
-        "content.text": COMMON_API
+      SpecialModel.deleteMany({
+        $or: [
+          {
+            name: COMMON_API
+          },
+          {
+            description: COMMON_API
+          }
+        ]
       }),
       UserModel.deleteMany({
         username: COMMON_API
       }),
-      MemberModel.deleteMany({
-        sid: COMMON_API
-      }),
-      RoomModel.deleteMany({
-        "info.name": COMMON_API
+      MovieModel.deleteMany({
+        author_description: COMMON_API
       }),
       ImageModel.deleteMany({
         src: COMMON_API
@@ -202,11 +131,11 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe(`${COMMON_API} get message list test`, function() {
+  describe(`${COMMON_API} get room list test`, function() {
       
-    describe(`${COMMON_API} get message list success test`, function() {
+    describe(`${COMMON_API} get room list success test`, function() {
       
-      it(`get message list success`, function(done) {
+      it(`get room list success`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -234,7 +163,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get message list success with type`, function(done) {
+      it(`get room list success with type`, function(done) {
 
         let specialIdA
         const { model } = mockCreateSpecial({
@@ -297,7 +226,322 @@ describe(`${COMMON_API} test`, function() {
 
       })  
 
-      it(`get message list success and not login`, function(done) {
+      it(`get room list success with _id`, function(done) {
+
+        let specialIdA
+        const { model } = mockCreateSpecial({
+          name: COMMON_API,
+          description: COMMON_API,
+          movie: [
+            movieAId,
+            movieBId,
+            movieCId
+          ],
+          poster: imageId,
+          glance: [
+            {
+              _id: ObjectId('571094e2976aeb1df982ad4e'),
+              timestamps: Date.now()
+            },
+            {
+              _id: ObjectId('571094e2976aeb1df982ad4e'),
+              timestamps: Date.now()
+            }
+          ]
+        })
+
+        model.save()
+        .then(data => {
+          specialIdA = data._id 
+          return Request
+          .get(COMMON_API)
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .query({
+            sort: 'hot_1'
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(res => {
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+            done(err)
+          }
+          responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
+            const indexThan = target.list.findIndex(item => specialIdA.equals(item._id))
+            const indexLess = target.list.findIndex(item => specialId.equals(item._id))
+            expect(indexThan > indexLess).to.be.true
+          })
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+
+      })  
+
+      it(`get room list success with origin`, function(done) {
+
+        let specialIdA
+        const { model } = mockCreateSpecial({
+          name: COMMON_API,
+          description: COMMON_API,
+          movie: [
+            movieAId,
+            movieBId,
+            movieCId
+          ],
+          poster: imageId,
+          glance: [
+            {
+              _id: ObjectId('571094e2976aeb1df982ad4e'),
+              timestamps: Date.now()
+            },
+            {
+              _id: ObjectId('571094e2976aeb1df982ad4e'),
+              timestamps: Date.now()
+            }
+          ]
+        })
+
+        model.save()
+        .then(data => {
+          specialIdA = data._id 
+          return Request
+          .get(COMMON_API)
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .query({
+            sort: 'hot_1'
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(res => {
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+            done(err)
+          }
+          responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
+            const indexThan = target.list.findIndex(item => specialIdA.equals(item._id))
+            const indexLess = target.list.findIndex(item => specialId.equals(item._id))
+            expect(indexThan > indexLess).to.be.true
+          })
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+
+      })  
+
+      it(`get room list success with create_user`, function(done) {
+
+        let specialIdA
+        const { model } = mockCreateSpecial({
+          name: COMMON_API,
+          description: COMMON_API,
+          movie: [
+            movieAId,
+            movieBId,
+            movieCId
+          ],
+          poster: imageId,
+          glance: [
+            {
+              _id: ObjectId('571094e2976aeb1df982ad4e'),
+              timestamps: Date.now()
+            },
+            {
+              _id: ObjectId('571094e2976aeb1df982ad4e'),
+              timestamps: Date.now()
+            }
+          ]
+        })
+
+        model.save()
+        .then(data => {
+          specialIdA = data._id 
+          return Request
+          .get(COMMON_API)
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .query({
+            sort: 'hot_1'
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(res => {
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+            done(err)
+          }
+          responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
+            const indexThan = target.list.findIndex(item => specialIdA.equals(item._id))
+            const indexLess = target.list.findIndex(item => specialId.equals(item._id))
+            expect(indexThan > indexLess).to.be.true
+          })
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+
+      })  
+
+      it(`get room list success with content`, function(done) {
+
+        let specialIdA
+        const { model } = mockCreateSpecial({
+          name: COMMON_API,
+          description: COMMON_API,
+          movie: [
+            movieAId,
+            movieBId,
+            movieCId
+          ],
+          poster: imageId,
+          glance: [
+            {
+              _id: ObjectId('571094e2976aeb1df982ad4e'),
+              timestamps: Date.now()
+            },
+            {
+              _id: ObjectId('571094e2976aeb1df982ad4e'),
+              timestamps: Date.now()
+            }
+          ]
+        })
+
+        model.save()
+        .then(data => {
+          specialIdA = data._id 
+          return Request
+          .get(COMMON_API)
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .query({
+            sort: 'hot_1'
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(res => {
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+            done(err)
+          }
+          responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
+            const indexThan = target.list.findIndex(item => specialIdA.equals(item._id))
+            const indexLess = target.list.findIndex(item => specialId.equals(item._id))
+            expect(indexThan > indexLess).to.be.true
+          })
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+
+      })  
+
+      it(`get room list success with members`, function(done) {
+
+        let specialIdA
+        const { model } = mockCreateSpecial({
+          name: COMMON_API,
+          description: COMMON_API,
+          movie: [
+            movieAId,
+            movieBId,
+            movieCId
+          ],
+          poster: imageId,
+          glance: [
+            {
+              _id: ObjectId('571094e2976aeb1df982ad4e'),
+              timestamps: Date.now()
+            },
+            {
+              _id: ObjectId('571094e2976aeb1df982ad4e'),
+              timestamps: Date.now()
+            }
+          ]
+        })
+
+        model.save()
+        .then(data => {
+          specialIdA = data._id 
+          return Request
+          .get(COMMON_API)
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .query({
+            sort: 'hot_1'
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(res => {
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+            done(err)
+          }
+          responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
+            const indexThan = target.list.findIndex(item => specialIdA.equals(item._id))
+            const indexLess = target.list.findIndex(item => specialId.equals(item._id))
+            expect(indexThan > indexLess).to.be.true
+          })
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+
+      }) 
+
+      it(`get room list success and not login`, function(done) {
 
         let specialIdA
         const { model } = mockCreateSpecial({
@@ -364,9 +608,9 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe(`${COMMON_API} post message test`, function() {
+  describe(`${COMMON_API} post room test`, function() {
       
-    describe(`${COMMON_API} post message success test`, function() {
+    describe(`${COMMON_API} post room success test`, function() {
 
       const nameNoValid = COMMON_API + 'no-valid'
       const nameHaveValid = COMMON_API + 'have-valid'
@@ -395,7 +639,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
       
-      it(`post message success`, function(done) {
+      it(`post room success`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -420,7 +664,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post message success and post text`, function(done) {
+      it(`post room success and post text`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -446,7 +690,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post message success and post media`, function(done) {
+      it(`post room success and post media`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -472,7 +716,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post message success and point_to user`, function(done) {
+      it(`post room success and point_to user`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -499,7 +743,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    describe(`${COMMON_API} post message fail test`, function() {
+    describe(`${COMMON_API} post room fail test`, function() {
 
       it(`post the message fail becuase lack of the params _id`, function(done) {
         Request
@@ -703,9 +947,9 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe(`${COMMON_API} put message test`, function() {
+  describe(`${COMMON_API} put room test`, function() {
       
-    describe(`${COMMON_API} put message success test`, function() {
+    describe(`${COMMON_API} put room success test`, function() {
 
       let newSpecial = COMMON_API + 'new-special'
 
@@ -730,33 +974,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
       
-      it(`put the message success and dependence room id`, function(done) {
-        Request
-        .put(COMMON_API)
-        .send({
-          _id: specialId.toString(),
-          name: newSpecial,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId,
-            movieAId
-          ],
-          valid: true
-        })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(200)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
-
-      it(`put the message success and dependence meessage id`, function(done) {
+      it(`put the room success`, function(done) {
         Request
         .put(COMMON_API)
         .send({
@@ -784,7 +1002,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    describe(`${COMMON_API} put message fail test`, function() {
+    describe(`${COMMON_API} put room fail test`, function() {
 
       let newName = COMMON_API + 'new-name'
 
@@ -826,7 +1044,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`put the message fail because the id is not valid`, function(done) {
+      it(`put the room fail because the id is not valid`, function(done) {
         Request
         .put(COMMON_API)
         .send({
@@ -845,7 +1063,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`put the message fail because lack of the id`, function(done) {
+      it(`put the room fail because lack of the id`, function(done) {
         Request
         .put(COMMON_API)
         .send({
@@ -868,9 +1086,9 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe(`${COMMON_API} delete message test`, function() {
+  describe(`${COMMON_API} delete room test`, function() {
       
-    describe(`${COMMON_API} delete message success test`, function() {
+    describe(`${COMMON_API} delete room success test`, function() {
 
       let specialId1
       let specialId2 
@@ -966,7 +1184,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    describe(`${COMMON_API} delete message fail test`, function() {
+    describe(`${COMMON_API} delete room fail test`, function() {
 
       let specialId 
       before(function(done) {
