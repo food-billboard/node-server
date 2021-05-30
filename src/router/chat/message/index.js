@@ -148,9 +148,10 @@ router
         }
       },
       {
-        $porject: {
+        $project: {
+          _id: 1,
           create_user: {
-            username: "$create_user.uesrname",
+            username: "$create_user.username",
             avatar: "$create_user.avatar.src",
             _id: "$create_user._id"
           },
@@ -172,7 +173,9 @@ router
                 }
               }
             }
-          }
+          },
+          createdAt: 1,
+          updatedAt: 1
         }
       }
     ])
@@ -186,139 +189,6 @@ router
     needCache: false 
   })
 
-})
-.put('/', async (ctx) => {
-  const check = Params.body(ctx, {
-    name: '_id',
-    validator: [
-			data => data.split(',').every(item => ObjectId.isValid(item))
-		]
-  })
-  if(check) return 
-
-  const [, token] = verifyTokenToData(ctx)
-  const [ _id ] = Param.sanitizers(ctx.request.body, {
-    name: '_id',
-    sanitizers: [
-      data => data.split(',').every(item => ObjectId(item))
-    ]
-  })
-  const { request: { body: { type } } } = ctx 
-  let match = {}
-  if(type == '1') {
-    match.room = _id[0]
-  }else {
-    match._id = {
-      $in: _id
-    }
-  }
-
-  const data = await new Promise((resolve, reject) => {
-    if(token) {
-      resolve()
-    }else {
-      reject({
-        errMsg: 'not authorization',
-        status: 401
-      })
-    }
-  })
-  .then(_ => {
-    const { id } = token
-    return MessageModel.updateMany(match, {
-      $addToSet: {
-        readed: ObjectId(id)
-      }
-    })
-  })
-  .then(_ => ({ data: _id }))
-  // await RoomModel.updateOne({
-  //   _id
-  // }, {
-  //   $set: { "members.$[message].message.$[user].readed": true }
-  // }, {
-  //   arrayFilters: [
-  //     {
-  //       message: {
-  //         $type: 3
-  //       },
-  //       "message.user": ObjectId(id)
-  //     },
-  //     {
-  //       user: {
-  //         $type: 3
-  //       },
-  //       "user.readed": false
-  //     }
-  //   ]
-  // })
-  .catch(dealErr(ctx))
-
-  responseDataDeal({
-    ctx,
-    data,
-    needCache: false 
-  })
-
-})
-.delete('/', async (ctx) => {
-  const [, token] = verifyTokenToData(ctx)
-  const check = Params.body(ctx, {
-    name: '_id',
-    validator: [
-			data => data.split(',').every(item => ObjectId.isValid(item))
-		]
-  })
-  if(check) return 
-
-  const { id } = token
-  const [ _id ] = Params.sanitizers(ctx.query, {
-    name: '_id',
-    sanitizers: [
-      data => data.split(',').every(item => ObjectId(item))
-    ]
-  })
-  let match = {}
-  const { query: { type } } = ctx
-  if(type == '1') {
-    match.room = _id[0]
-  }else {
-    match._id = {
-      $in: _id
-    }
-  }
-
-  const data = await new Promise((resolve, reject) => {
-    if(token) {
-      resolve(MemberModel.findOne({
-        user: ObjectId(id)
-      })
-      .select({
-        _id: 1
-      })
-      .exec()
-      .then(notFound))
-    }else {
-      reject({
-        errMsg: 'not authorization',
-        status: 401
-      })
-    }
-  })
-  .then(data => {
-    return MessageModel.updateMany(match, {
-      $addToSet: { deleted: ObjectId(data._id) }
-    })
-  })
-  .then(_ => ({ data: _id }))
-  .catch(dealErr(ctx))
-
-  responseDataDeal({
-    data,
-    needCache: false,
-    ctx
-  })
-  
 })
 .get('/detail', async(ctx) => {
 
@@ -445,12 +315,15 @@ router
             input: "$message",
             as: 'value',
             in: {
+              _id: "$$value._id",
               media_type: "$$value.media_type",
               user_info: {
                 username: "$$value.user_info.username",
                 avatar: "$$value.user_info.avatar.src",
                 _id: "$$value.user_info._id",
               },
+              createdAt: "$$value.createdAt",
+              updatedAt: "$$value.updatedAt",
               point_to: "$$value.point_to",
               content: {
                 text: "$$value.content.text",
@@ -477,6 +350,118 @@ router
 
 })
 .use(Authorization())
+.delete('/', async (ctx) => {
+  const [, token] = verifyTokenToData(ctx)
+  const check = Params.body(ctx, {
+    name: '_id',
+    validator: [
+			data => data.split(',').every(item => ObjectId.isValid(item))
+		]
+  })
+  if(check) return 
+
+  const { id } = token
+  const [ _id ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      data => data.split(',').every(item => ObjectId(item))
+    ]
+  })
+  let match = {}
+  const { query: { type } } = ctx
+  if(type == '1') {
+    match.room = _id[0]
+  }else {
+    match._id = {
+      $in: _id
+    }
+  }
+
+  const data = await MemberModel.findOne({
+    user: ObjectId(id)
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(notFound)
+  .then(data => {
+    return MessageModel.updateMany(match, {
+      $addToSet: { deleted: ObjectId(data._id) }
+    })
+  })
+  .then(_ => ({ data: _id }))
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    data,
+    needCache: false,
+    ctx
+  })
+  
+})
+.put('/', async (ctx) => {
+  const check = Params.body(ctx, {
+    name: '_id',
+    validator: [
+			data => data.split(',').every(item => ObjectId.isValid(item))
+		]
+  })
+  if(check) return 
+
+  const [, token] = verifyTokenToData(ctx)
+  const [ _id ] = Param.sanitizers(ctx.request.body, {
+    name: '_id',
+    sanitizers: [
+      data => data.split(',').every(item => ObjectId(item))
+    ]
+  })
+  const { request: { body: { type } } } = ctx 
+  let match = {}
+  if(type == '1') {
+    match.room = _id[0]
+  }else {
+    match._id = {
+      $in: _id
+    }
+  }
+  const { id } = token
+
+  const data = await MessageModel.updateMany(match, {
+    $addToSet: {
+      readed: ObjectId(id)
+    }
+  })
+  .then(_ => ({ data: _id }))
+  // await RoomModel.updateOne({
+  //   _id
+  // }, {
+  //   $set: { "members.$[message].message.$[user].readed": true }
+  // }, {
+  //   arrayFilters: [
+  //     {
+  //       message: {
+  //         $type: 3
+  //       },
+  //       "message.user": ObjectId(id)
+  //     },
+  //     {
+  //       user: {
+  //         $type: 3
+  //       },
+  //       "user.readed": false
+  //     }
+  //   ]
+  // })
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false 
+  })
+
+})
 .post('/', async(ctx) => {
   let templateMessage = {}
   const check = Params.body(ctx, {

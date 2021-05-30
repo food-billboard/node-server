@@ -1,5 +1,5 @@
 require('module-alias/register')
-const { SpecialModel, UserModel, RoomModel, MessageModel, MemberModel, ImageModel } = require('@src/utils')
+const { SpecialModel, UserModel, RoomModel, MessageModel, MemberModel, ImageModel, ROOM_TYPE, MESSAGE_MEDIA_TYPE } = require('@src/utils')
 const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
 const { Request, commonValidate, mockCreateUser, mockCreateMember, mockCreateMessage, mockCreateImage, mockCreateRoom } = require('@test/utils')
@@ -8,25 +8,40 @@ const COMMON_API = '/api/chat/message'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
-  expect(target).to.be.a('object').and.that.include.all.keys('list', 'total')
-  commonValidate.number(target.total)
-  expect(target.list).to.be.a('array')
-  target.list.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('movie', 'description', 'valid', '_id', 'glance', 'createdAt', 'updatedAt', 'name')
-    commonValidate.string(item.description)
-    commonValidate.string(item.name)
-    commonValidate.number(item.glance)
+  expect(target).to.be.a('array')
+  target.forEach(item => {
+    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'create_user', 'info', 'message', 'createdAt', 'updatedAt')
     commonValidate.objectId(item._id)
+    expect(item.create_user).to.be.a('object').and.that.include.any.keys('username', '_id', 'avatar')
+    commonValidate.string(item.create_user.username)
+    commonValidate.objectId(item.create_user._id)
+    if(item.create_user.avatar) {
+      commonValidate.poster(item.create_user.avatar)
+    }
+    expect(item.info).to.be.a('object').and.that.include.any.keys('name', 'avatar', 'description')
+    commonValidate.string(item.info.username)
+    commonValidate.string(item.info.description)
+    if(item.info.avatar) {
+      commonValidate.poster(item.info.avatar)
+    }
+    expect(item.message).to.be.a('object').and.that.includes.any.keys('text', 'image', 'video', 'audio', 'poster')
+    if(item.message.text) {
+      commonValidate.string(item.message.text)
+    }
+    if(item.message.video) {
+      commonValidate.string(item.message.video)
+    }
+    if(item.message.audio) {
+      commonValidate.string(item.message.audio)
+    }
+    if(item.message.image) {
+      commonValidate.string(item.message.image)
+    }
+    if(item.message.poster) {
+      commonValidate.string(item.message.poster)
+    }
     commonValidate.time(item.createdAt)
     commonValidate.time(item.updatedAt)
-    expect(item.valid).to.be.a('boolean')
-    expect(item.movie).to.be.a('array').and.that.not.length(0)
-    item.movie.forEach(item => {
-      expect(item).to.be.a('object').and.that.include.all.keys('name', '_id', 'poster')
-      commonValidate.string(item.name)
-      commonValidate.objectId(item._id)
-      commonValidate.poster(item.poster)
-    })
   })
 
   if(Array.isArray(validate)) {
@@ -67,11 +82,11 @@ describe(`${COMMON_API} test`, function() {
       userInfo = user._id 
       selfToken = signToken(userInfo)
       imageId = image._id
-      const { model: memeberModel } = mockCreateMember({
+      const { model: memberModel } = mockCreateMember({
         sid: COMMON_API,
         user: userInfo._id 
       })
-      return memeberModel.save()
+      return memberModel.save()
     })
     .then(member => {
       memberId = member._id 
@@ -227,7 +242,7 @@ describe(`${COMMON_API} test`, function() {
             return done(err)
           }
           responseExpect(obj, target => {
-            expect(target.list.length).to.not.be.equals(0)
+            expect(target.length).to.not.be.equals(0)
           })
           done()
         })
@@ -236,44 +251,19 @@ describe(`${COMMON_API} test`, function() {
 
       it(`get message list success with type`, function(done) {
 
-        let specialIdA
-        const { model } = mockCreateSpecial({
-          name: COMMON_API,
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId
-          ],
-          poster: imageId,
-          glance: [
-            {
-              _id: ObjectId('571094e2976aeb1df982ad4e'),
-              timestamps: Date.now()
-            },
-            {
-              _id: ObjectId('571094e2976aeb1df982ad4e'),
-              timestamps: Date.now()
-            }
-          ]
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
         })
-
-        model.save()
-        .then(data => {
-          specialIdA = data._id 
-          return Request
-          .get(COMMON_API)
-          .set({
-            Accept: 'Application/json',
-            Authorization: `Basic ${selfToken}`
-          })
-          .query({
-            sort: 'hot_1'
-          })
-          .expect(200)
-          .expect('Content-Type', /json/)
+        .query({
+          type: ROOM_TYPE.SYSTEM
         })
-        .then(res => {
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end((err, res) => {
+          if(err) return done(err)
           const { res: { text } } = res
           let obj
           try{
@@ -283,60 +273,29 @@ describe(`${COMMON_API} test`, function() {
             done(err)
           }
           responseExpect(obj, target => {
-            expect(target.list.length).to.not.be.equals(0)
-            const indexThan = target.list.findIndex(item => specialIdA.equals(item._id))
-            const indexLess = target.list.findIndex(item => specialId.equals(item._id))
-            expect(indexThan > indexLess).to.be.true
+            expect(target.length).to.not.be.equals(0)
+            expect(target.some(item => item._id == systemRoomId)).to.be.true 
+            expect(target.some(item => item._id == roomId)).to.be.false
           })
           done()
-        })
-        .catch(err => {
-          console.log('oops: ', err)
-          done(err)
         })
 
       })  
 
       it(`get message list success and not login`, function(done) {
 
-        let specialIdA
-        const { model } = mockCreateSpecial({
-          name: COMMON_API,
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId
-          ],
-          poster: imageId,
-          glance: [
-            {
-              _id: ObjectId('571094e2976aeb1df982ad4e'),
-              timestamps: Date.now()
-            },
-            {
-              _id: ObjectId('571094e2976aeb1df982ad4e'),
-              timestamps: Date.now()
-            }
-          ]
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'Application/json',
         })
-
-        model.save()
-        .then(data => {
-          specialIdA = data._id 
-          return Request
-          .get(COMMON_API)
-          .set({
-            Accept: 'Application/json',
-            Authorization: `Basic ${selfToken}`
-          })
-          .query({
-            sort: 'hot_1'
-          })
-          .expect(200)
-          .expect('Content-Type', /json/)
+        .query({
+          type: ROOM_TYPE.USER
         })
-        .then(res => {
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end((err, res) => {
+          if(err) return done(err)
           const { res: { text } } = res
           let obj
           try{
@@ -346,16 +305,11 @@ describe(`${COMMON_API} test`, function() {
             done(err)
           }
           responseExpect(obj, target => {
-            expect(target.list.length).to.not.be.equals(0)
-            const indexThan = target.list.findIndex(item => specialIdA.equals(item._id))
-            const indexLess = target.list.findIndex(item => specialId.equals(item._id))
-            expect(indexThan > indexLess).to.be.true
+            expect(target.length).to.not.be.equals(0)
+            expect(target.some(item => item._id == systemRoomId)).to.be.true 
+            expect(target.some(item => item._id == roomId)).to.be.false
           })
           done()
-        })
-        .catch(err => {
-          console.log('oops: ', err)
-          done(err)
         })
 
       })  
@@ -367,72 +321,14 @@ describe(`${COMMON_API} test`, function() {
   describe(`${COMMON_API} post message test`, function() {
       
     describe(`${COMMON_API} post message success test`, function() {
-
-      const nameNoValid = COMMON_API + 'no-valid'
-      const nameHaveValid = COMMON_API + 'have-valid'
-
-      after(function(done) {
-        SpecialModel.find({
-          name: { $in: [ nameNoValid, nameHaveValid ] }
-        })
-        .select({
-          _id: 1,
-          valid: 1,
-          name: 1
-        })
-        .exec()
-        .then(data => {
-          expect(data).to.be.a('array')
-          expect(data.length >= 2).to.be.true
-          const target = data.find(item => item.name == nameHaveValid)
-          expect(!!target).to.be.true
-          expect(target.valid).to.be.true
-          done()
-        })
-        .catch(err => {
-          console.log('oops', err)
-          done(err)
-        })
-      })
       
       it(`post message success`, function(done) {
         Request
         .post(COMMON_API)
         .send({
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId
-          ],
-          poster: imageId.toString(),
-          name: nameNoValid,
-          description: COMMON_API
-        })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(200)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
-
-      it(`post message success and post text`, function(done) {
-        Request
-        .post(COMMON_API)
-        .send({
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId
-          ],
-          poster: imageId.toString(),
-          name: nameHaveValid,
-          description: COMMON_API,
-          valid: true
+          content: COMMON_API,
+          type: MESSAGE_MEDIA_TYPE.TEXT,
+          _id: roomId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -450,15 +346,9 @@ describe(`${COMMON_API} test`, function() {
         Request
         .post(COMMON_API)
         .send({
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId
-          ],
-          poster: imageId.toString(),
-          name: nameHaveValid,
-          description: COMMON_API,
-          valid: true
+          content: imageId,
+          type: MESSAGE_MEDIA_TYPE.IMAGE,
+          _id: roomId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -476,14 +366,10 @@ describe(`${COMMON_API} test`, function() {
         Request
         .post(COMMON_API)
         .send({
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId
-          ],
-          poster: imageId.toString(),
-          name: nameNoValid,
-          description: COMMON_API
+          content: COMMON_API,
+          type: MESSAGE_MEDIA_TYPE.TEXT,
+          _id: roomId.toString(),
+          point_to: '5edb3c7b4f88da14ca419e61'
         })
         .set({
           Accept: 'Application/json',
@@ -501,18 +387,31 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`${COMMON_API} post message fail test`, function() {
 
-      it(`post the message fail becuase lack of the params _id`, function(done) {
+      it(`post the message fail because not login`, function(done) {
         Request
         .post(COMMON_API)
         .send({
-          name: COMMON_API + 'post-1',
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId,
-            null
-          ],
-          poster: imageId.toString()
+          content: COMMON_API,
+          type: MESSAGE_MEDIA_TYPE.TEXT,
+          _id: roomId.toString()
+        })
+        .set({
+          Accept: 'Application/json',
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+      })
+
+      it(`post the message fail because lack of the params _id`, function(done) {
+        Request
+        .post(COMMON_API)
+        .send({
+          content: COMMON_API,
+          type: MESSAGE_MEDIA_TYPE.TEXT,
         })
         .set({
           Accept: 'Application/json',
@@ -526,18 +425,13 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase the params of _id is not valid`, function(done) {
+      it(`post the message fail because the params of _id is not valid`, function(done) {
         Request
         .post(COMMON_API)
         .send({
-          name: COMMON_API + 'post-1',
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId,
-            null
-          ],
-          poster: imageId.toString()
+          content: COMMON_API,
+          type: MESSAGE_MEDIA_TYPE.TEXT,
+          _id: roomId.toString().slice(1)
         })
         .set({
           Accept: 'Application/json',
@@ -551,17 +445,33 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase the params of media conent is not valid`, function(done) {
+      it(`post the message fail because the params of media content is not valid`, function(done) {
+        const id = roomId.toString()
         Request
         .post(COMMON_API)
         .send({
-          name: COMMON_API + 'post-2',
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId
-          ],
-          poster: imageId.toString()
+          content: COMMON_API,
+          type: MESSAGE_MEDIA_TYPE.TEXT,
+          _id: `${(+id.slice(0, 1) + 1) % 10}${id.slice(1)}`
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(403)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+      })
+
+      it(`post the message fail because lack of the params of content`, function(done) {
+        Request
+        .post(COMMON_API)
+        .send({
+          type: MESSAGE_MEDIA_TYPE.TEXT,
+          _id: roomId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -575,17 +485,13 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase lack of the params of content`, function(done) {
+      it(`post the message fail because the params of type is not valid`, function(done) {
         Request
         .post(COMMON_API)
         .send({
-          name: COMMON_API + 'post-2',
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId
-          ],
-          poster: imageId.toString()
+          content: COMMON_API,
+          type: '',
+          _id: roomId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -599,18 +505,12 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase the params of type is not valid`, function(done) {
+      it(`post the message fail because lack of the params of type`, function(done) {
         Request
         .post(COMMON_API)
         .send({
-          name: COMMON_API + 'post-3',
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId,
-          ],
-          poster: imageId.toString().slice(1)
+          content: COMMON_API,
+          _id: roomId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -624,18 +524,14 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase lack of the params of type`, function(done) {
+      it(`post the message fail because the member is not exists`, function(done) {
+
         Request
         .post(COMMON_API)
         .send({
-          name: COMMON_API + 'post-3',
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId,
-          ],
-          poster: imageId.toString().slice(1)
+          content: COMMON_API,
+          type: MESSAGE_MEDIA_TYPE.TEXT,
+          _id: roomId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -647,56 +543,67 @@ describe(`${COMMON_API} test`, function() {
           if(err) return done(err)
           done()
         })
+
       })
 
-      it(`post the message fail becuase the member is not exists`, function(done) {
-        Request
-        .post(COMMON_API)
-        .send({
-          name: COMMON_API + 'post-3',
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId,
-          ],
-          poster: imageId.toString().slice(1)
-        })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(400)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
+      it(`post the message fail because the member is not int the room`, function(done) {
 
-      it(`post the message fail becuase the member is not int the room`, function(done) {
-        Request
-        .post(COMMON_API)
-        .send({
-          name: COMMON_API + 'post-3',
-          description: COMMON_API,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId,
-          ],
-          poster: imageId.toString().slice(1)
+        Promise.all([
+          RoomModel.updateOne({
+            _id: roomId
+          }, {
+            $set: {
+              members: []
+            }
+          }),
+          MemberModel.updateOne({
+            _id: memberId
+          }, {
+            $pull: {
+              room: roomId
+            }
+          })
+        ])
+        .then(_ => {
+          return Request
+          .post(COMMON_API)
+          .send({
+            content: COMMON_API,
+            type: MESSAGE_MEDIA_TYPE.TEXT,
+            _id: roomId.toString()
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(400)
+          .expect('Content-Type', /json/)
         })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
+        .then(function() {
+          return Promise.all([
+            RoomModel.updateOne({
+              _id: roomId
+            }, {
+              $set: {
+                members: [memberId]
+              }
+            }),
+            MemberModel.updateOne({
+              _id: memberId
+            }, {
+              $push: {
+                room: roomId
+              }
+            })
+          ])
         })
-        .expect(400)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
+        .then(_ => {
           done()
         })
+        .catch(err => {
+          done(err)
+        })
+
       })
 
     })
@@ -707,86 +614,130 @@ describe(`${COMMON_API} test`, function() {
       
     describe(`${COMMON_API} put message success test`, function() {
 
-      let newSpecial = COMMON_API + 'new-special'
+      const _id_ = ObjectId('5edb3c7b4f88da14ca419e61')
+      let messageIdA 
+      let messageIdB
 
       after(function(done) {
-        SpecialModel.findOne({
-          name: newSpecial,
-          valid: true,
+        MessageModel.find({
+          _id: {
+            $in: [messageIdA, messageIdB]
+          },
+          readed: {
+            $in: [memberId]
+          }
         })
         .select({
           _id: 1,
-          movie: 1,
         })
         .exec()
         .then(data => {
-          expect(!!data && !!data._doc).to.be.true
-          expect(data._doc.movie.length).to.be.equal(4)
-          done()
+          expect(!!data && data.length >= 2).to.be.true
         })
         .catch(err => {
-          console.log('oops: ', err)
           done(err)
         })
       })
       
       it(`put the message success and dependence room id`, function(done) {
-        Request
-        .put(COMMON_API)
-        .send({
-          _id: specialId.toString(),
-          name: newSpecial,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId,
-            movieAId
-          ],
-          valid: true
+
+        const { model } = mockCreateMessage({
+          content: {
+            text: COMMON_API,
+            audio: _id_
+          },
+          readed: []
         })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
+        model.save()
+        .then(data => {
+          messageIdA = data._id 
+          return Promise.all([
+            MessageModel.updateOne({
+              _id: messageIdA
+            }, {
+              room: roomId
+            }),
+            RoomModel.updateOne({
+              _id: roomId
+            }, {
+              $push: {
+                message: messageIdA
+              }
+            })
+          ])
         })
-        .expect(200)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
+        .then(_ => {
+          return Request
+          .put(COMMON_API)
+          .send({
+            _id: roomId.toString(),
+            type: 1
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(function() {
           done()
+        })
+        .catch(err => {
+          done(err)
         })
       })
 
-      it(`put the message success and dependence meessage id`, function(done) {
-        Request
-        .put(COMMON_API)
-        .send({
-          _id: specialId.toString(),
-          name: newSpecial,
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId,
-            movieAId
-          ],
-          valid: true
+      it(`put the message success and dependence message id`, function(done) {
+        const { model } = mockCreateMessage({
+          content: {
+            text: COMMON_API,
+            audio: _id_
+          },
+          readed: []
         })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
+        model.save()
+        .then(data => {
+          messageIdB = data._id 
+          return Promise.all([
+            MessageModel.updateOne({
+              _id: messageIdB
+            }, {
+              room: roomId
+            }),
+            RoomModel.updateOne({
+              _id: roomId
+            }, {
+              $push: {
+                message: messageIdB
+              }
+            })
+          ])
         })
-        .expect(200)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
+        .then(_ => {
+          return Request
+          .put(COMMON_API)
+          .send({
+            _id: messageIdB.toString(),
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(function() {
           done()
+        })
+        .catch(err => {
+          done(err)
         })
       })
 
     })
 
     describe(`${COMMON_API} put message fail test`, function() {
-
-      let newName = COMMON_API + 'new-name'
 
       after(function(done) {
         SpecialModel.findOne({
@@ -830,8 +781,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .put(COMMON_API)
         .send({
-          _id: specialId.toString().slice(1),
-          name: newName
+          _id: messageId.toString().slice(1),
         })
         .set({
           Accept: 'Application/json',
@@ -848,10 +798,6 @@ describe(`${COMMON_API} test`, function() {
       it(`put the message fail because lack of the id`, function(done) {
         Request
         .put(COMMON_API)
-        .send({
-          _id: specialId.toString().slice(1),
-          name: newName
-        })
         .set({
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
@@ -872,36 +818,37 @@ describe(`${COMMON_API} test`, function() {
       
     describe(`${COMMON_API} delete message success test`, function() {
 
-      let specialId1
-      let specialId2 
-      before(function(done) {
-        const { model: model1 } = mockCreateSpecial({
-          name: COMMON_API + 'delete-1',
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId
-          ],
-          description: COMMON_API,
-          origin: userInfo,
+      let messageId1
+      let messageId2 
+      beforeEach(function(done) {
+        const { model: model1 } = mockCreateMessage({
+          content: {
+            text: COMMON_API
+          },
+          room: roomId
         })
         const { model: model2 } = mockCreateSpecial({
-          name: COMMON_API + 'delete-2',
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId
-          ],
-          description: COMMON_API,
-          origin: userInfo,
+          content: {
+            text: COMMON_API
+          },
+          room: roomId
         })
         Promise.all([
           model1.save(),
           model2.save()
         ])
-        .then(([special1, special2]) => {
-          specialId1 = special1._id 
-          specialId2 = special2._id
+        .then(([message1, message2]) => {
+          messageId1 = message1._id 
+          messageId2 = message2._id
+          return RoomModel.updateOne({
+            _id: roomId
+          }, {
+            $set: {
+              message: [messageId1, messageId2]
+            }
+          })
+        })
+        .then(_ => {
           done()
         })
         .catch(err => {
@@ -910,9 +857,9 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      after(function(done) {
-        SpecialModel.find({
-          _id: { $in: [ specialId1, specialId2 ] }
+      afterEach(function(done) {
+        MessageModel.find({
+          _id: { $in: [ messageId1, messageId2 ] }
         })
         .select({
           _id: 1
@@ -927,12 +874,22 @@ describe(`${COMMON_API} test`, function() {
           done(err)
         })
       })
+
+      after(function(done) {
+        RoomModel.updateOne({
+          _id: roomId
+        }, {
+          $set: {
+            message: [messageId]
+          }
+        })
+      })
       
       it(`delete the message success and dependence room id`, function(done) {
         Request
         .delete(COMMON_API)
         .query({
-          _id: `${specialId1.toString()}, ${specialId2.toString()}`
+          _id: roomId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -946,11 +903,11 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`delete the message success and dependence meessage id`, function(done) {
+      it(`delete the message success and dependence message id`, function(done) {
         Request
         .delete(COMMON_API)
         .query({
-          _id: `${specialId1.toString()}, ${specialId2.toString()}`
+          _id: `${messageId1.toString()}, ${messageId2.toString()}`
         })
         .set({
           Accept: 'Application/json',
@@ -968,21 +925,25 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`${COMMON_API} delete message fail test`, function() {
 
-      let specialId 
+      let messageId1
       before(function(done) {
-        const { model } = mockCreateSpecial({
-          name: COMMON_API + 'delete-3',
-          movie: [
-            movieAId,
-            movieBId,
-            movieCId
-          ],
-          description: COMMON_API,
-          origin: userInfo,
+        const { model } = mockCreateMessage({
+          content: {
+            text: COMMON_API
+          }
         })
         model.save()
         .then(data => {
-          specialId = data._id 
+          messageId1 = data._id 
+          return RoomModel.updateOne({
+            _id: roomId
+          }, {
+            $set: {
+              message: [messageId1]
+            }
+          })
+        })
+        .then(_ => {
           done()
         })
         .catch(err => {
@@ -991,8 +952,24 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
+      after(function(done) {
+        RoomModel.updateOne({
+          _id: roomId
+        }, {
+          $set: {
+            message: [messageId]
+          }
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+      })
+
       it(`delete the message fail because the id is not valid`, function(done) {
-        const id = specialId.toString()
+        const id = messageId1.toString()
         Request
         .delete(COMMON_API)
         .query({
@@ -1014,7 +991,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .delete(COMMON_API)
         .query({
-          _id: specialId.toString().slice(1)
+          _id: messageId1.toString().slice(1)
         })
         .set({
           Accept: 'Application/json',

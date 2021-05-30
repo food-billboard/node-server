@@ -749,6 +749,9 @@
                           }
                         }
                       },
+                      "_id": {
+                        "type": "string"
+                      },
                       "status": {
                         "type": "string",
                         "description": "状态",
@@ -795,6 +798,9 @@
                   "items": {
                     "type": "object",
                     "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
                       "create_user": {
                         "type": "object",
                         "description": "用户信息",
@@ -829,14 +835,211 @@
                           }
                         }
                       },
-                      "status": {
+                      "createdAt": {
                         "type": "string",
-                        "description": "状态",
-                        "enum": [ "ONLINE", "OFFLINE" ]
+                        "format": "date-time"
                       },
-                      "sid": {
+                      "updatedAt": {
                         "type": "string",
-                        "description": "用户id"
+                        "format": "date-time"
+                      },
+                      "message": {
+                        "type": "object",
+                        "description": "最新消息内容(只会包含下面属性的一项---视频会包含video和poster两项)",
+                        "properties": {
+                          "video": {
+                            "type": "string",
+                            "description": "视频"
+                          },
+                          "image": {
+                            "type": "string",
+                            "description": "图片"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "文本"
+                          },
+                          "audio": {
+                            "type": "string",
+                            "description": "音频"
+                          },
+                          "poster": {
+                            "type": "string",
+                            "description": "视频海报"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "chat_message_get"
+      }
+    },
+    "chat_message_detail_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "user_info": {
+                        "type": "object",
+                        "description": "用户信息",
+                        "properties": {
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          },
+                          "_id": {
+                            "type": "string"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
+                          }
+                        }
+                      },
+                      "media_type": {
+                        "type": "string",
+                        "description": "媒体类型"
+                      },
+                      "point_to": {
+                        "type": "string",
+                        "description": "@"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "content": {
+                        "type": "object",
+                        "description": "最新消息内容(只会包含下面属性的一项---视频会包含video和poster两项)",
+                        "properties": {
+                          "video": {
+                            "type": "object",
+                            "description": "视频",
+                            "properties": {
+                              "src": {
+                                "type": "string",
+                                "description": "视频地址"
+                              },
+                              "poster": {
+                                "type": "string",
+                                "description": "海报"
+                              }
+                            }
+                          },
+                          "image": {
+                            "type": "string",
+                            "description": "图片"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "文本"
+                          },
+                          "audio": {
+                            "type": "string",
+                            "description": "音频"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "chat_message_detail_get"
+      }
+    },
+    "chat_room_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "create_user": {
+                        "type": "object",
+                        "description": "用户信息",
+                        "properties": {
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          },
+                          "_id": {
+                            "type": "string"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
+                          }
+                        }
+                      },
+                      "info": {
+                        "type": "object",
+                        "description": "房间信息",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "房间名称"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "房间描述"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "房间海报"
+                          }
+                        }
+                      },
+                      "members": {
+                        "type": "integer",
+                        "description": "成员数量"
+                      },
+                      "is_delete": {
+                        "type": "boolean",
+                        "description": "是否删除"
                       },
                       "createdAt": {
                         "type": "string",
@@ -855,14 +1058,8 @@
         }
       },
       "xml": {
-        "name": "chat_message_get"
+        "name": "chat_room_get"
       }
-    },
-    "chat_message_detail_get": {
-
-    },
-    "chat_room_get": {
-
     }
   },
   "externalDocs": {

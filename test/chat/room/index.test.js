@@ -8,25 +8,26 @@ const COMMON_API = '/api/chat/room'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
-  expect(target).to.be.a('object').and.that.include.all.keys('list', 'total')
-  commonValidate.number(target.total)
-  expect(target.list).to.be.a('array')
-  target.list.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('movie', 'description', 'valid', '_id', 'glance', 'createdAt', 'updatedAt', 'name')
-    commonValidate.string(item.description)
-    commonValidate.string(item.name)
-    commonValidate.number(item.glance)
+  expect(target).to.be.a('array')
+  target.forEach(item => {
+    expect(item).to.be.a('object').and.that.include.all.keys('create_user', 'info', 'members', '_id', 'is_delete', 'createdAt', 'updatedAt')
+    expect(item.is_delete).to.be.a('boolean')
+    commonValidate.number(item.members)
     commonValidate.objectId(item._id)
-    commonValidate.time(item.createdAt)
-    commonValidate.time(item.updatedAt)
-    expect(item.valid).to.be.a('boolean')
-    expect(item.movie).to.be.a('array').and.that.not.length(0)
-    item.movie.forEach(item => {
-      expect(item).to.be.a('object').and.that.include.all.keys('name', '_id', 'poster')
-      commonValidate.string(item.name)
-      commonValidate.objectId(item._id)
-      commonValidate.poster(item.poster)
-    })
+    commonValidate.date(item.createdAt)
+    commonValidate.date(item.updatedAt)
+    expect(item.info).to.be.a('object').and.that.includes.any.keys('name', 'avatar', 'description')
+    commonValidate.string(item.info.username)
+    if(item.info.avatar) {
+      commonValidate.string(item.info.avatar)
+    }
+    commonValidate.string(item.info.description)
+    expect(item.create_user).to.be.a('object').and.that.includes.any.keys('username', 'avatar', '_id')
+    commonValidate.string(item.create_user.username)
+    if(item.create_user.avatar) {
+      commonValidate.string(item.create_user.avatar)
+    }
+    commonValidate.objectId(item.create_user._id)
   })
 
   if(Array.isArray(validate)) {
