@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, FriendsModel, dealErr, FRIEND_STATUS, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
+const { verifyTokenToData, FriendsModel, dealErr, FRIEND_STATUS, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -49,7 +49,8 @@ router
     "friends.status": FRIEND_STATUS.BLACK
   })
   .select({
-    friends: 1
+    friends: 1,
+    member: 1
   })
   .populate({
     path: 'friends._id',

@@ -50,6 +50,11 @@
     }
   }
 ```
+  - 注意:
+  - `pipeline` 中使用 `$match` 匹配 `let`中定义的字段时，需要在外面包一个 `$expr`, 否则无法匹配  
+  `$match: { $expr: { _id: "$$customFields" } }`  
+  - 如果要在`$match`中匹配`ObjectId`, 需要使用`$eq`, 直接比较似乎无效,原因有待查证. `$expr: { $eq: [ "$_id", "$$customFields" ] }`    
+
 4. $unwind  
  - 避免`null`情况出现导致字段丢失  
 ```javascript
@@ -73,4 +78,14 @@
   }
 }
 
+```
+
+6. $addFields  
+- 向输出结果中新增字段  
+```javascript 
+  {
+    $addFields: {
+      new_fields: "$old_fields"
+    }
+  }
 ```

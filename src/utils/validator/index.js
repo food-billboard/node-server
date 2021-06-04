@@ -173,7 +173,7 @@ const Params = {
   validate(origin, ...validators) {
     let errs = []
     let response = validators.every(validate => {
-      const { name, validator=[], type=[] } = validate
+      const { name, validator=[], type=[], multipart=false } = validate
       let data
       //多层次验证
       if(name.includes('.')) {
@@ -191,7 +191,7 @@ const Params = {
         }
       }else {
         data = origin[name]
-        if(data === undefined) {
+        if(data === undefined && !multipart) {
           errs.push(name)
           return false
         }

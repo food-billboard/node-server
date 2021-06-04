@@ -309,6 +309,12 @@
             "in": "query",
             "type": "integer",
             "description":"每页数量"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "type": "string",
+            "description":"起始时间"
           }
         ],
         "responses": {
@@ -357,8 +363,8 @@
           {
             "name": "origin",
             "in": "query",
-            "type": "boolean",
-            "description":"是否为系统聊天室"
+            "type": "integer",
+            "description":"是否为系统聊天室(0否1是)"
           },
           {
             "name": "create_user",
@@ -458,8 +464,13 @@
             "name": "_id",
             "in": "body",
             "type": "string",
-            "required": true,
-            "description":"房间id"
+            "description":"房间id(参数all不为1是必填)"
+          },
+          {
+            "name": "all",
+            "in": "body",
+            "type": "string",
+            "description":"是否全部退出(0否, 1是)"
           }
         ],
         "responses": {
@@ -491,6 +502,42 @@
           {
             "name": "_id",
             "in": "query",
+            "type": "string",
+            "required": true,
+            "description":"房间id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/chat/room/join": {
+      "post": {
+        "tags": [
+          "room"
+        ],
+        "summary": "进入聊天室",
+        "description": "",
+        "operationId": "chat_room_join_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
             "type": "string",
             "required": true,
             "description":"房间id"
@@ -793,7 +840,27 @@
             "data": {
               "type":"object",
               "properties": {
-                "data": {
+                "room": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "描述"
+                    },
+                    "avatar": {
+                      "type": "string",
+                      "description": "头像"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "房间名称"
+                    }
+                  }
+                },
+                "message": {
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -832,6 +899,10 @@
                           "avatar": {
                             "type": "string",
                             "description": "头像"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "描述"
                           }
                         }
                       },
@@ -1006,6 +1077,14 @@
                             "type": "string",
                             "description": "用户名"
                           },
+                          "description": {
+                            "type": "string",
+                            "description": "描述"
+                          },
+                          "member": {
+                            "type": "string",
+                            "description": "成员id"
+                          },
                           "_id": {
                             "type": "string"
                           },
@@ -1048,6 +1127,10 @@
                       "updatedAt": {
                         "type": "string",
                         "format": "date-time"
+                      },
+                      "online_members": {
+                        "type": "integer",
+                        "format": "在线成员数量"
                       }
                     }
                   }

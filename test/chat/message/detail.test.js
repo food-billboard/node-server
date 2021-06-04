@@ -1,19 +1,28 @@
 require('module-alias/register')
-const { SpecialModel, UserModel, RoomModel, MessageModel, MemberModel, ImageModel, ROOM_TYPE, MESSAGE_MEDIA_TYPE } = require('@src/utils')
+const { UserModel, RoomModel, MessageModel, MemberModel, VideoModel, ImageModel, ROOM_TYPE, MESSAGE_MEDIA_TYPE } = require('@src/utils')
 const { expect } = require('chai')
-const { Types: { ObjectId } } = require('mongoose')
-const { Request, commonValidate, mockCreateUser, mockCreateMember, mockCreateMessage, mockCreateImage, mockCreateRoom } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateMember, mockCreateMessage, mockCreateImage, mockCreateRoom, mockCreateVideo } = require('@test/utils')
 
-const COMMON_API = '/api/chat/message'
+const COMMON_API = '/api/chat/message/detail'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
-  expect(target).to.be.a('array')
-  target.forEach(item => {
+  expect(target).to.be.a('object').and.that.includes.all.keys('room', "message")
+  expect(target.room).to.be.a('object').and.that.includes.all.keys('_id', 'info')
+  commonValidate.objectId(target.room._id)
+  expect(target.room.info).to.be.a('object').and.that.includes.any.keys('name', 'description', 'avatar')
+  commonValidate.string(target.room.info.name)
+  commonValidate.string(target.room.info.description)
+  if(target.room.info.avatar) {
+    commonValidate.poster(target.room.info.avatar)
+  }
+  expect(target.message.length > 0).to.be.true 
+  target.message.forEach(item => {
     expect(item).to.be.a('object').and.that.include.all.keys('_id', 'user_info', 'point_to', 'content', 'createdAt', 'updatedAt', 'media_type')
     commonValidate.objectId(item._id)
-    expect(item.user_info).to.be.a('object').and.that.include.any.keys('username', '_id', 'avatar')
+    expect(item.user_info).to.be.a('object').and.that.include.any.keys('username', '_id', 'avatar', 'description')
     commonValidate.string(item.user_info.username)
+    commonValidate.string(item.user_info.description)
     commonValidate.objectId(item.user_info._id)
     if(item.user_info.avatar) {
       commonValidate.poster(item.user_info.avatar)
@@ -25,9 +34,10 @@ function responseExpect(res, validate=[]) {
       commonValidate.string(item.content.text)
     }
     if(item.content.video) {
-      expect(item.content.video).to.be.a('object').and.that.include.any.keys('src', 'poster')
-      commonValidate.string(item.content.video.src)
-      commonValidate.string(item.content.video.poster)
+      commonValidate.string(item.content.video)
+    }
+    if(item.content.poster) {
+      commonValidate.string(item.content.poster)
     }
     if(item.content.audio) {
       commonValidate.string(item.content.audio)
@@ -55,10 +65,12 @@ describe(`${COMMON_API} test`, function() {
   let messageId 
   let systemMessageId 
   let imageMessageId 
+  let videoMessageId 
   let roomId 
   let systemRoomId 
   let memberId 
   let imageId 
+  let videoId 
 
   before(function(done) {
 
@@ -74,17 +86,25 @@ describe(`${COMMON_API} test`, function() {
       image.save(),
     ])
     .then(([user, image]) => {
-      userInfo = user._id 
-      selfToken = signToken(userInfo)
+      userInfo = user 
+      selfToken = signToken(userInfo._id)
       imageId = image._id
       const { model: memberModel } = mockCreateMember({
         sid: COMMON_API,
         user: userInfo._id 
       })
-      return memberModel.save()
+      const { model: videoModel } = mockCreateVideo({
+        src: COMMON_API,
+        poster: imageId
+      })
+      return Promise.all([
+        memberModel.save(),
+        videoModel.save()
+      ])
     })
-    .then(member => {
-      memberId = member._id 
+    .then(([member, video]) => {
+      memberId = member._id
+      videoId = video._id  
       const { model: systemMessage } = mockCreateMessage({
         content: {
           text: COMMON_API,
@@ -95,12 +115,19 @@ describe(`${COMMON_API} test`, function() {
           text: COMMON_API,
         }
       })
-      const { model: mediaMessage } = mockCreateMessage({
+      const { model: imageMessage } = mockCreateMessage({
         content: {
           text: COMMON_API,
           image: imageId
         },
         media_type: MESSAGE_MEDIA_TYPE.IMAGE 
+      })
+      const { model: videoMessage } = mockCreateMessage({
+        content: {
+          text: COMMON_API,
+          video: videoId
+        },
+        media_type: MESSAGE_MEDIA_TYPE.VIDEO 
       })
       const { model: systemRoom } = mockCreateRoom({
         info: {
@@ -108,29 +135,45 @@ describe(`${COMMON_API} test`, function() {
         },
         origin: true,
         type: ROOM_TYPE.SYSTEM,
+        members: [
+          memberId
+        ]
       })
       const { model: userRoom } = mockCreateRoom({
         info: {
           name: COMMON_API,
+          description: '测试用户房间'
         },
         origin: false,
-        type: ROOM_TYPE.USER
+        type: ROOM_TYPE.CHAT,
+        members: [
+          memberId
+        ]
       })
       return Promise.all([
         message.save(),
         systemMessage.save(),
-        mediaMessage.save(),
+        imageMessage.save(),
+        videoMessage.save(),
         systemRoom.save(),
         userRoom.save()
       ])
     })
-    .then(([message, systemMessage, mediaMessage, system, user]) => {
+    .then(([message, systemMessage, imageMessage, videoMessage, system, user]) => {
       messageId = message._id 
       systemMessageId = systemMessage._id
-      imageMessageId = mediaMessage._id 
+      imageMessageId = imageMessage._id 
+      videoMessageId = videoMessage._id 
       systemRoomId = system._id 
       roomId = user._id 
       return Promise.all([
+        MemberModel.updateOne({
+          _id: memberId
+        }, {
+          $set: {
+            room: [systemRoomId, roomId]
+          }
+        }),
         RoomModel.updateOne({
           _id: systemRoomId
         }, {
@@ -146,7 +189,7 @@ describe(`${COMMON_API} test`, function() {
           $set: {
             members: [memberId],
             create_user: memberId,
-            message: [messageId, imageMessageId]
+            message: [messageId, imageMessageId, videoMessageId]
           }
         }),
         MessageModel.updateOne({
@@ -173,13 +216,22 @@ describe(`${COMMON_API} test`, function() {
             user_info: memberId,
           }
         }),
+        MessageModel.updateOne({
+          _id: videoMessageId,
+        }, {
+          $set: {
+            room: roomId,
+            user_info: memberId,
+          }
+        }),
       ])
     })
-    .then(special => {
+    .then(() => {
       done()
     })
     .catch(err => {
       console.log('oops: ', err)
+      done(err)
     })
 
   })
@@ -201,6 +253,9 @@ describe(`${COMMON_API} test`, function() {
       }),
       ImageModel.deleteMany({
         src: COMMON_API
+      }),
+      VideoModel.deleteMany({
+        src: COMMON_API
       })
     ])
     .then(_ => {
@@ -208,6 +263,7 @@ describe(`${COMMON_API} test`, function() {
     })
     .catch(err => {
       console.log('oops: ', err)
+      done(err)
     })
 
   })
@@ -223,6 +279,9 @@ describe(`${COMMON_API} test`, function() {
         .set({
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: roomId.toString()
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -244,40 +303,102 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get message list success with type`, function(done) {
+    })
 
+    describe(`${COMMON_API} get message list fail test`, function() {
+
+      it(`get the message list fail because lack of the params _id`, function(done) {
         Request
         .get(COMMON_API)
         .set({
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
         })
-        .query({
-          type: ROOM_TYPE.SYSTEM
-        })
-        .expect(200)
+        .expect(400)
         .expect('Content-Type', /json/)
-        .end((err, res) => {
+        .end(function(err) {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-            done(err)
-          }
-          responseExpect(obj, target => {
-            expect(target.length).to.not.be.equals(0)
-            expect(target.some(item => item._id == systemRoomId)).to.be.true 
-            expect(target.some(item => item._id == roomId)).to.be.false
-          })
           done()
         })
+      })
 
-      })  
+      it(`get the message list fail because the params of _id is not valid`, function(done) {
+        Request
+        .get(COMMON_API)
+        .query({
+          _id: roomId.toString().slice(1)
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+      })
 
-      it(`get message list success and not login`, function(done) {
+      it(`get the message list fail because the member not in the room`, function(done) {
+
+        Promise.all([
+          MemberModel.updateOne({
+            _id: memberId
+          }, {
+            $pull: {
+              room: roomId
+            }
+          }),
+          RoomModel.updateOne({
+            _id: roomId
+          }, {
+            $pull: {
+              members: memberId
+            }
+          })
+        ])
+        .then(_ => {
+          return Request
+          .get(COMMON_API)
+          .query({
+            content: COMMON_API,
+            type: MESSAGE_MEDIA_TYPE.TEXT,
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(400)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return Promise.all([
+            MemberModel.updateOne({
+              _id: memberId
+            }, {
+              $push: {
+                room: roomId
+              }
+            }),
+            RoomModel.updateOne({
+              _id: roomId
+            }, {
+              $push: {
+                members: memberId
+              }
+            })
+          ])
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+      })
+
+      it(`get message list fail because not login`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -285,25 +406,12 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json',
         })
         .query({
-          type: ROOM_TYPE.USER
+          _id: roomId.toString()
         })
-        .expect(200)
+        .expect(404)
         .expect('Content-Type', /json/)
-        .end((err, res) => {
+        .end((err) => {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-            done(err)
-          }
-          responseExpect(obj, target => {
-            expect(target.length).to.not.be.equals(0)
-            expect(target.some(item => item._id == systemRoomId)).to.be.true 
-            expect(target.some(item => item._id == roomId)).to.be.false
-          })
           done()
         })
 

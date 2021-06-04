@@ -1,4 +1,6 @@
 const Router = require('@koa/router')
+const { Types: { ObjectId } } = require('mongoose')
+const Day = require('dayjs')
 const { 
   verifyTokenToData, 
   MemberModel, 
@@ -19,7 +21,7 @@ router
 .get('/', async(ctx) => {
 
   const [, token] = verifyTokenToData(ctx)
-  const [ currPage, pageSize ] = Param.sanitizers(ctx.request.body, {
+  const [ _id, currPage, pageSize ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => data.split(',').every(item => ObjectId(item))
@@ -50,7 +52,7 @@ router
   const data = await (
     token ? 
       MemberModel.findOne({
-      user: ObjectId(token.id)
+        user: ObjectId(token.id)
       })
       .select({ _id: 1 })
       .exec()
@@ -58,7 +60,7 @@ router
     : 
       Promise.resolve())
   .then(data => {
-    return   RoomModel.aggregate([
+    return RoomModel.aggregate([
       {
         $match: match
       },
@@ -75,12 +77,35 @@ router
       },
       {
         $lookup: {
-          from: 'user',
-          let: { customFields: "$create_user" },
+          from: 'members',
+          as: 'create_user',
+          foreignField: "_id",
+          localField: "create_user"
+        }
+      },
+      {
+        $unwind: {
+          path: "$create_user",
+          preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          let: { 
+            create_user_id: "$create_user.user"
+          },
           pipeline: [
             {
+              $match: {
+                $expr: {
+                  "$eq": [ "$_id", "$$create_user_id" ]
+                },
+              }
+            },
+            {
               $lookup: {
-                from: 'image',
+                from: 'images',
                 as: 'avatar',
                 foreignField: "_id",
                 localField: "avatar"
@@ -91,20 +116,20 @@ router
                 path: "$avatar",
                 preserveNullAndEmptyArrays: true 
               }
-            }
+            },
           ],
-          as: 'create_user',
-        },
+          as: 'create_user_info'
+        }
       },
       {
         $unwind: {
-          path: "$create_user",
+          path: "$create_user_info",
           preserveNullAndEmptyArrays: true 
         }
       },
       {
         $lookup: {
-          from: 'image',
+          from: 'images',
           as: 'info.avatar',
           foreignField: "_id",
           localField: "info.avatar"
@@ -118,66 +143,160 @@ router
       },
       {
         $lookup: {
-          from: 'message',
-          let: { customFields: "$message" },
+          from: 'messages',
+          let: { 
+            room_id: "$_id",
+          },
           pipeline: [
             ...(data ? [{
               $match: {
                 deleted: {
-                  $nin: [ObjectId(data.id)]
+                  $nin: [ObjectId(data._id)]
+                },
+                $expr: {
+                  "$eq": [ "$room", "$$room_id" ]
                 }
               }
-            }] : [{}]),
+            }] : []),
             {
               $sort: {
                 createdAt: -1
               }
             },
             {
-              $limit: 99
+              $limit: 1
+            },
+            {
+              $lookup: {
+                from: 'images',
+                as: 'content.image',
+                foreignField: "_id",
+                localField: "content.image" 
+              }
+            },
+            {
+              $lookup: {
+                from: 'videos',
+                as: 'content.video',
+                let: {
+                  content_video: "$content.video"
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: [
+                          "$_id", "$$content_video"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    $lookup: {
+                      from: 'images',
+                      as: 'poster',
+                      foreignField: "_id",
+                      localField: "poster" 
+                    }
+                  },
+                  {
+                    $unwind: {
+                      path: "$poster",
+                      preserveNullAndEmptyArrays: true 
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              $unwind: {
+                path: "$content.video",
+                preserveNullAndEmptyArrays: true 
+              }
+            },
+            {
+              $unwind: {
+                path: "$content.image",
+                preserveNullAndEmptyArrays: true 
+              }
             },
             {
               $project: {
                 _id: 1,
-                content: 1,
-                readed: 1
+                text: "$content.text",
+                image: "$content.image.src",
+                video: "$content.video.src",
+                poster: "$content.video.poster",
               }
             }
           ],
-          as: 'message',
+          as: 'message_info',
         }
+      },
+      {
+        $unwind: {
+          path: "$message_info",
+          preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
+        $lookup: {
+          from: 'messages',
+          let: { 
+            room_id: "$_id",
+          },
+          pipeline: [
+            ...(data ? [{
+              $match: {
+                deleted: {
+                  $nin: [ObjectId(data._id)]
+                },
+                readed: {
+                  $nin: [ObjectId(data._id)]
+                },
+                $expr: {
+                  "$eq": [ "$room", "$$room_id" ]
+                }
+              }
+            }] : []),
+            {
+              $project: {
+                _id: 1
+              }
+            }
+          ],
+          as: 'un_read_message',
+        }
+      },
+      {
+        $unwind: "$message_info"
       },
       {
         $project: {
           _id: 1,
           create_user: {
-            username: "$create_user.username",
-            avatar: "$create_user.avatar.src",
-            _id: "$create_user._id"
+            username: "$create_user_info.username",
+            avatar: "$create_user_info.avatar.src",
+            _id: "$create_user_info._id",
+            member: "$create_user._id",
           },
           info: {
             name: "$info.name",
             avatar: "$info.avatar.src",
             description: "$info.description"
           },
-          message: {
-            $map: {
-              input: "$message",
-              as: 'value',
-              in: {
-                media_type: "$$value.media_type",
-                content: {
-                  text: "$$value.content.text",
-                  image: "$$value.content.image",
-                  video: "$$value.content.video",
-                }
-              }
+          message_info: "$message_info",
+          un_read_message_count: {
+            $size: {
+              $ifNull: [
+                "$un_read_message", []
+              ]
             }
           },
           createdAt: 1,
           updatedAt: 1
-        }
-      }
+        },
+      },
     ])
   })
   .then(data => ({ data }))
@@ -201,10 +320,10 @@ router
   if(check) return 
 
   const [, token] = verifyTokenToData(ctx)
-  const [ _id, currPage, pageSize ] = Param.sanitizers(ctx.request.body, {
+  const [ _id, currPage, pageSize, start ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => data.split(',').every(item => ObjectId(item))
+      data => ObjectId(data)
     ]
   }, {
     name: 'currPage',
@@ -218,127 +337,259 @@ router
     sanitizers: [
       data => data >= 0 ? +data : 30
     ]
+  }, {
+    name: 'start',
+    sanitizers: [
+      data => Day(data).isValid() ? Day(data).toDate() : false
+    ]
   })
   let match = {
     _id
   }
-  if(!token) {
-    match.type = ROOM_TYPE.SYSTEM
-    match.origin = true 
+  let messageMatch = {
+    room: _id 
+  }
+  let skipLimitPipe = [
+    {
+      $limit: pageSize
+    }
+  ]
+  if(start) {
+    messageMatch.createdAt = {
+      $lte: start
+    }
+  }else {
+    skipLimitPipe.unshift({
+      $skip: currPage * pageSize
+    })
   }
 
-  const data = await RoomModel.aggregate([
-    {
-      $match: match
-    },
-    {
-      $lookup: {
-        from: 'message', 
-        let: { customFields: "$message" }, 
-        pipeline: [ 
-          {
-            $sort: {
-              createdAt: -1
-            }
-          },
-          {
-            $skip: currPage * pageSize
-          },
-          {
-            $limit: pageSize
-          },
-          {
-            $lookup: {
-              from: 'user',
-              let: { customFields: "$user_info" },
-              pipeline: [
-                {
-                  $lookup: {
-                    from: 'image',
-                    as: 'avatar',
-                    foreignField: "_id",
-                    localField: "avatar"
-                  }
-                },
-                {
-                  $unwind: {
-                    path: "$avatar",
-                    preserveNullAndEmptyArrays: true 
-                  }
-                }
-              ],
-              as: 'user_info',
+
+  const data = await new Promise((resolve) => {
+    if(token) {
+      const { id } = token
+      resolve(MemberModel.findOne({
+        user: ObjectId(id),
+        room: {
+          $in: [_id]
+        }
+      })
+      .select({
+        _id: 1
+      })
+      .exec()
+      .then(notFound))
+    }else {
+      match.type = ROOM_TYPE.SYSTEM
+      match.origin = true 
+      resolve()
+    }
+  })
+  .then(_ => {
+    return RoomModel.aggregate([
+      {
+        $match: match
+      },
+      {
+        $lookup: {
+          from: 'images',
+          as: 'info.avatar',
+          foreignField: "_id",
+          localField: "info.avatar" 
+        }
+      },
+      {
+        $unwind: {
+          path: "$info.avatar",
+          preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
+        $lookup: {
+          from: 'messages', 
+          as: 'message',
+          pipeline: [
+            {
+              $match: messageMatch
             },
-          },
-          {
-            $unwind: {
-              path: "$user_info",
-              preserveNullAndEmptyArrays: true 
-            }
-          },
-          {
-            $lookup: {
-              from: 'images',
-              as: 'content.image',
-              foreignField: "_id",
-              localField: "content.image"
-            }
-          },
-          {
-            $unwind: {
-              path: "$content.image",
-              preserveNullAndEmptyArrays: true 
-            }
-          },
-          {
-            $lookup: {
-              from: 'videos',
-              as: 'content.video',
-              foreignField: "_id",
-              localField: "content.video"
-            }
-          },
-          {
-            $unwind: {
-              path: "$content.video",
-              preserveNullAndEmptyArrays: true 
-            }
-          }
-        ],
-        as: 'message',
-      }
-    },
-    {
-      $project: {
-        message: {
-          $map: {
-            input: "$message",
-            as: 'value',
-            in: {
-              _id: "$$value._id",
-              media_type: "$$value.media_type",
-              user_info: {
-                username: "$$value.user_info.username",
-                avatar: "$$value.user_info.avatar.src",
-                _id: "$$value.user_info._id",
+            {
+              $sort: {
+                createdAt: -1
+              }
+            },
+            ...skipLimitPipe,
+            {
+              $lookup: {
+                from: 'members',
+                let: { member: "$user_info" }, 
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: [ "$_id", "$$member" ]
+                      }
+                    }
+                  },
+                  {
+                    $lookup: {
+                      from: 'users',
+                      let: { 
+                        member_user_id: "$user" 
+                      }, 
+                      pipeline: [
+                        {
+                          $match: {
+                            $expr: {
+                              $eq: [
+                                "$_id",
+                                "$$member_user_id"
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          $lookup: {
+                            from: 'image',
+                            as: 'avatar',
+                            foreignField: "_id",
+                            localField: "avatar"
+                          }
+                        },
+                        {
+                          $unwind: {
+                            path: "$avatar",
+                            preserveNullAndEmptyArrays: true 
+                          }
+                        },
+                        {
+                          $project: {
+                            _id: 1,
+                            avatar: "$avatar.src",
+                            username: 1,
+                            description: 1
+                          }
+                        }
+                      ],
+                      as: "user_info"
+                    }
+                  },
+                  {
+                    $unwind: {
+                      path: "$user_info",
+                      preserveNullAndEmptyArrays: true 
+                    }
+                  },
+                  {
+                    $project: {
+                      _id: "$user_info._id",
+                      avatar: "$user_info.avatar",
+                      username: "$user_info.username",
+                      description: "$user_info.description"
+                    }
+                  }
+                ],
+                as: 'user_info'
               },
-              createdAt: "$$value.createdAt",
-              updatedAt: "$$value.updatedAt",
-              point_to: "$$value.point_to",
-              content: {
-                text: "$$value.content.text",
-                image: "$$value.content.image.src",
-                video: {
-                  src: "$$value.content.video.src",
-                  poster: "$$value.content.video.poster",
-                }
+            },
+            {
+              $unwind: {
+                path: "$user_info",
+                preserveNullAndEmptyArrays: true 
+              }
+            },
+            {
+              $lookup: {
+                from: 'images',
+                as: 'content.image',
+                foreignField: "_id",
+                localField: "content.image" 
+              }
+            },
+            {
+              $lookup: {
+                from: 'videos',
+                as: 'content.video',
+                let: {
+                  content_video: "$content.video"
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: [
+                          "$_id", "$$content_video"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    $lookup: {
+                      from: 'images',
+                      as: 'poster',
+                      foreignField: "_id",
+                      localField: "poster" 
+                    }
+                  },
+                  {
+                    $unwind: {
+                      path: "$poster",
+                      preserveNullAndEmptyArrays: true 
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              $unwind: {
+                path: "$content.video",
+                preserveNullAndEmptyArrays: true 
+              }
+            },
+            {
+              $unwind: {
+                path: "$content.image",
+                preserveNullAndEmptyArrays: true 
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                user_info: "$user_info",
+                point_to: 1,
+                content: {
+                  text: "$content.text",
+                  image: "$content.image.src",
+                  video: "$content.video.src",
+                  poster: "$content.video.poster.src",
+                },
+                createdAt: 1,
+                updatedAt: 1,
+                media_type: 1
               }
             }
-          }
+          ],
+        }
+      },
+      {
+        $project: {
+          message: "$message",
+          room: {
+            _id: "$_id",
+            info: {
+              name: "$info.name",
+              description: "$info.description",
+              avatar: "$info.avatar.src"
+            }
+          },
+          _id: 0
         }
       }
-    }
-  ])
+    ])
+  })
+  .then(data => {
+    if(!data.length) return Promise.reject({ status: 404, errMsg: 'not found' })
+    return data[0]
+  })
   .then(data => ({ data }))
   .catch(dealErr(ctx))
 
@@ -352,10 +603,10 @@ router
 .use(Authorization())
 .delete('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  const check = Params.body(ctx, {
+  const check = Params.query(ctx, {
     name: '_id',
     validator: [
-			data => data.split(',').every(item => ObjectId.isValid(item))
+			data => data.split(',').every(item => ObjectId.isValid(item.trim()))
 		]
   })
   if(check) return 
@@ -364,7 +615,7 @@ router
   const [ _id ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => data.split(',').every(item => ObjectId(item))
+      data => data.split(',').map(item => ObjectId(item.trim()))
     ]
   })
   let match = {}
@@ -387,7 +638,7 @@ router
   .then(notFound)
   .then(data => {
     return MessageModel.updateMany(match, {
-      $addToSet: { deleted: ObjectId(data._id) }
+      $addToSet: { deleted: data._id }
     })
   })
   .then(_ => ({ data: _id }))
@@ -404,16 +655,16 @@ router
   const check = Params.body(ctx, {
     name: '_id',
     validator: [
-			data => data.split(',').every(item => ObjectId.isValid(item))
+			data => data.split(',').every(item => ObjectId.isValid(item.trim()))
 		]
   })
   if(check) return 
 
   const [, token] = verifyTokenToData(ctx)
-  const [ _id ] = Param.sanitizers(ctx.request.body, {
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
-      data => data.split(',').every(item => ObjectId(item))
+      data => data.split(',').map(item => ObjectId(item.trim()))
     ]
   })
   const { request: { body: { type } } } = ctx 
@@ -427,10 +678,20 @@ router
   }
   const { id } = token
 
-  const data = await MessageModel.updateMany(match, {
-    $addToSet: {
-      readed: ObjectId(id)
-    }
+  const data = await MemberModel.findOne({
+    user: ObjectId(id)
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(notFound)
+  .then(data => {
+    return MessageModel.updateMany(match, {
+      $addToSet: {
+        readed: ObjectId(data._id)
+      }
+    })
   })
   .then(_ => ({ data: _id }))
   // await RoomModel.updateOne({
@@ -467,7 +728,10 @@ router
   const check = Params.body(ctx, {
     name: 'content',
     validator: [
-      data => typeof data === 'string'
+      (data, origin) => {
+        const { type } = origin
+        return typeof data === 'string' && (type !== MESSAGE_MEDIA_TYPE.TEXT ? ObjectId.isValid(data) : !!data.length)
+      }
     ]
   }, {
     name: 'type',

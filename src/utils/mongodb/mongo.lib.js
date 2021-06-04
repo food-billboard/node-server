@@ -535,6 +535,10 @@ const RoomSchema = new Schema({
     type: ObjectId,
     ref: 'member'
   },
+  deleted: {
+    type: Boolean,
+    default: false 
+  },
   delete_users: [{
     type: ObjectId,
     ref: 'member'
@@ -555,6 +559,12 @@ const RoomSchema = new Schema({
     }
   },
   members: [
+    {
+      type: ObjectId,
+      ref: 'member'
+    }
+  ],
+  online_members: [
     {
       type: ObjectId,
       ref: 'member'
@@ -1547,6 +1557,10 @@ const FriendsSchema = new Schema({
   user: {
     type: ObjectId,
     ref: 'user'
+  },
+  member: {
+    type: ObjectId,
+    ref: 'member'
   },
   friends: [{
     _id: {

@@ -422,7 +422,7 @@
             "description": "成功",
             "schema": {
               "type": "object",
-              "$ref":"#/definitions/customer_get_manage_attention"
+              "$ref":"#/definitions/customer_get_manage_black"
             }
           }
         },
@@ -533,7 +533,7 @@
             "description": "成功",
             "schema": {
               "type": "object",
-              "$ref":"#/definitions/customer_get_manage_attention"
+              "$ref":"#/definitions/customer_get_manage_friends"
             }
           }
         },
@@ -2340,6 +2340,68 @@
       },
       "xml": {
         "name": "customer_manage_get_fans"
+      }
+    },
+    "customer_get_manage_friends": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "friends": {
+                  "type": "array",
+                  "items": {
+                    "$ref":"#/definitions/customer_user_list"
+                  }
+                },
+                "member": {
+                  "type": "string",
+                  "description": "成员id"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_manage_friends"
+      }
+    },
+    "customer_get_manage_black": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "friends": {
+                  "type": "array",
+                  "items": {
+                    "$ref":"#/definitions/customer_user_list"
+                  }
+                },
+                "member": {
+                  "type": "string",
+                  "description": "成员id"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_manage_black"
       }
     },
     "customer_get_manage_attention": {

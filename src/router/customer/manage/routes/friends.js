@@ -1,8 +1,25 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, FriendsModel, FRIEND_STATUS, dealErr, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
+const { verifyTokenToData, UserModel, FriendsModel, MemberModel, FRIEND_STATUS, dealErr, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
+
+async function checkMember(user) {
+  return MemberModel.findOne({
+    user,
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => {
+    if(data) return data 
+    const model = new MemberModel({
+      user
+    })
+    return model.save()
+  })
+}
 
 router
 .use(async(ctx, next) => {
@@ -51,7 +68,8 @@ router
     "friends.status": FRIEND_STATUS.NORMAL
   })
   .select({
-    friends: 1
+    friends: 1,
+    member: 1
   })
   .populate({
     path: 'friends._id',
@@ -115,10 +133,10 @@ router
     if(!!data) {
       return data.friends.every(item => item._id != _id.toString())
     } 
-    return true 
+    return checkMember(id)
   })
   .then(notFound)
-  .then(_ => {
+  .then(data => {
     return Promise.all([
       UserModel.updateOne({
         _id: id,
@@ -128,7 +146,8 @@ router
       FriendsModel.updateOne({
         user: id 
       }, {
-        $push: { friends: { _id, timestamps: Date.now() } }
+        $push: { friends: { _id, timestamps: Date.now() } },
+        ...(data && data._id ? { $set: { member: data._id } } : {})
       }, {
         upsert: true 
       })

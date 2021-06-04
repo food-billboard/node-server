@@ -8,7 +8,8 @@ const {
   ROOM_TYPE, 
   parseData, 
   MemberModel, 
-  ROOM_USER_NET_STATUS 
+  ROOM_USER_NET_STATUS,
+  notFound
 } = require('@src/utils')
 
 async function roomExists(data, userId) {
@@ -20,7 +21,10 @@ async function roomExists(data, userId) {
         type,
         origin: true,
       }
-      if(ObjectId.isValid(userId)) query["members.user"] = userId
+      if(ObjectId.isValid(_id)) query._id = _id 
+      if(ObjectId.isValid(userId)) query["members"] = {
+        $in: [userId]
+      }
     }else if(!ObjectId.isValid(userId)) {
       return Promise.reject({
         errMsg: 'not authorization',
@@ -29,24 +33,34 @@ async function roomExists(data, userId) {
     }else if(!ObjectId.isValid(_id)) {
       query = {
         type,
-        "members.user": { $in: members },
+        "members": { $in: members },
       }
     }else {
       query = {
         _id: ObjectId(_id),
-        "members.user": ObjectId(userId)
+        "members": {
+          $in: [userId]
+        },
+        deleted: false,
       }
     }
 
-    return RoomModel.findOneAndUpdate(query, {
-      $set: { "members.$.status": ROOM_USER_NET_STATUS.ONLINE }
-    })
-    .select({
-      _id: 1
-    })
-    .exec()
-    .then(parseData)
-    .then(data => {
+    return Promise.all([
+      RoomModel.findOne(query)
+      .select({
+        _id: 1
+      })
+      .exec()
+      .then(parseData),
+      MemberModel.updateOne({
+        _id: userId
+      }, {
+        $set: {
+          status: ROOM_USER_NET_STATUS.ONLINE
+        }
+      })
+    ])
+    .then(([data]) => {
       if(data) {
         const { _id } = data
         return _id.toString()
@@ -60,8 +74,7 @@ async function roomExists(data, userId) {
   return false
 }
 
-async function paramsValid(data) {
-  const [, token] = verifyTokenToData(ctx)
+async function paramsValid(data, token) {
   const { _id, members, type } = data
   if(type === ROOM_TYPE.SYSTEM) {
     return null 
@@ -78,7 +91,7 @@ async function paramsValid(data) {
       status: 400
     })
   }
-  if(type === ROOM_TYPE.CHAT && !!ObjectId.isValid(_id) && members.length != 1) {
+  if(type === ROOM_TYPE.CHAT && !ObjectId.isValid(_id) && members.length != 1) {
     return Promise.reject({
       errMsg: "单聊参数不正确",
       status: 400
@@ -125,9 +138,9 @@ const joinRoom = async (ctx) => {
     sanitizers: [
       data => {
         if(typeof data != 'string' && !Array.isArray(data)) return []
-        if(Array.isArray(data)) return data.filter(item => ObjectId.isValid(item)).map(item => ObjectId(item))
+        if(Array.isArray(data)) return data.filter(item => ObjectId.isValid(item.trim())).map(item => ObjectId(item.trim()))
         return data.split(',').reduce((acc, cur) => {
-          if(ObjectId.isValid(cur.trim())) acc.push(ObjectId(cur))
+          if(ObjectId.isValid(cur.trim())) acc.push(ObjectId(cur.trim()))
           return acc 
         }, [])
       }
@@ -135,15 +148,19 @@ const joinRoom = async (ctx) => {
   })
   let mimeId 
 
-  const data = await paramsValid(ctx)
+  const data = await paramsValid({
+    ...ctx.request.body,
+    members: newMembers,
+    type,
+  }, token)
   .then(_ => {
-    if(token) {
+    if(!token) {
       return {
-        memebers,
+        memebers: newMembers,
         mime: null
       }
     }
-    return formatMembers(newMembers, ObjectId(token._id))
+    return formatMembers(newMembers, ObjectId(token.id))
   })
   .then(({ members, mime }) => {
     mimeId = mime 
@@ -151,7 +168,7 @@ const joinRoom = async (ctx) => {
     return roomExists({
       ...ctx.request.body,
       members: newMembers,
-    }, token || mimeId)
+    }, mimeId)
   })
   .then(async (status) => {
     //创建房间
@@ -179,22 +196,35 @@ const joinRoom = async (ctx) => {
       const room = new RoomModel({
         type,
         info,
-        members: newMembers.map(m => {
-          const result = {
-            user: m,
-            status: ROOM_USER_NET_STATUS.OFFLINE
-          }
-          if(!token) return result 
-          return {
-            ...result,
-            status: m.equals(mimeId) ? ROOM_USER_NET_STATUS.ONLINE : ROOM_USER_NET_STATUS.OFFLINE,
-          }
-        })
+        // members: newMembers.map(m => {
+        //   const result = {
+        //     user: m,
+        //     status: ROOM_USER_NET_STATUS.OFFLINE
+        //   }
+        //   if(!token) return result 
+        //   return {
+        //     ...result,
+        //     status: m.equals(mimeId) ? ROOM_USER_NET_STATUS.ONLINE : ROOM_USER_NET_STATUS.OFFLINE,
+        //   }
+        // }),
+        members: newMembers
       })
+      
       return room.save()
-      .then(data => {
+      .then((data) => {
         const { _id } = data
-        return _id 
+        return MemberModel.updateMany({
+          _id: {
+            $in: newMembers
+          },
+        }, {
+          $addToSet: {
+            room: _id 
+          }
+        }, {
+          upsert: true 
+        })
+        .then(_ => _id)
       })
     }
     return status

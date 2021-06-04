@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { verifyTokenToData, RoomModel, dealErr, Params, responseDataDeal, ROOM_TYPE, parseData, MemberModel,  } = require('@src/utils')
+const { verifyTokenToData, RoomModel, dealErr, Params, responseDataDeal, ROOM_TYPE, parseData, MemberModel, Authorization, notFound } = require('@src/utils')
 const joinRoom = require('./utils/join')
 
 const router = new Router()
@@ -31,7 +31,7 @@ router
     match.origin = true
   }else {
     if(ROOM_TYPE[type]) match.type = type 
-    if(origin !== undefined) match.origin = !!origin 
+    match.origin = parseInt(origin) === 1
     if(ObjectId.isValid(create_user)) match.create_user = ObjectId(create_user)
     if(typeof content === 'string' && !!content) {
       const contentReg = {
@@ -49,9 +49,9 @@ router
     }
     if(typeof members === 'string') {
       const list = members.split(',')
-      if(!!list.length && list.every(item => ObjectId.isValid(item))) {
-        match["members.user"] = {
-          $in: list.map(item => ObjectId(item))
+      if(!!list.length && list.every(item => ObjectId.isValid(item.trim()))) {
+        match["members"] = {
+          $in: list.map(item => ObjectId(item.trim()))
         }
       }
     }
@@ -69,21 +69,72 @@ router
     },
     {
       $lookup: {
-        from: 'users', 
-        let: { customFields: "$user" },
+        from: 'members', 
+        let: {
+          member_id: "$create_user"
+        },
         pipeline: [  
           {
-            $lookup: {
-              from: 'images',
-              as: 'avatar',
-              foreignField: "_id",
-              localField: "avatar"
+            $match: {
+              $expr: {
+                $eq: [
+                  "$_id", "$$member_id"
+                ]
+              }
             }
           },
           {
-            $unwind: {
-              path: "$poster",
-              preserveNullAndEmptyArrays: true 
+            $lookup: {
+              from: 'users',
+              as: 'user_info',
+              let: {
+                user_id: "$user"
+              },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: [
+                        "$_id", "$$user_id"
+                      ]
+                    }
+                  }
+                },
+                {
+                  $lookup: {
+                    from: 'images',
+                    as: 'avatar',
+                    foreignField: "_id",
+                    localField: "avatar"
+                  }
+                },
+                {
+                  $unwind: {
+                    path: "$avatar",
+                    preserveNullAndEmptyArrays: true 
+                  }
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    username: 1,
+                    description: 1,
+                    avatar: "$avatar.src"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            $unwind: "$user_info"
+          },
+          {
+            $project: {
+              _id: "$user_info._id",
+              member: "$user",
+              username: "$user_info.username",
+              description: "$user_info.description",
+              avatar: "$user_info.avatar",
             }
           }
         ],
@@ -91,16 +142,15 @@ router
       }
     },
     {
-      $unwind: {
-        path: "$create_user",
-        preserveNullAndEmptyArrays: true 
-      }
+      $unwind: "$create_user",
     },
     {
-      from: 'images', 
-      localField: 'info.avatar', 
-      foreignField: '_id', 
-      as: 'info.avatar'
+      $lookup: {
+        from: 'images', 
+        localField: 'info.avatar', 
+        foreignField: '_id', 
+        as: 'info.avatar'
+      }
     },
     {
       $unwind: {
@@ -115,8 +165,10 @@ router
         updatedAt: 1,
         create_user: {
           username: "$create_user.username",
-          avatar: "$create_user.avatar.src",
-          _id: "$create_user._id"
+          avatar: "$create_user.avatar",
+          _id: "$create_user._id",
+          description: "$create_user.description",
+          member: "$create_user.member"
         },
         info: {
           name: "$info.name",
@@ -130,13 +182,14 @@ router
             ]
           }
         },
-        is_delete: {
+        online_members: {
           $size: {
             $ifNull: [
-              "$delete_users", []
+              "$online_members", []
             ]
           }
-        }
+        },
+        is_delete: "$deleted"
       }
     }
   ])
@@ -145,6 +198,7 @@ router
       data
     }
   })
+  .catch(dealErr(ctx))
 
   responseDataDeal({
     data,
@@ -158,35 +212,62 @@ router
   const [, token] = verifyTokenToData(ctx)
   const check = Params.body(ctx, {
     name: '_id',
+    multipart: true,
     validator: [
-			data => ObjectId.isValid(data)
+			(data, origin) => {
+        return origin.all == 1 ? true : ObjectId.isValid(data)
+      }
 		]
   })
   if(check) return 
 
-  const [ _id ] = Params.sanitizers(ctx.request.body, {
+  const [ roomId ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      (data, origin) => {
+        return origin.all == '1' ? null : ObjectId(data)
+      }
     ]
   })
+  const { all } = ctx.request.body
+  let modifiedCount = 0
+
+  async function update() {
+    const { id } = token
+    const userId = ObjectId(id)
+    return MemberModel.findOne({
+      user: userId
+    })
+    .select({
+      _id: 1,
+      room: 1
+    })
+    .exec()
+    .then(notFound)
+    .then(data => {
+      const { _id, room } = data
+      modifiedCount = all == '1' ? room.length : 1
+      return RoomModel.updateMany({
+        _id: {
+          $in: all == '1' ? room.map(item => ObjectId(item)) : [roomId]
+        }
+      }, {
+        $pull: {
+          online_members: _id
+        }
+      })
+    })
+    .then(data => {
+      if(data && data.nModified != modifiedCount) return Promise.reject({ status: 403, errMsg: '暂无权限' })
+      return roomId
+    })
+  }
 
   const data = await new Promise((resolve) => {
     if(token) {
-      const { id } = token
-      const userId = ObjectId(id)
-      resolve(MemberModel.updateOne({
-        status: ROOM_USER_NET_STATUS.ONLINE,
-        user: userId
-      }, {
-        $set: { status: ROOM_USER_NET_STATUS.OFFLINE }
-      })
-      .then(data => {
-        if(data && data.nModified == 0) return Promise.reject({ errMsg: '权限不足' })
-        return _id
-      }))
+      resolve(update())
     }else {
-      resolve(_id)
+      resolve(roomId)
     }
   })
   .then(data => ({ data }))
@@ -199,73 +280,143 @@ router
   })
   
 })
-.use(async(ctx, next) => {
+.post('/join', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
-  if(!token) {
-    const data = dealErr(ctx)({
-      errMsg: 'not authorization',
-      status: 401
-    })
-    responseDataDeal({
-      data,
-      ctx,
-      needCache: false 
-    })
-    return 
-  }
-  return await next()
-})
-.delete('/', async (ctx) => {
-  const [, token] = verifyTokenToData(ctx)
-  const check = Params.query(ctx, {
+  const check = Params.body(ctx, {
     name: '_id',
     validator: [
 			data => ObjectId.isValid(data)
 		]
   })
   if(check) return 
-
-  const { id } = token
-  const userId = ObjectId(id)
-  const [ _id ] = Params.sanitizers(data, {
+  const [ roomId ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
     ]
   })
 
-  const data = await RoomModel.findOne({
-    _id,
+  const data = await new Promise((resolve) => {
+    if(token) {
+      const { id } = token
+      const userId = ObjectId(id)
+      resolve(MemberModel.findOne({
+        user: userId
+      })
+      .select({
+        _id: 1,
+      })
+      .exec()
+      .then(notFound)
+      .then(data => {
+        const { _id } = data
+        return RoomModel.updateOne({
+          _id: {
+            $in: [roomId]
+          }
+        }, {
+          $addToSet: {
+            online_members: _id
+          }
+        })
+      })
+      .then(data => {
+        if(data && data.nModified != 1) return Promise.reject({ status: 403, errMsg: '暂无权限' })
+        return roomId
+      }))
+    }else {
+      resolve(roomId)
+    }
   })
-  .select({
-    type: 1,
-    create_user: 1,
-    members: 1,
-    delete_users: 1
+  .then(data => ({ data }))
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    data,
+    needCache: false,
+    ctx
   })
-  .exec()
-  .then(parseData)
-  .then(data => {
-    const { members, create_user, type, delete_users } = data 
-    if(type === ROOM_TYPE.SYSTEM || create_user !== id ||!members.some(item => item.user === id)) return Promise.reject({
+
+})
+.use(Authorization())
+.delete('/', async (ctx) => {
+  const [, token] = verifyTokenToData(ctx)
+  const check = Params.query(ctx, {
+    name: '_id',
+    validator: [
+			data => data.split(',').every(item => ObjectId.isValid(item.trim()))
+		]
+  })
+  if(check) return 
+
+  const { id } = token
+  const userId = ObjectId(id)
+  const [ _id ] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      data => data.split(',').map(item => ObjectId(item.trim()))
+    ]
+  })
+
+  const data = await Promise.all([
+    RoomModel.find({
+      _id: {
+        $in: _id
+      },
+    })
+    .select({
+      type: 1,
+      create_user: 1,
+      members: 1,
+      delete_users: 1
+    })
+    .exec()
+    .then(parseData),
+    MemberModel.findOne({
+      user: userId
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(parseData)
+  ])
+  .then(([room, member]) => {
+    const { _id: memberId } = member
+    let forbidden = false 
+    let needNotDelete = false 
+    room.forEach(item => {
+      const { members, create_user, type, delete_users } = item 
+      forbidden = type === ROOM_TYPE.SYSTEM || (type != ROOM_TYPE.CHAT && !create_user.equals(memberId)) || !members.some(item => item.equals(memberId))
+      needNotDelete = (type === ROOM_TYPE.CHAT && (delete_users.length == 0 || !!memberId.equals(delete_users[0]))) || type === ROOM_TYPE.GROUP_CHAT
+    })
+    if(forbidden) return Promise.reject({
       errMsg: 'forbidden',
       status: 403
     })
-    if(type === ROOM_TYPE.CHAT && delete_users.length != 2) {
-      return RoomModel.updateOne({
-        _id,
+    if(needNotDelete) {
+      return RoomModel.updateMany({
+        _id: {
+          $in: _id
+        },
         origin: false,
-        type: ROOM_TYPE.CHAT,
+        // type: ROOM_TYPE.CHAT,
       }, {
         $addToSet: {
-          delete_users: userId
+          delete_users: memberId
+        },
+        $set: {
+          deleted: true 
         }
       })
     }else {
+      const toDeleteRoomIds = _id.filter(item => room.some(item => item._id.equals(item) && item.create_user.equals(memberId)))
       return RoomModel.remove({
-        _id,
+        _id: {
+          $in: toDeleteRoomIds
+        },
         origin: false,
-        ...(type === ROOM_TYPE.CHAT ? {} : { create_user: data }),
+        // ...(type === ROOM_TYPE.CHAT ? {} : { create_user: data }),
       }, {
         single: true
       })
@@ -275,7 +426,7 @@ router
     return MemberModel.updateOne({
       user: userId,
     }, {
-      $pull: {
+      $pullAll: {
         room: _id
       }
     })
