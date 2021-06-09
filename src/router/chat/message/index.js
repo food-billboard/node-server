@@ -806,7 +806,8 @@ router
       _id: roomId,
       members: {
         $in: [userId]
-      }
+      },
+      deleted: false 
     }, {
       $addToSet: {
         message: data._id

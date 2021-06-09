@@ -162,6 +162,60 @@ router
     needCache: false
   })
 })
+// .put('/', async (ctx) => {
+//   const [, token] = verifyTokenToData(ctx)
+//   const [ _id ] = Params.sanitizers(ctx.request.body, {
+//     name: '_id',
+//     sanitizers: [
+//       data => ObjectId(data)
+//     ]
+//   })
+
+//   let { id } = token
+//   id = ObjectId(id)
+
+//   const data = await FriendsModel.findOne({
+//     user: id,
+//   })
+//   .select({
+//     _id: 1,
+//     friends: 1
+//   })
+//   .exec()
+//   .then(parseData)
+//   .then(data => {
+//     if(!!data) {
+//       return data.friends.every(item => item._id != _id.toString())
+//     } 
+//     return checkMember(id)
+//   })
+//   .then(notFound)
+//   .then(data => {
+//     return Promise.all([
+//       UserModel.updateOne({
+//         _id: id,
+//       }, {
+//         $inc: { friends: 1 }
+//       }),
+//       FriendsModel.updateOne({
+//         user: id 
+//       }, {
+//         $push: { friends: { _id, timestamps: Date.now() } },
+//         ...(data && data._id ? { $set: { member: data._id } } : {})
+//       }, {
+//         upsert: true 
+//       })
+//     ])
+//   })
+//   .then(_ => ({ data: _id }))
+//   .catch(dealErr(ctx))
+
+//   responseDataDeal({
+//     ctx,
+//     data,
+//     needCache: false
+//   })
+// })
 .delete('/', async(ctx) => {
   
   const [ _id ] = Params.sanitizers(ctx.query, {

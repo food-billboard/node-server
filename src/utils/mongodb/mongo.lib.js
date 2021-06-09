@@ -20,7 +20,9 @@ const {
   ROOM_TYPE,
   MESSAGE_TYPE,
   ROOM_USER_NET_STATUS,
-  MESSAGE_MEDIA_TYPE
+  MESSAGE_MEDIA_TYPE,
+  ERROR_ORIGIN_TYPE,
+  ERROR_TYPE
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -500,6 +502,9 @@ const MemberSchema = new Schema({
   },
   sid: {
     type: String,
+  },
+  temp_user_id: {
+    type: String 
   },
   status: {
     enum: Object.keys(ROOM_USER_NET_STATUS),
@@ -1581,6 +1586,22 @@ const FriendsSchema = new Schema({
   ...defaultConfig
 })
 
+const ErrorSchema = new Schema({
+  origin_type: {
+    type: String,
+    enum: Object.keys(ERROR_ORIGIN_TYPE)
+  },
+  error_type: {
+    type: String,
+    enum: Object.keys(ERROR_TYPE)
+  },
+  error_message: {
+    type: String 
+  },
+}, {
+  ...defaultConfig
+})
+
 const FIND_OPERATION_LIB = [
   'find',
   'findOne',
@@ -1664,6 +1685,7 @@ const AuthModel = model('auth', AuthSchema)
 const BehaviourModel = model('behaviour', BehaviourSchema)
 const FriendsModel = model('friend', FriendsSchema)
 const MemberModel = model('member', MemberSchema)
+const ErrorModel = model('error', ErrorSchema)
 
 module.exports = {
   UserModel,
@@ -1690,6 +1712,7 @@ module.exports = {
   BehaviourModel,
   FriendsModel,
   MemberModel,
+  ErrorModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1713,5 +1736,6 @@ module.exports = {
   AuthSchema,
   BehaviourSchema,
   FriendsSchema,
-  MemberSchema
+  MemberSchema,
+  ErrorSchema
 }

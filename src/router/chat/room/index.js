@@ -208,6 +208,7 @@ router
 
 })
 .post('/', joinRoom)
+//离开房间
 .put('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const check = Params.body(ctx, {
@@ -339,7 +340,85 @@ router
 
 })
 .use(Authorization())
-.delete('/', async (ctx) => {
+//删除房间
+.delete('/', async(ctx) => {
+  const [, token] = verifyTokenToData(ctx)
+  const check = Params.query(ctx, {
+    name: '_id',
+    validator: [
+			data => data.split(',').every(item => ObjectId.isValid(item.trim()))
+		]
+  })
+  if(check) return 
+
+  let deleteRoomList = []
+
+  const data = await MemberModel.findOne({
+    user: ObjectId(token.id)
+  })
+  .select({
+    _id: 1,
+  })
+  .exec()
+  .then(notFound)
+  .then(data => {
+    const { _id } = data 
+    return RoomModel.aggregate([
+      {
+        $match: {
+          create_user: _id,
+          origin: false ,
+          type: {
+            $ne: ROOM_TYPE.SYSTEM
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 1
+        }
+      }
+    ])
+  })
+  .then(parseData)
+  .then(data => {
+    const ids = data.map(item => item._id)
+    deleteRoomList = ids
+    return Promise.all([
+      MemberModel.updateMany({
+        user: ObjectId(token.id)
+      }, {
+        $pullAll: {
+          room: ids
+        }
+      }),
+      RoomModel.updateMany({
+        _id: {
+          $in: ids
+        }
+      }, {
+        $set: {
+          deleted: true 
+        }
+      })
+    ])
+  })
+  .then(_ => ({ data: deleteRoomList }))
+  // .catch(dealErr(ctx))
+  .catch(err => {
+    console.log(err)
+    return dealErr(ctx)(err)
+  })
+
+  responseDataDeal({
+    ctx,
+    needCache: false,
+    data 
+  })
+
+})
+//退出房间
+.delete('/join', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const check = Params.query(ctx, {
     name: '_id',
@@ -368,7 +447,7 @@ router
       type: 1,
       create_user: 1,
       members: 1,
-      delete_users: 1
+      delete_users: 1,
     })
     .exec()
     .then(parseData),
@@ -394,6 +473,7 @@ router
       errMsg: 'forbidden',
       status: 403
     })
+
     if(needNotDelete) {
       return RoomModel.updateMany({
         _id: {
@@ -405,12 +485,12 @@ router
         $addToSet: {
           delete_users: memberId
         },
-        $set: {
-          deleted: true 
+        $pull: {
+          online_members: memberId
         }
       })
     }else {
-      const toDeleteRoomIds = _id.filter(item => room.some(item => item._id.equals(item) && item.create_user.equals(memberId)))
+      const toDeleteRoomIds = _id.filter(roomId => room.some(item => item._id.equals(roomId) && !item.create_user.equals(memberId)))
       return RoomModel.remove({
         _id: {
           $in: toDeleteRoomIds

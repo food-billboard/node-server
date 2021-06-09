@@ -5,6 +5,7 @@ const { rankSchedule } = require('./rank')
 const { browserSchedule } = require('./browser')
 const { feedbackSchedule } = require('./feedback')
 const { behaviourSchedule } = require('./behaviour')
+const { unLoginChatUserSchedule } = require('./unlogin-chat-user')
 
 function schedule() {
   //媒体资源定时器
@@ -21,6 +22,8 @@ function schedule() {
   feedbackSchedule()
   //操作历史定时清除
   behaviourSchedule()
+  //聊天游客数据定时清除
+  unLoginChatUserSchedule()
 }
 
 module.exports = {

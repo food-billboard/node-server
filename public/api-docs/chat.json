@@ -13,6 +13,14 @@
   "basePath": "/v2",
   "tags": [
     {
+      "name": "connect",
+      "description": "连接相关",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
       "name": "member",
       "description": "成员相关",
       "externalDocs": {
@@ -42,6 +50,71 @@
     "http"
   ],
   "paths": {
+    "/api/chat/connect": {
+      "post": {
+        "tags": [
+          "connect"
+        ],
+        "summary": "连接",
+        "description": "",
+        "operationId": "chat_connect_post_connect",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "temp_user_id",
+            "in": "body",
+            "type": "string",
+            "description":"未登录情况下，使用它充当游客id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/chat_connect_post_connect"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/chat/disconnect": {
+      "post": {
+        "tags": [
+          "connect"
+        ],
+        "summary": "断开连接",
+        "description": "",
+        "operationId": "chat_connect_post_disconnect",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
     "/api/chat/member": {
       "get": {
         "tags": [
@@ -420,7 +493,7 @@
         ],
         "summary": "加入聊天室",
         "description": "",
-        "operationId": "chat_room_put",
+        "operationId": "chat_room_post",
         "produces": [
           "application/xml",
           "application/json"
@@ -1047,6 +1120,40 @@
       },
       "xml": {
         "name": "chat_message_detail_get"
+      }
+    },
+    "chat_connect_post_connect" :{
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "string",
+                      "description": "登录下存在, 成员id"
+                    },
+                    "temp_user_id": {
+                      "type": "string",
+                      "description": "游客id"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "chat_connect_post_connect"
       }
     },
     "chat_room_get": {

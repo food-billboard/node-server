@@ -5,6 +5,7 @@ const { Types: { ObjectId } } = require('mongoose')
 const { Request, commonValidate, mockCreateUser, mockCreateMember, mockCreateMessage, mockCreateImage, mockCreateRoom } = require('@test/utils')
 
 const COMMON_API = '/api/chat/room'
+const JOIN_COMMON_API = '/api/chat/room/join'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
@@ -54,6 +55,7 @@ describe(`${COMMON_API} test`, function() {
   let memberId 
   let imageId 
   let getToken
+  let toDeleteRoomList = []
 
   before(function(done) {
 
@@ -201,7 +203,18 @@ describe(`${COMMON_API} test`, function() {
         sid: COMMON_API
       }),
       RoomModel.deleteMany({
-        "info.name": COMMON_API
+        $or: [
+          {
+            _id: {
+              $in: toDeleteRoomList
+            }
+          },
+          {
+            "info.name": {
+              $in: [COMMON_API, JOIN_COMMON_API]
+            }
+          }
+        ]
       }),
       ImageModel.deleteMany({
         src: COMMON_API
@@ -532,8 +545,18 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err) {
+        .end(function(err, res) {
           if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+            return done(err)
+          }
+          const { res: { data: target } } = obj
+          toDeleteRoomList.push(target)
           done()
         })
       })
@@ -606,8 +629,18 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err) {
+        .end(function(err, res) {
           if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+            return done(err)
+          }
+          const { res: { data: target } } = obj
+          toDeleteRoomList.push(target)
           done()
         })
       })
@@ -929,8 +962,8 @@ describe(`${COMMON_API} test`, function() {
   describe(`${COMMON_API} delete room test`, function() {
       
     describe(`${COMMON_API} delete room success test`, function() {
-      
-      it(`delete the chat room success`, function(done) {
+
+      it(`delete chat room success`, function(done) {
         let roomId 
         const { model: chatRoom } = mockCreateRoom({
           info: {
@@ -938,7 +971,8 @@ describe(`${COMMON_API} test`, function() {
           },
           origin: false,
           type: ROOM_TYPE.CHAT,
-          members: [memberId]
+          members: [memberId],
+          create_user: memberId
         })
         chatRoom.save()
         .then(data => {
@@ -978,9 +1012,7 @@ describe(`${COMMON_API} test`, function() {
             .exec(),
             RoomModel.findOne({
               _id: roomId,
-              delete_users: {
-                $in: [memberId]
-              }
+              deleted: true 
             })
             .select({
               _id: 1
@@ -997,7 +1029,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`delete the group room success`, function(done) {
+      it(`delete group_chat room success`, function(done) {
         let roomId 
         const { model: chatRoom } = mockCreateRoom({
           info: {
@@ -1046,9 +1078,7 @@ describe(`${COMMON_API} test`, function() {
             .exec(),
             RoomModel.findOne({
               _id: roomId,
-              delete_users: {
-                $in: [memberId]
-              }
+              deleted: true 
             })
             .select({
               _id: 1
@@ -1065,65 +1095,37 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`delete the chat room and the delete user length equal 2`, function(done) {
+    })
+
+    describe(`${COMMON_API} delete room fail test`, function() {
+
+      it(`delete room fail because the room type is system`, function(done) {
         let roomId 
-        let newMemberId 
-        let otherUserId 
-        
         const { model: chatRoom } = mockCreateRoom({
           info: {
             name: COMMON_API,
           },
-          origin: false,
-          type: ROOM_TYPE.CHAT,
-          members: [memberId]
+          origin: true,
+          type: ROOM_TYPE.SYSTEM,
+          members: [memberId],
+          create_user: memberId
         })
-        const { model: user } = mockCreateUser({
-          username: COMMON_API
-        })
-
-        Promise.all([
-          chatRoom.save(),
-          user.save()
-        ])
-        .then(([room, user]) => {
-          roomId = room._id 
-          otherUserId = user._id 
-          const { model: newMember } = mockCreateMember({
-            sid: COMMON_API,
-            user: otherUserId
-          })
-          return newMember.save()
-        })
+        chatRoom.save()
         .then(data => {
-          newMemberId = data._id 
-          return Promise.all([
-            MemberModel.updateMany({
-              _id: {
-                $in: [memberId, newMemberId]
-              }
-            }, {
-              $push: {
-                room: roomId
-              }
-            }),
-            RoomModel.updateOne({
-              _id: roomId
-            }, {
-              $set: {
-                members: [newMemberId, memberId]
-              },
-              $push: {
-                delete_users: newMemberId
-              }
-            })
-          ])
+          roomId = data._id 
+          return MemberModel.updateOne({
+            _id: memberId
+          }, {
+            $push: {
+              room: roomId
+            }
+          })
         })
         .then(_ => {
           return Request
           .delete(COMMON_API)
           .query({
-            _id: `${roomId.toString()}, ${systemRoomId.toString()}`
+            _id: `${roomId.toString()}`
           })
           .set({
             Accept: 'Application/json',
@@ -1146,9 +1148,7 @@ describe(`${COMMON_API} test`, function() {
             .exec(),
             RoomModel.findOne({
               _id: roomId,
-              members: {
-                $nin: [memberId]
-              }
+              deleted: true 
             })
             .select({
               _id: 1
@@ -1157,8 +1157,7 @@ describe(`${COMMON_API} test`, function() {
           ])
         })
         .then(([member, room]) => {
-          expect(!!member).to.be.true 
-          expect(!!room).to.be.false 
+          expect(!!member || !!room).to.be.false 
           done()
         })
         .catch(function(err) {
@@ -1166,69 +1165,26 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-    })
-
-    describe(`${COMMON_API} delete room fail test`, function() {
-
-      it(`delete the room fail because the id is not valid`, function(done) {
-        Request
-        .delete(COMMON_API)
-        .query({
-          _id: roomId.toString().slice(1)
+      it(`delete room fail because the room's create_user is not self`, function(done) {
+        let roomId 
+        const { model: chatRoom } = mockCreateRoom({
+          info: {
+            name: COMMON_API,
+          },
+          origin: false,
+          type: ROOM_TYPE.CHAT,
+          members: [memberId],
         })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(400)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
-
-      it(`delete the room fail because lack of the id`, function(done) {
-        Request
-        .delete(COMMON_API)
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(400)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
-
-      it(`delete the room fail because the room type is system`, function(done) {
-        Request
-        .delete(COMMON_API)
-        .query({
-          _id: systemRoomId.toString()
-        })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(403)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
-
-      it(`delete the room fail because the room crete user is not self`, function(done) {
-        RoomModel.updateOne({
-          _id: roomId,
-        }, {
-          $set: {
-            create_user: ObjectId("5edb3c7b4f88da14ca419e61"),
-            type: ROOM_TYPE.GROUP_CHAT
-          }
+        chatRoom.save()
+        .then(data => {
+          roomId = data._id 
+          return MemberModel.updateOne({
+            _id: memberId
+          }, {
+            $push: {
+              room: roomId
+            }
+          })
         })
         .then(_ => {
           return Request
@@ -1240,20 +1196,33 @@ describe(`${COMMON_API} test`, function() {
             Accept: 'Application/json',
             Authorization: `Basic ${selfToken}`
           })
-          .expect(403)
+          .expect(200)
           .expect('Content-Type', /json/)
         })
         .then(_ => {
-          return RoomModel.updateOne({
-            _id: roomId
-          }, {
-            $set: {
-              create_user: memberId,
-              type: ROOM_TYPE.CHAT
-            }
-          })
+          return Promise.all([
+            MemberModel.findOne({
+              _id: memberId,
+              room: {
+                $nin: [roomId]
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec(),
+            RoomModel.findOne({
+              _id: roomId,
+              deleted: true 
+            })
+            .select({
+              _id: 1
+            })
+            .exec()
+          ])
         })
-        .then(_ => {
+        .then(([member, room]) => {
+          expect(!!member || !!room).to.be.false 
           done()
         })
         .catch(function(err) {
@@ -1261,50 +1230,42 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`delete the room fail because the room not includes the user`, function(done) {
-        const id = roomId.toString()
-        RoomModel.updateOne({
-          _id: roomId
-        }, {
-          $pull: {
-            members: memberId
-          }
+      it(`delete room fail because the _id is not valid`, function(done) {
+        Request
+        .delete(COMMON_API)
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
         })
-        .then(_ => {
-          return Request
-          .delete(COMMON_API)
-          .query({
-            _id: id
-          })
-          .set({
-            Accept: 'Application/json',
-            Authorization: `Basic ${selfToken}`
-          })
-          .expect(403)
-          .expect('Content-Type', /json/)
+        .send({
+          _id: roomId.toString().slice(1)
         })
-        .then(_ => {
-          return RoomModel.updateOne({
-            _id: roomId
-          }, {
-            $push: {
-              members: memberId
-            }
-          })
-        })
-        .then(_ => {
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end((err) => {
+          if(err) return done(err)
           done()
         })
-        .catch(function(err) {
-          done(err)
+      })
+
+      it(`delete room fail because lack of the params of _id`, function(done) {
+        Request
+        .delete(COMMON_API)
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end((err) => {
+          if(err) return done(err)
+          done()
         })
       })
 
     })
 
   })
-
-  const JOIN_COMMON_API = '/api/chat/room/join'
 
   describe(`${JOIN_COMMON_API} join the room test`, function() {
 
@@ -1466,6 +1427,384 @@ describe(`${COMMON_API} test`, function() {
           done()
         })
         .catch(err => {
+          done(err)
+        })
+      })
+
+    })
+
+  })
+
+  describe(`${JOIN_COMMON_API} leave the room test`, function() {
+
+    describe(`${JOIN_COMMON_API} leave room success test`, function() {
+      
+      it(`leave the chat room success`, function(done) {
+        let roomId 
+        const { model: chatRoom } = mockCreateRoom({
+          info: {
+            name: COMMON_API,
+          },
+          origin: false,
+          type: ROOM_TYPE.CHAT,
+          members: [memberId],
+        })
+        chatRoom.save()
+        .then(data => {
+          roomId = data._id 
+          return MemberModel.updateOne({
+            _id: memberId
+          }, {
+            $push: {
+              room: roomId
+            }
+          })
+        })
+        .then(_ => {
+          return Request
+          .delete(JOIN_COMMON_API)
+          .query({
+            _id: `${roomId.toString()}`
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return Promise.all([
+            MemberModel.findOne({
+              _id: memberId,
+              room: {
+                $nin: [roomId]
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec(),
+            RoomModel.findOne({
+              _id: roomId,
+              delete_users: {
+                $in: [memberId]
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec()
+          ])
+        })
+        .then(([member, room]) => {
+          expect(!!member && !!room).to.be.true 
+          done()
+        })
+        .catch(function(err) {
+          done(err)
+        })
+      })
+
+      it(`leave the group room success`, function(done) {
+        let roomId 
+        const { model: chatRoom } = mockCreateRoom({
+          info: {
+            name: JOIN_COMMON_API,
+          },
+          origin: false,
+          type: ROOM_TYPE.GROUP_CHAT,
+          members: [memberId],
+          create_user: memberId
+        })
+        chatRoom.save()
+        .then(data => {
+          roomId = data._id 
+          return MemberModel.updateOne({
+            _id: memberId
+          }, {
+            $push: {
+              room: roomId
+            }
+          })
+        })
+        .then(_ => {
+          return Request
+          .delete(JOIN_COMMON_API)
+          .query({
+            _id: `${roomId.toString()}`
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return Promise.all([
+            MemberModel.findOne({
+              _id: memberId,
+              room: {
+                $nin: [roomId]
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec(),
+            RoomModel.findOne({
+              _id: roomId,
+              delete_users: {
+                $in: [memberId]
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec()
+          ])
+        })
+        .then(([member, room]) => {
+          expect(!!member && !!room).to.be.true 
+          done()
+        })
+        .catch(function(err) {
+          done(err)
+        })
+      })
+
+      it(`leave the chat room and the leave user length equal 2`, function(done) {
+        let roomId 
+        let newMemberId 
+        let otherUserId 
+        
+        const { model: chatRoom } = mockCreateRoom({
+          info: {
+            name: COMMON_API,
+          },
+          origin: false,
+          type: ROOM_TYPE.CHAT,
+          members: [memberId]
+        })
+        const { model: user } = mockCreateUser({
+          username: COMMON_API
+        })
+
+        Promise.all([
+          chatRoom.save(),
+          user.save()
+        ])
+        .then(([room, user]) => {
+          roomId = room._id 
+          otherUserId = user._id 
+          const { model: newMember } = mockCreateMember({
+            sid: COMMON_API,
+            user: otherUserId
+          })
+          return newMember.save()
+        })
+        .then(data => {
+          newMemberId = data._id 
+          return Promise.all([
+            MemberModel.updateMany({
+              _id: {
+                $in: [memberId, newMemberId]
+              }
+            }, {
+              $push: {
+                room: roomId
+              }
+            }),
+            RoomModel.updateOne({
+              _id: roomId
+            }, {
+              $set: {
+                members: [newMemberId, memberId]
+              },
+              $push: {
+                delete_users: newMemberId
+              }
+            })
+          ])
+        })
+        .then(_ => {
+          return Request
+          .delete(JOIN_COMMON_API)
+          .query({
+            _id: `${roomId.toString()}, ${systemRoomId.toString()}`
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return Promise.all([
+            MemberModel.findOne({
+              _id: memberId,
+              room: {
+                $nin: [roomId]
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec(),
+            RoomModel.findOne({
+              _id: roomId,
+              members: {
+                $nin: [memberId]
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec()
+          ])
+        })
+        .then(([member, room]) => {
+          expect(!!member).to.be.true 
+          expect(!!room).to.be.false 
+          done()
+        })
+        .catch(function(err) {
+          done(err)
+        })
+      })
+
+    })
+
+    describe(`${JOIN_COMMON_API} leave room fail test`, function() {
+
+      it(`leave the room fail because the id is not valid`, function(done) {
+        Request
+        .delete(JOIN_COMMON_API)
+        .query({
+          _id: roomId.toString().slice(1)
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+      })
+
+      it(`leave the room fail because lack of the id`, function(done) {
+        Request
+        .delete(JOIN_COMMON_API)
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+      })
+
+      it(`leave the room fail because the room type is system`, function(done) {
+        Request
+        .delete(JOIN_COMMON_API)
+        .query({
+          _id: systemRoomId.toString()
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(403)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+      })
+
+      it(`leave the room fail because the room crete user is not self`, function(done) {
+        RoomModel.updateOne({
+          _id: roomId,
+        }, {
+          $set: {
+            create_user: ObjectId("5edb3c7b4f88da14ca419e61"),
+            type: ROOM_TYPE.GROUP_CHAT
+          }
+        })
+        .then(_ => {
+          return Request
+          .delete(JOIN_COMMON_API)
+          .query({
+            _id: `${roomId.toString()}`
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(403)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return RoomModel.updateOne({
+            _id: roomId
+          }, {
+            $set: {
+              create_user: memberId,
+              type: ROOM_TYPE.CHAT
+            }
+          })
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(function(err) {
+          done(err)
+        })
+      })
+
+      it(`leave the room fail because the room not includes the user`, function(done) {
+        const id = roomId.toString()
+        RoomModel.updateOne({
+          _id: roomId
+        }, {
+          $pull: {
+            members: memberId
+          }
+        })
+        .then(_ => {
+          return Request
+          .delete(JOIN_COMMON_API)
+          .query({
+            _id: id
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(403)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return RoomModel.updateOne({
+            _id: roomId
+          }, {
+            $push: {
+              members: memberId
+            }
+          })
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(function(err) {
           done(err)
         })
       })

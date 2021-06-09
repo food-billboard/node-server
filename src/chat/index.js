@@ -11,7 +11,11 @@ const server = http.createServer(app.callback())
 
 server.listen(3001)
 
-const io = new Ws(server, {/**config */})
+const io = Ws(server, {
+  cors: {
+    origin: true,
+  },
+})
 
 io
 .use(connection)

@@ -641,6 +641,52 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
+      it(`post the message fail because the room is deleted`, function(done) {
+
+        Promise.all([
+          RoomModel.updateOne({
+            _id: roomId
+          }, {
+            $set: {
+              deleted: true 
+            }
+          })
+        ])
+        .then(_ => {
+          return Request
+          .post(COMMON_API)
+          .send({
+            content: COMMON_API,
+            type: MESSAGE_MEDIA_TYPE.TEXT,
+            _id: roomId.toString()
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(403)
+          .expect('Content-Type', /json/)
+        })
+        .then(function() {
+          return Promise.all([
+            RoomModel.updateOne({
+              _id: roomId
+            }, {
+              $set: {
+                deleted: false 
+              }
+            })
+          ])
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
+      })
+
     })
 
   })
