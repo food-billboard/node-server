@@ -2,7 +2,12 @@ const { merge } = require('lodash')
 const request = require('../utils/request')
 
 const generateToken = (method) => async (socket, data, params, headers={}) => {
-  return method(params, headers)
+  const { token } = data
+  const newHeaders = merge({}, headers, {
+    authorization: `Basic ${token}`
+  })
+  console.log(newHeaders, 23333)
+  return method(params, newHeaders)
 }
 
 const url = (address) => `http://localhost:4000${address}`
@@ -34,39 +39,94 @@ const getMessageList = async (data, headers) => {
   })
 }
 
+//房间列表
+const getRoomList = async (data, headers) => {
+  return request(url('/api/chat/room'), {
+    method: 'GET',
+    params: data,
+    headers
+  })
+}
+
 //删除消息
 const deleteMessage = async (data, headers) => {
-  
+  return request(url('/api/chat/message'), {
+    method: 'DELETE',
+    params: data,
+    headers
+  })
 }
 
 //消息详情
 const getMessageDetail = async (data, headers) => {
-
+  return request(url('/api/chat/message/detail'), {
+    method: 'GET',
+    params: data,
+    headers
+  })
 }
 
 //读消息
 const readMessage = async (data, headers) => {
-
+  return request(url('/api/chat/message'), {
+    method: 'PUT',
+    params: data,
+    headers
+  })
 }
 
-//加入房间
+//发起聊天
+const createRoom = async (data, headers) => {
+  return request(url('/api/chat/room'), {
+    method: 'POST',
+    data,
+    headers
+  })
+}
+
+//进入房间
 const joinRoom = async (data, headers) => {
-
+  return request(url('/api/chat/room/join'), {
+    method: 'POST',
+    data,
+    headers
+  })
 }
 
-//离开房间
+//离开房间(下线)
 const leaveRoom = async (data, headers) => {
-
+  return request(url('/api/chat/room'), {
+    method: 'PUT',
+    data,
+    headers
+  })
 }
 
 //退出房间
-const quitRoom = async () => {
-
+const quitRoom = async (data, headers) => {
+  return request(url('/api/chat/room/join'), {
+    method: 'DELETE',
+    params: data,
+    headers
+  })
 }
 
 //删除房间
-const deleteRoom = async () => {
+const deleteRoom = async (data, headers) => {
+  return request(url('/api/chat/room'), {
+    method: 'DELETE',
+    params: data,
+    headers
+  })
+}
 
+//发送消息
+const postMessage = async (data, headers) => {
+  return request(url('/api/chat/message'), {
+    method: 'POST',
+    data,
+    headers
+  })
 }
 
 module.exports = {
@@ -80,4 +140,7 @@ module.exports = {
   leaveRoom: generateToken(leaveRoom),
   quitRoom: generateToken(quitRoom),
   deleteRoom: generateToken(deleteRoom),
+  postMessage: generateToken(postMessage),
+  createRoom: generateToken(createRoom),
+  getRoomList: generateToken(getRoomList),
 }

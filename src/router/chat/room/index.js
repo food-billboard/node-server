@@ -208,7 +208,7 @@ router
 
 })
 .post('/', joinRoom)
-//离开房间
+//离开房间(下线)
 .put('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const check = Params.body(ctx, {

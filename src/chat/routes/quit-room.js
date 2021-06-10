@@ -1,4 +1,6 @@
+const { pick } = require('lodash')
 const { quitRoom: quitRoomMethod } = require('../services')
+
 
 //可以在这里广播通知所有聊天室内用户有用户离开
 const quitRoom = socket => async(data) => {
@@ -19,7 +21,7 @@ const quitRoom = socket => async(data) => {
     res = JSON.stringify(errWrapper(err))
   }
 
-  socket.emit("quit_room", JSON.stringify(res))
+  socket.emit("quit_room", res)
 }
 
 module.exports = quitRoom

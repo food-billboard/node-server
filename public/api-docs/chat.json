@@ -183,7 +183,6 @@
             "name": "_id",
             "in": "query",
             "type": "string",
-            "required": true,
             "description":"房间id"
           },
           {
@@ -491,7 +490,7 @@
         "tags": [
           "room"
         ],
-        "summary": "加入聊天室",
+        "summary": "创建聊天室",
         "description": "",
         "operationId": "chat_room_post",
         "produces": [
@@ -603,6 +602,40 @@
         "summary": "进入聊天室",
         "description": "",
         "operationId": "chat_room_join_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"房间id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "room"
+        ],
+        "summary": "退出聊天室",
+        "description": "",
+        "operationId": "chat_room_join_delete",
         "produces": [
           "application/xml",
           "application/json"

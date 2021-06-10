@@ -16,7 +16,7 @@ const readMessage = socket => async (data) => {
     res = JSON.stringify(errWrapper(err))
   }
 
-  socket.emit("put", JSON.stringify(res))
+  socket.emit("put", res)
 }
 
 module.exports = readMessage

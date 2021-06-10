@@ -1,7 +1,6 @@
 const Router = require('@koa/router')
 const { verifyTokenToData, UserModel, FriendsModel, MemberModel, FRIEND_STATUS, dealErr, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
-const AgreeFriends = require('./agree-friends')
 
 const router = new Router()
 
@@ -66,7 +65,7 @@ router
 
   const data = await FriendsModel.findOne({
     user: ObjectId(id),
-    "friends.status": FRIEND_STATUS.NORMAL
+    "friends.status": FRIEND_STATUS.TO_AGREE
   })
   .select({
     friends: 1,
@@ -123,29 +122,41 @@ router
 
   const data = await FriendsModel.findOne({
     user: id,
+    $and: [
+      {
+        "friends._id": _id
+      },
+      {
+        "friends.status": FRIEND_STATUS.TO_AGREE
+      }
+    ]
   })
   .select({
     _id: 1,
     friends: 1
   })
   .exec()
-  .then(parseData)
-  .then(data => {
-    if(!!data) {
-      return data.friends.every(item => item._id != _id.toString())
-    } 
-    return checkMember(id)
-  })
   .then(notFound)
-  .then(data => {
-    return FriendsModel.updateOne({
-      user: id 
-    }, {
-      $push: { friends: { _id, timestamps: Date.now() } },
-      ...(data && data._id ? { $set: { member: data._id } } : {})
-    }, {
-      upsert: true 
-    })
+  .then(_ => {
+    return Promise.all([
+      UserModel.updateOne({
+        _id: id,
+      }, {
+        $inc: { friends: 1 }
+      }),
+      FriendsModel.updateOne({
+        user: id,
+        friends: { 
+          $elemMatch: { 
+            _id
+          } 
+        }
+      }, {
+        $set: { 
+          "friends.$.status": FRIEND_STATUS.NORMAL
+        }
+      })
+    ])
   })
   .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))
@@ -172,10 +183,7 @@ router
     user: ObjectId(id),
     friends: { 
       $elemMatch: { 
-        _id: _id,
-        status: {
-          $ne: FRIEND_STATUS.TO_AGREE
-        }
+        _id: _id
       } 
     }
   })
@@ -185,18 +193,11 @@ router
   .exec()
   .then(notFound)
   .then(() => {
-    return Promise.all([
-      UserModel.updateOne({
-        _id: ObjectId(id)
-      }, {
-        $inc: { friends: -1 }
-      }),
-      FriendsModel.updateOne({
-        user: ObjectId(id)
-      }, {
-        $pull: { friends: { _id } }
-      })
-    ])
+    return FriendsModel.updateOne({
+      user: ObjectId(id)
+    }, {
+      $pull: { friends: { _id } }
+    })
   })
   .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))
@@ -208,6 +209,5 @@ router
   })
 
 })
-.use('/agree', AgreeFriends.routes(), AgreeFriends.allowedMethods())
 
 module.exports = router

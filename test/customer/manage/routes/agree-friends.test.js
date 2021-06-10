@@ -3,7 +3,7 @@ const { expect } = require('chai')
 const { mockCreateUser, Request, commonValidate, mockCreateFriends } = require('@test/utils')
 const { UserModel, FRIEND_STATUS, FriendsModel } = require('@src/utils')
 
-const COMMON_API = '/api/customer/manage/friends'
+const COMMON_API = '/api/customer/manage/friends/agree'
 
 function responseExpect(res, validate=[]) {
 
@@ -59,23 +59,13 @@ describe(`${COMMON_API} test`, function() {
           {
             timestamps: Date.now(),
             _id: userId,
-            status: FRIEND_STATUS.NORMAL
+            status: FRIEND_STATUS.TO_AGREE
           }
         ]
       })
-      return Promise.all([
-        UserModel.updateOne({
-          username: COMMON_API,
-          description: COMMON_API
-        }, {
-          $inc: {
-            friends: 1
-          }
-        }),
-        model.save()
-      ])
+      return model.save()
     })
-    .then(([, data]) => {
+    .then((data) => {
       friendId = data._id
     })
     .catch(err => {
@@ -149,11 +139,11 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe(`get self friends list -> ${COMMON_API}`, function() {
+  describe(`get to_agree friends list -> ${COMMON_API}`, function() {
 
-    describe(`get self friends list success test -> ${COMMON_API}`, function() {
+    describe(`get to_agree friends list success test -> ${COMMON_API}`, function() {
       
-      it(`get self friends list success`, function(done) {
+      it(`get to_agree friends list success`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -184,15 +174,17 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe(`post the new user for friends -> ${COMMON_API}`, function() {
+  describe(`post the agree user for friends -> ${COMMON_API}`, function() {
 
-    describe(`post the new user for friends success test -> ${COMMON_API}`, function() {
+    describe(`post the agree user for friends success test -> ${COMMON_API}`, function() {
 
       before(function(done) {
         FriendsModel.updateMany({
           _id: friendId
         }, {
-          friends: []
+          $set: {
+            friends: [ { _id: userId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
+          }
         })
         .then(function() {
           done()
@@ -210,7 +202,7 @@ describe(`${COMMON_API} test`, function() {
               "friends._id": { $in: [ userId ] }
             },
             {
-              "friends.status": FRIEND_STATUS.TO_AGREE
+              "friends.status": FRIEND_STATUS.NORMAL
             }
           ]
         })
@@ -228,12 +220,12 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the new user for friends success`, function(done) {
+      it(`post the agree user for friends success`, function(done) {
 
         Request
         .post(COMMON_API)
         .send({
-          _id: userId
+          _id: userId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -250,13 +242,15 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    describe(`post the new user for friends success but not write success test -> ${COMMON_API}`, function() {
+    describe(`post the agree user for friends success but not write success test -> ${COMMON_API}`, function() {
 
       before(function(done) {
         FriendsModel.updateMany({
           _id: friendId
         }, {
-          friends: [ { _id: userId, timestamps: Date.now() } ]
+          $set: {
+            friends: [ { _id: userId, timestamps: Date.now(), status: FRIEND_STATUS.NORMAL } ]
+          }
         })
         .then(function() {
           done()
@@ -277,7 +271,7 @@ describe(`${COMMON_API} test`, function() {
         })
         .exec()
         .then(user => {
-          return !!user && user.friends.length == 1
+          return !!user && user.friends.length == 1 && user.friends[0].status == FRIEND_STATUS.NORMAL
         })
         .then(result => {
           if(result) return done()
@@ -285,7 +279,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the new user for friends fail but the user is friendsed`, function(done) {
+      it(`post the agree user for friends fail but the user is friendsed`, function(done) {
 
         Request
         .post(COMMON_API)
@@ -309,16 +303,16 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe(`cancel the user friends -> ${COMMON_API}`, function() {
+  describe(`cancel agree the user friends -> ${COMMON_API}`, function() {
 
-    describe(`cancel the new user for friends success test -> ${COMMON_API}`, function() {
+    describe(`cancel agree the new user for friends success test -> ${COMMON_API}`, function() {
 
       before(function(done) {
         FriendsModel.updateMany({
           _id: friendId,
         }, {
           $set: {
-            friends: [ { _id: userId, timestamps: Date.now(), status: FRIEND_STATUS.NORMAL } ]
+            friends: [ { _id: userId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
           }
         })
         .then(function() {
@@ -351,7 +345,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`cancel the new user for friends success`, function(done) {
+      it(`cancel the agree user for friends success`, function(done) {
 
         Request
         .delete(COMMON_API)
@@ -373,7 +367,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    describe(`cancel the new user for friends success but not write database test -> ${COMMON_API}`, function() {
+    describe(`cancel agree the new user for friends success but not write database test -> ${COMMON_API}`, function() {
 
       before(function(done) {
         FriendsModel.updateMany({
@@ -391,26 +385,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      after(function(done) {
-        FriendsModel.findOne({
-          _id: friendId,
-          friends: []
-        })
-        .select({
-          _id: 0,
-          friends: 1
-        })
-        .exec()
-        .then(user => {
-          return !!user
-        })
-        .then(result => {
-          if(result) return done()
-          done(new Error(COMMON_API))
-        })
-      })
-
-      it(`cancel the new user for friends fail because the user is not friendsed`, function(done) {
+      it(`cancel agree the new user for friends fail because the user is not friendsed`, function(done) {
         
         Request
         .delete(COMMON_API)
@@ -428,40 +403,6 @@ describe(`${COMMON_API} test`, function() {
           done()
         })
 
-      })
-
-      it(`cancel the user for friends fail because the user status is TO_AGREE`, function(done) {
-        FriendsModel.updateMany({
-          _id: friendId
-        }, {
-          friends: [ { _id: userId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
-        })
-        .then(function() {
-          return Request
-          .delete(COMMON_API)
-          .query({
-            _id: userId.toString()
-          })
-          .set({
-            Accept: 'Application/json',
-            Authorization: `Basic ${selfToken}`
-          })
-          .expect(404)
-          .expect('Content-Type', /json/)
-        })
-        .then(_ => {
-          return FriendsModel.updateMany({
-            _id: friendId
-          }, {
-            friends: []
-          })
-        })
-        .then(_ => {
-          done()
-        })
-        .catch(err => {
-          console.log('oops: ', err)
-        })
       })
 
     })

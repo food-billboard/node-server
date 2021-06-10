@@ -16,7 +16,7 @@ const getMessageList = socket => async (data) => {
     res = JSON.stringify(errWrapper(err))
   }
 
-  socket.emit("get", JSON.stringify(res))
+  socket.emit("get", res)
 }
 
 module.exports = getMessageList

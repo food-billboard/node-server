@@ -28,6 +28,10 @@ const connection = async (socket, next) => {
 
 }
 
+const broadcastRoomMember = () => {
+  
+}
+
 module.exports = {
   connection,
   request,

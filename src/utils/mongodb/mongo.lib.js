@@ -1578,7 +1578,7 @@ const FriendsSchema = new Schema({
     status: {
       type: String,
       enum: Object.keys(FRIEND_STATUS),
-      default: FRIEND_STATUS.NORMAL,
+      default: FRIEND_STATUS.TO_AGREE,
       uppercase: true 
     }
   }]

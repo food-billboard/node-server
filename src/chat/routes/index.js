@@ -8,6 +8,7 @@ const { joinRoom, leaveRoom } = require('./join-room')
 const removeRoom = require('./remove-room')
 const quitRoom = require('./quit-room')
 const connect = require('./connect')
+const getRoom = require('./get-room')
 const { middlewareVerifyTokenForSocketIo } = require("@src/utils")
 
 module.exports = socket => {
@@ -35,4 +36,6 @@ module.exports = socket => {
   .on('quit_room', quitRoom(socket))
   //连接保存信息
   .on('connect_user', connect(socket))
+  //房间列表
+  .on('room', getRoom(socket))
 }

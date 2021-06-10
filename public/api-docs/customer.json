@@ -613,6 +613,117 @@
         ]
       }
     },
+    "/api/customer/manage/friends/agree": {
+      "get": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "用户好友申请列表",
+        "description": "获取用户申请好友",
+        "operationId": "customer_get_manage_friends_agree",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "object",
+              "$ref":"#/definitions/customer_get_manage_friends"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "同意申请",
+        "description": "同意申请",
+        "operationId": "customer_put_manage_friends_agree",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "用户id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "拒绝申请",
+        "description": "拒绝申请",
+        "operationId": "customer_delete_manage_friends_agree",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
     "/api/customer/manage/fans": {
       "get": {
         "tags": [

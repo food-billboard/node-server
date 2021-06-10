@@ -108,7 +108,8 @@ const BEHAVIOUR_URL_TYPE_MAP = {
 
 const FRIEND_STATUS = {
   NORMAL: 'NORMAL',
-  BLACK: 'BLACK'
+  BLACK: 'BLACK',
+  TO_AGREE: 'TO_AGREE'
 }
 
 const ROOM_TYPE = {

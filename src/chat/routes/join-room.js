@@ -1,3 +1,4 @@
+const { pick } = require('lodash')
 const { joinRoom: joinRoomMethod, leaveRoom: leaveRoomMethod } = require('../services')
 
 //加入房间
@@ -19,7 +20,7 @@ const joinRoom = socket => async (data) => {
     res = JSON.stringify(errWrapper(err))
   }
 
-  socket.emit("join", JSON.stringify(res))
+  socket.emit("join", res)
 }
 
 //离开房间
@@ -41,7 +42,7 @@ const leaveRoom = socket => async (data) => {
     res = JSON.stringify(errWrapper(err))
   }
 
-  socket.emit("leave", JSON.stringify(res))
+  socket.emit("leave", res)
 }
 
 module.exports = {

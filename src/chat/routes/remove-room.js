@@ -1,3 +1,4 @@
+const { pick } = require('lodash')
 const { deleteRoom } = require('../services')
 
 const removeRoom = socket => async(data) => {
@@ -15,7 +16,7 @@ const removeRoom = socket => async(data) => {
     res = JSON.stringify(errWrapper(err))
   }
 
-  socket.emit("remove_room", JSON.stringify(res))
+  socket.emit("remove_room", res)
 }
 
 module.exports = removeRoom
