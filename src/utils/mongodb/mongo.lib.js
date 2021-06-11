@@ -506,13 +506,13 @@ const MemberSchema = new Schema({
   temp_user_id: {
     type: String 
   },
-  status: {
-    enum: Object.keys(ROOM_USER_NET_STATUS),
-    uppercase: true,
-    type: String,
-    trim: true,
-    required: true
-  },
+  // status: {
+  //   enum: Object.keys(ROOM_USER_NET_STATUS),
+  //   uppercase: true,
+  //   type: String,
+  //   trim: true,
+  //   required: true
+  // },
   room: [{
     type: ObjectId,
     ref: 'room'

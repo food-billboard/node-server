@@ -70,6 +70,18 @@ const ROLES_DATABASE_MAP = [
         {
           methods: '*',
           url: `${PREFIX_URL}manage\\/media(\\/valid)?`
+        },
+        {
+          methods: "*",
+          url: `${PREFIX_URL}manage\\/chat\\/room$`
+        },
+        {
+          methods: "*",
+          url: `${PREFIX_URL}manage\\/chat\\/message$`
+        },
+        {
+          methods: "*",
+          url: `${PREFIX_URL}manage\\/chat\\/member$`
         }
       ]
     }
@@ -130,6 +142,18 @@ const ROLES_DATABASE_MAP = [
         {
           methods: [ 'get' ],
           url: `${PREFIX_URL}manage\\/media(\\/valid)?`
+        },
+        {
+          methods: [ 'get', 'put' ],
+          url: `${PREFIX_URL}manage\\/chat\\/room$`
+        },
+        {
+          methods: [ "get" ],
+          url: `${PREFIX_URL}manage\\/chat\\/message$`
+        },
+        {
+          methods: [ "get" ],
+          url: `${PREFIX_URL}manage\\/chat\\/member$`
         }
       ]
     }
@@ -186,6 +210,18 @@ const ROLES_DATABASE_MAP = [
         {
           methods: [ 'get' ],
           url: `${PREFIX_URL}manage\\/instance\\/(info|special)`
+        },
+        {
+          methods: [ 'get' ],
+          url: `${PREFIX_URL}manage\\/chat\\/room$`
+        },
+        {
+          methods: [ "get" ],
+          url: `${PREFIX_URL}manage\\/chat\\/message$`
+        },
+        {
+          methods: [ "get" ],
+          url: `${PREFIX_URL}manage\\/chat\\/member$`
         }
       ]
     }

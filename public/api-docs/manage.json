@@ -21,6 +21,14 @@
       }
     },
     {
+      "name": "chat",
+      "description": "聊天相关",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
       "name": "movie",
       "description": "电影数据相关",
       "externalDocs": {
@@ -3651,6 +3659,440 @@
           }
         }
       }
+    },
+    "/api/manage/chat/room": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "聊天室列表",
+        "description": "",
+        "operationId": "manage_chat_get_room",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          },
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "聊天室id",
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "聊天室类型(GROUP_CHAT CHAT SYSTEM)",
+            "type": "string",
+            "enum": ["GROUP_CHAT", "CHAT", "SYSTEM"]
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "description": "是否为系统聊天室(1是 0否)",
+            "type": "integer"
+          },
+          {
+            "name": "create_user",
+            "in": "query",
+            "description": "创建用户",
+            "type": "integer"
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "内容(name description)",
+            "type": "integer"
+          },
+          {
+            "name": "members",
+            "in": "query",
+            "description": "成员(多个用,分隔)",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_chat_get_room"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "新增聊天室(只能新增系统聊天室)",
+        "description": "",
+        "operationId": "manage_chat_post_room",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "description": "名称",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "avatar",
+            "in": "body",
+            "description": "海报id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "members",
+            "in": "body",
+            "description": "成员(多个用,分隔)",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "description": "描述",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "修改聊天室",
+        "description": "",
+        "operationId": "manage_chat_put_room",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "聊天室id",
+            "type": "string",
+            "required": true 
+          },
+          {
+            "name": "members",
+            "in": "body",
+            "description": "要删除的成员id(多个用,分隔)",
+            "type": "string"
+          },
+          {
+            "name": "avatar",
+            "in": "body",
+            "description": "海报id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "description": "名称",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "description": "描述",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "删除聊天室",
+        "description": "",
+        "operationId": "manage_chat_delete_room",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "聊天室id(多个用,分隔)",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/manage/chat/message": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "消息列表",
+        "description": "",
+        "operationId": "manage_chat_get_message",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          },
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "聊天室id",
+            "type": "string",
+            "required": true 
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_chat_get_message"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "发送消息(只能发送系统消息)",
+        "description": "",
+        "operationId": "manage_chat_post_message",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "content",
+            "in": "body",
+            "description": "内容(媒体资源为id)",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "media_type",
+            "in": "body",
+            "description": "媒体类型(VIDEO, AUDIO, TEXT, IMAGE)",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "房间id",
+            "type": "string",
+            "required": true 
+          },
+          {
+            "name": "point_to",
+            "in": "body",
+            "description": "@",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "删除消息",
+        "description": "",
+        "operationId": "manage_chat_delete_message",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "消息id(多个用,分隔, 也可聊天室id,聊天室id会清空聊天室所有消息)",
+            "type": "string",
+            "required": true 
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "是否为聊天室(1是，0否)",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/manage/chat/member": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "成员列表",
+        "description": "",
+        "operationId": "manage_chat_get_member",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          },
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "成员id",
+            "type": "string"
+          },
+          {
+            "name": "room",
+            "in": "query",
+            "description": "聊天室id",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_chat_get_member"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "新增成员(将成员添加进聊天室, 只能是系统聊天室)",
+        "description": "",
+        "operationId": "manage_chat_post_room",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "成员id(多个用,分隔)",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "room",
+            "in": "body",
+            "description": "房间id",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "剔除成员(将成员从聊天室中移除)",
+        "description": "",
+        "operationId": "manage_chat_delete_member",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "成员id(多个用,分隔)",
+            "type": "string",
+            "required": true 
+          },
+          {
+            "name": "room",
+            "in": "query",
+            "description": "聊天室id",
+            "type": "string",
+            "required": true 
+          },
+          {
+            "name": "is_delete",
+            "in": "query",
+            "description": "是否全部删除(0否 1是, 1则会忽略成员id参数)",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
@@ -6150,6 +6592,365 @@
       },
       "xml": {
         "name": "manage_movie_detail_get_tag"
+      }
+    },
+    "manage_chat_get_room": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "description": "总数"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "聊天室类型",
+                        "enum": ["GROUP_CHAT", "CHAT", "SYSTEM"]
+                      },
+                      "origin": {
+                        "type": "boolean",
+                        "description": "是否为系统聊天室"
+                      },
+                      "delete_users": {
+                        "type": "integer",
+                        "description": "删除人数"
+                      },
+                      "message": {
+                        "type": "integer",
+                        "description": "消息数量"
+                      },
+                      "create_user": {
+                        "type": "object",
+                        "description": "创建用户",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type":"string",
+                            "description":"名称"
+                          },
+                          "description": {
+                            "type":"string",
+                            "description":"描述"
+                          },
+                          "avatar": {
+                            "type":"string",
+                            "description":"头像"
+                          },
+                          "member": {
+                            "type":"string",
+                            "description":"成员id"
+                          }
+                        }
+                      },
+                      "info": {
+                        "type": "object",
+                        "description": "聊天室信息",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type":"string",
+                            "description":"名称"
+                          },
+                          "description": {
+                            "type":"string",
+                            "description":"描述"
+                          }
+                        }
+                      },
+                      "members": {
+                        "type": "integer",
+                        "description": "成员数量"
+                      },
+                      "online_members": {
+                        "type": "integer",
+                        "description": "在线成员数量"
+                      },
+                      "is_delete": {
+                        "type": "boolean",
+                        "description": "是否删除"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_chat_get_room"
+      }
+    },
+    "manage_chat_get_message": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "description": "总数"
+                },
+                "room": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "info": {
+                      "type": "object",
+                      "description": "聊天室信息",
+                      "properties": {
+                        "_id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type":"string",
+                          "description":"名称"
+                        },
+                        "description": {
+                          "type":"string",
+                          "description":"描述"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "聊天室类型",
+                      "enum": ["GROUP_CHAT", "CHAT", "SYSTEM"]
+                    }
+                  }
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "user_info": {
+                        "type": "object",
+                        "description": "用户信息",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type":"string",
+                            "description":"名称"
+                          },
+                          "description": {
+                            "type":"string",
+                            "description":"描述"
+                          },
+                          "avatar": {
+                            "type":"string",
+                            "description":"头像"
+                          },
+                          "member": {
+                            "type":"string",
+                            "description":"成员id"
+                          }
+                        }
+                      },
+                      "message_type": {
+                        "type": "string",
+                        "description": "消息类型",
+                        "enum": ["ORIGIN", "USER"]
+                      },
+                      "point_to": {
+                        "type": "string",
+                        "description": "@"
+                      },
+                      "readed_count": {
+                        "type": "integer",
+                        "description": "已读数量"
+                      },
+                      "deleted_count": {
+                        "type": "integer",
+                        "description": "删除数量"
+                      },
+                      "content": {
+                        "type": "object",
+                        "description": "内容(只存在一项)",
+                        "properties": {
+                          "text": {
+                            "type": "string",
+                            "description":"文本"
+                          },
+                          "video": {
+                            "type":"string",
+                            "description":"视频"
+                          },
+                          "image": {
+                            "type":"string",
+                            "description":"图片"
+                          },
+                          "audio": {
+                            "type":"string",
+                            "description":"音频"
+                          }
+                        }
+                      },
+                      "media_type": {
+                        "type":"string",
+                        "description":"媒体类型",
+                        "enum": ["IMAGE", "VIDEO", "AUDIO", "TEXT"]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_chat_get_message"
+      }
+    },
+    "manage_chat_get_member": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "description": "总数"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "user": {
+                        "type": "object",
+                        "description": "用户信息",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type":"string",
+                            "description":"名称"
+                          },
+                          "description": {
+                            "type":"string",
+                            "description":"描述"
+                          },
+                          "avatar": {
+                            "type":"string",
+                            "description":"头像"
+                          }
+                        }
+                      },
+                      "sid": {
+                        "type": "string",
+                        "description": "socket id"
+                      },
+                      "temp_user_id": {
+                        "type": "string",
+                        "description": "游客id"
+                      },
+                      "room": {
+                        "type": "array",
+                        "description": "房间",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "_id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type":"string",
+                              "description":"名称"
+                            },
+                            "description": {
+                              "type":"string",
+                              "description":"描述"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_chat_get_member"
       }
     }
   },

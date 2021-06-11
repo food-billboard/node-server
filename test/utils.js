@@ -532,6 +532,22 @@ async function generateTemplateFile(files=[
 
 }
 
+const env = process.env.NODE_ENV
+
+function envSet() {
+  return new Promise((resolve) => {
+    process.env.NODE_ENV = 'production'
+    setTimeout(resolve, 300)
+  }) 
+}
+
+function envUnSet() {
+  return new Promise((resolve) => {
+    process.env.NODE_ENV = env
+    setTimeout(resolve, 300)
+  })
+}
+
 module.exports = {
   mockCreateUser,
   mockCreateMovie,
@@ -559,5 +575,7 @@ module.exports = {
   mockCreateFriends,
   mockCreateMember,
   mockCreateMessage,
-  mockCreateRoom
+  mockCreateRoom,
+  envSet,
+  envUnSet
 }
