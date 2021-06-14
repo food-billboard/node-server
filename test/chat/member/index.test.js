@@ -19,8 +19,8 @@ function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
   expect(target).to.be.a('array')
   target.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.any.keys('user', 'status', 'sid', 'createdAt', 'updatedAt', '_id')
-    commonValidate.string(item.status)
+    expect(item).to.be.a('object').and.that.includes.any.keys('user', 'sid', 'createdAt', 'updatedAt', '_id')
+    // commonValidate.string(item.status)
     if(item.sid) {
       commonValidate.string(item.sid)
     }

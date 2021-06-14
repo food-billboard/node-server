@@ -12,6 +12,9 @@ router
     sanitizers: [
       data => {
         try {
+          if(!ObjectId.isValid(data)) return {
+            done: false 
+          }
           return {
             done: true,
             data: {
@@ -30,6 +33,9 @@ router
     sanitizers: [
       data => {
         try {
+          if(!ObjectId.isValid(data)) return {
+            done: false 
+          }
           return {
             done: true,
             data: {
@@ -69,10 +75,10 @@ router
         }
       }
     ]
-  })
+  }, true)
 
-  const match = Object.entries(query).reduce((acc, cur) => {
-    const [ key, value ] = cur
+  const match = Object.values(query).reduce((acc, cur) => {
+    const [[ key, value ]] = Object.entries(cur)
     if(!acc[key]) {
       acc[key] = value 
     }else {
@@ -85,7 +91,7 @@ router
   }, {})
 
   const data = await Promise.all([
-    MessageModel.aggregate([
+    MemberModel.aggregate([
       {
         $match: match
       },
@@ -98,7 +104,7 @@ router
         }
       }
     ]),
-    MessageModel.aggregate([
+    MemberModel.aggregate([
       {
         $match: match
       },
@@ -122,7 +128,7 @@ router
             },
             {
               $lookup: {
-                from: 'image',
+                from: 'images',
                 as: 'avatar',
                 foreignField: "_id",
                 localField: "avatar"
@@ -186,10 +192,8 @@ router
   .then(([total_count, data]) => {
     if(!Array.isArray(total_count) || !Array.isArray(data)) return Promise.reject({ errMsg: 'data error', status: 404 })
     return {
-      data: {
-        total: total_count.length ? total_count[0].total || 0 : 0,
-        list: data,
-      }
+      total: total_count.length ? total_count[0].total || 0 : 0,
+      list: data,
     }
   })
   .then(data => ({ data }))
@@ -219,7 +223,7 @@ router
 
   if(check) return 
 
-  const { _id, room } = Params.sanitizers(ctx.request.body, {
+  const [ _id, room ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => data.split(',').map(item => ObjectId(item.trim()))
@@ -236,8 +240,10 @@ router
     origin: true,
     type: ROOM_TYPE.SYSTEM
   }, {
-    $pushAll: {
-      members: _id 
+    $push: {
+      members: {
+        $each: _id
+      } 
     }
   })
   .select({
@@ -273,9 +279,11 @@ router
 .delete('/', async(ctx) => {
   const check = Params.query(ctx, {
     name: '_id',
+    multipart: true,
     validator: [
       (data, origin) => {
-        if(parseInt(origin.is_delete) == 1) return true 
+        if(origin.is_delete === undefined && !data) return false 
+        if(parseInt(origin.is_delete) === 1) return true 
         const list = data.split(',')
         return list.every(item => ObjectId.isValid(item.trim())) && !!list.length
       }
@@ -295,7 +303,10 @@ router
     name: '_id',
     sanitizers: [
       (data, origin) => {
-        return parseInt(origin.is_delete) == 1 ? false : data.split(',').map(item => ObjectId(item.trim()))
+        if(origin.is_delete === undefined && !data) return false 
+        if(parseInt(origin.is_delete) == 1) return false 
+        const list = data.split(',').map(item => ObjectId(item.trim()))
+        return list 
       }
     ]
   }, {
@@ -332,12 +343,12 @@ router
       }
     } : {
       room: {
-        $in: [_id]
+        $in: [room]
       }
     }
     return MemberModel.updateMany(query, {
       $pull: {
-        room: _id
+        room
       }
     }) 
   })

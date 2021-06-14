@@ -77,7 +77,7 @@ const Params = {
           result
         })
         const _result = realSan.every((san, index) => {
-          const _result = san(result)
+          const _result = san(result, origin)
           return abandonFn((data) => {
             result = data
           }, _result, index != realSan.length - 1)
@@ -185,7 +185,7 @@ const Params = {
             data = data[deep]
           }
           return !!data
-        })) {
+        }) && !multipart) {
           errs.push(name)
           return false
         }

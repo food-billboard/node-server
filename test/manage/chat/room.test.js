@@ -161,7 +161,7 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe.skip(`${COMMON_API} get room list test`, function() {
+  describe(`${COMMON_API} get room list test`, function() {
       
     describe(`${COMMON_API} get room list success test`, function() {
       
@@ -217,6 +217,7 @@ describe(`${COMMON_API} test`, function() {
             return done(err)
           }
           responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
             expect(target.list.some(item => roomId.equals(item._id))).to.be.true 
           })
           done()
@@ -249,6 +250,7 @@ describe(`${COMMON_API} test`, function() {
             return done(err)
           }
           responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
             expect(!!target.list.find(item => systemRoomId.equals(item._id))).to.be.true 
           })
           done()
@@ -280,6 +282,7 @@ describe(`${COMMON_API} test`, function() {
             return done(err)
           }
           responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
             expect(!!target.list.find(item => systemRoomId.equals(item._id))).to.be.true 
           })
           done()
@@ -310,6 +313,7 @@ describe(`${COMMON_API} test`, function() {
             return done(_)
           }
           responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
             expect(!!target.list.find(item => roomId.equals(item._id))).to.be.true 
           })
           done()
@@ -340,6 +344,7 @@ describe(`${COMMON_API} test`, function() {
             return done(err)
           }
           responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
             expect(!!target.list.find(item => roomId.equals(item._id))).to.be.true 
           })
           done()
@@ -369,6 +374,7 @@ describe(`${COMMON_API} test`, function() {
             return done(err)
           }
           responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
             expect(!!target.list.find(item => systemRoomId.equals(item._id))).to.be.true 
           })
           done()
@@ -379,7 +385,7 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe.skip(`${COMMON_API} post room test`, function() {
+  describe(`${COMMON_API} post room test`, function() {
       
     describe(`${COMMON_API} post room success test`, function() {
       
@@ -643,7 +649,7 @@ describe(`${COMMON_API} test`, function() {
             _id: roomId.toString(),
             avatar: '8f63270f005f1c1a0d9448ca',
             name: newName,
-            members: otherMemberId.toString(),
+            members: memberId.toString(),
             description: newName,
           })
           .set({
@@ -688,44 +694,6 @@ describe(`${COMMON_API} test`, function() {
     })
 
     describe(`${COMMON_API} put room fail test`, function() {
-
-      after(function(done) {
-        SpecialModel.findOne({
-          $or: [
-            {
-              description: ''
-            },
-            {
-              name: ''
-            },
-            {
-              movie: [
-                movieAId,
-                movieBId
-              ],
-            },
-            {
-              movie: [
-                movieAId,
-                movieBId,
-                null
-              ],
-            }
-          ]
-        })
-        .select({
-          _id: 1
-        })
-        .exec()
-        .then(data => {
-          expect(!!data && !!data._doc).to.be.false
-          done()
-        })
-        .catch(err => {
-          console.log('oops: ', err)
-          done(err)
-        })
-      })
       
       it(`put the room fail because the user not the auth`, function(done) {
         
@@ -854,15 +822,15 @@ describe(`${COMMON_API} test`, function() {
         .then(_ => {
           return RoomModel.findOne({
             _id: roomId.toString(),
-            "info.avatar": '8f63270f005f1c1a0d9448c',
           })
           .select({
-            _id: 1
+            _id: 1,
+            "info.avatar": 1
           })
           .exec()
         })
         .then(function(data) {
-          expect(!!data).to.be.false 
+          expect(data.info.avatar.toString() === '8f63270f005f1c1a0d9448c').to.be.false 
           done()
         })
         .catch(err => {
@@ -901,6 +869,9 @@ describe(`${COMMON_API} test`, function() {
         .then(function(data) {
           expect(!!data).to.be.true 
           done()
+        })
+        .catch(err => {
+          done(err)
         })
       })
 
@@ -970,7 +941,7 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
-  describe.skip(`${COMMON_API} delete room test`, function() {
+  describe(`${COMMON_API} delete room test`, function() {
       
     describe(`${COMMON_API} delete room success test`, function() {
 

@@ -339,7 +339,18 @@ router
     const model = new RoomModel(initData)
     return model.save()
   })
-  .then(data => ({ data: { _id: data._id } }))
+  .then(async (data) => {
+    await MemberModel.updateMany({
+      _id: {
+        $in: data.members
+      }
+    }, {
+      $addToSet: {
+        room: data._id 
+      }
+    })
+    return { data: { _id: data._id } }
+  })
   .catch(dealErr(ctx))
 
   responseDataDeal({
@@ -395,12 +406,12 @@ router
           const result = {
             done: true,
             data: {
-              $pullAll: {
+              $set: {
                 members: data.split(',').map(item => ObjectId(item.trim()))
               }
             }
           }
-          if(result.data.$pullAll.members.length == 0) return {
+          if(result.data.$set.members.length == 0) return {
             done: false 
           }
           return result 
@@ -421,7 +432,9 @@ router
         return {
           done: true,
           data: {
-            $set: data 
+            $set: {
+              "info.description": data
+            } 
           }
         }
       }
@@ -445,8 +458,8 @@ router
     ]
   }, true)
 
-  let updateParams = Object.entries(update).reduce((acc, cur) => {
-    const [ key, value ] = cur 
+  let updateParams = Object.values(update).reduce((acc, cur) => {
+    const [[ key, value ]] = Object.entries(cur) 
     if(!acc[key]) {
       acc[key] = value
     }else {
@@ -461,10 +474,10 @@ router
     _id 
   }
   try {
-    const deleteMembers = updateParams.$pullAll.members
-    if(Array.isArray(deleteMembers)) {
+    const members = updateParams.$set.members
+    if(Array.isArray(members)) {
       query.create_user = {
-        $nin: deleteMembers
+        $in: members
       }
     }
   }catch(err) {}

@@ -81,20 +81,20 @@ router
           $set: { roles: [ 'USER' ] }
         })
       ] : []),
-      ...(uid ? [RoomModel.updateOne({
-        origin: false,
-        "members.sid": uid,
-        "members.user": null
-      }, {
-        $set: { "members.$.user": _id }
-      })] : []),
-      RoomModel.updateOne({
-        origin: true,
-        type: 'SYSTEM',
-        "members.user": { $ne: _id }
-      }, {
-        $push: { members: { message: [], user: _id, status: 'OFFLINE' } }
-      })
+      // ...(uid ? [RoomModel.updateOne({
+      //   origin: false,
+      //   "members.sid": uid,
+      //   "members.user": null
+      // }, {
+      //   $set: { "members.$.user": _id }
+      // })] : []),
+      // RoomModel.updateOne({
+      //   origin: true,
+      //   type: 'SYSTEM',
+      //   "members.user": { $ne: _id }
+      // }, {
+      //   $push: { members: { message: [], user: _id, status: 'OFFLINE' } }
+      // })
     ])
     return {
       data: omit(data, ['roles'])

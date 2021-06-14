@@ -1,14 +1,15 @@
 require('module-alias/register')
-const { UserModel, ImageModel, RoomModel, MemberModel, ROOM_TYPE, MessageModel, parseData, MESSAGE_MEDIA_TYPE } = require('@src/utils')
+const { UserModel, ImageModel, RoomModel, MemberModel, ROOM_TYPE, parseData } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateImage, mockCreateRoom, mockCreateMember, mockCreateMessage } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateImage, mockCreateRoom, mockCreateMember, envSet, envUnSet } = require('@test/utils')
 
 const COMMON_API = '/api/manage/chat/member'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
-  expect(target).to.be.a('array')
-  target.forEach(item => {
+  expect(target).to.be.a('object').and.that.include.all.keys('total', 'list')
+  commonValidate.number(target.total)
+  target.list.forEach(item => {
     expect(item).to.be.a('object').and.that.includes.any.keys('user', 'room', 'sid', 'createdAt', 'updatedAt', '_id', 'temp_user_id')
     if(item.sid) {
       commonValidate.string(item.sid)
@@ -19,13 +20,15 @@ function responseExpect(res, validate=[]) {
     commonValidate.objectId(item._id)
     commonValidate.date(item.createdAt)
     commonValidate.date(item.updatedAt)
-    expect(item.user).to.be.a('object').and.that.includes.any.keys('username', 'avatar', '_id', 'description')
-    commonValidate.string(item.user.description)
-    commonValidate.string(item.user.username)
-    if(item.user.avatar) {
-      commonValidate.string(item.user.avatar)
+    if(item.user) {
+      expect(item.user).to.be.a('object').and.that.includes.any.keys('username', 'avatar', '_id', 'description')
+      commonValidate.string(item.user.description)
+      commonValidate.string(item.user.username)
+      if(item.user.avatar) {
+        commonValidate.string(item.user.avatar)
+      }
+      commonValidate.objectId(item.user._id)
     }
-    commonValidate.objectId(item.user._id)
     expect(item.room).to.be.a('array')
     item.room.forEach(item => {
       expect(item).to.be.a('object').and.that.includes.any.keys('name', 'description', '_id')
@@ -199,7 +202,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          _id: roomId.toString()
+          room: roomId.toString()
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -214,6 +217,7 @@ describe(`${COMMON_API} test`, function() {
             return done(err)
           }
           responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
             expect(target.list.every(item => item.room.some(item => roomId.equals(item._id)))).to.be.true 
           })
           done()
@@ -245,6 +249,7 @@ describe(`${COMMON_API} test`, function() {
             return done(err)
           }
           responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
             expect(target.list.every(item => memberId.equals(item._id))).to.be.true 
           })
           done()
@@ -373,11 +378,11 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the member fail becuase the params of _id is not valid`, function(done) {
+      it(`post the member fail because the params of _id is not valid`, function(done) {
         Request
         .post(COMMON_API)
         .send({
-          _id: memberId.toString().sclie(1),
+          _id: memberId.toString().slice(1),
           room: systemRoomId.toString()
         })
         .set({
@@ -392,7 +397,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the member fail becuase lack of the params of _id`, function(done) {
+      it(`post the member fail because lack of the params of _id`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -410,7 +415,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the member fail becuase the params of room is not valid`, function(done) {
+      it(`post the member fail because the params of room is not valid`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -429,7 +434,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the member fail becuase lack of the params of room`, function(done) {
+      it(`post the member fail because lack of the params of room`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -458,7 +463,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
         })
-        .expect(400)
+        .expect(404)
         .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
@@ -514,7 +519,7 @@ describe(`${COMMON_API} test`, function() {
               }
             }, {
               $addToSet: {
-                members: memberid
+                members: memberId
               }
             })
             .select({
@@ -568,7 +573,7 @@ describe(`${COMMON_API} test`, function() {
         .then(_ => {
           return Request
           .delete(COMMON_API)
-          .send({
+          .query({
             is_delete: 1,
             room: systemRoomId.toString()
           })
@@ -588,7 +593,7 @@ describe(`${COMMON_API} test`, function() {
               }
             }, {
               $addToSet: {
-                members: memberid
+                members: memberId
               }
             })
             .select({
@@ -762,7 +767,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`delete the member fail because then room type is not system`, function() {
+      it(`delete the member fail because then room type is not system`, function(done) {
         Request
         .delete(COMMON_API)
         .query({
@@ -773,7 +778,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
         })
-        .expect(400)
+        .expect(404)
         .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)

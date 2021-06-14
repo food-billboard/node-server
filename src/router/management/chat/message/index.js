@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const { merge } = require('lodash')
 const { Types: { ObjectId } } = require('mongoose')
-const { MessageModel, RoomModel, verifyTokenToData, Params, notFound, avatarGet, MESSAGE_TYPE, MESSAGE_MEDIA_TYPE, ROOM_TYPE, dealErr, responseDataDeal } = require('@src/utils')
+const { MessageModel, RoomModel, MemberModel, verifyTokenToData, Params, notFound, avatarGet, MESSAGE_TYPE, MESSAGE_MEDIA_TYPE, ROOM_TYPE, dealErr, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
@@ -98,7 +98,7 @@ router
                   },
                   {
                     $lookup: {
-                      from: 'image',
+                      from: 'images',
                       as: 'avatar',
                       foreignField: "_id",
                       localField: "avatar"
@@ -207,6 +207,7 @@ router
           user_info: "$user_info",
           message_type: 1,
           point_to: 1,
+          room: 1,
           readed_count: {
             $size: {
               $ifNull: [
@@ -253,7 +254,7 @@ router
     .then(notFound)
     .then(data => {
       const { info, ...nextData } = data 
-      return merge({}, ...nextData, {
+      return merge({}, nextData, {
         info: merge({}, info, {
           avatar: avatarGet(info.avatar)
         })
@@ -263,11 +264,9 @@ router
   .then(([total_count, data, roomData]) => {
     if(!Array.isArray(total_count) || !Array.isArray(data)) return Promise.reject({ errMsg: 'data error', status: 404 })
     return {
-      data: {
-        total: total_count.length ? total_count[0].total || 0 : 0,
-        list: data,
-        room: roomData
-      }
+      total: total_count.length ? total_count[0].total || 0 : 0,
+      list: data,
+      room: roomData
     }
   })
   .then(data => ({ data }))
@@ -405,7 +404,10 @@ router
       }
     }) 
   })  
-  .then(_ => ({ data: { _id: messageId } }))
+  .then(data => {
+    if(!data || data.nModified === 0) return Promise.reject({ errMsg: 'not Found', status: 404 })
+    return { data: { _id: messageId } }
+  })
   .catch(dealErr(ctx))
 
   responseDataDeal({
@@ -456,6 +458,9 @@ router
         $pullAll: {
           message: _ids
         }
+      })
+      .then(data => {
+        if(data.nModified === 0) return Promise.reject({ errMsg: 'not found', status: 404 })
       }),
       MessageModel.deleteMany({
         _id: { $in: _ids }

@@ -21,7 +21,9 @@ function responseExpect(res, validate=[]) {
       commonValidate.poster(item.avatar)
       commonValidate.objectId(item.avatar_id)
     }
-    commonValidate.string(item.key)
+    if(item.key) {
+      commonValidate.string(item.key)
+    }
     commonValidate.string(item.source_type)
     commonValidate.date(item.createdAt)
     commonValidate.date(item.updatedAt)

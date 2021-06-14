@@ -8,6 +8,6 @@ const router = new Router()
 router
 .use('/room', Room.routes(), Room.allowedMethods())
 .use('/message', Message.routes(), Message.allowedMethods())
-.use('/members', Members.routes(), Members.allowedMethods())
+.use('/member', Members.routes(), Members.allowedMethods())
 
 module.exports = router

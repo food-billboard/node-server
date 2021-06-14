@@ -3799,7 +3799,7 @@
           {
             "name": "members",
             "in": "body",
-            "description": "要删除的成员id(多个用,分隔)",
+            "description": "成员id(多个用,分隔)",
             "type": "string"
           },
           {
@@ -6672,7 +6672,7 @@
                         "type": "object",
                         "description": "聊天室信息",
                         "properties": {
-                          "_id": {
+                          "avatar": {
                             "type": "string"
                           },
                           "name": {
@@ -6770,6 +6770,10 @@
                     "properties": {
                       "_id": {
                         "type": "string"
+                      },
+                      "room": {
+                        "type": "string",
+                        "description": "房间id"
                       },
                       "createdAt": {
                         "type": "string",

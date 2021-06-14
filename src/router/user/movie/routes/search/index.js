@@ -265,7 +265,11 @@ router
       data
     }
   })
-  .catch(dealErr(ctx))
+  .catch(err => {
+    console.log(err, 2222)
+    return dealErr(ctx)(err)
+  })
+  // .catch(dealErr(ctx))
 
   responseDataDeal({
     ctx,

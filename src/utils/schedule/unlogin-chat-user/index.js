@@ -2,6 +2,7 @@ const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
 const Day = require('dayjs')
 const { log4Error } = require('@src/config/winston')
+const { unGenerateChatUserSchedule } = require('./un-generate-user')
 const { MemberModel, RoomModel } = require('../../mongodb/mongo.lib')
 
 function scheduleMethod() {
@@ -21,7 +22,7 @@ function scheduleMethod() {
       }
     },
     {
-      $proeject: {
+      $project: {
         _id: 1
       }
     }
@@ -63,5 +64,6 @@ const unLoginChatUserSchedule = () => {
 }
 
 module.exports = {
-  unLoginChatUserSchedule
+  unLoginChatUserSchedule,
+  unGenerateChatUserSchedule
 }

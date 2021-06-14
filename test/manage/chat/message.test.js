@@ -1,7 +1,8 @@
 require('module-alias/register')
 const { UserModel, ImageModel, RoomModel, MemberModel, ROOM_TYPE, MessageModel, MESSAGE_MEDIA_TYPE } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateImage, mockCreateRoom, mockCreateMember, mockCreateMessage } = require('@test/utils')
+const { Types: { ObjectId } } = require('mongoose')
+const { Request, commonValidate, mockCreateUser, mockCreateImage, mockCreateRoom, mockCreateMember, mockCreateMessage, envSet, envUnSet } = require('@test/utils')
 
 const COMMON_API = '/api/manage/chat/message'
 
@@ -18,15 +19,16 @@ function responseExpect(res, validate=[]) {
   commonValidate.string(target.room.type)
   expect(target.room.info).to.be.a('object').and.that.includes.any.keys('name', 'description', 'avatar')
   commonValidate.string(target.room.info.name)
-  commonValidate.string(target.room.info.type)
+  commonValidate.string(target.room.info.description)
   if(target.room.info.avatar) {
     commonValidate.string(target.room.info.avatar)
   }
 
   expect(target.list).to.be.a('array')
   target.list.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'createdAt', 'updatedAt', 'user_info', 'message_type', 'point_to', 'readed_count', 'deleted_count', 'content', 'media_type')
+    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'createdAt', 'updatedAt', 'user_info', 'message_type', 'point_to', 'readed_count', 'deleted_count', 'content', 'media_type', 'room')
     commonValidate.objectId(item._id)
+    commonValidate.objectId(item.room)
     commonValidate.date(item.createdAt)
     commonValidate.date(item.updatedAt)
     expect(item.user_info).to.be.a('object').and.that.include.any.keys('username', 'avatar', '_id', 'member', 'description')
@@ -132,6 +134,7 @@ describe(`${COMMON_API} test`, function() {
           audio: mockAudioId,
           text: COMMON_API
         },
+        user_info: memberId,
         media_type: MESSAGE_MEDIA_TYPE.TEXT
       })
       const { model: mediaMessage } = mockCreateMessage({
@@ -139,6 +142,7 @@ describe(`${COMMON_API} test`, function() {
           audio: mockAudioId,
           image: imageId
         },
+        user_info: memberId,
         media_type: MESSAGE_MEDIA_TYPE.IMAGE
       })
       return Promise.all([
@@ -274,7 +278,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`${COMMON_API} get message list fail test`, function() {
 
-      it(`get message list fail becuase the id is not found`, function(done) {
+      it(`get message list fail because the id is not found`, function(done) {
         const id = roomId.toString()
         Request
         .get(COMMON_API)
@@ -294,7 +298,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get message list fail becuase the id is not valid`, function(done) {
+      it(`get message list fail because the id is not valid`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -314,7 +318,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get message list fail becuase lack of the params of id`, function(done) {
+      it(`get message list fail because lack of the params of id`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -364,7 +368,7 @@ describe(`${COMMON_API} test`, function() {
           }
           const { res: { data: { _id } } } = obj
           return MessageModel.findOne({
-            _id: objectId(_id),
+            _id: ObjectId(_id),
             media_type: MESSAGE_MEDIA_TYPE.TEXT,
             "content.text": COMMON_API,
             room: systemRoomId,
@@ -408,7 +412,7 @@ describe(`${COMMON_API} test`, function() {
           }
           const { res: { data: { _id } } } = obj
           return MessageModel.findOne({
-            _id: objectId(_id),
+            _id: ObjectId(_id),
             media_type: MESSAGE_MEDIA_TYPE.IMAGE,
             "content.image": imageId,
             room: systemRoomId,
@@ -475,7 +479,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase the params of content is not valid`, function(done) {
+      it(`post the message fail because the params of content is not valid`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -495,7 +499,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase lack of the params of content`, function(done) {
+      it(`post the message fail because lack of the params of content`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -514,7 +518,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase the params of media_type is not valid`, function(done) {
+      it(`post the message fail because the params of media_type is not valid`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -534,7 +538,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase lack of the params of media_type`, function(done) {
+      it(`post the message fail because lack of the params of media_type`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -553,7 +557,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase the params of _id is not valid`, function(done) {
+      it(`post the message fail because the params of _id is not valid`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -573,7 +577,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase lack of the params of _id`, function(done) {
+      it(`post the message fail because lack of the params of _id`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -592,7 +596,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
       
-      it(`post the message fail becuase the _id is not found`, function(done) {
+      it(`post the message fail because the _id is not found`, function(done) {
         const id = systemRoomId.toString()
         Request
         .post(COMMON_API)
@@ -613,7 +617,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the message fail becuase the room is not system`, function(done) {
+      it(`post the message fail because the room is not system`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -625,7 +629,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
         })
-        .expect(400)
+        .expect(404)
         .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)
@@ -670,11 +674,13 @@ describe(`${COMMON_API} test`, function() {
           return RoomModel.updateOne({
             _id: systemRoomId
           }, {
-            $pushAll: {
-              message: [
-                messageId1,
-                messageId2
-              ]
+            $push: {
+              message: {
+                $each: [
+                  messageId1,
+                  messageId2
+                ]
+              }
             }
           })
         })
@@ -727,7 +733,7 @@ describe(`${COMMON_API} test`, function() {
             MessageModel.findOne({
               _id: messageId1
             })
-            .slect({
+            .select({
               _id: 1
             })
             .exec()
@@ -762,7 +768,7 @@ describe(`${COMMON_API} test`, function() {
               _id: systemRoomId,
               message: []
             }),
-            MessageModel.findMany({
+            MessageModel.find({
               _id: {
                 $in: [
                   messageId2,
@@ -770,7 +776,7 @@ describe(`${COMMON_API} test`, function() {
                 ]
               }
             })
-            .slect({
+            .select({
               _id: 1
             })
             .exec()
@@ -932,7 +938,23 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`delete the message fail because then room type is not system`, function() {
+      it(`delete the message fail because then room type is not system`, function(done) {
+        Promise.all([
+          MessageModel.updateOne({
+            _id: messageId
+          }, {
+            $set: {
+              room: systemRoomId
+            }
+          }),
+          RoomModel.updateOne({
+            _id: roomId
+          }, {
+            $push: {
+              message: messageId
+            }
+          })
+        ])
         Request
         .delete(COMMON_API)
         .query({
@@ -942,7 +964,7 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
         })
-        .expect(400)
+        .expect(404)
         .expect('Content-Type', /json/)
         .end(function(err) {
           if(err) return done(err)

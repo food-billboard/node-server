@@ -88,4 +88,15 @@
       new_fields: "$old_fields"
     }
   }
+
+```
+
+7. $push  
+- 因为`pushAll`添加多项会报错，所以选择`$push`代替  
+```javascript
+  {
+    fields: {
+      $each: [ value1, value2 ]
+    }
+  }
 ```

@@ -786,7 +786,7 @@ describe(`${COMMON_API} test`, function() {
 
       it(`check the edit user info fail because lack the params of role`, function(done) {
         
-        const { role, ...nextUserInfo } = userInfo
+        const { roles, ...nextUserInfo } = userInfo
         
         Request
         .post(COMMON_API)
