@@ -31,7 +31,7 @@ function scheduleMethod() {
     ])
     .then(data => {
       const needGenerateUser = userList.filter(item => {
-        return !data.some(member => member.usr.equals(item._id))
+        return !data.some(member => member.user && member.user.equals(item._id))
       })
       return Promise.all(needGenerateUser.map(item => {
         const { _id } = item 

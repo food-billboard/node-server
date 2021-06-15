@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { MessageModel, RoomModel, MemberModel, Params, notFound, ROOM_TYPE, dealErr, responseDataDeal } = require('@src/utils')
+const { RoomModel, MemberModel, Params, notFound, ROOM_TYPE, dealErr, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
 
