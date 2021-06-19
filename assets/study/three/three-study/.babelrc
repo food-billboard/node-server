@@ -1,0 +1,24 @@
+{
+  "presets": ["next/babel"],
+  "plugins": [
+    [
+      "import",
+      {
+        "libraryName": "antd",
+        // "libraryDirectory": "es",
+        "style": true
+      }
+    ],
+    [
+      "module-resolver",
+      {
+        "alias": {
+          "@/components": "./components",
+          "@/constants": "./utils/constants",
+          "@/pages": "./pages",
+          "@/utils": "./utils"
+        }
+      }
+    ]
+  ]
+}
