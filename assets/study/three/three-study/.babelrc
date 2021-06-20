@@ -16,8 +16,22 @@
           "@/components": "./components",
           "@/constants": "./utils/constants",
           "@/pages": "./pages",
-          "@/utils": "./utils"
+          "@/utils": "./utils",
+          "@/store": "./store",
+          "@/config": "./config"
         }
+      }
+    ],
+    [
+      "styled-components", 
+      { 
+        "ssr": true 
+      }
+    ],
+    [
+      "@babel/plugin-proposal-decorators",
+      {
+        "legacy": true
       }
     ]
   ]

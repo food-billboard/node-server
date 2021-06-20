@@ -23,6 +23,12 @@
       ],
       "@/constants/*": [
         "./utils/constants/*"
+      ],
+      "@/store": [
+        "./store"
+      ],
+      "@/config/*": [
+        "./config/*"
       ]
     }
   }
