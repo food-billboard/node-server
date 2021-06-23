@@ -6,7 +6,6 @@ const generateToken = (method) => async (socket, data, params, headers={}) => {
   const newHeaders = merge({}, headers, {
     authorization: `Basic ${token}`
   })
-  console.log(newHeaders, 23333)
   return method(params, newHeaders)
 }
 

@@ -139,7 +139,12 @@ router
   .then(notFound)
   .then(data => {
     return FriendsModel.updateOne({
-      user: id 
+      user: id,
+      friends: {
+        $size: {
+          $lt: 9999
+        }
+      }
     }, {
       $push: { friends: { _id, timestamps: Date.now() } },
       ...(data && data._id ? { $set: { member: data._id } } : {})

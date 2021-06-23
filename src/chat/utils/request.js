@@ -112,7 +112,6 @@ const request = async (url, setting={}) => {
         ...(params ? { params: formatQuery(params) } : {}),
       })
     } catch(err) {
-      console.log(err, 2333)
       error = {
         status: err.response.status,
         errMsg: err.response.statusText

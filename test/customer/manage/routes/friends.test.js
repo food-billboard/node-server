@@ -256,7 +256,9 @@ describe(`${COMMON_API} test`, function() {
         FriendsModel.updateMany({
           _id: friendId
         }, {
-          friends: [ { _id: userId, timestamps: Date.now() } ]
+          $set: {
+            friends: [ { _id: userId, timestamps: Date.now() } ]
+          }
         })
         .then(function() {
           done()
@@ -303,6 +305,35 @@ describe(`${COMMON_API} test`, function() {
           done()
         })
 
+      })
+
+      it(`post the user for friends fail because the friends size is limit`, function() {
+        FriendsModel.updateMany({
+          _id: friendId
+        }, {
+          $set: {
+            friends: new Array(9999).fill({ _id: userId, timestamps: Date.now() })
+          }
+        })
+        .then(function() {
+          return Request
+          .post(COMMON_API)
+          .send({
+            _id: userId.toString()
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(404)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(function(err) {
+          done(err)
+        })
       })
 
     })
