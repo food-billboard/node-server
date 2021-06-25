@@ -202,7 +202,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref": "#/definitions/chat_member_get"
+              "$ref": "#/definitions/chat_message_get"
             }
           }
         },
@@ -944,109 +944,101 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"object",
-              "properties": {
-                "room": {
-                  "type": "object",
-                  "properties": {
-                    "_id": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string",
-                      "description": "描述"
-                    },
-                    "avatar": {
-                      "type": "string",
-                      "description": "头像"
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "房间名称"
-                    }
-                  }
-                },
-                "message": {
-                  "type": "array",
-                  "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "房间类型",
+                    "enum": [ "GROUP_CHAT", "CHAT", "SYSTEM" ]
+                  },
+                  "create_user": {
                     "type": "object",
+                    "description": "用户信息",
+                    "properties": {
+                      "username": {
+                        "type": "string",
+                        "description": "用户名"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "member": {
+                        "type": "string",
+                        "description": "成员id"
+                      },
+                      "_id": {
+                        "type": "string"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "头像"
+                      }
+                    }
+                  },
+                  "info": {
+                    "type": "object",
+                    "description": "房间信息",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "房间名称"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "房间描述"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "房间海报"
+                      }
+                    }
+                  },
+                  "message_info": {
+                    "type": "object",
+                    "description": "用户信息",
                     "properties": {
                       "_id": {
                         "type": "string"
                       },
-                      "create_user": {
-                        "type": "object",
-                        "description": "用户信息",
-                        "properties": {
-                          "username": {
-                            "type": "string",
-                            "description": "用户名"
-                          },
-                          "_id": {
-                            "type": "string"
-                          },
-                          "avatar": {
-                            "type": "string",
-                            "description": "头像"
-                          }
-                        }
-                      },
-                      "info": {
-                        "type": "object",
-                        "description": "用户信息",
-                        "properties": {
-                          "username": {
-                            "type": "string",
-                            "description": "用户名"
-                          },
-                          "_id": {
-                            "type": "string"
-                          },
-                          "avatar": {
-                            "type": "string",
-                            "description": "头像"
-                          },
-                          "description": {
-                            "type": "string",
-                            "description": "描述"
-                          }
-                        }
-                      },
-                      "createdAt": {
+                      "text": {
                         "type": "string",
-                        "format": "date-time"
+                        "description": "文本"
                       },
-                      "updatedAt": {
+                      "image": {
                         "type": "string",
-                        "format": "date-time"
+                        "description": "图片"
                       },
-                      "message": {
-                        "type": "object",
-                        "description": "最新消息内容(只会包含下面属性的一项---视频会包含video和poster两项)",
-                        "properties": {
-                          "video": {
-                            "type": "string",
-                            "description": "视频"
-                          },
-                          "image": {
-                            "type": "string",
-                            "description": "图片"
-                          },
-                          "text": {
-                            "type": "string",
-                            "description": "文本"
-                          },
-                          "audio": {
-                            "type": "string",
-                            "description": "音频"
-                          },
-                          "poster": {
-                            "type": "string",
-                            "description": "视频海报"
-                          }
-                        }
+                      "poster": {
+                        "type": "视频海报"
+                      },
+                      "video": {
+                        "type": "string",
+                        "description": "视频"
+                      },
+                      "media_type": {
+                        "type": "string",
+                        "description": "媒体类型",
+                        "enum": [ "IMAGE", "VIDEO", "TEXT", "AUDIO" ]
                       }
                     }
+                  },
+                  "un_read_message_count" : {
+                    "type": "integer",
+                    "description": "未读消息数量"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
                   }
                 }
               }
@@ -1070,7 +1062,33 @@
             "data": {
               "type":"object",
               "properties": {
-                "data": {
+                "room": {
+                  "type":"object",
+                  "properties": {
+                    "_id": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "description": "房间信息",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "房间名称"
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "房间描述"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "description": "房间海报"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -1086,6 +1104,10 @@
                             "type": "string",
                             "description": "用户名"
                           },
+                          "description": {
+                            "type": "string",
+                            "description": "描述"
+                          },
                           "_id": {
                             "type": "string"
                           },
@@ -1097,7 +1119,8 @@
                       },
                       "media_type": {
                         "type": "string",
-                        "description": "媒体类型"
+                        "description": "媒体类型",
+                        "enum": [ "IMAGE", "VIDEO", "TEXT", "AUDIO" ]
                       },
                       "point_to": {
                         "type": "string",
@@ -1202,6 +1225,11 @@
                     "properties": {
                       "_id": {
                         "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "房间类型",
+                        "enum": [ "GROUP_CHAT", "CHAT", "SYSTEM" ]
                       },
                       "create_user": {
                         "type": "object",

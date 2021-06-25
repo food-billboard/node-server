@@ -1,4 +1,5 @@
 const { deleteMessage: deleteMessagePost } = require('../services')
+const { errWrapper } = require('../utils')
 
 const deleteMessage = (socket) => async (data) => {
 

@@ -69,7 +69,7 @@ const getMessageDetail = async (data, headers) => {
 const readMessage = async (data, headers) => {
   return request(url('/api/chat/message'), {
     method: 'PUT',
-    params: data,
+    data,
     headers
   })
 }

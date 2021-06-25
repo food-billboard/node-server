@@ -163,6 +163,7 @@ router
         _id: 1,
         createdAt: 1,
         updatedAt: 1,
+        type: 1,
         create_user: {
           username: "$create_user.username",
           avatar: "$create_user.avatar",

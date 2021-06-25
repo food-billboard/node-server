@@ -1,5 +1,6 @@
 const { pick } = require('lodash')
 const { deleteRoom } = require('../services')
+const { errWrapper } = require('../utils')
 
 const removeRoom = socket => async(data) => {
 

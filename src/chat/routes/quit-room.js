@@ -1,6 +1,6 @@
 const { pick } = require('lodash')
 const { quitRoom: quitRoomMethod } = require('../services')
-
+const { errWrapper } = require('../utils')
 
 //可以在这里广播通知所有聊天室内用户有用户离开
 const quitRoom = socket => async(data) => {

@@ -1,5 +1,6 @@
 const { pick } = require('lodash')
 const { getRoomList: getRoomListMethod } = require('../services')
+const { errWrapper } = require('../utils')
 
 const getRoomList = socket => async (data) => {
 

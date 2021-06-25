@@ -1,5 +1,6 @@
 const { pick } = require('lodash')
 const { readMessage: readMessageMethod } = require('../services')
+const { errWrapper } = require('../utils')
 
 const readMessage = socket => async (data) => {
 

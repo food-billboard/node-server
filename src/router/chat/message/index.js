@@ -227,6 +227,7 @@ router
                 image: "$content.image.src",
                 video: "$content.video.src",
                 poster: "$content.video.poster",
+                media_type: 1
               }
             }
           ],
@@ -269,16 +270,15 @@ router
         }
       },
       {
-        $unwind: "$message_info"
-      },
-      {
         $project: {
           _id: 1,
+          type: 1,
           create_user: {
             username: "$create_user_info.username",
             avatar: "$create_user_info.avatar.src",
             _id: "$create_user_info._id",
             member: "$create_user._id",
+            description: "$create_user_info.description",
           },
           info: {
             name: "$info.name",
@@ -652,10 +652,14 @@ router
   
 })
 .put('/', async (ctx) => {
+  console.log(33333333, ctx.request.body)
   const check = Params.body(ctx, {
     name: '_id',
     validator: [
-			data => data.split(',').every(item => ObjectId.isValid(item.trim()))
+			data => {
+        console.log(data, 222222)
+        return data.split(',').every(item => ObjectId.isValid(item.trim()))
+      }
 		]
   })
   if(check) return 
@@ -670,7 +674,9 @@ router
   const { request: { body: { type } } } = ctx 
   let match = {}
   if(type == '1') {
-    match.room = _id[0]
+    match.room = {
+      $in: _id
+    }
   }else {
     match._id = {
       $in: _id

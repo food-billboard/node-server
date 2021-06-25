@@ -11,8 +11,9 @@ function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
   expect(target).to.be.a('array')
   target.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('create_user', 'info', 'members', '_id', 'is_delete', 'createdAt', 'updatedAt', 'online_members')
+    expect(item).to.be.a('object').and.that.include.all.keys('type', 'create_user', 'info', 'members', '_id', 'is_delete', 'createdAt', 'updatedAt', 'online_members')
     expect(item.is_delete).to.be.a('boolean')
+    commonValidate.string(item.type)
     commonValidate.number(item.members)
     commonValidate.number(item.online_members)
     commonValidate.objectId(item._id)

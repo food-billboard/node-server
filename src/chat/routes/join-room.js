@@ -1,5 +1,6 @@
 const { pick } = require('lodash')
 const { joinRoom: joinRoomMethod, leaveRoom: leaveRoomMethod } = require('../services')
+const { errWrapper } = require('../utils')
 
 //加入房间
 const joinRoom = socket => async (data) => {
