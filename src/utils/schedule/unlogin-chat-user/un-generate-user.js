@@ -1,7 +1,8 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
+const { Types: { ObjectId } } = require('mongoose')
 const { log4Error } = require('@src/config/winston')
-const { MemberModel, UserModel } = require('../../mongodb/mongo.lib')
+const { MemberModel, UserModel, FriendsModel } = require('../../mongodb/mongo.lib')
 
 function scheduleMethod() {
   console.log(chalk.yellow('聊天普通用户生成成员信息定时审查'))
@@ -40,6 +41,46 @@ function scheduleMethod() {
         })
         return model.save()
       }))
+    })
+    .then(_ => {
+      return MemberModel.aggregate([
+        {
+          $project: {
+            _id: 1,
+            user: 1,
+          }
+        }
+      ])
+    })
+    .then(memberList => {
+      return FriendsModel.aggregate([
+        {
+          $match: {
+            user: {
+              $in: memberList.map(item => item.user)
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            user: 1,
+          }
+        }
+      ])
+      .then(data => {
+        const needGenerateUser = memberList.filter(item => {
+          return ObjectId.isValid(item.user) && !data.some(firend => firend.user && firend.user.equals(item.user))
+        })
+        return Promise.all(needGenerateUser.map(item => {
+          const { _id, user } = item 
+          const model = new FriendsModel({
+            user,
+            member: _id 
+          })
+          return model.save()
+        }))
+      })
     })
   })
   .catch(err => {

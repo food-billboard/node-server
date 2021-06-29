@@ -652,12 +652,10 @@ router
   
 })
 .put('/', async (ctx) => {
-  console.log(33333333, ctx.request.body)
   const check = Params.body(ctx, {
     name: '_id',
     validator: [
 			data => {
-        console.log(data, 222222)
         return data.split(',').every(item => ObjectId.isValid(item.trim()))
       }
 		]

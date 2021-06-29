@@ -59,6 +59,13 @@ router
         let: { customFields: "$user" },
         pipeline: [  
           {
+            $match: {
+              $expr: {
+                "$eq": [ "$_id", "$$customFields" ]
+              },
+            }
+          },
+          {
             $lookup: {
               from: 'images',
               as: 'avatar',
@@ -83,11 +90,23 @@ router
       }
     },
     {
+      $lookup: {
+        from: "friends",
+        localField: 'user._id',
+        foreignField: 'user',
+        as: 'friends'
+      }
+    },  
+    {
+      $unwind: "$friends"
+    },
+    {
       $project: {
         user: {
           username: "$user.username",
           avatar: "$user.avatar.src",
-          _id: "$user._id"
+          _id: "$user._id",
+          friend_id: "$friends._id"
         },  
         status: 1,
         sid: 1,

@@ -141,11 +141,26 @@ router
               }
             },
             {
+              $lookup: {
+                from: 'friends',
+                as: 'friends',
+                foreignField: "user",
+                localField: "_id"
+              }
+            },
+            {
+              $unwind: {
+                path: "$friends",
+                preserveNullAndEmptyArrays: true 
+              }
+            },
+            {
               $project: {
                 _id: 1,
                 avatar: "$avatar.src",
                 username: 1,
                 description: 1,
+                friend_id: "$friends._id"
               }
             }
           ],

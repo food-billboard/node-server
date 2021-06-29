@@ -31,7 +31,7 @@ router
     match.origin = true
   }else {
     if(ROOM_TYPE[type]) match.type = type 
-    match.origin = parseInt(origin) === 1
+    if(origin !== undefined) match.origin = parseInt(origin) === 1
     if(ObjectId.isValid(create_user)) match.create_user = ObjectId(create_user)
     if(typeof content === 'string' && !!content) {
       const contentReg = {

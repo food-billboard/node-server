@@ -252,7 +252,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`post the new user for friends success but not write success test -> ${COMMON_API}`, function() {
 
-      before(function(done) {
+      it(`post the new user for friends fail but the user is friendsed`, function(done) {
         FriendsModel.updateMany({
           _id: friendId
         }, {
@@ -261,53 +261,40 @@ describe(`${COMMON_API} test`, function() {
           }
         })
         .then(function() {
-          done()
+          return Request
+          .post(COMMON_API)
+          .send({
+            _id: userId.toString()
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(404)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return FriendsModel.findOne({
+            _id: friendId,
+            "friends._id": { $in: [ userId ] }
+          })
+          .select({
+            _id: 0,
+            friends: 1
+          })
+          .exec()
+          .then(user => {
+            expect(!!user && user.friends.length == 1).to.be.true 
+            done()
+          })
         })
         .catch(err => {
-          console.log('oops: ', err)
-        })
-      })
-
-      after(function(done) {
-        FriendsModel.findOne({
-          _id: friendId,
-          "friends._id": { $in: [ userId ] }
-        })
-        .select({
-          _id: 0,
-          friends: 1
-        })
-        .exec()
-        .then(user => {
-          return !!user && user.friends.length == 1
-        })
-        .then(result => {
-          if(result) return done()
-          done(new Error(COMMON_API))
-        })
-      })
-
-      it(`post the new user for friends fail but the user is friendsed`, function(done) {
-
-        Request
-        .post(COMMON_API)
-        .send({
-          _id: userId.toString()
-        })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(404)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
+          done(err)
         })
 
       })
 
-      it(`post the user for friends fail because the friends size is limit`, function() {
+      it(`post the user for friends fail because the friends size is limit`, function(done) {
         FriendsModel.updateMany({
           _id: friendId
         }, {

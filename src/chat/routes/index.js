@@ -9,6 +9,7 @@ const removeRoom = require('./remove-room')
 const quitRoom = require('./quit-room')
 const connect = require('./connect')
 const getRoom = require('./get-room')
+const createRoom = require('./creaet-room')
 const { middlewareVerifyTokenForSocketIo } = require("@src/utils")
 
 module.exports = socket => {
@@ -24,6 +25,8 @@ module.exports = socket => {
   .on("post", sendMessage(socket))
   //用于获取信息详情
   .on("message", getDetail(socket))
+  //创建聊天室
+  .on('create_room', createRoom(socket))
   //加入聊天室
   .on("join", joinRoom(socket))
   //离开聊天室

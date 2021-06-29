@@ -6914,6 +6914,9 @@
                           "avatar": {
                             "type":"string",
                             "description":"头像"
+                          },
+                          "friend__id": {
+                            "type": "string"
                           }
                         }
                       },

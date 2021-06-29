@@ -1,6 +1,21 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { encoded, signToken, Params, UserModel, MemberModel, RoomModel, responseDataDeal, dealErr, dealRedis, EMAIL_REGEXP, setCookie, TOKEN_COOKIE, ROLES_MAP } = require('@src/utils')
+const { 
+  encoded, 
+  signToken, 
+  Params, 
+  UserModel, 
+  MemberModel, 
+  FriendsModel,
+  RoomModel, 
+  responseDataDeal, 
+  dealErr, 
+  dealRedis, 
+  EMAIL_REGEXP, 
+  setCookie, 
+  TOKEN_COOKIE, 
+  ROLES_MAP 
+} = require('@src/utils')
 const { email_type } = require('../map')
 
 const router = new Router()
@@ -36,6 +51,14 @@ function createInitialMember(userId) {
   const model = new MemberModel({
     user: userId,
     room: []
+  })
+  return model.save()
+}
+
+function createInitialFriends(userId, memberId) {
+  const model = new FriendsModel({
+    user: userId,
+    member: memberId,
   })
   return model.save()
 }
@@ -146,15 +169,14 @@ router
       // }),
       createInitialMember(_id)
     ])
+    .then(([member]) => {
+      return createInitialFriends(_id, member._id)
+    })
     return {
       data
     }
   })
-  .catch(err => {
-    console.log(err, 22222)
-    return dealErr(ctx)(err)
-  })
-  // .catch(dealErr(ctx))
+  .catch(dealErr(ctx))
 
   responseDataDeal({
     ctx,

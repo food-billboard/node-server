@@ -21,13 +21,14 @@ function responseExpect(res, validate=[]) {
     commonValidate.date(item.createdAt)
     commonValidate.date(item.updatedAt)
     if(item.user) {
-      expect(item.user).to.be.a('object').and.that.includes.any.keys('username', 'avatar', '_id', 'description')
+      expect(item.user).to.be.a('object').and.that.includes.any.keys('username', 'avatar', '_id', 'description', 'friend_id')
       commonValidate.string(item.user.description)
       commonValidate.string(item.user.username)
       if(item.user.avatar) {
         commonValidate.string(item.user.avatar)
       }
       commonValidate.objectId(item.user._id)
+      commonValidate.objectId(item.user.friend_id)
     }
     expect(item.room).to.be.a('array')
     item.room.forEach(item => {

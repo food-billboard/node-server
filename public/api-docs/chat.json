@@ -502,8 +502,19 @@
             "name": "_id",
             "in": "body",
             "type": "string",
-            "required": true,
             "description":"房间id"
+          },
+          {
+            "name": "members",
+            "in": "body",
+            "type": "string",
+            "description":"成员id(多个用,分隔, 已存在房间不需要此参数)"
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "description":"房间类型(CHAT GROUP_CHAT, 已存在房间不需要此参数)"
           }
         ],
         "responses": {
@@ -899,6 +910,9 @@
                           "avatar": {
                             "type": "string",
                             "description": "头像"
+                          },
+                          "friend_id": {
+                            "type": "string"
                           }
                         }
                       },
