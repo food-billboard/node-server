@@ -9,7 +9,11 @@ const removeRoom = require('./remove-room')
 const quitRoom = require('./quit-room')
 const connect = require('./connect')
 const getRoom = require('./get-room')
-const createRoom = require('./creaet-room')
+const createRoom = require('./create-room')
+const inviteFriendList = require('./friend/invite-list')
+const inviteFriend = require('./friend/invite-friend')
+const agreeFriend = require('./friend/agree-friend')
+const disagreeFriend = require('./friend/disagree-friend')
 const { middlewareVerifyTokenForSocketIo } = require("@src/utils")
 
 module.exports = socket => {
@@ -41,4 +45,13 @@ module.exports = socket => {
   .on('connect_user', connect(socket))
   //房间列表
   .on('room', getRoom(socket))
+
+  //好友申请
+  .on('invite_friend', inviteFriend(socket))
+  //同意申请
+  .on('agree_friend', agreeFriend(socket))
+  //拒绝申请
+  .on('disagree_friend', disagreeFriend(socket))
+  //好友申请列表
+  .on('invite_friend_list', inviteFriendList(socket))
 }

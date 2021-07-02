@@ -128,6 +128,42 @@ const postMessage = async (data, headers) => {
   })
 }
 
+//好友申请列表
+const inviteFriendList = async (data, headers) => {
+  return request(url('/api/customer/manage/friends/agree'), {
+    method: 'GET',
+    params: data,
+    headers
+  })
+}
+
+//好友申请
+const inviteFriend = async (data, headers) => {
+  return request(url('/api/customer/manage/friends'), {
+    method: 'POST',
+    data,
+    headers
+  })
+}
+
+//同意好友申请
+const agreeFriend = async (data, headers) => {
+  return request(url('/api/customer/manage/friends/agree'), {
+    method: 'POST',
+    data,
+    headers
+  })
+}
+
+//拒绝好友申请
+const disagreeFriend = async (data, headers) => {
+  return request(url('/api/customer/manage/friends/agree'), {
+    method: 'DELETE',
+    params: data,
+    headers
+  })
+}
+
 module.exports = {
   connectServer: generateToken(connectServer),
   deleteMessage: generateToken(deleteMessage),
@@ -142,4 +178,8 @@ module.exports = {
   postMessage: generateToken(postMessage),
   createRoom: generateToken(createRoom),
   getRoomList: generateToken(getRoomList),
+  inviteFriend: generateToken(inviteFriend),
+  agreeFriend: generateToken(agreeFriend),
+  disagreeFriend: generateToken(disagreeFriend),
+  inviteFriendList: generateToken(inviteFriendList),
 }

@@ -675,38 +675,6 @@
         ]
       }
     },
-    "read": {
-      "put": {
-        "tags": [
-          "chat"
-        ],
-        "summary": "读消息",
-        "description": "",
-        "operationId": "chat_put_message",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "_id",
-            "description": "消息id(多个用,分隔)",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功"
-          }
-        }
-      }
-    },
     "delete": {
       "delete": {
         "tags": [
@@ -714,7 +682,7 @@
         ],
         "summary": "删除消息",
         "description": "",
-        "operationId": "chat_delete_message",
+        "operationId": "delete",
         "consumes": [
           "application/json",
           "application/xml"
@@ -723,15 +691,127 @@
           "application/xml",
           "application/json"
         ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "_id",
-            "description": "消息id(多个用,分隔)",
-            "required": true,
-            "type": "string"
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
           }
+        }
+      }
+    },
+    "get": {
+      "get": {
+        "tags": [
+          "chat"
         ],
+        "summary": "获取消息",
+        "description": "",
+        "operationId": "get",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "put": {
+      "put": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "读消息",
+        "description": "",
+        "operationId": "put",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "post": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "发送消息",
+        "description": "",
+        "operationId": "post",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "message": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "消息详情",
+        "description": "",
+        "operationId": "message",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "create_room": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "创建聊天室",
+        "description": "",
+        "operationId": "create_room",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "成功"
@@ -744,9 +824,8 @@
         "tags": [
           "chat"
         ],
-        "summary": "加入 | 创建 聊天室",
-        "description": "加入或创建，可 创建 单聊 和 群聊",
-        "operationId": "chat_join_room",
+        "summary": "加入聊天室",
+        "operationId": "join",
         "consumes": [
           "application/json",
           "application/xml"
@@ -755,28 +834,7 @@
           "application/xml",
           "application/json"
         ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "type",
-            "description": "聊天室类型(CHAT | GROUP_CHAT | SYSTEM)",
-            "required": true,
-            "type": "string",
-            "enum": ["CHAT", "GROUP_CHAT", "SYSTEM"]
-          },
-          {
-            "in": "body",
-            "name": "_id",
-            "description": "聊天室id",
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "members",
-            "description": "成员id(多个用,分隔)",
-            "type": "string"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "成功"
@@ -789,9 +847,9 @@
         "tags": [
           "chat"
         ],
-        "summary": "离开 聊天室",
+        "summary": "离开聊天室",
         "description": "离开聊天室",
-        "operationId": "chat_leave_room",
+        "operationId": "leave",
         "consumes": [
           "application/json",
           "application/xml"
@@ -800,14 +858,7 @@
           "application/xml",
           "application/json"
         ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "_id",
-            "description": "聊天室id",
-            "type": "string"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "成功"
@@ -815,14 +866,62 @@
         }
       }
     },
-    "quit": {
+    "disconnecting": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "断开连接",
+        "description": "断开连接",
+        "operationId": "disconnecting",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "remove_room": {
+      "delete": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "删除聊天室",
+        "description": "删除聊天室",
+        "operationId": "remove_room",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "quit_room": {
       "post": {
         "tags": [
           "chat"
         ],
         "summary": "退出聊天室",
         "description": "退出聊天室",
-        "operationId": "chat_quit_room",
+        "operationId": "quit_room",
         "consumes": [
           "application/json",
           "application/xml"
@@ -831,14 +930,7 @@
           "application/xml",
           "application/json"
         ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "_id",
-            "description": "聊天室id",
-            "type": "string"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "成功"
@@ -846,14 +938,14 @@
         }
       }
     },
-    "remove": {
+    "connect_user": {
       "post": {
         "tags": [
           "chat"
         ],
-        "summary": "删除聊天室",
-        "description": "删除聊天室",
-        "operationId": "chat_remove_room",
+        "summary": "连接保存信息",
+        "description": "连接保存信息",
+        "operationId": "connect_user",
         "consumes": [
           "application/json",
           "application/xml"
@@ -862,14 +954,127 @@
           "application/xml",
           "application/json"
         ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "_id",
-            "description": "聊天室id",
-            "type": "string"
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
           }
+        }
+      }
+    },
+    "room": {
+      "get": {
+        "tags": [
+          "chat"
         ],
+        "summary": "房间列表",
+        "description": "房间列表",
+        "operationId": "room",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "invite_friend": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "好友申请",
+        "description": "好友申请",
+        "operationId": "invite_friend",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "agree_friend": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "同意好友申请",
+        "description": "同意好友申请",
+        "operationId": "agree_friend",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "disagree_friend": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "拒绝好友申请",
+        "description": "拒绝好友申请",
+        "operationId": "disagree_friend",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "invite_friend_list": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "好友申请列表",
+        "description": "好友申请列表",
+        "operationId": "invite_friend_list",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "成功"

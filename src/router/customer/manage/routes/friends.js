@@ -138,15 +138,17 @@ router
   })
   .then(notFound)
   .then(data => {
-    return FriendsModel.updateOne({
-      user: id,
-      $where: "this.friends.length < 9999"
-    }, {
-      $push: { friends: { _id, timestamps: Date.now() } },
-      ...(data && data._id ? { $set: { member: data._id } } : {})
-    }, {
-      upsert: true 
-    })
+    return Promise.all([
+      FriendsModel.updateOne({
+        user: id,
+        $where: "this.friends.length < 9999"
+      }, {
+        $push: { friends: { _id, timestamps: Date.now() } },
+        ...(data && data._id ? { $set: { member: data._id } } : {})
+      }, {
+        upsert: true 
+      })
+    ])
   })
   .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))
