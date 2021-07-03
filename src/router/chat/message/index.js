@@ -235,10 +235,7 @@ router
         }
       },
       {
-        $unwind: {
-          path: "$message_info",
-          preserveNullAndEmptyArrays: true 
-        }
+        $unwind: "$message_info"
       },
       {
         $lookup: {

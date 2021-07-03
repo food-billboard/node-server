@@ -5,12 +5,14 @@ const {
   mockCreateUser,
   commonValidate,
   mockCreateRoom,
-  mockCreateMember
+  mockCreateMember,
+  mockCreateFriends
 } = require('@test/utils')
 const {
   MemberModel,
   RoomModel, 
   UserModel,
+  FriendsModel
 } = require('@src/utils')
 
 const COMMON_API = '/api/chat/member'
@@ -52,6 +54,7 @@ describe(`${COMMON_API} test`, function() {
   let memberId 
   let userToken
   let getToken
+  let friendId 
 
   before(async function() {
 
@@ -83,15 +86,25 @@ describe(`${COMMON_API} test`, function() {
     })
     .then(data => {
       memberId = data._id
-      return RoomModel.updateOne({
-        info: {
-          name: COMMON_API
-        }
-      }, {
-        $set: {
-          member: [ memberId ]
-        }
+      const { model } = mockCreateFriends({
+        user: userId,
+        member: memberId
       })
+      return Promise.all([
+        RoomModel.updateOne({
+          info: {
+            name: COMMON_API
+          }
+        }, {
+          $set: {
+            member: [ memberId ]
+          }
+        }),
+        model.save()
+      ])
+    })
+    .then(([, friend]) => {
+      friendId = friend._id 
     })
     .catch(err => {
       console.log('oops: ', err)
@@ -111,6 +124,9 @@ describe(`${COMMON_API} test`, function() {
       }),
       RoomModel.deleteMany({
         "info.name": COMMON_API
+      }),
+      FriendsModel.deleteOne({
+        _id: friendId
       })
     ])
     .catch(err => {

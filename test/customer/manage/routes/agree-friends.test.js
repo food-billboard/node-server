@@ -11,8 +11,11 @@ function responseExpect(res, validate=[]) {
 
   expect(target).to.be.a('object').and.that.includes.all.keys('friends')
   target.friends.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id', 'description')
-    commonValidate.poster(item.avatar)
+    expect(item).to.be.a('object').and.that.includes.any.keys('avatar', 'username', '_id', 'description', 'friend_id')
+    if(item.avatar) {
+      commonValidate.poster(item.avatar)
+    }
+    commonValidate.objectId(item.friend_id)
     commonValidate.string(item.username)
     commonValidate.string(item.description)
     commonValidate.objectId(item._id)
@@ -54,11 +57,11 @@ describe(`${COMMON_API} test`, function() {
       result = self
       selfToken = signToken(self._id)
       const { model } = mockCreateFriends({
-        user: result._id,
+        user: userId,
         friends: [
           {
             timestamps: Date.now(),
-            _id: userId,
+            _id: result._id,
             status: FRIEND_STATUS.TO_AGREE
           }
         ]
@@ -183,7 +186,7 @@ describe(`${COMMON_API} test`, function() {
           _id: friendId
         }, {
           $set: {
-            friends: [ { _id: userId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
+            friends: [ { _id: result._id, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
           }
         })
         .then(function() {
@@ -197,14 +200,18 @@ describe(`${COMMON_API} test`, function() {
       after(function(done) {
         FriendsModel.findOne({
           _id: friendId,
-          $and: [
-            {
-              "friends._id": { $in: [ userId ] }
-            },
-            {
-              "friends.status": FRIEND_STATUS.NORMAL
+          friends: {
+            $elemMatch: {
+              $and: [
+                {
+                  "_id": result._id
+                },
+                {
+                  "status": FRIEND_STATUS.NORMAL
+                }
+              ]
             }
-          ]
+          }
         })
         .select({
           _id: 0,
@@ -212,11 +219,11 @@ describe(`${COMMON_API} test`, function() {
         })
         .exec()
         .then((user) => {
-          return !!user
+          expect(!!user).to.be.true 
+          done()
         })
-        .then(result => {
-          if(result) return done()
-          done(new Error(COMMON_API))
+        .catch(err => {
+          done(err)
         })
       })
 
@@ -312,7 +319,7 @@ describe(`${COMMON_API} test`, function() {
           _id: friendId,
         }, {
           $set: {
-            friends: [ { _id: userId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
+            friends: [ { _id: result._id, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
           }
         })
         .then(function() {

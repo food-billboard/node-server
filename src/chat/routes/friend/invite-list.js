@@ -1,6 +1,6 @@
 const { pick } = require('lodash')
-const { inviteFriendList: inviteFriendListMethod } = require('../services')
-const { errWrapper } = require('../utils')
+const { inviteFriendList: inviteFriendListMethod } = require('../../services')
+const { errWrapper } = require('../../utils')
 
 const inviteFriendList = socket => async(data) => {
 

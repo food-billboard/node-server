@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, FriendsModel, MemberModel, FRIEND_STATUS, dealErr, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
+const { verifyTokenToData, UserModel, FriendsModel, MemberModel, FRIEND_STATUS, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -63,21 +63,22 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
-  const data = FriendsModel.aggregate([
+  const data = await FriendsModel.aggregate([
     {
       $match: {
-        $and: [
-          {
-            "friends._id": id
-          },
-          {
-            "friends.status": FRIEND_STATUS.TO_AGREE
-          }
-        ]
+        friends: { 
+          $elemMatch: { 
+            $and: [
+              {
+                _id: ObjectId(id),
+              },
+              {
+                status: FRIEND_STATUS.TO_AGREE
+              }
+            ]
+          } 
+        }
       }
-    },
-    {
-      $unwind: "$friends"
     },
     {
       $skip: pageSize * currPage
@@ -88,7 +89,7 @@ router
     {
       $lookup: {
         from: 'users', 
-        let: { customFields: "$friends._id" },
+        let: { customFields: "$user" },
         pipeline: [  
           {
             $match: {
@@ -120,69 +121,29 @@ router
             }
           }
         ],
-        as: 'friends',
+        as: 'friends_info',
       }
     },
     {
-      $unwind: "$friends"
+      $unwind: "$friends_info"
     },
     {
       $project: {
-        avatar: "$friends.avatar",
-        username: "$friends.username",
-        _id: "$friends._id",
-        description: "$friends.description"
+        friend_id: "$_id",
+        avatar: "$friends_info.avatar",
+        username: "$friends_info.username",
+        _id: "$friends_info._id",
+        description: "$friends_info.description",
       }
     }
   ])
-  .then(data => ({ friends: data }))
-  .then(data => {
-    console.log(data)
-    return data 
-  })
-
-  // const data = await FriendsModel.findOne({
-  //   user: ObjectId(id),
-  //   "friends.status": FRIEND_STATUS.TO_AGREE
-  // })
-  // .select({
-  //   friends: 1,
-  //   member: 1
-  // })
-  // .populate({
-  //   path: 'friends._id',
-  //   select: {
-  //     username: 1,
-  //     avatar: 1,
-  //     description: 1
-  //   },
-  //   options: {
-  //     limit: pageSize,
-  //     skip: pageSize * currPage
-  //   }
-  // })
-  // .exec()
-  // .then(parseData)
-  // .then(data => {
-  //   const { friends=[] } = data || {}
-  //   return {
-  //     data: {
-  //       ...data,
-  //       friends: friends.filter(item => !!item._id).map(a => {
-  //         const { _id: { avatar, ...nextData } } = a
-  //         return {
-  //           ...nextData,
-  //           avatar: avatarGet(avatar),
-  //         }
-  //       })
-  //     }
-  //   }
-  // })
+  .then(data => ({ data: { friends: data } }))
   .catch(dealErr(ctx))
 
   responseDataDeal({
     ctx,
-    data
+    data,
+    needCache: false 
   })
 
 })
@@ -228,7 +189,7 @@ router
         user: _id,
         friends: { 
           $elemMatch: { 
-            id
+            _id: id
           } 
         }
       }, {
@@ -271,26 +232,28 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
-  const data = await FriendsModel.findOne({
+  const data = await FriendsModel.findOneAndUpdate({
     user: _id,
     friends: { 
       $elemMatch: { 
-        _id: ObjectId(id)
+        $and: [
+          {
+            _id: ObjectId(id),
+          },
+          {
+            status: FRIEND_STATUS.TO_AGREE
+          }
+        ]
       } 
     }
+  }, {
+    $pull: { friends: { _id: ObjectId(id) } }
   })
   .select({
     _id: 1
   })
   .exec()
   .then(notFound)
-  .then(() => {
-    return FriendsModel.updateOne({
-      user: _id
-    }, {
-      $pull: { friends: { _id } }
-    })
-  })
   .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))
 

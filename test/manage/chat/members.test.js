@@ -1,7 +1,7 @@
 require('module-alias/register')
-const { UserModel, ImageModel, RoomModel, MemberModel, ROOM_TYPE, parseData } = require('@src/utils')
+const { UserModel, ImageModel, RoomModel, MemberModel, ROOM_TYPE, parseData, FriendsModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateImage, mockCreateRoom, mockCreateMember, envSet, envUnSet } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateImage, mockCreateRoom, mockCreateMember, envSet, envUnSet, mockCreateFriends } = require('@test/utils')
 
 const COMMON_API = '/api/manage/chat/member'
 
@@ -57,6 +57,7 @@ describe(`${COMMON_API} test`, function() {
   let memberId 
   let imageId 
   let getToken
+  let friendId 
 
   before(function(done) {
 
@@ -85,6 +86,10 @@ describe(`${COMMON_API} test`, function() {
     })
     .then(member => {
       memberId = member._id 
+      const { model: friendModel } = mockCreateFriends({
+        user: userInfo._id,
+        member: memberId
+      })
       const { model: systemRoom } = mockCreateRoom({
         info: {
           name: COMMON_API,
@@ -106,11 +111,13 @@ describe(`${COMMON_API} test`, function() {
       return Promise.all([
         systemRoom.save(),
         userRoom.save(),
+        friendModel.save()
       ])
     })
-    .then(([system, user]) => {
+    .then(([system, user, friend]) => {
       systemRoomId = system._id 
       roomId = user._id 
+      friendId = friend._id
       return Promise.all([
         MemberModel.updateOne({
           _id: memberId
@@ -151,6 +158,9 @@ describe(`${COMMON_API} test`, function() {
       }),
       ImageModel.deleteMany({
         src: COMMON_API
+      }),
+      FriendsModel.deleteMany({
+        user: userInfo._id
       })
     ])
     .then(_ => {
