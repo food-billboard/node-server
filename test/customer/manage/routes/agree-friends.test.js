@@ -36,6 +36,7 @@ describe(`${COMMON_API} test`, function() {
   let selfToken
   let userId
   let friendId 
+  let selfFriendId
 
   before(async function() {
 
@@ -57,11 +58,18 @@ describe(`${COMMON_API} test`, function() {
       result = self
       selfToken = signToken(self._id)
       const { model } = mockCreateFriends({
+        user: result._id,
+      })
+      return model.save()
+    })
+    .then(data => {
+      selfFriendId = data._id
+      const { model } = mockCreateFriends({
         user: userId,
         friends: [
           {
             timestamps: Date.now(),
-            _id: result._id,
+            _id: selfFriendId,
             status: FRIEND_STATUS.TO_AGREE
           }
         ]
@@ -86,7 +94,14 @@ describe(`${COMMON_API} test`, function() {
         username: COMMON_API
       }),
       FriendsModel.deleteMany({
-        _id: friendId
+        $or: [
+          {
+            _id: friendId
+          },
+          {
+            _id: selfFriendId
+          }
+        ]
       })
     ])
     .catch(err => {
@@ -101,7 +116,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`pre check params fail test -> ${COMMON_API}`, function() {
 
-      it(`pre check params fail becasue of the user id is not verify`, function(done) {
+      it(`pre check params fail because of the user id is not verify`, function(done) {
 
         Request
         .post(COMMON_API)
@@ -121,7 +136,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`pre check params fail becasue lack of the user id`, function(done) {
+      it(`pre check params fail because lack of the user id`, function(done) {
 
         Request
         .delete(COMMON_API)
@@ -186,7 +201,7 @@ describe(`${COMMON_API} test`, function() {
           _id: friendId
         }, {
           $set: {
-            friends: [ { _id: result._id, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
+            friends: [ { _id: selfFriendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
           }
         })
         .then(function() {
@@ -204,7 +219,7 @@ describe(`${COMMON_API} test`, function() {
             $elemMatch: {
               $and: [
                 {
-                  "_id": result._id
+                  "_id": selfFriendId
                 },
                 {
                   "status": FRIEND_STATUS.NORMAL
@@ -232,7 +247,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .post(COMMON_API)
         .send({
-          _id: userId.toString()
+          _id: selfFriendId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -256,7 +271,7 @@ describe(`${COMMON_API} test`, function() {
           _id: friendId
         }, {
           $set: {
-            friends: [ { _id: userId, timestamps: Date.now(), status: FRIEND_STATUS.NORMAL } ]
+            friends: [ { _id: selfFriendId, timestamps: Date.now(), status: FRIEND_STATUS.NORMAL } ]
           }
         })
         .then(function() {
@@ -270,7 +285,7 @@ describe(`${COMMON_API} test`, function() {
       after(function(done) {
         FriendsModel.findOne({
           _id: friendId,
-          "friends._id": { $in: [ userId ] }
+          "friends._id": { $in: [ selfFriendId ] }
         })
         .select({
           _id: 0,
@@ -291,7 +306,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .post(COMMON_API)
         .send({
-          _id: userId.toString()
+          _id: friendId
         })
         .set({
           Accept: 'Application/json',
@@ -319,7 +334,7 @@ describe(`${COMMON_API} test`, function() {
           _id: friendId,
         }, {
           $set: {
-            friends: [ { _id: result._id, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
+            friends: [ { _id: selfFriendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
           }
         })
         .then(function() {
@@ -357,7 +372,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .delete(COMMON_API)
         .query({
-          _id: userId.toString()
+          _id: friendId
         })
         .set({
           Accept: 'Application/json',
@@ -397,7 +412,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .delete(COMMON_API)
         .query({
-          _id: userId.toString()
+          _id: friendId
         })
         .set({
           Accept: 'Application/json',

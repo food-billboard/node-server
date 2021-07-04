@@ -172,6 +172,12 @@ router
     .then(([member]) => {
       return createInitialFriends(_id, member._id)
     })
+    .then(data => {
+      return UserModel.updateOne({
+        _id: data.user,
+        friend_id: data._id
+      })
+    })
     return {
       data
     }

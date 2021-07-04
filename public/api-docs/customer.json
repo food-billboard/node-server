@@ -550,8 +550,8 @@
         "tags": [
           "manage"
         ],
-        "summary": "新增用户",
-        "description": "新增用户",
+        "summary": "添加好友",
+        "description": "添加好友",
         "operationId": "customer_put_manage_friends",
         "produces": [
           "application/xml",
@@ -561,7 +561,7 @@
           {
             "name": "_id",
             "in": "body",
-            "description": "用户id",
+            "description": "好友id",
             "required": true
           }
         ],
@@ -583,8 +583,8 @@
         "tags": [
           "manage"
         ],
-        "summary": "删除用户",
-        "description": "删除用户",
+        "summary": "删除好友",
+        "description": "删除好友",
         "operationId": "customer_delete_manage_friends",
         "produces": [
           "application/xml",
@@ -594,7 +594,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "用户id",
+            "description": "好友id",
             "required": true
           }
         ],
@@ -672,7 +672,7 @@
           {
             "name": "_id",
             "in": "body",
-            "description": "用户id",
+            "description": "好友id",
             "required": true
           }
         ],
@@ -705,7 +705,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "用户id",
+            "description": "好友id",
             "required": true
           }
         ],
@@ -2468,7 +2468,28 @@
                 "friends": {
                   "type": "array",
                   "items": {
-                    "$ref":"#/definitions/customer_user_list"
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "头像"
+                      },
+                      "username": {
+                        "type": "string",
+                        "description": "用户名"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format":"date-time"
+                      }
+                    }
                   }
                 },
                 "member": {

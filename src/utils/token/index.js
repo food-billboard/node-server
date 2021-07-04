@@ -37,7 +37,7 @@ const fileEncoded = (str) => {
 }
 
 //创建token
-const signToken = ({ id, mobile }, options={expiresIn: '1d'}, callback=(err, token)=>{}) => {
+const signToken = ({ id, mobile, friend_id }, options={expiresIn: '1d'}, callback=(err, token)=>{}) => {
   let newOptions = options, newCallback = callback
   if(typeof options === 'function') {
     newOptions = {}
@@ -47,6 +47,7 @@ const signToken = ({ id, mobile }, options={expiresIn: '1d'}, callback=(err, tok
     id,
     mobile,
     middel: MIDDEL,
+    friend_id
   }, SECRET, newOptions)
 }
 

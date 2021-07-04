@@ -384,6 +384,10 @@ const UserSchema = new Schema({
     type: Number,
     default: 0
   },
+  friend_id: {
+    type: ObjectId,
+    ref: 'friend'
+  },
   issue: [{
     _id: {
       type: ObjectId,
@@ -1570,7 +1574,7 @@ const FriendsSchema = new Schema({
   friends: [{
     _id: {
       type: ObjectId,
-      ref: 'user'
+      ref: 'friend'
     },
     timestamps: {
       type: Number 

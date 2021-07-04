@@ -61,7 +61,7 @@ router
   })
 
   const [, token] = verifyTokenToData(ctx)
-  const { id } = token
+  const { id, friend_id } = token
 
   const data = await FriendsModel.aggregate([
     {
@@ -70,7 +70,7 @@ router
           $elemMatch: { 
             $and: [
               {
-                _id: ObjectId(id),
+                _id: ObjectId(friend_id),
               },
               {
                 status: FRIEND_STATUS.TO_AGREE
@@ -156,14 +156,15 @@ router
     ]
   })
 
-  let { id } = token
+  let { id, friend_id } = token
+  friend_id = ObjectId(friend_id)
   id = ObjectId(id)
 
   const data = await FriendsModel.findOne({
-    user: _id,
+    _id,
     $and: [
       {
-        "friends._id": id
+        "friends._id": friend_id
       },
       {
         "friends.status": FRIEND_STATUS.TO_AGREE
@@ -179,17 +180,22 @@ router
   .then(_ => {
     return Promise.all([
       UserModel.updateMany({
-        _id: {
-          $in: [id, _id]
-        },
+        $or: [
+          {
+            _id: id 
+          },
+          {
+            friend_id: _id
+          }
+        ]
       }, {
         $inc: { friends: 1 }
       }),
       FriendsModel.updateOne({
-        user: _id,
+        _id,
         friends: { 
           $elemMatch: { 
-            _id: id
+            _id: friend_id
           } 
         }
       }, {
@@ -203,7 +209,7 @@ router
       }, {
         $addToSet: {
           friends: {
-            _id,
+            _id: friend_id,
             timestamps: Date.now(),
             status: FRIEND_STATUS.NORMAL
           }
@@ -230,15 +236,15 @@ router
   })
 
   const [, token] = verifyTokenToData(ctx)
-  const { id } = token
+  const { friend_id } = token
 
   const data = await FriendsModel.findOneAndUpdate({
-    user: _id,
+    _id,
     friends: { 
       $elemMatch: { 
         $and: [
           {
-            _id: ObjectId(id),
+            _id: ObjectId(friend_id),
           },
           {
             status: FRIEND_STATUS.TO_AGREE
@@ -247,7 +253,7 @@ router
       } 
     }
   }, {
-    $pull: { friends: { _id: ObjectId(id) } }
+    $pull: { friends: { _id: ObjectId(friend_id) } }
   })
   .select({
     _id: 1

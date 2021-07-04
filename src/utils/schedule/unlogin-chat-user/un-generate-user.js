@@ -57,7 +57,12 @@ function scheduleMethod() {
         {
           $match: {
             user: {
-              $in: memberList.map(item => item.user)
+              $in: userList.reduce((acc, cur) => {
+                if(!cur.friend_id) {
+                  acc.push(cur._id)
+                }
+                return acc 
+              }, [])
             }
           }
         },
@@ -70,7 +75,7 @@ function scheduleMethod() {
       ])
       .then(data => {
         const needGenerateUser = memberList.filter(item => {
-          return ObjectId.isValid(item.user) && !data.some(firend => firend.user && firend.user.equals(item.user))
+          return ObjectId.isValid(item.user) && !data.some(friend => friend.user && friend.user.equals(item.user))
         })
         return Promise.all(needGenerateUser.map(item => {
           const { _id, user } = item 
@@ -82,6 +87,18 @@ function scheduleMethod() {
         }))
       })
     })
+  })
+  .then(friendList => {
+    return Promise.all(friendList.map(friend => {
+      const { user, _id } = friend
+      return UserModel.updateOne({
+        _id: user 
+      }, {
+        $set: {
+          friend: _id
+        }
+      })
+    }))
   })
   .catch(err => {
     log4Error({
