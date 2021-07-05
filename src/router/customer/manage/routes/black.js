@@ -1,4 +1,5 @@
 const Router = require('@koa/router')
+const Day = require('dayjs')
 const { verifyTokenToData, FriendsModel, dealErr, FRIEND_STATUS, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -55,13 +56,19 @@ router
   .populate({
     path: 'friends._id',
     select: {
-      username: 1,
-      avatar: 1,
-      description: 1
+      _id: 1
     },
     options: {
       limit: pageSize,
-      skip: pageSize * currPage
+      skip: pageSize * currPage,
+      populate: {
+        path: 'user',
+        select: {
+          username: 1,
+          avatar: 1,
+          description: 1
+        }
+      }
     }
   })
   .exec()
@@ -72,10 +79,11 @@ router
       data: {
         ...data,
         black: friends.filter(item => !!item._id).map(a => {
-          const { _id: { avatar, ...nextData } } = a
+          const { _id: { user: { avatar, ...nextData }={} }, timestamps } = a
           return {
             ...nextData,
             avatar: avatarGet(avatar),
+            createdAt: Day(timestamps).format('YYYY-MM-DD HH:mm:ss')
           }
         })
       }

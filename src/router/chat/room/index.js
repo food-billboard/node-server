@@ -405,11 +405,7 @@ router
     ])
   })
   .then(_ => ({ data: deleteRoomList }))
-  // .catch(dealErr(ctx))
-  .catch(err => {
-    console.log(err)
-    return dealErr(ctx)(err)
-  })
+  .catch(dealErr(ctx))
 
   responseDataDeal({
     ctx,

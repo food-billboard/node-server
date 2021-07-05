@@ -175,7 +175,10 @@ router
     .then(data => {
       return UserModel.updateOne({
         _id: data.user,
-        friend_id: data._id
+      }, {
+        $set: {
+          friend_id: data._id
+        }
       })
     })
     return {

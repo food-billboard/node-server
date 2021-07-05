@@ -1565,11 +1565,13 @@ const BehaviourSchema = new Schema({
 const FriendsSchema = new Schema({
   user: {
     type: ObjectId,
-    ref: 'user'
+    ref: 'user',
+    unique: true 
   },
   member: {
     type: ObjectId,
-    ref: 'member'
+    ref: 'member',
+    unique: true 
   },
   friends: [{
     _id: {

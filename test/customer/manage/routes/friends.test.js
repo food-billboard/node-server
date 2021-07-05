@@ -286,7 +286,7 @@ describe(`${COMMON_API} test`, function() {
           return Request
           .post(COMMON_API)
           .send({
-            _id: userId.toString()
+            _id: friendId.toString()
           })
           .set({
             Accept: 'Application/json',

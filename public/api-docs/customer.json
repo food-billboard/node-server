@@ -450,7 +450,7 @@
           {
             "name": "_id",
             "in": "body",
-            "description": "用户id",
+            "description": "好友id",
             "required": true
           }
         ],
@@ -483,7 +483,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "用户id",
+            "description": "好友id",
             "required": true
           }
         ],

@@ -82,7 +82,7 @@ router
       limit: pageSize,
       skip: pageSize * currPage,
       populate: {
-        path: 'friends._id.user',
+        path: 'user',
         select: {
           username: 1,
           avatar: 1,
@@ -95,14 +95,11 @@ router
   .then(parseData)
   .then(data => {
     const { friends=[] } = data || {}
-    try {
-      console.log(friends[0]._id.friends, 2222)
-    }catch(err) {}
     return {
       data: {
         ...data,
         friends: friends.filter(item => !!item._id).map(a => {
-          const { _id: { avatar, ...nextData }, timestamps } = a
+          const { _id: { user: { avatar, ...nextData }={} }, timestamps } = a
           return {
             ...nextData,
             avatar: avatarGet(avatar),

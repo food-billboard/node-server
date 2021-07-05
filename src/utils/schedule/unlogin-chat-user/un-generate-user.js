@@ -55,18 +55,6 @@ function scheduleMethod() {
     .then(memberList => {
       return FriendsModel.aggregate([
         {
-          $match: {
-            user: {
-              $in: userList.reduce((acc, cur) => {
-                if(!cur.friend_id) {
-                  acc.push(cur._id)
-                }
-                return acc 
-              }, [])
-            }
-          }
-        },
-        {
           $project: {
             _id: 1,
             user: 1,
@@ -95,7 +83,7 @@ function scheduleMethod() {
         _id: user 
       }, {
         $set: {
-          friend: _id
+          friend_id: _id
         }
       })
     }))

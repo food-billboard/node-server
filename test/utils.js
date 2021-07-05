@@ -74,8 +74,8 @@ function mockCreateUser(values={}) {
       model,
       decodePassword: password,
       // token,
-      signToken: (id) => {
-        return signToken({ mobile, id }, { expiresIn: '5s' })
+      signToken: (id, friend_id='') => {
+        return signToken({ mobile, id, friend_id }, { expiresIn: '5s' })
       }
     }
 }

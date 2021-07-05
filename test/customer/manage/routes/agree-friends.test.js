@@ -56,7 +56,6 @@ describe(`${COMMON_API} test`, function() {
     .then(([self, user]) => {
       userId = user._id
       result = self
-      selfToken = signToken(self._id)
       const { model } = mockCreateFriends({
         user: result._id,
       })
@@ -64,6 +63,7 @@ describe(`${COMMON_API} test`, function() {
     })
     .then(data => {
       selfFriendId = data._id
+      selfToken = signToken(self._id, selfFriendId)
       const { model } = mockCreateFriends({
         user: userId,
         friends: [
@@ -247,7 +247,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .post(COMMON_API)
         .send({
-          _id: selfFriendId.toString()
+          _id: friendId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -372,7 +372,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .delete(COMMON_API)
         .query({
-          _id: friendId
+          _id: friendId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -412,7 +412,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .delete(COMMON_API)
         .query({
-          _id: friendId
+          _id: friendId.toString()
         })
         .set({
           Accept: 'Application/json',
