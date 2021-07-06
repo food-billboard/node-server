@@ -11,7 +11,7 @@ function responseExpect(res, validate=[]) {
 
   expect(target).to.be.a('object').and.that.includes.all.keys('friends')
   target.friends.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.any.keys('avatar', 'username', '_id', 'description', 'friend_id')
+    expect(item).to.be.a('object').and.that.includes.any.keys('avatar', 'username', '_id', 'description', 'friend_id', 'createdAt')
     if(item.avatar) {
       commonValidate.poster(item.avatar)
     }

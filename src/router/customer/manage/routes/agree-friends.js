@@ -87,6 +87,21 @@ router
       $limit: pageSize
     },
     {
+      $unwind: "$friends"
+    },
+    {
+      $match: {
+        $and: [
+          {
+            "friends._id": ObjectId(friend_id),
+          },
+          {
+            "friends.status": FRIEND_STATUS.TO_AGREE
+          }
+        ]
+      }
+    },
+    {
       $lookup: {
         from: 'users', 
         let: { customFields: "$user" },
@@ -117,7 +132,7 @@ router
               _id: 1,
               avatar: "$avatar.src",
               description: 1,
-              username: 1
+              username: 1,
             }
           }
         ],
@@ -134,6 +149,7 @@ router
         username: "$friends_info.username",
         _id: "$friends_info._id",
         description: "$friends_info.description",
+        createdAt: "$friends.timestamps"
       }
     }
   ])
@@ -160,16 +176,22 @@ router
   friend_id = ObjectId(friend_id)
   id = ObjectId(id)
 
+  console.log(friend_id, _id, 22222)
+
   const data = await FriendsModel.findOne({
     _id,
-    $and: [
-      {
-        "friends._id": friend_id
-      },
-      {
-        "friends.status": FRIEND_STATUS.TO_AGREE
-      }
-    ]
+    friends: { 
+      $elemMatch: { 
+        $and: [
+          {
+            _id: friend_id
+          },
+          {
+            status: FRIEND_STATUS.TO_AGREE
+          }
+        ]
+      } 
+    },
   })
   .select({
     _id: 1,
@@ -209,7 +231,7 @@ router
       }, {
         $addToSet: {
           friends: {
-            _id: friend_id,
+            _id,
             timestamps: Date.now(),
             status: FRIEND_STATUS.NORMAL
           }

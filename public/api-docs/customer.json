@@ -2365,6 +2365,9 @@
                 "_id": {
                   "type": "string"
                 },
+                "friend_id": {
+                  "type": "string"
+                },
                 "hot": {
                   "type": "integer",
                   "description": "被点赞次数"

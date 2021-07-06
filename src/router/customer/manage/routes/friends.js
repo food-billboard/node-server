@@ -131,6 +131,9 @@ router
 
   const data = await FriendsModel.findOne({
     user: id,
+    _id: {
+      $nin: [_id]
+    }
   })
   .select({
     _id: 1,
