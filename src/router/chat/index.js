@@ -125,10 +125,10 @@ router
     const { _id } = data 
     return RoomModel.updateMany({
       members: {
-        $in: _id 
+        $in: [_id] 
       },
       online_members: {
-        $in: _id 
+        $in: [_id] 
       }
     }, {
       $pull: {

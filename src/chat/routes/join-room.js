@@ -14,8 +14,7 @@ const joinRoom = socket => async (data) => {
       sid: id,
       ...pick(data, ["_id"])
     })
-    const { res: { data: roomId } } = res 
-    console.log(roomId)
+    const { res: { data: roomId } } = JSON.parse(res) 
     socket.join(roomId)
   }catch(err) {
     res = JSON.stringify(errWrapper(err))
@@ -36,8 +35,7 @@ const leaveRoom = socket => async (data) => {
       sid: id,
       ...pick(data, ["_id"])
     })
-    const { res: { data: roomId } } = res 
-    console.log(roomId)
+    const { res: { data: roomId } } = JSON.parse(res)  
     socket.leave(roomId)
   }catch(err) {
     res = JSON.stringify(errWrapper(err))
