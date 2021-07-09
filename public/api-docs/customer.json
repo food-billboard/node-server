@@ -2476,6 +2476,12 @@
                       "_id": {
                         "type": "string"
                       },
+                      "friend_id": {
+                        "type": "string"
+                      },
+                      "member": {
+                        "type": "string"
+                      },
                       "avatar": {
                         "type": "string",
                         "description": "头像"

@@ -11,11 +11,12 @@ function responseExpect(res, validate=[]) {
 
   expect(target).to.be.a('object').and.that.includes.all.keys('friends')
   target.friends.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id', 'description', 'createdAt')
+    expect(item).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id', 'description', 'createdAt', 'friend_id')
     commonValidate.poster(item.avatar)
     commonValidate.string(item.username)
     commonValidate.string(item.description)
     commonValidate.objectId(item._id)
+    commonValidate.objectId(item.friend_id)
     commonValidate.date(item.createdAt)
   })
 
@@ -86,17 +87,33 @@ describe(`${COMMON_API} test`, function() {
     })
     .then(data => {
       selfFriendId = data._id 
-      return FriendsModel.updateOne({
-        _id: friendId
-      }, {
-        friends: {
-          $push: {
-            timestamps: Date.now(),
-            _id: selfFriendId,
-            status: FRIEND_STATUS.NORMAL
+      return Promise.all([
+        FriendsModel.updateOne({
+          _id: friendId
+        }, {
+          friends: {
+            $push: {
+              timestamps: Date.now(),
+              _id: selfFriendId,
+              status: FRIEND_STATUS.NORMAL
+            }
           }
-        }
-      })
+        }),
+        UserModel.updateOne({
+          _id: result._id 
+        }, {
+          $set: {
+            friend_id: selfFriendId
+          }
+        }),
+        UserModel.updateOne({
+          _id: userId
+        }, {
+          $set: {
+            friend_id: friendId
+          }
+        })
+      ])
     })
     .catch(err => {
       console.log('oops: ', err)

@@ -71,12 +71,12 @@ router
   })
   .select({
     friends: 1,
-    member: 1
   })
   .populate({
     path: 'friends._id',
     select: {
-      _id: 1
+      _id: 1,
+      member: 1
     },
     options: {
       limit: pageSize,
@@ -86,7 +86,8 @@ router
         select: {
           username: 1,
           avatar: 1,
-          description: 1
+          description: 1,
+          friend_id: 1
         },
       }
     }
@@ -99,11 +100,12 @@ router
       data: {
         ...data,
         friends: friends.filter(item => !!item._id).map(a => {
-          const { _id: { user: { avatar, ...nextData }={} }, timestamps } = a
+          const { _id: { user: { avatar, ...nextData }={}, member }, timestamps } = a
           return {
             ...nextData,
             avatar: avatarGet(avatar),
-            createdAt: Day(timestamps).format('YYYY-MM-DD HH:mm:ss')
+            createdAt: Day(timestamps).format('YYYY-MM-DD HH:mm:ss'),
+            member
           }
         })
       }

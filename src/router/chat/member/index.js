@@ -78,6 +78,14 @@ router
               path: "$avatar",
               preserveNullAndEmptyArrays: true 
             }
+          },
+          {
+            $project: {
+              username: 1,
+              avatar: "$avatar.src",
+              _id: 1,
+              friend_id: 1
+            }
           }
         ],
         as: 'user',
@@ -90,24 +98,8 @@ router
       }
     },
     {
-      $lookup: {
-        from: "friends",
-        localField: 'user._id',
-        foreignField: 'user',
-        as: 'friends'
-      }
-    },  
-    {
-      $unwind: "$friends"
-    },
-    {
       $project: {
-        user: {
-          username: "$user.username",
-          avatar: "$user.avatar.src",
-          _id: "$user._id",
-          friend_id: "$friends._id"
-        },  
+        user: "$user",  
         status: 1,
         sid: 1,
         createdAt: 1,
