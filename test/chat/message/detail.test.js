@@ -1,7 +1,7 @@
 require('module-alias/register')
-const { UserModel, RoomModel, MessageModel, MemberModel, VideoModel, ImageModel, ROOM_TYPE, MESSAGE_MEDIA_TYPE } = require('@src/utils')
+const { UserModel, RoomModel, MessageModel, FriendsModel, MemberModel, VideoModel, ImageModel, ROOM_TYPE, MESSAGE_MEDIA_TYPE } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateMember, mockCreateMessage, mockCreateImage, mockCreateRoom, mockCreateVideo } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateFriends, mockCreateMember, mockCreateMessage, mockCreateImage, mockCreateRoom, mockCreateVideo } = require('@test/utils')
 
 const COMMON_API = '/api/chat/message/detail'
 
@@ -20,10 +20,12 @@ function responseExpect(res, validate=[]) {
   target.message.forEach(item => {
     expect(item).to.be.a('object').and.that.include.all.keys('_id', 'user_info', 'point_to', 'content', 'createdAt', 'updatedAt', 'media_type')
     commonValidate.objectId(item._id)
-    expect(item.user_info).to.be.a('object').and.that.include.any.keys('username', '_id', 'avatar', 'description')
+    expect(item.user_info).to.be.a('object').and.that.include.any.keys('username', '_id', 'avatar', 'description', 'friend_id', 'member')
     commonValidate.string(item.user_info.username)
     commonValidate.string(item.user_info.description)
     commonValidate.objectId(item.user_info._id)
+    commonValidate.objectId(item.user_info.member)
+    commonValidate.objectId(item.user_info.friend_id)
     if(item.user_info.avatar) {
       commonValidate.poster(item.user_info.avatar)
     }
@@ -71,6 +73,7 @@ describe(`${COMMON_API} test`, function() {
   let memberId 
   let imageId 
   let videoId 
+  let friendId 
 
   before(function(done) {
 
@@ -105,6 +108,10 @@ describe(`${COMMON_API} test`, function() {
     .then(([member, video]) => {
       memberId = member._id
       videoId = video._id  
+      const { model: friend } = mockCreateFriends({
+        user: userInfo._id,
+        member: memberId
+      })
       const { model: systemMessage } = mockCreateMessage({
         content: {
           text: COMMON_API,
@@ -156,16 +163,18 @@ describe(`${COMMON_API} test`, function() {
         imageMessage.save(),
         videoMessage.save(),
         systemRoom.save(),
-        userRoom.save()
+        userRoom.save(),
+        friend.save()
       ])
     })
-    .then(([message, systemMessage, imageMessage, videoMessage, system, user]) => {
+    .then(([message, systemMessage, imageMessage, videoMessage, system, user, friend]) => {
       messageId = message._id 
       systemMessageId = systemMessage._id
       imageMessageId = imageMessage._id 
       videoMessageId = videoMessage._id 
       systemRoomId = system._id 
       roomId = user._id 
+      friendId = friend._id 
       return Promise.all([
         MemberModel.updateOne({
           _id: memberId
@@ -224,6 +233,13 @@ describe(`${COMMON_API} test`, function() {
             user_info: memberId,
           }
         }),
+        UserModel.updateOne({
+          _id: userInfo._id 
+        }, {
+          $set: {
+            friend_id: friendId
+          }
+        })
       ])
     })
     .then(() => {
@@ -256,6 +272,9 @@ describe(`${COMMON_API} test`, function() {
       }),
       VideoModel.deleteMany({
         src: COMMON_API
+      }),
+      FriendsModel.deleteMany({
+        _id: friendId
       })
     ])
     .then(_ => {
@@ -301,6 +320,37 @@ describe(`${COMMON_API} test`, function() {
           done()
         })
 
+      })
+
+      it(`get message list success with message id`, function(done) {
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: roomId.toString(),
+          messageId: messageId.toString()
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+            return done(err)
+          }
+          responseExpect(obj, target => {
+            expect(target.length).to.not.be.equals(0)
+            expect(target.message.some(item => item._id === messageId.toString())).to.be.true
+          })
+          done()
+        })
       })
 
     })

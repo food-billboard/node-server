@@ -387,6 +387,12 @@
             "in": "query",
             "type": "string",
             "description":"起始时间"
+          },
+          {
+            "name": "messageId",
+            "in": "query",
+            "type": "string",
+            "description":"消息id"
           }
         ],
         "responses": {
@@ -1328,6 +1334,12 @@
                             "description": "描述"
                           },
                           "_id": {
+                            "type": "string"
+                          },
+                          "member": {
+                            "type": "string"
+                          },
+                          "friend_id": {
                             "type": "string"
                           },
                           "avatar": {

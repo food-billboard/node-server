@@ -82,7 +82,7 @@ router
       limit: pageSize,
       skip: pageSize * currPage,
       populate: {
-        path: 'user',
+        path: 'user', 
         select: {
           username: 1,
           avatar: 1,
@@ -142,14 +142,14 @@ router
     friends: 1
   })
   .exec()
-  .then(parseData)
-  .then(data => {
-    if(!!data) {
-      return data.friends.every(item => item._id != _id.toString())
-    } 
-    return checkMember(id)
-  })
   .then(notFound)
+  // .then(data => {
+  //   if(!!data) {
+  //     return data.friends.every(item => item._id != _id.toString())
+  //   } 
+  //   return checkMember(id)
+  // })
+  // .then(notFound)
   .then(data => {
     return Promise.all([
       FriendsModel.updateOne({

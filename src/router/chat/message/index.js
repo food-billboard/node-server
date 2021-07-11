@@ -60,6 +60,22 @@ router
     : 
       Promise.resolve())
   .then(data => {
+    let messageMatch = []
+    if(data) {
+      messageMatch = [
+        {
+          $match: {
+            deleted: {
+              $nin: [ObjectId(data._id)]
+            },
+            $expr: {
+              "$eq": [ "$room", "$$room_id" ],
+            },
+          }
+        }
+      ]
+    }
+
     return RoomModel.aggregate([
       {
         $match: match
@@ -148,16 +164,7 @@ router
             room_id: "$_id",
           },
           pipeline: [
-            ...(data ? [{
-              $match: {
-                deleted: {
-                  $nin: [ObjectId(data._id)]
-                },
-                $expr: {
-                  "$eq": [ "$room", "$$room_id" ]
-                }
-              }
-            }] : []),
+            ...messageMatch,
             {
               $sort: {
                 createdAt: -1
@@ -317,7 +324,7 @@ router
   if(check) return 
 
   const [, token] = verifyTokenToData(ctx)
-  const [ _id, currPage, pageSize, start ] = Params.sanitizers(ctx.query, {
+  const [ _id, currPage, pageSize, start, messageId ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
@@ -337,7 +344,16 @@ router
   }, {
     name: 'start',
     sanitizers: [
-      data => Day(data).isValid() ? Day(data).toDate() : false
+      data => {
+        return Day(data).isValid() && !!data ? Day(data).toDate() : false
+      }
+    ]
+  }, {
+    name: 'messageId',
+    sanitizers: [
+      data => {
+        return ObjectId.isValid(data) ? ObjectId(data) : false 
+      }
     ]
   })
   let match = {
@@ -360,7 +376,11 @@ router
       $skip: currPage * pageSize
     })
   }
-
+  if(messageId) {
+    messageMatch.$expr = {
+      $eq: [ "$_id", messageId ]
+    }
+  }
 
   const data = await new Promise((resolve) => {
     if(token) {
@@ -411,7 +431,7 @@ router
             },
             {
               $sort: {
-                createdAt: -1
+                createdAt: 1
               }
             },
             ...skipLimitPipe,
@@ -446,7 +466,7 @@ router
                         },
                         {
                           $lookup: {
-                            from: 'image',
+                            from: 'images',
                             as: 'avatar',
                             foreignField: "_id",
                             localField: "avatar"
@@ -463,7 +483,8 @@ router
                             _id: 1,
                             avatar: "$avatar.src",
                             username: 1,
-                            description: 1
+                            description: 1,
+                            friend_id: 1
                           }
                         }
                       ],
@@ -481,7 +502,9 @@ router
                       _id: "$user_info._id",
                       avatar: "$user_info.avatar",
                       username: "$user_info.username",
-                      description: "$user_info.description"
+                      description: "$user_info.description",
+                      member: "$_id",
+                      friend_id: "$user_info.friend_id"
                     }
                   }
                 ],
@@ -803,20 +826,26 @@ router
     return message.save()
   })
   .then(data => {
-    return RoomModel.updateOne({
-      _id: roomId,
-      members: {
-        $in: [userId]
-      },
-      deleted: false 
-    }, {
-      $addToSet: {
-        message: data._id
-      }
-    })
+    return Promise.all([
+      RoomModel.updateOne({
+        _id: roomId,
+        members: {
+          $in: [userId]
+        },
+        deleted: false 
+      }, {
+        $addToSet: {
+          message: data._id
+        }
+      }),
+      data
+    ])
   })
-  .then(data => {
+  .then(([data, message]) => {
     if(data && data.nModified == 0) return Promise.reject({ errMsg: 'forbidden', status: 403 })
+    return {
+      data: message._id
+    }
   })
   .catch(dealErr(ctx))
   

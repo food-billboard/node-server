@@ -61,32 +61,45 @@ function scheduleMethod() {
           }
         }
       ])
-      .then(data => {
+      .then(friendList => {
         const needGenerateUser = memberList.filter(item => {
-          return ObjectId.isValid(item.user) && !data.some(friend => friend.user && friend.user.equals(item.user))
+          return ObjectId.isValid(item.user) && !friendList.some(friend => friend.user && friend.user.equals(item.user))
         })
         return Promise.all(needGenerateUser.map(item => {
           const { _id, user } = item 
           const model = new FriendsModel({
-            user,
-            member: _id 
+            user: ObjectId(user),
+            member: ObjectId(_id) 
           })
           return model.save()
         }))
       })
     })
-  })
-  .then(friendList => {
-    return Promise.all(friendList.map(friend => {
-      const { user, _id } = friend
-      return UserModel.updateOne({
-        _id: user 
-      }, {
-        $set: {
-          friend_id: _id
+    .then(_ => {
+      return FriendsModel.aggregate([
+        {
+          $project: {
+            _id: 1,
+            user: 1,
+          }
         }
+      ])
+    })
+    .then(friendList => {
+      const needUpdateUser = friendList.filter(friend => {
+        return !userList.some(user => friend._id.equals(user.friend_id))
       })
-    }))
+      return Promise.all(needUpdateUser.map(friend => {
+        const { user, _id } = friend
+        return UserModel.updateOne({
+          _id: ObjectId(user) 
+        }, {
+          $set: {
+            friend_id: _id
+          }
+        })
+      }))
+    })
   })
   .catch(err => {
     log4Error({
