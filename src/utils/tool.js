@@ -1,5 +1,6 @@
 const path = require('path')
 const Day = require('dayjs')
+const fse = require('fs-extra')
 var isoWeek = require('dayjs/plugin/isoWeek')
 const { pick } = require('lodash')
 const { Types: { ObjectId } } = require('mongoose')
@@ -14,7 +15,9 @@ Day.extend(isoWeek)
 const checkDir = path => !fs.existsSync(path) || !fs.statSync(path).isDirectory()
 
 //检查并创建文件夹
-const checkAndCreateDir = (...paths) => paths.forEach(path => Array.isArray(path) ? checkAndCreateDir(path) : ( typeof path === 'string' && checkDir(path) && fs.mkdirSync(path)))
+const checkAndCreateDir = (...paths) => paths.forEach(path => {
+  Array.isArray(path) ? checkAndCreateDir(path) : ( typeof path === 'string' && fse.ensureDirSync(path))
+})
 
 const typeProto = (arg, type) => Object.prototype.toString.call(arg) === `[object ${type.slice(0, 1).toUpperCase()}${type.slice(1)}]`
 

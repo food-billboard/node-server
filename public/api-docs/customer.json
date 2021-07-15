@@ -2529,7 +2529,34 @@
                 "friends": {
                   "type": "array",
                   "items": {
-                    "$ref":"#/definitions/customer_user_list"
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "friend_id": {
+                        "type": "string"
+                      },
+                      "member": {
+                        "type": "string"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "头像"
+                      },
+                      "username": {
+                        "type": "string",
+                        "description": "用户名"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format":"date-time"
+                      }
+                    }
                   }
                 },
                 "member": {

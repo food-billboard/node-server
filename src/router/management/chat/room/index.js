@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { RoomModel, MemberModel, Params, ROOM_TYPE, verifyTokenToData, dealErr, responseDataDeal } = require('@src/utils')
+const { RoomModel, MemberModel, Params, ROOM_TYPE, verifyTokenToData, dealErr, responseDataDeal, MessageModel } = require('@src/utils')
 
 const router = new Router()
 
@@ -152,7 +152,10 @@ router
         }
       },
       {
-        $unwind: "$create_user",
+        $unwind: {
+          path: "$create_user",
+          preserveNullAndEmptyArrays: true 
+        }
       },
       {
         $lookup: {
@@ -522,9 +525,25 @@ router
     ]
   })
   
-  const data = await RoomModel.deleteMany({
-    _id: { $in: _ids }
-  })
+  const data = await Promise.all([
+    RoomModel.deleteMany({
+      _id: { $in: _ids }
+    }),
+    MessageModel.deleteMany({
+      room: {
+        $in: _ids
+      }
+    }),
+    MemberModel.updateMany({
+      room: {
+        $in: _ids
+      }
+    }, {
+      $pullAll: {
+        room: _ids
+      }
+    })
+  ])
   .then(data => {
     if(data.deletedCount === 0) return Promise.reject({ errMsg: 'not found', status: 404 })
     return {

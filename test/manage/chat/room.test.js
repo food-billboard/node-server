@@ -1,8 +1,8 @@
 require('module-alias/register')
-const { UserModel, ImageModel, RoomModel, MemberModel, ROOM_TYPE } = require('@src/utils')
+const { UserModel, ImageModel, RoomModel, MemberModel, ROOM_TYPE, MessageModel } = require('@src/utils')
 const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
-const { Request, commonValidate, mockCreateUser, mockCreateImage, mockCreateRoom, mockCreateMember, envSet, envUnSet } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateImage, mockCreateRoom, mockCreateMember, mockCreateMessage, envSet, envUnSet } = require('@test/utils')
 
 const COMMON_API = '/api/manage/chat/room'
 
@@ -947,18 +947,22 @@ describe(`${COMMON_API} test`, function() {
 
       let roomId1
       let roomId2 
+      let messageId1
+      let messageId2
       before(function(done) {
         const { model: model1 } = mockCreateRoom({
           info: {
             name: COMMON_API + 'delete-1',
             description: COMMON_API,
-          }
+          },
+          members: [memberId]
         })
         const { model: model2 } = mockCreateRoom({
           info: {
             name: COMMON_API + 'delete-2',
             description: COMMON_API,
-          }
+          },
+          members: [memberId],
         })
         Promise.all([
           model1.save(),
@@ -967,6 +971,45 @@ describe(`${COMMON_API} test`, function() {
         .then(([room1, room2]) => {
           roomId1 = room1._id 
           roomId2 = room2._id
+          const { model: message1 } = mockCreateMessage({
+            room: roomId1
+          })
+          const { model: message2 } = mockCreateMessage({
+            room: roomId2
+          })
+          return Promise.all([
+            message1.save(),
+            message2.save(),
+            MemberModel.updateOne({
+              _id: memberId
+            }, {
+              $pushAll: {
+                room: [roomId1, roomId2]
+              }
+            })
+          ])
+        })
+        .then(([message1, message2]) => {
+          messageId1 = message1._id 
+          messageId2 = message2._id 
+          return Promise.all([
+            RoomModel.updateOne({
+              _id: roomId1
+            }, {
+              $push: {
+                message: messageId1
+              }
+            }),
+            RoomModel.updateOne({
+              _id: roomId2
+            }, {
+              $push: {
+                message: messageId2
+              }
+            })
+          ])
+        })
+        .then(_ => {
           done()
         })
         .catch(err => {
@@ -976,19 +1019,59 @@ describe(`${COMMON_API} test`, function() {
       })
 
       after(function(done) {
-        RoomModel.find({
-          _id: { $in: [ roomId1, roomId2 ] }
-        })
-        .select({
-          _id: 1
-        })
-        .exec()
-        .then(data => {
-          expect(data.length).to.be.eq(0)
-          done()
+        let callback = done 
+        Promise.all([
+          RoomModel.find({
+            _id: { $in: [ roomId1, roomId2 ] }
+          })
+          .select({
+            _id: 1
+          })
+          .exec(),
+          MessageModel.find({
+            _id: {
+              $in: [messageId1, messageId2]
+            }
+          })
+          .select({
+            _id: 1
+          })
+          .exec(),
+          MemberModel.findOne({
+            _id: memberId,
+            room: {
+              $in: [
+                roomId1,
+                roomId2
+              ]
+            }
+          })
+          .select({
+            _id: 1
+          })
+          .exec()
+        ])
+        .then(([room, message, member]) => {
+          expect(room.length).to.be.eq(0)
+          expect(message.length).to.be.eq(0)
+          expect(!!member).to.be.false
         })
         .catch(err => {
-          console.log('oops: ', err)
+          callback = done.bind(this, err)
+        })
+        .then(_ => {
+          return Promise.all([
+            MessageModel.deleteMany({
+              _id: {
+                $in: [messageId1, messageId2]
+              }
+            }),
+          ])
+        })
+        .then(_ => {
+          callback()
+        })
+        .catch(err => {
           done(err)
         })
       })

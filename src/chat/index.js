@@ -2,8 +2,13 @@ const Koa = require("koa")
 require('module-alias/register')
 const Ws = require('socket.io')
 const http = require('http')
+const { 
+  MongoDB, 
+} = require("@src/utils")
 const { connection } = require('./utils')
 const Router = require("./routes")
+
+MongoDB()
 
 const app = new Koa()
 
@@ -19,4 +24,4 @@ const io = Ws(server, {
 
 io
 .use(connection)
-.on("connection", Router) 
+.on("connection", Router(io)) 

@@ -7,7 +7,6 @@ const getRoomList = socket => async (data) => {
   const { id } = socket
 
   let res 
-
   try {
     res = await getRoomListMethod(socket, data, {
       sid: id,

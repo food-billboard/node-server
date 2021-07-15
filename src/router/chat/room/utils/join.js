@@ -9,13 +9,16 @@ const {
   parseData, 
   MemberModel, 
   ROOM_USER_NET_STATUS,
-  notFound
+  FriendsModel,
+  notFound,
+  FRIEND_STATUS
 } = require('@src/utils')
 
 async function roomExists(data, userId) {
   const { _id, members, type } = data
   if(ObjectId.isValid(_id) || ( !ObjectId.isValid(_id) && type === ROOM_TYPE.CHAT ) || type === ROOM_TYPE.SYSTEM) {
     let query = {}
+    //系统
     if(type === ROOM_TYPE.SYSTEM) {
       query = {
         type,
@@ -25,17 +28,23 @@ async function roomExists(data, userId) {
       if(ObjectId.isValid(userId)) query["members"] = {
         $in: [userId]
       }
-    }else if(!ObjectId.isValid(userId)) {
+    }
+    //未登录
+    else if(!ObjectId.isValid(userId)) {
       return Promise.reject({
         errMsg: 'not authorization',
         status: 401
       })
-    }else if(!ObjectId.isValid(_id)) {
+    }
+    //创建
+    else if(!ObjectId.isValid(_id)) {
       query = {
         type,
-        "members": { $in: members },
+        "members": type === ROOM_TYPE.CHAT ? members  : { $in: members },
       }
-    }else {
+    }
+    //已经存在
+    else {
       query = {
         _id: ObjectId(_id),
         "members": {
@@ -110,16 +119,91 @@ async function formatMembers(prevMemebers, userId) {
   .then(notFound)
   .then(data => {
     const { _id } = data
-    if(!prevMemebers.some(item => item.equals(_id))) return {
-      mime: _id,
-      members: [
-        ...prevMemebers,
-        _id 
-      ] 
+    let newMembers = [...prevMemebers]
+    if(!prevMemebers.some(item => item.equals(_id))) {
+      newMembers = [
+        ...newMembers,
+        _id
+      ]
     }
+    if(newMembers.length < 2) return Promise.reject({ errMsg: '成员数量不正确', status: 404 })
     return {
       mime: _id,
-      members: prevMemebers
+      members: newMembers
+    }
+  })
+}
+
+async function isMembersValid(members, mime, status) {
+  const toAddMembers = members.filter(item => !item.equals(mime))
+  return FriendsModel.findOne({
+    member: mime 
+  })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => {
+    const { _id } = data 
+    return MemberModel.aggregate([
+      {
+        $match: {
+          _id: {
+            $in: toAddMembers
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'friends', 
+          let: {
+            member_id: "$_id"
+          },
+          pipeline: [  
+            {
+              $match: {
+                $expr: {
+                  $eq: [
+                    "$member", "$$member_id"
+                  ]
+                },
+                friends: {
+                  $elemMatch: { 
+                    $and: [
+                      {
+                        _id,
+                      },
+                      {
+                        status: FRIEND_STATUS.NORMAL
+                      }
+                    ]
+                  } 
+                }
+              }
+            },
+          ],
+          as: 'friends',
+        }
+      },
+      {
+        $unwind: "$friends"
+      },
+      {
+        $project: {
+          _id: 1
+        }
+      }
+    ])
+  })
+  .then(data => {
+    if(data.length !== toAddMembers.length) {
+      if(!status) return Promise.reject({ errMsg: "不可对非好友创建群聊", status: 403 })
+      return RoomModel.deleteOne({
+        _id: ObjectId(status)
+      })
+      .then(_ => {
+        return Promise.reject({ errMsg: "不可对非好友创建群聊", status: 403 })
+      })
     }
   })
 }
@@ -170,6 +254,10 @@ const joinRoom = async (ctx) => {
       members: newMembers,
     }, mimeId)
   })
+  .then(status => {
+    return isMembersValid(newMembers, mimeId, status)
+    .then(_ => status)
+  })
   .then(async (status) => {
     //创建房间
     if(!status) {
@@ -196,17 +284,6 @@ const joinRoom = async (ctx) => {
       const room = new RoomModel({
         type,
         info,
-        // members: newMembers.map(m => {
-        //   const result = {
-        //     user: m,
-        //     status: ROOM_USER_NET_STATUS.OFFLINE
-        //   }
-        //   if(!token) return result 
-        //   return {
-        //     ...result,
-        //     status: m.equals(mimeId) ? ROOM_USER_NET_STATUS.ONLINE : ROOM_USER_NET_STATUS.OFFLINE,
-        //   }
-        // }),
         members: newMembers
       })
       

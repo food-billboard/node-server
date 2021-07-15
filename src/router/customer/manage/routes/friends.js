@@ -65,49 +65,99 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
-  const data = await FriendsModel.findOne({
-    user: ObjectId(id),
-    "friends.status": FRIEND_STATUS.NORMAL
-  })
-  .select({
-    friends: 1,
-  })
-  .populate({
-    path: 'friends._id',
-    select: {
-      _id: 1,
-      member: 1
+  const data = await FriendsModel.aggregate([
+    {
+      $match: {
+        user: ObjectId(id),
+      }
     },
-    options: {
-      limit: pageSize,
-      skip: pageSize * currPage,
-      populate: {
-        path: 'user', 
-        select: {
-          username: 1,
-          avatar: 1,
-          description: 1,
-          friend_id: 1
+    {
+      $unwind: "$friends"
+    },
+    {
+      $match: {
+        "friends.status": FRIEND_STATUS.NORMAL
+      }
+    },
+    {
+      $skip: pageSize * currPage
+    },
+    {
+      $limit: pageSize
+    },
+    {
+      $lookup: {
+        from: 'users', 
+        let: {
+          friend_id: "$friends._id"
         },
+        pipeline: [  
+          {
+            $match: {
+              $expr: {
+                $eq: [
+                  "$friend_id", "$$friend_id"
+                ]
+              }
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              as: 'avatar',
+              foreignField: "_id",
+              localField: "avatar"
+            }
+          },
+          {
+            $unwind: {
+              path: "$avatar",
+              preserveNullAndEmptyArrays: true 
+            }
+          },
+          {
+            $project: {
+              _id: 1,
+              username: 1,
+              description: 1,
+              avatar: "$avatar.src",
+              friend_id: 1,
+            }
+          },
+        ],
+        as: 'user_info',
+      }
+    },
+    {
+      $unwind: "$user_info"
+    },
+    {
+      $lookup: {
+        from: 'friends',
+        as: 'member_info',
+        foreignField: "_id",
+        localField: "friends._id"
+      }
+    },
+    {
+      $unwind: "$member_info"
+    },
+    {
+      $project: {
+        member: "$member_info.member",
+        _id: "$user_info._id",
+        username: "$user_info.username",
+        description: "$user_info.description",
+        avatar: "$user_info.avatar",
+        friend_id: "$user_info.friend_id",
+        createdAt: 1,
       }
     }
-  })
-  .exec()
-  .then(parseData)
+  ])
   .then(data => {
-    const { friends=[] } = data || {}
     return {
       data: {
-        ...data,
-        friends: friends.filter(item => !!item._id).map(a => {
-          const { _id: { user: { avatar, ...nextData }={}, member }, timestamps } = a
-          return {
-            ...nextData,
-            avatar: avatarGet(avatar),
-            createdAt: Day(timestamps).format('YYYY-MM-DD HH:mm:ss'),
-            member
-          }
-        })
+        friends: data
       }
     }
   })
@@ -143,13 +193,6 @@ router
   })
   .exec()
   .then(notFound)
-  // .then(data => {
-  //   if(!!data) {
-  //     return data.friends.every(item => item._id != _id.toString())
-  //   } 
-  //   return checkMember(id)
-  // })
-  // .then(notFound)
   .then(data => {
     return Promise.all([
       FriendsModel.updateOne({
@@ -157,7 +200,7 @@ router
         $where: "this.friends.length < 9999"
       }, {
         $push: { friends: { _id, timestamps: Date.now() } },
-        ...(data && data._id ? { $set: { member: data._id } } : {})
+        // ...(data && data._id ? { $set: { member: data._id } } : {})
       }, {
         upsert: true 
       })
