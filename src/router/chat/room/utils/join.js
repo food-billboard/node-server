@@ -1,4 +1,5 @@
 const { Types: { ObjectId } } = require('mongoose')
+const { merge } = require('lodash')
 const { 
   verifyTokenToData, 
   RoomModel, 
@@ -14,23 +15,25 @@ const {
   FRIEND_STATUS
 } = require('@src/utils')
 
-async function roomExists(data, userId) {
+async function roomExists(data, userMemberId) {
   const { _id, members, type } = data
   if(ObjectId.isValid(_id) || ( !ObjectId.isValid(_id) && type === ROOM_TYPE.CHAT ) || type === ROOM_TYPE.SYSTEM) {
-    let query = {}
+    let query = {
+      type,
+      deleted: false 
+    }
     //系统
     if(type === ROOM_TYPE.SYSTEM) {
-      query = {
-        type,
+      query = merge({}, query, {
         origin: true,
-      }
+      })
       if(ObjectId.isValid(_id)) query._id = _id 
-      if(ObjectId.isValid(userId)) query["members"] = {
-        $in: [userId]
+      if(ObjectId.isValid(userMemberId)) query["members"] = {
+        $in: [userMemberId]
       }
     }
     //未登录
-    else if(!ObjectId.isValid(userId)) {
+    else if(!ObjectId.isValid(userMemberId)) {
       return Promise.reject({
         errMsg: 'not authorization',
         status: 401
@@ -38,38 +41,43 @@ async function roomExists(data, userId) {
     }
     //创建
     else if(!ObjectId.isValid(_id)) {
-      query = {
-        type,
-        "members": type === ROOM_TYPE.CHAT ? members  : { $in: members },
-      }
+      query = merge({}, query, {
+        members: {
+          $in: members,
+          $size: members.length
+        },
+      })
     }
     //已经存在
     else {
-      query = {
+      query = merge({}, query, {
         _id: ObjectId(_id),
         "members": {
-          $in: [userId]
+          $in: [userMemberId]
         },
-        deleted: false,
-      }
+      })
     }
 
     return Promise.all([
-      RoomModel.findOne(query)
+      RoomModel.findOneAndUpdate(query, {
+        $pullAll: {
+          delete_users: members
+        }
+      })
       .select({
         _id: 1
       })
       .exec()
       .then(parseData),
       MemberModel.updateOne({
-        _id: userId
+        _id: userMemberId
       }, {
         $set: {
           status: ROOM_USER_NET_STATUS.ONLINE
-        }
+        },
       })
     ])
-    .then(([data]) => {
+    .then(([data])=> {
       if(data) {
         const { _id } = data
         return _id.toString()
@@ -305,6 +313,18 @@ const joinRoom = async (ctx) => {
       })
     }
     return status
+  })
+  .then(data => {
+    return MemberModel.updateMany({
+      _id: {
+        $in: newMembers
+      }
+    }, {
+      $addToSet: {
+        room: data
+      }
+    })
+    .then(_ => data)
   })
   .then(data => ({ data }))
   .catch(dealErr(ctx))

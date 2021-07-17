@@ -1,27 +1,9 @@
 const Router = require('@koa/router')
 const { verifyTokenToData, UserModel, FriendsModel, MemberModel, FRIEND_STATUS, dealErr, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
-const Day = require('dayjs')
 const AgreeFriends = require('./agree-friends')
 
 const router = new Router()
-
-async function checkMember(user) {
-  return MemberModel.findOne({
-    user,
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => {
-    if(data) return data 
-    const model = new MemberModel({
-      user
-    })
-    return model.save()
-  })
-}
 
 router
 .use(async(ctx, next) => {
@@ -76,7 +58,12 @@ router
     },
     {
       $match: {
-        "friends.status": FRIEND_STATUS.NORMAL
+        "friends.status": {
+          $in: [
+            FRIEND_STATUS.NORMAL,
+            FRIEND_STATUS.AGREE
+          ]
+        }
       }
     },
     {
@@ -233,7 +220,10 @@ router
       $elemMatch: { 
         _id: _id,
         status: {
-          $ne: FRIEND_STATUS.TO_AGREE
+          $nin: [
+            FRIEND_STATUS.TO_AGREE,
+            FRIEND_STATUS.DIS_AGREE
+          ] 
         }
       } 
     }

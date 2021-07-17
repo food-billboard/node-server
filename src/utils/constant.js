@@ -110,7 +110,8 @@ const FRIEND_STATUS = {
   NORMAL: 'NORMAL',
   BLACK: 'BLACK',
   TO_AGREE: 'TO_AGREE',
-  DISS_AGREE: "DIS_AGREE"
+  DISS_AGREE: "DIS_AGREE",
+  AGREE: "AGREE"
 }
 
 const ROOM_TYPE = {
@@ -147,6 +148,11 @@ const ERROR_TYPE = {
   TYPE_ERROR: "TYPE_ERROR"
 }
 
+const USER_HOT_HISTORY_TYPE = {
+  comment: "comment",
+  barrage: "barrage"
+}
+
 module.exports = {
   MESSAGE_MEDIA_TYPE,
   MESSAGE_TYPE,
@@ -173,5 +179,6 @@ module.exports = {
   BEHAVIOUR_URL_TYPE_MAP,
   FRIEND_STATUS,
   ERROR_ORIGIN_TYPE,
-  ERROR_TYPE
+  ERROR_TYPE,
+  USER_HOT_HISTORY_TYPE
 }

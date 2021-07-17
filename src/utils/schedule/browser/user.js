@@ -1,15 +1,22 @@
 const { UserModel } = require('../../mongodb/mongo.lib')
 
+/** 
+ * 将用户被点赞及浏览电影记录清除
+ * 浏览或被点赞记录超过500
+*/
+
+const LIMIT = 500
+
 async function userDeal() {
   return UserModel.aggregate([
     {
       $match: {
         $or: [
           {
-            $where: "this.glance.length > 500"
+            $where: `this.glance.length > ${LIMIT}`
           },
           {
-            $where: "this.hot_history.length > 500"
+            $where: `this.hot_history.length > ${LIMIT}`
           },
         ]
       }
@@ -29,11 +36,11 @@ async function userDeal() {
       const hotTotal = hot_history.length
       let setFields = {}
       let update = {}
-      if(glanceTotal > 500) {
-        setFields.glance = glance.slice(glanceTotal - 500)
+      if(glanceTotal > LIMIT) {
+        setFields.glance = glance.slice(glanceTotal - LIMIT)
       }
-      if(hotTotal > 500) {
-        setFields.hot_history = hot_history.slice(hotTotal - 500)
+      if(hotTotal > LIMIT) {
+        setFields.hot_history = hot_history.slice(hotTotal - LIMIT)
       }
       update.$set = setFields
       return UserModel.updateOne({
@@ -44,5 +51,6 @@ async function userDeal() {
 }
 
 module.exports = {
-  userDeal
+  userDeal,
+  LIMIT
 }

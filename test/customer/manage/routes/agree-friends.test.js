@@ -11,13 +11,14 @@ function responseExpect(res, validate=[]) {
 
   expect(target).to.be.a('object').and.that.includes.all.keys('friends')
   target.friends.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.any.keys('avatar', 'username', '_id', 'description', 'friend_id', 'createdAt')
+    expect(item).to.be.a('object').and.that.includes.any.keys('avatar', 'username', '_id', 'description', 'friend_id', 'createdAt', 'status')
     if(item.avatar) {
       commonValidate.poster(item.avatar)
     }
     commonValidate.objectId(item.friend_id)
     commonValidate.string(item.username)
     commonValidate.string(item.description)
+    commonValidate.string(item.status)
     commonValidate.objectId(item._id)
   })
 
@@ -37,6 +38,10 @@ describe(`${COMMON_API} test`, function() {
   let userId
   let friendId 
   let selfFriendId
+  let disagreeUserId 
+  let agreeUserId 
+  let disagreeFriendId 
+  let agreeFriendId 
 
   before(async function() {
 
@@ -49,21 +54,45 @@ describe(`${COMMON_API} test`, function() {
       description: COMMON_API
     })
 
+    const { model:agreeUser } = mockCreateUser({
+      username: COMMON_API,
+    })
+
+    const { model:disagreeUser } = mockCreateUser({
+      username: COMMON_API,
+    })
+
     await Promise.all([
       self.save(),
-      user.save()
+      user.save(),
+      agreeUser.save(),
+      disagreeUser.save()
     ])
-    .then(([self, user]) => {
+    .then(([self, user, agree, disagree]) => {
       userId = user._id
       result = self
+      agreeUserId = agree._id 
+      disagreeUserId = disagree._id 
       const { model } = mockCreateFriends({
         user: result._id,
       })
-      return model.save()
+      const { model: agreeFriend } = mockCreateFriends({
+        user: agreeUserId
+      })
+      const { model: disagreeFriend } = mockCreateFriends({
+        user: disagreeUserId
+      })
+      return Promise.all([
+        model.save(),
+        agreeFriend.save(),
+        disagreeFriend.save(),
+      ])
     })
-    .then(data => {
+    .then(([data, agreeFriend, disagreeFriend]) => {
       selfFriendId = data._id
       selfToken = signToken(self._id, selfFriendId)
+      agreeFriendId = agreeFriend._id
+      disagreeFriendId = disagreeFriend._id
       const { model } = mockCreateFriends({
         user: userId,
         friends: [
@@ -74,7 +103,38 @@ describe(`${COMMON_API} test`, function() {
           }
         ]
       })
-      return model.save()
+      return Promise.all([
+        model.save(),
+        FriendsModel.updateOne({
+          _id: selfFriendId
+        }, {
+          $set: {
+            friends:[
+              {
+                timestamps: Date.now(),
+                _id: agreeFriendId,
+                status: FRIEND_STATUS.TO_AGREE
+              },
+              {
+                timestamps: Date.now(),
+                _id: disagreeFriendId,
+                status: FRIEND_STATUS.TO_AGREE
+              },
+            ]
+          }
+        }),
+        FriendsModel.updateOne({
+          _id: agreeFriendId
+        }, {
+          $push: {
+            friends:{
+              timestamps: Date.now(),
+              _id: selfFriendId,
+              status: FRIEND_STATUS.NORMAL
+            },
+          }
+        }),
+      ])
     })
     .then((data) => {
       friendId = data._id
@@ -94,14 +154,14 @@ describe(`${COMMON_API} test`, function() {
         username: COMMON_API
       }),
       FriendsModel.deleteMany({
-        $or: [
-          {
-            _id: friendId
-          },
-          {
-            _id: selfFriendId
-          }
-        ]
+        _id: {
+          $in: [
+            friendId,
+            selfFriendId,
+            agreeFriendId,
+            disagreeFriendId
+          ]
+        }
       })
     ])
     .catch(err => {
@@ -182,6 +242,18 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, target => {
             expect(target.friends.length).not.be.equal(0)
+            const { agree, normal, disagree } = target.friends.reduce((acc, cur) => {
+              const { friend_id } = cur 
+              if(agreeFriendId.equals(friend_id)) acc.agree = true 
+              if(friendId.equals(friend_id)) acc.normal = true 
+              if(disagreeFriendId.equals(friend_id)) acc.disagree = true 
+              return acc 
+            }, {
+              agree: false,
+              normal: false,
+              disagree: false 
+            })
+            expect(!!agree && !!normal && !!disagree).to.be.true 
           })
           done()
         })
@@ -222,7 +294,7 @@ describe(`${COMMON_API} test`, function() {
                   "_id": selfFriendId
                 },
                 {
-                  "status": FRIEND_STATUS.NORMAL
+                  "status": FRIEND_STATUS.AGREE
                 }
               ]
             }
@@ -348,7 +420,12 @@ describe(`${COMMON_API} test`, function() {
       after(async function() {
         const res = await FriendsModel.findOne({
           _id: friendId,
-          friends: []
+          friends: {
+            $elemMatch: {
+              _id: selfFriendId,
+              status: FRIEND_STATUS.DIS_AGREE
+            }
+          }
         })
         .select({
           _id: 1,

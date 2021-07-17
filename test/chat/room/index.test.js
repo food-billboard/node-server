@@ -486,9 +486,20 @@ describe(`${COMMON_API} test`, function() {
   describe(`${COMMON_API} post room test`, function() {
       
     describe(`${COMMON_API} post room success test`, function() {
+
+      const valid = (roomQuery, memberQuery) => {
+        return Promise.all([
+          RoomModel.findOne(roomQuery),
+          MemberModel.findOne(memberQuery)
+        ])
+        .then(([room, member]) => {
+          expect(!!room && !!member).to.be.true 
+        })
+      }
       
       it(`post room success and post group_room`, function(done) {
 
+        let roomId 
         const { model: groupRoom } = mockCreateRoom({
           info: {
             name: COMMON_API,
@@ -500,6 +511,7 @@ describe(`${COMMON_API} test`, function() {
 
         groupRoom.save()
         .then(data => {
+          roomId = data._id 
           return Promise.all([
             data,
             MemberModel.updateOne({
@@ -516,7 +528,6 @@ describe(`${COMMON_API} test`, function() {
           .post(COMMON_API)
           .send({
             _id: data._id.toString(),
-            // type: ROOM_TYPE.GROUP_CHAT
           })
           .set({
             Accept: 'Application/json',
@@ -524,6 +535,26 @@ describe(`${COMMON_API} test`, function() {
           })
           .expect(200)
           .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return valid({
+            _id: roomId,
+            members: {
+              $in: [
+                memberId
+              ]
+            },
+            delete_users: {
+              $nin: [
+                memberId
+              ] 
+            }
+          }, {
+            _id: memberId,
+            room: {
+              $in: [roomId]
+            }
+          })
         })
         .then(_ => {
           done()
@@ -546,19 +577,43 @@ describe(`${COMMON_API} test`, function() {
         })
         .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if(err) return done(err)
+        .then(function(res) {
           const { res: { text } } = res
           let obj
           try{
             obj = JSON.parse(text)
           }catch(_) {
-            console.log(_)
             return done(err)
           }
           const { res: { data: target } } = obj
           toDeleteRoomList.push(target)
+          return target 
+        })
+        .then(roomId => {
+          return valid({
+            _id: roomId,
+            members: {
+              $in: [
+                memberId
+              ]
+            },
+            delete_users: {
+              $nin: [
+                memberId
+              ] 
+            }
+          }, {
+            _id: roomId,
+            room: {
+              $in: [roomId]
+            }
+          })
+        })
+        .then(_ => {
           done()
+        })
+        .catch(err => {
+          done(err)
         })
       })
 
@@ -614,6 +669,66 @@ describe(`${COMMON_API} test`, function() {
         .end(function(err) {
           if(err) return done(err)
           done()
+        })
+      })
+
+      it(`post room success and post chat room and room exists and user is quit before`, function(done) {
+        MemberModel.updateOne({
+          _id: memberId
+        }, {
+          $pull: {
+            room: roomId
+          }
+        })
+        .then(_ => {
+          return RoomModel.updateOne({
+            _id: roomId
+          }, {
+            $push: {
+              delete_users: {
+                memberId
+              }
+            }
+          })
+        })
+        .then(_ => {
+          return Request
+          .post(COMMON_API)
+          .send({
+            _id: roomId.toString()
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return valid({
+            _id: roomId,
+            members: {
+              $in: [
+                memberId
+              ]
+            },
+            delete_users: {
+              $nin: [
+                memberId
+              ] 
+            }
+          }, {
+            _id: memberId,
+            room: {
+              $in: [roomId]
+            }
+          })
+        })
+        .then(function(_) {
+          done()
+        })
+        .catch(err => {
+          done(err)
         })
       })
 
@@ -960,6 +1075,174 @@ describe(`${COMMON_API} test`, function() {
 
   })
 
+  describe(`${JOIN_COMMON_API} join the room test`, function() {
+
+    describe(`${JOIN_COMMON_API} join room success test`, function() {
+
+      after(function(done) {
+        RoomModel.findOne({
+          _id: roomId,
+          online_members: {
+            $in: [memberId]
+          }
+        })
+        .select({
+          _id: 1
+        })
+        .exec()
+        .then((room) => {
+          expect(!!room.length).to.be.false 
+          return RoomModel.updateMany({
+            _id: {
+              $in: [roomId]
+            },
+          }, {
+            $push: {
+              online_members: memberId
+            }
+          })
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+          done(err)
+        })
+      })
+      
+      it(`join the room success`, function(done) {
+        Request
+        .post(JOIN_COMMON_API)
+        .send({
+          _id: roomId.toString()
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+      })
+
+      it(`join the system room success and not login`, function(done) {
+        Request
+        .post(JOIN_COMMON_API)
+        .send({
+          _id: systemRoomId.toString()
+        })
+        .set({
+          Accept: 'Application/json',
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+      })
+
+    })
+
+    describe(`${JOIN_COMMON_API} join room fail test`, function() {
+
+
+      it(`join the room fail because the id is not valid`, function(done) {
+        Request
+        .post(JOIN_COMMON_API)
+        .send({
+          _id: roomId.toString().slice(1),
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+      })
+
+      it(`join the room fail because lack of the id`, function(done) {
+        Request
+        .post(JOIN_COMMON_API)
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+      })
+
+      // it(`join the room fail because not login`, function(done) {
+      //   Request
+      //   .post(JOIN_COMMON_API)
+      //   .send({
+      //     _id: roomId.toString()
+      //   })
+      //   .set({
+      //     Accept: 'Application/json',
+      //   })
+      //   .expect(400)
+      //   .expect('Content-Type', /json/)
+      //   .end(function(err) {
+      //     if(err) return done(err)
+      //     done()
+      //   })
+      // })
+
+      it(`join the room fail because user not online`, function(done) {
+        MemberModel.updateOne({
+          _id: memberId.toString()
+        }, {
+          $set: {
+            status: ROOM_USER_NET_STATUS.OFFLINE
+          }
+        })
+        .then(_ => {
+          return Request
+          .post(JOIN_COMMON_API)
+          .send({
+            _id: roomId.toString().slice(1),
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(400)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return MemberModel.updateOne({
+            _id: memberId.toString()
+          }, {
+            $set: {
+              status: ROOM_USER_NET_STATUS.ONLINE
+            }
+          })
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+      })
+
+    })
+
+  })
+
   describe(`${COMMON_API} delete room test`, function() {
       
     describe(`${COMMON_API} delete room success test`, function() {
@@ -1013,7 +1296,10 @@ describe(`${COMMON_API} test`, function() {
             .exec(),
             RoomModel.findOne({
               _id: roomId,
-              deleted: true 
+              deleted: true,
+              delete_users: {
+                $in: [memberId]
+              }
             })
             .select({
               _id: 1
@@ -1079,7 +1365,10 @@ describe(`${COMMON_API} test`, function() {
             .exec(),
             RoomModel.findOne({
               _id: roomId,
-              deleted: true 
+              deleted: true,
+              delete_users: {
+                $in: [memberId]
+              }
             })
             .select({
               _id: 1
@@ -1261,174 +1550,6 @@ describe(`${COMMON_API} test`, function() {
         .end((err) => {
           if(err) return done(err)
           done()
-        })
-      })
-
-    })
-
-  })
-
-  describe(`${JOIN_COMMON_API} join the room test`, function() {
-
-    describe(`${JOIN_COMMON_API} join room success test`, function() {
-
-      after(function(done) {
-        RoomModel.findOne({
-          _id: roomId,
-          online_members: {
-            $in: [memberId]
-          }
-        })
-        .select({
-          _id: 1
-        })
-        .exec()
-        .then((room) => {
-          expect(!!room.length).to.be.false 
-          return RoomModel.updateMany({
-            _id: {
-              $in: [roomId]
-            },
-          }, {
-            $push: {
-              online_members: memberId
-            }
-          })
-        })
-        .then(_ => {
-          done()
-        })
-        .catch(err => {
-          console.log('oops: ', err)
-          done(err)
-        })
-      })
-      
-      it(`join the room success`, function(done) {
-        Request
-        .post(JOIN_COMMON_API)
-        .send({
-          _id: roomId.toString()
-        })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(200)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
-
-      it(`join the system room success and not login`, function(done) {
-        Request
-        .post(JOIN_COMMON_API)
-        .send({
-          _id: systemRoomId.toString()
-        })
-        .set({
-          Accept: 'Application/json',
-        })
-        .expect(200)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
-
-    })
-
-    describe(`${JOIN_COMMON_API} join room fail test`, function() {
-
-
-      it(`join the room fail because the id is not valid`, function(done) {
-        Request
-        .post(JOIN_COMMON_API)
-        .send({
-          _id: roomId.toString().slice(1),
-        })
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(400)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
-
-      it(`join the room fail because lack of the id`, function(done) {
-        Request
-        .post(JOIN_COMMON_API)
-        .set({
-          Accept: 'Application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .expect(400)
-        .expect('Content-Type', /json/)
-        .end(function(err) {
-          if(err) return done(err)
-          done()
-        })
-      })
-
-      // it(`join the room fail because not login`, function(done) {
-      //   Request
-      //   .post(JOIN_COMMON_API)
-      //   .send({
-      //     _id: roomId.toString()
-      //   })
-      //   .set({
-      //     Accept: 'Application/json',
-      //   })
-      //   .expect(400)
-      //   .expect('Content-Type', /json/)
-      //   .end(function(err) {
-      //     if(err) return done(err)
-      //     done()
-      //   })
-      // })
-
-      it(`join the room fail because user not online`, function(done) {
-        MemberModel.updateOne({
-          _id: memberId.toString()
-        }, {
-          $set: {
-            status: ROOM_USER_NET_STATUS.OFFLINE
-          }
-        })
-        .then(_ => {
-          return Request
-          .post(JOIN_COMMON_API)
-          .send({
-            _id: roomId.toString().slice(1),
-          })
-          .set({
-            Accept: 'Application/json',
-            Authorization: `Basic ${selfToken}`
-          })
-          .expect(400)
-          .expect('Content-Type', /json/)
-        })
-        .then(_ => {
-          return MemberModel.updateOne({
-            _id: memberId.toString()
-          }, {
-            $set: {
-              status: ROOM_USER_NET_STATUS.ONLINE
-            }
-          })
-        })
-        .then(function() {
-          done()
-        })
-        .catch(err => {
-          done(err)
         })
       })
 

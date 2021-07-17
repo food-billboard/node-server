@@ -35,12 +35,19 @@ describe(`${COMMON_API} test`, function() {
   let selfToken
   let userId
   let friendId 
+  let agreeFriendId 
   let selfFriendId
+  let agreeUserId 
 
   before(async function() {
 
     const { model:user } = mockCreateUser({
       username: COMMON_API,
+    })
+
+    const { model: agreeUser } = mockCreateUser({
+      username: COMMON_API,
+      description: COMMON_API.repeat(2)
     })
   
     const { model: self, signToken } = mockCreateUser({
@@ -50,11 +57,13 @@ describe(`${COMMON_API} test`, function() {
 
     await Promise.all([
       self.save(),
-      user.save()
+      user.save(),
+      agreeUser.save()
     ])
-    .then(([self, user]) => {
+    .then(([self, user, agreeUser]) => {
       userId = user._id
       result = self
+      agreeUserId = agreeUser._id
       selfToken = signToken(self._id)
       const { model } = mockCreateFriends({
         user: userId
@@ -80,13 +89,20 @@ describe(`${COMMON_API} test`, function() {
             timestamps: Date.now(),
             _id: friendId,
             status: FRIEND_STATUS.NORMAL
-          }
+          },
         ]
       })
-      return model.save()
+      const { model: agreeFriend } = mockCreateFriends({
+        user: agreeUserId,
+      })
+      return Promise.all([
+        model.save(),
+        agreeFriend.save()
+      ])
     })
-    .then(data => {
+    .then(([data, agreeFriend]) => {
       selfFriendId = data._id 
+      agreeFriendId = agreeFriend._id 
       return Promise.all([
         FriendsModel.updateOne({
           _id: friendId
@@ -96,6 +112,17 @@ describe(`${COMMON_API} test`, function() {
               timestamps: Date.now(),
               _id: selfFriendId,
               status: FRIEND_STATUS.NORMAL
+            }
+          }
+        }),
+        FriendsModel.updateOne({
+          _id: selfFriendId
+        }, {
+          friends: {
+            $push: {
+              timestamps: Date.now() - 100,
+              _id: agreeFriendId,
+              status: FRIEND_STATUS.TO_AGREE
             }
           }
         }),
@@ -112,7 +139,14 @@ describe(`${COMMON_API} test`, function() {
           $set: {
             friend_id: friendId
           }
-        })
+        }),
+        UserModel.updateOne({
+          _id: agreeUserId
+        }, {
+          $set: {
+            friend_id: agreeFriendId
+          }
+        }),
       ])
     })
     .catch(err => {
@@ -131,7 +165,7 @@ describe(`${COMMON_API} test`, function() {
       }),
       FriendsModel.deleteMany({
         _id: {
-          $in: [friendId, selfFriendId]
+          $in: [friendId, selfFriendId, agreeFriendId]
         }
       })
     ])
@@ -212,7 +246,17 @@ describe(`${COMMON_API} test`, function() {
             console.log(_)
           }
           responseExpect(obj, target => {
+            const { agree, normal } = target.friends.reduce((acc, cur) => {
+              const { friend_id } = cur 
+              if(agreeFriendId.equals(friend_id)) acc.agree = true 
+              if(friendId.equals(friend_id)) acc.normal = true 
+              return acc 
+            }, {
+              agree: false,
+              normal: false
+            })
             expect(target.friends.length).not.be.equal(0)
+            expect(!!agree && !!normal).to.be.true 
           })
           done()
         })
@@ -497,7 +541,41 @@ describe(`${COMMON_API} test`, function() {
           return Request
           .delete(COMMON_API)
           .query({
-            _id: userId.toString()
+            _id: friendId.toString()
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(404)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return FriendsModel.updateMany({
+            _id: selfFriendId
+          }, {
+            friends: []
+          })
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+      })
+
+      it(`cancel the user for friends fail because the user status is DIS_AGREE`, function(done) {
+        FriendsModel.updateMany({
+          _id: selfFriendId
+        }, {
+          friends: [ { _id: friendId, timestamps: Date.now(), status: FRIEND_STATUS.DIS_AGREE } ]
+        })
+        .then(function() {
+          return Request
+          .delete(COMMON_API)
+          .query({
+            _id: friendId.toString()
           })
           .set({
             Accept: 'Application/json',

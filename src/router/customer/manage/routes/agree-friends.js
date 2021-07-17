@@ -4,23 +4,6 @@ const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
-async function checkMember(user) {
-  return MemberModel.findOne({
-    user,
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => {
-    if(data) return data 
-    const model = new MemberModel({
-      user
-    })
-    return model.save()
-  })
-}
-
 router
 .use(async(ctx, next) => {
   const { method } = ctx
@@ -61,7 +44,7 @@ router
   })
 
   const [, token] = verifyTokenToData(ctx)
-  const { id, friend_id } = token
+  const { friend_id } = token
 
   const data = await FriendsModel.aggregate([
     {
@@ -73,7 +56,13 @@ router
                 _id: ObjectId(friend_id),
               },
               {
-                status: FRIEND_STATUS.TO_AGREE
+                status: {
+                  $in: [
+                    FRIEND_STATUS.TO_AGREE,
+                    FRIEND_STATUS.AGREE,
+                    FRIEND_STATUS.DIS_AGREE
+                  ]
+                }
               }
             ]
           } 
@@ -96,7 +85,13 @@ router
             "friends._id": ObjectId(friend_id),
           },
           {
-            "friends.status": FRIEND_STATUS.TO_AGREE
+            "friends.status": {
+              $in: [
+                FRIEND_STATUS.TO_AGREE,
+                FRIEND_STATUS.AGREE,
+                FRIEND_STATUS.DIS_AGREE
+              ]
+            }
           }
         ]
       }
@@ -149,7 +144,8 @@ router
         username: "$friends_info.username",
         _id: "$friends_info._id",
         description: "$friends_info.description",
-        createdAt: "$friends.timestamps"
+        createdAt: "$friends.timestamps",
+        status: "$friends.status"
       }
     }
   ])
@@ -175,8 +171,6 @@ router
   let { id, friend_id } = token
   friend_id = ObjectId(friend_id)
   id = ObjectId(id)
-
-  console.log(friend_id, _id, 22222)
 
   const data = await FriendsModel.findOne({
     _id,
@@ -233,7 +227,7 @@ router
           friends: {
             _id,
             timestamps: Date.now(),
-            status: FRIEND_STATUS.NORMAL
+            status: FRIEND_STATUS.AGREE
           }
         }
       })
@@ -275,7 +269,9 @@ router
       } 
     }
   }, {
-    $pull: { friends: { _id: ObjectId(friend_id) } }
+    $set: { 
+      "friends.$.status": FRIEND_STATUS.DIS_AGREE
+    }
   })
   .select({
     _id: 1

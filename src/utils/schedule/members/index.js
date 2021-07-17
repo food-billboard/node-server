@@ -1,13 +1,19 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
-const Day = require('dayjs')
 const { log4Error } = require('@src/config/winston')
 const { MemberModel, UserModel } = require('../../mongodb/mongo.lib')
 
-function scheduleMethod() {
+/** 
+ * 清除无用成员信息
+ * user 字段 无法在 User数据库中找到
+*/
+
+function scheduleMethod({
+  test=false
+}={}) {
   console.log(chalk.yellow('无效成员定时删除审查'))
 
-  UserModel.aggregate([
+  return UserModel.aggregate([
     {
       $project: {
         _id: 1
@@ -42,7 +48,7 @@ function scheduleMethod() {
     })
   })
   .catch(err => {
-    log4Error({
+    !!test && log4Error({
       __request_log_id__: '无效成员定时删除审查'
     }, err)
     console.log(chalk.red('部分任务执行失败: ', JSON.stringify(err)))
@@ -58,4 +64,5 @@ const notUseMemberSchedule = () => {
 
 module.exports = {
   notUseMemberSchedule,
+  scheduleMethod
 }

@@ -3,11 +3,18 @@ const chalk = require('chalk')
 const { log4Error } = require('@src/config/winston')
 const { BehaviourModel } = require('../../mongodb/mongo.lib')
 
-function scheduleMethod() {
+/**
+ * 将行为历史数据清除
+ * 当数据大于2000条
+ */
+
+function scheduleMethod({
+  test=false
+}={}) {
 
   console.log(chalk.yellow('操作历史定时删除'))
 
-  Promise.all([
+  return Promise.all([
     BehaviourModel.aggregate([
       {
         $group: {
@@ -45,7 +52,7 @@ function scheduleMethod() {
   })
   .catch(err => {
     console.log(err)
-    log4Error({
+    !!test && log4Error({
       __request_log_id__: '操作历史定时删除'
     }, err)
   })
@@ -57,5 +64,6 @@ const behaviourSchedule = async () => {
 }
 
 module.exports = {
-  behaviourSchedule
+  behaviourSchedule,
+  scheduleMethod
 }

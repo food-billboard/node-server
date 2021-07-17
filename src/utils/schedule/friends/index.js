@@ -1,37 +1,27 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
-const Day = require('dayjs')
 const { log4Error } = require('@src/config/winston')
-const { MemberModel, FriendsModel, UserModel } = require('../../mongodb/mongo.lib')
+const { FriendsModel, UserModel } = require('../../mongodb/mongo.lib')
+const { friendsStatusChangeSchedule } = require('./friend_status')
 
-function scheduleMethod() {
+/** 
+ * 删除未知的好友数据
+ * 好友的user字段未在User数据库中存在
+*/
+
+function scheduleMethod({
+  test=false
+}={}) {
   console.log(chalk.yellow('无效好友定时删除审查'))
 
-  Promise.all([
-    UserModel.aggregate([
-      {
-        $project: {
-          _id: 1
-        }
+  return UserModel.aggregate([
+    {
+      $project: {
+        _id: 1
       }
-    ]),
-    MemberModel.aggregate([
-      {
-        $match: {
-          user: {
-            $type: 7
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 1,
-          user: 1,
-        }
-      }
-    ])
+    }
   ])
-  .then(([userList, memberList]) => {
+  .then(userList => {
     return FriendsModel.aggregate([
       {
         $project: {
@@ -52,7 +42,7 @@ function scheduleMethod() {
     })
   })
   .catch(err => {
-    log4Error({
+    test && log4Error({
       __request_log_id__: '无效好友定时删除审查'
     }, err)
     console.log(chalk.red('部分任务执行失败: ', JSON.stringify(err)))
@@ -67,5 +57,7 @@ const notUseFriendsSchedule = () => {
 }
 
 module.exports = {
+  scheduleMethod,
   notUseFriendsSchedule,
+  friendsStatusChangeSchedule,
 }

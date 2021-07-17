@@ -1,5 +1,10 @@
 const { SpecialModel } = require('../../mongodb/mongo.lib')
 
+/** 
+ * 将专题的浏览记录清除
+ * 当浏览记录数量超过500
+*/
+
 async function specialDeal() {
   return SpecialModel.aggregate([
     {

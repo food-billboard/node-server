@@ -7,7 +7,7 @@ const { feedbackSchedule } = require('./feedback')
 const { behaviourSchedule } = require('./behaviour')
 const { unLoginChatUserSchedule, unGenerateChatUserSchedule } = require('./unlogin-chat-user')
 const { notUseMemberSchedule } = require('./members')
-const { notUseFriendsSchedule } = require('./friends')
+const { notUseFriendsSchedule, friendsStatusChangeSchedule } = require('./friends')
 
 function schedule() {
   //媒体资源定时器
@@ -43,6 +43,8 @@ function schedule() {
   //无效好友定时删除审查
   //0 10 24 * * 7
   notUseFriendsSchedule()
+  //0 20 24 * * *
+  friendsStatusChangeSchedule()
 }
 
 module.exports = {

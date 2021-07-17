@@ -4,7 +4,9 @@ const { userDeal } = require('./user')
 const { specialDeal } = require('./special')
 const { log4Error } = require('@src/config/winston')
 
-function scheduleMethod() {
+function scheduleMethod({
+  test=false
+}={}) {
 
   console.log(chalk.yellow('浏览记录定时删除'))
 
@@ -13,8 +15,7 @@ function scheduleMethod() {
     specialDeal()
   ])
   .catch(err => {
-    console.log(err)
-    log4Error({
+    !!test && log4Error({
       __request_log_id__: '浏览记录定时删除'
     }, err)
   })
@@ -26,5 +27,6 @@ const browserSchedule = async () => {
 }
 
 module.exports = {
-  browserSchedule
+  browserSchedule,
+  scheduleMethod
 }

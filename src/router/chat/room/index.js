@@ -388,24 +388,33 @@ router
   .then(data => {
     const ids = data.map(item => item._id)
     deleteRoomList = ids
-    return Promise.all([
-      MemberModel.updateMany({
-        user: ObjectId(token.id)
-      }, {
-        $pullAll: {
-          room: ids
-        }
-      }),
-      RoomModel.updateMany({
+    return MemberModel.findOneAndUpdate({
+      user: ObjectId(token.id)
+    }, {
+      $pullAll: {
+        room: ids
+      }
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(notFound)
+    .then(data => {
+      const { _id } = data
+       return RoomModel.updateMany({
         _id: {
           $in: ids
         }
       }, {
         $set: {
           deleted: true 
-        }
+        },
+        $addToSet: {
+          delete_users: ObjectId(_id)
+        },
       })
-    ])
+    })
   })
   .then(_ => ({ data: deleteRoomList }))
   .catch(dealErr(ctx))
@@ -480,7 +489,6 @@ router
           $in: _id
         },
         origin: false,
-        // type: ROOM_TYPE.CHAT,
       }, {
         $addToSet: {
           delete_users: memberId

@@ -91,12 +91,14 @@ const updateMovieTag = (tagList) => {
 
 }
 
-function scheduleMethod() {
+function scheduleMethod({
+  test=false
+}={}) {
   if(!nodejieba) return 
   console.log(chalk.magenta('数据标签tag定时审查'))
 
   //当前简单使用评论当做tag
-  cleanTag()
+  return cleanTag()
   .then(collecteComment)
   .then(setTag)
   .then(updateMovieTag)
@@ -106,7 +108,7 @@ function scheduleMethod() {
   })
   .catch(err => {
     console.log(chalk.red('tag定时获取失败: ', JSON.stringify(err)))
-    log4Error({
+    !!test && log4Error({
       __request_log_id__: '数据tag定时审查'
     }, err)
   })
@@ -118,5 +120,6 @@ const tagSchedule = () => {
 }
 
 module.exports = {
-  tagSchedule
+  tagSchedule,
+  scheduleMethod
 }

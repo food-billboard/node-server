@@ -22,7 +22,8 @@ const {
   ROOM_USER_NET_STATUS,
   MESSAGE_MEDIA_TYPE,
   ERROR_ORIGIN_TYPE,
-  ERROR_TYPE
+  ERROR_TYPE,
+  USER_HOT_HISTORY_TYPE
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -351,8 +352,8 @@ const UserSchema = new Schema({
     },
     origin_type: {
       type: String,
-      enum: [ 'comment', 'barrage' ],
-      default: 'comment'
+      enum: Object.keys(USER_HOT_HISTORY_TYPE),
+      default: USER_HOT_HISTORY_TYPE['comment']
     }
   }],
 	hot: {

@@ -136,5 +136,6 @@ const mediaSchedule = () => {
 }
 
 module.exports = {
-  mediaSchedule
+  mediaSchedule,
+  scheduleMethod
 }

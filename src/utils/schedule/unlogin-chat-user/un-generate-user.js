@@ -117,5 +117,6 @@ const unGenerateChatUserSchedule = () => {
 }
 
 module.exports = {
-  unGenerateChatUserSchedule
+  unGenerateChatUserSchedule,
+  scheduleMethod
 }

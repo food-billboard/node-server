@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { nanoid } = require('nanoid')
 const { Types: { ObjectId } } = require('mongoose')
-const { FriendsModel, UserModel } = require('@src/utils')  
+const { FriendsModel } = require('@src/utils')  
 const { request } = require('./request')
 
 const isTempUserExists = (data) => {
@@ -10,27 +10,27 @@ const isTempUserExists = (data) => {
   return nanoid()
 }
 
-const getAllSockets = (socket) => {
+const getAllSockets = (io) => {
   try {
-    const sockets = socket.server.sockets
+    const sockets = io.sockets.sockets
     return sockets
   }catch(err) {
     return new Map()
   }
 }
 
-const getAllSocketsId = (socket) => {
-  const sockets = getAllSockets(socket)
+const getAllSocketsId = (io) => {
+  const sockets = getAllSockets(io)
   return Array.from(sockets.keys())
 }
 
-const getSocketId = (socket, id) => {
-  const sockets = getAllSocketsId(socket)
+const getSocketId = (io, id) => {
+  const sockets = getAllSocketsId(io)
   return sockets.find(item => item === id)
 }
 
-const getSocket = (socket, id) => {
-  const sockets = getAllSockets(socket)
+const getSocket = (io, id) => {
+  const sockets = getAllSockets(io)
   return sockets.get(id)
 }
 

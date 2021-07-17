@@ -36,7 +36,12 @@ const broadcastMember = async (io, socket, data) => {
     const [ { sid } ] = result
     const friendSocket = getSocket(io, sid)
     if(friendSocket) {
-      friendSocket.emit('invite_friend')
+      friendSocket.emit('invite_friend', {
+        success: true,
+        data: {
+          fetch: true 
+        }
+      })
     }
   }catch(err) {
     console.log(err)
