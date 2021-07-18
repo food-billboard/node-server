@@ -1,8 +1,8 @@
 require('module-alias/register')
-const { UserModel, RoomModel, MessageModel, MemberModel, ImageModel, MESSAGE_MEDIA_TYPE, ROOM_TYPE, ROOM_USER_NET_STATUS } = require('@src/utils')
+const { UserModel, RoomModel, MessageModel, MemberModel, FriendsModel, FRIEND_STATUS, ImageModel, MESSAGE_MEDIA_TYPE, ROOM_TYPE, ROOM_USER_NET_STATUS } = require('@src/utils')
 const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
-const { Request, commonValidate, mockCreateUser, mockCreateMember, mockCreateMessage, mockCreateImage, mockCreateRoom } = require('@test/utils')
+const { Request, commonValidate, mockCreateFriends, mockCreateUser, mockCreateMember, mockCreateMessage, mockCreateImage, mockCreateRoom } = require('@test/utils')
 
 const COMMON_API = '/api/chat/room'
 const JOIN_COMMON_API = '/api/chat/room/join'
@@ -20,11 +20,13 @@ function responseExpect(res, validate=[]) {
     commonValidate.date(item.createdAt)
     commonValidate.date(item.updatedAt)
     expect(item.info).to.be.a('object').and.that.includes.any.keys('name', 'avatar', 'description')
-    commonValidate.string(item.info.name)
-    if(item.info.avatar) {
-      commonValidate.string(item.info.avatar)
+    if(item.type !== ROOM_TYPE.CHAT) {
+      commonValidate.string(item.info.name)
+      if(item.info.avatar) {
+        commonValidate.string(item.info.avatar)
+      }
+      commonValidate.string(item.info.description)
     }
-    commonValidate.string(item.info.description)
     expect(item.create_user).to.be.a('object').and.that.includes.any.keys('username', 'avatar', '_id', 'description', 'member')
     commonValidate.string(item.create_user.username)
     commonValidate.string(item.create_user.description)
@@ -47,6 +49,7 @@ function responseExpect(res, validate=[]) {
 describe(`${COMMON_API} test`, function() {
 
   let userInfo
+  let otherUserId 
   let selfToken
   let messageId 
   let systemMessageId 
@@ -54,9 +57,12 @@ describe(`${COMMON_API} test`, function() {
   let roomId 
   let systemRoomId 
   let memberId 
+  let otherMemberId 
   let imageId 
   let getToken
   let toDeleteRoomList = []
+  let friendsId 
+  let otherFriendId
 
   before(function(done) {
 
@@ -64,27 +70,53 @@ describe(`${COMMON_API} test`, function() {
       src: COMMON_API
     })
 
-    image.save()
-    .then(image => {
+    const { model: friends } = mockCreateFriends({})
+    const { model: otherFriends } = mockCreateFriends({})
+
+    Promise.all([
+      image.save(),
+      friends.save(),
+      otherFriends.save()
+    ])
+    .then(([image, friends, otherFriends]) => {
       imageId = image._id
+      friendsId = friends._id 
+      otherFriendId = otherFriends._id 
       const { model: user, signToken } = mockCreateUser({
         username: COMMON_API,
-        avatar: imageId
+        avatar: imageId,
+        friend_id: friendsId
+      })
+      const { model: otherUser } = mockCreateUser({
+        username: COMMON_API,
+        friend_id: otherFriendId
       })
       getToken = signToken
-      return user.save()
+      return Promise.all([
+        user.save(),
+        otherUser.save()
+      ])
     })
-    .then(user => {
+    .then(([ user, otherUser ]) => {
       userInfo = user 
+      otherUserId = otherUser._id 
       selfToken = getToken(userInfo._id)
       const { model: memberModel } = mockCreateMember({
         sid: COMMON_API,
         user: userInfo._id 
       })
-      return memberModel.save()
+      const { model: otherMemberModel } = mockCreateMember({
+        sid: COMMON_API,
+        user: otherUserId
+      })
+      return Promise.all([
+        memberModel.save(),
+        otherMemberModel.save()
+      ])
     })
-    .then(member => {
+    .then(([member, otherMember]) => {
       memberId = member._id 
+      otherMemberId = otherMember._id 
       const { model: systemMessage } = mockCreateMessage({
         content: {
           text: COMMON_API,
@@ -123,7 +155,37 @@ describe(`${COMMON_API} test`, function() {
         systemMessage.save(),
         mediaMessage.save(),
         systemRoom.save(),
-        userRoom.save()
+        userRoom.save(),
+        FriendsModel.updateOne({
+          _id: friendsId
+        }, {
+          $set: {
+            member: memberId,
+            user: userInfo._id,
+            friends: [
+              {
+                _id: otherFriendId,
+                timestamps: Date.now(),
+                status: FRIEND_STATUS.NORMAL
+              }
+            ]
+          }
+        }),
+        FriendsModel.updateOne({
+          _id: otherFriendId
+        }, {
+          $set: {
+            member: otherMemberId,
+            user: otherUserId,
+            friends: [
+              {
+                _id: friendsId,
+                timestamps: Date.now(),
+                status: FRIEND_STATUS.NORMAL
+              }
+            ]
+          }
+        })
       ])
     })
     .then(([message, systemMessage, mediaMessage, system, user]) => {
@@ -219,6 +281,9 @@ describe(`${COMMON_API} test`, function() {
       }),
       ImageModel.deleteMany({
         src: COMMON_API
+      }),
+      FriendsModel.deleteMany({
+        _id: friendsId
       })
     ])
     .then(_ => {
@@ -487,7 +552,7 @@ describe(`${COMMON_API} test`, function() {
       
     describe(`${COMMON_API} post room success test`, function() {
 
-      const valid = (roomQuery, memberQuery) => {
+      const valid = async (roomQuery, memberQuery) => {
         return Promise.all([
           RoomModel.findOne(roomQuery),
           MemberModel.findOne(memberQuery)
@@ -512,22 +577,20 @@ describe(`${COMMON_API} test`, function() {
         groupRoom.save()
         .then(data => {
           roomId = data._id 
-          return Promise.all([
-            data,
-            MemberModel.updateOne({
-              _id: memberId
-            }, {
-              $push: {
-                room: data._id
-              }
-            })
-          ])
+          return MemberModel.updateOne({
+            _id: memberId
+          }, {
+            $push: {
+              room: data._id
+            }
+          })
         })
-        .then(([data]) => {
+        .then(() => {
           return Request
           .post(COMMON_API)
           .send({
-            _id: data._id.toString(),
+            _id: roomId.toString(),
+            type: ROOM_TYPE.GROUP_CHAT,
           })
           .set({
             Accept: 'Application/json',
@@ -568,7 +631,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .post(COMMON_API)
         .send({
-          members: memberId.toString(),
+          members: `${memberId.toString()},${otherMemberId.toString()}`,
           type: ROOM_TYPE.GROUP_CHAT
         })
         .set({
@@ -603,7 +666,12 @@ describe(`${COMMON_API} test`, function() {
               ] 
             }
           }, {
-            _id: roomId,
+            _id: {
+              $in: [
+                memberId,
+                otherMemberId
+              ]
+            },
             room: {
               $in: [roomId]
             }
@@ -622,6 +690,7 @@ describe(`${COMMON_API} test`, function() {
         .post(COMMON_API)
         .send({
           _id: systemRoomId.toString(),
+          type: ROOM_TYPE.SYSTEM
         })
         .set({
           Accept: 'Application/json',
@@ -658,7 +727,8 @@ describe(`${COMMON_API} test`, function() {
         Request
         .post(COMMON_API)
         .send({
-          _id: roomId.toString()
+          _id: roomId.toString(),
+          type: ROOM_TYPE.CHAT
         })
         .set({
           Accept: 'Application/json',
@@ -685,9 +755,7 @@ describe(`${COMMON_API} test`, function() {
             _id: roomId
           }, {
             $push: {
-              delete_users: {
-                memberId
-              }
+              delete_users: memberId
             }
           })
         })
@@ -736,7 +804,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .post(COMMON_API)
         .send({
-          members: `${memberId.toString()}`,
+          members: `${otherMemberId.toString()}`,
           type: ROOM_TYPE.CHAT
         })
         .set({
@@ -766,7 +834,8 @@ describe(`${COMMON_API} test`, function() {
         .post(COMMON_API)
         .send({
           _id: systemRoomId.toString(),
-          type: ROOM_TYPE.SYSTEM
+          type: ROOM_TYPE.SYSTEM,
+          members: memberId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -783,7 +852,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`${COMMON_API} post room fail test`, function() {
 
-      it(`post the room fail becuase post the unsystem room and not login`, function(done) {
+      it(`post the room fail because post the unsystem room and not login`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -800,7 +869,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the room fail becuase lack params _id and members`, function(done) {
+      it(`post the room fail because lack params _id and members`, function(done) {
         Request
         .post(COMMON_API)
         .set({
@@ -818,7 +887,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the room fail becuase post chat room and lack of params _id and members length not equal 1`, function(done) {
+      it(`post the room fail because post chat room and lack of params _id and members length not equal 1`, function(done) {
         Request
         .post(COMMON_API)
         .send({
@@ -836,7 +905,7 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
-      it(`post the room fail becuase the room is deleted`, function(done) {
+      it(`post the room fail because the room is deleted`, function(done) {
         RoomModel.updateOne({
           _id: roomId.toString()
         }, {

@@ -105,6 +105,13 @@ describe(`${COMMON_API} test`, function() {
     })
     .then(([, friend]) => {
       friendId = friend._id 
+      return UserModel.updateOne({
+        _id: userId
+      }, {
+        $set: {
+          friend_id: friendId
+        }
+      })
     })
     .catch(err => {
       console.log('oops: ', err)

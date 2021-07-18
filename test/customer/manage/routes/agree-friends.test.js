@@ -38,10 +38,12 @@ describe(`${COMMON_API} test`, function() {
   let userId
   let friendId 
   let selfFriendId
+  let normalFriendId 
   let disagreeUserId 
   let agreeUserId 
   let disagreeFriendId 
   let agreeFriendId 
+  let normalUserId 
 
   before(async function() {
 
@@ -62,17 +64,23 @@ describe(`${COMMON_API} test`, function() {
       username: COMMON_API,
     })
 
+    const { model:normalUser } = mockCreateUser({
+      username: COMMON_API,
+    })
+
     await Promise.all([
       self.save(),
       user.save(),
       agreeUser.save(),
-      disagreeUser.save()
+      disagreeUser.save(),
+      normalUser.save()
     ])
-    .then(([self, user, agree, disagree]) => {
+    .then(([self, user, agree, disagree, normalUser]) => {
       userId = user._id
       result = self
       agreeUserId = agree._id 
       disagreeUserId = disagree._id 
+      normalUserId = normalUser._id 
       const { model } = mockCreateFriends({
         user: result._id,
       })
@@ -82,17 +90,29 @@ describe(`${COMMON_API} test`, function() {
       const { model: disagreeFriend } = mockCreateFriends({
         user: disagreeUserId
       })
+      const { model: normalFriend } = mockCreateFriends({
+        user: normalUserId,
+        friends: [
+          {
+            timestamps: Date.now(),
+            _id: normalFriendId,
+            status: FRIEND_STATUS.NORMAL
+          },
+        ]
+      })
       return Promise.all([
         model.save(),
         agreeFriend.save(),
         disagreeFriend.save(),
+        normalFriend.save()
       ])
     })
-    .then(([data, agreeFriend, disagreeFriend]) => {
+    .then(([data, agreeFriend, disagreeFriend, normalFriend]) => {
       selfFriendId = data._id
       selfToken = signToken(self._id, selfFriendId)
       agreeFriendId = agreeFriend._id
       disagreeFriendId = disagreeFriend._id
+      normalFriendId = normalFriend._id 
       const { model } = mockCreateFriends({
         user: userId,
         friends: [
@@ -100,29 +120,11 @@ describe(`${COMMON_API} test`, function() {
             timestamps: Date.now(),
             _id: selfFriendId,
             status: FRIEND_STATUS.TO_AGREE
-          }
+          },
         ]
       })
       return Promise.all([
         model.save(),
-        FriendsModel.updateOne({
-          _id: selfFriendId
-        }, {
-          $set: {
-            friends:[
-              {
-                timestamps: Date.now(),
-                _id: agreeFriendId,
-                status: FRIEND_STATUS.TO_AGREE
-              },
-              {
-                timestamps: Date.now(),
-                _id: disagreeFriendId,
-                status: FRIEND_STATUS.TO_AGREE
-              },
-            ]
-          }
-        }),
         FriendsModel.updateOne({
           _id: agreeFriendId
         }, {
@@ -136,7 +138,7 @@ describe(`${COMMON_API} test`, function() {
         }),
       ])
     })
-    .then((data) => {
+    .then(([data]) => {
       friendId = data._id
     })
     .catch(err => {
@@ -242,6 +244,7 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, target => {
             expect(target.friends.length).not.be.equal(0)
+            console.log(target.friends, 666)
             const { agree, normal, disagree } = target.friends.reduce((acc, cur) => {
               const { friend_id } = cur 
               if(agreeFriendId.equals(friend_id)) acc.agree = true 
@@ -253,6 +256,7 @@ describe(`${COMMON_API} test`, function() {
               normal: false,
               disagree: false 
             })
+            console.log(agree, normal, disagree, 5555)
             expect(!!agree && !!normal && !!disagree).to.be.true 
           })
           done()

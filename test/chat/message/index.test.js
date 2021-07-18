@@ -26,7 +26,6 @@ function responseExpect(res, validate=[]) {
     if(item.info.avatar) {
       commonValidate.poster(item.info.avatar)
     }
-    console.log(item.message_info, 22222)
     expect(item.message_info).to.be.a('object').and.that.includes.any.keys('text', 'image', 'video', 'audio', 'poster')
     if(item.message_info.text) {
       commonValidate.string(item.message_info.text)

@@ -2,17 +2,25 @@ const path = require('path')
 const fs = require('fs').promises
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
+const Day = require('dayjs')
 const { log4Error } = require('@src/config/winston')
 const { STATIC_FILE_PATH, MEDIA_STATUS } = require('../constant')
 const { ImageModel, VideoModel, OtherMediaModel } = require('../mongodb/mongo.lib')
 const { rmdir } = require('../tool')
+
+/** 
+ * 无用文件删除
+ * 文件在数据库中不存在
+ * 文件在数据库中状态为ERROR
+ * 文件在数据库中状态为UPLOADING且上次上传时间超过 MAX_KEEP_FILE_MILL
+*/
 
 const MAX_KEEP_FILE_MILL = 30 * 24 * 60 * 60 * 1000
 
 const mediaDeal = async ({
   path: folder,
   model
-}) => {
+}, log=true) => {
 
   let files = []
 
@@ -42,7 +50,7 @@ const mediaDeal = async ({
             },
             {
               updatedAt: {
-                $lte: new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
+                $lte: Day(Date.now() - MAX_KEEP_FILE_MILL).toDate()
               }
             }
           ]
@@ -72,7 +80,7 @@ const mediaDeal = async ({
 
   })))
   .catch(err => {
-    log4Error({
+    log && log4Error({
       __request_log_id__: '媒体资源定时审查'
     }, err)
     console.log(chalk.red('部分任务执行失败: ', JSON.stringify(err)))
@@ -81,7 +89,7 @@ const mediaDeal = async ({
 }
 
 //删除过期的临时文件
-const templateFileDeal = async () => {
+const templateFileDeal = async (log=true) => {
   const folder = path.join(STATIC_FILE_PATH, 'template')
 
   return fs.readdir(folder)
@@ -101,32 +109,40 @@ const templateFileDeal = async () => {
     }))
 
   })
+  .catch(err => {
+    log && log4Error({
+      __request_log_id__: '媒体资源定时审查'
+    }, err)
+    console.log(chalk.red('部分任务执行失败: ', JSON.stringify(err)))
+  })
 
 }
 
-function scheduleMethod() {
+async function scheduleMethod({
+  test=false
+}={}) {
   console.log(chalk.yellow('媒体资源定时审查'))
 
   //图片
-  mediaDeal({
+  await mediaDeal({
     path: path.join(STATIC_FILE_PATH, 'image'),
     model: ImageModel
-  })
+  }, test)
 
   //视频
-  mediaDeal({
+  await mediaDeal({
     path: path.join(STATIC_FILE_PATH, 'video'),
     model: VideoModel
-  })
+  }, test)
 
   //其他
-  mediaDeal({
+  await mediaDeal({
     path: path.join(STATIC_FILE_PATH, 'other'),
     model: OtherMediaModel
-  })
+  }, test)
 
   //临时文件过期删除
-  templateFileDeal()
+  await templateFileDeal(test)
 }
 
 const mediaSchedule = () => {

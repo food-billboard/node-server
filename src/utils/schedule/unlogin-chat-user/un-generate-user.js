@@ -4,10 +4,18 @@ const { Types: { ObjectId } } = require('mongoose')
 const { log4Error } = require('@src/config/winston')
 const { MemberModel, UserModel, FriendsModel } = require('../../mongodb/mongo.lib')
 
-function scheduleMethod() {
+/** 
+ * 同步成员、用户、好友 的 id 映射关系
+ * 生成不存在的用户好友信息
+ * 生成不存在的用户成员信息
+*/
+
+function scheduleMethod({
+  test=false
+}={}) {
   console.log(chalk.yellow('聊天普通用户生成成员信息定时审查'))
 
-  UserModel.aggregate([
+  return UserModel.aggregate([
     {
       $project: {
         _id: 1
@@ -102,7 +110,7 @@ function scheduleMethod() {
     })
   })
   .catch(err => {
-    log4Error({
+    !!test && log4Error({
       __request_log_id__: '聊天普通用户生成成员信息定时审查'
     }, err)
     console.log(chalk.red('部分任务执行失败: ', JSON.stringify(err)))

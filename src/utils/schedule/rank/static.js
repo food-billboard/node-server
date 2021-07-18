@@ -75,5 +75,6 @@ const staticDeal = (rankList) => {
 }
 
 module.exports = {
-  staticDeal
+  staticDeal,
+  STATIC_RANK_MAP
 }

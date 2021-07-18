@@ -15,7 +15,7 @@ const classifyDeal = async (rankList) => {
       const { match_pattern, _id: rankId } = cur 
       const [ { origin_id, origin } ] = match_pattern
       const index = classList.findIndex(cls => cls._id.equals(origin_id))
-      if(!~index && origin == 'classify') acc.push(rankId)
+      if(!~index && origin === 'classify') acc.push(rankId)
       if(!!~index) classList.splice(index, 1)
       return acc
     }, [])

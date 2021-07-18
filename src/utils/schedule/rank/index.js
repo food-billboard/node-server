@@ -7,6 +7,15 @@ const { RankModel, MovieModel } = require('../../mongodb/mongo.lib')
 const { rankOperation } = require('./utils')
 const { parseData } = require('../../error-deal')
 
+/** 
+ * 更新排行榜数据
+ * 删除 match_pattern字段 不合理 的数据(非数组|长度为0)
+ * 删除 classify数据库 _id 字段中不存在的match_pattern中origin_id数据
+ * 新增 classify数据库 _id 字段 在 match_pattern中origin_id 数据
+ * 新增 静态排行榜数据 在 match_pattern 中 不存在的数据
+ * 将最新匹配排行榜规则的电影添加至 match 字段
+*/
+
 function findMatchMovieData() {
   let result 
   return RankModel.aggregate([
@@ -49,7 +58,9 @@ function findMatchMovieData() {
   })
 }
 
-function scheduleMethod() {
+function scheduleMethod({
+  test=false
+}={}) {
 
   console.log(chalk.yellow('排行榜资源定时更新'))
 
@@ -86,8 +97,7 @@ function scheduleMethod() {
   })
   .then(findMatchMovieData)
   .catch(err => {
-    console.log(err)
-    log4Error({
+    !!test && log4Error({
       __request_log_id__: '排行榜资源定时更新'
     }, err)
   })
@@ -99,5 +109,6 @@ const rankSchedule = async () => {
 }
 
 module.exports = {
-  rankSchedule
+  rankSchedule,
+  scheduleMethod
 }

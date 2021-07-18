@@ -5,10 +5,17 @@ const { log4Error } = require('@src/config/winston')
 const { unGenerateChatUserSchedule } = require('./un-generate-user')
 const { MemberModel, RoomModel } = require('../../mongodb/mongo.lib')
 
-function scheduleMethod() {
+const MAX_TIMESTAMPS = 1000 * 24 * 60 * 60 * 7
+
+/** 
+ * 游客数据清除
+ * 游客账号未注册 超过
+*/
+
+function scheduleMethod({ test=false }={}) {
   console.log(chalk.yellow('游客数据定时审查'))
 
-  MemberModel.aggregate([
+  return MemberModel.aggregate([
     {
       $match: {
         user: {
@@ -17,7 +24,7 @@ function scheduleMethod() {
           }
         },
         updatedAt: {
-          $lte: Day(Date.now() - 1000 * 24 * 60 * 60 * 7).toDate()
+          $lte: Day(Date.now() - MAX_TIMESTAMPS).toDate()
         }
       }
     },
@@ -49,7 +56,7 @@ function scheduleMethod() {
     ])
   })
   .catch(err => {
-    log4Error({
+    test && log4Error({
       __request_log_id__: '游客数据定时审查'
     }, err)
     console.log(chalk.red('部分任务执行失败: ', JSON.stringify(err)))
@@ -66,5 +73,6 @@ const unLoginChatUserSchedule = () => {
 module.exports = {
   unLoginChatUserSchedule,
   unGenerateChatUserSchedule,
-  scheduleMethod
+  scheduleMethod,
+  MAX_TIMESTAMPS
 }

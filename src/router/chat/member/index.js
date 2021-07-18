@@ -204,7 +204,7 @@ router
       data => ObjectId(data)
     ]
   }, {
-    name: 'memebers',
+    name: 'members',
     sanitizers: [
       data => data.split(',').map(item => ObjectId(item))
     ]
@@ -249,7 +249,7 @@ router
       data => ObjectId(data)
     ]
   }, {
-    name: 'memebers',
+    name: 'members',
     sanitizers: [
       data => data.split(',').map(item => ObjectId(item))
     ]

@@ -1,5 +1,5 @@
 const { Types: { ObjectId } } = require('mongoose')
-const { merge } = require('lodash')
+const { merge, omit } = require('lodash')
 const { 
   verifyTokenToData, 
   RoomModel, 
@@ -50,7 +50,7 @@ async function roomExists(data, userMemberId) {
     }
     //已经存在
     else {
-      query = merge({}, query, {
+      query = merge({}, omit(query, ["type"]), {
         _id: ObjectId(_id),
         "members": {
           $in: [userMemberId]
@@ -116,7 +116,7 @@ async function paramsValid(data, token) {
   } 
 }
 
-async function formatMembers(prevMemebers, userId) {
+async function formatMembers(prevMembers, userId) {
   return MemberModel.findOne({
     user: userId
   })
@@ -127,14 +127,13 @@ async function formatMembers(prevMemebers, userId) {
   .then(notFound)
   .then(data => {
     const { _id } = data
-    let newMembers = [...prevMemebers]
-    if(!prevMemebers.some(item => item.equals(_id))) {
+    let newMembers = [...prevMembers]
+    if(!prevMembers.some(item => item.equals(_id))) {
       newMembers = [
         ...newMembers,
         _id
       ]
     }
-    if(newMembers.length < 2) return Promise.reject({ errMsg: '成员数量不正确', status: 404 })
     return {
       mime: _id,
       members: newMembers
@@ -151,6 +150,7 @@ async function isMembersValid(members, mime, status) {
     _id: 1
   })
   .exec()
+  .then(notFound)
   .then(data => {
     const { _id } = data 
     return MemberModel.aggregate([
@@ -248,7 +248,7 @@ const joinRoom = async (ctx) => {
   .then(_ => {
     if(!token) {
       return {
-        memebers: newMembers,
+        members: newMembers,
         mime: null
       }
     }
@@ -257,12 +257,15 @@ const joinRoom = async (ctx) => {
   .then(({ members, mime }) => {
     mimeId = mime 
     newMembers = members 
+    const { _id } = ctx.request.body 
+    if(!!token && !_id && newMembers.length < 2) return Promise.reject({ errMsg: '成员数量不正确', status: 404 })
     return roomExists({
       ...ctx.request.body,
       members: newMembers,
     }, mimeId)
   })
   .then(status => {
+    if(!token) return status 
     return isMembersValid(newMembers, mimeId, status)
     .then(_ => status)
   })
