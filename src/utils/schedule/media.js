@@ -4,7 +4,7 @@ const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
 const Day = require('dayjs')
 const { log4Error } = require('@src/config/winston')
-const { STATIC_FILE_PATH, MEDIA_STATUS } = require('../constant')
+const { STATIC_FILE_PATH, MEDIA_STATUS, STATIC_FILE_PATH_NO_WRAPPER } = require('../constant')
 const { ImageModel, VideoModel, OtherMediaModel } = require('../mongodb/mongo.lib')
 const { rmdir } = require('../tool')
 
@@ -74,9 +74,8 @@ const mediaDeal = async ({
   })
   .then(dataList => dataList.map(data => data.src))
   .then(dataList => Promise.allSettled(files.map(file => {
-
     if(dataList.includes(file)) return Promise.resolve()
-    return fs.unlink(file)
+    return fs.unlink(path.join(STATIC_FILE_PATH_NO_WRAPPER, file))
 
   })))
   .catch(err => {
@@ -153,5 +152,6 @@ const mediaSchedule = () => {
 
 module.exports = {
   mediaSchedule,
-  scheduleMethod
+  scheduleMethod,
+  MAX_KEEP_FILE_MILL
 }

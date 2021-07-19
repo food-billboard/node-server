@@ -11,11 +11,14 @@ function responseExpect(res, validate=[]) {
 
   expect(target).to.be.a('object').and.that.includes.all.keys('friends')
   target.friends.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id', 'description', 'createdAt', 'friend_id')
-    commonValidate.poster(item.avatar)
+    expect(item).to.be.a('object').and.that.includes.any.keys('avatar', 'username', '_id', 'description', 'createdAt', 'friend_id', 'member')
+    if(item.avatar) {
+      commonValidate.poster(item.avatar)
+    }
     commonValidate.string(item.username)
     commonValidate.string(item.description)
     commonValidate.objectId(item._id)
+    commonValidate.objectId(item.member)
     commonValidate.objectId(item.friend_id)
     commonValidate.date(item.createdAt)
   })
@@ -107,8 +110,8 @@ describe(`${COMMON_API} test`, function() {
         FriendsModel.updateOne({
           _id: friendId
         }, {
-          friends: {
-            $push: {
+          $push: {
+            friends: {
               timestamps: Date.now(),
               _id: selfFriendId,
               status: FRIEND_STATUS.NORMAL
@@ -118,12 +121,19 @@ describe(`${COMMON_API} test`, function() {
         FriendsModel.updateOne({
           _id: selfFriendId
         }, {
-          friends: {
-            $push: {
-              timestamps: Date.now() - 100,
-              _id: agreeFriendId,
-              status: FRIEND_STATUS.TO_AGREE
-            }
+          $set: {
+            friends: [
+              {
+                timestamps: Date.now() - 100,
+                _id: agreeFriendId,
+                status: FRIEND_STATUS.AGREE
+              },
+              {
+                timestamps: Date.now() - 100,
+                _id: friendId,
+                status: FRIEND_STATUS.NORMAL
+              },
+            ]
           }
         }),
         UserModel.updateOne({
@@ -275,7 +285,9 @@ describe(`${COMMON_API} test`, function() {
         FriendsModel.updateMany({
           _id: selfFriendId
         }, {
-          friends: []
+          $set: {
+            friends: []
+          }
         })
         .then(function() {
           done()
@@ -340,7 +352,7 @@ describe(`${COMMON_API} test`, function() {
           _id: selfFriendId
         }, {
           $set: {
-            friends: [ { _id: friendId, timestamps: Date.now() } ]
+            friends: [ { _id: friendId, timestamps: Date.now(), status: FRIEND_STATUS.NORMAL } ]
           }
         })
         .then(function() {

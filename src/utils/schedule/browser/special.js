@@ -1,5 +1,7 @@
 const { SpecialModel } = require('../../mongodb/mongo.lib')
 
+const MAX_COUNT = 500 
+
 /** 
  * 将专题的浏览记录清除
  * 当浏览记录数量超过500
@@ -9,7 +11,9 @@ async function specialDeal() {
   return SpecialModel.aggregate([
     {
       $match: {
-        $where: "this.glance.length > 500"
+        "glance.501": {
+          $exists: true 
+        }
       }
     },
     {
@@ -25,7 +29,7 @@ async function specialDeal() {
       const glanceTotal = glance.length
       let update = {
         $set: {
-          glance: glance.slice(glanceTotal - 500),
+          glance: glance.slice(glanceTotal - MAX_COUNT),
         }
       }
       return SpecialModel.updateOne({
@@ -36,5 +40,6 @@ async function specialDeal() {
 }
 
 module.exports = {
-  specialDeal
+  specialDeal,
+  MAX_COUNT
 }

@@ -8,10 +8,10 @@ const { VideoModel, STATIC_FILE_PATH, MEDIA_STATUS } = require('@src/utils')
 const { mockCreateVideo } = require('@test/utils')
 const { scheduleMethod, MAX_KEEP_FILE_MILL } = require("@src/utils/schedule/media")
 
-const SCHEDULE_PREFIX = "schedule of not use file clear test"
+const SCHEDULE_PREFIX = "schedule of media clear test"
 
-const testOriginPath = path.resolve(root.path, 'test/assets/test-video.mp4')
-const mediaPath = path.resolve(STATIC_FILE_PATH, '/video/test-video.mp4')
+const testOriginPath = path.join(root.path, 'test/assets/test-video.mp4')
+const mediaPath = path.join(STATIC_FILE_PATH, '/video/test-video.mp4')
 
 async function createTempFile() {
   const exists = fse.existsSync(mediaPath)
@@ -35,15 +35,9 @@ describe(SCHEDULE_PREFIX, function() {
 
   after(function(done) {
     Promise.all([
-      MovieModel.deleteMany({
-        name: SCHEDULE_PREFIX
+      VideoModel.deleteMany({
+        src: mediaPath
       }),
-      TagModel.deleteMany({
-        source: movieId
-      }),
-      CommentModel.deleteMany({
-        "content.text": SCHEDULE_PREFIX
-      })
     ])
     .then(_ => {
       done()
@@ -89,7 +83,7 @@ describe(SCHEDULE_PREFIX, function() {
         src: mediaPath
       })
       .select({
-        _id
+        _id: 1
       })
       .exec()
     })
@@ -105,9 +99,10 @@ describe(SCHEDULE_PREFIX, function() {
   })
 
   it('media in database status is uploading and last upload is one month ago', function(done) {
+    console.log(Day(Date.now() - MAX_KEEP_FILE_MILL - 100).toDate(), 2333)
     const { model } = mockCreateVideo({
       src: mediaPath,
-      updatedAt: Day(Date.now() - MAX_KEEP_FILE_MILL - 100 ).toDate(),
+      updatedAt: Day(Date.now() - MAX_KEEP_FILE_MILL - 100).toDate(),
       info: {
         status: MEDIA_STATUS.UPLOADING
       }
@@ -125,7 +120,7 @@ describe(SCHEDULE_PREFIX, function() {
         src: mediaPath
       })
       .select({
-        _id
+        _id: 1
       })
       .exec()
     })

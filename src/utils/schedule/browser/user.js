@@ -13,10 +13,13 @@ async function userDeal() {
       $match: {
         $or: [
           {
-            $where: `this.glance.length > ${LIMIT}`
+            [`glance.${LIMIT}`]: {
+            }
           },
           {
-            $where: `this.hot_history.length > ${LIMIT}`
+            [`hot_history.${LIMIT}`]: {
+              $exists: true 
+            }
           },
         ]
       }

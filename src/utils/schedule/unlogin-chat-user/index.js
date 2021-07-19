@@ -35,17 +35,17 @@ function scheduleMethod({ test=false }={}) {
     }
   ])
   .then(data => {
-    const members = data.map(item => item._id)
+    const members = data.map(item => {
+      return item._id
+    })
     return Promise.all([
       RoomModel.updateMany({
         members: {
           $in: members
         }
       }, {
-        $pull: {
-          members: {
-            $each: members
-          }
+        $pullAll: {
+          members
         }
       }),
       MemberModel.deleteMany({

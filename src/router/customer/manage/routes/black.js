@@ -69,14 +69,14 @@ router
       $lookup: {
         from: 'users', 
         let: {
-          friend_id: "$friends._id"
+          friend: "$friends._id"
         },
         pipeline: [  
           {
             $match: {
               $expr: {
                 $eq: [
-                  "$friend_id", "$$friend_id"
+                  "$friend_id", "$$friend"
                 ]
               }
             }
@@ -119,7 +119,7 @@ router
         description: "$user_info.description",
         avatar: "$user_info.avatar",
         friend_id: "$user_info.friend_id",
-        createdAt: 1,
+        createdAt: "$friends.timestamps"
       }
     }
   ])

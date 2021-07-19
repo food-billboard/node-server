@@ -172,6 +172,9 @@ router
     user: id,
     _id: {
       $nin: [_id]
+    },
+    "friends._id": {
+      $nin: [_id]
     }
   })
   .select({

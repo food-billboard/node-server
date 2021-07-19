@@ -27,7 +27,7 @@ describe(SCHEDULE_PREFIX, function() {
 
   after(function(done) {
     FriendsModel.deleteMany({
-      user: isValidObjectId("8f63270f005f1c1a0d9448ca")
+      user: ObjectId("8f63270f005f1c1a0d9448ca")
     })
     .then(_ => {
       done()

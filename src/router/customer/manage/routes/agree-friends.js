@@ -216,7 +216,7 @@ router
         }
       }, {
         $set: { 
-          "friends.$.status": FRIEND_STATUS.NORMAL
+          "friends.$.status": FRIEND_STATUS.AGREE
         }
       }),
       FriendsModel.updateOne({
@@ -227,7 +227,7 @@ router
           friends: {
             _id,
             timestamps: Date.now(),
-            status: FRIEND_STATUS.AGREE
+            status: FRIEND_STATUS.NORMAL
           }
         }
       })

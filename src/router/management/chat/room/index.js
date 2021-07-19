@@ -544,8 +544,8 @@ router
       }
     })
   ])
-  .then(data => {
-    if(data.deletedCount === 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+  .then(([room]) => {
+    if(room.deletedCount === 0) return Promise.reject({ errMsg: 'not found', status: 404 })
     return {
       data: {
         data: null

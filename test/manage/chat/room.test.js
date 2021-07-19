@@ -27,13 +27,15 @@ function responseExpect(res, validate=[]) {
     if(item.info.avatar) {
       commonValidate.string(item.info.avatar)
     }
-    expect(item.create_user).to.be.a('object').and.that.include.any.keys('username', 'avatar', '_id', 'member', 'description')
-    commonValidate.string(item.create_user.username)
-    commonValidate.string(item.create_user.description)
-    commonValidate.objectId(item.create_user._id)
-    commonValidate.objectId(item.create_user.member)
-    if(item.create_user.avatar) {
-      commonValidate.string(item.create_user.avatar)
+    if(item.type !== ROOM_TYPE.CHAT) {
+      expect(item.create_user).to.be.a('object').and.that.include.any.keys('username', 'avatar', '_id', 'member', 'description')
+      commonValidate.string(item.create_user.username)
+      commonValidate.string(item.create_user.description)
+      commonValidate.objectId(item.create_user._id)
+      commonValidate.objectId(item.create_user.member)
+      if(item.create_user.avatar) {
+        commonValidate.string(item.create_user.avatar)
+      }
     }
     commonValidate.number(item.members)
     commonValidate.number(item.online_members)
@@ -983,8 +985,8 @@ describe(`${COMMON_API} test`, function() {
             MemberModel.updateOne({
               _id: memberId
             }, {
-              $pushAll: {
-                room: [roomId1, roomId2]
+              $set: {
+                room: [roomId1, roomId2, systemRoomId, roomId]
               }
             })
           ])

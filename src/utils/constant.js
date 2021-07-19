@@ -14,6 +14,7 @@ const EMAIL_REGEXP = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|
 
 //静态资源目录
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
+const STATIC_FILE_PATH_NO_WRAPPER = path.resolve(__dirname, '../../')
 
 //最大单次发送文件大小
 const MAX_FILE_SINGLE_RESPONSE_SIZE = 1024 * 1024 * 5
@@ -110,7 +111,7 @@ const FRIEND_STATUS = {
   NORMAL: 'NORMAL',
   BLACK: 'BLACK',
   TO_AGREE: 'TO_AGREE',
-  DISS_AGREE: "DIS_AGREE",
+  DIS_AGREE: "DIS_AGREE",
   AGREE: "AGREE"
 }
 
@@ -180,5 +181,6 @@ module.exports = {
   FRIEND_STATUS,
   ERROR_ORIGIN_TYPE,
   ERROR_TYPE,
-  USER_HOT_HISTORY_TYPE
+  USER_HOT_HISTORY_TYPE,
+  STATIC_FILE_PATH_NO_WRAPPER
 }

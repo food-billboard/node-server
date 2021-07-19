@@ -92,13 +92,6 @@ describe(`${COMMON_API} test`, function() {
       })
       const { model: normalFriend } = mockCreateFriends({
         user: normalUserId,
-        friends: [
-          {
-            timestamps: Date.now(),
-            _id: normalFriendId,
-            status: FRIEND_STATUS.NORMAL
-          },
-        ]
       })
       return Promise.all([
         model.save(),
@@ -128,12 +121,34 @@ describe(`${COMMON_API} test`, function() {
         FriendsModel.updateOne({
           _id: agreeFriendId
         }, {
-          $push: {
-            friends:{
-              timestamps: Date.now(),
+          $set: {
+            friends:[{
+              timestamps: 100000,
               _id: selfFriendId,
-              status: FRIEND_STATUS.NORMAL
-            },
+              status: FRIEND_STATUS.AGREE
+            }]
+          }
+        }),
+        FriendsModel.updateOne({
+          _id: disagreeFriendId
+        }, {
+          $set: {
+            friends:[{
+              timestamps: 100001,
+              _id: selfFriendId,
+              status: FRIEND_STATUS.DIS_AGREE
+            }]
+          }
+        }),
+        FriendsModel.updateOne({
+          _id: normalFriendId
+        }, {
+          $set: {
+            friends:[{
+              timestamps: 100002,
+              _id: selfFriendId,
+              status: FRIEND_STATUS.TO_AGREE
+            }]
           }
         }),
       ])
@@ -244,7 +259,6 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, target => {
             expect(target.friends.length).not.be.equal(0)
-            console.log(target.friends, 666)
             const { agree, normal, disagree } = target.friends.reduce((acc, cur) => {
               const { friend_id } = cur 
               if(agreeFriendId.equals(friend_id)) acc.agree = true 
@@ -256,7 +270,6 @@ describe(`${COMMON_API} test`, function() {
               normal: false,
               disagree: false 
             })
-            console.log(agree, normal, disagree, 5555)
             expect(!!agree && !!normal && !!disagree).to.be.true 
           })
           done()

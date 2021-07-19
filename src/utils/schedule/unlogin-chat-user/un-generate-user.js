@@ -70,8 +70,22 @@ function scheduleMethod({
         }
       ])
       .then(friendList => {
-        const needGenerateUser = memberList.filter(item => {
-          return ObjectId.isValid(item.user) && !friendList.some(friend => friend.user && friend.user.equals(item.user))
+        const { needGenerateUser,  needUpdateUser} = memberList.reduce((acc, cur) => {
+          const { user } = cur 
+          if(!ObjectId.isValid(user)) return acc 
+          const target = friendList.find(friend => friend.user && friend.user.equals(cur.user))
+          if(!!target && !ObjectId.isValid(target.member)) {
+            acc.needUpdateUser.push({
+              friend: target._id,
+              member: cur
+            })
+          }else if(!target){
+            acc.needGenerateUser.push(cur)
+          }
+          return acc 
+        }, {
+          needGenerateUser: [],
+          needUpdateUser: []
         })
         return Promise.all(needGenerateUser.map(item => {
           const { _id, user } = item 
@@ -81,6 +95,16 @@ function scheduleMethod({
           })
           return model.save()
         }))
+        .then(_ => Promise.all(needUpdateUser.map(item => {
+          const { friend, member } = item 
+          return FriendsModel.updateOne({
+            _id: friend
+          }, {
+            $set:  {
+              member: member._id 
+            }
+          })
+        })))
       })
     })
     .then(_ => {

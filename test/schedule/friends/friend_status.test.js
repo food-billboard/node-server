@@ -5,7 +5,7 @@ const { FriendsModel, FRIEND_STATUS } = require('@src/utils')
 const { mockCreateFriends } = require('@test/utils')
 const { scheduleMethod, SPACE } = require("@src/utils/schedule/friends/friend_status")
 
-const SCHEDULE_PREFIX = "schedule of unuse friends test"
+const SCHEDULE_PREFIX = "schedule of change agree status friends test"
 
 describe(SCHEDULE_PREFIX, function() {
 
@@ -34,7 +34,7 @@ describe(SCHEDULE_PREFIX, function() {
 
   after(function(done) {
     FriendsModel.deleteMany({
-      user: isValidObjectId("8f63270f005f1c1a0d9448ca")
+      user: ObjectId("8f63270f005f1c1a0d9448ca")
     })
     .then(_ => {
       done()
@@ -51,7 +51,7 @@ describe(SCHEDULE_PREFIX, function() {
     })
     .then(_ => {
       return FriendsModel.findOne({
-        user: isValidObjectId("8f63270f005f1c1a0d9448ca"),
+        user: ObjectId("8f63270f005f1c1a0d9448ca"),
         friends: {
           $elemMatch: {
             $and: [

@@ -502,7 +502,7 @@ const GlobalSchema = new Schema({
 const MemberSchema = new Schema({ 
   user: {
     type: ObjectId,
-    required: true,
+    // required: true,
     ref: 'user'
   },
   sid: {

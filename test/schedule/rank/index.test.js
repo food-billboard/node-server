@@ -84,26 +84,27 @@ describe(SCHEDULE_PREFIX, function() {
         .select({
           _id: 1
         })
-      ]),
-      RankModel.find({
-        name: SCHEDULE_PREFIX,
-        match: {
-          $in: [
-            movieId
-          ]
-        }
-      })
-      .select({
-        match_pattern: 1,
-        _id: 1
-      })
+        .exec(),
+        RankModel.find({
+          name: SCHEDULE_PREFIX,
+          match: {
+            $in: [
+              movieId
+            ]
+          }
+        })
+        .select({
+          match_pattern: 1,
+          _id: 1
+        })
+        .exec()
+      ])
     })
     .then(([movie, rank]) => {
       expect(!!movie).to.be.true 
       expect(rank.length === 1).to.be.true 
       const [ { match_pattern } ] = rank
-      const [ { origin_id, origin, field, op } ] = match_pattern
-      console.log(match_pattern)
+      const [ { origin_id, origin } ] = match_pattern
       expect(classifyId.equals(origin_id)).to.be.true 
       expect(origin === 'classify').to.be.true 
       return rank

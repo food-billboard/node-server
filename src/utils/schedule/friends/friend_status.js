@@ -12,11 +12,11 @@ const SPACE = 1000 * 24 * 60 * 60 * 30
  * 时间距离现在超过 SPACE
 */
 
-function scheduleMethod({
+async function scheduleMethod({
   test=false
 }={}) {
   console.log(chalk.yellow('好友状态定时审查'))
-  FriendsModel.aggregate([
+  return FriendsModel.aggregate([
     {
       $match: {
         friends: {

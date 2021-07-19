@@ -16,7 +16,7 @@ const { parseData } = require('../../error-deal')
  * 将最新匹配排行榜规则的电影添加至 match 字段
 */
 
-function findMatchMovieData() {
+async function findMatchMovieData() {
   let result 
   return RankModel.aggregate([
     {
@@ -58,7 +58,7 @@ function findMatchMovieData() {
   })
 }
 
-function scheduleMethod({
+async function scheduleMethod({
   test=false
 }={}) {
 
@@ -67,7 +67,7 @@ function scheduleMethod({
   let remove = []
   let add = []
 
-  RankModel.find({})
+  return RankModel.find({})
   .select({
     match_pattern: 1,
     name: 1

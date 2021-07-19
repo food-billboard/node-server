@@ -63,7 +63,7 @@ const setTag = async (dataList) => {
 
 const updateMovieTag = (tagList) => {
   const movie2TagMap = tagList.reduce((acc, cur) => {
-    const { source, _id } = cur
+    const { source, _id, text } = cur
     if(!acc.has(source)) acc.set(source, [])
     const prev = acc.get(source)
     acc.set(source, [ ...prev, _id ])
@@ -75,13 +75,13 @@ const updateMovieTag = (tagList) => {
 
   movie2TagMap.clear()
 
-  return Promise.allSettled(keys.map(key => {
+  return Promise.allSettled(keys.map(movieId => {
     const [ , tags ] = mapEntries.find(entry => {
       const [ key ] = entry
-      return key.equals(key)
+      return key.equals(movieId)
     })
     return MovieModel.updateOne({
-      _id: key
+      _id: movieId
     }, {
       $set: {
         tag: tags

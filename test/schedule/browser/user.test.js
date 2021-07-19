@@ -14,6 +14,7 @@ describe(SCHEDULE_PREFIX, function() {
   before(function(done) {
 
     const { model } = mockCreateUser({
+      username: SCHEDULE_PREFIX,
       description: SCHEDULE_PREFIX,
       hot_history: new Array(MAX).fill({
         _id: ObjectId("8f63270f005f1c1a0d9448ca"),
@@ -57,15 +58,21 @@ describe(SCHEDULE_PREFIX, function() {
         username: SCHEDULE_PREFIX,
         $and: [
           {
-            $where: "this.glance.length < 500",
+            [`glance.${LIMIT + 1}`]: {
+              $exists: false 
+            }
           },
           {
-            $where: "this.hot_history.length < 500",
-          }
+            [`hot_history.${LIMIT + 1}`]: {
+              $exists: false 
+            }
+          },
         ]
       })
       .select({
-        _id: 1
+        _id: 1,
+        glance: 1,
+        hot_history: 1
       })
       .exec()
     })

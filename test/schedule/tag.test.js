@@ -21,7 +21,8 @@ describe(SCHEDULE_PREFIX, function() {
     const { model: comment } = mockCreateComment({
       content: {
         text: SCHEDULE_PREFIX
-      }
+      },
+      source_type: "movie"
     })
 
     Promise.all([
@@ -97,7 +98,7 @@ describe(SCHEDULE_PREFIX, function() {
     })
     .then(_ => {
       return MovieModel.findOne({
-        name: SCHEDULE_PREFIX
+        name: SCHEDULE_PREFIX,
       })
       .select({
         _id: 1,

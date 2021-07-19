@@ -7,7 +7,7 @@ const { scheduleMethod, MAX_TIMESTAMPS } = require("@src/utils/schedule/unlogin-
 
 const SCHEDULE_PREFIX = "schedule of unlogin-chat-user test"
 
-describe(SCHEDULE_PREFIX, function() {
+describe.skip(SCHEDULE_PREFIX, function() {
 
   let memberId 
   let roomId 
@@ -15,7 +15,8 @@ describe(SCHEDULE_PREFIX, function() {
   before(function(done) {
 
     const { model: member } = mockCreateMember({
-      sid: SCHEDULE_PREFIX
+      sid: SCHEDULE_PREFIX,
+      user: undefined
     })
     const { model: room } = mockCreateRoom({
       info: {
@@ -105,11 +106,11 @@ describe(SCHEDULE_PREFIX, function() {
             ]
           }
         })
+        .select({
+          _id: 1
+        })
+        .exec()
       ])
-      .select({
-        _id: 1
-      })
-      .exec()
     })
     .then(([room, member]) => {
       expect(!!room).to.be.false 

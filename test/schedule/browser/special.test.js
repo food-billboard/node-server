@@ -3,7 +3,7 @@ const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
 const { SpecialModel } = require('@src/utils')
 const { mockCreateSpecial } = require('@test/utils')
-const { specialDeal } = require("@src/utils/schedule/browser/special")
+const { specialDeal, MAX_COUNT } = require("@src/utils/schedule/browser/special")
 
 const SCHEDULE_PREFIX = "schedule of special test"
 
@@ -43,19 +43,22 @@ describe(SCHEDULE_PREFIX, function() {
 
   it(`special glance user clear data`, function(done) {
 
-    specialDeal()
+    specialDeal({
+      test: true 
+    })
     .then(_ => {
       return SpecialModel.findOne({
         description: SCHEDULE_PREFIX,
-        $where: "this.glance.length < 500"
       })
       .select({
-        _id: 1
+        _id: 1,
+        glance: 1
       })
       .exec()
     })
     .then(data => {
       expect(!!data).to.be.true 
+      expect(data.glance.length <= MAX_COUNT).to.be.true 
     })
     .then(_ => {
       done()

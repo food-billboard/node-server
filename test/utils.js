@@ -374,7 +374,8 @@ function mockCreateBehaviour(values) {
 function mockCreateFriends(values) {
   let baseModel = {
     user: ObjectId('8f63270f005f1c1a0d9448ca'),
-    friends: []
+    friends: [],
+    member: ObjectId('8f63270f005f1c1a0d9448ca'),
   }
 
   baseModel = mergeConfig(baseModel, values, true)
