@@ -15,7 +15,9 @@ function responseExpect(res, validate=[]) {
     commonValidate.objectId(item._id)
     commonValidate.string(item.another_name)
     commonValidate.string(item.name)
-    commonValidate.string(item.key)
+    if(item.key) {
+      commonValidate.string(item.key)
+    }
     if(item.avatar) {
       commonValidate.poster(item.avatar)
       commonValidate.poster(item.avatar_id)

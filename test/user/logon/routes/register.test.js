@@ -2,7 +2,7 @@ require('module-alias/register')
 const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
 const { mockCreateUser, Request, commonValidate, mockCreateImage, createMobile } = require('@test/utils')
-const { getToken, UserModel, dealRedis, ImageModel } = require('@src/utils')
+const { getToken, UserModel, dealRedis, ImageModel, MemberModel } = require('@src/utils')
 const { email_type } = require('@src/router/user/logon/map')
 
 const COMMON_API = '/api/user/logon/register'
@@ -77,6 +77,7 @@ describe(`${COMMON_API} test`, function() {
       let captcha = '123456'
       let description = COMMON_API
       let username = COMMON_API
+      let userId 
 
       let redisKey = `${email}-${email_type[1]}`
 
@@ -99,9 +100,17 @@ describe(`${COMMON_API} test`, function() {
           }),
           dealRedis(function(redis) {
             redis.del(redisKey)
+          }),
+          MemberModel.findOneAndDelete({
+            user: userId
           })
+          .select({
+            _id: 1
+          })
+          .exec()
         ])
-        .then(function() {
+        .then(function([,,data]) {
+          expect(!!data._id).to.be.true
           done()
         })
         .catch(err => {
@@ -134,7 +143,9 @@ describe(`${COMMON_API} test`, function() {
           }catch(_) {
             console.log(_)
           }
-          responseExpect(obj)
+          responseExpect(obj, target => {
+            userId = ObjectId(target._id) 
+          })
           done()
         })
 
@@ -142,7 +153,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    describe(`post the info for registe and register some role`, function() {
+    describe(`post the info for register and register some role`, function() {
 
       let mobile = createMobile()
       let email = `${mobile}@qq.com`
@@ -299,7 +310,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`post the info for register and verify fail becuase the password is not verify`, function(done) {
+      it(`post the info for register and verify fail because the password is not verify`, function(done) {
 
         Request
         .post(COMMON_API)
@@ -319,7 +330,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`post the info for register and verify fail becuase the email is not verify`, function(done) {
+      it(`post the info for register and verify fail because the email is not verify`, function(done) {
 
         Request
         .post(COMMON_API)
@@ -339,7 +350,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`post the info for register and verify fail becuase the captcha is not verify`, function(done) {
+      it(`post the info for register and verify fail because the captcha is not verify`, function(done) {
 
         Request
         .post(COMMON_API)
@@ -359,7 +370,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`post the info for register and verify fail becuase lack the params of mobile`, function(done) {
+      it(`post the info for register and verify fail because lack the params of mobile`, function(done) {
 
         Request
         .post(COMMON_API)

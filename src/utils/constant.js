@@ -14,6 +14,7 @@ const EMAIL_REGEXP = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|
 
 //静态资源目录
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
+const STATIC_FILE_PATH_NO_WRAPPER = path.resolve(__dirname, '../../')
 
 //最大单次发送文件大小
 const MAX_FILE_SINGLE_RESPONSE_SIZE = 1024 * 1024 * 5
@@ -108,10 +109,56 @@ const BEHAVIOUR_URL_TYPE_MAP = {
 
 const FRIEND_STATUS = {
   NORMAL: 'NORMAL',
-  BLACK: 'BLACK'
+  BLACK: 'BLACK',
+  TO_AGREE: 'TO_AGREE',
+  DIS_AGREE: "DIS_AGREE",
+  AGREE: "AGREE"
+}
+
+const ROOM_TYPE = {
+  GROUP_CHAT: "GROUP_CHAT",
+  CHAT: "CHAT",
+  SYSTEM: "SYSTEM"
+}
+
+const ROOM_USER_NET_STATUS = {
+  ONLINE: "ONLINE",
+  OFFLINE: "OFFLINE"
+}
+
+const MESSAGE_TYPE = MOVIE_SOURCE_TYPE
+
+const MESSAGE_MEDIA_TYPE = {
+  IMAGE: "IMAGE",
+  AUDIO: "AUDIO",
+  TEXT: "TEXT",
+  VIDEO: "VIDEO",
+  LINK: "LINK",
+  FRIEND_INVITE: "FRIEND_INVITE",
+}
+
+const ERROR_ORIGIN_TYPE = {
+  WEAPP: "WEAPP",
+  MANAGEMENT: "ERROR_ORIGIN_TYPE",
+  H5: "H5",
+  WEB: "WEB",
+  APP: "APP"
+}
+
+const ERROR_TYPE = {
+  TYPE_ERROR: "TYPE_ERROR"
+}
+
+const USER_HOT_HISTORY_TYPE = {
+  comment: "comment",
+  barrage: "barrage"
 }
 
 module.exports = {
+  MESSAGE_MEDIA_TYPE,
+  MESSAGE_TYPE,
+  ROOM_USER_NET_STATUS,
+  ROOM_TYPE,
   NETWORK,
   EMAIL_AUTH,
   EMAIL_REGEXP,
@@ -133,5 +180,9 @@ module.exports = {
   PRODUCTION_API_DOMAIN,
   API_DOMAIN: process.env.NODE_ENV === 'production' ? PRODUCTION_API_DOMAIN : DEVELOPMENT_API_DOMAIN,
   BEHAVIOUR_URL_TYPE_MAP,
-  FRIEND_STATUS
+  FRIEND_STATUS,
+  ERROR_ORIGIN_TYPE,
+  ERROR_TYPE,
+  USER_HOT_HISTORY_TYPE,
+  STATIC_FILE_PATH_NO_WRAPPER
 }

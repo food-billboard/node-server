@@ -8,13 +8,18 @@ const COMMON_API = '/api/customer/manage/black'
 function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
-
   expect(target).to.be.a('object').and.that.includes.all.keys('black')
   target.black.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id')
-    commonValidate.poster(item.avatar)
+    expect(item).to.be.a('object').and.that.includes.any.keys('avatar', 'username', '_id', 'description', 'createdAt', 'member', 'friend_id')
+    if(item.avatar) {
+      commonValidate.poster(item.avatar)
+    }
     commonValidate.string(item.username)
+    commonValidate.string(item.description)
     commonValidate.objectId(item._id)
+    commonValidate.objectId(item.member)
+    commonValidate.objectId(item.friend_id)
+    commonValidate.number(item.createdAt)
   })
 
   if(Array.isArray(validate)) {
@@ -32,6 +37,7 @@ describe(`${COMMON_API} test`, function() {
   let selfToken
   let userId
   let friendId 
+  let selfFriendId 
 
   before(async function() {
 
@@ -53,14 +59,7 @@ describe(`${COMMON_API} test`, function() {
       result = self
       selfToken = signToken(self._id)
       const { model } = mockCreateFriends({
-        user: result._id,
-        friends: [
-          {
-            timestamps: Date.now(),
-            _id: userId,
-            status: FRIEND_STATUS.BLACK
-          }
-        ]
+        user: userId,
       })
       return Promise.all([
         UserModel.updateOne({
@@ -76,6 +75,49 @@ describe(`${COMMON_API} test`, function() {
     })
     .then(([, data]) => {
       friendId = data._id 
+      const { model } = mockCreateFriends({
+        user: result._id,
+        friends: [
+          {
+            timestamps: Date.now(),
+            _id: friendId,
+            status: FRIEND_STATUS.BLACK
+          }
+        ]
+      })
+      return model.save()
+    })
+    .then((data) => {
+      selfFriendId = data._id 
+      return Promise.all([
+        FriendsModel.updateOne({
+          _id: friendId
+        }, {
+          $set: {
+            friends: [
+              {
+                timestamps: Date.now(),
+                _id: selfFriendId,
+                status: FRIEND_STATUS.NORMAL
+              }
+            ]
+          }
+        }),
+        UserModel.updateOne({
+          _id: result._id 
+        }, {
+          $set: {
+            friend_id: selfFriendId
+          }
+        }),
+        UserModel.updateOne({
+          _id: userId
+        }, {
+          $set: {
+            friend_id: friendId
+          }
+        })
+      ])
     })
     .catch(err => {
       console.log('oops: ', err)
@@ -92,7 +134,9 @@ describe(`${COMMON_API} test`, function() {
         username: COMMON_API
       }),
       FriendsModel.deleteMany({
-        _id: friendId
+        _id: {
+          $in: [friendId, selfFriendId]
+        }
       })
     ])
     .catch(err => {
@@ -112,7 +156,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .put(COMMON_API)
         .send({
-          _id: userId.toString().slice(1)
+          _id: friendId.toString().slice(1)
         })
         .set({
           Accept: 'Application/json',
@@ -189,10 +233,10 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
         FriendsModel.updateMany({
-          _id: friendId
+          _id: selfFriendId
         }, {
           friends: [{
-            _id: userId,
+            _id: friendId,
             timestamps: Date.now(),
             status: FRIEND_STATUS.NORMAL
           }]
@@ -207,11 +251,11 @@ describe(`${COMMON_API} test`, function() {
 
       after(function(done) {
         FriendsModel.findOne({
-          _id: friendId._id,
+          _id: selfFriendId,
           friends: { 
             $elemMatch: { 
               status: FRIEND_STATUS.BLACK,
-              _id: userId
+              _id: friendId
             } 
           }
         })
@@ -234,7 +278,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .put(COMMON_API)
         .send({
-          _id: userId
+          _id: friendId
         })
         .set({
           Accept: 'Application/json',
@@ -255,10 +299,10 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
         FriendsModel.updateMany({
-          _id: friendId,
+          _id: selfFriendId,
         }, {
           $set: {
-            friends: [ { _id: userId, timestamps: Date.now(), status: FRIEND_STATUS.BLACK } ]
+            friends: [ { _id: friendId, timestamps: Date.now(), status: FRIEND_STATUS.BLACK } ]
           }
         })
         .then(function() {
@@ -271,11 +315,11 @@ describe(`${COMMON_API} test`, function() {
 
       after(function(done) {
         FriendsModel.findOne({
-          _id: friendId,
+          _id: selfFriendId,
           friends: { 
             $elemMatch: { 
               status: FRIEND_STATUS.BLACK,
-              _id: userId
+              _id: friendId
             } 
           }
         })
@@ -298,7 +342,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .put(COMMON_API)
         .send({
-          _id: userId.toString()
+          _id: friendId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -323,10 +367,10 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
         FriendsModel.updateMany({
-          _id: friendId,
+          _id: selfFriendId,
         }, {
           $set: {
-            friends: [ { _id: userId, timestamps: Date.now(), status: FRIEND_STATUS.BLACK } ]
+            friends: [ { _id: friendId, timestamps: Date.now(), status: FRIEND_STATUS.BLACK } ]
           }
         })
         .then(function() {
@@ -339,11 +383,11 @@ describe(`${COMMON_API} test`, function() {
 
       after(async function() {
         const res = await FriendsModel.findOne({
-          _id: friendId,
+          _id: selfFriendId,
           friends: { 
             $elemMatch: { 
               status: FRIEND_STATUS.NORMAL,
-              _id: userId
+              _id: friendId
             } 
           }
         })
@@ -369,7 +413,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .delete(COMMON_API)
         .query({
-          _id: userId.toString()
+          _id: friendId.toString()
         })
         .set({
           Accept: 'Application/json',
@@ -390,13 +434,13 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
         FriendsModel.updateMany({
-          _id: friendId,
+          _id: selfFriendId,
         }, {
           $set: {
             friends: [
               {
                 timestamps: Date.now(),
-                _id: userId,
+                _id: friendId,
                 status: FRIEND_STATUS.NORMAL
               }
             ]
@@ -412,11 +456,11 @@ describe(`${COMMON_API} test`, function() {
 
       after(function(done) {
         FriendsModel.findOne({
-          _id: friendId,
+          _id: selfFriendId,
           friends: { 
             $elemMatch: { 
               status: FRIEND_STATUS.NORMAL,
-              _id: userId
+              _id: friendId
             } 
           }
         })
@@ -439,7 +483,7 @@ describe(`${COMMON_API} test`, function() {
         Request
         .delete(COMMON_API)
         .query({
-          _id: userId.toString()
+          _id: friendId.toString()
         })
         .set({
           Accept: 'Application/json',

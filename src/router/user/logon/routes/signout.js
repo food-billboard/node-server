@@ -1,4 +1,5 @@
 const Router = require('@koa/router')
+const { Types: { ObjectId }} = require('mongoose')
 const { verifyTokenToData, dealErr, UserModel, RoomModel, notFound, responseDataDeal, setCookie, TOKEN_COOKIE } = require("@src/utils")
 
 const router = new Router()
@@ -9,15 +10,15 @@ router
 
   const data = await new Promise((resolve, reject) => {
     if(token) {
-      const { mobile } = token
-      return resolve(mobile)
+      const { id } = token
+      return resolve(id)
     }else {
       reject({ errMsg: 'not authorization', status: 401 })
     }
   })
-  .then(mobile => {
+  .then(id => {
     return UserModel.findOneAndUpdate({
-      mobile: Number(mobile)
+      _id: ObjectId(id)
     }, {
       $set: { status: 'SIGNOUT' }
     })

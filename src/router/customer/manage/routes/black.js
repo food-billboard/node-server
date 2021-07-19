@@ -1,5 +1,6 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, FriendsModel, dealErr, FRIEND_STATUS, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
+const Day = require('dayjs')
+const { verifyTokenToData, FriendsModel, dealErr, FRIEND_STATUS, notFound, Params, responseDataDeal, avatarGet, parseData } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -44,38 +45,88 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
-  const data = await FriendsModel.findOne({
-    user: ObjectId(id),
-    "friends.status": FRIEND_STATUS.BLACK
-  })
-  .select({
-    friends: 1
-  })
-  .populate({
-    path: 'friends._id',
-    select: {
-      username: 1,
-      avatar: 1
+  const data = await FriendsModel.aggregate([
+    {
+      $match: {
+        user: ObjectId(id),
+      }
     },
-    options: {
-      limit: pageSize,
-      skip: pageSize * currPage
+    {
+      $unwind: "$friends"
+    },
+    {
+      $match: {
+        "friends.status": FRIEND_STATUS.BLACK
+      }
+    },
+    {
+      $skip: pageSize * currPage
+    },
+    {
+      $limit: pageSize
+    },
+    {
+      $lookup: {
+        from: 'users', 
+        let: {
+          friend: "$friends._id"
+        },
+        pipeline: [  
+          {
+            $match: {
+              $expr: {
+                $eq: [
+                  "$friend_id", "$$friend"
+                ]
+              }
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              as: 'avatar',
+              foreignField: "_id",
+              localField: "avatar"
+            }
+          },
+          {
+            $unwind: {
+              path: "$avatar",
+              preserveNullAndEmptyArrays: true 
+            }
+          },
+          {
+            $project: {
+              _id: 1,
+              username: 1,
+              description: 1,
+              avatar: "$avatar.src",
+              friend_id: 1
+            }
+          },
+        ],
+        as: 'user_info',
+      }
+    },
+    {
+      $unwind: "$user_info"
+    },
+    {
+      $project: {
+        member: 1,
+        _id: "$user_info._id",
+        username: "$user_info.username",
+        description: "$user_info.description",
+        avatar: "$user_info.avatar",
+        friend_id: "$user_info.friend_id",
+        createdAt: "$friends.timestamps"
+      }
     }
-  })
-  .exec()
-  .then(parseData)
+  ])
   .then(data => {
-    const { friends=[] } = data || {}
     return {
       data: {
-        ...data,
-        black: friends.filter(item => !!item._id).map(a => {
-          const { _id: { avatar, ...nextData } } = a
-          return {
-            ...nextData,
-            avatar: avatarGet(avatar),
-          }
-        })
+        black: data
       }
     }
   })

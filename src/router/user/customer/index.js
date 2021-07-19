@@ -4,7 +4,7 @@ const Movie = require('./routes/movie')
 const Comment = require('./routes/comment')
 const Fans = require('./routes/fans')
 const { Types: { ObjectId } } = require("mongoose")
-const { UserModel, dealErr, Params, responseDataDeal, parseData } = require("@src/utils")
+const { UserModel, dealErr, Params, responseDataDeal, parseData, avatarGet } = require("@src/utils")
 
 const router = new Router()
 
@@ -39,7 +39,8 @@ router
     fans:1,
     attentions: 1,
     createdAt: 1,
-    updatedAt: 1
+    updatedAt: 1,
+    description: 1
   })
   .exec()
   .then(parseData)
@@ -51,7 +52,7 @@ router
         ...nextData,
         attentions: attentions.length,
         fans: fans.length,
-        avatar: avatar ? avatar.src : null 
+        avatar: avatarGet(avatar) 
       }
     }
   })

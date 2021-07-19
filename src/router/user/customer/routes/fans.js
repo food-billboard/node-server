@@ -49,7 +49,8 @@ router
     path: 'fans._id',
     select: {
       username: 1,
-      avatar: 1
+      avatar: 1,
+      description: 1
     },
     options: { 
       ...(pageSize >= 0 ? { limit: pageSize } : {}),

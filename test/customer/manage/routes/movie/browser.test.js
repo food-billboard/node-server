@@ -157,7 +157,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the self browser list success and return the status of 304`, function(done) {
+      it.skip(`get the self browser list success and return the status of 304`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -177,7 +177,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the self browser list success and hope return the status of 304 but the content has edited`, function(done) {
+      it.skip(`get the self browser list success and hope return the status of 304 but the content has edited`, function(done) {
 
 
         Request
@@ -198,7 +198,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the self browser list success and hope return the status of 304 but the params of query is change`, function(done) {
+      it.skip(`get the self browser list success and hope return the status of 304 but the params of query is change`, function(done) {
 
         const query = {
           pageSize: 10

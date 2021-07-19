@@ -223,7 +223,7 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.list.length > 1).to.be.true
+          expect(target.list.length >= 1).to.be.true
         })
         done()
       })

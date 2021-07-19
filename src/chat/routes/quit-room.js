@@ -1,85 +1,27 @@
-const { verifySocketIoToken, RoomModel, UserModel, notFound, Params } = require("@src/utils")
-const { Types: { ObjectId } } = require('mongoose')
+const { pick } = require('lodash')
+const { quitRoom: quitRoomMethod } = require('../services')
+const { errWrapper } = require('../utils')
 
 //可以在这里广播通知所有聊天室内用户有用户离开
 const quitRoom = socket => async(data) => {
-  const [, token] = verifySocketIoToken(data.token)
-  const check = Params.bodyUnStatus(data, {
-    name: '_id',
-    validator: [
-			data => ObjectId.isValid(data)
-		]
-  })
-  if(check && !token) {
-    socket.emit("delete", JSON.stringify({
-      success: false,
-      res: {
-        errMsg: 'bad request'
-      }
-    }))
-    return
+
+  const { id } = socket
+
+  let res 
+
+  try {
+    res = await quitRoomMethod(socket, data, {
+      sid: id,
+      ...pick(data, ["_id"])
+    })
+    // const { res: { data: roomId } } = res 
+    // console.log(roomId)
+    // socket.leave(roomId)
+  }catch(err) {
+    res = JSON.stringify(errWrapper(err))
   }
 
-  let res
-  const { mobile } = token
-  const [ _id ] = Params.sanitizers(data, {
-    name: '_id',
-    sanitizers: [
-      data => ObjectId(data)
-    ]
-  })
-
-  await UserModel.findOne({
-    mobile: Number(mobile)
-  })
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._id)
-  .then(notFound)
-  .then(data => RoomModel.findOneAndUpdate({
-    "members.user": data,
-    _id,
-    origin: false,
-    type: 'GROUP_CHAT',
-    create_user: { $ne: data }
-  }, {
-    $pull: { members: { user: data } }
-  }))
-  .select({
-    _id: 1
-  })
-  .exec()
-  .then(data => !!data && data._id)
-  .then(id => {
-    if(!id) return Promise.reject({ errMsg: 'forbidden' })
-    res = {
-      success: true,
-      res: id.toString()
-    }
-  })
-  .catch(err => {
-    console.log(err)
-    if(err && err.errMsg) {
-      res = {
-        success: false,
-        res: {
-          ...err
-        }
-      }
-    }else {
-      res = {
-        success: false,
-        res: {
-          errMsg: err
-        }
-      }
-    }
-    return false
-  })
-
-  socket.emit("quit_room", JSON.stringify(res))
+  socket.emit("quit_room", res)
 }
 
 module.exports = quitRoom

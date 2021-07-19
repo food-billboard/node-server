@@ -1,38 +1,16 @@
-const { verifySocketIoToken, RoomModel, notFound } = require("@src/utils")
+const { disConnectServer } = require('../services')
 
 const disconnection = socket => async (_) => {
+
   const { id } = socket
 
-  await RoomModel.findOneAndUpdate({
-    origin: true,
-    type: 'SYSTEM',
-    "members.sid": id
-  }, {
-    $set: {
-      "members.$.status": "OFFLINE",
-      "members.$.sid": null
-    }
-  })
-  .select({
-    "members.user": 1,
-    "members.sid": 1
-  })
-  .exec()
-  .then(data => !!data && data._doc)
-  .then(data => {
-    if(!data) return
-    const { members } = data
-    const [ mine ] = members.filter(m => m.sid === id)
-    const { user } = mine
-    return RoomModel.updateMany({
-      "members.user": user,
-      "members.status": "ONLINE"
-    }, {
-      $set: { "members.$.status": "OFFLINE" }
+  try {
+    await disConnectServer(socket, {}, {
+      sid: id
     })
-  })
-  .catch(err => {
-    console.log(err)
-  })
+  }catch(err) {
+    
+  }
+
 }
 module.exports = disconnection

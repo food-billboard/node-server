@@ -63,7 +63,7 @@ const setTag = async (dataList) => {
 
 const updateMovieTag = (tagList) => {
   const movie2TagMap = tagList.reduce((acc, cur) => {
-    const { source, _id } = cur
+    const { source, _id, text } = cur
     if(!acc.has(source)) acc.set(source, [])
     const prev = acc.get(source)
     acc.set(source, [ ...prev, _id ])
@@ -75,13 +75,13 @@ const updateMovieTag = (tagList) => {
 
   movie2TagMap.clear()
 
-  return Promise.allSettled(keys.map(key => {
+  return Promise.allSettled(keys.map(movieId => {
     const [ , tags ] = mapEntries.find(entry => {
       const [ key ] = entry
-      return key.equals(key)
+      return key.equals(movieId)
     })
     return MovieModel.updateOne({
-      _id: key
+      _id: movieId
     }, {
       $set: {
         tag: tags
@@ -91,12 +91,14 @@ const updateMovieTag = (tagList) => {
 
 }
 
-function scheduleMethod() {
+function scheduleMethod({
+  test=false
+}={}) {
   if(!nodejieba) return 
   console.log(chalk.magenta('数据标签tag定时审查'))
 
   //当前简单使用评论当做tag
-  cleanTag()
+  return cleanTag()
   .then(collecteComment)
   .then(setTag)
   .then(updateMovieTag)
@@ -106,7 +108,7 @@ function scheduleMethod() {
   })
   .catch(err => {
     console.log(chalk.red('tag定时获取失败: ', JSON.stringify(err)))
-    log4Error({
+    !!test && log4Error({
       __request_log_id__: '数据tag定时审查'
     }, err)
   })
@@ -118,5 +120,6 @@ const tagSchedule = () => {
 }
 
 module.exports = {
-  tagSchedule
+  tagSchedule,
+  scheduleMethod
 }

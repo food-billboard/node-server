@@ -8,6 +8,7 @@ try {
 const { Types: { ObjectId } } = require('mongoose')
 const { RoomModel } = require('../mongodb/mongo.lib')
 const cookie = require('./cookie')
+const { ROOM_TYPE } = require('../constant')
 const { getCookie, TOKEN_COOKIE } = cookie 
 
 //秘钥
@@ -36,7 +37,7 @@ const fileEncoded = (str) => {
 }
 
 //创建token
-const signToken = ({ id, mobile }, options={expiresIn: '1d'}, callback=(err, token)=>{}) => {
+const signToken = ({ id, mobile, friend_id }, options={expiresIn: '1d'}, callback=(err, token)=>{}) => {
   let newOptions = options, newCallback = callback
   if(typeof options === 'function') {
     newOptions = {}
@@ -46,6 +47,7 @@ const signToken = ({ id, mobile }, options={expiresIn: '1d'}, callback=(err, tok
     id,
     mobile,
     middel: MIDDEL,
+    friend_id
   }, SECRET, newOptions)
 }
 
@@ -102,23 +104,23 @@ const middlewareVerifyTokenForSocketIo = socket => async (packet, next) => {
   if(whiteList.includes(name)) return await next()
   if(midList.includes(name)) {
     const { _id } = data
-      const roomData = await RoomModel.findOne({
-        ...(_id ? { _id: ObjectId(_id) } : {}),
-        type: 'SYSTEM'
-      })
-      .select({ _id: 1 })
-      .exec()
-      .then(data => data)
-      if(roomData) {
-        return await next()
-      }else {
-        socket.emit(name, JSON.stringify({
-          success: false,
-          res: {
-            errMsg: 401
-          }
-        }))
-      }
+    const roomData = await RoomModel.findOne({
+      ...(_id ? { _id: ObjectId(_id) } : {}),
+      type: ROOM_TYPE.SYSTEM
+    })
+    .select({ _id: 1 })
+    .exec()
+    .then(data => data)
+    if(roomData) {
+      return await next()
+    }else {
+      socket.emit(name, JSON.stringify({
+        success: false,
+        res: {
+          errMsg: 401
+        }
+      }))
+    }
   }else {
     // next(new Error('401 unAuthorized'))
     socket.emit(name, JSON.stringify({

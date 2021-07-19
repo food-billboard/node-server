@@ -422,7 +422,7 @@
             "description": "成功",
             "schema": {
               "type": "object",
-              "$ref":"#/definitions/customer_get_manage_attention"
+              "$ref":"#/definitions/customer_get_manage_black"
             }
           }
         },
@@ -450,7 +450,7 @@
           {
             "name": "_id",
             "in": "body",
-            "description": "用户id",
+            "description": "好友id",
             "required": true
           }
         ],
@@ -483,7 +483,7 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "用户id",
+            "description": "好友id",
             "required": true
           }
         ],
@@ -533,7 +533,7 @@
             "description": "成功",
             "schema": {
               "type": "object",
-              "$ref":"#/definitions/customer_get_manage_attention"
+              "$ref":"#/definitions/customer_get_manage_friends"
             }
           }
         },
@@ -550,8 +550,8 @@
         "tags": [
           "manage"
         ],
-        "summary": "新增用户",
-        "description": "新增用户",
+        "summary": "添加好友",
+        "description": "添加好友",
         "operationId": "customer_put_manage_friends",
         "produces": [
           "application/xml",
@@ -561,7 +561,7 @@
           {
             "name": "_id",
             "in": "body",
-            "description": "用户id",
+            "description": "好友id",
             "required": true
           }
         ],
@@ -583,8 +583,8 @@
         "tags": [
           "manage"
         ],
-        "summary": "删除用户",
-        "description": "删除用户",
+        "summary": "删除好友",
+        "description": "删除好友",
         "operationId": "customer_delete_manage_friends",
         "produces": [
           "application/xml",
@@ -594,7 +594,118 @@
           {
             "name": "_id",
             "in": "query",
-            "description": "用户id",
+            "description": "好友id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/customer/manage/friends/agree": {
+      "get": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "用户好友申请列表",
+        "description": "获取用户申请好友",
+        "operationId": "customer_get_manage_friends_agree",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "object",
+              "$ref":"#/definitions/customer_get_manage_friends"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "同意申请",
+        "description": "同意申请",
+        "operationId": "customer_put_manage_friends_agree",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "好友id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "拒绝申请",
+        "description": "拒绝申请",
+        "operationId": "customer_delete_manage_friends_agree",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "好友id",
             "required": true
           }
         ],
@@ -2254,6 +2365,9 @@
                 "_id": {
                   "type": "string"
                 },
+                "friend_id": {
+                  "type": "string"
+                },
                 "hot": {
                   "type": "integer",
                   "description": "被点赞次数"
@@ -2308,6 +2422,10 @@
         "username": {
           "type": "string",
           "description": "用户名"
+        },
+        "description": {
+          "type": "string",
+          "description": "描述"
         }
       }
     },
@@ -2336,6 +2454,127 @@
       },
       "xml": {
         "name": "customer_manage_get_fans"
+      }
+    },
+    "customer_get_manage_friends": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "friends": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "friend_id": {
+                        "type": "string"
+                      },
+                      "member": {
+                        "type": "string"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "头像"
+                      },
+                      "username": {
+                        "type": "string",
+                        "description": "用户名"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format":"date-time"
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "状态",
+                        "enum": [ "TO_AGREE", "DIS_AGREE", "AGREE" ]
+                      }
+                    }
+                  }
+                },
+                "member": {
+                  "type": "string",
+                  "description": "成员id"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_manage_friends"
+      }
+    },
+    "customer_get_manage_black": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "friends": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "friend_id": {
+                        "type": "string"
+                      },
+                      "member": {
+                        "type": "string"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "头像"
+                      },
+                      "username": {
+                        "type": "string",
+                        "description": "用户名"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format":"date-time"
+                      }
+                    }
+                  }
+                },
+                "member": {
+                  "type": "string",
+                  "description": "成员id"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_manage_black"
       }
     },
     "customer_get_manage_attention": {
@@ -3051,6 +3290,10 @@
                 "avatar": {
                   "type": "string",
                   "description": "头像"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
                 },
                 "fans": {
                   "type": "integer",

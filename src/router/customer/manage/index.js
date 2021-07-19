@@ -53,7 +53,8 @@ router
     attentions: 1,
     createdAt: 1,
     updatedAt: 1,
-    friends: 1
+    friends: 1,
+    friend_id: 1
   })
   .exec()
   .then(notFound)

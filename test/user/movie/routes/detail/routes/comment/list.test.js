@@ -227,7 +227,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the comment list success and return the status of 304`, function(done) {
+      it.skip(`get the comment list success and return the status of 304`, function(done) {
 
         const query = {
           _id: movieId.toString()
@@ -251,7 +251,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the comment list success and hope return the status of 304 but the content has edited`, function(done) {
+      it.skip(`get the comment list success and hope return the status of 304 but the content has edited`, function(done) {
 
         const query = {
           _id: movieId.toString()
@@ -275,7 +275,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the comment list success and hope return the status of 304 but the params of query is change`, function(done) {
+      it.skip(`get the comment list success and hope return the status of 304 but the params of query is change`, function(done) {
 
         const query = {
           offset: 0,

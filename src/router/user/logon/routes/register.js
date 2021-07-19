@@ -1,6 +1,21 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { encoded, signToken, Params, UserModel, RoomModel, responseDataDeal, dealErr, dealRedis, EMAIL_REGEXP, setCookie, TOKEN_COOKIE, ROLES_MAP } = require('@src/utils')
+const { 
+  encoded, 
+  signToken, 
+  Params, 
+  UserModel, 
+  MemberModel, 
+  FriendsModel,
+  RoomModel, 
+  responseDataDeal, 
+  dealErr, 
+  dealRedis, 
+  EMAIL_REGEXP, 
+  setCookie, 
+  TOKEN_COOKIE, 
+  ROLES_MAP 
+} = require('@src/utils')
 const { email_type } = require('../map')
 
 const router = new Router()
@@ -30,6 +45,22 @@ function createInitialUserInfo({ mobile, password, username, avatar, description
   } 
   if(!!description) defaultModel.description = description
   return defaultModel
+}
+
+function createInitialMember(userId) {
+  const model = new MemberModel({
+    user: userId,
+    room: []
+  })
+  return model.save()
+}
+
+function createInitialFriends(userId, memberId) {
+  const model = new FriendsModel({
+    user: userId,
+    member: memberId,
+  })
+  return model.save()
 }
 
 router
@@ -119,24 +150,37 @@ router
   .then(async (data) => {
     const { _id } = data
     await Promise.all([
-      ...(
-        uid ? RoomModel.updateOne({
-          origin: true,
-          "members.sid": uid
-        }, {
-          $set: { "members.$.user": _id }
-        })
-        : 
-        []
-      ),
-      RoomModel.updateOne({
-        origin: false,
-        type: 'SYSTEM',
-        "members.user": { $nin: [ _id ] }
-      }, {
-        $push: { members: { message: [], user: _id, status: 'OFFLINE' } }
-      })
+      // ...(
+      //   uid ? RoomModel.updateOne({
+      //     origin: true,
+      //     "members.sid": uid
+      //   }, {
+      //     $set: { "members.$.user": _id }
+      //   })
+      //   : 
+      //   []
+      // ),
+      // RoomModel.updateOne({
+      //   origin: false,
+      //   type: 'SYSTEM',
+      //   "members.user": { $nin: [ _id ] }
+      // }, {
+      //   $push: { members: { message: [], user: _id, status: 'OFFLINE' } }
+      // }),
+      createInitialMember(_id)
     ])
+    .then(([member]) => {
+      return createInitialFriends(_id, member._id)
+    })
+    .then(data => {
+      return UserModel.updateOne({
+        _id: data.user,
+      }, {
+        $set: {
+          friend_id: data._id
+        }
+      })
+    })
     return {
       data
     }

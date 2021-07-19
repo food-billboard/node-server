@@ -43,7 +43,8 @@ router
     hot:1,
     fans: 1,
     attention:1,
-    roles: 1
+    roles: 1,
+    friend_id: 1
   })
   .exec()
   .then(parseData)
@@ -52,8 +53,8 @@ router
     return data
   })
   .then(data => {
-    const { fans=[], attentions=[], password:_, avatar, roles, _id, ...nextData } = data
-    const token = signToken({ mobile, id: _id })
+    const { fans=[], attentions=[], password:_, avatar, roles, _id, friend_id, ...nextData } = data
+    const token = signToken({ mobile, id: _id, friend_id })
 
     //重置默认的koa状态码
     ctx.status = 200
@@ -81,20 +82,20 @@ router
           $set: { roles: [ 'USER' ] }
         })
       ] : []),
-      ...(uid ? [RoomModel.updateOne({
-        origin: false,
-        "members.sid": uid,
-        "members.user": null
-      }, {
-        $set: { "members.$.user": _id }
-      })] : []),
-      RoomModel.updateOne({
-        origin: true,
-        type: 'SYSTEM',
-        "members.user": { $ne: _id }
-      }, {
-        $push: { members: { message: [], user: _id, status: 'OFFLINE' } }
-      })
+      // ...(uid ? [RoomModel.updateOne({
+      //   origin: false,
+      //   "members.sid": uid,
+      //   "members.user": null
+      // }, {
+      //   $set: { "members.$.user": _id }
+      // })] : []),
+      // RoomModel.updateOne({
+      //   origin: true,
+      //   type: 'SYSTEM',
+      //   "members.user": { $ne: _id }
+      // }, {
+      //   $push: { members: { message: [], user: _id, status: 'OFFLINE' } }
+      // })
     ])
     return {
       data: omit(data, ['roles'])

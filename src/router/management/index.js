@@ -6,6 +6,7 @@ const Movie = require('./movie')
 const User = require('./user')
 const Instance = require('./instance')
 const Media = require('./media')
+const Chat = require('./chat')
 const { verifyTokenToData, dealErr, responseDataDeal } = require('@src/utils')
 
 const router = new Router()
@@ -35,5 +36,6 @@ router
 .use('/user', User.routes(), User.allowedMethods())
 .use('/instance', Instance.routes(), Instance.allowedMethods())
 .use('/media', Media.routes(), Media.allowedMethods())
+.use('/chat', Chat.routes(), Chat.allowedMethods())
 
 module.exports = router

@@ -201,7 +201,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get self userinfo test success -> ${COMMON_API}`, function() {
 
-      it(`get self userinfo test success and return the status of 304`, function(done) {
+      it.skip(`get self userinfo test success and return the status of 304`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -221,7 +221,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get self userinfo test success and hope return the status of 304 but the content has edited`, function(done) {
+      it.skip(`get self userinfo test success and hope return the status of 304 but the content has edited`, function(done) {
 
 
         Request
@@ -242,7 +242,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get self userinfo test success and hope return the status of 304 but the params of query is change`, function(done) {
+      it.skip(`get self userinfo test success and hope return the status of 304 but the params of query is change`, function(done) {
 
         const query = {
           _id: result._id.toString()

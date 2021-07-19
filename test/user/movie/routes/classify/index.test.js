@@ -139,7 +139,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get classify list success and return the status of 304`, async function() {
+      it.skip(`get classify list success and return the status of 304`, async function() {
 
         const query = {
           _id: result._id.toString()
@@ -177,7 +177,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get classify list success and hope return the status of 304 but the content has edited`, function(done) {
+      it.skip(`get classify list success and hope return the status of 304 but the content has edited`, function(done) {
 
         const query = {
           _id: result._id.toString()
@@ -201,7 +201,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get classify list success and hope return the status of 304 but the params of query is change`, function(done) {
+      it.skip(`get classify list success and hope return the status of 304 but the params of query is change`, function(done) {
 
         const query = {
           offset: 0,

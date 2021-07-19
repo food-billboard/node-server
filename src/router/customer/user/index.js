@@ -86,6 +86,7 @@ router
     attentions: 1,
     createdAt: 1,
     updatedAt: 1,
+    description: 1
   })
   .exec()
   .then(notFound)

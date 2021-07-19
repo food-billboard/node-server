@@ -5,19 +5,25 @@ const { log4Error } = require('@src/config/winston')
 const { FeedbackModel } = require('../../mongodb/mongo.lib')
 const { FEEDBACK_STATUS } = require('../../constant')
 
-function scheduleMethod() {
+/** 
+ * 将已处理的反馈删除
+ * 反馈时间超过30天
+*/
+
+function scheduleMethod({
+  test=false
+}={}) {
 
   console.log(chalk.yellow('反馈记录定时删除'))
 
-  FeedbackModel.deleteMany({
+  return FeedbackModel.deleteMany({
     updatedAt: {
       $gte: Day().subtract(30, 'd').toDate(),
     },
     status: FEEDBACK_STATUS.DEAL,
   })
   .catch(err => {
-    console.log(err)
-    log4Error({
+    !!test && log4Error({
       __request_log_id__: '反馈记录定时删除'
     }, err)
   })
@@ -29,5 +35,6 @@ const feedbackSchedule = async () => {
 }
 
 module.exports = {
-  feedbackSchedule
+  feedbackSchedule,
+  scheduleMethod
 }

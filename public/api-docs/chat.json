@@ -13,8 +13,32 @@
   "basePath": "/v2",
   "tags": [
     {
-      "name": "chat",
-      "description": "聊天相关",
+      "name": "connect",
+      "description": "连接相关",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "member",
+      "description": "成员相关",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "room",
+      "description": "成员相关",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "message",
+      "description": "消息相关",
       "externalDocs": {
         "description": "Find out more",
         "url": "http://swagger.io"
@@ -26,52 +50,159 @@
     "http"
   ],
   "paths": {
-    "/api/customer/barrage": {
-      "get": {
+    "/api/chat/connect": {
+      "post": {
         "tags": [
-          "barrage"
+          "connect"
         ],
-        "summary": "获取电影的弹幕列表",
+        "summary": "连接",
         "description": "",
-        "operationId": "customer_get_barrage",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
+        "operationId": "chat_connect_post_connect",
         "produces": [
           "application/xml",
           "application/json"
         ],
         "parameters": [
           {
-            "in": "query",
-            "name": "_id",
-            "description": "电影id",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "timeStart",
-            "description": "弹幕出现在视频中的起始时间(ms)",
-            "type": "number"
-          },
-          {
-            "in": "query",
-            "name": "process",
-            "description": "获取的弹幕时长(ms)",
-            "type": "number"
+            "name": "temp_user_id",
+            "in": "body",
+            "type": "string",
+            "description":"未登录情况下，使用它充当游客id"
           }
         ],
         "responses": {
           "200": {
             "description": "成功",
             "schema": {
-              "type": "array",
-              "name": "response",
-              "items": {
-                "$ref": "#/definitions/customer_get_barrage"
-              }
+              "$ref": "#/definitions/chat_connect_post_connect"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/chat/disconnect": {
+      "post": {
+        "tags": [
+          "connect"
+        ],
+        "summary": "断开连接",
+        "description": "",
+        "operationId": "chat_connect_post_disconnect",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/chat/member": {
+      "get": {
+        "tags": [
+          "member"
+        ],
+        "summary": "获取聊天室成员列表",
+        "description": "",
+        "operationId": "chat_member_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description":"房间id"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "type": "integer",
+            "description":"当前页"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "type": "integer",
+            "description":"每页数量"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/chat_member_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/chat/message": {
+      "get": {
+        "tags": [
+          "message"
+        ],
+        "summary": "获取聊天室消息列表",
+        "description": "",
+        "operationId": "chat_message_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "description":"房间id"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "type": "integer",
+            "description":"当前页"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "type": "integer",
+            "description":"每页数量"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/chat_message_get"
             }
           }
         },
@@ -86,46 +217,73 @@
       },
       "put": {
         "tags": [
-          "barrage"
+          "message"
         ],
-        "summary": "发送电影弹幕",
+        "summary": "读取聊天室消息",
         "description": "",
-        "operationId": "customer_put_barrage",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
+        "operationId": "chat_message_put",
         "produces": [
           "application/xml",
           "application/json"
         ],
         "parameters": [
           {
-            "in": "body",
             "name": "_id",
-            "description": "电影id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "in": "body",
-            "name": "content",
-            "description": "弹幕内容",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "time",
-            "description": "弹幕出现在视频中的时间",
-            "required": true,
             "type": "string",
-            "format":"date-time"
+            "required": true,
+            "description":"房间id 或 消息id(多个用,分隔)"
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "description":"id类型(0 , 1房间)"
           }
         ],
         "responses": {
           "200": {
-            "description": "发送成功"
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "message"
+        ],
+        "summary": "删除聊天室消息",
+        "description": "",
+        "operationId": "chat_message_delete",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"房间id 或 消息id(多个用,分隔)"
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "description":"id类型(0 , 1房间)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
           }
         },
         "security": [
@@ -139,26 +297,269 @@
       },
       "post": {
         "tags": [
-          "barrage"
+          "message"
         ],
-        "summary": "电影弹幕点赞",
+        "summary": "发送消息",
         "description": "",
-        "operationId": "customer_post_barrage",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
+        "operationId": "chat_message_post",
         "produces": [
           "application/xml",
           "application/json"
         ],
         "parameters": [
           {
-            "in": "body",
             "name": "_id",
-            "description": "弹幕id",
+            "in": "body",
+            "type": "string",
             "required": true,
-            "type":"string"
+            "description":"房间id"
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "description":"消息类型(IMAGE, AUDIO, TEXT, VIDEO)",
+            "required": true
+          },
+          {
+            "name": "content",
+            "in": "body",
+            "type": "string",
+            "description":"消息(文本 | 媒体id)",
+            "required": true
+          },
+          {
+            "name": "point_to",
+            "in": "body",
+            "type": "string",
+            "description":"@用户id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/chat/message/detail": {
+      "get": {
+        "tags": [
+          "message"
+        ],
+        "summary": "获取聊天室消息详情",
+        "description": "",
+        "operationId": "chat_message_detail_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description":"房间id"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "type": "integer",
+            "description":"当前页"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "type": "integer",
+            "description":"每页数量"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "type": "string",
+            "description":"起始时间"
+          },
+          {
+            "name": "messageId",
+            "in": "query",
+            "type": "string",
+            "description":"消息id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/chat_message_detail_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/chat/room": {
+      "get": {
+        "tags": [
+          "room"
+        ],
+        "summary": "获取聊天室列表",
+        "description": "",
+        "operationId": "chat_room_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "description":"房间id"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "type": "string",
+            "description":"房间类型(SYSTEM | USER)"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "type": "integer",
+            "description":"是否为系统聊天室(0否1是)"
+          },
+          {
+            "name": "create_user",
+            "in": "query",
+            "type": "string",
+            "description":"创建用户"
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "type": "string",
+            "description":"文字搜索(名称，描述)"
+          },
+          {
+            "name": "members",
+            "in": "query",
+            "type": "string",
+            "description":"聊天室成员id()"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "type": "integer",
+            "description":"当前页"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "type": "integer",
+            "description":"每页数量"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/chat_room_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "room"
+        ],
+        "summary": "创建聊天室",
+        "description": "",
+        "operationId": "chat_room_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "description":"房间id"
+          },
+          {
+            "name": "members",
+            "in": "body",
+            "type": "string",
+            "description":"成员id(多个用,分隔, 已存在房间不需要此参数)"
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "description":"房间类型(CHAT GROUP_CHAT, 已存在房间不需要此参数)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "room"
+        ],
+        "summary": "退出聊天室",
+        "description": "",
+        "operationId": "chat_room_put",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "description":"房间id(参数all不为1是必填)"
+          },
+          {
+            "name": "all",
+            "in": "body",
+            "type": "string",
+            "description":"是否全部退出(0否, 1是)"
           }
         ],
         "responses": {
@@ -177,26 +578,22 @@
       },
       "delete": {
         "tags": [
-          "barrage"
+          "room"
         ],
-        "summary": "电影弹幕取消点赞",
+        "summary": "删除聊天室",
         "description": "",
-        "operationId": "customer_delete_barrage",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
+        "operationId": "chat_room_delete",
         "produces": [
           "application/xml",
           "application/json"
         ],
         "parameters": [
           {
-            "in":"query",
             "name": "_id",
-            "description": "弹幕id",
+            "in": "query",
+            "type": "string",
             "required": true,
-            "type":"string"
+            "description":"房间id"
           }
         ],
         "responses": {
@@ -214,14 +611,88 @@
         ]
       }
     },
-    "/api/customer/manage": {
-      "get": {
+    "/api/chat/room/join": {
+      "post": {
         "tags": [
-          "manage"
+          "room"
         ],
-        "summary": "获取用户信息",
-        "description": "获取用户的基本信息",
-        "operationId": "customer_get_manage",
+        "summary": "进入聊天室",
+        "description": "",
+        "operationId": "chat_room_join_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"房间id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "room"
+        ],
+        "summary": "退出聊天室",
+        "description": "",
+        "operationId": "chat_room_join_delete",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"房间id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "delete": {
+      "delete": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "删除消息",
+        "description": "",
+        "operationId": "delete",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
         "produces": [
           "application/xml",
           "application/json"
@@ -229,287 +700,841 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "成功",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/customer_get_manage"
-              }
-            }
+            "description": "成功"
           }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
+        }
       }
     },
-    "/api/customer/manage/attention": {
+    "get": {
       "get": {
         "tags": [
-          "manage"
+          "chat"
         ],
-        "summary": "用户关注",
-        "description": "获取用户关注的人员列表",
-        "operationId": "customer_get_manage_attention",
+        "summary": "获取消息",
+        "description": "",
+        "operationId": "get",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
         "produces": [
           "application/xml",
           "application/json"
         ],
-        "parameters": [
-          {
-            "name": "currPage",
-            "in": "query",
-            "description": "当前页",
-            "type": "integer"
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "description": "每页数量",
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "schema": {
-              "type": "object",
-              "$ref":"#/definitions/customer_get_manage_attention"
-            }
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "manage"
-        ],
-        "summary": "关注用户",
-        "description": "关注用户",
-        "operationId": "customer_put_manage_attention",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "_id",
-            "in": "body",
-            "description": "用户id",
-            "required": true
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "成功"
           }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "manage"
-        ],
-        "summary": "取消关注用户",
-        "description": "取消关注用户",
-        "operationId": "customer_delete_manage_attention",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "_id",
-            "in": "query",
-            "description": "用户id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功"
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
+        }
       }
     },
-    "/api/customer/manage/black": {
+    "put": {
+      "put": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "读消息",
+        "description": "",
+        "operationId": "put",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "post": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "发送消息",
+        "description": "",
+        "operationId": "post",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "message": {
       "get": {
         "tags": [
-          "manage"
+          "chat"
         ],
-        "summary": "用户黑名单",
-        "description": "获取用户黑名单的人员列表",
-        "operationId": "customer_get_manage_black",
+        "summary": "消息详情",
+        "description": "",
+        "operationId": "message",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
         "produces": [
           "application/xml",
           "application/json"
         ],
-        "parameters": [
-          {
-            "name": "currPage",
-            "in": "query",
-            "description": "当前页",
-            "type": "integer"
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "description": "每页数量",
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "schema": {
-              "type": "object",
-              "$ref":"#/definitions/customer_get_manage_attention"
-            }
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "manage"
-        ],
-        "summary": "拉黑用户",
-        "description": "拉黑用户",
-        "operationId": "customer_put_manage_black",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "_id",
-            "in": "body",
-            "description": "用户id",
-            "required": true
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "成功"
           }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "manage"
-        ],
-        "summary": "取消拉黑用户",
-        "description": "取消拉黑用户",
-        "operationId": "customer_delete_manage_black",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "_id",
-            "in": "query",
-            "description": "用户id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功"
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      }
-    }
-  },
-  "securityDefinitions": {
-    "petstore_auth": {
-      "type": "oauth2",
-      "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-      "flow": "implicit",
-      "scopes": {
-        "write:pets": "modify pets in your account",
-        "read:pets": "read your pets"
+        }
       }
     },
-    "api_key": {
-      "type": "apiKey",
-      "name": "api_key",
-      "in": "header"
+    "create_room": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "创建聊天室",
+        "description": "",
+        "operationId": "create_room",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "join": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "加入聊天室",
+        "operationId": "join",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "leave": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "离开聊天室",
+        "description": "离开聊天室",
+        "operationId": "leave",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "disconnecting": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "断开连接",
+        "description": "断开连接",
+        "operationId": "disconnecting",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "remove_room": {
+      "delete": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "删除聊天室",
+        "description": "删除聊天室",
+        "operationId": "remove_room",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "quit_room": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "退出聊天室",
+        "description": "退出聊天室",
+        "operationId": "quit_room",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "connect_user": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "连接保存信息",
+        "description": "连接保存信息",
+        "operationId": "connect_user",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "room": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "房间列表",
+        "description": "房间列表",
+        "operationId": "room",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "invite_friend": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "好友申请",
+        "description": "好友申请",
+        "operationId": "invite_friend",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "agree_friend": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "同意好友申请",
+        "description": "同意好友申请",
+        "operationId": "agree_friend",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "disagree_friend": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "拒绝好友申请",
+        "description": "拒绝好友申请",
+        "operationId": "disagree_friend",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "invite_friend_list": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "好友申请列表",
+        "description": "好友申请列表",
+        "operationId": "invite_friend_list",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
     }
   },
   "definitions": {
-    "media_content": {
+    "chat_member_get": {
       "type": "object",
-      "description": "评论内容",
       "properties": {
-        "text": {
-          "type": "string",
-          "description": "文字内容"
+        "success": {
+          "type": "boolean"
         },
-        "image": {
-          "type":"array",
-          "description": "图片",
-          "items": {
-            "type":"string"
-          }
-        },
-        "video": {
-          "type":"array",
-          "description": "视频",
-          "items": {
-            "type":"string"
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "user": {
+                        "type": "object",
+                        "description": "用户信息",
+                        "properties": {
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          },
+                          "_id": {
+                            "type": "string"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
+                          },
+                          "friend_id": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "_id": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "状态",
+                        "enum": [ "ONLINE", "OFFLINE" ]
+                      },
+                      "sid": {
+                        "type": "string",
+                        "description": "用户id"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
+      },
+      "xml": {
+        "name": "chat_member_get"
+      }
+    },
+    "chat_message_get" : {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "房间类型",
+                    "enum": [ "GROUP_CHAT", "CHAT", "SYSTEM" ]
+                  },
+                  "create_user": {
+                    "type": "object",
+                    "description": "用户信息",
+                    "properties": {
+                      "username": {
+                        "type": "string",
+                        "description": "用户名"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "member": {
+                        "type": "string",
+                        "description": "成员id"
+                      },
+                      "_id": {
+                        "type": "string"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "头像"
+                      }
+                    }
+                  },
+                  "info": {
+                    "type": "object",
+                    "description": "房间信息",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "房间名称"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "房间描述"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "房间海报"
+                      }
+                    }
+                  },
+                  "message_info": {
+                    "type": "object",
+                    "description": "用户信息",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string",
+                        "description": "文本"
+                      },
+                      "image": {
+                        "type": "string",
+                        "description": "图片"
+                      },
+                      "poster": {
+                        "type": "视频海报"
+                      },
+                      "video": {
+                        "type": "string",
+                        "description": "视频"
+                      },
+                      "media_type": {
+                        "type": "string",
+                        "description": "媒体类型",
+                        "enum": [ "IMAGE", "VIDEO", "TEXT", "AUDIO" ]
+                      }
+                    }
+                  },
+                  "un_read_message_count" : {
+                    "type": "integer",
+                    "description": "未读消息数量"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "chat_message_get"
+      }
+    },
+    "chat_message_detail_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "room": {
+                  "type":"object",
+                  "properties": {
+                    "_id": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "description": "房间信息",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "房间名称"
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "房间描述"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "description": "房间海报"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "user_info": {
+                        "type": "object",
+                        "description": "用户信息",
+                        "properties": {
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "描述"
+                          },
+                          "_id": {
+                            "type": "string"
+                          },
+                          "member": {
+                            "type": "string"
+                          },
+                          "friend_id": {
+                            "type": "string"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
+                          }
+                        }
+                      },
+                      "media_type": {
+                        "type": "string",
+                        "description": "媒体类型",
+                        "enum": [ "IMAGE", "VIDEO", "TEXT", "AUDIO" ]
+                      },
+                      "point_to": {
+                        "type": "string",
+                        "description": "@"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "content": {
+                        "type": "object",
+                        "description": "最新消息内容(只会包含下面属性的一项---视频会包含video和poster两项)",
+                        "properties": {
+                          "video": {
+                            "type": "string",
+                            "description": "视频地址"
+                          },
+                          "poster": {
+                            "type": "string",
+                            "description": "视频海报地址"
+                          },
+                          "image": {
+                            "type": "string",
+                            "description": "图片"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "文本"
+                          },
+                          "audio": {
+                            "type": "string",
+                            "description": "音频"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "chat_message_detail_get"
+      }
+    },
+    "chat_connect_post_connect" :{
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "string",
+                      "description": "登录下存在, 成员id"
+                    },
+                    "temp_user_id": {
+                      "type": "string",
+                      "description": "游客id"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "chat_connect_post_connect"
+      }
+    },
+    "chat_room_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "房间类型",
+                        "enum": [ "GROUP_CHAT", "CHAT", "SYSTEM" ]
+                      },
+                      "create_user": {
+                        "type": "object",
+                        "description": "用户信息",
+                        "properties": {
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "描述"
+                          },
+                          "member": {
+                            "type": "string",
+                            "description": "成员id"
+                          },
+                          "_id": {
+                            "type": "string"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
+                          }
+                        }
+                      },
+                      "info": {
+                        "type": "object",
+                        "description": "房间信息",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "房间名称"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "房间描述"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "房间海报"
+                          }
+                        }
+                      },
+                      "members": {
+                        "type": "integer",
+                        "description": "成员数量"
+                      },
+                      "is_delete": {
+                        "type": "boolean",
+                        "description": "是否删除"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "online_members": {
+                        "type": "integer",
+                        "format": "在线成员数量"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "chat_room_get"
       }
     }
   },

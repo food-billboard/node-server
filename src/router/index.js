@@ -1,5 +1,6 @@
 const Router = require('@koa/router')
 const User = require('./user')
+const Chat = require('./chat')
 const Customer = require('./customer')
 const Management = require('./management')
 const Manage = require('./manage')
@@ -41,6 +42,7 @@ router
 .use('/user', User.routes(), User.allowedMethods())
 .use('/customer', Customer.routes(), Customer.allowedMethods())
 .use('/manage', Management.routes(), Management.allowedMethods())
+.use('/chat', Chat.routes(), Chat.allowedMethods())
 .use('/backend', Manage.routes(), Manage.allowedMethods())
 
 module.exports = router

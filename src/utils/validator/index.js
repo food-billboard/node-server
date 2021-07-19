@@ -77,7 +77,7 @@ const Params = {
           result
         })
         const _result = realSan.every((san, index) => {
-          const _result = san(result)
+          const _result = san(result, origin)
           return abandonFn((data) => {
             result = data
           }, _result, index != realSan.length - 1)
@@ -173,7 +173,7 @@ const Params = {
   validate(origin, ...validators) {
     let errs = []
     let response = validators.every(validate => {
-      const { name, validator=[], type=[] } = validate
+      const { name, validator=[], type=[], multipart=false } = validate
       let data
       //多层次验证
       if(name.includes('.')) {
@@ -185,13 +185,13 @@ const Params = {
             data = data[deep]
           }
           return !!data
-        })) {
+        }) && !multipart) {
           errs.push(name)
           return false
         }
       }else {
         data = origin[name]
-        if(data === undefined) {
+        if(data === undefined && !multipart) {
           errs.push(name)
           return false
         }

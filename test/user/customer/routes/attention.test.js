@@ -14,13 +14,14 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.a('object').and.that.includes.all.keys('attentions')
   expect(target.attentions).to.be.a('array')
   target.attentions.forEach(item => {
-    expect(item).to.be.a('object').and.includes.all.keys('avatar', 'username', '_id')
+    expect(item).to.be.a('object').and.includes.all.keys('avatar', 'username', '_id', 'description')
     //avatar
     expect(item).to.have.a.property('avatar').and.satisfy(function(target) {
       return target == null ? true : ObjectId.isValid(target)
     })
     //username
     expect(item).to.have.a.property('username').and.is.a('string')
+    expect(item).to.have.a.property('description').and.is.a('string')
     //_id
     expect(item).to.have.a.property('_id').and.is.a('string').that.satisfy(function(target) {
       return ObjectId.isValid(target)
@@ -106,7 +107,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get another user attention success and return the status of 304`, function(done) {
+      it.skip(`get another user attention success and return the status of 304`, function(done) {
 
         const query = {
           _id: result._id.toString()
