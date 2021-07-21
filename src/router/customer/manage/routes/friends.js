@@ -184,17 +184,35 @@ router
   .exec()
   .then(notFound)
   .then(data => {
-    return Promise.all([
-      FriendsModel.updateOne({
-        user: id,
-        $where: "this.friends.length < 9999"
-      }, {
-        $push: { friends: { _id, timestamps: Date.now() } },
-        // ...(data && data._id ? { $set: { member: data._id } } : {})
-      }, {
-        upsert: true 
-      })
-    ])
+    const selfFriendId = data._id 
+    return FriendsModel.updateOne({
+      _id,
+      $where: "this.friends.length < 9999",
+      friends: {
+        $elemMatch: {
+          _id: {
+            $nin: [
+              selfFriendId
+            ]
+          }
+        }
+      }
+    }, {
+      $push: { friends: { _id: selfFriendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } },
+    }, {
+      upsert: true 
+    })
+  })
+  .then(data => {
+    const isExists = !!data && data.nModified == 1
+    return FriendsModel.updateOne({
+      user: id,
+      $where: "this.friends.length < 9999"
+    }, {
+      $push: { friends: { _id, timestamps: Date.now(), status: isExists ? FRIEND_STATUS.NORMAL : FRIEND_STATUS.TO_AGREEING } },
+    }, {
+      upsert: true 
+    })
   })
   .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))
@@ -225,7 +243,9 @@ router
         status: {
           $nin: [
             FRIEND_STATUS.TO_AGREE,
-            FRIEND_STATUS.DIS_AGREE
+            FRIEND_STATUS.DIS_AGREE,
+            FRIEND_STATUS.TO_AGREEING,
+            FRIEND_STATUS.DIS_AGREEED,
           ] 
         }
       } 

@@ -2500,8 +2500,8 @@
                       },
                       "status": {
                         "type": "string",
-                        "description": "状态",
-                        "enum": [ "TO_AGREE", "DIS_AGREE", "AGREE" ]
+                        "description": "状态(normal仅显示最近30天)",
+                        "enum": [ "TO_AGREE", "DIS_AGREE", "AGREE", "NORMAL" ]
                       }
                     }
                   }

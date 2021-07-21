@@ -9,6 +9,8 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
+  console.log(target.friends, 244444)
+
   expect(target).to.be.a('object').and.that.includes.all.keys('friends')
   target.friends.forEach(item => {
     expect(item).to.be.a('object').and.that.includes.any.keys('avatar', 'username', '_id', 'description', 'friend_id', 'createdAt', 'status')
@@ -112,49 +114,87 @@ describe(`${COMMON_API} test`, function() {
           {
             timestamps: Date.now(),
             _id: selfFriendId,
-            status: FRIEND_STATUS.TO_AGREE
+            status: FRIEND_STATUS.NORMAL
           },
         ]
       })
-      return Promise.all([
-        model.save(),
-        FriendsModel.updateOne({
-          _id: agreeFriendId
-        }, {
-          $set: {
-            friends:[{
-              timestamps: 100000,
-              _id: selfFriendId,
-              status: FRIEND_STATUS.AGREE
-            }]
-          }
-        }),
-        FriendsModel.updateOne({
-          _id: disagreeFriendId
-        }, {
-          $set: {
-            friends:[{
-              timestamps: 100001,
-              _id: selfFriendId,
-              status: FRIEND_STATUS.DIS_AGREE
-            }]
-          }
-        }),
-        FriendsModel.updateOne({
-          _id: normalFriendId
-        }, {
-          $set: {
-            friends:[{
-              timestamps: 100002,
-              _id: selfFriendId,
-              status: FRIEND_STATUS.TO_AGREE
-            }]
-          }
-        }),
-      ])
+      return model.save()
     })
-    .then(([data]) => {
+    .then(data => {
       friendId = data._id
+      return FriendsModel.updateOne({
+        _id: selfFriendId
+      }, {
+        $set: {
+          friends:[{
+            timestamps: Date.now(),
+            _id: disagreeFriendId,
+            status: FRIEND_STATUS.DIS_AGREEED
+          }, {
+            timestamps: Date.now(),
+            _id: friendId,
+            status: FRIEND_STATUS.DIS_AGREE
+          }, {
+            timestamps: Date.now(),
+            _id: agreeFriendId,
+            status: FRIEND_STATUS.AGREE
+          }, {
+            timestamps: Date.now(),
+            _id: normalFriendId,
+            status: FRIEND_STATUS.TO_AGREE
+          }]
+        }
+      })
+      // return Promise.all([
+      //   FriendsModel.updateOne({
+      //     _id: selfFriendId
+      //   }, {
+      //     $set: {
+      //       friends:[{
+      //         timestamps: Date.now(),
+      //         _id: disagreeFriendId,
+      //         status: FRIEND_STATUS.DIS_AGREEED
+      //       }, {
+      //         timestamps: Date.now(),
+      //         _id: disagreeFriendId,
+      //         status: FRIEND_STATUS.DIS_AGREEED
+      //       }]
+      //     }
+      //   }),
+      //   FriendsModel.updateOne({
+      //     _id: agreeFriendId
+      //   }, {
+      //     $set: {
+      //       friends:[{
+      //         timestamps: 100000,
+      //         _id: selfFriendId,
+      //         status: FRIEND_STATUS.AGREE
+      //       }]
+      //     }
+      //   }),
+      //   FriendsModel.updateOne({
+      //     _id: disagreeFriendId
+      //   }, {
+      //     $set: {
+      //       friends:[{
+      //         timestamps: 100001,
+      //         _id: selfFriendId,
+      //         status: FRIEND_STATUS.DIS_AGREE
+      //       }]
+      //     }
+      //   }),
+      //   FriendsModel.updateOne({
+      //     _id: normalFriendId
+      //   }, {
+      //     $set: {
+      //       friends:[{
+      //         timestamps: 100002,
+      //         _id: selfFriendId,
+      //         status: FRIEND_STATUS.TO_AGREE
+      //       }]
+      //     }
+      //   }),
+      // ])
     })
     .catch(err => {
       console.log('oops: ', err)
@@ -259,18 +299,20 @@ describe(`${COMMON_API} test`, function() {
           }
           responseExpect(obj, target => {
             expect(target.friends.length).not.be.equal(0)
-            const { agree, normal, disagree } = target.friends.reduce((acc, cur) => {
+            const { agree, disagree, to_agree, self_disagree } = target.friends.reduce((acc, cur) => {
               const { friend_id } = cur 
               if(agreeFriendId.equals(friend_id)) acc.agree = true 
-              if(friendId.equals(friend_id)) acc.normal = true 
-              if(disagreeFriendId.equals(friend_id)) acc.disagree = true 
+              if(friendId.equals(friend_id)) acc.disagree = true 
+              if(disagreeFriendId.equals(friend_id)) acc.self_disagree = true 
+              if(normalFriendId.equals(friend_id)) acc.to_agree = true 
               return acc 
             }, {
               agree: false,
-              normal: false,
-              disagree: false 
+              disagree: false,
+              to_agree: false,
+              self_disagree: false 
             })
-            expect(!!agree && !!normal && !!disagree).to.be.true 
+            expect(!!agree && !!disagree && !!to_agree && !!self_disagree).to.be.true 
           })
           done()
         })
@@ -286,13 +328,22 @@ describe(`${COMMON_API} test`, function() {
     describe(`post the agree user for friends success test -> ${COMMON_API}`, function() {
 
       before(function(done) {
-        FriendsModel.updateMany({
-          _id: friendId
-        }, {
-          $set: {
-            friends: [ { _id: selfFriendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
-          }
-        })
+        Promise.all([
+          FriendsModel.updateMany({
+            _id: friendId
+          }, {
+            $set: {
+              friends: [ { _id: selfFriendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
+            }
+          }),
+          FriendsModel.updateMany({
+            _id: selfFriendId
+          }, {
+            $set: {
+              friends: [ { _id: friendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREEING } ]
+            }
+          })
+        ])
         .then(function() {
           done()
         })
@@ -302,28 +353,50 @@ describe(`${COMMON_API} test`, function() {
       })
 
       after(function(done) {
-        FriendsModel.findOne({
-          _id: friendId,
-          friends: {
-            $elemMatch: {
-              $and: [
-                {
-                  "_id": selfFriendId
-                },
-                {
-                  "status": FRIEND_STATUS.AGREE
-                }
-              ]
+        Promise.all([
+          FriendsModel.findOne({
+            _id: friendId,
+            friends: {
+              $elemMatch: {
+                $and: [
+                  {
+                    "_id": selfFriendId
+                  },
+                  {
+                    "status": FRIEND_STATUS.AGREE
+                  }
+                ]
+              }
             }
-          }
-        })
-        .select({
-          _id: 0,
-          friends: 1
-        })
-        .exec()
-        .then((user) => {
-          expect(!!user).to.be.true 
+          })
+          .select({
+            _id: 0,
+            friends: 1
+          })
+          .exec(),
+          FriendsModel.findOne({
+            _id: selfFriendId,
+            friends: {
+              $elemMatch: {
+                $and: [
+                  {
+                    "_id": friendId
+                  },
+                  {
+                    "status": FRIEND_STATUS.NORMAL
+                  }
+                ]
+              }
+            }
+          })
+          .select({
+            _id: 0,
+            friends: 1
+          })
+          .exec()
+        ])
+        .then(([user, self]) => {
+          expect(!!user && !!self).to.be.true 
           done()
         })
         .catch(err => {
@@ -419,13 +492,22 @@ describe(`${COMMON_API} test`, function() {
     describe(`cancel agree the new user for friends success test -> ${COMMON_API}`, function() {
 
       before(function(done) {
-        FriendsModel.updateMany({
-          _id: friendId,
-        }, {
-          $set: {
-            friends: [ { _id: selfFriendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
-          }
-        })
+        Promise.all([
+          FriendsModel.updateMany({
+            _id: friendId,
+          }, {
+            $set: {
+              friends: [ { _id: selfFriendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
+            }
+          }),
+          FriendsModel.updateMany({
+            _id: selfFriendId,
+          }, {
+            $set: {
+              friends: [ { _id: friendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREEING } ]
+            }
+          })
+        ])
         .then(function() {
           done()
         })
@@ -435,22 +517,38 @@ describe(`${COMMON_API} test`, function() {
       })
 
       after(async function() {
-        const res = await FriendsModel.findOne({
-          _id: friendId,
-          friends: {
-            $elemMatch: {
-              _id: selfFriendId,
-              status: FRIEND_STATUS.DIS_AGREE
+        const res = await Promise.all([
+          FriendsModel.findOne({
+            _id: friendId,
+            friends: {
+              $elemMatch: {
+                _id: selfFriendId,
+                status: FRIEND_STATUS.DIS_AGREEED
+              }
             }
-          }
-        })
-        .select({
-          _id: 1,
-          friends: 1
-        })
-        .exec()
-        .then(user => {
-          return !!user
+          })
+          .select({
+            _id: 1,
+            friends: 1
+          })
+          .exec(),
+          FriendsModel.findOne({
+            _id: selfFriendId,
+            friends: {
+              $elemMatch: {
+                _id: friendId,
+                status: FRIEND_STATUS.DIS_AGREE
+              }
+            }
+          })
+          .select({
+            _id: 1,
+            friends: 1
+          })
+          .exec()
+        ])
+        .then(([user, self]) => {
+          return !!user && !!self
         })
         .catch(err => {
           console.log('oops: ', err)

@@ -108,10 +108,19 @@ const BEHAVIOUR_URL_TYPE_MAP = {
 }
 
 const FRIEND_STATUS = {
+  //正常
   NORMAL: 'NORMAL',
+  //黑名单
   BLACK: 'BLACK',
+  //等待同意
   TO_AGREE: 'TO_AGREE',
+  //等待中(向他人发出申请时自己的状态)
+  TO_AGREEING: "TO_AGREEING",
+  //拒绝
   DIS_AGREE: "DIS_AGREE",
+  //被拒绝
+  DIS_AGREEED: "DIS_AGREEED",
+  //同意(即将变成NORMAL)
   AGREE: "AGREE"
 }
 

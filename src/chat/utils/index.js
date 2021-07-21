@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { nanoid } = require('nanoid')
 const { Types: { ObjectId } } = require('mongoose')
-const { FriendsModel } = require('@src/utils')  
+const { FriendsModel, RoomModel, notFound } = require('@src/utils')  
 const { request } = require('./request')
 
 const isTempUserExists = (data) => {
@@ -91,6 +91,32 @@ const findFriends = async (_id) => {
   return data 
 }
 
+const findMembers = async (_id) => {
+  const data = await RoomModel.findOne({
+    _id: ObjectId(_id)
+  })
+  .select({
+    _id: 1,
+    members: 1,
+  })
+  .populate({
+    path: 'members',
+    select: {
+      _id: 1,
+      sid: 1,
+    }
+  })
+  .exec()
+  .then(notFound)
+  .then(data => {
+    return data.members
+  })
+  .catch(err => {
+    return []
+  })
+  return data
+}
+
 module.exports = {
   connection,
   request,
@@ -100,5 +126,6 @@ module.exports = {
   getAllSocketsId,
   getSocketId,
   getSocket,
-  findFriends
+  findFriends,
+  findMembers
 }

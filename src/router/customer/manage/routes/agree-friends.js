@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, FriendsModel, MemberModel, FRIEND_STATUS, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
+const { verifyTokenToData, UserModel, FriendsModel, FRIEND_STATUS, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
 
@@ -44,28 +44,27 @@ router
   })
 
   const [, token] = verifyTokenToData(ctx)
-  const { friend_id } = token
+  const { id } = token
 
   const data = await FriendsModel.aggregate([
     {
       $match: {
-        friends: { 
-          $elemMatch: { 
-            $and: [
-              {
-                _id: ObjectId(friend_id),
-              },
-              {
-                status: {
-                  $in: [
-                    FRIEND_STATUS.TO_AGREE,
-                    FRIEND_STATUS.AGREE,
-                    FRIEND_STATUS.DIS_AGREE
-                  ]
-                }
-              }
-            ]
-          } 
+        user: ObjectId(id),
+      }
+    },
+    {
+      $unwind: "$friends"
+    },
+    {
+      $match: {
+        "friends.status": {
+          $in: [
+            FRIEND_STATUS.TO_AGREE,
+            FRIEND_STATUS.AGREE,
+            FRIEND_STATUS.DIS_AGREE,
+            FRIEND_STATUS.DIS_AGREEED,
+            FRIEND_STATUS.NORMAL,
+          ]
         }
       }
     },
@@ -76,35 +75,25 @@ router
       $limit: pageSize
     },
     {
-      $unwind: "$friends"
+      $lookup: {
+        from: 'friends', 
+        localField: 'friends._id', 
+        foreignField: '_id', 
+        as: 'friend_origin_data'
+      }
     },
     {
-      $match: {
-        $and: [
-          {
-            "friends._id": ObjectId(friend_id),
-          },
-          {
-            "friends.status": {
-              $in: [
-                FRIEND_STATUS.TO_AGREE,
-                FRIEND_STATUS.AGREE,
-                FRIEND_STATUS.DIS_AGREE
-              ]
-            }
-          }
-        ]
-      }
+      $unwind: "$friend_origin_data"
     },
     {
       $lookup: {
         from: 'users', 
-        let: { customFields: "$user" },
+        let: { user_id: "$friend_origin_data.user" },
         pipeline: [  
           {
             $match: {
               $expr: {
-                "$eq": [ "$_id", "$$customFields" ]
+                "$eq": [ "$_id", "$$user_id" ]
               },
             }
           },
@@ -139,7 +128,7 @@ router
     },
     {
       $project: {
-        friend_id: "$_id",
+        friend_id: "$friends._id",
         avatar: "$friends_info.avatar",
         username: "$friends_info.username",
         _id: "$friends_info._id",
@@ -181,7 +170,7 @@ router
             _id: friend_id
           },
           {
-            status: FRIEND_STATUS.TO_AGREE
+            status: FRIEND_STATUS.TO_AGREEING
           }
         ]
       } 
@@ -216,19 +205,21 @@ router
         }
       }, {
         $set: { 
-          "friends.$.status": FRIEND_STATUS.AGREE
+          "friends.$.status": FRIEND_STATUS.AGREE,
+          "friends.$.timestamps": Date.now()
         }
       }),
       FriendsModel.updateOne({
         user: id,
-        $where: "this.friends.length < 9999"
+        friends: { 
+          $elemMatch: { 
+            _id
+          } 
+        }
       }, {
-        $addToSet: {
-          friends: {
-            _id,
-            timestamps: Date.now(),
-            status: FRIEND_STATUS.NORMAL
-          }
+        $set: { 
+          "friends.$.status": FRIEND_STATUS.NORMAL,
+          "friends.$.timestamps": Date.now()
         }
       })
     ])
@@ -254,16 +245,16 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { friend_id } = token
 
-  const data = await FriendsModel.findOneAndUpdate({
-    _id,
+  const data = await FriendsModel.updateOne({
+    _id: ObjectId(friend_id),
     friends: { 
       $elemMatch: { 
         $and: [
           {
-            _id: ObjectId(friend_id),
+            _id,
           },
           {
-            status: FRIEND_STATUS.TO_AGREE
+            status: FRIEND_STATUS.TO_AGREEING
           }
         ]
       } 
@@ -273,10 +264,32 @@ router
       "friends.$.status": FRIEND_STATUS.DIS_AGREE
     }
   })
-  .select({
-    _id: 1
+  .then(data => {
+    if(!data || data.nModified === 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+    return FriendsModel.findOneAndUpdate({
+      _id,
+      friends: { 
+        $elemMatch: { 
+          $and: [
+            {
+              _id: ObjectId(friend_id),
+            },
+            {
+              status: FRIEND_STATUS.TO_AGREE
+            }
+          ]
+        } 
+      }
+    }, {
+      $set: { 
+        "friends.$.status": FRIEND_STATUS.DIS_AGREEED
+      }
+    })
+    .select({
+      _id: 1
+    })
+    .exec()
   })
-  .exec()
   .then(notFound)
   .then(_ => ({ data: _id }))
   .catch(dealErr(ctx))

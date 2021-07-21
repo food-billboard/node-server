@@ -182,7 +182,12 @@ async function isMembersValid(members, mime, status) {
                         _id,
                       },
                       {
-                        status: FRIEND_STATUS.NORMAL
+                        status: {
+                          $in: [
+                            FRIEND_STATUS.NORMAL,
+                            FRIEND_STATUS.AGREE
+                          ]
+                        }
                       }
                     ]
                   } 
@@ -258,6 +263,7 @@ const joinRoom = async (ctx) => {
     mimeId = mime 
     newMembers = members 
     const { _id } = ctx.request.body 
+    if(newMembers.length > 100 && type !== ROOM_TYPE.SYSTEM) return Promise.reject({ errMsg: '超过最高房间成员数量', status: 403 }) 
     if(!!token && !_id && newMembers.length < 2) return Promise.reject({ errMsg: '成员数量不正确', status: 404 })
     return roomExists({
       ...ctx.request.body,

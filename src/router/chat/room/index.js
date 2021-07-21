@@ -142,7 +142,10 @@ router
       }
     },
     {
-      $unwind: "$create_user"
+      $unwind: {
+        path: "$info.create_user",
+        preserveNullAndEmptyArrays: true  
+      }
     },
     {
       $lookup: {
