@@ -317,17 +317,22 @@ router
 
   const check = Params.query(ctx, {
     name: '_id',
+    multipart: true,
     validator: [
-			data => ObjectId.isValid(data)
+			(data, origin) => {
+        return ObjectId.isValid(origin.messageId) || ObjectId.isValid(data)
+      }
 		]
   })
-  if(check) return 
+  if(check) return
 
   const [, token] = verifyTokenToData(ctx)
   const [ _id, currPage, pageSize, start, messageId ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => {
+        return ObjectId.isValid(data) ? ObjectId(data) : false 
+      }
     ]
   }, {
     name: 'currPage',
@@ -339,7 +344,9 @@ router
     name: 'pageSize',
     _default: 30,
     sanitizers: [
-      data => data >= 0 ? +data : 30
+      data => {
+        return data >= 0 ? +data : 30
+      }
     ]
   }, {
     name: 'start',
@@ -357,10 +364,18 @@ router
     ]
   })
   let match = {
-    _id
+    
   }
   let messageMatch = {
-    room: _id 
+    
+  }
+  if(_id) {
+    match = {
+      _id
+    }
+    messageMatch = {
+      room: _id 
+    }
   }
   let skipLimitPipe = [
     {
@@ -380,6 +395,11 @@ router
     messageMatch.$expr = {
       $eq: [ "$_id", messageId ]
     }
+    match.message = {
+      $in: [
+        messageId
+      ]
+    }
   }
 
   const data = await new Promise((resolve) => {
@@ -387,9 +407,11 @@ router
       const { id } = token
       resolve(MemberModel.findOne({
         user: ObjectId(id),
-        room: {
-          $in: [_id]
-        }
+        ...(!!_id ? {
+          room: {
+            $in: [_id]
+          }
+        } : {})
       })
       .select({
         _id: 1
@@ -431,10 +453,15 @@ router
             },
             {
               $sort: {
-                createdAt: 1
+                createdAt: -1
               }
             },
             ...skipLimitPipe,
+            {
+              $sort: {
+                createdAt: 1
+              }
+            },
             {
               $lookup: {
                 from: 'members',

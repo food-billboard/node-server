@@ -367,7 +367,6 @@
             "name": "_id",
             "in": "query",
             "type": "string",
-            "required": true,
             "description":"房间id"
           },
           {
