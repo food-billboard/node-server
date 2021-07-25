@@ -1,27 +1,54 @@
 # Node+MongoDB服务器(娱乐)
 
-## 当前服务器用作之前写的电影推荐小程序的服务端: https://github.com/food-billboard/movie-weapp
+## 当前服务用作以下应用的服务端  
+1. [电影推荐小程序](https://github.com/food-billboard/movie-weapp)   
+2. [管理后台](https://github.com/food-billboard/mini-app-management)
+3. [聊天Demo](https://github.com/food-billboard/chat-demo)
 
-### pm2 相关
-`pm2 start <file-name>` 启动服务  
-`--name <process-name>` 重命名进程  
-`--watch` 监听  
-`pm2 stop <file-name>` 暂停指定进程  
-`pm2 stop all` 暂停所有进程  
-`pm2 delete <file-name>` 删除指定进程  
-`pm2 delete all` 删除所有进程  
-`pm2 list` 进程列表  
-`pm2 describe <name>` 查看指定进程的具体情况  
-`pm2 monit <name>` 查看指定进程资源消耗情况  
-`pm2 logs` 查看所有日志  
-`pm2 logs <name>` 查看指定进程之日  
-`pm2 restart <name>` 重启指定进程  
-`pm2 restart all` 重启所有进程  
+## 介绍  
+- 这是一个关于电影推荐相关的`Node`后台服务。其中包含了电影数据，用户数据等的Api接口。  
+### 接口  
+- 详细的Api接口包含如下  
+  1. 游客接口  
+    - 弹幕  
+    - 用户信息  
+    - 排行榜、每日上新、热门、分类、专题等
+    - 登录、注册等  
+    - 电影数据、搜索等    
+    - 小程序信息  
+  2. 会员接口  
+    - 弹幕  
+    - 个人信息、好友申请、点赞、评论、关注、反馈等  
+    - 电影数据  
+    - 文件上传  
+    - 用户信息  
+  3. 管理后台接口  
+    - 个人信息  
+    - 聊天室相关  
+    - 用户、电影等统计  
+    - 小程序信息、专题等  
+    - 媒体资源  
+    - 电影数据、评论等  
+    - 用户数据  
+  4. 聊天室接口  
+    - 聊天室成员
+    - 聊天室消息  
+    - 聊天室  
 
-### 开发
-1. 测试 `npm run test`  
+- 接口文档地址(本地文档)  
+  [聊天室](http://localhost:4000/api/backend/swagger/chat.html)  
+  [会员](http://localhost:4000/api/backend/swagger/customer.html)  
+  [游客](http://localhost:4000/api/backend/swagger/user.html)  
+  [管理后台](http://localhost:4000/api/backend/swagger/manage.html)  
+
+### 框架  
+基础: `Koa`  
+数据库: `Mongodb`  
+缓存: `redis`  
+聊天: `socket.io`  
+
+### 关于已有命令使用 
+1. 测试 `npm run internal_test`  
 2. 测试覆盖率 `npm run coverage`
-6. 开发环境启动 `npm run dev`
-7. 开发生产环境启动  `npm run dev_prod`  
-8. 生产环境启动  `npm run prod`  
-9. 生产环境重启  `npm run restart`   
+3. 开发环境启动 `npm run dev:nodemon`  
+4. 生产环境启动  `npm run prod:pm2`  
