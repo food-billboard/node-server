@@ -32,10 +32,12 @@ function responseExpect(res, validate=[]) {
     }
     expect(item.room).to.be.a('array')
     item.room.forEach(item => {
-      expect(item).to.be.a('object').and.that.includes.any.keys('name', 'description', '_id')
-      commonValidate.string(item.description)
-      commonValidate.string(item.name)
-      commonValidate.objectId(item._id)
+      if(item.room && Object.keys(item.room).length) {
+        expect(item).to.be.a('object').and.that.includes.any.keys('name', 'description', '_id')
+        commonValidate.string(item.description)
+        commonValidate.string(item.name)
+        commonValidate.objectId(item._id)
+      }
     })
   })
 

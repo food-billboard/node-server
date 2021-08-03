@@ -188,19 +188,13 @@ router
     return FriendsModel.updateOne({
       _id,
       $where: "this.friends.length < 9999",
-      friends: {
-        $elemMatch: {
-          _id: {
-            $nin: [
-              selfFriendId
-            ]
-          }
-        }
+      "friends._id": {
+        $nin: [
+          selfFriendId
+        ]
       }
     }, {
       $push: { friends: { _id: selfFriendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } },
-    }, {
-      upsert: true 
     })
   })
   .then(data => {
@@ -209,9 +203,7 @@ router
       user: id,
       $where: "this.friends.length < 9999"
     }, {
-      $push: { friends: { _id, timestamps: Date.now(), status: isExists ? FRIEND_STATUS.NORMAL : FRIEND_STATUS.TO_AGREEING } },
-    }, {
-      upsert: true 
+      $push: { friends: { _id, timestamps: Date.now(), status: isExists ? FRIEND_STATUS.TO_AGREEING : FRIEND_STATUS.NORMAL } },
     })
   })
   .then(_ => ({ data: _id }))

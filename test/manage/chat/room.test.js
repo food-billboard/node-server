@@ -21,11 +21,13 @@ function responseExpect(res, validate=[]) {
     expect(item.origin).to.be.a('boolean')
     commonValidate.number(item.delete_users)
     commonValidate.number(item.message)
-    expect(item.info).to.be.a('object').and.that.include.any.keys('name', 'avatar', 'description')
-    commonValidate.string(item.info.name)
-    commonValidate.string(item.info.description)
-    if(item.info.avatar) {
-      commonValidate.string(item.info.avatar)
+    if(item.type != ROOM_TYPE.CHAT) {
+      expect(item.info).to.be.a('object').and.that.include.any.keys('name', 'avatar', 'description')
+      commonValidate.string(item.info.name)
+      commonValidate.string(item.info.description)
+      if(item.info.avatar) {
+        commonValidate.string(item.info.avatar)
+      }
     }
     if(item.type !== ROOM_TYPE.CHAT) {
       expect(item.create_user).to.be.a('object').and.that.include.any.keys('username', 'avatar', '_id', 'member', 'description')

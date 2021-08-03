@@ -315,6 +315,12 @@
             "description":"房间id"
           },
           {
+            "name": "message_id",
+            "in": "body",
+            "type": "string",
+            "description":"消息id(修改消息内容)"
+          },
+          {
             "name": "type",
             "in": "body",
             "type": "string",
@@ -333,6 +339,13 @@
             "in": "body",
             "type": "string",
             "description":"@用户id"
+          },
+          {
+            "name": "status",
+            "in": "body",
+            "type": "string",
+            "description":"消息状态(LOADING | DONE | ERROR)默认DONE",
+            "enum": ["LOADING", "DONE"]
           }
         ],
         "responses": {
@@ -1351,6 +1364,11 @@
                         "type": "string",
                         "description": "媒体类型",
                         "enum": [ "IMAGE", "VIDEO", "TEXT", "AUDIO" ]
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "消息状态",
+                        "enum": [ "LOADING", "DONE", "ERROR" ]
                       },
                       "point_to": {
                         "type": "string",

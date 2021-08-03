@@ -27,14 +27,16 @@ function responseExpect(res, validate=[]) {
       }
       commonValidate.string(item.info.description)
     }
-    expect(item.create_user).to.be.a('object').and.that.includes.any.keys('username', 'avatar', '_id', 'description', 'member')
-    commonValidate.string(item.create_user.username)
-    commonValidate.string(item.create_user.description)
-    if(item.create_user.avatar) {
-      commonValidate.string(item.create_user.avatar)
+    if(item.create_user && Object.keys(item.create_user).length) {
+      expect(item.create_user).to.be.a('object').and.that.includes.any.keys('username', 'avatar', '_id', 'description', 'member')
+      commonValidate.string(item.create_user.username)
+      commonValidate.string(item.create_user.description)
+      if(item.create_user.avatar) {
+        commonValidate.string(item.create_user.avatar)
+      }
+      commonValidate.objectId(item.create_user._id)
+      commonValidate.objectId(item.create_user.member)
     }
-    commonValidate.objectId(item.create_user._id)
-    commonValidate.objectId(item.create_user.member)
   })
 
   if(Array.isArray(validate)) {

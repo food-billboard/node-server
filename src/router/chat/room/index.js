@@ -143,7 +143,7 @@ router
     },
     {
       $unwind: {
-        path: "$info.create_user",
+        path: "$create_user",
         preserveNullAndEmptyArrays: true  
       }
     },

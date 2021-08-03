@@ -9,8 +9,6 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
-  console.log(target.friends, 244444)
-
   expect(target).to.be.a('object').and.that.includes.all.keys('friends')
   target.friends.forEach(item => {
     expect(item).to.be.a('object').and.that.includes.any.keys('avatar', 'username', '_id', 'description', 'friend_id', 'createdAt', 'status')
@@ -333,14 +331,14 @@ describe(`${COMMON_API} test`, function() {
             _id: friendId
           }, {
             $set: {
-              friends: [ { _id: selfFriendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
+              friends: [ { _id: selfFriendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREEING } ]
             }
           }),
           FriendsModel.updateMany({
             _id: selfFriendId
           }, {
             $set: {
-              friends: [ { _id: friendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREEING } ]
+              friends: [ { _id: friendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREE } ]
             }
           })
         ])

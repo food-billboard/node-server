@@ -18,7 +18,7 @@ function responseExpect(res, validate=[]) {
   }
   expect(target.message.length > 0).to.be.true 
   target.message.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'user_info', 'point_to', 'content', 'createdAt', 'updatedAt', 'media_type')
+    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'user_info', 'point_to', 'content', 'createdAt', 'updatedAt', 'media_type', "status")
     commonValidate.objectId(item._id)
     expect(item.user_info).to.be.a('object').and.that.include.any.keys('username', '_id', 'avatar', 'description', 'friend_id', 'member')
     commonValidate.string(item.user_info.username)
@@ -47,6 +47,7 @@ function responseExpect(res, validate=[]) {
     if(item.content.image) {
       commonValidate.string(item.content.image)
     }
+    commonValidate.string(item.status)
     commonValidate.time(item.createdAt)
     commonValidate.time(item.updatedAt)
   })

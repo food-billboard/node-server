@@ -12,7 +12,8 @@ const {
   ROOM_TYPE, 
   Authorization, 
   MESSAGE_MEDIA_TYPE,
-  notFound
+  notFound,
+  MESSAGE_POST_STATUS
 } = require('@src/utils')
 
 const router = new Router()
@@ -65,6 +66,7 @@ router
       messageMatch = [
         {
           $match: {
+            status: MESSAGE_POST_STATUS.DONE,
             deleted: {
               $nin: [ObjectId(data._id)]
             },
@@ -363,11 +365,40 @@ router
       }
     ]
   })
+
+  // const COMMON_MESSAGE_MATCH = {
+  //   $not: {
+  //     $and: [
+  //       {
+  //         $and: ["text", "image", "video", "audio"].map(item => {
+  //           return {
+  //             $or: [
+  //               {
+  //                 [`content.${item}`]: "",
+  //               },
+  //               {
+  //                 [`content.${item}`]: {
+  //                   $exists: false 
+  //                 }
+  //               }
+  //             ]
+  //           }
+  //         })
+  //       },
+  //       {
+  //         $not: {
+  //           status: MESSAGE_POST_STATUS.LOADING
+  //         }
+  //       }
+  //     ]
+  //   }
+  // }
+
   let match = {
     
   }
   let messageMatch = {
-    
+
   }
   if(_id) {
     match = {
@@ -603,6 +634,7 @@ router
                 _id: 1,
                 user_info: "$user_info",
                 point_to: 1,
+                status: 1,
                 content: {
                   text: "$content.text",
                   image: "$content.image.src",
@@ -780,19 +812,24 @@ router
     name: 'content',
     validator: [
       (data, origin) => {
-        const { type } = origin
+        const { type, message_id, status } = origin
+        if(!ObjectId.isValid(message_id) && status === MESSAGE_POST_STATUS.LOADING) return true 
         return typeof data === 'string' && (type !== MESSAGE_MEDIA_TYPE.TEXT ? ObjectId.isValid(data) : !!data.length)
       }
     ]
   }, {
     name: 'type',
     validator: [
-      data => !!data && !!Object.keys(MESSAGE_MEDIA_TYPE).includes(data)
+      (data, origin) => {
+        return !!data && !!Object.keys(MESSAGE_MEDIA_TYPE).includes(data)
+      }
     ]
   }, {
     name: '_id',
     validator: [
-			data => ObjectId.isValid(data)
+			(data, origin) => {
+        return ObjectId.isValid(data)
+      }
 		]
   })
 
@@ -802,15 +839,19 @@ router
 
   const { id } = token
   let userId = ObjectId(id)
-  const [ roomId, type, content, point_to ] = Params.sanitizers(ctx.request.body, {
+  const [ roomId, type, content, point_to, messageId, status ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
+      data => {
+        return ObjectId(data)
+      }
     ]
   }, {
     name: 'type',
     sanitizers: [
-      data => data.toUpperCase()
+      data => {
+        return data.toUpperCase()
+      }
     ]
   }, {
     name: 'content',
@@ -822,16 +863,30 @@ router
     sanitizers: [
       data => ObjectId.isValid(data) ? ObjectId(data) : data
     ]
+  }, {
+    name: 'message_id',
+    sanitizers: [
+      data => ObjectId.isValid(data) ? ObjectId(data) : false 
+    ]
+  }, {
+    name: 'status',
+    sanitizers: [
+      data => {
+        const realData = typeof data === 'string' ? data.trim().toUpperCase() : ''
+        return Object.keys(MESSAGE_POST_STATUS).includes(realData) ? realData :  MESSAGE_POST_STATUS.DONE
+      }
+    ]
   })
 
-  if(point_to) templateMessage.point_to = point_to
   templateMessage = {
     media_type: type,
     room: roomId,
-    content: {
-      [type.toLowerCase()]: content
-    }
   }
+  if(content) templateMessage.content = {
+    [type.toLowerCase()]: content
+  }
+  if(point_to) templateMessage.point_to = point_to
+  if(status) templateMessage.status = status 
 
   const data = await MemberModel.findOne({
     user: userId,
@@ -846,32 +901,53 @@ router
   .then(notFound)
   .then(data => {
     const { _id } = data 
-    userId = _id
-    templateMessage.user_info = userId
-    templateMessage.readed = [userId]
-    const message = new MessageModel(templateMessage)
-    return message.save()
-  })
-  .then(data => {
-    return Promise.all([
-      RoomModel.updateOne({
-        _id: roomId,
-        members: {
-          $in: [userId]
-        },
-        deleted: false 
+    if(messageId) {
+      let setMessage = {
+        media_type: type,
+        status
+      }
+      if(content) {
+        setMessage[`content.${type.toLowerCase()}`] = content
+      }
+      return MessageModel.updateOne({
+        _id: messageId
       }, {
-        $addToSet: {
-          message: data._id
+        $set: setMessage
+      })
+      .then((data) => {
+        if(data && data.nModified == 0) return Promise.reject({ errMsg: 'forbidden', status: 403 })
+        return {
+          data: messageId
         }
-      }),
-      data
-    ])
-  })
-  .then(([data, message]) => {
-    if(data && data.nModified == 0) return Promise.reject({ errMsg: 'forbidden', status: 403 })
-    return {
-      data: message._id
+      })
+    }else {
+      userId = _id
+      templateMessage.user_info = userId
+      templateMessage.readed = [userId]
+      const message = new MessageModel(templateMessage)
+      return message.save()
+      .then(data => {
+        return Promise.all([
+          RoomModel.updateOne({
+            _id: roomId,
+            members: {
+              $in: [userId]
+            },
+            deleted: false 
+          }, {
+            $addToSet: {
+              message: data._id
+            }
+          }),
+          data
+        ])
+      })
+      .then(([data, message]) => {
+        if(data && data.nModified == 0) return Promise.reject({ errMsg: 'forbidden', status: 403 })
+        return {
+          data: message._id
+        }
+      })
     }
   })
   .catch(dealErr(ctx))

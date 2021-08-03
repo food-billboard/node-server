@@ -19,11 +19,11 @@ const {
   FRIEND_STATUS,
   ROOM_TYPE,
   MESSAGE_TYPE,
-  ROOM_USER_NET_STATUS,
   MESSAGE_MEDIA_TYPE,
   ERROR_ORIGIN_TYPE,
   ERROR_TYPE,
-  USER_HOT_HISTORY_TYPE
+  USER_HOT_HISTORY_TYPE,
+  MESSAGE_POST_STATUS
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -654,6 +654,14 @@ const MessageSchema = new Schema({
       type: ObjectId
     }
   },
+  status: {
+    type: String,
+    uppercase: true,
+    trim: true,
+    enum: Object.keys(MESSAGE_POST_STATUS),
+    required: true,
+    default: MESSAGE_POST_STATUS.DONE
+  }
 }, {
   ...defaultConfig
 })

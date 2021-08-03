@@ -283,7 +283,12 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
         FriendsModel.updateMany({
-          _id: selfFriendId
+          _id: {
+            $in: [
+              selfFriendId,
+              friendId
+            ]
+          }
         }, {
           $set: {
             friends: []
@@ -318,14 +323,18 @@ describe(`${COMMON_API} test`, function() {
           expect(!!user).to.be.true 
           return FriendsModel.findOne({
             _id: friendId,
-            $and: [
-              {
-                "friends._id": { $in: [ selfFriendId ] }
-              },
-              {
-                "friends.status": FRIEND_STATUS.TO_AGREE
+            friends: {
+              $elemMatch: {
+                $and: [
+                  {
+                    _id: { $in: [ selfFriendId ] }
+                  },
+                  {
+                    status: FRIEND_STATUS.TO_AGREE
+                  }
+                ]
               }
-            ]
+            }
           })
           .select({
             _id: 0,
