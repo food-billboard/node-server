@@ -1,7 +1,6 @@
 const Router = require('@koa/router')
 const Validator = require('validator')
 const Url = require('url')
-const merge = require('lodash/merge')
 const pick = require('lodash/pick')
 const { Types: { ObjectId } } = require('mongoose')
 const { 
@@ -17,8 +16,6 @@ const {
   MEDIA_STATUS,
   MEDIA_AUTH,
   parseUrl,
-  MEDIA_ORIGIN_TYPE,
-  ROLES_MAP
 } = require('@src/utils')
 const { headRequestDeal, patchRequestDeal, postMediaDeal, postRequstDeal } = require('./utils')
 
@@ -474,53 +471,41 @@ router
     ]
   })
 
-  const data = await UserModel.findOne({
-    _id: ObjectId(userId)
-  })
-  .select({
-    roles: 1
-  })
-  .exec()
-  .then(notFound)
-  .then(data => {
-    const curUserMaxRole = Math.min(...data.roles.map(item => ROLES_MAP[item]))
-    const MaxRole = Math.min(...Object.values(ROLES_MAP))
-
-    let query = {}
-    if(MaxRole < curUserMaxRole) {
-      query = merge({}, query, {
-        $or: [
-          {
-            white_list: {
-              $in: [ObjectId(userId)]
+  const data = await Promise.all(updateData.map(item => {
+    const { _id, poster } = item 
+    return VideoModel.updateOne({
+      _id,
+      $or: [
+        {
+          $and: [
+            {
+              white_list: {
+                $in: [
+                  ObjectId(userId)
+                ]
+              }
+            },
+            {
+              auth: MEDIA_AUTH.PRIVATE
             }
-          },
-          {
-            auth: MEDIA_AUTH.PUBLIC
-          }
-        ],
-        origin_type: {
-          $ne: MEDIA_ORIGIN_TYPE.ORIGIN
+          ]
+        },
+        {
+          auth: MEDIA_AUTH.PUBLIC
         }
-      })
-    }
-
-    return Promise.all(updateData.map(item => {
-      const { _id, poster } = item 
-      query._id = _id 
-      return VideoModel.updateOne(query, {
-        $set: {
-          poster
-        }
-      })
-      .then(data => {
-        if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
-        return {
-          _id
-        }
-      })
-    }))
-  })
+      ]
+    }, {
+      $set: {
+        poster
+      }
+    })
+    .then(data => {
+      if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+      return {
+        _id
+      }
+    })
+  }))
   .then(_ => {
     return {
       data: {}
@@ -535,5 +520,98 @@ router
   })
 
 })
+// //视频新增海报
+// .put('/video/poster', async (ctx) => {
+//   const check = Params.body(ctx, {
+//     name: 'data',
+//     validator: [
+//       data => {
+//         if(typeof data !== 'string' || !data) return false 
+//         return data.split(',').every(item => {
+//           const [ _id, poster ] = item.split('-')
+//           return ObjectId.isValid(_id) && ObjectId.isValid(poster)
+//         })
+//       }
+//     ]
+//   })
+//   if(check) return 
+
+//   const [ , token ] = verifyTokenToData(ctx)
+//   const { id: userId } = token 
+
+//   const [ updateData ] = Params.sanitizers(ctx.request.body, {
+//     name: 'data',
+//     sanitizers: [
+//       data => data.split(',').map(item => {
+//         const [ _id, poster ] = item.split('-')
+//         return {
+//           _id: ObjectId(_id),
+//           poster: ObjectId(poster)
+//         }
+//       })
+//     ]
+//   })
+
+//   const data = await UserModel.findOne({
+//     _id: ObjectId(userId)
+//   })
+//   .select({
+//     roles: 1
+//   })
+//   .exec()
+//   .then(notFound)
+//   .then(data => {
+//     const curUserMaxRole = Math.min(...data.roles.map(item => ROLES_MAP[item]))
+//     const MaxRole = Math.min(...Object.values(ROLES_MAP))
+
+//     let query = {}
+//     if(MaxRole < curUserMaxRole) {
+//       query = merge({}, query, {
+//         $or: [
+//           {
+//             white_list: {
+//               $in: [ObjectId(userId)]
+//             }
+//           },
+//           {
+//             auth: MEDIA_AUTH.PUBLIC
+//           }
+//         ],
+//         origin_type: {
+//           $ne: MEDIA_ORIGIN_TYPE.ORIGIN
+//         }
+//       })
+//     }
+
+//     return Promise.all(updateData.map(item => {
+//       const { _id, poster } = item 
+//       query._id = _id 
+//       return VideoModel.updateOne(query, {
+//         $set: {
+//           poster
+//         }
+//       })
+//       .then(data => {
+//         if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+//         return {
+//           _id
+//         }
+//       })
+//     }))
+//   })
+//   .then(_ => {
+//     return {
+//       data: {}
+//     }
+//   })
+//   .catch(dealErr(ctx))
+
+//   responseDataDeal({
+//     data,
+//     needCache: false,
+//     ctx
+//   })
+
+// })
 
 module.exports = router

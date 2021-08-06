@@ -26,7 +26,7 @@ const sendMessage = (socket, io) => async (data) => {
   try {
     res = await postMessage(socket, data, {
       sid: id,
-      ...pick(data, ["_id", 'type', 'content', 'point_to'])
+      ...pick(data, ["_id", 'type', 'content', 'point_to', "message_id"])
     })
     // broadcastRoomMember()
 
