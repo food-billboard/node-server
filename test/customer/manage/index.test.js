@@ -10,11 +10,14 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('object').and.include.all.keys('attentions', 'avatar', 'fans', 'hot', 'username', '_id', 'createdAt', 'updatedAt')
+  expect(target).to.be.a('object').and.include.all.keys('attentions', 'avatar', 'fans', 'hot', 'username', '_id', 'createdAt', 'updatedAt', 'email', 'description', "mobile")
   commonValidate.number(target.attentions)
   commonValidate.poster(target.avatar)
   commonValidate.number(target.fans)
   commonValidate.string(target.username)
+  commonValidate.string(target.email)
+  commonValidate.string(target.description)
+  commonValidate.number(target.mobile)
   commonValidate.objectId(target._id)
   commonValidate.time(target.createdAt)
   commonValidate.time(target.updatedAt)

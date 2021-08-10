@@ -2392,6 +2392,18 @@
                   "type": "string",
                   "description": "用户名"
                 },
+                "mobile": {
+                  "type": "string",
+                  "description": "手机号"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "邮箱"
+                },
                 "createdAt": {
                   "type": "string",
                   "format":"date-time"
