@@ -354,7 +354,7 @@ router
     name: 'start',
     sanitizers: [
       data => {
-        return Day(data).isValid() && !!data ? Day(data).toDate() : false
+        return (Day(data).isValid() && !!data) ? Day(data).toDate() : false
       }
     ]
   }, {

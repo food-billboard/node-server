@@ -57,6 +57,7 @@ router
     friend_id: 1,
     email: 1,
     mobile: 1,
+    description: 1,
   })
   .exec()
   .then(notFound)
