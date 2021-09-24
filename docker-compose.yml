@@ -34,6 +34,10 @@ services:
     ports:
       - 27017:27017
     volumes:
+      # db path 
+      # company comp 
+      # - /usr/local/etc/mongodb:/data/db
+      # remote service 
       - /home/movie/mongodb/data:/data/db
       - /usr/local/mongodb/log:/var/log/mongodb
   redis:
