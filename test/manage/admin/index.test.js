@@ -1,6 +1,6 @@
 require('module-alias/register')
 const { omit } = require('lodash')
-const { UserModel, ImageModel, encoded } = require('@src/utils')
+const { UserModel, ImageModel, encoded, ROLES_NAME_MAP } = require('@src/utils')
 const { expect } = require('chai')
 const { Request, commonValidate, mockCreateUser, mockCreateImage } = require('@test/utils')
 const { Types: { ObjectId } } = require("mongoose")
@@ -179,6 +179,49 @@ describe(`${COMMON_API} test`, function() {
   })
 
   describe(`${COMMON_API} fail test`, function() {
+
+    describe(`get the admin info fail -> ${COMMON_API}`, function() {
+
+      it(`get the admin info fail because the user auth is lower than sub_development`, function(done) {
+
+        UserModel.updateOne({
+          _id: userInfo._id 
+        }, {
+          $set: {
+            roles: [
+              ROLES_NAME_MAP.CUSTOMER
+            ]
+          }
+        })
+        .then(_ => {
+          return Request
+          .get(COMMON_API)
+          .set({
+            Accept: 'application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(403)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return UserModel.updateOne({
+            _id: userInfo._id 
+          }, {
+            $set: {
+              roles: userInfo.roles 
+            }
+          })
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
+      })
+
+    })
     
     describe(`put the admin info fail -> ${COMMON_API}`, function() {
 

@@ -592,7 +592,8 @@ describe(`${COMMON_API} test`, function() {
           return obj 
         })
         .then(data => {
-          expect(data.some(item => item._id === roomId.toString())).to.be.false
+          const { res: { data: dataList } } = data 
+          expect(dataList.some(item => item._id === roomId.toString())).to.be.false
         })
         .then(_ => {
           return Promise.all([
@@ -611,6 +612,9 @@ describe(`${COMMON_API} test`, function() {
               }
             })
           ])
+        })
+        .then(_ => {
+          done()
         })
         .catch(err => {
           done(err)
@@ -1880,7 +1884,7 @@ describe(`${COMMON_API} test`, function() {
           })
           return Promise.all([
             newMember.save(),
-            MessageModel.updateOne({
+            MessageModel.findOne({
               _id: messageId,
               room: roomId
             })

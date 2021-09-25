@@ -202,6 +202,13 @@ router
           }
         }
       },
+      {
+        $match: {
+          user: {
+            $exists: true 
+          }
+        }
+      }
     ]),
   ])
   .then(([total_count, data]) => {

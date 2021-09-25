@@ -66,6 +66,11 @@ const ROLES_MAP = {
   USER: 5
 }
 
+const ROLES_NAME_MAP = Object.keys(ROLES_MAP).reduce((acc, cur) => {
+  acc[cur] = cur 
+  return acc 
+}, {})
+
 const FEEDBACK_STATUS = {
   DEALING: 'DEALING',
   DEAL: 'DEAL'
@@ -198,5 +203,6 @@ module.exports = {
   ERROR_TYPE,
   USER_HOT_HISTORY_TYPE,
   STATIC_FILE_PATH_NO_WRAPPER,
-  MESSAGE_POST_STATUS
+  MESSAGE_POST_STATUS,
+  ROLES_NAME_MAP
 }
