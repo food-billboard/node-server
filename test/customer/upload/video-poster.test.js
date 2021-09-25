@@ -1,10 +1,12 @@
 require('module-alias/register')
-const { UserModel, ImageModel, MEDIA_ORIGIN_TYPE, MEDIA_AUTH, MEDIA_STATUS, VideoModel } = require('@src/utils')
+const { UserModel, ImageModel, MEDIA_ORIGIN_TYPE, MEDIA_AUTH, VideoModel } = require('@src/utils')
 const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
 const { Request, mockCreateUser, mockCreateImage, mockCreateVideo } = require('@test/utils')
 
 const COMMON_API = '/api/customer/upload/video/poster'
+
+const MOCK_ID = ObjectId("8f63270f005f1c1a0d9448ca")
 
 describe(`${COMMON_API} test`, () => {
 
@@ -90,36 +92,20 @@ describe(`${COMMON_API} test`, () => {
 
   describe(`put the video poster success test -> ${COMMON_API}`, function() {
 
-    after(function(done) {
+    it(`put the video poster and white_list includes the user success`, function(done) {
 
-      VideoModel.findOne({
-        poster: imageId
-      })
-      .select({
-        _id: 1
-      })
-      .exec()
-      .then(data => {
-        expect(!!data).to.be.true
-        done()
-      })
-      .catch(err => {
-        console.log('oops: ', err)
-      })
-
-    })
-
-    it(`put the video poster and user is max role success`, function(done) {
-
-      UserModel.updateMany({
-        _id: userInfo._id 
+      VideoModel.updateMany({
+        _id: videoId
       }, {
         $set: {
-          roles: ["SUPER_ADMIN"]
+          white_list: [userInfo._id],
+          origin_type: MEDIA_ORIGIN_TYPE.USER,
+          auth: MEDIA_AUTH.PRIVATE,
+          poster: MOCK_ID
         }
       })
       .then(_ => {
-        Request
+        return Request
         .put(COMMON_API)
         .set({
           Accept: 'application/json',
@@ -130,53 +116,22 @@ describe(`${COMMON_API} test`, () => {
         })
         .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if(err) return done(err)
-          done()
-        })
       })
-      .catch(err => {
-        done(err)
-      })
-
-    })
-
-    it(`put the video poster and white_list includes the user success`, function(done) {
-
-      Promise.all([
-        UserModel.updateMany({
-          _id: userInfo._id 
-        }, {
-          $set: {
-            roles: ["CUSTOMER"]
-          }
-        }),
-        VideoModel.updateMany({
-          _id: videoId
-        }, {
-          $set: {
-            white_list: [userInfo._id],
-            origin_type: MEDIA_ORIGIN_TYPE.USER,
-            auth: MEDIA_AUTH.PRIVATE
-          }
-        })
-      ])
       .then(_ => {
-        Request
-        .put(COMMON_API)
-        .set({
-          Accept: 'application/json',
-          Authorization: `Basic ${selfToken}`
+        return VideoModel.findOne({
+          _id: videoId,
+          poster: imageId
         })
-        .send({
-          data: `${videoId.toString()}-${imageId.toString()}`
+        .select({
+          _id: 1
         })
-        .expect(200)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if(err) return done(err)
-          done()
-        })
+        .exec()
+      })
+      .then(data => {
+        expect(!!data).to.be.true 
+      })
+      .then(_ => {
+        done()
       })
       .catch(err => {
         done(err)
@@ -186,25 +141,18 @@ describe(`${COMMON_API} test`, () => {
 
     it(`put the video poster and the auth is public success`, function(done) {
 
-      Promise.all([
-        UserModel.updateMany({
-          _id: userInfo._id 
-        }, {
-          $set: {
-            roles: ["CUSTOMER"]
-          }
-        }),
-        VideoModel.updateMany({
-          _id: videoId
-        }, {
-          $set: {
-            white_list: [],
-            auth: MEDIA_AUTH.PUBLIC
-          }
-        })
-      ])
+      VideoModel.updateMany({
+        _id: videoId
+      }, {
+        $set: {
+          white_list: [],
+          origin_type: MEDIA_ORIGIN_TYPE.USER,
+          auth: MEDIA_AUTH.PUBLIC,
+          poster: MOCK_ID
+        }
+      })
       .then(_ => {
-        Request
+        return Request
         .put(COMMON_API)
         .set({
           Accept: 'application/json',
@@ -215,10 +163,22 @@ describe(`${COMMON_API} test`, () => {
         })
         .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if(err) return done(err)
-          done()
+      })
+      .then(_ => {
+        return VideoModel.findOne({
+          _id: videoId,
+          poster: imageId
         })
+        .select({
+          _id: 1
+        })
+        .exec()
+      })
+      .then(data => {
+        expect(!!data).to.be.true 
+      })
+      .then(_ => {
+        done()
       })
       .catch(err => {
         done(err)
@@ -230,38 +190,19 @@ describe(`${COMMON_API} test`, () => {
 
   describe(`put the media fail test -> ${COMMON_API}`, function() {
 
-    const id = ObjectId("8f63270f005f1c1a0d9448ca")
-
     before(function(done) {
       VideoModel.updateMany({
         src: COMMON_API
       }, {
         $set: {
-          poster: id
+          auth: MEDIA_AUTH.PUBLIC,
+          poster: MOCK_ID
         }
       })
       .then(_ => {
         done()
       })
       .catch(err => {
-        done(err)
-      })
-    })
-
-    after(function(done) {
-      VideoModel.findOne({
-        poster: id 
-      })
-      .select({
-        _id: 1
-      })
-      .exec()
-      .then(data => {
-        expect(!!data).to.be.true 
-        done()
-      })
-      .catch(err => {
-        console.log('oops: ', err)
         done(err)
       })
     })
@@ -345,24 +286,15 @@ describe(`${COMMON_API} test`, () => {
 
     it(`put video poster fail because auth is not verify`, function(done) {
 
-      Promise.all([
-        UserModel.updateMany({
-          _id: userInfo._id 
-        }, {
-          $set: {
-            roles: ["CUSTOMER"]
-          }
-        }),
-        VideoModel.updateMany({
-          _id: videoId
-        }, {
-          $set: {
-            white_list: [],
-            origin_type: MEDIA_ORIGIN_TYPE.USER,
-            auth: MEDIA_AUTH.PRIVATE
-          }
-        })
-      ])
+      VideoModel.updateMany({
+        _id: videoId
+      }, {
+        $set: {
+          white_list: [],
+          origin_type: MEDIA_ORIGIN_TYPE.USER,
+          auth: MEDIA_AUTH.PRIVATE
+        }
+      })
       .then(_ => {
         return Request
         .put(COMMON_API)
@@ -371,62 +303,12 @@ describe(`${COMMON_API} test`, () => {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          type: 0,
-          _id: imageId.toString(),
-          name: COMMON_API,
-          auth: '',
-          status: MEDIA_STATUS.COMPLETE
+          data: `${videoId.toString()}-${imageId.toString()}`
         })
-        .expect(400)
+        .expect(404)
         .expect('Content-Type', /json/)
       })
       .then(_ => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-
-    })
-
-    it(`put video poster fail because the media is ORIGIN`, function(done) {
-
-      Promise.all([
-        UserModel.updateMany({
-          _id: userInfo._id 
-        }, {
-          $set: {
-            roles: ["CUSTOMER"]
-          }
-        }),
-        VideoModel.updateMany({
-          _id: videoId
-        }, {
-          $set: {
-            white_list: [userInfo._id],
-            origin_type: MEDIA_ORIGIN_TYPE.ORIGIN,
-            auth: MEDIA_AUTH.PUBLIC
-          }
-        })
-      ])
-      .then(_ => {
-        return Request
-        .put(COMMON_API)
-        .set({
-          Accept: 'application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .send({
-          type: 0,
-          _id: imageId.toString(),
-          name: COMMON_API,
-          auth: '',
-          status: MEDIA_STATUS.COMPLETE
-        })
-        .expect(400)
-        .expect('Content-Type', /json/)
-      })
-      .then(() => {
         done()
       })
       .catch(err => {

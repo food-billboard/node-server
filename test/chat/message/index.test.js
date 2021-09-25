@@ -1,5 +1,5 @@
 require('module-alias/register')
-const { UserModel, RoomModel, MessageModel, MemberModel, ImageModel, ROOM_TYPE, MESSAGE_MEDIA_TYPE } = require('@src/utils')
+const { UserModel, RoomModel, MessageModel, MemberModel, ImageModel, ROOM_TYPE, MESSAGE_MEDIA_TYPE, MESSAGE_POST_STATUS } = require('@src/utils')
 const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
 const { Request, commonValidate, mockCreateUser, mockCreateMember, mockCreateMessage, mockCreateImage, mockCreateRoom } = require('@test/utils')
@@ -400,6 +400,73 @@ describe(`${COMMON_API} test`, function() {
         })
       })
 
+      it(`post message success and post status`, function(done) {
+        Request
+        .post(COMMON_API)
+        .send({
+          content: COMMON_API,
+          type: MESSAGE_MEDIA_TYPE.TEXT,
+          _id: roomId.toString(),
+          status: MESSAGE_POST_STATUS.DONE
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
+      })
+
+      it(`post message success and update message`, function(done) {
+        MessageModel.updateOne({
+          _id: messageId
+        }, {
+          $set: {
+            status: MESSAGE_POST_STATUS.LOADING 
+          }
+        })
+        .then(_ => {
+          return Request
+          .post(COMMON_API)
+          .send({
+            content: COMMON_API,
+            type: MESSAGE_MEDIA_TYPE.TEXT,
+            _id: roomId.toString(),
+            status: MESSAGE_POST_STATUS.DONE,
+            message_id: messageId.toString()
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return MessageModel.findOne({
+            _id: messageId,
+            status: MESSAGE_POST_STATUS.DONE,
+          })
+          .select({
+            _id: 1
+          })
+          .exec()
+        })
+        .then(data => {
+          expect(!!data).to.be.true 
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+      })
+
     })
 
     describe(`${COMMON_API} post message fail test`, function() {
@@ -686,6 +753,49 @@ describe(`${COMMON_API} test`, function() {
           done(err)
         })
 
+      })
+
+      // it(`post the message fail because update message and the message id is not valid`, function(done) {
+      //   Request
+      //   .post(COMMON_API)
+      //   .send({
+      //     content: COMMON_API,
+      //     type: MESSAGE_MEDIA_TYPE.TEXT,
+      //     _id: roomId,
+      //     message_id: messageId.toString().slice(1)
+      //   })
+      //   .set({
+      //     Accept: 'Application/json',
+      //     Authorization: `Basic ${selfToken}`
+      //   })
+      //   .expect(400)
+      //   .expect('Content-Type', /json/)
+      //   .end(function(err) {
+      //     if(err) return done(err)
+      //     done()
+      //   })
+      // })
+
+      it(`post the message fail because update message and the message id is not found`, function(done) {
+        const id = messageId.toString()
+        Request
+        .post(COMMON_API)
+        .send({
+          content: COMMON_API,
+          type: MESSAGE_MEDIA_TYPE.TEXT,
+          _id: roomId,
+          message_id: `${(id.slice(0, 1) + 4) % 10}${id.slice(1)}`
+        })
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(403)
+        .expect('Content-Type', /json/)
+        .end(function(err) {
+          if(err) return done(err)
+          done()
+        })
       })
 
     })

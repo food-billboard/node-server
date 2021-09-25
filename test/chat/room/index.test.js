@@ -27,14 +27,16 @@ function responseExpect(res, validate=[]) {
       }
       commonValidate.string(item.info.description)
     }
-    expect(item.create_user).to.be.a('object').and.that.includes.any.keys('username', 'avatar', '_id', 'description', 'member')
-    commonValidate.string(item.create_user.username)
-    commonValidate.string(item.create_user.description)
-    if(item.create_user.avatar) {
-      commonValidate.string(item.create_user.avatar)
+    if(item.create_user && Object.keys(item.create_user).length) {
+      expect(item.create_user).to.be.a('object').and.that.includes.any.keys('username', 'avatar', '_id', 'description', 'member')
+      commonValidate.string(item.create_user.username)
+      commonValidate.string(item.create_user.description)
+      if(item.create_user.avatar) {
+        commonValidate.string(item.create_user.avatar)
+      }
+      commonValidate.objectId(item.create_user._id)
+      commonValidate.objectId(item.create_user.member)
     }
-    commonValidate.objectId(item.create_user._id)
-    commonValidate.objectId(item.create_user.member)
   })
 
   if(Array.isArray(validate)) {
@@ -543,6 +545,82 @@ describe(`${COMMON_API} test`, function() {
         })
 
       })  
+
+    })
+
+    describe(`${COMMON_API} get room list fail test`, function() {
+
+      it(`get room list fail because self is quit the room`, function(done) {
+
+        Promise.all([
+          RoomModel.updateOne({
+            _id: roomId
+          }, {
+            $set: {
+              delete_users: [
+                memberId
+              ]
+            }
+          }),
+          MemberModel.updateOne({
+            _id: memberId
+          }, {
+            $pull: {
+              room: roomId
+            }
+          })
+        ])
+        .then(_ => {
+          return Request
+          .get(COMMON_API)
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(data => {
+          const { res: { text } } = data
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+            return done(err)
+          }
+          return obj 
+        })
+        .then(data => {
+          const { res: { data: dataList } } = data 
+          expect(dataList.some(item => item._id === roomId.toString())).to.be.false
+        })
+        .then(_ => {
+          return Promise.all([
+            RoomModel.updateOne({
+              _id: roomId
+            }, {
+              $set: {
+                delete_users: []
+              }
+            }),
+            MemberModel.updateOne({
+              _id: memberId
+            }, {
+              $addToSet: {
+                room: roomId
+              }
+            })
+          ])
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
+      })
 
     })
 
@@ -1769,23 +1847,34 @@ describe(`${COMMON_API} test`, function() {
         let roomId 
         let newMemberId 
         let otherUserId 
-        
-        const { model: chatRoom } = mockCreateRoom({
-          info: {
-            name: COMMON_API,
-          },
-          origin: false,
-          type: ROOM_TYPE.CHAT,
-          members: [memberId]
-        })
-        const { model: user } = mockCreateUser({
-          username: COMMON_API
+        let messageId 
+
+        const { model: message } = mockCreateMessage({
+          content: {
+            text: COMMON_API,
+          }
         })
 
-        Promise.all([
-          chatRoom.save(),
-          user.save()
-        ])
+        message.save()
+        .then(data => {
+          messageId = data._id 
+          const { model: chatRoom } = mockCreateRoom({
+            info: {
+              name: COMMON_API,
+            },
+            origin: false,
+            type: ROOM_TYPE.CHAT,
+            members: [memberId],
+            message: [messageId]
+          })
+          const { model: user } = mockCreateUser({
+            username: COMMON_API
+          })
+          return Promise.all([
+            chatRoom.save(),
+            user.save()
+          ])
+        })
         .then(([room, user]) => {
           roomId = room._id 
           otherUserId = user._id 
@@ -1793,9 +1882,15 @@ describe(`${COMMON_API} test`, function() {
             sid: COMMON_API,
             user: otherUserId
           })
-          return newMember.save()
+          return Promise.all([
+            newMember.save(),
+            MessageModel.findOne({
+              _id: messageId,
+              room: roomId
+            })
+          ])
         })
-        .then(data => {
+        .then(([data]) => {
           newMemberId = data._id 
           return Promise.all([
             MemberModel.updateMany({
@@ -1853,12 +1948,19 @@ describe(`${COMMON_API} test`, function() {
             .select({
               _id: 1
             })
-            .exec()
+            .exec(),
+            MessageModel.findOne({
+              room: roomId 
+            })
+            .select({
+              _id: 1
+            })
           ])
         })
-        .then(([member, room]) => {
+        .then(([member, room, message]) => {
           expect(!!member).to.be.true 
           expect(!!room).to.be.false 
+          expect(!!message).to.be.false 
           done()
         })
         .catch(function(err) {

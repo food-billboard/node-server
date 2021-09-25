@@ -1,8 +1,23 @@
 const { pick } = require('lodash')
 const { postMessage } = require('../services')
-const { errWrapper } = require('../utils')
+const { errWrapper, findMembers, getSocket } = require('../utils')
 
-const sendMessage = socket => async (data) => {
+async function broadcast(io, socket, roomId, origin) {
+  const data = await findMembers(roomId)
+  data.forEach(member => {
+    try {
+      const { sid } = member
+      const memberSocket = getSocket(io, sid)
+      if(memberSocket) {
+        memberSocket.emit('post', origin)
+      }
+    }catch(err) {
+      console.log(err)
+    } 
+  })
+}
+
+const sendMessage = (socket, io) => async (data) => {
 
   const { id } = socket
 
@@ -11,7 +26,7 @@ const sendMessage = socket => async (data) => {
   try {
     res = await postMessage(socket, data, {
       sid: id,
-      ...pick(data, ["_id", 'type', 'content', 'point_to'])
+      ...pick(data, ["_id", 'type', 'content', 'point_to', "message_id"])
     })
     // broadcastRoomMember()
 
@@ -38,7 +53,11 @@ const sendMessage = socket => async (data) => {
     //     username: userInfo.username
     //   })
     // })
-
+    const { success } = JSON.parse(res) 
+    if(success) {
+      broadcast(io, socket, data._id, res)
+      return 
+    }
   }catch(err) {
     res = JSON.stringify(errWrapper(err))
   }

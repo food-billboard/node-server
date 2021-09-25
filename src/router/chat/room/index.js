@@ -1,9 +1,32 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { verifyTokenToData, RoomModel, dealErr, Params, responseDataDeal, ROOM_TYPE, parseData, MemberModel, Authorization, notFound } = require('@src/utils')
+const { 
+  verifyTokenToData, 
+  RoomModel, 
+  dealErr, 
+  Params, 
+  responseDataDeal, 
+  ROOM_TYPE, 
+  parseData, 
+  MemberModel, 
+  Authorization, 
+  notFound,
+  MessageModel
+} = require('@src/utils')
 const joinRoom = require('./utils/join')
 
 const router = new Router()
+
+const getMemberId = (user) => {
+  return MemberModel.findOne({ user })
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => {
+    return data._id
+  })
+}
 
 router
 .get('/', async(ctx) => {
@@ -23,13 +46,19 @@ router
   })
   const { _id, type, origin, create_user, content, members } = ctx.query
 
-  let match = {}
+  let match = {
+    
+  }
   const [, token] = verifyTokenToData(ctx)
   if(ObjectId.isValid(_id)) match._id = ObjectId(_id)
   if(!token) {
     match.type = ROOM_TYPE.SYSTEM
     match.origin = true
   }else {
+    const memberId = await getMemberId(token.id)
+    match.delete_users = {
+      $nin: [memberId]
+    }
     if(ROOM_TYPE[type]) match.type = type 
     if(origin !== undefined) match.origin = parseInt(origin) === 1
     if(ObjectId.isValid(create_user)) match.create_user = ObjectId(create_user)
@@ -142,7 +171,10 @@ router
       }
     },
     {
-      $unwind: "$create_user"
+      $unwind: {
+        path: "$create_user",
+        preserveNullAndEmptyArrays: true  
+      }
     },
     {
       $lookup: {
@@ -473,7 +505,7 @@ router
     room.forEach(item => {
       const { members, create_user, type, delete_users } = item 
       forbidden = type === ROOM_TYPE.SYSTEM || (type != ROOM_TYPE.CHAT && !create_user.equals(memberId)) || !members.some(item => item.equals(memberId))
-      needNotDelete = (type === ROOM_TYPE.CHAT && (delete_users.length == 0 || !!memberId.equals(delete_users[0]))) || type === ROOM_TYPE.GROUP_CHAT
+      needNotDelete = (type === ROOM_TYPE.CHAT && (delete_users.length == 0 || !!memberId.equals(delete_users[0]))) || type === ROOM_TYPE.GROUP_CHAT 
     })
     if(forbidden) return Promise.reject({
       errMsg: 'forbidden',
@@ -481,30 +513,56 @@ router
     })
 
     if(needNotDelete) {
-      return RoomModel.updateMany({
-        _id: {
-          $in: _id
-        },
-        origin: false,
-      }, {
-        $addToSet: {
-          delete_users: memberId
-        },
-        $pull: {
-          online_members: memberId
-        }
-      })
+      return Promise.all([
+        RoomModel.updateMany({
+          _id: {
+            $in: _id
+          },
+          origin: false,
+        }, {
+          $addToSet: {
+            delete_users: memberId
+          },
+          $pull: {
+            online_members: memberId
+          }
+        }),
+        MessageModel.updateMany({
+          room: {
+            $in: _id
+          }
+        }, {
+          $addToSet: {
+            deleted: memberId
+          }
+        })
+      ])
     }else {
-      const toDeleteRoomIds = _id.filter(roomId => room.some(item => item._id.equals(roomId) && !item.create_user.equals(memberId)))
-      return RoomModel.remove({
-        _id: {
-          $in: toDeleteRoomIds
-        },
-        origin: false,
-        // ...(type === ROOM_TYPE.CHAT ? {} : { create_user: data }),
-      }, {
-        single: true
+      const toDeleteRoomIds = _id.filter(roomId => {
+        return room.some(item => {
+          return item._id.equals(roomId) && (
+            item.type === ROOM_TYPE.CHAT ||
+            true
+            // !item.create_user.equals(memberId)
+          )
+        })
       })
+      return Promise.all([
+        RoomModel.remove({
+          _id: {
+            $in: toDeleteRoomIds
+          },
+          origin: false,
+          // ...(type === ROOM_TYPE.CHAT ? {} : { create_user: data }),
+        }, {
+          single: true
+        }),
+        MessageModel.deleteMany({
+          room: {
+            $in: toDeleteRoomIds
+          }
+        })
+      ])
     }
   })
   .then(_ => {

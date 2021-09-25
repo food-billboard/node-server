@@ -13,6 +13,8 @@ const createRoom = socket => async(data) => {
       sid: id,
       ...pick(data, ["_id", "type", "members"])
     })
+    const { res: { data: roomId } } = JSON.parse(res) 
+    socket.join(roomId)
   }catch(err) {
     res = JSON.stringify(errWrapper(err))
   }

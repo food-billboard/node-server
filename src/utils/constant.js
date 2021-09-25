@@ -66,6 +66,11 @@ const ROLES_MAP = {
   USER: 5
 }
 
+const ROLES_NAME_MAP = Object.keys(ROLES_MAP).reduce((acc, cur) => {
+  acc[cur] = cur 
+  return acc 
+}, {})
+
 const FEEDBACK_STATUS = {
   DEALING: 'DEALING',
   DEAL: 'DEAL'
@@ -108,10 +113,19 @@ const BEHAVIOUR_URL_TYPE_MAP = {
 }
 
 const FRIEND_STATUS = {
+  //正常
   NORMAL: 'NORMAL',
+  //黑名单
   BLACK: 'BLACK',
+  //等待同意
   TO_AGREE: 'TO_AGREE',
+  //等待中(向他人发出申请时自己的状态)
+  TO_AGREEING: "TO_AGREEING",
+  //拒绝
   DIS_AGREE: "DIS_AGREE",
+  //被拒绝
+  DIS_AGREEED: "DIS_AGREEED",
+  //同意(即将变成NORMAL)
   AGREE: "AGREE"
 }
 
@@ -154,6 +168,12 @@ const USER_HOT_HISTORY_TYPE = {
   barrage: "barrage"
 }
 
+const MESSAGE_POST_STATUS = {
+  LOADING: "LOADING",
+  ERROR: "ERROR",
+  DONE: "DONE"
+}
+
 module.exports = {
   MESSAGE_MEDIA_TYPE,
   MESSAGE_TYPE,
@@ -184,5 +204,7 @@ module.exports = {
   ERROR_ORIGIN_TYPE,
   ERROR_TYPE,
   USER_HOT_HISTORY_TYPE,
-  STATIC_FILE_PATH_NO_WRAPPER
+  STATIC_FILE_PATH_NO_WRAPPER,
+  MESSAGE_POST_STATUS,
+  ROLES_NAME_MAP
 }

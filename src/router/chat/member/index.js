@@ -33,7 +33,7 @@ router
   })
 
   let match = {
-    room: {
+    _id: {
       $in: [_id]
     },
   }
@@ -43,9 +43,12 @@ router
     match.origin = true
   }
 
-  const data = await MemberModel.aggregate([
+  const data = await RoomModel.aggregate([
     {
       $match: match
+    },
+    {
+      $unwind: "$members"
     },
     {
       $skip: currPage * pageSize
@@ -55,8 +58,19 @@ router
     },
     {
       $lookup: {
+        from: 'members',
+        as: 'members_user',
+        foreignField: "_id",
+        localField: "members"
+      }
+    },
+    {
+      $unwind: "$members_user"
+    },
+    {
+      $lookup: {
         from: 'users', 
-        let: { customFields: "$user" },
+        let: { customFields: "$members_user.user" },
         pipeline: [  
           {
             $match: {
@@ -100,11 +114,11 @@ router
     {
       $project: {
         user: "$user",  
-        status: 1,
-        sid: 1,
-        createdAt: 1,
-        updatedAt: 1,
-        _id: 1
+        status: "$members_user.status",
+        sid: "$members_user.sid",
+        createdAt:"$members_user.createdAt",
+        updatedAt: "$members_user.updatedAt",
+        _id: "$members_user._id",
       }
     }
   ])

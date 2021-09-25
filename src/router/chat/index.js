@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
-const { verifyTokenToData, dealErr, Params, responseDataDeal, parseData, MemberModel, notFound, RoomModel } = require('@src/utils')
+const { verifyTokenToData, dealErr, Params, responseDataDeal, notFound, MemberModel, RoomModel } = require('@src/utils')
 const Message = require('./message')
 const Room = require('./room')
 const Member = require('./member')
@@ -61,7 +61,7 @@ router
     _id: 1
   })
   .exec()
-  .then(parseData)
+  .then(notFound)
   .then(data => {
     return {
       data: {

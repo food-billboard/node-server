@@ -1,9 +1,10 @@
 const Router = require('@koa/router')
 const { merge } = require('lodash')
+const { Types: { ObjectId } } = require('mongoose')
 const Upload = require('./upload')
 const Comment = require('./comment')
 const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal, Params, avatarGet, encoded } = require('@src/utils')
-const { Types: { ObjectId } } = require('mongoose')
+const { auth } = require('./auth')
 
 const router = new Router()
 
@@ -43,6 +44,7 @@ router
   })
   .exec()
   .then(notFound)
+  .then(auth)
   .then(data => {
     const { fans, attentions, issue, comment, store, avatar, ...nextData } = data
     return {

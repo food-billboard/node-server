@@ -154,7 +154,12 @@ router
     user: id,
     friends: { 
       $elemMatch: { 
-        status: FRIEND_STATUS.NORMAL,
+        status: {
+          $in: [
+            FRIEND_STATUS.NORMAL,
+            FRIEND_STATUS.AGREE,
+          ]
+        },
         _id
       } 
     }

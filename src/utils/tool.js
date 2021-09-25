@@ -237,6 +237,17 @@ function cookieDomainSet(env) {
   return nodeEnv.toLowerCase() == 'prod' ? '47.111.229.250' : 'localhost'
 }
 
+function withTry(func) {
+  return async function(...args) {
+    try {
+      const data = await func(...args)
+      return [null, data]
+    }catch(err) {
+      return [err, null]
+    }
+  }
+}
+
 module.exports = {
   isType,
   isEmpty,
@@ -256,5 +267,6 @@ module.exports = {
   avatarGet,
   formatMediaUrl,
   parseUrl,
-  cookieDomainSet
+  cookieDomainSet,
+  withTry
 }

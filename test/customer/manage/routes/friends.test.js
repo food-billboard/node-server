@@ -283,7 +283,12 @@ describe(`${COMMON_API} test`, function() {
 
       before(function(done) {
         FriendsModel.updateMany({
-          _id: selfFriendId
+          _id: {
+            $in: [
+              selfFriendId,
+              friendId
+            ]
+          }
         }, {
           $set: {
             friends: []
@@ -305,7 +310,7 @@ describe(`${COMMON_API} test`, function() {
               "friends._id": { $in: [ friendId ] }
             },
             {
-              "friends.status": FRIEND_STATUS.TO_AGREE
+              "friends.status": FRIEND_STATUS.TO_AGREEING
             }
           ]
         })
@@ -315,11 +320,36 @@ describe(`${COMMON_API} test`, function() {
         })
         .exec()
         .then((user) => {
-          return !!user
+          expect(!!user).to.be.true 
+          return FriendsModel.findOne({
+            _id: friendId,
+            friends: {
+              $elemMatch: {
+                $and: [
+                  {
+                    _id: { $in: [ selfFriendId ] }
+                  },
+                  {
+                    status: FRIEND_STATUS.TO_AGREE
+                  }
+                ]
+              }
+            }
+          })
+          .select({
+            _id: 0,
+            friends: 1
+          })
+          .exec()
         })
         .then(result => {
-          if(result) return done()
-          done(new Error(COMMON_API))
+          expect(!!result).to.be.true 
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(err => {
+          done(err)
         })
       })
 
@@ -582,6 +612,74 @@ describe(`${COMMON_API} test`, function() {
           _id: selfFriendId
         }, {
           friends: [ { _id: friendId, timestamps: Date.now(), status: FRIEND_STATUS.DIS_AGREE } ]
+        })
+        .then(function() {
+          return Request
+          .delete(COMMON_API)
+          .query({
+            _id: friendId.toString()
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(404)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return FriendsModel.updateMany({
+            _id: selfFriendId
+          }, {
+            friends: []
+          })
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+      })
+
+      it(`cancel the user for friends fail because the user status is TO_AGREEING`, function(done) {
+        FriendsModel.updateMany({
+          _id: selfFriendId
+        }, {
+          friends: [ { _id: friendId, timestamps: Date.now(), status: FRIEND_STATUS.TO_AGREEING } ]
+        })
+        .then(function() {
+          return Request
+          .delete(COMMON_API)
+          .query({
+            _id: friendId.toString()
+          })
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(404)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return FriendsModel.updateMany({
+            _id: selfFriendId
+          }, {
+            friends: []
+          })
+        })
+        .then(_ => {
+          done()
+        })
+        .catch(err => {
+          console.log('oops: ', err)
+        })
+      })
+
+      it(`cancel the user for friends fail because the user status is TO_AGREEING`, function(done) {
+        FriendsModel.updateMany({
+          _id: selfFriendId
+        }, {
+          friends: [ { _id: friendId, timestamps: Date.now(), status: FRIEND_STATUS.DIS_AGREEED } ]
         })
         .then(function() {
           return Request

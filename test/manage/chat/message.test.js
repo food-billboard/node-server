@@ -26,11 +26,12 @@ function responseExpect(res, validate=[]) {
 
   expect(target.list).to.be.a('array')
   target.list.forEach(item => {
-    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'createdAt', 'updatedAt', 'user_info', 'message_type', 'point_to', 'readed_count', 'deleted_count', 'content', 'media_type', 'room')
+    expect(item).to.be.a('object').and.that.include.all.keys('_id', 'createdAt', 'updatedAt', "status", 'user_info', 'message_type', 'point_to', 'readed_count', 'deleted_count', 'content', 'media_type', 'room')
     commonValidate.objectId(item._id)
     commonValidate.objectId(item.room)
     commonValidate.date(item.createdAt)
     commonValidate.date(item.updatedAt)
+    commonValidate.string(item.status)
     expect(item.user_info).to.be.a('object').and.that.include.any.keys('username', 'avatar', '_id', 'member', 'description')
     commonValidate.string(item.user_info.username)
     commonValidate.string(item.user_info.description)

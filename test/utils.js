@@ -27,7 +27,8 @@ const {
   ROOM_USER_NET_STATUS,
   MESSAGE_MEDIA_TYPE,
   ROOM_TYPE,
-  MESSAGE_TYPE
+  MESSAGE_TYPE,
+  MESSAGE_POST_STATUS
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
@@ -406,6 +407,7 @@ function mockCreateMessage(values) {
     content: {
       text: '测试消息内容'
     },
+    status: MESSAGE_POST_STATUS.DONE
   }
 
   baseModel = mergeConfig(baseModel, values, true)

@@ -6813,6 +6813,11 @@
                         "description": "消息类型",
                         "enum": ["ORIGIN", "USER"]
                       },
+                      "status": {
+                        "type": "string",
+                        "description": "消息状态",
+                        "enum": ["LOADING", "DONE", "ERROR"]
+                      },
                       "point_to": {
                         "type": "string",
                         "description": "@"

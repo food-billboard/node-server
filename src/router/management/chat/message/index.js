@@ -207,6 +207,7 @@ router
           user_info: "$user_info",
           message_type: 1,
           point_to: 1,
+          status: 1,
           room: 1,
           readed_count: {
             $size: {
