@@ -14,6 +14,7 @@ const PinYin = require('./pinyin')
 const Video = require('./video')
 const Media = require('./media')
 const Middleware = require('./middleware')
+const Common = require("./common")
 
 module.exports = {
   ...MongoDB,
@@ -31,5 +32,6 @@ module.exports = {
   ...PinYin,
   ...Video,
   ...Media,
-  ...Middleware
+  ...Middleware,
+  ...Common
 }

@@ -1,6 +1,18 @@
 const Router = require('@koa/router')
 const Detail = require('./detail')
-const { UserModel, verifyTokenToData, dealErr, VALIDATOR_MAP, Params, responseDataDeal, ROLES_MAP, USER_STATUS, encoded, EMAIL_REGEXP } = require('@src/utils')
+const { 
+  UserModel, 
+  verifyTokenToData, 
+  dealErr, 
+  VALIDATOR_MAP, 
+  Params, 
+  responseDataDeal, 
+  ROLES_MAP, 
+  USER_STATUS, 
+  encoded, 
+  EMAIL_REGEXP,
+  initialUserData 
+} = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
 const { Auth } = require('./auth')
@@ -217,10 +229,12 @@ router
   if(check) return
 
   let userModel = {}
-  const [ roles ] = Params.sanitizers(ctx.body, {
+  const [ roles ] = Params.sanitizers(ctx.request.body, {
     name: 'roles',
     sanitizers: [
-      data => typeof data === 'string' ? data.split(',') : "USER"
+      data => {
+        return (typeof data === 'string') ? data.split(',') : ["USER"]
+      }
     ]
   })
   const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'roles' ]
@@ -263,6 +277,7 @@ router
   .then(data => {
     if(data.length == 0) return Promise.reject({ status: 403, errMsg: 'forbidden' })
     if(data.length >= 2 || (data.length == 1 && data[0].mobile == Number(newUserMobile))) return Promise.reject({ status: 400, errMsg: 'user exists' }) 
+    return initialUserData(userModel)
     const model = new UserModel(userModel)
     return model.save()
   })
