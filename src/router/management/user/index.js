@@ -245,8 +245,6 @@ router
     if(params.includes(cur)) {
       if(cur === 'roles') {
         acc.roles = roles
-      }else if(cur === 'password') {
-        acc.password = encoded(body[cur])
       }else if(typeof body[cur] != 'undefined') {
         acc[cur] = body[cur]
       }
@@ -278,8 +276,6 @@ router
     if(data.length == 0) return Promise.reject({ status: 403, errMsg: 'forbidden' })
     if(data.length >= 2 || (data.length == 1 && data[0].mobile == Number(newUserMobile))) return Promise.reject({ status: 400, errMsg: 'user exists' }) 
     return initialUserData(userModel)
-    const model = new UserModel(userModel)
-    return model.save()
   })
   .then(data => ({ data: { _id: data._id } }))
   .catch(dealErr(ctx))

@@ -2140,29 +2140,24 @@
           {
             "name":"username",
             "in": "body",
-            "required": true,
             "description": "用户名",
-            "type": "string",
-            "format":"date-time"
+            "type": "string"
           },
           {
             "name":"avatar",
             "in": "body",
-            "required": true,
             "description": "头像",
             "type": "string"
           },
           {
             "name":"description",
             "in": "body",
-            "required": true,
             "description": "描述",
             "type": "string"
           },
           {
             "name":"roles",
             "in": "body",
-            "required": true,
             "description": "角色, 多个用,分隔",
             "type": "string",
             "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
@@ -2221,28 +2216,24 @@
           {
             "name":"mobile",
             "in": "body",
-            "required": true,
             "description": "手机",
             "type": "integer"
           },
           {
             "name":"password",
             "in": "body",
-            "required": true,
             "description": "密码",
             "type": "string"
           },
           {
             "name":"email",
             "in": "body",
-            "required": true,
             "description": "邮箱",
             "type": "string"
           },
           {
             "name":"username",
             "in": "body",
-            "required": true,
             "description": "用户名",
             "type": "string",
             "format":"date-time"
@@ -2250,21 +2241,18 @@
           {
             "name":"avatar",
             "in": "body",
-            "required": true,
             "description": "头像",
             "type": "string"
           },
           {
             "name":"description",
             "in": "body",
-            "required": true,
             "description": "描述",
             "type": "string"
           },
           {
             "name":"roles",
             "in": "body",
-            "required": true,
             "description": "角色,多个用,分隔",
             "type": "string",
             "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
