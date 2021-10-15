@@ -1,5 +1,4 @@
 const Router = require('@koa/router')
-const { Types: { ObjectId } } = require('mongoose')
 const { 
   signToken, 
   Params, 
@@ -10,7 +9,8 @@ const {
   EMAIL_REGEXP, 
   setCookie, 
   TOKEN_COOKIE, 
-  initialUserData
+  initialUserData,
+  cookieDomainSet
 } = require('@src/utils')
 const { email_type } = require('../map')
 
@@ -44,7 +44,7 @@ router
     name: 'mobile',
     type: ['toInt']
   })
-  const { request: { body: { email, captcha, username, description, avatar } } } = ctx
+  const { request: { body: { email, captcha, username, description, avatar, env } } } = ctx
 
   //判断账号是否存在
   const data = await UserModel.findOne({
@@ -85,7 +85,7 @@ router
     ctx.status = 200
     //设置cookie
     //临时设置，需要修改
-    setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set' })
+    setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set', options: { domain: cookieDomainSet(env) } })
     
     return {
       data: {

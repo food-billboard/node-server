@@ -21,6 +21,26 @@ services:
   #     7000:7000
   #   volumes:
   #     - ./static/video:/root/download/:rw
+  rabbitmq:
+    image: rabbitmq:3.8.3-management
+    container_name: rabbitmq
+    restart: always
+    hostname: movieRabbit
+    ports:
+      # 管理界面
+      - 15672:15672
+      # erlang
+      - 4369:4369
+      # client
+      - 5672:5672
+      # server
+      - 25672:25672
+    volumes:
+      - "./local_data/rabbitmq/data:/var/lib/rabbitmq"
+      - "./local_data/rabbitmq/data:/var/log/rabbitmq/log"
+    environment:
+      - RABBITMQ_DEFAULT_USER="admin"
+      - RABBITMQ_DEFAULT_PASS="admin"
   mongo:
     container_name: mongo
     image: mongo:4.0.3
