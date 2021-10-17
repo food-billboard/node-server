@@ -3482,7 +3482,7 @@
         }
       }
     },
-    "/api/manage/media/vaid": {
+    "/api/manage/media/valid": {
       "get": {
         "tags": [
           "media"
@@ -6419,19 +6419,33 @@
           "type": "object",
           "properties": {
             "data": {
-              "type": "object",
-              "properties": {
-                "complete": {
-                  "type": "boolean",
-                  "description": "是否完成"
-                },
-                "error": {
-                  "type": "boolean",
-                  "description": "是否出错"
-                },
-                "exists": {
-                  "type": "boolean",
-                  "description": "是否存在"
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "complete": {
+                    "type": "boolean",
+                    "description": "是否完成"
+                  },
+                  "error": {
+                    "type": "boolean",
+                    "description": "是否出错"
+                  },
+                  "exists": {
+                    "type": "boolean",
+                    "description": "是否存在"
+                  },
+                  "_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "文件名称"
+                  },
+                  "src": {
+                    "type": "string",
+                    "description": "文件路径"
+                  }
                 }
               }
             }

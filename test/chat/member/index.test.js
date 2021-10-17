@@ -169,7 +169,6 @@ describe(`${COMMON_API} test`, function() {
             console.log(_)
           }
           responseExpect(obj, target => {
-            console.log(target, 222222)
             expect(target.some(item => item._id === memberId.toString())).to.be.true
           })
           done()

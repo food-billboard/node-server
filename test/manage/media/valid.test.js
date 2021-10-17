@@ -10,10 +10,14 @@ const COMMON_API = '/api/manage/media/valid'
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
-  expect(target).to.be.a('object').and.that.include.all.keys('complete', 'error', 'exists')
-  expect(target.complete).to.be.a('boolean')
-  expect(target.error).to.be.a('boolean')
-  expect(target.exists).to.be.a('boolean')
+  expect(target).to.be.a("array")
+
+  target.forEach(item => {
+    expect(item).to.be.a('object').and.that.include.all.keys('complete', 'error', 'exists')
+    expect(item.complete).to.be.a('boolean')
+    expect(item.error).to.be.a('boolean')
+    expect(item.exists).to.be.a('boolean')
+  })
 
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
@@ -144,9 +148,11 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.complete).to.be.false
-          expect(target.error).to.be.true
-          expect(target.exists).to.be.false
+          target.forEach(item => {
+            expect(item.complete).to.be.false
+            expect(item.error).to.be.true
+            expect(item.exists).to.be.false
+          })
         })
         done()
       })
@@ -183,9 +189,11 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.complete).to.be.false
-          expect(target.error).to.be.true
-          expect(target.exists).to.be.true
+          target.forEach(item => {
+            expect(item.complete).to.be.false
+            expect(item.error).to.be.true
+            expect(item.exists).to.be.true
+          })
         })
       })
       .then(_ => {
@@ -235,10 +243,10 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          responseExpect(obj, (target) => {
-            expect(target.complete).to.be.false
-            expect(target.error).to.be.false
-            expect(target.exists).to.be.true
+          target.forEach(item => {
+            expect(item.complete).to.be.false
+            expect(item.error).to.be.false
+            expect(item.exists).to.be.true
           })
         })
       })
@@ -289,9 +297,11 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.complete).to.be.true
-          expect(target.error).to.be.false
-          expect(target.exists).to.be.true
+          target.forEach(item => {
+            expect(item.complete).to.be.true
+            expect(item.error).to.be.false
+            expect(item.exists).to.be.true
+          })
         })
       })
       .then(_ => {
@@ -335,9 +345,11 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.complete).to.be.true
-          expect(target.error).to.be.false
-          expect(target.exists).to.be.true
+          target.forEach(item => {
+            expect(item.complete).to.be.true
+            expect(item.error).to.be.false
+            expect(item.exists).to.be.true
+          })
         })
         done()
       })
@@ -374,9 +386,11 @@ describe(`${COMMON_API} test`, () => {
           console.log(_)
         }
         responseExpect(obj, (target) => {
-          expect(target.complete).to.be.false
-          expect(target.error).to.be.true
-          expect(target.exists).to.be.false
+          target.forEach(item => {
+            expect(item.complete).to.be.false
+            expect(item.error).to.be.true
+            expect(item.exists).to.be.false
+          })
         })
       })
       .then(_ => {

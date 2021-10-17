@@ -97,11 +97,28 @@ router
     $options: 'ig'
   }
 
+  const match = {
+    createdAt: {
+      $lte: end_date,
+      ...(!!start_date ? { $gte: start_date } : {})
+    },
+    roles: {
+      $in: roles
+    },
+    status: {
+      $in: status
+    },
+    $or: [ 'username', 'email', 'mobile' ].map(item => ({ [item]: contentReg }))
+  }
+
   const data = await Promise.all([
     //用户总数
     UserModel.aggregate([
       {
-        $project: {
+        $match: match
+      },
+      {
+        $group: {
           _id: null,
           total: {
             $sum: 1
@@ -111,19 +128,7 @@ router
     ]),
     UserModel.aggregate([
       {
-        $match: {
-          createdAt: {
-            $lte: end_date,
-            ...(!!start_date ? { $gte: start_date } : {})
-          },
-          roles: {
-            $in: roles
-          },
-          status: {
-            $in: status
-          },
-          $or: [ 'username', 'email', 'mobile' ].map(item => ({ [item]: contentReg }))
-        }
+        $match: match
       },
       {
         $skip: currPage * pageSize
@@ -203,7 +208,6 @@ router
   .then(([total_count, user_data]) => {
 
     if(!Array.isArray(total_count) || !Array.isArray(user_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
-
     return {
       data: {
         total: !!total_count.length ? total_count[0].total || 0 : 0,
