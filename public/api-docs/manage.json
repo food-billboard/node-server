@@ -1032,6 +1032,34 @@
         }
       }
     },
+    "/api/manage/movie/detail/tag/update": {
+      "put": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "更新电影标签",
+        "description": "",
+        "operationId": "manage_movie_detail_put_tag_update",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "电影id",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
     "/api/manage/movie/detail/valid": {
       "put": {
         "tags": [

@@ -1,23 +1,27 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
+const { Types: { ObjectId } } = require("mongoose")
 let nodejieba
 try {
   nodejieba = require('nodejieba')
 }catch(err) {
   console.log(chalk.red('当前不支持nodejieba包'))
 }
-const { Types: { ObjectId } } = require('mongoose')
 const { log4Error } = require('@src/config/winston')
 const { COMMENT_SOURCE_TYPE, EXTRACT_KEYWORD_TOP_N } = require('../constant')
 const { MovieModel, TagModel, CommentModel } = require('../mongodb/mongo.lib')
 
 
-const collecteComment = async () => {
+const collectComment = async (movieId) => {
+  let match = {
+    source_type: COMMENT_SOURCE_TYPE.movie,
+  }
+  if(!!movieId) match.source = {
+    $in: movieId
+  }
   return CommentModel.aggregate([
     {
-      $match: {
-        source_type: COMMENT_SOURCE_TYPE.movie
-      }
+      $match: match
     },
     {
       $project: {
@@ -29,10 +33,22 @@ const collecteComment = async () => {
   .then(list => list.map(comment => ({ id: comment.source.toString(), value: comment.content.text })))
 }
 
-const cleanTag = async () => {
+const cleanTag = async (movieId) => {
+  let tagMatch = {}
+  let movieMatch = {}
+  if(!!movieId) {
+    tagMatch = {
+      source: {
+        $in: movieId
+      }
+    }
+    movieMatch = {
+      _id: movieId
+    }
+  }
   return Promise.all([
-    TagModel.deleteMany({}),
-    MovieModel.updateMany({}, {
+    TagModel.deleteMany(tagMatch),
+    MovieModel.updateMany(movieMatch, {
       $set: { tag: [] }
     })
   ])
@@ -91,6 +107,15 @@ const updateMovieTag = (tagList) => {
 
 }
 
+function action(movieId) {
+  return cleanTag(movieId)
+  .then(() => {
+    return collectComment(movieId)
+  })
+  .then(setTag)
+  .then(updateMovieTag)
+}
+
 function scheduleMethod({
   test=false
 }={}) {
@@ -98,10 +123,7 @@ function scheduleMethod({
   console.log(chalk.magenta('数据标签tag定时审查'))
 
   //当前简单使用评论当做tag
-  return cleanTag()
-  .then(collecteComment)
-  .then(setTag)
-  .then(updateMovieTag)
+  return action()
   .then(results => {
     const errors = results.filter(result => result.status === "rejected")
     if(!!errors.length) return Promise.reject({ errMsg: 'tag设置部分错误', list: errors })
@@ -121,5 +143,6 @@ const tagSchedule = () => {
 
 module.exports = {
   tagSchedule,
-  scheduleMethod
+  scheduleMethod,
+  action
 }

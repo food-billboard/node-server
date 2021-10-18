@@ -129,7 +129,7 @@ describe(`${COMMON_API} test`, function() {
   
       })
 
-      it(`get the tag success width _id`, function(done) {
+      it(`get the tag success with _id`, function(done) {
 
         Request
         .get(COMMON_API)
