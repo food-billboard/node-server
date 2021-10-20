@@ -26,8 +26,18 @@ async function MongoDB(url="mongodb://127.0.0.1:27017/movie") {
   return Promise.resolve()
 }
 
+function objectIdFormat(id) {
+  return id.split(",").map(item => mongoose.Types.ObjectId(item.trim()))
+}
+
+function objectIdValid(id) {
+  return id.split(",").every(item => mongoose.Types.ObjectId.isValid(item.trim()))
+}
+
 module.exports = {
   ...Lib,
+  objectIdFormat,
+  objectIdValid,
   MongoDB: connectTry(MongoDB, {
     msg: 'the mongodb server is run in error'
   })

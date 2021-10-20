@@ -8,26 +8,51 @@ const API_PATH = path.join(root, 'public')
 
 const router = new Router()
 
+const STATIC_PAGE_MAP = [
+  {
+    regexp: /(?<=.+\/chat\/).+$/,
+    path: "chat"
+  },
+  {
+    regexp: /(?<=.+\/swagger\/).+$/,
+    path: "api-docs"
+  },
+  {
+    regexp: /(?<=.+\/backend\/).+$/,
+    path: "manage"
+  },
+  {
+    regexp: /(?<=.+\/test\/).+$/,
+    path: "test"
+  }
+]
+
 router
 .get('/:path(.*)', async (ctx, _) => {
-  const { url } = ctx
+  const { URL: url } = ctx.request
   let name 
-  const backendMatch = url.match(/(?<=.+\/backend\/).+$/)
-  const swaggerMatch = url.match(/(?<=.+\/swagger\/).+$/)
-  const testMatch = url.match(/(?<=.+\/test\/).+$/)
   let filePath = API_PATH
-  if(swaggerMatch) {
-    [name] = swaggerMatch
-    filePath = path.join(filePath, 'api-docs', name)
-  }else if(testMatch) {
-    [name] = testMatch
-    filePath = path.join(filePath, 'test', name)
-  }else if(backendMatch) {
-    [name] = backendMatch
-    filePath = path.join(filePath, 'manage', name)
-  }else {
+  const {
+    origin,
+    pathname
+  } = new URL(url)
+  const realUrl = origin + pathname
+
+  const result = STATIC_PAGE_MAP.some(item => {
+    const { regexp, path: dir } = item 
+    const match = realUrl.match(regexp)
+    if(match) {
+      [name] = match
+      filePath = path.join(filePath, dir, name)
+      return true 
+    }
+    return false 
+  })
+
+  if(!result) {
     return ctx.status = 404
   }
+
   const extname = path.extname(name)
 
   let stat
@@ -39,7 +64,6 @@ router
       throw new Error()
     }
   }catch(_) {
-    console.log(_)
     return ctx.status = 404
   }
 

@@ -1,6 +1,18 @@
 const Router = require('@koa/router')
 const Detail = require('./detail')
-const { UserModel, verifyTokenToData, dealErr, VALIDATOR_MAP, Params, responseDataDeal, ROLES_MAP, USER_STATUS, encoded, EMAIL_REGEXP } = require('@src/utils')
+const { 
+  UserModel, 
+  verifyTokenToData, 
+  dealErr, 
+  VALIDATOR_MAP, 
+  Params, 
+  responseDataDeal, 
+  ROLES_MAP, 
+  USER_STATUS, 
+  encoded, 
+  EMAIL_REGEXP,
+  initialUserData 
+} = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
 const { Auth } = require('./auth')
@@ -85,11 +97,28 @@ router
     $options: 'ig'
   }
 
+  const match = {
+    createdAt: {
+      $lte: end_date,
+      ...(!!start_date ? { $gte: start_date } : {})
+    },
+    roles: {
+      $in: roles
+    },
+    status: {
+      $in: status
+    },
+    $or: [ 'username', 'email', 'mobile' ].map(item => ({ [item]: contentReg }))
+  }
+
   const data = await Promise.all([
     //用户总数
     UserModel.aggregate([
       {
-        $project: {
+        $match: match
+      },
+      {
+        $group: {
           _id: null,
           total: {
             $sum: 1
@@ -99,19 +128,7 @@ router
     ]),
     UserModel.aggregate([
       {
-        $match: {
-          createdAt: {
-            $lte: end_date,
-            ...(!!start_date ? { $gte: start_date } : {})
-          },
-          roles: {
-            $in: roles
-          },
-          status: {
-            $in: status
-          },
-          $or: [ 'username', 'email', 'mobile' ].map(item => ({ [item]: contentReg }))
-        }
+        $match: match
       },
       {
         $skip: currPage * pageSize
@@ -191,7 +208,6 @@ router
   .then(([total_count, user_data]) => {
 
     if(!Array.isArray(total_count) || !Array.isArray(user_data)) return Promise.reject({ errMsg: 'not found', status: 404 })
-
     return {
       data: {
         total: !!total_count.length ? total_count[0].total || 0 : 0,
@@ -217,10 +233,12 @@ router
   if(check) return
 
   let userModel = {}
-  const [ roles ] = Params.sanitizers(ctx.body, {
+  const [ roles ] = Params.sanitizers(ctx.request.body, {
     name: 'roles',
     sanitizers: [
-      data => typeof data === 'string' ? data.split(',') : "USER"
+      data => {
+        return (typeof data === 'string') ? data.split(',') : ["USER"]
+      }
     ]
   })
   const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'roles' ]
@@ -231,8 +249,6 @@ router
     if(params.includes(cur)) {
       if(cur === 'roles') {
         acc.roles = roles
-      }else if(cur === 'password') {
-        acc.password = encoded(body[cur])
       }else if(typeof body[cur] != 'undefined') {
         acc[cur] = body[cur]
       }
@@ -263,8 +279,7 @@ router
   .then(data => {
     if(data.length == 0) return Promise.reject({ status: 403, errMsg: 'forbidden' })
     if(data.length >= 2 || (data.length == 1 && data[0].mobile == Number(newUserMobile))) return Promise.reject({ status: 400, errMsg: 'user exists' }) 
-    const model = new UserModel(userModel)
-    return model.save()
+    return initialUserData(userModel)
   })
   .then(data => ({ data: { _id: data._id } }))
   .catch(dealErr(ctx))

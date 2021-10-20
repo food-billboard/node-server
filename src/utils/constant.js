@@ -1,7 +1,8 @@
 const path = require('path')
 
 const DEVELOPMENT_API_DOMAIN = 'http://localhost:4000'
-const PRODUCTION_API_DOMAIN = 'http://47.111.229.250'
+const PRODUCTION_DOMAIN = "47.111.229.250"
+const PRODUCTION_API_DOMAIN = `http://${PRODUCTION_DOMAIN}`
 
 const EMAIL_AUTH = {
   pass: 'hgldcifqqwmlbajd',
@@ -94,7 +95,7 @@ const MEDIA_AUTH = {
 
 const MEDIA_ORIGIN_TYPE = MOVIE_SOURCE_TYPE
 
-const NETWORK = process.env.NODE_ENV !== 'production' ? 'localhost' : '47.111.229.250'
+const NETWORK = process.env.NODE_ENV !== 'production' ? 'localhost' : PRODUCTION_DOMAIN
 
 //关键词抽取个数
 const EXTRACT_KEYWORD_TOP_N = 1
@@ -206,5 +207,6 @@ module.exports = {
   USER_HOT_HISTORY_TYPE,
   STATIC_FILE_PATH_NO_WRAPPER,
   MESSAGE_POST_STATUS,
-  ROLES_NAME_MAP
+  ROLES_NAME_MAP,
+  PRODUCTION_DOMAIN
 }

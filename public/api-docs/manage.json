@@ -1032,6 +1032,34 @@
         }
       }
     },
+    "/api/manage/movie/detail/tag/update": {
+      "put": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "更新电影标签",
+        "description": "",
+        "operationId": "manage_movie_detail_put_tag_update",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "电影id",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
     "/api/manage/movie/detail/valid": {
       "put": {
         "tags": [
@@ -2140,29 +2168,24 @@
           {
             "name":"username",
             "in": "body",
-            "required": true,
             "description": "用户名",
-            "type": "string",
-            "format":"date-time"
+            "type": "string"
           },
           {
             "name":"avatar",
             "in": "body",
-            "required": true,
             "description": "头像",
             "type": "string"
           },
           {
             "name":"description",
             "in": "body",
-            "required": true,
             "description": "描述",
             "type": "string"
           },
           {
             "name":"roles",
             "in": "body",
-            "required": true,
             "description": "角色, 多个用,分隔",
             "type": "string",
             "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
@@ -2221,28 +2244,24 @@
           {
             "name":"mobile",
             "in": "body",
-            "required": true,
             "description": "手机",
             "type": "integer"
           },
           {
             "name":"password",
             "in": "body",
-            "required": true,
             "description": "密码",
             "type": "string"
           },
           {
             "name":"email",
             "in": "body",
-            "required": true,
             "description": "邮箱",
             "type": "string"
           },
           {
             "name":"username",
             "in": "body",
-            "required": true,
             "description": "用户名",
             "type": "string",
             "format":"date-time"
@@ -2250,21 +2269,18 @@
           {
             "name":"avatar",
             "in": "body",
-            "required": true,
             "description": "头像",
             "type": "string"
           },
           {
             "name":"description",
             "in": "body",
-            "required": true,
             "description": "描述",
             "type": "string"
           },
           {
             "name":"roles",
             "in": "body",
-            "required": true,
             "description": "角色,多个用,分隔",
             "type": "string",
             "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
@@ -3494,7 +3510,7 @@
         }
       }
     },
-    "/api/manage/media/vaid": {
+    "/api/manage/media/valid": {
       "get": {
         "tags": [
           "media"
@@ -6431,19 +6447,33 @@
           "type": "object",
           "properties": {
             "data": {
-              "type": "object",
-              "properties": {
-                "complete": {
-                  "type": "boolean",
-                  "description": "是否完成"
-                },
-                "error": {
-                  "type": "boolean",
-                  "description": "是否出错"
-                },
-                "exists": {
-                  "type": "boolean",
-                  "description": "是否存在"
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "complete": {
+                    "type": "boolean",
+                    "description": "是否完成"
+                  },
+                  "error": {
+                    "type": "boolean",
+                    "description": "是否出错"
+                  },
+                  "exists": {
+                    "type": "boolean",
+                    "description": "是否存在"
+                  },
+                  "_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "文件名称"
+                  },
+                  "src": {
+                    "type": "string",
+                    "description": "文件路径"
+                  }
                 }
               }
             }

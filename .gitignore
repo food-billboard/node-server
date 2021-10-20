@@ -30,3 +30,6 @@ package-lock.json
 /coverage/
 
 /.history
+
+# log 
+/local_data 

@@ -2,7 +2,7 @@ require('module-alias/register')
 const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
 const { mockCreateUser, Request, commonValidate, mockCreateImage, createMobile } = require('@test/utils')
-const { getToken, UserModel, dealRedis, ImageModel, MemberModel } = require('@src/utils')
+const { getToken, UserModel, dealRedis, ImageModel, MemberModel, ROLES_NAME_MAP } = require('@src/utils')
 const { email_type } = require('@src/router/user/logon/map')
 
 const COMMON_API = '/api/user/logon/register'
@@ -179,7 +179,11 @@ describe(`${COMMON_API} test`, function() {
         Promise.all([
           UserModel.findOne({
             mobile,
-            roles: ["SUPER_ADMIN"]
+            roles: {
+              $in: [
+                ROLES_NAME_MAP.CUSTOMER
+              ]
+            }
           }),
           dealRedis(function(redis) {
             redis.del(redisKey)
@@ -195,7 +199,7 @@ describe(`${COMMON_API} test`, function() {
           done()
         })
         .catch(err => {
-          console.log('oops: ', err)
+          done(err)
         })
       })
 

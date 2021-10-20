@@ -1,7 +1,8 @@
 const Router = require('@koa/router')
-const { TagModel, dealErr, responseDataDeal, Params } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
+const { TagModel, dealErr, responseDataDeal, Params, objectIdFormat, objectIdValid } = require('@src/utils')
+const { action } = require("@src/utils/schedule/tag")
 
 const router = new Router()
 
@@ -12,10 +13,10 @@ router
     name: '_id',
     sanitizers: [
       data => {
-        if(data.split(',').every(item => ObjectId.isValid(item.trim()))) return {
+        if(objectIdValid(data)) return {
           done: true,
           data: {
-            _id: { $in: data.split(',').map(item => ObjectId(item.trim())) }
+            _id: { $in: objectIdFormat(data) }
           }
         }
         return {
@@ -233,7 +234,7 @@ router
     ]
   })
 
-  const data = TagModel.updateOne({
+  const data = await TagModel.updateOne({
     _id
   }, {
     $set: { valid }
@@ -258,7 +259,7 @@ router
   const check = Params.query(ctx, {
     name: '_id',
     validator: [
-      data => data.split(',').every(item => ObjectId.isValid(item.trim()))
+      data => objectIdValid(data)
     ]
   })
 
@@ -267,7 +268,7 @@ router
   const [ _ids ] = Params.sanitizers(ctx.query, {
     name: '_id',
     sanitizers: [
-      data => data.split(',').map(item => ObjectId(item.trim()))
+      data => objectIdFormat(data)
     ]
   })
 
@@ -286,6 +287,35 @@ router
     needCache: false
   })
 
+})
+.put("/update", async (ctx) => {
+  const check = Params.body(ctx, {
+    name: '_id',
+    validator: [
+      data => objectIdValid(data)
+    ]
+  })
+
+  if(check) return 
+
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
+    name: '_id',
+    sanitizers: [
+      data => objectIdFormat(data)
+    ]
+  })
+
+  const data = await action(_id)
+  .then(() => {
+    return true
+  })
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false
+  })
 })
 
 module.exports = router
