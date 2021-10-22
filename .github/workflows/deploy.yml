@@ -32,8 +32,8 @@ jobs:
           npm install yarn pm2 -g
       - run: |
           yarn
-      - run: |
-          pm2 deploy pm2.config.js production update
+      # - run: |
+      #     pm2 deploy pm2.config.js production update
 
       # 登录服务器  
       - name: login aliyun service 
@@ -44,5 +44,6 @@ jobs:
           host: ${{ secrets.SSH_IP }}
           key: ${{ secrets.ALIYUN_SERVICE }}
           script: |
+            pm2 deploy pm2.config.js production update
             ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@${{ secrets.SSH_IP }} "cd /home/source;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
             pm2 startOrRestart pm2.config.js
