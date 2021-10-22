@@ -42,7 +42,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           host: ${{ secrets.SSH_IP }}
-          key: ${{ secrets.ALIYUN_SERVICE }}
+          # key: ${{ secrets.ALIYUN_SERVICE }}
           script: |
             pm2 deploy pm2.config.js production update
             ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@${{ secrets.SSH_IP }} "cd /home/source;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
