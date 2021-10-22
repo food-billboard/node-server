@@ -44,7 +44,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: "/home"
           EXCLUDE: "/node_modules/"
-        run: |
-          ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@${{ secrets.SSH_IP }} "cd /home/source;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
-        run: | 
-          pm2 startOrRestart pm2.config.js
+        with:
+          scripts: |
+            ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@${{ secrets.SSH_IP }} "cd /home/source;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
+            pm2 startOrRestart pm2.config.js
