@@ -4,7 +4,7 @@ on:
     branches:
       - master 
 jobs:
-  deploy and start:
+  deploy-and-start:
     runs-on: ubuntu-latest # 运行环境
     steps:
       # 下载代码
