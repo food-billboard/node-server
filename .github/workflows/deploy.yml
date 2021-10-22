@@ -26,10 +26,9 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.ALIYUN_SERVICE }}
-          SOURCE: "./"
           REMOTE_HOST: ${{ secrets.SSH_IP }}
           REMOTE_USER: ${{ secrets.SSH_USERNAME }}
-          TARGET: ${{ secrets.REMOTE_PATH }}
+          # TARGET: ${{ secrets.REMOTE_PATH }}
 
       # 登录服务器并启动docker服务   
       - name: start the remote server 
