@@ -27,8 +27,6 @@ jobs:
         with:
           node-version: 12.16.1
       - run: |
-          ls 
-      - run: |
           npm install yarn pm2 -g
       - run: |
           yarn
@@ -45,5 +43,8 @@ jobs:
           # key: ${{ secrets.ALIYUN_SERVICE }}
           script: |
             pm2 deploy pm2.config.js production update
-            ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@${{ secrets.SSH_IP }} "cd /home/source;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
+            ls 
+            cd /home/source
+            docker-compose -f docker-compose.yml pull
+            docker-compose -f docker-compose.yml up -d
             pm2 startOrRestart pm2.config.js
