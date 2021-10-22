@@ -1,0 +1,42 @@
+name: Deploy server to aliyun 
+on: 
+  push:
+    branches:
+      - master 
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # 运行环境
+    steps:
+      # 下载代码
+      - name: Checkout  
+        uses: actions/checkout@master
+      # 该步骤运行的命令或者 action
+      # - run
+      # 当前所需的环境变量 
+      # - env 
+
+      # - name: ssh 
+      # - run: |
+      #     openssl aes-256-cbc -K $encrypted_cee67c79dec3_key -iv $encrypted_cee67c79dec3_iv -in id_rsa.enc -out ~/.ssh/id_rsa -d
+      # - run: |
+      #     chmod 600 ~/.ssh/id_rsa
+
+      # 设置node 
+      - name: setup node 
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.16.1
+      - run: npm install yarn -g
+      - run: npm install pm2 -g 
+      - run: yarn 
+
+      - name: deploy
+      - run: |
+          pm2 deploy pm2.config.js production update
+
+      # 登录服务器  
+      - name: login aliyun service 
+      - run: |
+          ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@${{ secrets.SSH_IP }} "cd /home/source;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
+      - run: | 
+          pm2 startOrRestart pm2.config.js
