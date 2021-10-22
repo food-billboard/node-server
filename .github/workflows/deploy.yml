@@ -27,6 +27,8 @@ jobs:
         with:
           node-version: 12.16.1
       - run: |
+          ls 
+      - run: |
           npm install yarn pm2 -g
       - run: |
           yarn
