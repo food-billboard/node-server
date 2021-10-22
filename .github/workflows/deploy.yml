@@ -35,7 +35,7 @@ jobs:
 
       # 登录服务器  
       - name: login aliyun service 
-        uses: easingthemes/ssh-action@master
+        uses: appleboy/ssh-action@master
         with:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
