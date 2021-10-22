@@ -15,6 +15,11 @@ module.exports = {
       name: 'media',
       script: 'media.js',
       exec_mode: "cluster_mode"
+    },
+    {
+      name: "socket",
+      script: "./src/chat/index.js",
+      exec_mode: "cluster_mode",
     }
   ],
 

@@ -4,22 +4,12 @@ on:
     branches:
       - master 
 jobs:
-  build-and-deploy:
+  deploy and start:
     runs-on: ubuntu-latest # 运行环境
     steps:
       # 下载代码
       - name: Checkout  
         uses: actions/checkout@master
-      # 该步骤运行的命令或者 action
-      # - run
-      # 当前所需的环境变量 
-      # - env 
-
-      # - name: ssh 
-      # - run: |
-      #     openssl aes-256-cbc -K $encrypted_cee67c79dec3_key -iv $encrypted_cee67c79dec3_iv -in id_rsa.enc -out ~/.ssh/id_rsa -d
-      # - run: |
-      #     chmod 600 ~/.ssh/id_rsa
 
       # 设置node 
       - name: setup node 
@@ -28,23 +18,30 @@ jobs:
           node-version: 12.16.1
       - run: |
           npm install yarn pm2 -g
-      - run: |
-          yarn
-      # - run: |
-      #     pm2 deploy pm2.config.js production update
 
-      # 登录服务器  
-      - name: login aliyun service 
+      # 文件上传
+      - name: deploy
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.ALIYUN_SERVICE }}
+          SOURCE: "./"
+          REMOTE_HOST: ${{ secrets.SSH_IP }}
+          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
+          TARGET: ${{ secrets.REMOTE_PATH }}
+
+      # 登录服务器并启动docker服务   
+      - name: start the remote server 
         uses: appleboy/ssh-action@master
         with:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           host: ${{ secrets.SSH_IP }}
-          # key: ${{ secrets.ALIYUN_SERVICE }}
           script: |
             pm2 deploy pm2.config.js production update
             ls 
-            cd /home/source
+            cd ${{ secrets.REMOTE_PATH }}
+            npm install pm2 yarn -g 
+            yarn 
             docker-compose -f docker-compose.yml pull
             docker-compose -f docker-compose.yml up -d
             pm2 startOrRestart pm2.config.js
