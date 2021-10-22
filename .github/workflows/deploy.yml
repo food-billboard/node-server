@@ -26,17 +26,25 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.16.1
-      - run: npm install yarn -g
-      - run: npm install pm2 -g 
-      - run: yarn 
-
-      - name: deploy
-      - run: |
+        run: |
+          npm install yarn -g
+        run: |
+          npm install pm2 -g 
+        run: | 
+          yarn 
+        run: |
           pm2 deploy pm2.config.js production update
 
       # 登录服务器  
       - name: login aliyun service 
-      - run: |
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.ALIYUN_SERVICE }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: "/home"
+          EXCLUDE: "/node_modules/"
+        run: |
           ssh -o "StrictHostKeyChecking no" -i ~/.ssh/id_rsa root@${{ secrets.SSH_IP }} "cd /home/source;docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d;exit"
-      - run: | 
+        run: | 
           pm2 startOrRestart pm2.config.js
