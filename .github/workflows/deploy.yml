@@ -26,14 +26,10 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.16.1
-        run: |
-          npm install yarn -g
-        run: |
-          npm install pm2 -g 
-        run: | 
-          yarn 
-        run: |
-          pm2 deploy pm2.config.js production update
+          scripts: |
+            npm install yarn pm2 -g
+            yarn
+            pm2 deploy pm2.config.js production update
 
       # 登录服务器  
       - name: login aliyun service 
