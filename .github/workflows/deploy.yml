@@ -30,7 +30,6 @@ jobs:
           REMOTE_USER: ${{ secrets.SSH_USERNAME }}
           ARGS: "-avz --delete"
           TARGET: ${{ secrets.REMOTE_PATH }}
-          HOME: "~"
 
       # 登录服务器并启动docker服务   
       - name: start the remote server 
