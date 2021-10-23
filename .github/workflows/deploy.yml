@@ -21,15 +21,15 @@ jobs:
       # - run: |
       #     pm2 deploy pm2.config.js production update
 
-      # # 文件上传
-      # - name: deploy
-      #   uses: easingthemes/ssh-deploy@main
-      #   env:
-      #     SSH_PRIVATE_KEY: ${{ secrets.ALIYUN_SSH_KEY }}
-      #     REMOTE_HOST: ${{ secrets.SSH_IP }}
-      #     REMOTE_USER: ${{ secrets.SSH_USERNAME }}
-      #     ARGS: "-avz --delete"
-      #     TARGET: ${{ secrets.REMOTE_PATH }}
+      # 文件上传
+      - name: deploy
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.ALIYUN_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_IP }}
+          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
+          ARGS: "-avz --delete"
+          TARGET: ${{ secrets.REMOTE_PATH }}
 
       # 登录服务器并启动docker服务   
       - name: start the remote server 
@@ -41,7 +41,6 @@ jobs:
           script: |
             ls 
             cd ${{ secrets.REMOTE_PATH }}
-            git pull origin master
             npm install pm2 yarn -g 
             yarn 
             docker-compose -f docker-compose.yml pull
