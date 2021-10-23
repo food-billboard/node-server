@@ -21,16 +21,16 @@ jobs:
       # - run: |
       #     pm2 deploy pm2.config.js production update
 
-      # 文件上传
-      - name: deploy
-        uses: easingthemes/ssh-deploy@v2.1.1
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.LOCAL_SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.SSH_IP }}
-          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
-          ARGS: "-avzr --delete"
-          # TARGET: ${{ secrets.REMOTE_PATH }}
-          SOURCE: "./"
+      # # 文件上传
+      # - name: deploy
+      #   uses: easingthemes/ssh-deploy@v2.1.1
+      #   env:
+      #     SSH_PRIVATE_KEY: ${{ secrets.LOCAL_SSH_PRIVATE_KEY }}
+      #     REMOTE_HOST: ${{ secrets.SSH_IP }}
+      #     REMOTE_USER: ${{ secrets.SSH_USERNAME }}
+      #     ARGS: "-avz --delete"
+      #     TARGET: ${{ secrets.REMOTE_PATH }}
+      #     SOURCE: "./"
 
       # 登录服务器并启动docker服务   
       - name: start the remote server 
