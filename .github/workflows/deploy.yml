@@ -23,7 +23,7 @@ jobs:
 
       # 文件上传
       - name: deploy
-        uses: easingthemes/ssh-deploy@2.1.1
+        uses: easingthemes/ssh-deploy@v2.1.1
         env:
           SSH_PRIVATE_KEY: ${{ secrets.LOCAL_SSH_PRIVATE_KEY }}
           REMOTE_HOST: ${{ secrets.SSH_IP }}
