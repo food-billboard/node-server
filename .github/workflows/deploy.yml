@@ -23,12 +23,12 @@ jobs:
 
       # 文件上传
       - name: deploy
-        uses: easingthemes/ssh-deploy@main
+        uses: easingthemes/ssh-deploy@2.1.1
         env:
           SSH_PRIVATE_KEY: ${{ secrets.LOCAL_SSH_PRIVATE_KEY }}
           REMOTE_HOST: ${{ secrets.SSH_IP }}
           REMOTE_USER: ${{ secrets.SSH_USERNAME }}
-          ARGS: "-avz --delete"
+          ARGS: "-avzr --delete"
           TARGET: ${{ secrets.REMOTE_PATH }}
           SOURCE: "./"
 
