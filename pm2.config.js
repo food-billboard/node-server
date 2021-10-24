@@ -1,3 +1,6 @@
+
+console.log(process.env)
+
 module.exports = {
   name: "app",
   apps : [
@@ -25,7 +28,6 @@ module.exports = {
 
   deploy : {
     production : {
-      // key: "~/.ssh/id_rsa",
       user: "root",
       host: "47.111.229.250",
       ssh_options: "StrictHostKeyChecking=no",
