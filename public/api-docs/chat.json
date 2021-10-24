@@ -132,8 +132,13 @@
             "name": "_id",
             "in": "query",
             "type": "string",
-            "required": true,
             "description":"房间id"
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "type": "string",
+            "description":"用户信息"
           },
           {
             "name": "currPage",
@@ -1158,6 +1163,13 @@
                       "updatedAt": {
                         "type": "string",
                         "format": "date-time"
+                      },
+                      "room": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "description": "房间id"
+                        }
                       }
                     }
                   }

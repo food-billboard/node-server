@@ -6,127 +6,185 @@ const router = new Router()
 
 router 
 .get('/', async(ctx) => {
-  const check = Params.query(ctx, {
-    name: '_id',
-    validator: [
-      data => ObjectId.isValid(data)
-    ]
-  })
-  if(check) return 
-  const [ currPage, pageSize, _id ] = Params.sanitizers(ctx.query, {
+  const { currPage, pageSize, _id, content } = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
     sanitizers: [
-      data => data >= 0 ? +data : 0
+      data => {
+        return {
+          done: true,
+          data: data >= 0 ? +data : 0
+        }
+      }
     ]
   }, {
     name: 'pageSize',
     _default: 30,
     sanitizers: [
-      data => data >= 0 ? +data : 30
+      data => {
+        return {
+          done: true,
+          data: data >= 0 ? +data : 30
+        }
+      }
     ]
   }, {
     name: '_id',
     sanitizers: [
-      data => ObjectId(data)
-    ]
-  })
-
-  let match = {
-    _id: {
-      $in: [_id]
-    },
-  }
-  const [, token] = verifyTokenToData(ctx)
-  if(!token) {
-    match.type = ROOM_TYPE.SYSTEM
-    match.origin = true
-  }
-
-  const data = await RoomModel.aggregate([
-    {
-      $match: match
-    },
-    {
-      $unwind: "$members"
-    },
-    {
-      $skip: currPage * pageSize
-    },
-    {
-      $limit: pageSize
-    },
-    {
-      $lookup: {
-        from: 'members',
-        as: 'members_user',
-        foreignField: "_id",
-        localField: "members"
-      }
-    },
-    {
-      $unwind: "$members_user"
-    },
-    {
-      $lookup: {
-        from: 'users', 
-        let: { customFields: "$members_user.user" },
-        pipeline: [  
-          {
-            $match: {
-              $expr: {
-                "$eq": [ "$_id", "$$customFields" ]
-              },
-            }
-          },
-          {
-            $lookup: {
-              from: 'images',
-              as: 'avatar',
-              foreignField: "_id",
-              localField: "avatar"
-            }
-          },
-          {
-            $unwind: {
-              path: "$avatar",
-              preserveNullAndEmptyArrays: true 
-            }
-          },
-          {
-            $project: {
-              username: 1,
-              avatar: "$avatar.src",
-              _id: 1,
-              friend_id: 1
+      data => {
+        if(ObjectId.isValid(data)) return {
+          done: true,
+          data: {
+            room: {
+              $in: [ObjectId(data)]
             }
           }
-        ],
-        as: 'user',
+        }
+        return {
+          done: false 
+        }
       }
-    },
-    {
-      $unwind: {
-        path: "$user",
-        preserveNullAndEmptyArrays: true 
+    ]
+  }, {
+    name: 'content',
+    sanitizers: [
+      data => {
+        if(typeof data === 'string' && !!data.length) {
+
+          function reg(content) {
+            return {
+              $regex: content,
+              $options: 'gi'
+            }
+          }
+
+          let filter = [
+            {
+              username: reg(data)
+            },
+            {
+              description: reg(data)
+            },
+          ]
+
+          return {
+            done: true,
+            data: {
+              $or: filter
+            }
+          }
+        }
+        return {
+          done: false 
+        }
       }
-    },
-    {
-      $project: {
-        user: "$user",  
-        status: "$members_user.status",
-        sid: "$members_user.sid",
-        createdAt:"$members_user.createdAt",
-        updatedAt: "$members_user.updatedAt",
-        _id: "$members_user._id",
+    ]
+  }, true)
+
+  const userMatch = {
+    ...content
+  }
+
+  let roomMatch = {
+    ..._id
+  }
+  // const [, token] = verifyTokenToData(ctx)
+  // if(!token) {
+  //   match.type = ROOM_TYPE.SYSTEM
+  //   match.origin = true
+  // }
+
+  const data = await Promise.all([
+    MemberModel.aggregate([
+      {
+        $match: roomMatch
+      },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1
+          }
+        }
       }
-    }
+    ]),
+    MemberModel.aggregate([
+      {
+        $match: roomMatch
+      },
+      {
+        $skip: currPage * pageSize
+      },
+      {
+        $limit: pageSize
+      },
+      {
+        $lookup: {
+          from: 'users', 
+          let: { customFields: "$user" },
+          pipeline: [  
+            {
+              $match: {
+                $expr: {
+                  "$eq": [ "$_id", "$$customFields" ]
+                },
+                ...userMatch,
+              }
+            },
+            {
+              $lookup: {
+                from: 'images',
+                as: 'avatar',
+                foreignField: "_id",
+                localField: "avatar"
+              }
+            },
+            {
+              $unwind: {
+                path: "$avatar",
+                preserveNullAndEmptyArrays: true 
+              }
+            },
+            {
+              $project: {
+                username: 1,
+                avatar: "$avatar.src",
+                _id: 1,
+                friend_id: 1
+              }
+            }
+          ],
+          as: 'user',
+        }
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
+        $project: {
+          user: "$user",  
+          status: 1,
+          sid: 1,
+          createdAt:1,
+          updatedAt: 1,
+          _id: 1,
+          room: "$room_list"
+        }
+      }
+    ])
   ])
-  .then(data => {
+  .then(([total_count, data]) => {
+    if(!Array.isArray(total_count) || !Array.isArray(data)) return Promise.reject({ errMsg: 'data error', status: 404 })
     return {
-      data
+      total: total_count.length ? total_count[0].total || 0 : 0,
+      list: data,
     }
   })
+  .then(data => ({ data }))
+  .catch(dealErr(ctx))
 
   responseDataDeal({
     data,

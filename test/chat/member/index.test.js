@@ -19,10 +19,13 @@ const COMMON_API = '/api/chat/member'
 
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
-  expect(target).to.be.a('array')
-  target.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.any.keys('user', 'sid', 'createdAt', 'updatedAt', '_id')
+  expect(target).to.be.a('object').and.that.includes.any.keys("list", "total")
+  commonValidate.number(target.total)
+  target.list.forEach(item => {
+    expect(item).to.be.a('object').and.that.includes.any.keys('user', 'sid', 'createdAt', 'updatedAt', '_id', 'room')
     // commonValidate.string(item.status)
+    expect(item.room).to.be.a("array")
+    item.room.forEach(roomItem => commonValidate.objectId(roomItem))
     if(item.sid) {
       commonValidate.string(item.sid)
     }
@@ -169,14 +172,42 @@ describe(`${COMMON_API} test`, function() {
             console.log(_)
           }
           responseExpect(obj, target => {
-            expect(target.some(item => item._id === memberId.toString())).to.be.true
+            expect(target.list.some(item => item._id === memberId.toString())).to.be.true
           })
           done()
         })
 
       })
 
-      it(`get the member list success and not login`, function(done) {
+      it(`get the member lis success with content`, function() {
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${userToken}`
+        })
+        .query({
+          content: COMMON_API
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, target => {
+            expect(target.list.some(item => item._id === memberId.toString())).to.be.true
+          })
+          done()
+        })
+      })
+
+      it.skip(`get the member list success and not login`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -209,7 +240,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`get the member list fail test`, function() {
 
-      it(`get member list fail because of not have the room id param`, function(done) {
+      it.skip(`get member list fail because of not have the room id param`, function(done) {
 
         Request
         .get(COMMON_API)
@@ -226,7 +257,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get member list fail because of the database can not find the room id`, function(done) {
+      it.skip(`get member list fail because of the database can not find the room id`, function(done) {
 
         const id = roomId.toString()
 
@@ -257,7 +288,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get member list fail because of the room id is not verify`, function(done) {
+      it.skip(`get member list fail because of the room id is not verify`, function(done) {
 
         Request
         .get(COMMON_API)
