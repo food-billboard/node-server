@@ -1,6 +1,3 @@
-
-console.log(process.env)
-
 module.exports = {
   name: "app",
   apps : [

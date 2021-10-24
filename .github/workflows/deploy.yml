@@ -11,6 +11,15 @@ jobs:
       - name: Checkout  
         uses: actions/checkout@master
 
+      # 设置ssh文件
+      - name: Setup ssh
+        env:
+          LOCAL_SSH_PRIVATE_KEY: ${{ secrets.LOCAL_SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$LOCAL_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa 
+          chmod 600 ~/.ssh/id_rsa
+
       # 设置node 
       - name: setup node 
         uses: actions/setup-node@v1
