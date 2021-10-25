@@ -88,6 +88,7 @@ router
   let roomMatch = {
     ..._id
   }
+
   // const [, token] = verifyTokenToData(ctx)
   // if(!token) {
   //   match.type = ROOM_TYPE.SYSTEM
@@ -161,6 +162,44 @@ router
         $unwind: {
           path: "$user",
           preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
+        $lookup: {
+          from: 'rooms',
+          as: 'room_list',
+          let: { customFields: "$_id" },
+          pipeline: [  
+            {
+              $match: {
+                $expr: {
+                  "$in": [ "$$customFields", "$members" ]
+                },
+              }
+            },
+            {
+              $lookup: {
+                from: 'images',
+                as: 'info.avatar',
+                foreignField: "_id",
+                localField: "info.avatar"
+              }
+            },
+            {
+              $unwind: {
+                path: "$info.avatar",
+                preserveNullAndEmptyArrays: true 
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                avatar: "$info.avatar.src",
+                name: "$info.name",
+                description: "$info.description"
+              }
+            }
+          ],
         }
       },
       {

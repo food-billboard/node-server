@@ -214,7 +214,8 @@ describe(`${COMMON_API} test`, function() {
             friendId,
             selfFriendId,
             agreeFriendId,
-            disagreeFriendId
+            disagreeFriendId,
+            normalFriendId
           ]
         }
       })

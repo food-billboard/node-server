@@ -83,12 +83,19 @@ describe(`${CONNECT_API} test`, function() {
         }
       }),
       MemberModel.deleteMany({
-        sid: {
-          $in: [
-            CONNECT_API,
-            DIS_CONNECT_API
-          ]
-        }
+        $or: [
+          {
+            sid: {
+              $in: [
+                CONNECT_API,
+                DIS_CONNECT_API
+              ]
+            }
+          },
+          {
+            _id: memberId
+          }
+        ]
       })
     ])
     .then(_ => {

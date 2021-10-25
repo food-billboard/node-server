@@ -225,7 +225,17 @@ describe(`${COMMON_API} test`, function() {
         ]
       }),
       MessageModel.deleteMany({
-        "content.audio": mockAudioId
+        $or: [
+          {
+            "content.audio": mockAudioId
+          },
+          {
+            "content.image": imageId
+          },
+          {
+            "content.text": COMMON_API
+          }
+        ]
       }),
       ImageModel.deleteMany({
         src: COMMON_API

@@ -1144,6 +1144,30 @@
                           }
                         }
                       },
+                      "room": {
+                        "type": "array",
+                        "description": "房间信息",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "description": "房间名称"
+                            },
+                            "_id": {
+                              "type": "string"
+                            },
+                            "avatar": {
+                              "type": "string",
+                              "description": "背景"
+                            },
+                            "description": {
+                              "type": "string",
+                              "description": "描述"
+                            }
+                          }
+                        }
+                      },
                       "_id": {
                         "type": "string"
                       },
@@ -1163,13 +1187,6 @@
                       "updatedAt": {
                         "type": "string",
                         "format": "date-time"
-                      },
-                      "room": {
-                        "type": "array",
-                        "items": {
-                          "type": "string",
-                          "description": "房间id"
-                        }
                       }
                     }
                   }

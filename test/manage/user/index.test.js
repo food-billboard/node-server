@@ -1,5 +1,5 @@
 require('module-alias/register')
-const { UserModel, ImageModel } = require('@src/utils')
+const { UserModel, ImageModel, FriendsModel, MemberModel } = require('@src/utils')
 const { expect } = require('chai')
 const { Request, commonValidate, mockCreateUser, mockCreateImage, createMobile } = require('@test/utils')
 const Day = require('dayjs')
@@ -91,13 +91,14 @@ describe(`${COMMON_API} test`, function() {
             username: COMMON_API
           },
           {
-            username: COMMON_API.slice(10)
+            username: COMMON_API.slice(1)
           }
         ]
       }),
       ImageModel.deleteMany({
         src: COMMON_API
-      })
+      }),
+      
     ])
     .then(_ => {
       done()
@@ -295,9 +296,23 @@ describe(`${COMMON_API} test`, function() {
 
       after(function(done) {
 
-        UserModel.deleteOne({
+        UserModel.findOneAndDelete({
           username: COMMON_API.slice(1),
           roles: ["USER", 'CUSTOMER']
+        })
+        .select({
+          _id: 1
+        })
+        .exec()
+        .then(data => {
+          return Promise.all([
+            MemberModel.deleteOne({
+              user: data._id 
+            }),
+            FriendsModel.deleteOne({
+              user: data._id
+            })
+          ])
         })
         .then(_ => {
           done()

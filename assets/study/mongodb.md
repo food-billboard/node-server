@@ -55,6 +55,28 @@
   `$match: { $expr: { _id: "$$customFields" } }`  
   - 如果要在`$match`中匹配`ObjectId`, 需要使用`$eq`, 直接比较似乎无效,原因有待查证. `$expr: { $eq: [ "$_id", "$$customFields" ] }`    
 
+  - 例子🌰  
+  `$match`匹配某个值是否在一个数组中存在  
+```javascript
+  {
+    $lookup: {
+      from: 'images', 
+      let: { customFields: "$covers" },
+      pipeline: [ 
+        {
+          $match: {
+            $expr: {
+              // 图片id是否存在于数据项的 covers 数组中
+              "$in": [ "$_id", "$$customFields" ]
+            }
+          }
+        }
+      ],
+      as: 'movie',
+    }
+  }
+```
+
 4. $unwind  
  - 避免`null`情况出现导致字段丢失  
 ```javascript

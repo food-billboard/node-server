@@ -210,7 +210,14 @@ describe(`${COMMON_API} test`, function() {
 
     Promise.all([
       MessageModel.deleteMany({
-        "content.text": COMMON_API
+        $or: [
+          {
+            "content.text": COMMON_API
+          },
+          {
+            "content.image": imageId
+          }
+        ]
       }),
       UserModel.deleteMany({
         username: COMMON_API

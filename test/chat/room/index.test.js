@@ -285,7 +285,9 @@ describe(`${COMMON_API} test`, function() {
         src: COMMON_API
       }),
       FriendsModel.deleteMany({
-        _id: friendsId
+        _id: {
+          $in: [friendsId, otherFriendId]
+        }
       })
     ])
     .then(_ => {

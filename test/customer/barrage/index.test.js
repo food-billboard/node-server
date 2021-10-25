@@ -103,7 +103,14 @@ describe(`${COMMON_API} test`, function() {
         username: COMMON_API
       }),
       BarrageModel.deleteMany({
-        origin: movieId
+        $or: [
+          {
+            origin: movieId
+          },
+          {
+            content: COMMON_API
+          }
+        ]
       }),
       MovieModel.deleteMany({
         name: COMMON_API

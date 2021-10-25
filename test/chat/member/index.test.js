@@ -21,11 +21,20 @@ function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
   expect(target).to.be.a('object').and.that.includes.any.keys("list", "total")
   commonValidate.number(target.total)
+  expect(target.list).to.be.a("array")
+
   target.list.forEach(item => {
     expect(item).to.be.a('object').and.that.includes.any.keys('user', 'sid', 'createdAt', 'updatedAt', '_id', 'room')
     // commonValidate.string(item.status)
     expect(item.room).to.be.a("array")
-    item.room.forEach(roomItem => commonValidate.objectId(roomItem))
+    item.room.forEach(roomItem => {
+      expect(roomItem).to.be.a('object').and.that.includes.any.keys('avatar', 'name', 'description', '_id')
+      const { avatar, name, description, _id } = roomItem
+      commonValidate.objectId(_id)
+      commonValidate.string(name)
+      commonValidate.string(description)
+      if(avatar) commonValidate.string(avatar)
+    })
     if(item.sid) {
       commonValidate.string(item.sid)
     }
@@ -179,7 +188,7 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it(`get the member lis success with content`, function() {
+      it(`get the member lis success with content`, function(done) {
         Request
         .get(COMMON_API)
         .set({

@@ -6,6 +6,8 @@ const { Request, commonValidate, mockCreateUser, mockCreateImage, mockCreateRoom
 
 const COMMON_API = '/api/manage/chat/room'
 
+const newRoomName = COMMON_API + 'new-room'
+
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
@@ -145,7 +147,12 @@ describe(`${COMMON_API} test`, function() {
       RoomModel.deleteMany({
         $or: [
           {
-            "info.name": COMMON_API
+            "info.name": {
+              $in: [
+                COMMON_API,
+                newRoomName
+              ]
+            }
           },
           {
             "info.description": COMMON_API
@@ -624,8 +631,6 @@ describe(`${COMMON_API} test`, function() {
   })
 
   describe(`${COMMON_API} put room test`, function() {
-
-    let newName = COMMON_API + 'new-room'
       
     describe(`${COMMON_API} put room success test`, function() {
       
@@ -652,9 +657,9 @@ describe(`${COMMON_API} test`, function() {
           .send({
             _id: roomId.toString(),
             avatar: '8f63270f005f1c1a0d9448ca',
-            name: newName,
+            name: newRoomName,
             members: memberId.toString(),
-            description: newName,
+            description: newRoomName,
           })
           .set({
             Accept: 'Application/json',
@@ -667,11 +672,11 @@ describe(`${COMMON_API} test`, function() {
           return RoomModel.findOne({
             _id: roomId,
             "info.avatar": ObjectId('8f63270f005f1c1a0d9448ca'),
-            "info.name": newName,
+            "info.name": newRoomName,
             members: {
               $nin: [otherMemberId]
             },
-            "info.description": newName,
+            "info.description": newRoomName,
           })
         })
         .then(data => {
@@ -715,8 +720,8 @@ describe(`${COMMON_API} test`, function() {
           .send({
             _id: roomId.toString(),
             avatar: '8f63270f005f1c1a0d9448ca',
-            name: newName,
-            description: newName,
+            name: newRoomName,
+            description: newRoomName,
           })
           .set({
             Accept: 'Application/json',
@@ -751,8 +756,8 @@ describe(`${COMMON_API} test`, function() {
         .send({
           _id: roomId.toString().slice(1),
           avatar: '8f63270f005f1c1a0d9448ca',
-          name: newName,
-          description: newName,
+          name: newRoomName,
+          description: newRoomName,
         })
         .set({
           Accept: 'Application/json',
@@ -773,8 +778,8 @@ describe(`${COMMON_API} test`, function() {
         .send({
           _id: `${Math.floor(10 / (+id[0] + 1))}${id.slice(1)}`,
           avatar: '8f63270f005f1c1a0d9448ca',
-          name: newName,
-          description: newName,
+          name: newRoomName,
+          description: newRoomName,
         })
         .set({
           Accept: 'Application/json',
@@ -793,8 +798,8 @@ describe(`${COMMON_API} test`, function() {
         .put(COMMON_API)
         .send({
           avatar: '8f63270f005f1c1a0d9448ca',
-          name: newName,
-          description: newName,
+          name: newRoomName,
+          description: newRoomName,
         })
         .set({
           Accept: 'Application/json',
@@ -814,8 +819,8 @@ describe(`${COMMON_API} test`, function() {
         .send({
           _id: roomId.toString(),
           avatar: '8f63270f005f1c1a0d9448c',
-          name: newName,
-          description: newName,
+          name: newRoomName,
+          description: newRoomName,
         })
         .set({
           Accept: 'Application/json',
@@ -848,8 +853,8 @@ describe(`${COMMON_API} test`, function() {
         .send({
           _id: roomId.toString(),
           avatar: '8f63270f005f1c1a0d9448ca',
-          name: newName,
-          description: newName,
+          name: newRoomName,
+          description: newRoomName,
           members: ''
         })
         .set({
@@ -886,7 +891,7 @@ describe(`${COMMON_API} test`, function() {
           _id: roomId.toString(),
           avatar: '8f63270f005f1c1a0d9448ca',
           name: '',
-          description: newName,
+          description: newRoomName,
         })
         .set({
           Accept: 'Application/json',
@@ -916,7 +921,7 @@ describe(`${COMMON_API} test`, function() {
         .send({
           _id: roomId.toString(),
           avatar: '8f63270f005f1c1a0d9448ca',
-          name: newName,
+          name: newRoomName,
           description: '',
         })
         .set({

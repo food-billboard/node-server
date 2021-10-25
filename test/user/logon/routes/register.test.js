@@ -2,7 +2,7 @@ require('module-alias/register')
 const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
 const { mockCreateUser, Request, commonValidate, mockCreateImage, createMobile } = require('@test/utils')
-const { getToken, UserModel, dealRedis, ImageModel, MemberModel, ROLES_NAME_MAP } = require('@src/utils')
+const { getToken, UserModel, dealRedis, ImageModel, MemberModel, ROLES_NAME_MAP, FriendsModel } = require('@src/utils')
 const { email_type } = require('@src/router/user/logon/map')
 
 const COMMON_API = '/api/user/logon/register'
@@ -107,7 +107,10 @@ describe(`${COMMON_API} test`, function() {
           .select({
             _id: 1
           })
-          .exec()
+          .exec(),
+          FriendsModel.deleteOne({
+            user: userId
+          })
         ])
         .then(function([,,data]) {
           expect(!!data._id).to.be.true
@@ -163,6 +166,8 @@ describe(`${COMMON_API} test`, function() {
 
       let redisKey = `${email}-${email_type[1]}`
 
+      let userId 
+
       before(function(done) {
         dealRedis(function(redis) {
           redis.set(redisKey, captcha)
@@ -187,6 +192,12 @@ describe(`${COMMON_API} test`, function() {
           }),
           dealRedis(function(redis) {
             redis.del(redisKey)
+          }),
+          MemberModel.deleteOne({
+            user: userId
+          }),
+          FriendsModel.deleteOne({
+            user: userId
           })
         ])
         .then(([data]) => {
@@ -227,7 +238,9 @@ describe(`${COMMON_API} test`, function() {
           }catch(_) {
             console.log(_)
           }
-          responseExpect(obj)
+          responseExpect(obj, (target) => {
+            userId = target._id 
+          })
           done()
         })
       })
@@ -263,9 +276,11 @@ describe(`${COMMON_API} test`, function() {
       })
 
       after(function(done) {
-        UserModel.deleteOne({
-          username: COMMON_API
-        })
+        Promise.all([
+          UserModel.deleteOne({
+            username: COMMON_API
+          })
+        ])
         .then(function() {
           done()
         })
