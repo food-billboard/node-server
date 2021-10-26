@@ -1119,7 +1119,7 @@
             "data": {
               "type":"object",
               "properties": {
-                "data": {
+                "list": {
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -1171,11 +1171,6 @@
                       "_id": {
                         "type": "string"
                       },
-                      "status": {
-                        "type": "string",
-                        "description": "状态",
-                        "enum": [ "ONLINE", "OFFLINE" ]
-                      },
                       "sid": {
                         "type": "string",
                         "description": "用户id"
@@ -1190,6 +1185,10 @@
                       }
                     }
                   }
+                },
+                "total": {
+                  "type": "integer",
+                  "description": "总数"
                 }
               }
             }

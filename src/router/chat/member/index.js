@@ -101,6 +101,48 @@ router
         $match: roomMatch
       },
       {
+        $lookup: {
+          from: 'users', 
+          let: { customFields: "$user" },
+          pipeline: [  
+            {
+              $match: {
+                $expr: {
+                  "$eq": [ "$_id", "$$customFields" ]
+                },
+                ...userMatch,
+              }
+            },
+            {
+              $lookup: {
+                from: 'images',
+                as: 'avatar',
+                foreignField: "_id",
+                localField: "avatar"
+              }
+            },
+            {
+              $unwind: {
+                path: "$avatar",
+                preserveNullAndEmptyArrays: true 
+              }
+            },
+            {
+              $project: {
+                username: 1,
+                avatar: "$avatar.src",
+                _id: 1,
+                friend_id: 1
+              }
+            }
+          ],
+          as: 'user',
+        }
+      },
+      {
+        $unwind: "$user"
+      },
+      {
         $group: {
           _id: null,
           total: {
@@ -159,10 +201,7 @@ router
         }
       },
       {
-        $unwind: {
-          path: "$user",
-          preserveNullAndEmptyArrays: true 
-        }
+        $unwind: "$user"
       },
       {
         $lookup: {
@@ -205,7 +244,6 @@ router
       {
         $project: {
           user: "$user",  
-          status: 1,
           sid: 1,
           createdAt:1,
           updatedAt: 1,
