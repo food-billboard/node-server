@@ -24,7 +24,7 @@
   "dependencies": {
     "@koa/router": "^9.0.1",
     "app-root-path": "^3.0.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "chalk": "^4.1.0",
     "commander": "^6.2.1",
     "dayjs": "^1.10.4",
