@@ -10,7 +10,7 @@ const router = new Router()
 
 const STATIC_PAGE_MAP = [
   {
-    regexp: /(?<=.+\/chat\/).+$/,
+    regexp: /(?<=.+\/communicate\/).+$/,
     path: "chat"
   },
   {
