@@ -52,7 +52,8 @@ const SET_TYPE = {
       domain: ctx.req.headers.host,
       path: '/',
       secure: false,
-      isHttpOnly: true,
+      // !暂时不要了，因为聊天demo哪里需要获取cookie  
+      // isHttpOnly: true,
       ...options,
     })
   },
