@@ -84,7 +84,7 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - ./bin/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./bin/nginx/conf.d:/etc/nginx/conf.d
       - ./bin/nginx/logs.log:/etc/nginx/logs/log.log
       - ./public:/movie/server/public:ro
       - ./static:/movie/server/static:ro
