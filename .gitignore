@@ -33,3 +33,4 @@ package-lock.json
 
 # log 
 /local_data 
+/bin/nginx/logs/log
