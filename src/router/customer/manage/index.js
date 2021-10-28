@@ -80,6 +80,18 @@ router
   })
 
 })
+.get('/token', async (ctx) => {
+
+  const [, token] = verifyTokenToData(ctx, true)
+
+  responseDataDeal({
+    ctx,
+    data: {
+      data: token
+    }
+  })
+
+})
 .use('/attention', Attention.routes(), Attention.allowedMethods())
 .use('/movie', Movie.routes(), Movie.allowedMethods())
 .use('/comment', Comment.routes(), Comment.allowedMethods())

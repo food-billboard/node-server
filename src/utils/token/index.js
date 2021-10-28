@@ -133,10 +133,10 @@ const middlewareVerifyTokenForSocketIo = socket => async (packet, next) => {
 }
 
 //token验证并返回内容
-const verifyTokenToData = (ctx) => {
+const verifyTokenToData = (ctx, origin=false) => {
   const { header: { authorization } } = ctx.request
   const token = getCookie(ctx, TOKEN_COOKIE)
-  return getToken(token || authorization)
+  return origin ? getOriginToken(token || authorization) : getToken(token || authorization)
 }
 
 //socket验证token
@@ -152,9 +152,16 @@ const verifySocketIoToken = token => {
   }
 }
 
-const getToken = (authorization) => {
+const getOriginToken = (authorization) => {
   if(!authorization) return ['401', null]
   const token = /.+ .+/.test(authorization) ? authorization.split(' ')[1] : authorization
+  return [ null, token ] 
+}
+
+const getToken = (authorization) => {
+  const tokenData = getOriginToken(authorization)
+  if(tokenData[0]) return tokenData 
+  const [, token] = tokenData
   try { 
     const { middel, ...nextToken } = verifyToken(token)
     if(middel !== MIDDEL) return ['401', null]
@@ -173,5 +180,6 @@ module.exports = {
   verifySocketIoToken,
   fileEncoded,
   getToken,
+  getOriginToken,
   ...cookie
 }

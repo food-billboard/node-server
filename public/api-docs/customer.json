@@ -280,6 +280,40 @@
         ]
       }
     },
+    "/api/customer/manage/token": {
+      "get": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "获取用户登录token",
+        "description": "socket连接时用",
+        "operationId": "customer_get_manage_token",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/customer_get_manage_token"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
     "/api/customer/manage/attention": {
       "get": {
         "tags": [
@@ -2418,7 +2452,27 @@
         }
       },
       "xml": {
-        "name": "customer_get_barrage"
+        "name": "customer_get_manage"
+      }
+    },
+    "customer_get_manage_token": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "string",
+              "description": "token"
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_get_manage_token"
       }
     },
     "customer_user_list": {
