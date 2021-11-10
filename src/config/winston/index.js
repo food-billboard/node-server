@@ -8,8 +8,8 @@ const { timestamp, label, combine, simple, splat, prettyPrint, printf, json, ms 
 const Day = require('dayjs')
 const chalk = require('chalk')
 const fs = require('fs')
-const { verifyTokenToData } = require('@src/utils/token')
-const { isType, uuid } = require('@src/utils/tool')
+const { verifyTokenToData } = require('../../utils/token')
+const { isType, uuid } = require('../../utils/tool')
 
 // error: 0, 
 // warn: 1, 

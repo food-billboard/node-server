@@ -17,7 +17,9 @@
     "test": "echo hello node-server",
     "internal_test": "mocha --recursive --timeout 10000",
     "coverage": "nyc npm run internal_test",
-    "docker:restart": "docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d"
+    "docker:restart": "docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d",
+  
+    "mock:user": "node ./mock/createUser.js -m 18368003190 -p shenjing8"
   },
   "author": "GLF",
   "license": "ISC",
@@ -26,7 +28,7 @@
     "app-root-path": "^3.0.0",
     "axios": "^0.24.0",
     "chalk": "^4.1.0",
-    "commander": "^6.2.1",
+    "commander": "^8.3.0",
     "dayjs": "^1.10.4",
     "elasticsearch": "^16.7.1",
     "fluent-ffmpeg": "^2.1.2",

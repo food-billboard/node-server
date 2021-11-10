@@ -2,7 +2,7 @@ const Day = require('dayjs')
 const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
-const { log4Database } = require('@src/config/winston')
+const { log4Database } = require('../../config/winston')
 const { 
   BEHAVIOUR_URL_TYPE_MAP, 
   EMAIL_REGEXP, 

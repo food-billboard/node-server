@@ -29,7 +29,7 @@ const {
   ROOM_TYPE,
   MESSAGE_TYPE,
   MESSAGE_POST_STATUS
-} = require('@src/utils')
+} = require('../src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
 const { expect } = require('chai')
@@ -45,9 +45,10 @@ function createMobile() {
 
 //用户创建
 function mockCreateUser(values={}) {
+  const { password: definePassword, mobile: defineMobile, ...nextValues } = values 
   const password = '1234567890'
-  const mobile = values.mobile || createMobile()
-  const encodedPwd = encoded(password)
+  const mobile = defineMobile || createMobile()
+  const encodedPwd = encoded(definePassword || password)
   // const token = signToken({ mobile, id }, {expiresIn: '5s'})
   let baseModel = {
     mobile,
@@ -67,18 +68,18 @@ function mockCreateUser(values={}) {
     status: 'SIGNOUT',
     roles: [ 'SUPER_ADMIN' ]
   }
-  baseModel = mergeConfig(baseModel, values, true)
+  baseModel = mergeConfig(baseModel, nextValues, true)
 
   const model = new UserModel(baseModel)
 
   return {
-      model,
-      decodePassword: password,
-      // token,
-      signToken: (id, friend_id='') => {
-        return signToken({ mobile, id, friend_id }, { expiresIn: '5s' })
-      }
+    model,
+    decodePassword: password,
+    // token,
+    signToken: (id, friend_id='') => {
+      return signToken({ mobile, id, friend_id }, { expiresIn: '5s' })
     }
+  }
 }
 
 //电影创建
