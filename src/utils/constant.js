@@ -1,7 +1,7 @@
 const path = require('path')
 
 const DEVELOPMENT_API_DOMAIN = 'http://localhost:4000'
-const PRODUCTION_DOMAIN = "47.111.229.250"
+const PRODUCTION_DOMAIN = "47.97.27.23"
 const PRODUCTION_API_DOMAIN = `http://${PRODUCTION_DOMAIN}`
 
 const EMAIL_AUTH = {

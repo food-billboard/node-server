@@ -26,7 +26,7 @@ module.exports = {
   deploy : {
     production : {
       user: "root",
-      host: "47.111.229.250",
+      host: "47.97.27.23",
       ssh_options: "StrictHostKeyChecking=no",
       ref: "master",
       repo: "git@github.com:food-billboard/node-server.git",
