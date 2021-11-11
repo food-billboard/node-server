@@ -33,7 +33,7 @@ module.exports = {
       // repo: "https://github.com.cnpmjs.org/food-billboard/node-server",
       path: "/home",
       "post-deploy":
-        "git pull origin master && source ~/.nvm/nvm.sh && yarn install", //&& pm2 startOrRestart pm2.config.js 
+        "git pull origin master && source ~/.nvm/nvm.sh && npm install yarn -g && yarn install", //&& pm2 startOrRestart pm2.config.js 
       "env": {
         "NODE_ENV": "production"
       }
