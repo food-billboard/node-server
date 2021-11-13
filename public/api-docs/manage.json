@@ -911,6 +911,166 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "新增电影评论列表",
+        "description": "新增电影评论列表",
+        "operationId": "manage_movie_detail_post_comment",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "源id(电影id或者评论id)",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "source_type",
+            "in": "body",
+            "description": "源类型",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "movie", "comment"
+            ]
+          },
+          {
+            "name": "content",
+            "in": "body",
+            "description": "内容",
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "description": "文字内容"
+              },
+              "image": {
+                "type": "string",
+                "description": "图片内容"
+              },
+              "video": {
+                "type": "string",
+                "description": "视频内容"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "删除电影评论列表",
+        "description": "删除电影评论列表",
+        "operationId": "manage_movie_detail_delete_comment",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "description": "评论id(多个用,分隔)",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
+    "/api/manage/movie/detail/comment/detail": {
+      "get": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "电影评论列表详情",
+        "description": "",
+        "operationId": "manage_movie_detail_get_comment_detail",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "评论id",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "description": "开始日期",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "description": "结束日期",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "hot",
+            "in": "query",
+            "description": "人气排序",
+            "type": "integer",
+            "enum": [ "1", "-1" ]
+          },
+          {
+            "name": "time",
+            "in": "query",
+            "description": "时间排序",
+            "type": "integer",
+            "enum": [ "1", "-1" ]
+          },
+          {
+            "name": "comment",
+            "in": "query",
+            "description": "评论数量排序",
+            "type": "integer",
+            "enum": [ "1", "-1" ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_movie_detail_get_comment_detail"
+            }
+          }
+        }
       }
     },
     "/api/manage/movie/detail/tag": {
@@ -4937,6 +5097,99 @@
       },
       "xml": {
         "name": "manage_movie_detail_get_comment"
+      }
+    },
+    "manage_movie_detail_get_comment_detail": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "description": "总数"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "user_info": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "描述"
+                          }
+                        }
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "comment_users": {
+                        "type": "integer",
+                        "description": "总评论量"
+                      },
+                      "total_like": {
+                        "type": "integer",
+                        "description": "人气"
+                      },
+                      "content": {
+                        "type": "object",
+                        "description": "内容",
+                        "properties": {
+                          "text": {
+                            "type": "string"
+                          },
+                          "image": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "video": {
+                            "type": "string",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_movie_detail_get_comment_detail"
       }
     },
     "manage_movie_detail_get_user": {

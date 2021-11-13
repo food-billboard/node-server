@@ -1,7 +1,7 @@
 require('module-alias/register')
-const { UserModel, CommentModel, MovieModel, ImageModel } = require('@src/utils')
+const { UserModel, CommentModel, MovieModel, ImageModel, COMMENT_SOURCE_TYPE, ROLES_NAME_MAP } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateMovie, mockCreateComment, mockCreateImage } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateMovie, mockCreateComment, mockCreateImage, parseResponse, deepParseResponse, envSet, envUnSet } = require('@test/utils')
 const { Types: { ObjectId } } = require("mongoose")
 const Day = require('dayjs')
 
@@ -78,7 +78,7 @@ describe(`${COMMON_API} test`, function() {
       movieId = data._id
 
       const { model: one } = mockCreateComment({
-        source_type: 'movie',
+        source_type: COMMENT_SOURCE_TYPE.movie,
         source: movieId,
         content: {
           text: COMMON_API,
@@ -89,7 +89,7 @@ describe(`${COMMON_API} test`, function() {
         total_like: 10
       })
       const { model: two } = mockCreateComment({
-        source_type: 'movie',
+        source_type: COMMENT_SOURCE_TYPE.movie,
         source: movieId,
         content: {
           text: COMMON_API,
@@ -159,193 +159,442 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`${COMMON_API} success test`, function() {
 
-    it(`get the movie comment list success`, function(done) {
+    describe(`get movie success test -> ${COMMON_API}`, function() {
+      it(`get the movie comment list success`, function(done) {
 
-      Request
-      .get(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .query({
-        _id: movieId.toString()
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .end(function(err, res) {
-        if(err) return done(err)
-        const { res: { text } } = res
-        let obj
-        try{
-          obj = JSON.parse(text)
-        }catch(_) {
-          console.log(_)
-        }
-        responseExpect(obj, target => {
-          expect(target.list.length).to.not.be.equals(0)
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
         })
-        done()
+        .query({
+          _id: movieId.toString()
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, target => {
+            expect(target.list.length).to.not.be.equals(0)
+          })
+          done()
+        })
+  
+      })
+  
+      it(`get the movie comment list with comment`, function(done) {
+  
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: movieId.toString(),
+          comment: -1
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            const { _id } = list[0]
+            expect(oneCommentId.equals(_id)).to.be.true
+          })
+          done()
+        })
+  
+      })
+  
+      it(`get the movie comment list with sort of hot`, function(done) {
+  
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: movieId.toString(),
+          hot: -1
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            const { _id } = list[0]
+            expect(oneCommentId.equals(_id)).to.be.true
+          })
+          done()
+        })
+  
+      })
+  
+      it(`get the movie comment list with sort of time`, function(done) {
+  
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: movieId.toString(),
+          time: -1
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj)
+          done()
+        })
+  
+      })
+  
+      it(`get the movie comment list with sort of start_date`, function(done) {
+  
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: movieId,
+          start_date: Day(Date.now() + 1000 * 24 * 60 * 60).format('YYYY-MM-DD')
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          const { res: { text } } = res
+          let obj
+          try{
+            obj = JSON.parse(text)
+          }catch(_) {
+            console.log(_)
+          }
+          responseExpect(obj, (target) => {
+            const { list } = target
+            expect(list.length).to.be.equals(0)
+  
+          })
+          done()
+        })
+  
+      })
+  
+      it(`get the movie comment list with sort of end_date`, function(done) {
+  
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: movieId,
+          end_date: '2019-10-11'
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          let obj = parseResponse(res)
+          responseExpect(obj, (target) => {
+            const { list } = target
+            expect(list.length).to.be.equals(0)
+  
+          })
+          done()
+        })
+  
+      })
+    })
+
+    describe(`post comment success test -> ${COMMON_API}`, function() {
+
+      it(`post comment success and post comment`, function(done) {
+
+        Request
+        .post(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          source_type: COMMENT_SOURCE_TYPE.comment,
+          _id: oneCommentId.toString(),
+          content: {
+            text: COMMON_API,
+            image: [
+              imageId.toString()
+            ]
+          }
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .then(function(data) {
+          let obj = deepParseResponse(data)
+          obj = ObjectId(obj)
+          return Promise.all([
+            CommentModel.findOne({
+              _id: oneCommentId,
+              sub_comments: {
+                $in: [
+                  obj
+                ]
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec(),
+            CommentModel.findOne({
+              _id: obj
+            })
+            .select({
+              _id: 1
+            })
+            .exec(),
+            UserModel.findOne({
+              _id: userInfo._id,
+              comment: {
+                $in: obj 
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec()
+          ])
+        })
+        .then(data => {
+          expect(data.every(item => !!item)).to.be.true 
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
+      })
+
+      it(`post comment success and post movie`, function(done) {
+
+        Request
+        .post(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          source_type: COMMENT_SOURCE_TYPE.movie,
+          _id: movieId.toString(),
+          content: {
+            text: COMMON_API,
+            image: [
+              imageId.toString()
+            ]
+          }
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .then(function(data) {
+          let obj = deepParseResponse(data)
+          return Promise.all([
+            MovieModel.findOne({
+              _id: movieId,
+              comment: {
+                $in: [
+                  obj
+                ]
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec(),
+            CommentModel.findOne({
+              _id: obj
+            })
+            .select({
+              _id: 1
+            })
+            .exec(),
+            UserModel.findOne({
+              _id: userInfo._id,
+              comment: {
+                $in: obj 
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec()
+          ])
+        })
+        .then(data => {
+          expect(data.every(item => !!item)).to.be.true 
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
       })
 
     })
 
-    it(`get the movie comment list with comment`, function(done) {
+    describe(`delete comment success test -> ${COMMON_API}`, function() {
+      
+      it(`delete comment success`, function(done) {
 
-      Request
-      .get(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .query({
-        _id: movieId.toString(),
-        comment: -1
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .end(function(err, res) {
-        if(err) return done(err)
-        const { res: { text } } = res
-        let obj
-        try{
-          obj = JSON.parse(text)
-        }catch(_) {
-          console.log(_)
-        }
-        responseExpect(obj, (target) => {
-          const { list } = target
-          const { _id } = list[0]
-          expect(oneCommentId.equals(_id)).to.be.true
+        let movieCommentId 
+        let commentCommentId 
+
+        const { model: movieComment } = mockCreateComment({
+          source_type: COMMENT_SOURCE_TYPE.movie,
+          source: movieId,
+          content: {
+            text: COMMON_API,
+            image: [ imageId ],
+            video: []
+          },
+          user_info: userInfo._id,
+          total_like: 10
         })
-        done()
-      })
 
-    })
-
-    it(`get the movie comment list with sort of hot`, function(done) {
-
-      Request
-      .get(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .query({
-        _id: movieId.toString(),
-        hot: -1
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .end(function(err, res) {
-        if(err) return done(err)
-        const { res: { text } } = res
-        let obj
-        try{
-          obj = JSON.parse(text)
-        }catch(_) {
-          console.log(_)
-        }
-        responseExpect(obj, (target) => {
-          const { list } = target
-          const { _id } = list[0]
-          expect(oneCommentId.equals(_id)).to.be.true
+        movieComment.save()
+        .then(data => {
+          movieCommentId = data._id 
+          const { model: commentComment } = mockCreateComment({
+            source_type: COMMENT_SOURCE_TYPE.comment,
+            source: movieCommentId,
+            content: {
+              text: COMMON_API,
+              image: [ imageId ],
+              video: []
+            },
+            user_info: userInfo._id,
+            total_like: 10
+          })
+          return commentComment.save()
         })
-        done()
-      })
-
-    })
-
-    it(`get the movie comment list with sort of time`, function(done) {
-
-      Request
-      .get(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .query({
-        _id: movieId.toString(),
-        time: -1
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .end(function(err, res) {
-        if(err) return done(err)
-        const { res: { text } } = res
-        let obj
-        try{
-          obj = JSON.parse(text)
-        }catch(_) {
-          console.log(_)
-        }
-        responseExpect(obj)
-        done()
-      })
-
-    })
-
-    it(`get the movie comment list with sort of start_date`, function(done) {
-
-      Request
-      .get(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .query({
-        _id: movieId,
-        start_date: Day(Date.now() + 1000 * 24 * 60 * 60).format('YYYY-MM-DD')
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .end(function(err, res) {
-        if(err) return done(err)
-        const { res: { text } } = res
-        let obj
-        try{
-          obj = JSON.parse(text)
-        }catch(_) {
-          console.log(_)
-        }
-        responseExpect(obj, (target) => {
-          const { list } = target
-          expect(list.length).to.be.equals(0)
-
+        .then(data => {
+          commentCommentId = data._id 
+          return Promise.all([
+            MovieModel.updateOne({
+              _id: movieId,
+            }, {
+              $push: {
+                comment: movieCommentId
+              }
+            }),
+            CommentModel.updateOne({
+              _id: movieCommentId
+            }, {
+              $push: {
+                sub_comments: commentCommentId
+              }
+            })
+          ])
         })
-        done()
-      })
-
-    })
-
-    it(`get the movie comment list with sort of end_date`, function(done) {
-
-      Request
-      .get(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .query({
-        _id: movieId,
-        end_date: '2019-10-11'
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .end(function(err, res) {
-        if(err) return done(err)
-        const { res: { text } } = res
-        let obj
-        try{
-          obj = JSON.parse(text)
-        }catch(_) {
-          console.log(_)
-        }
-        responseExpect(obj, (target) => {
-          const { list } = target
-          expect(list.length).to.be.equals(0)
-
+        .then(_ => {
+          return Request
+          .delete(COMMON_API)
+          .set({
+            Accept: 'application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .query({
+            _id: movieCommentId.toString()
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
         })
-        done()
+        .then(function(data) {
+          return Promise.all([
+            CommentModel.find({
+              _id: {
+                $in: [
+                  commentCommentId,
+                  movieCommentId
+                ]
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec(),
+            UserModel.findOne({
+              _id: userInfo._id,
+              comment: {
+                $in: [
+                  movieCommentId,
+                  commentCommentId 
+                ]
+              }
+            })
+            .select({
+              _id: 1
+            })
+            .exec(),
+            MovieModel.findOne({
+              _id: movieId,
+              comment: {
+                $in: [
+                  movieCommentId
+                ]
+              }
+            })
+          ])
+        })
+        .then(([comment, user, movie]) => {
+          expect(comment.length).to.be.equal(0) 
+          expect(!!user).to.be.false
+          expect(!!movie).to.be.false
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
+      
+      
       })
 
     })
@@ -354,22 +603,285 @@ describe(`${COMMON_API} test`, function() {
 
   describe(`${COMMON_API} fail test`, function() {
     
-    it(`get the movie comment list fail because the movie id is not verify`, function(done) {
+    describe(`get comment fail test -> ${COMMON_API}`, function() {
 
-      Request
-      .get(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
+      it(`get the movie comment list fail because the movie id is not verify`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: movieId.toString().slice(1)
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          done()
+        })
+  
       })
-      .query({
-        _id: movieId.toString().slice(1)
+
+    })
+
+    describe(`post comment fail test -> ${COMMON_API}`, function() {
+
+      it(`post comment fail because the user is not the auth`, function(done) {
+
+        UserModel.updateOne({
+          _id: userInfo._id 
+        }, {
+          $set: {
+            roles: [
+              ROLES_NAME_MAP.CUSTOMER
+            ]
+          }
+        })
+        .then(envSet)
+        .then(data => {
+          return Request
+          .post(COMMON_API)
+          .set({
+            Accept: 'application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .send({
+            source_type: movieId.toString(),
+            _id: oneCommentId.toString(),
+            content: {
+              text: COMMON_API,
+              image: [
+                imageId.toString()
+              ]
+            }
+          })
+          .expect(403)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return UserModel.updateOne({
+            _id: userInfo._id 
+          }, {
+            $set: {
+              roles: [
+                ROLES_NAME_MAP.SUPER_ADMIN
+              ]
+            }
+          })
+        })
+        .then(envUnSet)
+        .then(_ => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
       })
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .end(function(err, res) {
-        if(err) return done(err)
-        done()
+
+      it(`post comment fail because the source_type is not valid`, function(done) {
+
+        Request
+        .post(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          source_type: "233",
+          _id: oneCommentId.toString(),
+          content: {
+            text: COMMON_API,
+            image: [
+              imageId.toString()
+            ]
+          }
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .then(data => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
+      })
+
+      it(`post comment fail because not found source_type params`, function(done) {
+
+        Request
+        .post(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          _id: oneCommentId.toString(),
+          content: {
+            text: COMMON_API,
+            image: [
+              imageId.toString()
+            ]
+          }
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .then(() => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
+      })
+
+      it(`post comment fail because the _id is not valid`, function(done) {
+
+        Request
+        .post(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          source_type: COMMENT_SOURCE_TYPE.comment,
+          _id: oneCommentId.toString().slice(1),
+          content: {
+            text: COMMON_API,
+            image: [
+              imageId.toString()
+            ]
+          }
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .then(() => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
+      })
+
+      it(`post the comment fail because not found the _id`, function(done) {
+
+        Request
+        .post(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          source_type: COMMENT_SOURCE_TYPE.comment,
+          _id: oneCommentId.toString().slice(1),
+          content: {
+            text: COMMON_API,
+            image: [
+              imageId.toString()
+            ]
+          }
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .then(() => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
+      })
+
+    })
+
+    describe(`delete comment fail test -> ${COMMON_API}`, function() {
+      
+      it(`delete comment fail because the user is not the auth`, function(done) {
+
+        UserModel.updateOne({
+          _id: userInfo._id 
+        }, {
+          $set: {
+            roles: [
+              ROLES_NAME_MAP.CUSTOMER
+            ]
+          }
+        })
+        .then(envSet)
+        .then(data => {
+          return Request
+          .delete(COMMON_API)
+          .set({
+            Accept: 'application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .query({
+            _id: oneCommentId.toString()
+          })
+          .expect(403)
+          .expect('Content-Type', /json/)
+        })
+        .then(_ => {
+          return UserModel.updateOne({
+            _id: userInfo._id 
+          }, {
+            $set: {
+              roles: [
+                ROLES_NAME_MAP.SUPER_ADMIN
+              ]
+            }
+          })
+        })
+        .then(envUnSet)
+        .then(_ => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+
+      })
+
+      it(`delete comment fail because the _id is not valid`, function(done) {
+
+        Request
+        .delete(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: oneCommentId.toString().slice(1)
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end((err, res) => {
+          if(err) return done(err) 
+          done()
+        })
+
+      })
+
+      it(`delete comment fail because not found the _id`, function(done) {
+
+        Request
+        .delete(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end((err, res) => {
+          if(err) return done(err) 
+          done()
+        })
+
       })
 
     })

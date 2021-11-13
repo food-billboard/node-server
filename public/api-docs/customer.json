@@ -845,6 +845,42 @@
             ]
           }
         ]
+      },
+      "delete": {
+        "tags": [
+          "manage"
+        ],
+        "summary": "删除评论列表",
+        "description": "删除用户发布的评论列表",
+        "operationId": "customer_manage_delete_comment",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "评论id(多个用,分隔)",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
       }
     },
     "/api/customer/manage/movie": {

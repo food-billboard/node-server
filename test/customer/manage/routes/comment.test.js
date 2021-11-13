@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { mockCreateUser, mockCreateImage, mockCreateMovie, mockCreateVideo, mockCreateComment, Request, createEtag, commonValidate } = require('@test/utils')
-const { UserModel, ImageModel, VideoModel, CommentModel, MovieModel } = require('@src/utils')
+const { UserModel, ImageModel, VideoModel, CommentModel, MovieModel, COMMENT_SOURCE_TYPE } = require('@src/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/customer/manage/comment'
@@ -264,6 +264,167 @@ describe(`${COMMON_API} test`, function() {
       .expect('ETag', createEtag(query))
       .end(function(err, _) {
         if(err) return done(err)
+        done()
+      })
+
+    })
+
+  })
+
+  describe(`delete self comment success test -> ${COMMON_API}`, function() {
+
+    it(`delete comment success`, function(done) {
+
+      let movieCommentId 
+      let commentCommentId 
+
+      const { model: movieComment } = mockCreateComment({
+        source_type: COMMENT_SOURCE_TYPE.movie,
+        source: movieId,
+        content: {
+          text: COMMON_API,
+          image: [ imageId ],
+          video: []
+        },
+        user_info: userId,
+        total_like: 10
+      })
+
+      movieComment.save()
+      .then(data => {
+        movieCommentId = data._id 
+        const { model: commentComment } = mockCreateComment({
+          source_type: COMMENT_SOURCE_TYPE.comment,
+          source: movieCommentId,
+          content: {
+            text: COMMON_API,
+            image: [ imageId ],
+            video: []
+          },
+          user_info: userId,
+          total_like: 10
+        })
+        return commentComment.save()
+      })
+      .then(data => {
+        commentCommentId = data._id 
+        return Promise.all([
+          MovieModel.updateOne({
+            _id: movieId,
+          }, {
+            $push: {
+              comment: movieCommentId
+            }
+          }),
+          CommentModel.updateOne({
+            _id: movieCommentId
+          }, {
+            $push: {
+              sub_comments: commentCommentId
+            }
+          })
+        ])
+      })
+      .then(_ => {
+        return Request
+        .delete(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: movieCommentId.toString()
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+      })
+      .then(function(data) {
+        return Promise.all([
+          CommentModel.find({
+            _id: {
+              $in: [
+                commentCommentId,
+                movieCommentId
+              ]
+            }
+          })
+          .select({
+            _id: 1
+          })
+          .exec(),
+          UserModel.findOne({
+            _id: userId,
+            comment: {
+              $in: [
+                movieCommentId,
+                commentCommentId 
+              ]
+            }
+          })
+          .select({
+            _id: 1
+          })
+          .exec(),
+          MovieModel.findOne({
+            _id: movieId,
+            comment: {
+              $in: [
+                movieCommentId
+              ]
+            }
+          })
+        ])
+      })
+      .then(([comment, user, movie]) => {
+        expect(comment.length).to.be.equal(0) 
+        expect(!!user).to.be.false
+        expect(!!movie).to.be.false
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+
+    
+    
+    })
+
+  })
+
+  describe(`delete self comment fail test -> ${COMMON_API}`, function() {
+
+    it(`delete comment fail because the _id is not valid`, function(done) {
+
+      Request
+      .delete(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        _id: result._id.toString().slice(1)
+      })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .end((err, res) => {
+        if(err) return done(err) 
+        done()
+      })
+
+    })
+
+    it(`delete comment fail because not found the _id`, function(done) {
+
+      Request
+      .delete(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .end((err, res) => {
+        if(err) return done(err) 
         done()
       })
 

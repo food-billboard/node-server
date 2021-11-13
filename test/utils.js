@@ -551,6 +551,28 @@ function envUnSet() {
   })
 }
 
+function parseResponse(res) {
+  const { res: { text } } = res
+  let obj = {}
+  try{
+    obj = JSON.parse(text)
+    return obj 
+  }catch(err) {
+    console.log(err)
+    return obj 
+  }
+}
+
+function deepParseResponse(res) {
+  try {
+    const result = parseResponse(res)
+    return result.res.data 
+  }catch(err) {
+    console.log(err)
+    return {}
+  }
+}
+
 module.exports = {
   mockCreateUser,
   mockCreateMovie,
@@ -580,5 +602,7 @@ module.exports = {
   mockCreateMessage,
   mockCreateRoom,
   envSet,
-  envUnSet
+  envUnSet,
+  parseResponse,
+  deepParseResponse
 }
