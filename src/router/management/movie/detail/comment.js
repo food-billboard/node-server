@@ -1,4 +1,5 @@
 const Router = require('@koa/router')
+const { isNill } = require("lodash")
 const { MovieModel, CommentModel, dealErr, notFound, responseDataDeal, Params, verifyTokenToData, COMMENT_SOURCE_TYPE } = require('@src/utils')
 const { Types: { ObjectId }, Aggregate } = require('mongoose')
 const { UserModel } = require('../../../../utils/mongodb/mongo.lib')
@@ -459,22 +460,39 @@ router
   }, {
     name: 'hot',
     sanitizers: [
-      data => parseInt(data),
-      data => Number.isNaN(data) ? -1 : data > 0 ? 1 : -1
+      data => isNill(data) ? 0 : data > 0 ? 1 : -1
     ]
   }, {
     name: 'time',
     sanitizers: [
-      data => parseInt(data),
-      data => Number.isNaN(data) ? -1 : data > 0 ? 1 : -1
+      data => isNill(data) ? 0 : data > 0 ? 1 : -1
     ]
   }, {
     name: 'comment',
     sanitizers: [
-      data => parseInt(data),
-      data => Number.isNaN(data) ? -1 : data > 0 ? 1 : -1
+      data =>isNill(data) ? 0 : data > 0 ? 1 : -1
     ]
   })
+
+  const commentMatch = {
+    $expr: {
+      $eq: [
+        "$source", "$$parentId"
+      ]
+    },
+  }
+
+  const commentSort = {}
+
+  if(hot) commentSort.total_like = +hot 
+  if(time) commentSort.createdAt = +time
+  if(comment) commentSort.comment_users = +comment 
+
+  if(start_date || end_date) {
+    commentMatch.createdAt = {}
+    if(start_date) commentMatch.createdAt.$gte = start_date 
+    if(end_date) commentMatch.createdAt.$lte = end_date 
+  }
 
   const data = await CommentModel.aggregate([
     {
@@ -490,17 +508,7 @@ router
         },
         pipeline: [
           {
-            $match: {
-              $expr: {
-                $eq: [
-                  "$source", "$$parentId"
-                ]
-              },
-              createdAt: {
-                $gte: start_date,
-                $lte: end_date
-              }
-            }
+            $match: commentMatch
           },
           {
             $lookup: {
@@ -584,13 +592,9 @@ router
               updatedAt: 1
             }
           },
-          {
-            $sort: {
-              comment_users: comment,
-              createdAt: time,
-              total_like: hot,
-            }
-          },
+          ...(Object.values(commentSort).length ? [{
+            $sort: commentSort 
+          }] : []) 
         ],
         as: "comment" 
       }
