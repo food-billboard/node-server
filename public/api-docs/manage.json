@@ -5034,6 +5034,15 @@
                       "_id": {
                         "type": "string"
                       },
+                      "source": {
+                        "type": "string",
+                        "description": "原始id(电影或评论)"
+                      },
+                      "source_type": {
+                        "type": "string",
+                        "description": "原始类型",
+                        "enum": [ "movie", "comment" ]
+                      },
                       "user_info": {
                         "type": "object",
                         "properties": {
@@ -5043,6 +5052,14 @@
                           "username": {
                             "type": "string",
                             "description": "作者用户名"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "描述"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
                           }
                         }
                       },
@@ -5058,9 +5075,9 @@
                         "type": "integer",
                         "description": "总评论量"
                       },
-                      "like_person_count": {
+                      "comment_users": {
                         "type": "integer",
-                        "description": "点赞reshuffle"
+                        "description": "总评论用户"
                       },
                       "total_like": {
                         "type": "integer",
@@ -5123,6 +5140,15 @@
                       "_id": {
                         "type": "string"
                       },
+                      "source": {
+                        "type": "string",
+                        "description": "原始id(电影或评论)"
+                      },
+                      "source_type": {
+                        "type": "string",
+                        "description": "原始类型",
+                        "enum": [ "movie", "comment" ]
+                      },
                       "user_info": {
                         "type": "object",
                         "properties": {
@@ -5152,6 +5178,10 @@
                         "format": "date-time"
                       },
                       "comment_users": {
+                        "type": "integer",
+                        "description": "总评论用户"
+                      },
+                      "comment_count": {
                         "type": "integer",
                         "description": "总评论量"
                       },

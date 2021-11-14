@@ -15,14 +15,17 @@ function responseExpect(res, validate=[]) {
   expect(target.list).to.be.a('array')
 
   target.list.forEach(item => {
-    expect(item).to.be.a('object').that.includes.all.keys('_id', 'user_info', 'comment_users', 'total_like', 'content', 'createdAt', 'updatedAt')
+    expect(item).to.be.a('object').that.includes.all.keys('_id', 'user_info', 'comment_users', 'total_like', 'content', 'createdAt', 'updatedAt', "source_type", "source", "comment_count")
     commonValidate.objectId(item._id)
+    commonValidate.objectId(item.source)
+    commonValidate.string(item.source_type)
     expect(item.user_info).to.be.a('object').that.includes.any.keys('_id', 'username', "description", "avatar")
     commonValidate.string(item.user_info.username)
     commonValidate.string(item.user_info.description)
     if(item.user_info.avatar) commonValidate.string(item.user_info.avatar)
     commonValidate.objectId(item.user_info._id)
     commonValidate.number(item.comment_users)
+    commonValidate.number(item.comment_count)
     commonValidate.number(item.total_like)
     expect(item.content).to.be.a('object').and.that.includes.all.keys('text', 'image', 'video')
     commonValidate.string(item.content.text)

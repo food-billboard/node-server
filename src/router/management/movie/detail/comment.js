@@ -153,15 +153,17 @@ router
           total_like: 1,
           createdAt: 1,
           updatedAt: 1,
-          like_person_count: {
+          source_type: 1,
+          source: 1,
+          content: 1,
+          comment_users: {
             $size: {
               $ifNull: [
-                "$like_person",
+                "$comment_users",
                 []
               ]
             }
           },
-          content: 1,
           comment_count: {
             $size: {
               $ifNull: [
@@ -187,10 +189,44 @@ router
       },
       {
         $lookup: {
-          from: 'users', 
-          localField: 'user_info', 
-          foreignField: '_id', 
-          as: 'user_info'
+          from: "users",
+          let: {
+            userId: "$user_info"
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [
+                    "$_id", "$$userId"
+                  ]
+                }
+              }
+            },
+            {
+              $lookup: {
+                from: 'images',
+                localField: 'avatar',
+                foreignField: '_id',
+                as: 'avatar'
+              }
+            },
+            {
+              $unwind: {
+                path: "$avatar",
+                preserveNullAndEmptyArrays: true 
+              }
+            },
+            {
+              $project: {
+                username: 1,
+                avatar: "$avatar.src",
+                _id: 1,
+                description: 1
+              }
+            }
+          ],
+          as: "user_info"
         }
       },
       {
@@ -214,13 +250,18 @@ router
       },
       {
         $project: {
+          _id: 1,
           user_info: {
             _id: "$user_info._id",
-            username: "$user_info.username"
+            username: "$user_info.username",
+            description: "$user_info.description",
+            avatar: "$user_info.avatar"
           },
           comment_count: 1,
           total_like: 1,
-          like_person_count: 1,
+          source_type: 1,
+          comment_users: 1,
+          source: 1,
           content: {
             text: "$content.text",
             video: "$video.src",
@@ -576,10 +617,19 @@ router
               _id: 1,
               user_info: "$user_info",
               total_like: 1,
+              source_type: 1,
+              source: 1,
               comment_users: {
                 $size: {
                   $ifNull: [
                     "$comment_users", []
+                  ]
+                }
+              },
+              comment_count: {
+                $size: {
+                  $ifNull: [
+                    "$sub_comments", []
                   ]
                 }
               },

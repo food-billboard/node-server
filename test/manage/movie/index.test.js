@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { MovieModel, UserModel, ClassifyModel, ImageModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateMovie, mockCreateClassify, mockCreateUser, mockCreateImage } = require('@test/utils')
+const { Request, commonValidate, mockCreateMovie, mockCreateClassify, mockCreateUser, mockCreateImage, parseResponse } = require('@test/utils')
 const { Types: { ObjectId } } = require("mongoose")
 const Day = require('dayjs')
 
@@ -190,13 +190,7 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
+          let obj = parseResponse(res)
           responseExpect(obj, (target) => {
             const { list } = target
             expect(list.length).to.not.be.equals(0)
@@ -222,13 +216,7 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
+          let obj = parseResponse(res)
           responseExpect(obj, (target) => {
             const { list } = target
             expect(list.length).to.not.be.equals(0)
@@ -253,13 +241,7 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
+          let obj = parseResponse(res)
           responseExpect(obj, (target) => {
             const { list } = target
             expect(list.length).to.not.be.equals(0)
@@ -284,13 +266,7 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
+          let obj = parseResponse(res)
           responseExpect(obj, (target) => {
             const { list } = target
             expect(list.length).to.not.be.equals(0)
@@ -315,13 +291,7 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
+          let obj = parseResponse(res)
           responseExpect(obj, (target) => {
             const { list } = target
             expect(list.length).to.not.be.equals(0)
@@ -351,13 +321,7 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
+          let obj = parseResponse(res)
           responseExpect(obj, (target) => {
             const { list } = target
             expect(list.length >= 1).to.be.true
@@ -386,13 +350,7 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
+          let obj = parseResponse(res)
           responseExpect(obj, (target) => {
             const { list } = target
             expect(list.length >= 1).to.be.true
@@ -421,13 +379,7 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
+          let obj = parseResponse(res)
           responseExpect(obj, (target) => {
             const { list } = target
             const exists = list.every(item => Day(item.createdAt).year() <= 2019)
@@ -458,12 +410,7 @@ describe(`${COMMON_API} test`, function() {
         .end(function(err, res) {
           if(err) return done(err)
           const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
+          let obj = parseResponse(res)
           responseExpect(obj, (target) => {
             const { list } = target
             expect(list.length).to.be.equals(0)
@@ -492,16 +439,10 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
+          let obj = parseResponse(res)
           responseExpect(obj, (target) => {
             const { list } = target
-            expect(list.length).to.be.equals(1)
+            expect(list.length >= 1).to.be.true
           })
           done()
         })
