@@ -3533,7 +3533,7 @@
           {
             "name": "type",
             "in": "query",
-            "description": "资源类型",
+            "description": "资源类型(0-图片，1-视频，2-其他)",
             "type": "string",
             "enum": ["0", "1", "2"],
             "required": true
