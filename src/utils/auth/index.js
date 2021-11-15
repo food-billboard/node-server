@@ -150,9 +150,29 @@ function rolesAuthMapValidator({
   })
 }
 
+function loginAuthorization() {
+  return async(ctx, next) => {
+    const [ , token ] = verifyTokenToData(ctx)
+    let error
+    if(!token) {
+      error = dealErr(ctx)({ errMsg: 'not authorization', status: 401 })
+      responseDataDeal({
+        ctx,
+        data: error,
+        needCache: false
+      })
+      return
+    }
+  
+    return await next()
+  
+  }
+}
+
 module.exports = {
   // initAuthMapData,
   authMiddleware,
   rolesAuthMapValidator,
-  findMostRole
+  findMostRole,
+  loginAuthorization
 }

@@ -52,3 +52,6 @@
 2. 测试覆盖率 `npm run coverage`
 3. 开发环境启动 `npm run dev:nodemon`  
 4. 生产环境启动  `npm run prod:pm2`  
+
+### Mark  
+- 静态资源在数据库中的目录是`/[image|video|other]/xxxx.xx`

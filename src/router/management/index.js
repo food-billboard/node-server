@@ -7,28 +7,13 @@ const User = require('./user')
 const Instance = require('./instance')
 const Media = require('./media')
 const Chat = require('./chat')
-const { verifyTokenToData, dealErr, responseDataDeal } = require('@src/utils')
+const { loginAuthorization } = require('@src/utils')
 
 const router = new Router()
 
 router
 //登录判断
-.use(async(ctx, next) => {
-  const [ , token ] = verifyTokenToData(ctx)
-  let error
-  if(!token) {
-    error = dealErr(ctx)({ errMsg: 'not authorization', status: 401 })
-    responseDataDeal({
-      ctx,
-      data: error,
-      needCache: false
-    })
-    return
-  }
-
-  return await next()
-
-})
+.use(loginAuthorization())
 .use('/dashboard', Dashboard.routes(), Dashboard.allowedMethods())
 .use('/admin', Admin.routes(), Admin.allowedMethods())
 // .use('/error', Error.routes(), Error.allowedMethods())

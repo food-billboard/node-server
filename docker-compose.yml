@@ -3,6 +3,9 @@ networks:
   nginx_bridge:
     driver: bridge
 services:
+  ffmpeg:
+    image: jrottenberg/ffmpeg:3.3
+    container_name: ffmpeg 
   # node-media-server:
   #   image: illuspas/node-media-server:latest
   #   container_name: ffmpeg_video 
