@@ -54,4 +54,4 @@
 4. 生产环境启动  `npm run prod:pm2`  
 
 ### Mark  
-- 静态资源在数据库中的目录是`/[image|video|other]/xxxx.xx`
+- 静态资源在数据库中的目录是`/static/[image|video|other]/xxxx.xx`

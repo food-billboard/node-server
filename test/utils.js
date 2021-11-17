@@ -35,6 +35,7 @@ const {
   MESSAGE_TYPE,
   MESSAGE_POST_STATUS,
   STATIC_FILE_PATH,
+  STATIC_FILE_PATH_NO_WRAPPER,
   downloadVideo,
   fileEncoded
 } = require('@src/utils')
@@ -266,8 +267,8 @@ async function mockCreateRealVideo(values={}) {
     filename = await downloadVideo(MOCK_DOWNLOAD_VIDEO_ADDRESS, "test-video", path.join(STATIC_FILE_PATH, "video"))
   }
 
-  const src = `/video/${filename}`  
-  const absoluteSrc = path.join(STATIC_FILE_PATH, src)
+  const src = `/static/video/${filename}`  
+  const absoluteSrc = path.join(STATIC_FILE_PATH_NO_WRAPPER, src)
   const data = fs.statSync(absoluteSrc)
   const fileData = await fs.readFile(absoluteSrc)
 

@@ -14,6 +14,7 @@ const {
   MEDIA_AUTH, 
   notFound, 
   STATIC_FILE_PATH, 
+  STATIC_FILE_PATH_NO_WRAPPER,
   MEDIA_ORIGIN_TYPE, 
   MEDIA_STATUS,
   fileEncoded,
@@ -93,13 +94,15 @@ router
         posterName = posterName || data.name 
         posterName += "-temp"
         tempPosterFileName = path.join(STATIC_FILE_PATH, "/image", `/${posterName}${suffix}`)
-        if(!fs.existsSync(path.join(STATIC_FILE_PATH, src))) return notFound(false)
+        if(!fs.existsSync(path.join(STATIC_FILE_PATH_NO_WRAPPER, src))) {
+          return notFound(false)
+        }
         return data
       })
       .then(data => {
         // 视频截图  
         return new Promise((resolve, reject) => {
-          const cmd = `docker run -v ${STATIC_FILE_PATH}:/run/project ${FFMPEG_VERSION} -ss ${time} -i ${path.join("/run/project", data.src)} -y -f image2 -t 0.001 ${path.join("/run/project", "/image", `/${posterName}${suffix}`)}`
+          const cmd = `docker run -v ${STATIC_FILE_PATH_NO_WRAPPER}:/run/project ${FFMPEG_VERSION} -ss ${time} -i ${path.join("/run/project", data.src)} -y -f image2 -t 0.001 ${path.join("/run/project/static/image", `/${posterName}${suffix}`)}`
           exec(cmd, function(err) {
             if(err) {
               reject({
@@ -133,7 +136,7 @@ router
       })
       .then(data => {
         const model = new ImageModel({
-          src: `/image/${data}${suffix}`,
+          src: `/static/image/${data}${suffix}`,
           name: posterName,
           origin_type: MEDIA_ORIGIN_TYPE[origin_type] || MEDIA_ORIGIN_TYPE.USER,
           auth: MEDIA_AUTH[auth] || MEDIA_AUTH.PUBLIC,
