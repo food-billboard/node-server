@@ -15,6 +15,7 @@ const Video = require('./video')
 const Media = require('./media')
 const Middleware = require('./middleware')
 const Common = require("./common")
+const Download = require('./download')
 
 module.exports = {
   ...MongoDB,
@@ -33,5 +34,6 @@ module.exports = {
   ...Video,
   ...Media,
   ...Middleware,
-  ...Common
+  ...Common,
+  ...Download
 }

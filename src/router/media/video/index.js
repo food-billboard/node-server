@@ -1,9 +1,9 @@
 const Router = require('@koa/router')
-const Video = require('./video')
+const Poster = require('./poster')
 
 const router = new Router()
 
 router
-.use('/video', Video.routes(), Video.allowedMethods())
+.use('/poster', Poster.routes(), Poster.allowedMethods())
 
 module.exports = router

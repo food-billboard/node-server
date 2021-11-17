@@ -4,6 +4,8 @@ const DEVELOPMENT_API_DOMAIN = 'http://localhost:4000'
 const PRODUCTION_DOMAIN = "47.97.27.23"
 const PRODUCTION_API_DOMAIN = `http://${PRODUCTION_DOMAIN}`
 
+const FFMPEG_VERSION = "jrottenberg/ffmpeg:4.1-centos"
+
 const EMAIL_AUTH = {
   pass: 'hgldcifqqwmlbajd',
   username: 'G',
@@ -208,5 +210,6 @@ module.exports = {
   STATIC_FILE_PATH_NO_WRAPPER,
   MESSAGE_POST_STATUS,
   ROLES_NAME_MAP,
-  PRODUCTION_DOMAIN
+  PRODUCTION_DOMAIN,
+  FFMPEG_VERSION
 }

@@ -1,0 +1,59 @@
+version: '2'
+networks:
+  nginx_bridge:
+    driver: bridge
+services:
+  ffmpeg:
+    image: jrottenberg/ffmpeg:4.1-centos
+    container_name: ffmpeg 
+  rabbitmq:
+    image: rabbitmq:3.8.3-management
+    container_name: rabbitmq
+    restart: always
+    hostname: movieRabbit
+    ports:
+      # 管理界面
+      - 15672:15672
+      # erlang
+      - 4369:4369
+      # client
+      - 5672:5672
+      # server
+      - 25672:25672
+    volumes:
+      - "./local_data/rabbitmq/data:/var/lib/rabbitmq"
+      - "./local_data/rabbitmq/data:/var/log/rabbitmq/log"
+    environment:
+      - RABBITMQ_DEFAULT_USER="admin"
+      - RABBITMQ_DEFAULT_PASS="admin"
+  mongo:
+    container_name: mongo
+    image: mongo:4.0.3
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - /usr/local/etc/mongodb:/data/db
+      - /usr/local/mongodb/log:/var/log/mongodb
+  redis:
+    image: redis
+    container_name: redis
+    volumes:
+      - /usr/local/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - 6379:6379
+  nginx:
+    image: nginx:1.19
+    container_name: nginx
+    restart: always
+    privileged: true
+    ports:
+      - 8080:80
+      - 80:80
+      - 443:443
+    volumes:
+      - ./bin/nginx/conf.d:/etc/nginx/conf.d
+      - ./bin/nginx/logs.log:/etc/nginx/logs/log.log
+      - ./public:/movie/server/public:ro
+      - ./static:/movie/server/static:ro
+    network_mode: host

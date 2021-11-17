@@ -1,3 +1,8 @@
+const fs = require("fs-extra")
+const path = require("path")
+const mime = require("mime")
+const { expect } = require('chai')
+const mongoose = require('mongoose')
 const { 
   encoded, 
   signToken,
@@ -28,23 +33,23 @@ const {
   MESSAGE_MEDIA_TYPE,
   ROOM_TYPE,
   MESSAGE_TYPE,
-  MESSAGE_POST_STATUS
+  MESSAGE_POST_STATUS,
+  STATIC_FILE_PATH,
+  downloadVideo,
+  fileEncoded
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
-const { expect } = require('chai')
-const mongoose = require('mongoose')
-const path = require('path')
-const fs = require('fs')
-const fsPromise = fs.promises
 const { Types: { ObjectId } } = mongoose
+
+const MOCK_DOWNLOAD_VIDEO_ADDRESS = "https://vd2.bdstatic.com/mda-mkdk45isaj55hx7d/sc/cae_h264_clips/1636899416361308851/mda-mkdk45isaj55hx7d.mp4?auth_key=1637058284-0-0-dff1f0fc63cc7f77eb92e49c0beb77d5&bcevod_channel=searchbox_feed&pd=1&pt=3&abtest=3000186_3&klogid=3283889803"
 
 function createMobile() {
   return parseInt(`13${new Array(9).fill(0).map(_ => Math.floor(Math.random() * 10)).join('')}`)
 }
 
 //用户创建
-function mockCreateUser(values={}) {
+function mockCreateUser(values={}, tokenSetting={}) {
   const password = '1234567890'
   const mobile = values.mobile || createMobile()
   const encodedPwd = encoded(password)
@@ -76,7 +81,7 @@ function mockCreateUser(values={}) {
       decodePassword: password,
       // token,
       signToken: (id, friend_id='') => {
-        return signToken({ mobile, id, friend_id }, { expiresIn: '5s' })
+        return signToken({ mobile, id, friend_id }, { expiresIn: '5s', ...tokenSetting })
       }
     }
 }
@@ -251,6 +256,39 @@ function mockCreateImage(values={}) {
   const model = new ImageModel(baseModel)
 
   return { model }
+}
+
+//创建真实视频
+async function mockCreateRealVideo(values={}) {
+  const exists = fs.existsSync(path.join(STATIC_FILE_PATH, "/video/test-video.mp4"))
+  let filename = "test-video.mp4"
+  if(!exists) {
+    filename = await downloadVideo(MOCK_DOWNLOAD_VIDEO_ADDRESS, "test-video", path.join(STATIC_FILE_PATH, "video"))
+  }
+
+  const src = `/video/${filename}`  
+  const absoluteSrc = path.join(STATIC_FILE_PATH, src)
+  const data = fs.statSync(absoluteSrc)
+  const fileData = await fs.readFile(absoluteSrc)
+
+  await VideoModel.deleteOne({
+    src
+  })
+
+  return {
+    ...mockCreateVideo(mergeConfig({
+      src,
+      info: {
+        mime: mime.getType(filename),
+        md5: fileEncoded(fileData),
+        size: data.size
+      },  
+    }, values, true)),
+    unlink: () => {
+      return fs.unlink(absoluteSrc)
+    }
+  }
+
 }
 
 //创建视频
@@ -516,7 +554,7 @@ async function generateTemplateFile(files=[
       const exists = fs.existsSync(filePath)
       if(!exists) {
         const buffer = Buffer.alloc(size, 'a')
-        await fsPromise.writeFile(filePath, buffer)
+        await fs.writeFile(filePath, buffer)
         // const writeStream = fs.createWriteStream(filePath)
         // await new Promise((resolve, reject) => {
         //   writeStream.on('finish', resolve)
@@ -604,5 +642,6 @@ module.exports = {
   envSet,
   envUnSet,
   parseResponse,
-  deepParseResponse
+  deepParseResponse,
+  mockCreateRealVideo
 }

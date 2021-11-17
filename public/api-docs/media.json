@@ -1,0 +1,121 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "这是某微信小程序的用户后端api接口文档，有兴趣可以去github上给个鼓励  github at [https://github.com/food-billboard?tab=repositories) ",
+    "version": "1.0.0",
+    "title": "小程序api文档",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host": "petstore.swagger.io",
+  "basePath": "/v2",
+  "tags": [
+    {
+      "name": "video",
+      "description": "视频相关",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/api/media/video/poster": {
+      "put": {
+        "tags": [
+          "video"
+        ],
+        "summary": "截取视频海报",
+        "description": "",
+        "operationId": "media_video_put_poster",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"视频的id"
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "type": "string",
+            "description":"图片名称"
+          },
+          {
+            "name": "origin_type",
+            "in": "body",
+            "type": "string",
+            "description":"来源类型(ORIGIN, USER)",
+            "enum": [ "ORIGIN", "USER" ]
+          },
+          {
+            "name": "auth",
+            "in": "body",
+            "type": "string",
+            "description":"权限类型(PUBLIC, PRIVATE)",
+            "enum": [ "PUBLIC", "PRIVATE" ]
+          },
+          {
+            "name": "time",
+            "in": "body",
+            "type": "string",
+            "description":"截取图片的视频时间(00:00:10)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/media_video_put_poster"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "media_video_put_poster": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"string",
+              "description": "图片id"
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "media_video_put_poster"
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  }
+}
