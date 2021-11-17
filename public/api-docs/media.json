@@ -71,6 +71,12 @@
             "in": "body",
             "type": "string",
             "description":"截取图片的视频时间(00:00:10)"
+          },
+          {
+            "name": "overlap",
+            "in": "body",
+            "type": "boolean",
+            "description":"是否覆盖原有截图(不覆盖则不生成新截图)"
           }
         ],
         "responses": {

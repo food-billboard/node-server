@@ -113,7 +113,7 @@ describe(`${COMMON_API} test`, () => {
       UserModel.deleteMany({
         username: COMMON_API
       }),
-      videoDelete()
+      // videoDelete()
     ])
     .then(_ => {
       done()
@@ -285,6 +285,121 @@ describe(`${COMMON_API} test`, () => {
         })
         return existsAndDeleteImage(id, (data) => {
           return data.auth.toUpperCase() == MEDIA_AUTH.PRIVATE
+        })
+      })
+      .then(data => {
+        if(data) {
+          return done()
+        }else {
+          return done("request error")
+        }
+      })
+      .catch(err => {
+        done(err)
+      })
+
+    })
+
+    it(`generate the video poster success and the poster is exists`, function(done) {
+
+      let fileSize 
+      let mockData 
+
+      Request
+      .put(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        _id: videoId.toString()
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(data => {
+        mockData = data 
+      })
+      .then(_ => {
+        return Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          _id: videoId.toString()
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+      })
+      .then(function(res) {
+        let obj = parseResponse(res)
+        const id = deepParseResponse(res)
+        const prevId = deepParseResponse(mockData)
+        expect(prevId === id).to.be.true 
+        responseExpect(obj, (target) => {
+          expect(target.length).to.be.not.equals(0)
+        })
+        return existsAndDeleteImage(id, (data) => {
+          return data.info.size !== fileSize
+        })
+      })
+      .then(data => {
+        if(data) {
+          return done()
+        }else {
+          return done("request error")
+        }
+      })
+      .catch(err => {
+        done(err)
+      })
+
+    })
+
+    it(`generate the video poster success and overlap the exists poster`, function(done) {
+
+      let fileSize 
+      let mockData 
+
+      Request
+      .put(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        _id: videoId.toString()
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(data => {
+        mockData = data 
+      })
+      .then(_ => {
+        return Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          _id: videoId.toString(),
+          overlap: true 
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+      })
+      .then(function(res) {
+        let obj = parseResponse(res)
+        const id = deepParseResponse(res)
+        const prevId = deepParseResponse(mockData)
+        expect(prevId === id).to.be.false 
+        responseExpect(obj, (target) => {
+          expect(target.length).to.be.not.equals(0)
+        })
+        return existsAndDeleteImage(id, (data) => {
+          return data.info.size !== fileSize
         })
       })
       .then(data => {
