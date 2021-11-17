@@ -54,7 +54,7 @@
     "pinyin": "^2.10.2",
     "shelljs": "^0.8.4",
     "socket.io": "^4.0.2",
-    "validator": "^13.1.1",
+    "validator": "^13.7.0",
     "winston": "^3.3.3"
   },
   "_moduleAliases": {
