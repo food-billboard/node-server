@@ -82,7 +82,11 @@ const ROLES_DATABASE_MAP = [
         {
           methods: "*",
           url: `${PREFIX_URL}manage\\/chat\\/member$`
-        }
+        },
+        {
+          methods: '*', //or [ get, post ]
+          url: `${PREFIX_URL}manage\\/schedule.?`
+        },
       ]
     }
   },

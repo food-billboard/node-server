@@ -139,6 +139,7 @@ function scheduleMethod({
 const tagSchedule = () => {
 
   const schedule = nodeSchedule.scheduleJob('0  0  20  *  *  6', scheduleMethod)
+
 }
 
 module.exports = {

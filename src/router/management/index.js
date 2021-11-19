@@ -7,6 +7,7 @@ const User = require('./user')
 const Instance = require('./instance')
 const Media = require('./media')
 const Chat = require('./chat')
+const Schedule = require('./schedule')
 const { loginAuthorization } = require('@src/utils')
 
 const router = new Router()
@@ -22,5 +23,6 @@ router
 .use('/instance', Instance.routes(), Instance.allowedMethods())
 .use('/media', Media.routes(), Media.allowedMethods())
 .use('/chat', Chat.routes(), Chat.allowedMethods())
+.use('/schedule', Schedule.routes(), Schedule.allowedMethods())
 
 module.exports = router

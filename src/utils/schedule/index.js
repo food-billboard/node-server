@@ -1,3 +1,7 @@
+const fs = require("fs-extra")
+const { omit } = require("lodash")
+const { SCHEDULE_STATUS } = require('../constant')
+
 const { mediaSchedule } = require('./media')
 const { tagSchedule } = require('./tag')
 const { movieSchedule } = require('./movie')
@@ -8,6 +12,79 @@ const { behaviourSchedule } = require('./behaviour')
 const { unLoginChatUserSchedule, unGenerateChatUserSchedule } = require('./unlogin-chat-user')
 const { notUseMemberSchedule } = require('./members')
 const { notUseFriendsSchedule, friendsStatusChangeSchedule } = require('./friends')
+
+const SCHEDULE_MAP = {}
+
+function requireAllSchedule() {
+
+  return []
+}
+
+class Schedule {
+
+  init() {
+    const scheduleList = requireAllSchedule()
+    scheduleList.forEach(schedule => {
+      const { name, schedule, ...nextScheduleData } = schedule()
+      SCHEDULE_MAP[name] = {
+        name,
+        ...nextScheduleData
+      }
+    })
+  }
+
+  setScheduleConfig(name, value={}) {
+    SCHEDULE_MAP[name] = {
+      ...SCHEDULE_MAP[name] || {},
+      ...value
+    }
+  }
+
+  isScheduleExists(name) {
+    return SCHEDULE_MAP[name]
+  }
+
+  isTimeValid(time) {
+    return Object.values(SCHEDULE_MAP).some(item => item.time === time)
+  }
+
+  getScheduleList() {
+    return Object.values(SCHEDULE_MAP).map(item => omit(item, ["schedule"]))
+  }
+
+  changeScheduleTime(params={}) {
+    const { name, time } = params
+    const { schedule } = SCHEDULE_MAP[name]
+    const result = schedule.reschedule(time)
+    if(result) {
+      this.setScheduleConfig({ time })
+    }
+    return result 
+  }
+
+  cancelSchedule(params={}) {
+    const { name } = params
+    const { schedule, status } = SCHEDULE_MAP[name]
+    if(status === SCHEDULE_STATUS.CANCEL) return true 
+    const result = schedule.cancel(time)
+    if(result) {
+      this.setScheduleConfig({ time })
+    }
+    return result 
+  }
+
+  restartSchedule(params) {
+    const { name } = params
+    const { time, status } = SCHEDULE_MAP[name]
+    if(status === SCHEDULE_STATUS.SCHEDULING) return true 
+    return this.changeScheduleTime({
+      name,
+      time
+    })
+  }
+
+}
+
 
 function schedule() {
   //媒体资源定时器
@@ -47,8 +124,11 @@ function schedule() {
   friendsStatusChangeSchedule()
 }
 
+const scheduleConstructor = new Schedule()
+
 module.exports = {
-  schedule
+  schedule,
+  scheduleConstructor
 }
 
 /**

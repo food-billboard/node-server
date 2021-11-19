@@ -2021,11 +2021,6 @@
                         },
                         "_id": {
                           "type": "string"
-                        },
-                        "match_field": {
-                          "type": "string",
-                          "description": "匹配类型",
-                          "enum": ["classify", "district"]
                         }
                       }
                     }

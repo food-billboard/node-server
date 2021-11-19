@@ -21,7 +21,7 @@ const {
   redisConnect, 
   authMiddleware, 
   notes_customer_behaviour_middleware,
-  schedule
+  scheduleConstructor
 } = require("@src/utils")
 const { request, middleware4Uuid } = require('@src/config/winston')
 
@@ -37,7 +37,7 @@ initStaticFileDir()
 //redis服务启动
 redisConnect()
 //定时任务
-schedule()
+scheduleConstructor.init()
 
 app
 .use(Cors())
