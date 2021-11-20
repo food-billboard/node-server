@@ -1,5 +1,6 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
+const CacheJson = require('../cache.json')
 const { log4Error } = require('@src/config/winston')
 const { FriendsModel } = require('../../mongodb/mongo.lib')
 const { FRIEND_STATUS } = require('../../constant')
@@ -79,12 +80,15 @@ async function scheduleMethod({
 
 const friendsStatusChangeSchedule = () => {
 
-  const schedule = nodeSchedule.scheduleJob('0 10 24 * * 7', scheduleMethod)
+  const { name, time } = CacheJson.friendsStatusChangeSchedule
 
+  const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)
+
+  return schedule 
 }
 
 module.exports = {
-  friendsStatusChangeSchedule,
+  schedule: friendsStatusChangeSchedule,
   scheduleMethod,
   SPACE
 }

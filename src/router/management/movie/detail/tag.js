@@ -2,7 +2,7 @@ const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
 const { TagModel, dealErr, responseDataDeal, Params, objectIdFormat, objectIdValid } = require('@src/utils')
-const { action } = require("@src/utils/schedule/tag")
+const { action } = require("@src/utils/schedule/tag.schedule")
 
 const router = new Router()
 

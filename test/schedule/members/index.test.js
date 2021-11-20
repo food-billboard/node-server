@@ -3,7 +3,7 @@ const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
 const { MemberModel } = require('@src/utils')
 const { mockCreateMember } = require('@test/utils')
-const { scheduleMethod } = require("@src/utils/schedule/members")
+const { scheduleMethod } = require("@src/utils/schedule/members/index.schedule")
 
 const SCHEDULE_PREFIX = "schedule of unuse member test"
 

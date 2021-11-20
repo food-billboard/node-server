@@ -327,7 +327,7 @@ router
   responseDataDeal({
     ctx,
     data,
-    needCachme: false
+    needCache: false
   })
 })
 .use('/detail', Detail.routes(), Detail.allowedMethods())

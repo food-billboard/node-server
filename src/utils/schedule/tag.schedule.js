@@ -7,6 +7,7 @@ try {
 }catch(err) {
   console.log(chalk.red('当前不支持nodejieba包'))
 }
+const CacheJson = require('./cache.json')
 const { log4Error } = require('@src/config/winston')
 const { COMMENT_SOURCE_TYPE, EXTRACT_KEYWORD_TOP_N } = require('../constant')
 const { MovieModel, TagModel, CommentModel } = require('../mongodb/mongo.lib')
@@ -138,12 +139,16 @@ function scheduleMethod({
 
 const tagSchedule = () => {
 
-  const schedule = nodeSchedule.scheduleJob('0  0  20  *  *  6', scheduleMethod)
+  const { name, time } = CacheJson.tagSchedule
+
+  const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)
+
+  return schedule 
 
 }
 
 module.exports = {
-  tagSchedule,
+  schedule: tagSchedule,
   scheduleMethod,
   action
 }

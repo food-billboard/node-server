@@ -1,5 +1,6 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
+const CacheJson = require('./cache.json')
 const { log4Error } = require('@src/config/winston')
 const { parseData } = require('../error-deal')
 const { MovieModel, UserModel } = require('../mongodb/mongo.lib')
@@ -65,10 +66,14 @@ function scheduleMethod({
 
 const movieSchedule = () => {
 
-  const schedule = nodeSchedule.scheduleJob('0  0  22  *  *  5', scheduleMethod)
+  const { name, time } = CacheJson.movieSchedule
+
+  const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)
+
+  return schedule 
 }
 
 module.exports = {
-  movieSchedule,
+  schedule: movieSchedule,
   scheduleMethod
 }

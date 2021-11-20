@@ -1,5 +1,6 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
+const CacheJson = require('../cache.json')
 const { log4Error } = require('@src/config/winston')
 const { classifyDeal } = require('./classify')
 const { staticDeal } = require('./static')
@@ -104,11 +105,15 @@ async function scheduleMethod({
 
 }
 
-const rankSchedule = async () => {
-  const schedule = nodeSchedule.scheduleJob('0  0  18  *  *  7', scheduleMethod)
+const rankSchedule = () => {
+  const { name, time } = CacheJson.rankSchedule
+
+  const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)
+
+  return schedule 
 }
 
 module.exports = {
-  rankSchedule,
+  schedule: rankSchedule,
   scheduleMethod
 }

@@ -3,7 +3,7 @@ const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
 const { MovieModel } = require('@src/utils')
 const { mockCreateMovie } = require('@test/utils')
-const { scheduleMethod } = require("@src/utils/schedule/movie")
+const { scheduleMethod } = require("@src/utils/schedule/movie.schedule")
 
 const SCHEDULE_PREFIX = "schedule of no author movie test"
 

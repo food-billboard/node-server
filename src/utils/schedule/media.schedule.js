@@ -3,6 +3,7 @@ const fs = require('fs').promises
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
 const Day = require('dayjs')
+const CacheJson = require('./cache.json')
 const { log4Error } = require('@src/config/winston')
 const { STATIC_FILE_PATH, MEDIA_STATUS, STATIC_FILE_PATH_NO_WRAPPER } = require('../constant')
 const { ImageModel, VideoModel, OtherMediaModel } = require('../mongodb/mongo.lib')
@@ -146,12 +147,16 @@ async function scheduleMethod({
 
 const mediaSchedule = () => {
 
-  const schedule = nodeSchedule.scheduleJob('0  0  20  *  *  7', scheduleMethod)
+  const { name, time } = CacheJson.mediaSchedule
+
+  const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)
+
+  return schedule 
 
 }
 
 module.exports = {
-  mediaSchedule,
+  schedule: mediaSchedule,
   scheduleMethod,
   MAX_KEEP_FILE_MILL
 }

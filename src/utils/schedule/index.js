@@ -1,133 +1,180 @@
 const fs = require("fs-extra")
+const path = require("path")
 const { omit } = require("lodash")
+const mime = require("mime")
+const { log4Error } = require('../../config/winston')
+const CacheJson = require('./cache.json')
 const { SCHEDULE_STATUS } = require('../constant')
-
-const { mediaSchedule } = require('./media')
-const { tagSchedule } = require('./tag')
-const { movieSchedule } = require('./movie')
-const { rankSchedule } = require('./rank')
-const { browserSchedule } = require('./browser')
-const { feedbackSchedule } = require('./feedback')
-const { behaviourSchedule } = require('./behaviour')
-const { unLoginChatUserSchedule, unGenerateChatUserSchedule } = require('./unlogin-chat-user')
-const { notUseMemberSchedule } = require('./members')
-const { notUseFriendsSchedule, friendsStatusChangeSchedule } = require('./friends')
 
 const SCHEDULE_MAP = {}
 
-function requireAllSchedule() {
+function requireAllSchedule(scheduleFileList, retryTimes=5) {
+  try {
+    return scheduleFileList.reduce((acc, schedule) => {
+      const result = require(schedule)
+      if(result.schedule) {
+        acc.push(result.schedule)
+      }
+      return acc 
+    }, [])
+  }catch(err) {
+    if(retryTimes > 0) return requireAllSchedule(scheduleFileList, retryTimes - 1)
+    log4Error({ __request_log_id__: "requireAllSchedule" }, err)
+    return []
+  }
+}
 
-  return []
+async function collectAllSchedule(dir=__dirname, currentRelativeDir=".", retryTimes=5) {
+  try {
+    const currentDir = dir
+    const fileList = await fs.readdir(currentDir)
+    let resultList = []
+    for(let i = 0; i < fileList.length; i ++) {
+      const target = fileList[i]
+      const filePath = path.join(currentDir, target)
+      const stat = await fs.stat(filePath)
+      const nextRelativeDir = `${currentRelativeDir}/${target}`
+      if(stat.isDirectory()) {
+        const result = await collectAllSchedule(filePath, nextRelativeDir, retryTimes)
+        resultList.push(...result)
+      }else if(mime.getExtension(mime.getType(target)) === "js" && target.endsWith("schedule.js")) {
+        resultList.push(nextRelativeDir)
+      }
+    }
+    return resultList
+  }catch(err) {
+    if(retryTimes > 0) return collectAllSchedule("", ".", retryTimes - 1)
+    log4Error({ __request_log_id__: "collectAllSchedule" }, err)
+    return []
+  }
 }
 
 class Schedule {
 
-  init() {
-    const scheduleList = requireAllSchedule()
-    scheduleList.forEach(schedule => {
-      const { name, schedule, ...nextScheduleData } = schedule()
+  async init() {
+    const scheduleFileList = await collectAllSchedule()
+    const scheduleList = requireAllSchedule(scheduleFileList) || []
+    for(let i = 0; i < scheduleList.length; i ++) {
+      const schedule = scheduleList[i]
+      const scheduleTask = schedule()
+      const name = scheduleTask.name 
       SCHEDULE_MAP[name] = {
         name,
-        ...nextScheduleData
+        schedule: scheduleTask,
+        ...CacheJson[name]
       }
-    })
-  }
-
-  setScheduleConfig(name, value={}) {
-    SCHEDULE_MAP[name] = {
-      ...SCHEDULE_MAP[name] || {},
-      ...value
     }
   }
 
-  isScheduleExists(name) {
+  async setScheduleConfig(name, value={}) {
+    const newData = {
+      ...SCHEDULE_MAP[name] || {},
+      ...value
+    }
+    SCHEDULE_MAP[name] = newData
+    CacheJson[name] = omit(newData, ["schedule"])
+
+    await fs.writeFile(path.join(__dirname, "/cache.json"), JSON.stringify(CacheJson))
+  }
+
+  getScheduleConfig(name) {
     return SCHEDULE_MAP[name]
   }
 
+  isScheduleExists(name) {
+    return !!SCHEDULE_MAP[name]
+  }
+
+  formatTime(time) {
+    return time.split(" ").map(item => item.trim()).join(" ")
+  }
+
   isTimeValid(time) {
-    return Object.values(SCHEDULE_MAP).some(item => item.time === time)
+    const formatTime = this.formatTime(time)
+    const TIME_VALID_MAP = [
+      function(data) {
+        const numberData = parseFloat(data)
+        return numberData >= 0 && numberData <= 59
+      },
+      function(data) {
+        const numberData = parseFloat(data)
+        return numberData >= 0 && numberData <= 59
+      },
+      function(data) {
+        const numberData = parseFloat(data)
+        return numberData >= 0 && numberData <= 23
+      },
+      function(data) {
+        const numberData = parseFloat(data)
+        return numberData >= 1 && numberData <= 31
+      },
+      function(data) {
+        const numberData = parseFloat(data)
+        return numberData >= 1 && numberData <= 12
+      },
+      function(data) {
+        const numberData = parseFloat(data)
+        return numberData >= 0 && numberData <= 6
+      },
+    ]
+    return !Object.values(SCHEDULE_MAP).some(item => item.time === formatTime) && formatTime.split(" ").every((item, index) => {
+      if(item === "*") return true 
+      if(item.includes(".")) return false 
+      return TIME_VALID_MAP[index](item)
+    })
   }
 
   getScheduleList() {
     return Object.values(SCHEDULE_MAP).map(item => omit(item, ["schedule"]))
   }
 
-  changeScheduleTime(params={}) {
+  async changeScheduleTime(params={}) {
     const { name, time } = params
     const { schedule } = SCHEDULE_MAP[name]
-    const result = schedule.reschedule(time)
+    const result = schedule.schedule(time)
     if(result) {
-      this.setScheduleConfig({ time })
+      await this.setScheduleConfig(name, { time, status: SCHEDULE_STATUS.SCHEDULING })
     }
     return result 
   }
 
-  cancelSchedule(params={}) {
+  async cancelSchedule(params={}) {
     const { name } = params
-    const { schedule, status } = SCHEDULE_MAP[name]
+    const { schedule, status, time } = SCHEDULE_MAP[name]
     if(status === SCHEDULE_STATUS.CANCEL) return true 
     const result = schedule.cancel(time)
     if(result) {
-      this.setScheduleConfig({ time })
+      await this.setScheduleConfig(name, { status: SCHEDULE_STATUS.CANCEL })
     }
     return result 
   }
 
-  restartSchedule(params) {
+  async restartSchedule(params) {
     const { name } = params
     const { time, status } = SCHEDULE_MAP[name]
     if(status === SCHEDULE_STATUS.SCHEDULING) return true 
-    return this.changeScheduleTime({
+    return await this.changeScheduleTime({
       name,
       time
     })
   }
 
-}
+  async dealSchedule(name) {
+    const { schedule } = SCHEDULE_MAP[name]
+    schedule.invoke()
+    return true 
+  }
 
+  async resumeAllSchedule() {
+    const defaultCache = require("./default.cache.json")
+    await fs.writeFile(path.join(__dirname, "/cache.json"), JSON.stringify(defaultCache))
+  }
 
-function schedule() {
-  //媒体资源定时器
-  //0  0  20  *  *  7
-  mediaSchedule()
-  //数据标签定时器
-  //0  0  20  *  *  6
-  tagSchedule()
-  //无用数据删除
-  //0  0  22  *  *  5
-  movieSchedule()
-  //排行榜资源更新
-  //0  0  18  *  *  7
-  rankSchedule()
-  //浏览记录定时清除
-  //0  0  19  *  *  7
-  browserSchedule()
-  //反馈任务定时清除
-  //0  0  23  *  *  7
-  feedbackSchedule()
-  //操作历史定时清除
-  //0  0  24  *  *  7
-  behaviourSchedule()
-  //聊天游客数据定时清除
-  //0  0  23  *  *  *
-  unLoginChatUserSchedule()
-  //聊天普通用户生成成员信息
-  //0  0  22  *  *  *
-  unGenerateChatUserSchedule()
-  //无效成员定时删除审查
-  //0 5 24 * * 7
-  notUseMemberSchedule()
-  //无效好友定时删除审查
-  //0 10 24 * * 7
-  notUseFriendsSchedule()
-  //0 20 24 * * *
-  friendsStatusChangeSchedule()
 }
 
 const scheduleConstructor = new Schedule()
 
 module.exports = {
-  schedule,
   scheduleConstructor
 }
 
@@ -135,7 +182,7 @@ module.exports = {
   * * * * * * *
   ┬ ┬ ┬ ┬ ┬ ┬
   │ │ │ │ │  |
-  │ │ │ │ │ └ day of week (0 - 7) (0 or 7 is Sun)
+  │ │ │ │ │ └ day of week (0 - 6) (0 is Sun)
   │ │ │ │ └───── month (1 - 12)
   │ │ │ └────────── day of month (1 - 31)
   │ │ └─────────────── hour (0 - 23)

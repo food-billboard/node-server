@@ -1,5 +1,6 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
+const CacheJson = require('../cache.json')
 const { log4Error } = require('@src/config/winston')
 const { MemberModel, UserModel } = require('../../mongodb/mongo.lib')
 
@@ -58,11 +59,15 @@ function scheduleMethod({
 
 const notUseMemberSchedule = () => {
 
-  const schedule = nodeSchedule.scheduleJob('0 5 24 * * 7', scheduleMethod)
+  const { name, time } = CacheJson.notUseMemberSchedule
+
+  const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)
+
+  return schedule 
 
 }
 
 module.exports = {
-  notUseMemberSchedule,
+  schedule: notUseMemberSchedule,
   scheduleMethod
 }

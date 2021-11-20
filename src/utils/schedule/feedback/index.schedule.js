@@ -1,6 +1,7 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
 const Day = require('dayjs')
+const CacheJson = require('../cache.json')
 const { log4Error } = require('@src/config/winston')
 const { FeedbackModel } = require('../../mongodb/mongo.lib')
 const { FEEDBACK_STATUS } = require('../../constant')
@@ -30,11 +31,13 @@ function scheduleMethod({
 
 }
 
-const feedbackSchedule = async () => {
-  const schedule = nodeSchedule.scheduleJob('0  0  23  *  *  7', scheduleMethod)
+const feedbackSchedule = () => {
+  const { name, time } = CacheJson.feedbackSchedule
+  const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)
+  return schedule 
 }
 
 module.exports = {
-  feedbackSchedule,
+  schedule: feedbackSchedule,
   scheduleMethod
 }

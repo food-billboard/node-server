@@ -1,8 +1,8 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
 const { log4Error } = require('@src/config/winston')
+const CacheJson = require('../cache.json')
 const { FriendsModel, UserModel } = require('../../mongodb/mongo.lib')
-const { friendsStatusChangeSchedule } = require('./friend_status')
 
 /** 
  * 删除未知的好友数据
@@ -51,13 +51,12 @@ function scheduleMethod({
 }
 
 const notUseFriendsSchedule = () => {
-
-  const schedule = nodeSchedule.scheduleJob('0 10 24 * * 7', scheduleMethod)
-
+  const { name, time } = CacheJson.notUseFriendsSchedule
+  const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)
+  return schedule 
 }
 
 module.exports = {
   scheduleMethod,
-  notUseFriendsSchedule,
-  friendsStatusChangeSchedule,
+  schedule: notUseFriendsSchedule,
 }

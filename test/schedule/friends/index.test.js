@@ -3,7 +3,7 @@ const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
 const { FriendsModel } = require('@src/utils')
 const { mockCreateFriends } = require('@test/utils')
-const { scheduleMethod } = require("@src/utils/schedule/friends")
+const { scheduleMethod } = require("@src/utils/schedule/friends/index.schedule")
 
 const SCHEDULE_PREFIX = "schedule of unuse friends test"
 

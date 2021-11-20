@@ -1,8 +1,8 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
 const Day = require('dayjs')
+const CacheJson = require('../cache.json')
 const { log4Error } = require('@src/config/winston')
-const { unGenerateChatUserSchedule } = require('./un-generate-user')
 const { MemberModel, RoomModel } = require('../../mongodb/mongo.lib')
 
 const MAX_TIMESTAMPS = 1000 * 24 * 60 * 60 * 7
@@ -66,13 +66,16 @@ function scheduleMethod({ test=false }={}) {
 
 const unLoginChatUserSchedule = () => {
 
-  const schedule = nodeSchedule.scheduleJob('0  0  23  *  *  *', scheduleMethod)
+  const { name, time } = CacheJson.unLoginChatUserSchedule
+
+  const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)
+
+  return schedule 
 
 }
 
 module.exports = {
-  unLoginChatUserSchedule,
-  unGenerateChatUserSchedule,
+  schedule: unLoginChatUserSchedule,
   scheduleMethod,
   MAX_TIMESTAMPS
 }

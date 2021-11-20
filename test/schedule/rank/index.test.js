@@ -2,7 +2,7 @@ require('module-alias/register')
 const { expect } = require('chai')
 const { MovieModel, RankModel, ClassifyModel } = require('@src/utils')
 const { mockCreateMovie, mockCreateRank, mockCreateClassify } = require('@test/utils')
-const { scheduleMethod } = require("@src/utils/schedule/rank")
+const { scheduleMethod } = require("@src/utils/schedule/rank/index.schedule")
 const { STATIC_RANK_MAP } = require("@src/utils/schedule/rank/static")
 
 const STATIC_COUNT = STATIC_RANK_MAP.length

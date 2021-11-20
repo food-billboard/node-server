@@ -75,6 +75,14 @@
         "description": "Find out more about our store",
         "url": "http://swagger.io"
       }
+    },
+    {
+      "name": "schedule",
+      "description": "定时任务相关",
+      "externalDocs": {
+        "description": "Find out more about our store",
+        "url": "http://swagger.io"
+      }
     }
   ],
   "schemes": [
@@ -4269,6 +4277,135 @@
           }
         }
       }
+    },
+    "/api/manage/schedule": {
+      "get": {
+        "tags": [
+          "schedule"
+        ],
+        "summary": "任务列表",
+        "description": "",
+        "operationId": "manage_schedule_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_schedule_get"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "schedule"
+        ],
+        "summary": "恢复任务执行",
+        "description": "",
+        "operationId": "manage_schedule_put",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "required": true,
+            "description": "任务名称",
+            "type": "string"
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "schedule"
+        ],
+        "summary": "立即执行任务",
+        "description": "",
+        "operationId": "manage_schedule_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "required": true,
+            "description": "任务名称",
+            "type": "string"
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "schedule"
+        ],
+        "summary": "取消任务执行",
+        "description": "",
+        "operationId": "manage_schedule_delete",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "required": true,
+            "description": "任务名称",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/api/manage/schedule/time": {
+      "put": {
+        "tags": [
+          "schedule"
+        ],
+        "summary": "修改任务执行时间",
+        "description": "",
+        "operationId": "manage_schedule_put_time",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "required": true,
+            "description": "任务名称",
+            "type": "string"
+          },
+          {
+            "name": "time",
+            "in": "body",
+            "required": true,
+            "description": "任务执行时间(cron)",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/api/manage/schedule/resume": {
+      "post": {
+        "tags": [
+          "schedule"
+        ],
+        "summary": "恢复所有任务为默认状态",
+        "description": "",
+        "operationId": "manage_schedule_post_resume",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ]
+      }
     }
   },
   "securityDefinitions": {
@@ -7276,6 +7413,47 @@
       },
       "xml": {
         "name": "manage_chat_get_member"
+      }
+    },
+    "manage_schedule_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "任务名称"
+                  },
+                  "time": {
+                    "type": "string",
+                    "description": "执行时间"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "描述"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "状态",
+                    "enum": [ "CANCEL", "SCHEDULING" ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_schedule_get"
       }
     }
   },

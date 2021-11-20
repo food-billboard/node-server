@@ -6,7 +6,7 @@ const Day = require('dayjs')
 const root = require('app-root-path')
 const { VideoModel, STATIC_FILE_PATH, MEDIA_STATUS } = require('@src/utils')
 const { mockCreateVideo } = require('@test/utils')
-const { scheduleMethod, MAX_KEEP_FILE_MILL } = require("@src/utils/schedule/media")
+const { scheduleMethod, MAX_KEEP_FILE_MILL } = require("@src/utils/schedule/media.schedule")
 
 const SCHEDULE_PREFIX = "schedule of media clear test"
 

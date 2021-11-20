@@ -2,7 +2,7 @@ require('module-alias/register')
 const { expect } = require('chai')
 const { TagModel, CommentModel, MovieModel } = require('@src/utils')
 const { mockCreateTag, mockCreateComment, mockCreateMovie } = require('@test/utils')
-const { scheduleMethod } = require("@src/utils/schedule/tag")
+const { scheduleMethod } = require("@src/utils/schedule/tag.schedule")
 
 const SCHEDULE_PREFIX = "schedule of no movie tag test"
 

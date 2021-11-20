@@ -2,7 +2,7 @@ require('module-alias/register')
 const { expect } = require('chai')
 const { BehaviourModel } = require('@src/utils')
 const { mockCreateBehaviour } = require('@test/utils')
-const { scheduleMethod } = require("@src/utils/schedule/behaviour")
+const { scheduleMethod } = require("@src/utils/schedule/behaviour/index.schedule")
 
 const MAX_TIMESTAMPS = 100 
 

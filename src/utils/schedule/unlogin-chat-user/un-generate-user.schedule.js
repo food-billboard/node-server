@@ -1,6 +1,7 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
 const { Types: { ObjectId } } = require('mongoose')
+const CacheJson = require('../cache.json')
 const { log4Error } = require('@src/config/winston')
 const { MemberModel, UserModel, FriendsModel } = require('../../mongodb/mongo.lib')
 
@@ -144,11 +145,15 @@ function scheduleMethod({
 
 const unGenerateChatUserSchedule = () => {
 
-  const schedule = nodeSchedule.scheduleJob('0  0  22  *  *  *', scheduleMethod)
+  const { name, time } = CacheJson.unGenerateChatUserSchedule
+
+  const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)
+
+  return schedule 
 
 }
 
 module.exports = {
-  unGenerateChatUserSchedule,
+  schedule: unGenerateChatUserSchedule,
   scheduleMethod
 }

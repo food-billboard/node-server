@@ -1,5 +1,6 @@
 const nodeSchedule = require('node-schedule')
 const chalk = require('chalk')
+const CacheJson = require('../cache.json')
 const { userDeal } = require('./user')
 const { specialDeal } = require('./special')
 const { log4Error } = require('@src/config/winston')
@@ -22,11 +23,13 @@ function scheduleMethod({
 
 }
 
-const browserSchedule = async () => {
-  const schedule = nodeSchedule.scheduleJob('0  0  19  *  *  7', scheduleMethod)
+const browserSchedule = () => {
+  const { name, time } = CacheJson.browserSchedule
+  const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)
+  return schedule 
 }
 
 module.exports = {
-  browserSchedule,
+  schedule: browserSchedule,
   scheduleMethod
 }

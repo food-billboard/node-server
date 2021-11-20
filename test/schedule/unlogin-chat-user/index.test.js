@@ -3,7 +3,7 @@ const { expect } = require('chai')
 const Day = require('dayjs')
 const { RoomModel, MemberModel } = require('@src/utils')
 const { mockCreateRoom, mockCreateMember } = require('@test/utils')
-const { scheduleMethod, MAX_TIMESTAMPS } = require("@src/utils/schedule/unlogin-chat-user")
+const { scheduleMethod, MAX_TIMESTAMPS } = require("@src/utils/schedule/unlogin-chat-user/index.schedule")
 
 const SCHEDULE_PREFIX = "schedule of unlogin-chat-user test"
 
