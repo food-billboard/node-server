@@ -2170,6 +2170,37 @@
                   },
                   "_id": {
                     "type": "string"
+                  },
+                  "rate": {
+                    "type": "string",
+                    "description": "评分"
+                  },
+                  "author_description": {
+                    "type": "string",
+                    "description": "作者描述"
+                  },
+                  "author_rate": {
+                    "type": "string",
+                    "description": "作者评分"
+                  },
+                  "author": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "username": {
+                          "type": "string",
+                          "description": "作者名称"
+                        },
+                        "_id": {
+                          "type": "string"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "description": "头像"
+                        }
+                      }
+                    }
                   }
                 }
               }

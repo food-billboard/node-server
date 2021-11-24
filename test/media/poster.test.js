@@ -11,7 +11,10 @@ const COMMON_API = '/api/media/video/poster'
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
-  commonValidate.objectId(target)
+  expect(target).to.be.a("object").and.that.include.all.keys("_id", "src")
+
+  commonValidate.objectId(target._id)
+  commonValidate.string(target.src)
 
   if(Array.isArray(validate)) {
     validate.forEach(valid => {

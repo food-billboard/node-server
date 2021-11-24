@@ -55,6 +55,7 @@ router
   const { id } = token
 
   let posterId 
+  let posterSrc 
 
   let data = await VideoModel.findOne({
     _id,
@@ -157,6 +158,7 @@ router
       })
       .then(data => {
         posterId = data._id 
+        posterSrc = data.src 
         return VideoModel.updateOne({
           _id
         }, {
@@ -167,7 +169,10 @@ router
       })
       .then(_ => {
         return {
-          data: posterId
+          data: {
+            _id: posterId,
+            src: posterSrc
+          }
         }
       })
       .catch(dealErr(ctx)) 

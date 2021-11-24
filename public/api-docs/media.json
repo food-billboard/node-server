@@ -19,6 +19,14 @@
         "description": "Find out more",
         "url": "http://swagger.io"
       }
+    },
+    {
+      "name": "base",
+      "description": "公共",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
     }
   ],
   "schemes": [
@@ -26,6 +34,57 @@
     "http"
   ],
   "paths": {
+    "/api/media": {
+      "get": {
+        "tags": [
+          "base"
+        ],
+        "summary": "媒体资源",
+        "description": "",
+        "operationId": "media_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "description":"媒体资源id(多个用,分隔)"
+          },
+          {
+            "name": "src",
+            "in": "query",
+            "type": "string",
+            "description":"媒体资源地址(多个用,分隔)"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "type": "string",
+            "description":"媒体类型(video-视频，image-图片)",
+            "enum": [ "video", "image" ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/media_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
     "/api/media/video/poster": {
       "put": {
         "tags": [
@@ -109,14 +168,59 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"string",
-              "description": "图片id"
+              "type":"object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "图片id"
+                },
+                "src": {
+                  "type": "string",
+                  "description": "图片地址"
+                }
+              }
             }
           }
         }
       },
       "xml": {
         "name": "media_video_put_poster"
+      }
+    },
+    "media_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "description": "图片id"
+                  },
+                  "src": {
+                    "type": "string",
+                    "description": "图片地址"
+                  },
+                  "poster": {
+                    "type": "string",
+                    "description": "海报地址（视频专有）"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "media_get"
       }
     }
   },
