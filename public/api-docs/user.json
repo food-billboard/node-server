@@ -1359,6 +1359,12 @@
             "type": "string"
           },
           {
+            "name": "classify",
+            "in": "query",
+            "description": "分类(以英文,分隔的id)",
+            "type": "string"
+          },
+          {
             "name": "time",
             "in": "query",
             "description": "上映时间(start_end)",
@@ -2269,6 +2275,13 @@
                     "username": {
                       "type":"string",
                       "description": "作者名称"
+                    },
+                    "avatar": {
+                      "type":"string",
+                      "description": "头像"
+                    },
+                    "_id": {
+                      "type":"string"
                     }
                   }
                 },
@@ -2292,15 +2305,23 @@
                           "avatar": {
                             "type":"string",
                             "description": "头像"
+                          },
+                          "username": {
+                            "type":"string",
+                            "description": "用户名"
+                          },
+                          "description": {
+                            "type":"string",
+                            "description": "描述"
                           }
-                        },
-                        "content": {
-                          "type": "object",
-                          "properties": {
-                            "text": {
-                              "type": "string",
-                              "description": "文字评论"
-                            }
+                        }
+                      },
+                      "content": {
+                        "type": "object",
+                        "properties": {
+                          "text": {
+                            "type": "string",
+                            "description": "文字评论"
                           }
                         }
                       }

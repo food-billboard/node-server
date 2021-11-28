@@ -3052,6 +3052,10 @@
                       "type":"string",
                       "description": "作者名称"
                     },
+                    "avatar": {
+                      "type":"string",
+                      "description": "头像"
+                    },
                     "_id": {
                       "type":"string"
                     }
@@ -3077,15 +3081,22 @@
                           "avatar": {
                             "type":"string",
                             "description": "头像"
+                          },
+                          "_id": {
+                            "type":"string"
+                          },
+                          "username": {
+                            "type":"string",
+                            "description": "用户名"
                           }
-                        },
-                        "content": {
-                          "type": "object",
-                          "properties": {
-                            "text": {
-                              "type": "string",
-                              "description": "文字评论"
-                            }
+                        }
+                      },
+                      "content": {
+                        "type": "object",
+                        "properties": {
+                          "text": {
+                            "type": "string",
+                            "description": "文字评论"
                           }
                         }
                       }
