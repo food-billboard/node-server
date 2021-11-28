@@ -69,7 +69,7 @@ router
     .select({
       modified_time: 0,
       source_type: 0,
-      stauts: 0,
+      status: 0,
       related_to: 0,
       barrage: 0
     })
@@ -89,6 +89,8 @@ router
         path: 'user_info',
         select: {
           avatar: 1,
+          username: 1,
+          _id: 1
         }
       }
     })
@@ -96,7 +98,8 @@ router
       path: 'author',
       select: {
         username: 1,
-        _id: 1
+        _id: 1,
+        avatar: 1
       }
     })
     .populate({
@@ -145,7 +148,7 @@ router
     .then(notFound)
   })
   .then(data => {
-    const { info, poster, video, images, comment, total_rate, rate_person, same_film, tag, ...nextData } = data
+    const { author, info, poster, video, images, comment, total_rate, rate_person, same_film, tag, ...nextData } = data
     const { actor, director, district, language, classify, ...nextInfo } = info
 
     const rate = total_rate / rate_person
@@ -153,6 +156,11 @@ router
     return {
       data: {
         ...nextData,
+        author: {
+          _id: author._id,
+          username: author.username,
+          avatar: avatarGet(author.avatar)
+        },
         store,
         video: video ? video.src : null,
         rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),

@@ -44,14 +44,19 @@ function responseExpect(res, validate=[]) {
     'poster', 'rate', 'same_film', 'store', 'tag', 'video', '_id'
   )
 
-  expect(target.author).to.be.a('object').and.have.a.property('username').and.is.a('string').and.that.lengthOf.above(0)
+  expect(target.author).to.be.a('object').and.that.includes.any.keys("username", "_id", "avatar")
+  commonValidate.string(target.author.username)
+  commonValidate.poster(target.author.avatar)
+  commonValidate.objectId(target.author._id)
   commonValidate.string(target.author_description, function() { return true })
   commonValidate.number(target.author_rate)
   expect(target.comment).to.be.a('array')
   target.comment.forEach(item => {
     expect(item).to.be.a('object').that.includes.all.keys('user_info', 'content')
-    expect(item.user_info).to.be.a('object').and.have.a.property('avatar')
+    expect(item.user_info).to.be.a('object').and.have.any.keys('avatar', 'username', 'description')
     commonValidate.poster(item.user_info.avatar)
+    commonValidate.string(item.user_info.username)
+    commonValidate.objectId(item.user_info._id)
     expect(item.content).to.be.a('object').and.have.a.property('text').that.is.a('string')
   })
   commonValidate.date(target.createdAt)

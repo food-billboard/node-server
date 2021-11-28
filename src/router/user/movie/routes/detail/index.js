@@ -67,7 +67,8 @@ router
     populate: {
       path: 'user_info',
       select: {
-        avatar: 1
+        avatar: 1,
+        username: 1,
       }
     }
   })
@@ -76,6 +77,7 @@ router
     select: {
       username: 1,
       _id: 1,
+      avatar: 1
     }
   })
   .populate({
@@ -154,7 +156,10 @@ router
     return {
       data: {
         ...nextNewData,
-        author: pick(author, ['username', '_id']),
+        author: {
+          ...pick(author, ['username', '_id']),
+          avatar: avatarGet(author.avatar)
+        },
         rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
         info: {
           ...nextInfo,
