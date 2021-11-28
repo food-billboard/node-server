@@ -52,7 +52,8 @@ function responseExpect(res, validate=[]) {
   commonValidate.number(target.author_rate)
   expect(target.comment).to.be.a('array')
   target.comment.forEach(item => {
-    expect(item).to.be.a('object').that.includes.all.keys('user_info', 'content')
+    expect(item).to.be.a('object').that.includes.all.keys('user_info', 'content', "_id")
+    commonValidate.objectId(item._id)
     expect(item.user_info).to.be.a('object').and.have.any.keys('avatar', 'username', 'description')
     commonValidate.poster(item.user_info.avatar)
     commonValidate.string(item.user_info.username)

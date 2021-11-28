@@ -77,7 +77,8 @@ router
       path: 'comment',
       select: {
         user_info: 1,
-        "content.text":1
+        "content.text":1,
+        _id: 1
       },
       options: {
         sort: {

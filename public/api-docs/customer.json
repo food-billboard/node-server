@@ -3075,6 +3075,9 @@
                   "items": {
                     "type":"object",
                     "properties": {
+                      "_id": {
+                        "type":"string"
+                      },
                       "user_info": {
                         "type": "object",
                         "properties": {

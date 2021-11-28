@@ -56,7 +56,7 @@ router
     select: {
       "content.text": 1,
       user_info: 1,
-      _id: 0
+      _id: 1
     },
     options: {
       sort: {
