@@ -17,7 +17,7 @@ router
   const newUrl = `/api/user/customer${url.split('user')[1]}`
   if(method.toLocaleLowerCase() == 'get') {
     if(token && _id) {
-      if(!['', '/comment'].includes(pathUrl)) {
+      if(!['', '/comment', '/attention', '/fans'].includes(pathUrl)) {
         return ctx.redirect(newUrl)
       }else {
         await next()
