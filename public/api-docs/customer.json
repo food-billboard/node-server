@@ -1880,6 +1880,92 @@
         }
       }
     },
+    "/api/customer/user/fans": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "非本人用户粉丝",
+        "description": "",
+        "operationId": "customer_user_get_fans",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "单页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/customer_user_get_fans"
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/user/attention": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "非本人用户关注列表",
+        "description": "",
+        "operationId": "customer_user_get_attention",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "单页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/customer_user_get_attention"
+            }
+          }
+        }
+      }
+    },
     "/api/customer/upload": {
       "post": {
         "tags": [
@@ -3513,6 +3599,86 @@
       },
       "xml": {
         "name": "customer_user_get_comment"
+      }
+    },
+    "customer_user_get_fans": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "avatar": {
+                  "type": "string",
+                  "description": "头像"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
+                },
+                "attention": {
+                  "type": "boolean",
+                  "description": "是否被关注"
+                },
+                "username": {
+                  "type": "string",
+                  "description": "用户名"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_user_get_fans"
+      }
+    },
+    "customer_user_get_attention": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "avatar": {
+                  "type": "string",
+                  "description": "头像"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
+                },
+                "attention": {
+                  "type": "boolean",
+                  "description": "是否被关注"
+                },
+                "username": {
+                  "type": "string",
+                  "description": "用户名"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_user_get_attention"
       }
     },
     "customer_upload_get_chunk": {
