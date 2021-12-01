@@ -14,12 +14,14 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.a('object').and.have.a.property('store').and.that.is.a('array')
 
   target.store.forEach(item => {
-    expect(item).to.be.a('object').and.includes.all.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot')
+    expect(item).to.be.a('object').and.includes.all.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot', 'images')
     commonValidate.string(item.description, () => true)
     commonValidate.string(item.name)
     commonValidate.poster(item.poster)
     commonValidate.objectId(item._id)
     commonValidate.number(item.rate)
+    expect(item.images).to.be.a("array")
+    item.images.forEach(item => commonValidate.string(item))
     //classify
     expect(item.classify).to.be.a('array').and.that.lengthOf.above(0)
     item.forEach(classify => {

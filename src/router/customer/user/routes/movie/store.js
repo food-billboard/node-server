@@ -91,6 +91,14 @@ router
             {
               $lookup: {
                 from: 'images',
+                as: 'images',
+                foreignField: "_id",
+                localField: "images"
+              }
+            },
+            {
+              $lookup: {
+                from: 'images',
                 as: 'poster',
                 foreignField: "_id",
                 localField: "poster"
@@ -176,6 +184,7 @@ router
                   _id: "$author._id",
                   avatar: "$author.avatar.src",
                 },
+                images: "$images.src"
               }
             }
           ],
@@ -212,6 +221,7 @@ router
           publish_time: "$store_data.publish_time",
           hot: "$store_data.hot",
           author: "$store_data.author",
+          images: "$store_data.images",
         }
       }
     ])

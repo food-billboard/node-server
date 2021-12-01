@@ -1813,6 +1813,13 @@
             }
           }
         },
+        "images": {
+          "type": "array",
+          "description": "截图",
+          "items": {
+            "type": "string"
+          }
+        },
         "publish_time": {
           "type": "string",
           "description": "上映时间",

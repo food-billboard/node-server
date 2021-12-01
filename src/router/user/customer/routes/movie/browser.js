@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr, Params, responseDataDeal, parseData } = require("@src/utils")
+const { UserModel, dealErr, Params, responseDataDeal, parseData, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -58,6 +58,7 @@ router
       "info.screen_time": 1,
 			poster: 1,
 			hot: 1,
+      images: 1,
 			// author_rate: 1,
       rate_person: 1,
       total_rate: 1
@@ -78,7 +79,7 @@ router
       data: {
         ...nextData,
         glance: glance.map(g => {
-          const { _id: { info: { description, name, classify, screen_time }, poster, rate_person, total_rate,  ...nextD } } = g
+          const { _id: { info: { description, name, classify, screen_time }, poster, images, rate_person, total_rate,  ...nextD } } = g
           const rate = total_rate / rate_person
           return {
             ...nextD,
@@ -88,7 +89,8 @@ router
             classify,
             store:false,
             publish_time: screen_time,
-            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
+            images: images.map(item => avatarGet(item))
           }
         })
       }

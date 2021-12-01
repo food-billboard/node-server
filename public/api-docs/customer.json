@@ -2999,6 +2999,19 @@
           "type": "array",
           "description": "分类",
           "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "名称"
+              }
+            }
+          }
+        },
+        "images": {
+          "type": "array",
+          "description": "截图",
+          "items": {
             "type": "string"
           }
         },

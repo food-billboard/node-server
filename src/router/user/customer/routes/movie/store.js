@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { UserModel, dealErr, parseData, Params, responseDataDeal } = require("@src/utils")
+const { UserModel, dealErr, parseData, Params, responseDataDeal, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -59,7 +59,8 @@ router
 			hot: 1,
 			// author_rate: 1,
       total_rate: 1,
-      rate_person: 1
+      rate_person: 1,
+      images: 1
     },
     populate: {
       path: "info.classify",
@@ -77,17 +78,18 @@ router
       data: {
         ...data,
         store: store.map(s => {
-          const { _id: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
+          const { _id: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, images, ...nextS } } = s
           const rate = total_rate / rate_person
           return {
             ...nextS,
-            poster: poster ? poster.src : null,
+            poster: avatarGet(poster),
             description,
             name,
             classify,
             store: false,
             publish_time: screen_time,
-            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
+            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
+            images: images.map(item => avatarGet(item))
           }
         })
       }
