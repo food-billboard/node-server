@@ -178,7 +178,10 @@ router
       .catch(dealErr(ctx)) 
     }else {
       data = {
-        data: poster._id 
+        data: {
+          _id: poster._id,
+          src: poster.src 
+        }
       }
     }
   }

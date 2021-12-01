@@ -13,7 +13,7 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.a('object').and.that.have.a.property('glance')
 
   target.glance.forEach(item => {
-    expect(item).to.be.a('object').and.includes.all.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot')
+    expect(item).to.be.a('object').and.includes.any.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot', "author")
     commonValidate.string(item.description, function() { return true })
     commonValidate.string(item.name)
     commonValidate.poster(item.poster)
@@ -27,6 +27,10 @@ function responseExpect(res, validate=[]) {
     })
     commonValidate.time(item.publish_time) 
     commonValidate.number(item.hot)
+    expect(item.author).to.be.a("object").and.that.include.any.keys("username", "_id", "avatar")
+    commonValidate.string(item.author.username)
+    if(item.author.avatar) commonValidate.poster(item.author.avatar)
+    commonValidate.objectId(item.author._id)
   })
 
   if(Array.isArray(validate)) {
@@ -47,6 +51,7 @@ describe(`${COMMON_API} test`, function() {
     let userId
     let result
     let getToken
+    let movieId 
 
     before(async function() {
       const { model } = mockCreateClassify({
@@ -60,12 +65,14 @@ describe(`${COMMON_API} test`, function() {
           name: COMMON_API,
           info: {
             classify: [ data._id ]
-          }
+          },
+          description: "22222"
         })
 
         return model.save()
       })
       .then(function(data) {
+        movieId = data._id 
         const { model, signToken } = mockCreateUser({
           username: COMMON_API,
           glance: [ { _id: data._id  }],
@@ -78,6 +85,15 @@ describe(`${COMMON_API} test`, function() {
         result = data
         userId = result._id
         selfToken = getToken(userId)
+      })
+      .then(_ => {
+        return MovieModel.updateOne({
+          _id: movieId
+        }, {
+          $set: {
+            author: userId
+          }
+        })
       })
       .catch(err => {
         console.log('oops: ', err)
