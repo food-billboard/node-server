@@ -1966,6 +1966,135 @@
         }
       }
     },
+    "/api/customer/user/movie/browser": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "非本人用户浏览列表",
+        "description": "",
+        "operationId": "customer_user_get_browser",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "单页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/customer_user_get_browser"
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/user/movie/store": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "非本人用户收藏列表",
+        "description": "",
+        "operationId": "customer_user_get_store",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "单页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/customer_user_get_store"
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/user/movie/issue": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "非本人用户发布列表",
+        "description": "",
+        "operationId": "customer_user_get_issue",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "用户id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "单页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/customer_user_get_issue"
+            }
+          }
+        }
+      }
+    },
     "/api/customer/upload": {
       "post": {
         "tags": [
@@ -3679,6 +3808,87 @@
       },
       "xml": {
         "name": "customer_user_get_attention"
+      }
+    },
+    "customer_user_get_browser": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "issue": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/customer_movie_list"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_user_get_browser"
+      }
+    },
+    "customer_user_get_store": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "issue": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/customer_movie_list"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_user_get_store"
+      }
+    },
+    "customer_user_get_issue": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "issue": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/customer_movie_list"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_user_get_issue"
       }
     },
     "customer_upload_get_chunk": {

@@ -1,10 +1,11 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
+const { verifyTokenToData, UserModel, dealErr, Params, responseDataDeal } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
-router.get('/', async (ctx) => {
+router
+.get('/', async (ctx) => {
   const [ currPage, pageSize ] = Params.sanitizers(ctx.query, {
     name: 'currPage',
     _default: 0,
@@ -23,58 +24,176 @@ router.get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
-  const data = await UserModel.findOne({
-    _id: ObjectId(id)
-  })
-  .select({
-    glance: 1,
-    updatedAt: 1
-  })
-  .populate({
-    path: 'glance._id',
-    select: {
-      "info.classify": 1,
-			"info.description": 1,
-			"info.name": 1,
-			poster: 1,
-			"info.screen_time": 1,
-			hot: 1,
-      total_rate: 1,
-      rate_person: 1
+  const data = await UserModel.aggregate([
+    {
+      $match: {
+        _id: ObjectId(id)
+      }
     },
-    options: {
-      ...(pageSize >= 0 ? { limit: pageSize } : {}),
-      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
+    {
+      $unwind: "$glance"
     },
-    populate: {
-      path: 'info.classify',
-      select: {
-        _id: 0,
-        name: 1
+    {
+      $skip: currPage * pageSize
+    },
+    {
+      $limit: pageSize
+    },
+    {
+      $addFields: {
+        "glance_id": "$glance._id"
+      }
+    },
+    {
+      $addFields: {
+        "store_list": "$store._id"
+      }
+    },
+    {
+      $lookup: {
+        from: 'movies', 
+        let: { 
+          movie_id: "$glance_id" 
+        },
+        pipeline: [  
+          {
+            $match: {
+              $expr: {
+                "$eq": [ "$_id", "$$movie_id" ]
+              },
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              as: 'poster',
+              foreignField: "_id",
+              localField: "poster"
+            }
+          },
+          {
+            $unwind: {
+              path: "$poster",
+              preserveNullAndEmptyArrays: true 
+            }
+          },
+          {
+            $lookup: {
+              from: 'classifies',
+              as: 'info.classify',
+              foreignField: "_id",
+              localField: "info.classify"
+            }
+          },
+          {
+            $lookup: {
+              from: 'users',
+              as: 'author',
+              foreignField: "_id",
+              localField: "author"
+            }
+          },
+          {
+            $unwind: {
+              path: "$author",
+              preserveNullAndEmptyArrays: true 
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              as: 'author.avatar',
+              foreignField: "_id",
+              localField: "author.avatar"
+            }
+          },
+          {
+            $unwind: {
+              path: "$author.avatar",
+              preserveNullAndEmptyArrays: true 
+            }
+          },
+          {
+            $addFields: {
+              cal_rate: {
+                $divide: [
+                  "$total_rate",
+                  "$rate_person"
+                ]
+              }
+            }
+          },
+          {
+            $project: {
+              description: "$info.description",
+              name: 1,
+              poster: "$poster.src",
+              _id: 1,
+              rate: {
+                $ifNull: [
+                  "$cal_rate",
+                  0
+                ]
+              },
+              classify: {
+                $map: {
+                  input: "$info.classify",
+                  as: "classify",
+                  in: {
+                    name: "$$classify.name"
+                  }
+                }
+              },
+              publish_time: "$info.screen_time",
+              hot: 1,
+              author: {
+                username: "$author.username",
+                _id: "$author._id",
+                avatar: "$author.avatar.src",
+              },
+            }
+          }
+        ],
+        as: 'glance_data',
+      }
+    },
+    {
+      $unwind: "$glance_data"
+    },
+    {
+      $addFields: {
+        store: {
+          $cond: [
+            {
+              $in: [
+                "$glance_id", "$store_list"
+              ]
+            },
+            true,
+            false 
+          ]
+        }
+      }
+    },
+    {
+      $project: {
+        store: "$store",
+        description: "$glance_data.description",
+        name: "$glance_data.name",
+        poster: "$glance_data.poster",
+        _id: "$glance_data._id",
+        rate: "$glance_data.rate",
+        classify: "$glance_data.classify",
+        publish_time: "$glance_data.publish_time",
+        hot: "$glance_data.hot",
+        author: "$glance_data.author",
       }
     }
-  })
-  .exec()
-  .then(notFound)
+  ])
   .then(data => {
-    const { glance, ...nextData } = data
     return {
       data: {
-        ...nextData,
-        glance: glance.filter(item => !!item._id).map(g => {
-          const { _id: { info: { description, name, classify, screen_time }={}, poster, total_rate, rate_person, ...nextD }={} } = g
-          const rate = total_rate /rate_person
-          return {
-            ...nextD,
-            poster: avatarGet(poster),
-            description,
-            name,
-            classify,
-            store:false,
-            publish_time: screen_time,
-            rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1)
-          }
-        })
+        glance: data 
       }
     }
   })
@@ -83,6 +202,7 @@ router.get('/', async (ctx) => {
   responseDataDeal({
     ctx,
     data,
+    needCache: false 
   })
 })
 

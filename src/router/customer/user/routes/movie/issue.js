@@ -56,7 +56,7 @@ router
         }
       },
       {
-        $unwind: "$glance"
+        $unwind: "$issue"
       },
       {
         $skip: currPage * pageSize
@@ -66,7 +66,7 @@ router
       },
       {
         $addFields: {
-          "glance_id": "$glance._id"
+          "issue_id": "$issue._id"
         }
       },
       {
@@ -78,7 +78,7 @@ router
         $lookup: {
           from: 'movies', 
           let: { 
-            movie_id: "$glance_id" 
+            movie_id: "$issue_id" 
           },
           pipeline: [  
             {
@@ -179,11 +179,11 @@ router
               }
             }
           ],
-          as: 'glance_data',
+          as: 'issue_data',
         }
       },
       {
-        $unwind: "$glance_data"
+        $unwind: "$issue_data"
       },
       {
         $addFields: {
@@ -191,7 +191,7 @@ router
             $cond: [
               {
                 $in: [
-                  "$glance_id", data.store.map(item => item._id)
+                  "$issue_id", data.store.map(item => item._id)
                 ]
               },
               true,
@@ -203,15 +203,15 @@ router
       {
         $project: {
           store: "$store",
-          description: "$glance_data.description",
-          name: "$glance_data.name",
-          poster: "$glance_data.poster",
-          _id: "$glance_data._id",
-          rate: "$glance_data.rate",
-          classify: "$glance_data.classify",
-          publish_time: "$glance_data.publish_time",
-          hot: "$glance_data.hot",
-          author: "$glance_data.author",
+          description: "$issue_data.description",
+          name: "$issue_data.name",
+          poster: "$issue_data.poster",
+          _id: "$issue_data._id",
+          rate: "$issue_data.rate",
+          classify: "$issue_data.classify",
+          publish_time: "$issue_data.publish_time",
+          hot: "$issue_data.hot",
+          author: "$issue_data.author",
         }
       }
     ])
@@ -219,7 +219,7 @@ router
   .then(data => {
     return {
       data: {
-        glance: data 
+        issue: data 
       }
     }
   })

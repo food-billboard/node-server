@@ -25,10 +25,11 @@ function responseExpect(res, validate=[]) {
   }
 }
 
-function existsAndDeleteImage(id, filter) {
+function existsAndDeleteImage(res, filter) {
   let imageData 
+  const { _id } = res 
   return ImageModel.findOne({
-    _id: ObjectId(id),
+    _id: ObjectId(_id),
   })
   .select({
     _id: 1,
@@ -339,7 +340,7 @@ describe(`${COMMON_API} test`, () => {
         let obj = parseResponse(res)
         const id = deepParseResponse(res)
         const prevId = deepParseResponse(mockData)
-        expect(prevId === id).to.be.true 
+        expect(prevId._id === id._id).to.be.true 
         responseExpect(obj, (target) => {
           expect(target.length).to.be.not.equals(0)
         })
