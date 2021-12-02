@@ -16,7 +16,6 @@ const {
   NUM_DAY,
   responseDataDeal,
   parseData,
-  MOVIE_STATUS
 } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -729,12 +728,14 @@ router
     ]
   })
 
-  const data = await MovieModel.aggregate([
+  const data = await UserModel.aggregate([
     {
       $match: {
-        author: ObjectId(id),
-        status: MOVIE_STATUS.COMPLETE
+        _id: ObjectId(id)
       }
+    },
+    {
+      $unwind: "$issue"
     },
     {
       $skip: currPage * pageSize
@@ -743,78 +744,170 @@ router
       $limit: pageSize
     },
     {
-      $lookup: {
-        from: 'classifies', 
-        localField: 'info.classify', 
-        foreignField: '_id', 
-        as: 'info.classify'
+      $addFields: {
+        "issue": "$issue._id"
+      }
+    },
+    {
+      $addFields: {
+        "store_list": "$store._id"
       }
     },
     {
       $lookup: {
-        from: 'users', 
-        localField: 'author', 
-        foreignField: '_id', 
-        as: 'author'
+        from: 'movies', 
+        let: { 
+          movie_id: "$issue_id" 
+        },
+        pipeline: [  
+          {
+            $match: {
+              $expr: {
+                "$eq": [ "$_id", "$$movie_id" ]
+              },
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              as: 'images',
+              foreignField: "_id",
+              localField: "images"
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              as: 'poster',
+              foreignField: "_id",
+              localField: "poster"
+            }
+          },
+          {
+            $unwind: {
+              path: "$poster",
+              preserveNullAndEmptyArrays: true 
+            }
+          },
+          {
+            $lookup: {
+              from: 'classifies',
+              as: 'info.classify',
+              foreignField: "_id",
+              localField: "info.classify"
+            }
+          },
+          {
+            $lookup: {
+              from: 'users',
+              as: 'author',
+              foreignField: "_id",
+              localField: "author"
+            }
+          },
+          {
+            $unwind: {
+              path: "$author",
+              preserveNullAndEmptyArrays: true 
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              as: 'author.avatar',
+              foreignField: "_id",
+              localField: "author.avatar"
+            }
+          },
+          {
+            $unwind: {
+              path: "$author.avatar",
+              preserveNullAndEmptyArrays: true 
+            }
+          },
+          {
+            $addFields: {
+              cal_rate: {
+                $divide: [
+                  "$total_rate",
+                  "$rate_person"
+                ]
+              }
+            }
+          },
+          {
+            $project: {
+              description: "$info.description",
+              name: 1,
+              poster: "$poster.src",
+              _id: 1,
+              rate: {
+                $ifNull: [
+                  "$cal_rate",
+                  0
+                ]
+              },
+              classify: {
+                $map: {
+                  input: "$info.classify",
+                  as: "classify",
+                  in: {
+                    name: "$$classify.name"
+                  }
+                }
+              },
+              publish_time: "$info.screen_time",
+              hot: 1,
+              author: {
+                username: "$author.username",
+                _id: "$author._id",
+                avatar: "$author.avatar.src",
+              },
+              images: "$images.src"
+            }
+          }
+        ],
+        as: 'issue_data',
       }
     },
     {
-      $unwind: {
-        path: "$author",
-        preserveNullAndEmptyArrays: true 
-      }
+      $unwind: "$issue_data"
     },
     {
-      $lookup: {
-        from: 'images', 
-        localField: 'poster', 
-        foreignField: '_id', 
-        as: 'poster'
-      }
-    },
-    {
-      $unwind: {
-        path: "$poster",
-        preserveNullAndEmptyArrays: true 
-      }
-    },
-    {
-      $lookup: {
-        from: 'images', 
-        localField: 'author.avatar', 
-        foreignField: '_id', 
-        as: 'author.avatar'
-      }
-    },
-    {
-      $unwind: {
-        path: "$author.avatar",
-        preserveNullAndEmptyArrays: true 
+      $addFields: {
+        store: {
+          $cond: [
+            {
+              $in: [
+                "$issue_id", "$store_list"
+              ]
+            },
+            true,
+            false 
+          ]
+        }
       }
     },
     {
       $project: {
-        classify: "$info.classify.name",
-        description: "$info.description",
-        name: "$info.name",
-        poster: "$poster.src",
-        publish_time: "$info.screen_time",
-        hot: 1,
-        author: {
-          _id: "$author._id",
-          username: "$author.username",
-          avatar: "$author.avatar.src"
-        },
-        rate: {
-          $divide: [ "$total_rate", "$rate_person" ]
-        }
+        store: "$store",
+        description: "$issue_data.description",
+        name: "$issue_data.name",
+        poster: "$issue_data.poster",
+        _id: "$issue_data._id",
+        rate: "$issue_data.rate",
+        classify: "$issue_data.classify",
+        publish_time: "$issue_data.publish_time",
+        hot: "$issue_data.hot",
+        author: "$issue_data.author",
+        images: "$issue_data.images",
       }
     }
   ])
   .then(data => {
     return {
       data: {
-        issue: data
+        issue: data 
       }
     }
   })
