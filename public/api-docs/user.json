@@ -1533,10 +1533,7 @@
           }
         },
         "content": {
-          "type": "object",
-          "schema": {
-            "$ref":"#/definitions/media_content"
-          }
+          "$ref":"#/definitions/media_content"
         },
         "createdAt": {
           "type": "string",
