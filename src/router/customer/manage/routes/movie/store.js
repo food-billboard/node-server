@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const {  verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal } = require("@src/utils")
+const {  verifyTokenToData, UserModel, dealErr, notFound, Params, responseDataDeal, avatarGet } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -42,7 +42,8 @@ router.get('/', async (ctx) => {
 			hot: 1,
 			// author_rate: 1,
       total_rate: 1,
-      rate_person: 1
+      rate_person: 1,
+      images: 1
     },
     options: {
       ...(pageSize >= 0 ? { limit: pageSize } : {}),
@@ -64,7 +65,7 @@ router.get('/', async (ctx) => {
       data: {
         ...data,
         store: store.map(s => {
-          const { _id: { poster, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
+          const { _id: { poster, images, info: { description, name, classify, screen_time }={}, total_rate, rate_person, ...nextS } } = s
           const rate = total_rate / rate_person
           return {
             ...nextS,
@@ -74,7 +75,8 @@ router.get('/', async (ctx) => {
             classify,
             store: true,
             publish_time: screen_time,
-            rate: Number.isNaN(rate) ? 0 : rate
+            rate: Number.isNaN(rate) ? 0 : rate,
+            images: images.map(avatarGet)
           }
         })
       }
