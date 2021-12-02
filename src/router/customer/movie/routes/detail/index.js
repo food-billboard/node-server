@@ -2,25 +2,12 @@ const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Rate = require('./routes/rate')
 const Store = require('./routes/store')
-const { verifyTokenToData, middlewareVerifyToken, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet, MOVIE_STATUS } = require("@src/utils")
+const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet, MOVIE_STATUS } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
 router
-.use(async(ctx, next) => {
-  const [, token] = verifyTokenToData(ctx)
-  if(!token) {
-    const data = dealErr(ctx)({ errMsg: 'not authorization', status: 401 })
-    responseDataDeal({
-      ctx,
-      data,
-      needCache: false
-    })
-    return 
-  }
-  return await next()
-})
 .get('/', async (ctx) => {
   const check = Params.query(ctx, {
     name: "_id",
@@ -228,7 +215,6 @@ router
   }catch(err) {}
 
 })
-.use(middlewareVerifyToken)
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 .use('/rate', Rate.routes(), Rate.allowedMethods())
 .use('/store', Store.routes(), Store.allowedMethods())
