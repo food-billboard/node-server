@@ -1,6 +1,6 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, mockCreateComment, mockCreateMovie, Request, createEtag, commonValidate } = require('@test/utils')
+const { mockCreateUser, mockCreateComment, mockCreateMovie, Request, deepParseResponse, commonValidate } = require('@test/utils')
 const { UserModel, CommentModel, MovieModel } = require('@src/utils')
 const Day = require('dayjs')
 const { Types: { ObjectId } } = require('mongoose')
@@ -21,7 +21,11 @@ function responseExpect(res, validate=[]) {
     expect(item.content).to.have.a.property('image').that.is.a('array')
     expect(item.content).to.have.a.property('video').that.is.a('array')
     expect(item.content.image.every(media => typeof media === 'string')).to.be.true
-    expect(item.content.video.every(media => typeof media === 'string')).to.be.true
+    item.content.video.every(media => {
+      expect(media).to.be.a("object").and.that.include.any.keys("src", "poster")
+      commonValidate.string(media.src)
+      commonValidate.poster(media.poster)
+    })
     //createdAt
     commonValidate.time(item.createdAt)
     commonValidate.time(item.updatedAt)
@@ -47,9 +51,10 @@ function responseExpect(res, validate=[]) {
     //like
     expect(item.like).to.be.a('boolean')
 
-    expect(item.user_info).to.be.a('object').and.that.includes.all.keys('avatar', 'username')
+    expect(item.user_info).to.be.a('object').and.that.includes.any.keys('avatar', 'username', "_id")
     commonValidate.poster(item.user_info.avatar)
     commonValidate.string(item.user_info.username)
+    commonValidate.objectId(item.user_info._id)
   })
 
   if(Array.isArray(validate)) {
@@ -111,7 +116,10 @@ describe(`${COMMON_API} test`, function() {
           user_info: userId,
           content: {
             text: COMMON_API
-          }
+          },
+          like_person: [
+            self._id 
+          ]
         })
 
         return Promise.all([
@@ -318,10 +326,12 @@ describe(`${COMMON_API} test`, function() {
           Accept: 'Application/json',
           Authorization: `Basic ${selfToken}`
         })
-        .expect(404)
+        .expect(200)
         .expect('Content-Type', /json/)
-        .end(function(err) {
+        .end(function(err, res) {
           if(err) return done(err)
+          const obj = deepParseResponse(res)
+          expect(obj.comment.length).to.equal(0)
           done()
         })
 

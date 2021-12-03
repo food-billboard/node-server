@@ -4,12 +4,6 @@ const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
-function getSourceContent(contnet) {
-  if(typeof content === 'string') return contnet 
-  const { text } = contnet || {}
-  return text || ''
-}
-
 router
 .get('/', async (ctx) => {
   const [, token] = verifyTokenToData(ctx)
@@ -31,88 +25,225 @@ router
     ]
   })
 
-  const data = await UserModel.findOne({
-    _id: ObjectId(id)
-  })
-  .select({
-    comment: 1,
-    avatar: 1,
-    username: 1,
-    _id: 1
-  })
-  .populate({
-    path: 'comment',
-    options: {
-      ...(pageSize >= 0 ? { limit: pageSize } : {}),
-      ...((currPage >= 0 && pageSize >= 0) ? { skip: pageSize * currPage } : {})
-    },
-    select: {
-      source: 1,
-      updatedAt: 1,
-      createdAt: 1,
-      total_like: 1,
-      content: 1,
-      like_person: 1,
-      comment_users: 1,
-      source_type: 1,
-    },
-    populate: {
-      path: 'source',
-      select: {
-        name: 1,
-        content: 1,
+  const data = await CommentModel.aggregate([
+    {
+      $match: {
+        user_info: ObjectId(id) 
       }
     },
-  })
-  .exec()
-  .then(notFound)
-  .then(data => {
-    const { comment, _id: userId, avatar, ...nextData } = data
-    let like = false
-    return {
-      data: {
-        comment: comment.map(c => {
-          like = false
-          const { 
-            like_person, 
-            content: { image, video, ...nextContent }, 
-            source={}, 
-            source_type,
-            comment_users,
-            ...nextC 
-          } = c
-
-          const { name, content, ...nextSoruce } = source || {}
-          if(like_person.some(l => l.equals(userId))) {
-            like = true
-          }
-          return {
-            ...nextC,
-            comment_users: comment_users.length,
-            content: {
-              ...nextContent,
-              image: image.filter(i => i && !!i.src).map(i => i.src),
-              video: video.filter(v => v && !!v.src).map(v => {
-                const { src, poster } = v
-                return {
-                  src,
-                  poster: avatarGet(poster)
-                }
-              })
-            },
-            source: {
-              ...nextSoruce,
-              type: source_type,
-              content: name ? name : getSourceContent(content)
-            },
-            like,
-            user_info: {
-              ...nextData,
-              _id: userId,
-              avatar: avatar ? avatar.src : null,
+    {
+      $skip: currPage * pageSize
+    },
+    {
+      $limit: pageSize
+    },
+    {
+      $lookup: {
+        from: 'movies',
+        as: 'source_movie',
+        foreignField: "_id",
+        localField: "source"
+      }
+    }, 
+    {
+      $unwind: {
+        path: "$source_movie",
+        preserveNullAndEmptyArrays: true 
+      }
+    }, 
+    {
+      $lookup: {
+        from: 'comments',
+        as: 'source_comment',
+        foreignField: "_id",
+        localField: "source"
+      }
+    }, 
+    {
+      $unwind: {
+        path: "$source_comment",
+        preserveNullAndEmptyArrays: true 
+      }
+    }, 
+    {
+      $lookup: {
+        from: 'users',
+        let: { 
+          user_id: "$user_info"
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                "$eq": [ "$_id", "$$user_id" ]
+              },
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              as: 'avatar',
+              foreignField: "_id",
+              localField: "avatar"
+            }
+          },
+          {
+            $unwind: {
+              path: "$avatar",
+              preserveNullAndEmptyArrays: true 
+            }
+          },
+          {
+            $project: {
+              _id: 1,
+              avatar: "$avatar.src",
+              username: 1
             }
           }
-        })
+        ],
+        as: 'user_info'
+      }
+    }, 
+    {
+      $unwind: {
+        path: "$user_info",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
+      $lookup: {
+        from: 'users',
+        as: 'comment_users',
+        let: {
+          user_ids: "$comment_users"
+        },
+        pipeline: [
+          { 
+            $match: {
+              $expr: {
+                "$in": [ "$_id", "$$user_ids" ]
+              },
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              as: 'avatar',
+              foreignField: "_id",
+              localField: "avatar"
+            }
+          },
+          {
+            $unwind: {
+              path: "$avatar",
+              preserveNullAndEmptyArrays: true 
+            }
+          },
+          {
+            $project: {
+              _id: 1,
+              username: 1,
+              avatar: '$avatar.src'
+            }
+          }
+        ],
+      }
+    }, 
+    {
+      $lookup: {
+        from: 'videos',
+        as: 'content.video',
+        let: {
+          video_ids: "$content.video"
+        },
+        pipeline: [
+          { 
+            $match: {
+              $expr: {
+                "$in": [ "$_id", "$$video_ids" ]
+              },
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              as: 'poster',
+              foreignField: "_id",
+              localField: "poster"
+            }
+          },
+          {
+            $unwind: {
+              path: "$poster",
+              preserveNullAndEmptyArrays: true 
+            }
+          },
+          {
+            $project: {
+              src: 1,
+              poster: '$poster.src'
+            }
+          }
+        ],
+      }
+    }, 
+    {
+      $lookup: {
+        from: 'images',
+        as: 'content.image',
+        foreignField: "_id",
+        localField: "content.image"
+      }
+    },
+    {
+      $addFields: {
+        like: {
+          $cond: [
+            {
+              $in: [
+                ObjectId(id), "$like_person"
+              ]
+            },
+            true,
+            false 
+          ]
+        }
+      }
+    },  
+    {
+      $project: {
+        comment_users: "$comment_users",
+        content: {
+          text: "$content.text",
+          image: "$content.image.src",
+          video: "$content.video",
+        },
+        createdAt: 1,
+        updatedAt: 1,
+        like: "$like",
+        total_like: 1,
+        _id: 1,
+        user_info: "$user_info",
+        source: {
+          _id: "$source",
+          type: "$source_type",
+          content: {
+            $ifNull: [
+              "$source_movie.name",
+              "$source_comment.content.text"
+            ]
+          }
+        }
+      }
+    }
+  ])
+  .then(data => {
+    const [ target={} ] = data 
+    const { comment, sub } = target 
+    return {
+      data: {
+        comment,
+        sub 
       }
     }
   })

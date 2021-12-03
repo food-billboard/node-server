@@ -27,23 +27,26 @@ function responseExpect(res, validate=[]) {
       'like', 'user_info', '_id'
     )
     const { comment_users, content, createdAt, updatedAt, total_like, like, user_info, _id } = item
-    expect(comment_users).to.be.satisfies(function(target) {
-      if(typeof target === 'number') {
-        commonValidate.number(target)
-      }else {
-        expect(target).to.be.a('array')
-        target.forEach(tar => {
-          expect(tar).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id')
-          commonValidate.poster(tar.avatar)
-          commonValidate.string(tar.username)
-          commonValidate.objectId(tar._id)
-        })
-      }
-    })
+    if(typeof comment_users === 'number') {
+      commonValidate.number(comment_users)
+    }else {
+      expect(comment_users).to.be.a('array')
+      comment_users.forEach(tar => {
+        expect(tar).to.be.a('object').and.that.includes.all.keys('avatar', 'username', '_id')
+        commonValidate.poster(tar.avatar)
+        commonValidate.string(tar.username)
+        commonValidate.objectId(tar._id)
+      })
+    }
     expect(content).to.be.a('object').that.includes.all.keys('image', 'text', 'video')
     commonValidate.string(content.text, function(_) { return true })
     expect(content.video).to.be.a('array')
-    content.video.forEach(item => commonValidate.string(item))
+    content.video.forEach(item => {
+      expect(item).to.be.a('object').that.includes.any.keys('src', 'poster')
+      const { poster, src } = item 
+      commonValidate.string(src)
+      commonValidate.poster(poster)
+    })
     expect(content.image).to.be.a('array')
     content.image.forEach(item => commonValidate.string(item))
     commonValidate.time(createdAt)
@@ -121,7 +124,7 @@ describe(`${COMMON_API} test`, function() {
         name: COMMON_API,
         author: userId,
         source_type: 'USER',
-        stauts: 'COMPLETE',
+        status: 'COMPLETE',
       })
 
       movieDatabase = movie
@@ -141,7 +144,11 @@ describe(`${COMMON_API} test`, function() {
         source_type: 'movie',
         source: movieId,
         comment_users: [ userId ],
-        sub_comments: []
+        sub_comments: [],
+        user_info: userId,
+        like_person: [
+          userId 
+        ]
       })
 
       commentDatabase = comment

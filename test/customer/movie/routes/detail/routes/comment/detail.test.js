@@ -125,8 +125,8 @@ describe(`${COMMON_API} test`, function() {
           image: [ imageId ],
           video: [ videoId ]
         },
-        like_person: [user._id],
-        comment_users: [ user._id ]
+        like_person: [userId],
+        comment_users: [ userId ]
       })
 
       return model.save()

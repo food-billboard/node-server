@@ -19,16 +19,20 @@ function responseExpect(res, validate=[]) {
       '_id', 'source', 'user_info'
     )
 
-    commonValidate.number(item.comment_users)
+    expect(item.comment_users).to.be.a("array")
+    item.comment_users.forEach(item => {
+      expect(item).to.be.a('object').and.that.includes.any.keys('avatar', 'username', '_id')
+      commonValidate.poster(item.avatar)
+      commonValidate.string(item.username)
+      commonValidate.objectId(item._id)
+    })
     expect(item.content).to.be.a('object').and.includes.all.keys('text', 'image', 'video')
     commonValidate.string(item.content.text, function(target) { return true })
     item.content.image.forEach(item => commonValidate.poster(item))
     item.content.video.forEach(item => {
       expect(item).to.be.a('object').and.that.includes.any.keys('src', 'poster')
-      commonValidate.poster(item.src)
-      if(item.poster) {
-        commonValidate.poster(item.poster)
-      }
+      commonValidate.string(item.src)
+      commonValidate.poster(item.poster)
     })
 
     commonValidate.time(item.createdAt)
@@ -44,7 +48,7 @@ function responseExpect(res, validate=[]) {
     //   return !!~['movie', 'comment'].indexOf(target.toLowerCase())
     // })
 
-    expect(item.user_info).to.be.a('object').and.that.includes.all.keys('avatar', '_id', 'username')
+    expect(item.user_info).to.be.a('object').and.that.includes.any.keys('avatar', '_id', 'username')
     commonValidate.poster(item.user_info.avatar)
     commonValidate.objectId(item.user_info._id)
     commonValidate.string(item.user_info.username)
