@@ -238,12 +238,9 @@ router
     }
   ])
   .then(data => {
-    const [ target={} ] = data 
-    const { comment, sub } = target 
     return {
       data: {
-        comment,
-        sub 
+        comment: data,
       }
     }
   })
