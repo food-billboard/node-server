@@ -1522,6 +1522,49 @@
         }
       }
     },
+    "/api/customer/movie/detail/special": {
+      "get": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "专题列表",
+        "description": "专题列表",
+        "operationId": "customer_movie_get_special",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "专题id",
+            "type": "string",
+            "required": true 
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref":"#/definitions/customer_movie_get_special"
+            }
+          }
+        }
+      }
+    },
     "/api/customer/movie/detail/rate": {
       "put": {
         "tags": [
@@ -3067,6 +3110,44 @@
       },
       "xml": {
         "name": "customer_manage_get_store"
+      }
+    },
+    "customer_movie_get_special": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "poster": {
+                  "type": "string",
+                  "description": "海报"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "名称"
+                },
+                "_id": {
+                  "type": "string"
+                },
+                "movie": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/customer_movie_list"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_manage_get_movie"
       }
     },
     "customer_manage_get_movie": {

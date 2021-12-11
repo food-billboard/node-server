@@ -1,6 +1,6 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, mockCreateMovie, mockCreateClassify, Request, createEtag, commonValidate, mockCreateImage } = require('@test/utils')
+const { mockCreateUser, mockCreateMovie, mockCreateClassify, Request, createEtag, commonMovieValid, mockCreateImage } = require('@test/utils')
 const { UserModel, MovieModel, ClassifyModel, ImageModel } = require('@src/utils')
 
 const COMMON_API = '/api/user/customer/movie/browser'
@@ -11,25 +11,7 @@ function responseExpect(res, validate=[]) {
 
   expect(target).to.be.a('object').and.have.a.property('glance')
 
-  target.glance.forEach(item => {
-    expect(item).to.be.a('object').and.includes.all.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot', 'updatedAt', 'images')
-    commonValidate.string(item.description, () => true)
-    commonValidate.string(item.name)
-    commonValidate.poster(item.poster)
-    commonValidate.objectId(item._id)
-    expect(item.store).to.be.a('boolean')
-    commonValidate.number(item.rate)
-    commonValidate.time(item.updatedAt)
-    expect(item.images).to.be.a("array")
-    item.images.forEach(item => commonValidate.string(item))
-    //classify
-    expect(item.classify).to.be.a('array').and.that.lengthOf.above(0)
-    item.classify.forEach(classify => {
-      expect(classify).to.be.a('object').and.that.has.a.property('name').and.that.is.a('string')
-    })
-    commonValidate.date(item.publish_time)
-    commonValidate.number(item.hot)
-  })
+  commonMovieValid(target.glance)
 
   if(Array.isArray(validate)) {
     validate.forEach(valid => {

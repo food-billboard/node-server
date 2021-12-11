@@ -1,10 +1,9 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, mockCreateMovie, mockCreateImage, mockCreateSpecial, mockCreateClassify, Request, createEtag, commonValidate, commonMovieValid } = require('@test/utils')
+const { mockCreateUser, mockCreateMovie, mockCreateImage, mockCreateSpecial, mockCreateClassify, Request, parseResponse, commonValidate, commonMovieValid } = require('@test/utils')
 const { MovieModel, ImageModel, SpecialModel, ClassifyModel, UserModel } = require('@src/utils')
-const Day = require('dayjs')
 
-const COMMON_API = '/api/user/home/special'
+const COMMON_API = '/api/customer/movie/detail/special'
 
 function responseExpect(res, validate=[]) {
 
@@ -30,15 +29,18 @@ function responseExpect(res, validate=[]) {
 
 describe(`${COMMON_API} test`, function() {
 
-  describe(`get home special list test -> ${COMMON_API}`, function() {
+  describe(`get special list test -> ${COMMON_API}`, function() {
 
     let imageId
     let result
+    let selfInfo 
+    let selfToken
+    let movieId 
     let resultTest
 
     before(function(done) {
 
-      const { model } = mockCreateUser({
+      const { model: user, signToken } = mockCreateUser({
         username: COMMON_API
       })
 
@@ -52,10 +54,12 @@ describe(`${COMMON_API} test`, function() {
       Promise.all([
         image.save(),
         classify.save(),
-        model.save()
+        user.save()
       ])
       .then(function([image, classify, user]) {
         imageId = image._id
+        selfInfo = user 
+        selfToken = signToken(selfInfo._id)
         const { model } = mockCreateMovie({
           name: COMMON_API,
           poster: imageId,
@@ -63,12 +67,13 @@ describe(`${COMMON_API} test`, function() {
             classify: [ classify._id ]
           },
           images: [imageId],
-          author: user._id 
+          author: selfInfo._id 
         })
 
         return model.save()
       })
       .then(function(data) {
+        movieId = data._id 
         const { model } = mockCreateSpecial({
           movie: data._id,
           poster: imageId,
@@ -88,7 +93,6 @@ describe(`${COMMON_API} test`, function() {
       })
       .then(function([data, testData]) {
         result = data
-        resultTest = testData
         done()
       })
       .catch(err => {
@@ -129,14 +133,17 @@ describe(`${COMMON_API} test`, function() {
       })
     })
 
-    describe(`get home special list success test -> ${COMMON_API}`, function() {
+    describe(`get special list success test -> ${COMMON_API}`, function() {
 
-      it(`get home special list success`, function(done) {
+      it(`get special list success`, function(done) {
 
         Request
         .get(COMMON_API)
         .query({ _id: result._id.toString() })
-        .set('Accept', 'Application/json')
+        .set({
+          'Accept': 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
         .expect(200)
         .expect('Content-Type', /json/)
         .end(function(err, res) {
@@ -154,93 +161,70 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
-      it.skip(`get home special list success and return the status of 304`, function(done) {
+      it(`get special list success and self store it`, function(done) {
 
-        const query = {
-          _id: result._id.toString()
-        }
-
-        Request
-        .get(COMMON_API)
-        .query(query)
-        .set({
-          Accept: 'Application/json',
-          'If-Modified-Since': result.updatedAt,
-          'If-None-Match': createEtag(query)
+        UserModel.updateOne({
+          _id: selfInfo._id 
+        }, {
+          $set: {
+            store: [
+              {
+                timestamps: 100,
+                _id: movieId
+              }
+            ]
+          }
         })
-        .expect(304)
-        .expect('Last-Modified', result.updatedAt.toString())
-        .expect('ETag', createEtag(query))
-        .end(function(err, _) {
-          if(err) return done(err)
-          done()
+        .then(_ => {
+          return Request
+          .get(COMMON_API)
+          .query({ _id: result._id.toString() })
+          .set({
+            'Accept': 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
         })
-
-      })
-
-      it.skip(`get home special list success and hope return the status 304 but the the cache is out of time`, function(done) {
-
-        const query = {
-          _id: result._id.toString()
-        }
-
-        const newDate = new Date((Day(result.updatedAt).valueOf - 10000))
-
-        Request
-        .get(COMMON_API)
-        .query(query)
-        .set({
-          Accept: 'Application/json',
-          'If-Modified-Since': newDate,
-          'If-None-Match': createEtag(query)
-        })
-        .expect(200)
-        .expect('Last-Modified', result.updatedAt.toString())
-        .expect('ETag', createEtag(query))
-        .end(function(err, _) {
-          if(err) return done(err)
-          done()
-        })
-
-      })
-
-      it.skip(`get home special list success and hope return the status 304 but the the resource has edited`, function(done) {
-
-        const query = {
-          _id: resultTest._id.toString()
-        }
-
-        Request
-        .get(COMMON_API)
-        .query(query)
-        .set({
-          Accept: 'Application/json',
-          'If-Modified-Since': result.updatedAt,
-          'If-None-Match': createEtag({
-            ...query,
-            pageSize: 10
+        .then(function(res) {
+          let obj = parseResponse(res)
+          responseExpect(obj, target => {
+            expect(target.movie.some(item => {
+              return item._id === movieId.toString() && item.store
+            })).to.be.true 
           })
         })
-        .expect(200)
-        .expect('Last-Modified', result.updatedAt.toString())
-        .expect('ETag', createEtag(query))
-        .end(function(err, _) {
-          if(err) return done(err)
+        .then(_ => {
+          return UserModel.updateOne({
+            _id: selfInfo._id 
+          }, {
+            $set: {
+              store: []
+            }
+          })
+        })
+        .then(_ => {
           done()
+        })
+        .catch(err => {
+          done(err)
         })
 
       })
 
     })
 
-    describe(`get home special list fail test -> ${COMMON_API}`, function() {
+    describe(`get special list fail test -> ${COMMON_API}`, function() {
 
-      it(`get home special list fail because the special id is not verify`, function(done) {
+      it(`get special list fail because the special id is not verify`, function(done) {
 
         Request
         .get(COMMON_API)
         .query({ _id: result._id.toString().slice(1) })
-        .set('Accept', 'Application/json')
+        .set({
+          'Accept': 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
         .expect(400)
         .expect('Content-Type', /json/)
         .end(function(err, _) {
@@ -250,14 +234,17 @@ describe(`${COMMON_API} test`, function() {
 
       })
       
-      it(`get home special list fail because the special id is not found`, function(done) {
+      it(`get special list fail because the special id is not found`, function(done) {
 
         const { _id } = result
 
         Request
         .get(COMMON_API)
         .query({ _id: `${(parseInt(_id.toString().slice(0, 1)) + 5) % 10}${_id.toString().slice(1)}` })
-        .set('Accept', 'Application/json')
+        .set({
+          'Accept': 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
         .expect(404)
         .expect('Content-Type', /json/)
         .end(function(err, _) {

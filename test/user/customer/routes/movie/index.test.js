@@ -1,6 +1,6 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, mockCreateMovie, mockCreateClassify, Request, createEtag, commonValidate } = require('@test/utils')
+const { mockCreateUser, mockCreateMovie, mockCreateClassify, Request, createEtag, commonValidate, commonMovieValid } = require('@test/utils')
 const { ClassifyModel, MovieModel, UserModel } = require('@src/utils')
 
 const COMMON_API = '/api/user/customer/movie'
@@ -11,22 +11,7 @@ function responseExpect(res, validate=[]) {
 
   expect(target).to.be.a('object').and.have.a.property('issue').that.is.a('array')
 
-  target.issue.forEach(item => {
-    expect(item).to.be.a('object').and.includes.all.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot')
-    commonValidate.string(item.description, () => true)
-    commonValidate.string(item.name)
-    commonValidate.poster(item.poster)
-    commonValidate.objectId(item._id)
-    expect(item._id).to.be.a('boolean')
-    commonValidate.number(item.rate)
-    //classify
-    expect(item.classify).to.be.a('array').and.that.lengthOf.above(0)
-    item.forEach(classify => {
-      expect(classify).to.be.a('object').and.that.has.a.property('name').and.that.is.a('string')
-    })
-    commonValidate.time(item.publish_time)
-    commonValidate.number(item.hot)
-  })
+  commonMovieValid(target.issue)
 
   if(Array.isArray(validate)) {
     validate.forEach(valid => {

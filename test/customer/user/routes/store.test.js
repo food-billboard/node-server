@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, Request, commonValidate, parseResponse, deepParseResponse, mockCreateMovie } = require('@test/utils')
-const { UserModel, MovieModel } = require('@src/utils')
+const { mockCreateUser, Request, mockCreateClassify, parseResponse, deepParseResponse, mockCreateMovie, commonMovieValid } = require('@test/utils')
+const { UserModel, MovieModel, ClassifyModel } = require('@src/utils')
 
 const COMMON_API = '/api/customer/user/movie/store'
 
@@ -10,29 +10,7 @@ function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
   expect(target).to.be.a('object').and.that.have.a.property('store')
-
-  target.store.forEach(item => {
-    expect(item).to.be.a('object').and.includes.any.keys('description', 'name', 'poster', '_id', 'store', 'rate', 'classify', 'publish_time', 'hot', "author", "images")
-    commonValidate.string(item.description, function() { return true })
-    commonValidate.string(item.name)
-    commonValidate.poster(item.poster)
-    commonValidate.objectId(item._id)
-    expect(item.store).to.be.a('boolean')
-    commonValidate.number(item.rate)
-    expect(item.images).to.be.a("array")
-    item.images.forEach(item => commonValidate.string(item))
-    //classify
-    expect(item.classify).to.be.a('array')
-    item.classify.forEach(classify => {
-      expect(classify).to.be.a('object').and.that.has.a.property('name').and.that.is.a('string')
-    })
-    commonValidate.time(item.publish_time) 
-    commonValidate.number(item.hot)
-    expect(item.author).to.be.a("object").and.that.include.any.keys("username", "_id", "avatar")
-    commonValidate.string(item.author.username)
-    if(item.author.avatar) commonValidate.poster(item.author.avatar)
-    commonValidate.objectId(item.author._id)
-  })
+  commonMovieValid(target.store)
 
   if(Array.isArray(validate)) {
     validate.forEach(valid => {
@@ -51,6 +29,7 @@ describe(`${COMMON_API} test`, function() {
     let storeUserId 
     let targetMovieId  
     let selfToken 
+    let classifyId 
 
     before(function(done) {
       
@@ -63,17 +42,22 @@ describe(`${COMMON_API} test`, function() {
       const { model:self, signToken } = mockCreateUser({
         username: COMMON_API,
       })
+      const { model: classify } = mockCreateClassify({
+        name: COMMON_API
+      })
       
       Promise.all([
         store.save(),
         self.save(),
-        movie.save()
+        movie.save(),
+        classify.save()
       ])
-      .then(function([store, self, movie]) {
+      .then(function([store, self, movie, classify]) {
         userResult = self
         storeUserId = store._id
         targetMovieId = movie._id 
         selfToken = signToken(self._id)
+        classifyId = classify._id 
         return Promise.all([
           UserModel.updateOne({
             _id: storeUserId
@@ -91,7 +75,8 @@ describe(`${COMMON_API} test`, function() {
             _id: targetMovieId
           }, {
             $set: {
-              author: userResult._id 
+              author: userResult._id,
+              "info.classify": [classifyId]
             }
           })
         ])
@@ -110,6 +95,9 @@ describe(`${COMMON_API} test`, function() {
           username: COMMON_API
         }),
         MovieModel.deleteMany({
+          name: COMMON_API
+        }),
+        ClassifyModel.deleteMany({
           name: COMMON_API
         })
       ])

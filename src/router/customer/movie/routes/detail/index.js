@@ -2,6 +2,7 @@ const Router = require('@koa/router')
 const Comment = require('./routes/comment')
 const Rate = require('./routes/rate')
 const Store = require('./routes/store')
+const Special = require('./routes/special')
 const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet, MOVIE_STATUS } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -218,5 +219,6 @@ router
 .use('/comment', Comment.routes(), Comment.allowedMethods())
 .use('/rate', Rate.routes(), Rate.allowedMethods())
 .use('/store', Store.routes(), Store.allowedMethods())
+.use('/special', Special.routes(), Special.allowedMethods())
 
 module.exports = router
