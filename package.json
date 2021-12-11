@@ -4,6 +4,7 @@
   "description": "电影小程序后端api接口服务，包含mocha单元测试",
   "main": "app.js",
   "scripts": {
+    "preinstall": "npx only-allow yarn",
     "dev:socket": "nodemon ./src/chat/index.js ./src/config/nodemon/index.dev.json",
     "prod:socket": "nodemon ./src/chat/index.js ./src/config/nodemon/index.prod.json",
     "dev:nodemon": "nodemon app.js --config ./src/config/nodemon/index.dev.json",
