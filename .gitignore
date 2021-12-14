@@ -34,3 +34,7 @@ yarn-error.log*
 /bin/nginx/logs/log
 
 package-lock.json
+
+# assets 
+/public/chat/
+/public/manage/
