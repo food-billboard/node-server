@@ -14,6 +14,10 @@ const STATIC_PAGE_MAP = [
     path: "chat"
   },
   {
+    regexp: /(?<=.+\/movie5\/).+$/,
+    path: "movie5"
+  },
+  {
     regexp: /(?<=.+\/swagger\/).+$/,
     path: "api-docs"
   },
