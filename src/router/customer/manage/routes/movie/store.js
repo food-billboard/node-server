@@ -76,7 +76,7 @@ router.get('/', async (ctx) => {
             store: true,
             publish_time: screen_time,
             rate: Number.isNaN(rate) ? 0 : rate,
-            images: images.map(avatarGet)
+            images: images.map(item => avatarGet(item))
           }
         })
       }

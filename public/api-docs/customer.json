@@ -3450,15 +3450,13 @@
                             "type": "string",
                             "description": "演员名称"
                           },
-                          "other": {
-                            "type": "object",
-                            "properties": {
-                              "avatar": {
-                                "type": "string",
-                                "description": "演员海报地址"
-                              }
-                            }
-                          }
+                          "_id": {
+                            "type": "string"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "演员海报地址"
+                          } 
                         }
                       }
                     },

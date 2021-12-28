@@ -102,7 +102,6 @@ router
       select: {
         name: 1,
         "other.avatar": 1,
-        _id: 0
       }
     })
     .populate({
@@ -181,13 +180,10 @@ router
         info: {
           ...nextInfo,
           actor: actor.map(item => {
-            const { other: { avatar, ...nextOther }={}, ...nextItem } = item
+            const { other: { avatar }={}, ...nextItem } = item
             return {
               ...nextItem,
-              other: {
-                ...nextOther,
-                avatar: !!avatar ? avatar.src : null
-              }
+              avatar: avatarGet(avatar)
             }
           }),
           director,

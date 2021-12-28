@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { mockCreateUser, Request, createEtag, commonValidate, mockCreateClassify, mockCreateMovie } = require('@test/utils')
-const { UserModel, ClassifyModel, MovieModel } = require('@src/utils') 
+const { mockCreateUser, Request, createEtag, commonValidate, mockCreateClassify, mockCreateMovie, mockCreateImage } = require('@test/utils')
+const { UserModel, ClassifyModel, MovieModel, ImageModel } = require('@src/utils') 
 const Day = require('dayjs')
 
 const COMMON_API = '/api/customer/manage/movie/store'
@@ -48,20 +48,30 @@ describe(`${COMMON_API} test`, function() {
     let updatedAt
     let userId
     let result
+    let imageId 
     let getToken
 
     before(async function() {
       const { model } = mockCreateClassify({
         name: COMMON_API
       })
+      const { model: image } = mockCreateImage({
+        src: COMMON_API
+      })
 
-      await model.save()
-      .then(data => {
+      await Promise.all([
+        model.save(),
+        image.save()
+      ])
+      .then(([data, image]) => {
+        imageId = image._id 
         const { model } = mockCreateMovie({
           name: COMMON_API,
           info: {
             classify: [ data._id ]
-          }
+          },
+          poster: imageId,
+          images: [imageId]
         })
 
         return model.save()
@@ -99,6 +109,9 @@ describe(`${COMMON_API} test`, function() {
         }),
         ClassifyModel.deleteOne({
           name: COMMON_API
+        }),
+        ImageModel.deleteMany({
+          src: COMMON_API
         })
       ])
       .catch(err => {

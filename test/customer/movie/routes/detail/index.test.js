@@ -64,13 +64,11 @@ function responseExpect(res, validate=[]) {
   commonValidate.time(screen_time)
   expect(actor).to.be.a('array').and.that.lengthOf.above(0)
   actor.forEach(item => {
-    expect(item).to.be.a('object').and.that.includes.all.keys('name', 'other')
-    const { name, other } = item
+    expect(item).to.be.a('object').and.that.includes.any.keys('name', 'avatar', '_id')
+    const { name, avatar, _id } = item
     commonValidate.string(name)
-    if(other && other.avatar != undefined) {
-      expect(other).to.be.a('object').and.that.includes.all.keys('avatar')
-      commonValidate.poster(other.avatar)
-    }
+    commonValidate.poster(avatar)
+    commonValidate.objectId(_id)
   })
   expect(another_name).to.be.a('array')
   another_name.forEach(item => commonValidate.string(item))
