@@ -1926,8 +1926,24 @@
                     "type": "string",
                     "description": "海报"
                   },
+                  "video": {
+                    "type": "string",
+                    "description": "视频"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
                   "_id": {
                     "type": "string"
+                  },
+                  "author_rate": {
+                    "type": "integer",
+                    "description": "作者评分"
+                  },
+                  "author_description": {
+                    "type": "string",
+                    "description": "作者描述"
                   }
                 }
               }

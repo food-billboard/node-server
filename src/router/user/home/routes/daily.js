@@ -43,10 +43,28 @@ router
       }
     },
     {
+      $lookup: {
+        from: 'videos',
+        localField: 'video',
+        foreignField: '_id',
+        as: 'video'
+      }
+    },
+    {
+      $unwind: {
+        path: "$video",
+        preserveNullAndEmptyArrays: true 
+      }
+    },
+    {
       $project: {
         name: 1,
         poster: "$poster.src",
-        _id: 1
+        _id: 1,
+        author_rate: 1,
+        createdAt: 1,
+        video: "$video.src",
+        author_description: 1
       }
     }
   ])
