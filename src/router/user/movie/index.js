@@ -8,6 +8,7 @@ const Actor = require('./routes/actor')
 const Director = require('./routes/director')
 const Language = require('./routes/language')
 const OrderList = require('./routes/orderList')
+const Special = require('./routes/special')
 
 const router = new Router()
 
@@ -21,5 +22,6 @@ router
 .use('/director', Director.routes(), Director.allowedMethods())
 .use('/language', Language.routes(), Language.allowedMethods())
 .use('/order', OrderList.routes(), OrderList.allowedMethods())
+.use('/special', Special.routes(), Special.allowedMethods())
 
 module.exports = router

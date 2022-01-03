@@ -893,6 +893,43 @@
         }
       }
     },
+    "/api/user/movie/special": {
+      "get": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "专题列表",
+        "description": "电影专题列表",
+        "operationId": "user_movie_get_special",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type":"object",
+              "$ref":"#/definitions/user_movie_get_special"
+            }
+          }
+        }
+      }
+    },
     "/api/user/movie/detail": {
       "get": {
         "tags": [
@@ -2131,6 +2168,59 @@
                     "type": "string",
                     "description": "类型",
                     "enum": ["special", "movie"]
+                  },
+                  "_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "user_home_get_swiper"
+      }
+    },
+    "user_movie_get_special": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "glance_count": {
+                    "type": "integer",
+                    "description": "人气"
+                  },
+                  "poster": {
+                    "type": "string",
+                    "description": "海报"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "名称"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "描述"
+                  },
+                  "movie_count": {
+                    "type": "integer",
+                    "description": "电影数量"
                   },
                   "_id": {
                     "type": "string"
