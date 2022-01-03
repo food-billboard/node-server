@@ -1522,6 +1522,124 @@
         }
       }
     },
+    "/api/customer/movie/detail/classify": {
+      "get": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "分类",
+        "description": "电影分类列表",
+        "operationId": "customer_movie_get_classify",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "分类id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type":"object",
+              "$ref":"#/definitions/customer_movie_get_classify"
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/movie/detail/rank": {
+      "get": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "排行榜",
+        "description": "电影排行榜列表",
+        "operationId": "customer_movie_get_rank",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "description": "分类id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          },
+          {
+            "name": "glance",
+            "in": "query",
+            "description": "浏览量(1 | -1)",
+            "type": "integer"
+          },
+          {
+            "name": "author_rate",
+            "in": "query",
+            "description": "作者评分(1 | -1)",
+            "type": "integer"
+          },
+          {
+            "name": "hot",
+            "in": "query",
+            "description": "人气(1 | -1)",
+            "type": "integer"
+          },
+          {
+            "name": "rate_person",
+            "in": "query",
+            "description": "评分人数(1 | -1)",
+            "type": "integer"
+          },
+          {
+            "name": "total_rate",
+            "in": "query",
+            "description": "总评分(1 | -1)",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type":"object",
+              "$ref":"#/definitions/customer_movie_get_rank"
+            }
+          }
+        }
+      }
+    },
     "/api/customer/movie/detail/special": {
       "get": {
         "tags": [
@@ -3110,6 +3228,46 @@
       },
       "xml": {
         "name": "customer_manage_get_store"
+      }
+    },
+    "customer_movie_get_classify": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "$ref": "#/definitions/customer_movie_list"
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_movie_get_classify"
+      }
+    },
+    "customer_movie_get_rank": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "$ref": "#/definitions/customer_movie_list"
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "customer_movie_get_classify"
       }
     },
     "customer_movie_get_special": {

@@ -101,6 +101,20 @@ const commonAggregateMovie = [
   }
 ]
 
+const commonSeparateMovieFields = (parent, ignore=[]) => {
+  const commonFields = [
+    "images", "poster", "classify", "description", 
+    "name", "_id", "publish_time", "hot", "author",
+    "rate"
+  ]
+  const realFields = commonFields.filter(item => !ignore.includes(item))
+  return realFields.reduce((acc, cur) => {
+    acc[cur] = `$${parent}.${cur}`
+    return acc 
+  }, {})
+}
+
 module.exports = {
-  commonAggregateMovie
+  commonAggregateMovie,
+  commonSeparateMovieFields
 }

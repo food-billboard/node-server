@@ -3,6 +3,8 @@ const Comment = require('./routes/comment')
 const Rate = require('./routes/rate')
 const Store = require('./routes/store')
 const Special = require('./routes/special')
+const Classify = require('./routes/classify')
+const Rank = require('./routes/rank')
 const { verifyTokenToData, UserModel, MovieModel, dealErr, notFound, Params, responseDataDeal, avatarGet, MOVIE_STATUS } = require("@src/utils")
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -216,5 +218,7 @@ router
 .use('/rate', Rate.routes(), Rate.allowedMethods())
 .use('/store', Store.routes(), Store.allowedMethods())
 .use('/special', Special.routes(), Special.allowedMethods())
+.use('/classify', Classify.routes(), Classify.allowedMethods())
+.use('/rank', Rank.routes(), Rank.allowedMethods())
 
 module.exports = router
