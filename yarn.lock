@@ -1173,7 +1173,7 @@ fromentries@^1.2.0:
 
 fs-extra@^10.0.0:
   version "10.0.0"
-  resolved "https://registry.npmmirror.com/fs-extra/download/fs-extra-10.0.0.tgz#9ff61b655dde53fb34a82df84bb214ce802e17c1"
+  resolved "https://registry.npmmirror.com/fs-extra/download/fs-extra-10.0.0.tgz?cache=0&sync_timestamp=1632397277365&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Ffs-extra%2Fdownload%2Ffs-extra-10.0.0.tgz#9ff61b655dde53fb34a82df84bb214ce802e17c1"
   integrity sha1-n/YbZV3eU/s0qC34S7IUzoAuF8E=
   dependencies:
     graceful-fs "^4.2.0"
