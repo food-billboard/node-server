@@ -23,8 +23,6 @@ jobs:
       # 设置node 
       - name: setup node 
         uses: actions/setup-node@v1
-        with:
-          node-version: 12.16.1
       - run: |
           npm install yarn pm2 -g
       - run: |
