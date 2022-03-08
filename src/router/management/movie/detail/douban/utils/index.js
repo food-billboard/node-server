@@ -292,12 +292,14 @@ async function fetchDouData({
   const { poster, actor, director, district, language, classify, ...nextBaseInfo } = await fetchBaseInfo(movieId)
   const images = await fetchImages(movieId)
   const video = await fetchVideo(movieId)
-  const idPoster = await downloadFile(poster, 'webp', userId)
 
+  const idPoster = await downloadFile(poster, 'webp', userId)
   const idImages = await Promise.all(images.map(item => {
     return downloadFile(item, 'webp', userId)
   }))
+
   const idVideo = await downloadFile(video, 'mp4', userId, idPoster)
+
   const newActor = await findAndCreateActor(actor, userId)
   const newDirector = await findAndCreateDirector(director, userId)
   const newDistrict = await findAndCreateDistrict(district, userId)
@@ -370,7 +372,6 @@ async function fetchBaseInfo(movieId) {
   try {
     await page.goto(`https://movie.douban.com/subject/${movieId}/`);
     result = await GET_MOVIE_BASE_INFO(page)
-    await page.screenshot({path: 'example.png'});
   }catch(err) {
 
   }finally {
@@ -457,11 +458,13 @@ async function updateMedia(_id) {
 
 async function downloadFile(url, mime, userId, poster) {
   const templateDir = path.join(STATIC_FILE_PATH, 'template')
-  const filename = `template_file_${Date.now()}`
+  const filename = `template_file_${Date.now()}_${Math.random()}`
   const templateFile = path.join(templateDir, `${filename}.${mime}`)
   if(!fs.existsSync(templateDir)) fs.mkdirSync(templateDir)
 
-  const result = await downloadVideo(url, filename, templateDir)
+  if(!fs.existsSync(templateFile)) {
+    const result = await downloadVideo(url, filename, templateDir)
+  }
 
   const fileData = fs.readFileSync(templateFile)
   const md5 = fileEncoded(fileData)
@@ -501,3 +504,14 @@ async function downloadFile(url, mime, userId, poster) {
 module.exports = {
   fetchDouData
 }
+
+// const { Types: { ObjectId } } = require('mongoose')
+
+// console.log(Date.now())
+// fetchDouData({
+//   movieId: '34874432',
+//   userId: ObjectId('8f63270f005f1c1a0d9448ca')
+// })
+// .then(_ => {
+//   console.log(Date.now())
+// })

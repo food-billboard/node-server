@@ -843,6 +843,68 @@
         }
       }
     },
+    "/api/manage/movie/detail/douban": {
+      "get": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "获取豆瓣电影数据",
+        "description": "",
+        "operationId": "manage_movie_detail_get_douban",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "豆瓣电影id",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_movie_detail_get_douban"
+            }
+          }
+        }
+      }
+    },
+    "/api/manage/movie/detail/douban/detail": {
+      "get": {
+        "tags": [
+          "movie"
+        ],
+        "summary": "豆瓣电影临时数据详情",
+        "description": "",
+        "operationId": "manage_movie_detail_get_douban_detail",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "电影id",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_movie_detail_get_douban_detail"
+            }
+          }
+        }
+      }
+    },
     "/api/manage/movie/detail/comment": {
       "get": {
         "tags": [
@@ -5145,6 +5207,126 @@
       },
       "xml": {
         "name": "manage_movie_detail_get"
+      }
+    },
+    "manage_movie_detail_get_douban_detail": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "电影名称"
+                },
+                "classify": {
+                  "type": "array",
+                  "description": "分类",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "actor": {
+                  "type": "array",
+                  "description": "演员",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "director": {
+                  "type": "array",
+                  "description": "导演",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "district": {
+                  "type": "array",
+                  "description": "地区",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "language": {
+                  "type": "array",
+                  "description": "语言",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "alias": {
+                  "type": "array",
+                  "description": "别名",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "screen_time": {
+                  "type": "string",
+                  "description": "上映时间",
+                  "format":"date-time"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
+                },
+                "images": {
+                  "type": "array",
+                  "description": "图片",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "poster": {
+                  "type": "string",
+                  "description": "海报"
+                },
+                "video": {
+                  "type": "string",
+                  "description": "视频"
+                },
+                "rate": {
+                  "type": "integer",
+                  "description": "作者评分"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_movie_detail_get_comment"
+      }
+    },
+    "manage_movie_detail_get_douban": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "string",
+                  "description": "电影id"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_movie_detail_get_comment"
       }
     },
     "manage_movie_detail_get_comment": {

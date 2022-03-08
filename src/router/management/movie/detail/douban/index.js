@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { dealErr, responseDataDeal, Param, verifyTokenToData, getClient } = require('@src/utils')
+const { dealErr, responseDataDeal, Params, verifyTokenToData, getClient } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const { nanoid } = require('nanoid')
 const { fetchDouData } = require('./utils')
@@ -10,9 +10,9 @@ router
   .get('/', async (ctx) => {
 
     const check = Params.query(ctx, {
-      name: '_id',
+      name: 'id',
       validator: [
-        data => ObjectId.isValid(data)
+        data => !!data 
       ]
     })
 
@@ -21,12 +21,7 @@ router
     const [, token] = verifyTokenToData(ctx)
     const { id } = token
 
-    const [_id] = Params.sanitizers(ctx.query, {
-      name: '_id',
-      sanitizers: [
-        data => ObjectId(data)
-      ]
-    })
+    const { id:_id } = ctx.query
 
     const data = await fetchDouData({
       movieId: _id,
@@ -36,11 +31,12 @@ router
         const redisClient = getClient()
         const id = nanoid()
         return new Promise((resolve, reject) => {
-          redisClient.set(id, 10 * 60, JSON.stringify(data), (err) => {
+          const jsonString = JSON.stringify(data)
+          redisClient.setex(id, 10 * 60, jsonString, (err) => {
             if (err) {
-              reject()
+              reject(err)
             } else {
-              resolve()
+              resolve(id)
             }
           })
         })
@@ -61,7 +57,7 @@ router
   })
   .get('/detail', async (ctx) => {
     const check = Params.query(ctx, {
-      name: '_id',
+      name: 'id',
       validator: [
         data => !!data
       ]
@@ -69,13 +65,13 @@ router
 
     if (check) return
 
-    const { _id } = ctx.query
+    const { id:_id } = ctx.query
 
     const redisClient = getClient()
 
     const data = await new Promise((resolve, reject) => {
       redisClient.get(_id, (err, data) => {
-        if (err) {
+        if (err || !data) {
           reject({
             errMsg: err,
             status: 500
