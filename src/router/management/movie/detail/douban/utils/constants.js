@@ -12,16 +12,23 @@ const BASE_INFO_WRAPPER = '#content .article .subject'
 // 导演
 const MOVIE_DIRECTOR = async (page) => {
   const name = await page.$eval(`${BASE_INFO_WRAPPER} #info span .attrs a`, value => {
-    return value.innerHTML
-  }) || ""
-  return name.trim()
+    return {
+      value: value.innerHTML.trim(),
+      id: value.href.split('celebrity')[1].replaceAll('/', ''),
+    }
+  })
+  return [name]
 }
 
 // 演员
 const MOVIE_ACTORS = async (page) => {
   const actors = await page.$$eval(`${BASE_INFO_WRAPPER} #info .actor .attrs span`, value => {
     return value.map(item => {
-      return item.querySelector('a').innerHTML
+      const target = item.querySelector('a')
+      return {
+        value: target.innerHTML.trim(),
+        id: target.href.split('celebrity')[1].replaceAll('/', '')
+      }
     })
   })
   return actors
@@ -48,7 +55,7 @@ const MOVIE_CLASSIFY = async (page) => {
 // 日期
 const MOVIE_DATE = async (page) => {
   const date = await page.$eval(`${BASE_INFO_WRAPPER} #info span[property='v:initialReleaseDate']`, value => {
-    return value.innerHTML
+    return value.innerHTML.slice(0, 10)
   })
   return date 
 }
@@ -61,7 +68,9 @@ const MOVIE_LANGUAGE = async (page) => {
     })
     return target.nextSibling.textContent
   })
-  return (language || "").trim()
+  return [
+    (language || "").trim()
+  ]
 }
 
 // 地区  
@@ -72,7 +81,9 @@ const MOVIE_DISTRICT = async (page) => {
     })
     return target.nextSibling.textContent
   })
-  return (district || "").trim()
+  return [
+    (district || "").trim()
+  ]
 }
 
 // 别名
@@ -119,7 +130,7 @@ const GET_MOVIE_BASE_INFO = async (page) => {
   const poster = await MOVIE_POSTER(page)
   const actor =await MOVIE_ACTORS(page)
   const classify = await MOVIE_CLASSIFY(page)
-  const date = await MOVIE_DATE(page)
+  const screen_time = await MOVIE_DATE(page)
   const language = await MOVIE_LANGUAGE(page)
   const district = await MOVIE_DISTRICT(page)
   const alias =await MOVIE_ALIAS(page)
@@ -127,16 +138,18 @@ const GET_MOVIE_BASE_INFO = async (page) => {
   const description = await MOVIE_DESCRIPTION(page)
   return {
     name,
-    director,
-    poster,
-    actor,
     classify,
-    date,
+    actor,
+    director,
     language,
-    district,
     alias,
-    rate, 
-    description
+    screen_time,
+    description,
+    author_rate: 0,
+    author_description: '',
+    poster,
+    district,
+    rate 
   }
 }
 

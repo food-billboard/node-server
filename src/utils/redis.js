@@ -44,7 +44,7 @@ const redisDisConnect = () => {
 }
 
 const AccessLimitCheck = async(ctx, next) => {
-  let isLimit = await isAcessLimit(ctx)
+  let isLimit = await isAccessLimit(ctx)
 
   return await next()
 
@@ -71,7 +71,7 @@ getIp = (ctx) => {
   return false
 }
 
-const isAcessLimit = async (ctx) => {
+const isAccessLimit = async (ctx) => {
   if(!client || process.env.NODE_ENV !== 'production') return false
   const { request: { method, url } } = ctx
   //客户端ip获取
@@ -98,10 +98,15 @@ const dealRedis = async (opera) => {
   return await opera(client)
 }
 
+const getClient = () => {
+  return client 
+}
+
 
 module.exports = {
   AccessLimitCheck,
   redisConnect: connectTry(redisConnect),
   redisDisConnect,
-  dealRedis
+  dealRedis,
+  getClient
 }
