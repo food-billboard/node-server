@@ -1617,6 +1617,36 @@ const ErrorSchema = new Schema({
   ...defaultConfig
 })
 
+// ------------------------------------大屏 ------------------------------------
+
+const ScreenSchema = new Schema({
+  user: {
+    type: ObjectId,
+    required: true 
+  },
+  data: {
+    type: String,
+    required: true,
+  },
+  enable: {
+    type: Boolean,
+    default: false 
+  },
+  flag: {
+    type: String,
+    enum: ['PC' | 'H5'],
+    default: 'PC'
+  },
+  name: String,
+  poster: String,
+  description: String 
+}, {
+  ...defaultConfig
+})
+
+
+// ------------------------------------大屏 ------------------------------------
+
 const FIND_OPERATION_LIB = [
   'find',
   'findOne',
@@ -1701,6 +1731,7 @@ const BehaviourModel = model('behaviour', BehaviourSchema)
 const FriendsModel = model('friend', FriendsSchema)
 const MemberModel = model('member', MemberSchema)
 const ErrorModel = model('error', ErrorSchema)
+const ScreenModal = modal('screen', ScreenSchema)
 
 module.exports = {
   UserModel,
@@ -1728,6 +1759,7 @@ module.exports = {
   FriendsModel,
   MemberModel,
   ErrorModel,
+  ScreenModal,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1752,5 +1784,6 @@ module.exports = {
   BehaviourSchema,
   FriendsSchema,
   MemberSchema,
-  ErrorSchema
+  ErrorSchema,
+  ScreenSchema
 }

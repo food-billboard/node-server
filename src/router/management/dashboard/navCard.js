@@ -110,7 +110,6 @@ const userStatistics = () => {
     }
   })
   .catch(err => {
-    console.log(err)
     return templateData
   })
 }

@@ -5,6 +5,7 @@ const Customer = require('./customer')
 const Management = require('./management')
 const Manage = require('./manage')
 const Media = require('./media')
+const Screen = require('./screen')
 const { Types: { ObjectId } } = require('mongoose')
 const { dealErr, responseDataDeal } = require('@src/utils')
 
@@ -44,6 +45,7 @@ router
 .use('/customer', Customer.routes(), Customer.allowedMethods())
 .use('/manage', Management.routes(), Management.allowedMethods())
 .use('/media', Media.routes(), Media.allowedMethods())
+.use('/screen', Screen.routes(), Screen.allowedMethods())
 .use('/chat', Chat.routes(), Chat.allowedMethods())
 .use('/backend', Manage.routes(), Manage.allowedMethods())
 
