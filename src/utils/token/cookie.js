@@ -23,10 +23,10 @@ const TOKEN_COOKIE = 'jstoken'
 const COOKIE_MAP = {}
 
 //设置cookie
-const setCookieName = (name) => {
+const setCookieName = (name, parse=true) => {
   if(typeof name === 'string') {
     if(!!COOKIE_MAP[name]) return COOKIE_MAP[name]
-    const encodedName = encoded(name)
+    const encodedName = parse ? encoded(name) : name 
     COOKIE_MAP[name] = encodedName
     return encodedName
   }
@@ -35,11 +35,11 @@ const setCookieName = (name) => {
 COOKIE_MAP[TOKEN_COOKIE] = setCookieName(TOKEN_COOKIE)
 
 //获取cookie
-const getCookieName = (name) => {
+const getCookieName = (name, parse) => {
   if(!name) return
   if(typeof name === 'string') {
     if(!!COOKIE_MAP[name]) return COOKIE_MAP[name]
-    return setCookieName(name)
+    return setCookieName(name, parse)
   }
 
 }
@@ -78,7 +78,7 @@ const SET_TYPE = {
 // }
 
 
-const setCookie = async (ctx, { key, value, options, type }) => {
+const setCookie = async (ctx, { key, value, options, type, parse }) => {
   // await next()
   const { request: { method, url }, status } = ctx
   // const { pathname } = Url.parse(url)
@@ -93,7 +93,7 @@ const setCookie = async (ctx, { key, value, options, type }) => {
   // if(!needToEdit) return
   // const { action } = config
 
-  return SET_TYPE[type](ctx, getCookieName(key), value, options)
+  return SET_TYPE[type](ctx, getCookieName(key, parse), value, options)
 }
 
 const getCookie = (ctx, key) => SET_TYPE.get(ctx, key)

@@ -1,10 +1,75 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, dealErr, notFound, Params, responseDataDeal, ScreenModal } = require('@src/utils')
-const { Aggregate, Types: { ObjectId } } = require('mongoose')
+const { verifyTokenToData, dealErr, Params, responseDataDeal, ScreenModal, notFound, loginAuthorization, getCookie } = require('@src/utils')
+const { Types: { ObjectId } } = require('mongoose')
+const { getUserAgent, SHARE_COOKIE_KEY } = require('./constants')
 
 const router = new Router()
 
 router
+// 详情
+.get('/detail', async (ctx) => {
+
+  const check = Params.body(ctx, {
+    name: '_id',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  })
+
+  if(check) return 
+
+  const [, token] = verifyTokenToData(ctx)
+  let isValid = !!token  
+  const agentHeaderData = getUserAgent(ctx)
+  const agentCookie = getCookie(ctx, SHARE_COOKIE_KEY)
+  isValid = isValid || agentHeaderData === agentCookie
+
+  const { _id } = ctx.query
+
+  const data = await new Promise((resolve, reject) => {
+    if(isValid) {
+      resolve()
+    }else {
+      reject({ status: 403, errMsg: 'forbidden' })
+    }
+  })
+  .then(_ => {
+    return ScreenModal.findOne({
+      _id: ObjectId(_id),
+    })
+  })
+  .select({
+    _id: 1,
+    data: 1,
+    name: 1,
+    poster: 1,
+    description: 1
+  })
+  .exec()
+  .then(notFound)
+  .then((result) => {
+
+    const { data, _id, name, poster, description } = result 
+
+    return {
+      data: {
+        _id, 
+        name, 
+        poster, 
+        description,
+        components: JSON.parse(data)
+      }
+    }
+  })
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data
+  })
+
+})
+.use(loginAuthorization())
 // 列表
 .get('/', async (ctx) => {
 
@@ -152,8 +217,43 @@ router
   })
 
 })
-// 新增
-.post('/', async (ctx) => {
+// 删除
+.delete('/', async (ctx) => {
+  const check = Params.body(ctx, {
+    name: '_id',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  })
+
+  if(check) return 
+
+  const [, token] = verifyTokenToData(ctx)
+  const { id } = token
+  const { _id } = ctx.query
+
+  const data = await ScreenModal.deleteOne({
+    _id: ObjectId(_id),
+    user: ObjectId(id)
+  })
+  .then(data => {
+
+    if(data && data.nModified == 0) return Promise.reject({ errMsg: 'forbidden', status: 403 })
+
+    return {
+      data: _id 
+    }
+  })
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false 
+  })
+
+})
+.use(async (ctx, next) => {
 
   const check = Params.body(ctx, {
     name: 'name',
@@ -179,12 +279,18 @@ router
 
   if(check) return 
 
+  await next() 
+
+})
+// 新增
+.post('/', async (ctx) => {
+
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
   const { description, name, data: componentData, flag, poster } = ctx.request.body
 
-  const modal = new ScreenModal({
+  const model = new ScreenModal({
     name,
     data: componentData,
     user: ObjectId(id),
@@ -211,13 +317,44 @@ router
 // 修改
 .put('/', async (ctx) => {
 
-})
-// 删除
-.delete('/', async (ctx) => {
+  const check = Params.body(ctx, {
+    name: '_id',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  })
 
-})
-// 详情
-.get('/detail', async (ctx) => {
+  if(check) return 
+
+  const [, token] = verifyTokenToData(ctx)
+  const { id } = token
+
+  const { description, name, data: componentData, flag, poster, _id } = ctx.request.body
+
+  const data = await ScreenModal.updateOne({
+    _id: ObjectId(_id),
+    user: ObjectId(id)
+  }, {
+    description,
+    name,
+    data: componentData,
+    flag,
+    poster
+  })
+  .exec()
+  .then(data => {
+    if(data && data.nModified == 0) return Promise.reject({ errMsg: 'forbidden', status: 403 })
+    return {
+      data: _id
+    }
+  })
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data,
+    needCache: false 
+  })
 
 })
 

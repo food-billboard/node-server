@@ -1731,7 +1731,7 @@ const BehaviourModel = model('behaviour', BehaviourSchema)
 const FriendsModel = model('friend', FriendsSchema)
 const MemberModel = model('member', MemberSchema)
 const ErrorModel = model('error', ErrorSchema)
-const ScreenModal = modal('screen', ScreenSchema)
+const ScreenModal = model('screen', ScreenSchema)
 
 module.exports = {
   UserModel,
