@@ -1,9 +1,6 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, dealErr, Params, responseDataDeal, ScreenModal, setCookie, getCookie, notFound, fileEncoded } = require('@src/utils')
+const { verifyTokenToData, dealErr, Params, responseDataDeal, ScreenModal, notFound } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
-const { getUserAgent } = require('./constants')
-
-const PREVIEW_COOKIE_NAME = 'preview_valid'
 
 const router = new Router()
 
@@ -37,16 +34,6 @@ router
   .exec()
   .then(notFound)
   .then(data => {
-    // 设置cookie
-    const cookieValue = getUserAgent(ctx) + `_${_id}`
-    const cookieName = PREVIEW_COOKIE_NAME
-
-    setCookie(ctx, {  
-      key: cookieName,
-      value: cookieValue,
-      parse: false,
-      type: 'set',
-    })
 
     return {
       
@@ -88,13 +75,8 @@ router
   .then(notFound)
   .then(data => {
 
-    const cookieValue = getUserAgent(ctx) + `_${_id}`
-    const cookieName = PREVIEW_COOKIE_NAME
-
-    const cookie = getCookie(ctx, cookieName)
-
     return {
-      data: cookie === cookieValue
+      data: true 
     }
 
   })

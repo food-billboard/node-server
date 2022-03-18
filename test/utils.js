@@ -27,6 +27,7 @@ const {
   BarrageModel, 
   FeedbackModel,
   BehaviourModel,
+  ScreenModal,
   mergeConfig,
   FriendsModel,
   ROOM_USER_NET_STATUS,
@@ -486,6 +487,25 @@ function mockCreateSearch(values) {
   return { model }
 }
 
+// 创建大屏
+function mockCreateScreen(values) {
+  let baseModel = {
+    user: ObjectId(''),
+    data: JSON.stringify({
+      
+    }),
+    enable: false,
+    flag: 'PC',
+    name: '测试名称',
+    poster: 'http://22222.png',
+    description: '测试描述' 
+  }
+
+  baseModel = mergeConfig(baseModel, values, true)
+  const model = new ScreenModal(baseModel)
+  return { model }
+}
+
 //创建查询参数etag
 function createEtag(query={}) {
   return Object.keys(query).reduce((acc, cur) => {
@@ -668,5 +688,6 @@ module.exports = {
   parseResponse,
   deepParseResponse,
   mockCreateRealVideo,
+  mockCreateScreen,
   commonMovieValid
 }
