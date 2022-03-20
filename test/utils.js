@@ -490,7 +490,7 @@ function mockCreateSearch(values) {
 // 创建大屏
 function mockCreateScreen(values) {
   let baseModel = {
-    user: ObjectId(''),
+    user: ObjectId('8f63270f005f1c1a0d9448ca'),
     data: JSON.stringify({
       
     }),

@@ -1,7 +1,8 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { UserModel, VideoModel, ImageModel } = require('@src/utils')
-const { Request, commonValidate, mockCreateUser, mockCreateImage, mockCreateVideo, parseResponse, deepParseResponse, mockCreateScreen } = require('@test/utils')
+const { Types: { ObjectId } } = require('mongoose')
+const { UserModel, ScreenModal } = require('@src/utils')
+const { Request, mockCreateUser, mockCreateScreen } = require('@test/utils')
 
 const COMMON_API = '/api/screen/preview'
 const GET_VALID_API = '/api/screen/preview/valid'
@@ -9,42 +10,33 @@ const GET_VALID_API = '/api/screen/preview/valid'
 describe(`${COMMON_API} test`, () => {
 
   let userInfo
+  let screenId
   let selfToken
-  let videoData
-  let imageId 
   let getToken
 
   before(function(done) {
 
-    const { model } = mockCreateImage({
-      name: COMMON_API,
-      src: COMMON_API
+    const { model, signToken } = mockCreateUser({
+      username: COMMON_API
     })
+
+    getToken = signToken
 
     model.save()
-    .then(data => {
-      imageId = data._id 
-      const { model } = mockCreateVideo({
-        name: COMMON_API,
-        poster: imageId,
-        src: `/static/image/${COMMON_API}`
-      })
-      return model.save()
-    })
-    .then((video) => {
-      videoData = video
-
-      const { model: user, signToken } = mockCreateUser({
-        username: COMMON_API
-      })
-
-      getToken = signToken
-
-      return user.save()
-    })
     .then((user) => {
       userInfo = user
       selfToken = getToken(userInfo._id)
+
+      const { model } = mockCreateScreen({
+        name: COMMON_API,
+        user: userInfo._id 
+      })
+
+      return model.save()
+
+    })
+    .then(data => {
+      screenId = data._id 
     })
     .then(_ => {
       done()
@@ -58,15 +50,12 @@ describe(`${COMMON_API} test`, () => {
   after(function(done) {
 
     Promise.all([
-      VideoModel.deleteMany({
+      ScreenModal.deleteMany({
         name: COMMON_API
       }),
       UserModel.deleteMany({
         username: COMMON_API
       }),
-      ImageModel.deleteMany({
-        name: COMMON_API
-      })
     ])
     .then(_ => {
       done()
@@ -82,24 +71,16 @@ describe(`${COMMON_API} test`, () => {
     it(`preview the screen success`, function(done) {
 
       Request
-      .get(COMMON_API)
+      .post(COMMON_API)
       .set({
         Accept: 'application/json',
         Authorization: `Basic ${selfToken}`
       })
-      .query({
-        src: videoData.src,
-        type: "video"
+      .send({
+        _id: screenId.toString() 
       })
       .expect(200)
       .expect('Content-Type', /json/)
-      .then(function(res) {
-        let obj = parseResponse(res)
-        responseExpect(obj, (target) => {
-          expect(target.length).to.be.not.equals(0)
-          expect(target.some(item => item._id === videoData._id.toString())).to.be.true 
-        })
-      })
       .then(_ => {
         done()
       })
@@ -115,13 +96,80 @@ describe(`${COMMON_API} test`, () => {
 
     it(`preview screen fail because the id is not valid`, function(done) {
 
+      Request
+      .post(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        _id: screenId.toString().slice(1)
+      })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+
     })
 
     it(`preview screen fail because the id is not found`, function(done) {
-
+      const id = screenId.toString()
+      Request
+      .post(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        _id: `${(id.slice(0, 1) + 4) % 10}${id.slice(1)}`
+      })
+      .expect(404)
+      .expect('Content-Type', /json/)
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
     })
 
     it(`preview screen fail because the creator is not self`, function(done) {
+
+      ScreenModal.updateMany({
+        name: COMMON_API
+      }, {
+        user: ObjectId('8f63270f005f1c1a0d9448ca')
+      })
+      .then(_ => {
+        return Request
+        .post(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          _id: screenId.toString(),
+        })
+        .expect(404)
+        .expect('Content-Type', /json/)
+      })
+      .then(_ => {
+        return ScreenModal.updateMany({
+          name: COMMON_API,
+        }, {
+          user: userInfo._id 
+        })
+      })
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
 
     })
 
@@ -132,24 +180,16 @@ describe(`${COMMON_API} test`, () => {
     it(`get valid of the preview success`, function(done) {
 
       Request
-      .get(COMMON_API)
+      .get(GET_VALID_API)
       .set({
         Accept: 'application/json',
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        src: videoData.src,
-        type: "video"
+        _id: screenId.toString() 
       })
       .expect(200)
       .expect('Content-Type', /json/)
-      .then(function(res) {
-        let obj = parseResponse(res)
-        responseExpect(obj, (target) => {
-          expect(target.length).to.be.not.equals(0)
-          expect(target.some(item => item._id === videoData._id.toString())).to.be.true 
-        })
-      })
       .then(_ => {
         done()
       })
@@ -164,15 +204,78 @@ describe(`${COMMON_API} test`, () => {
   describe(`get valid of the preview fail test -> ${GET_VALID_API}`, function() {
 
     it(`get valid of the preview fail because the id is not valid`, function(done) {
-
+      Request
+      .get(GET_VALID_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        _id: screenId.toString().slice(1)
+      })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
     })
 
     it(`get valid of the preview fail because the id is not found`, function(done) {
-
+      const id = screenId.toString() 
+      Request
+      .get(GET_VALID_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        _id: `${(id.slice(0, 1) + 4) % 10}${id.slice(1)}`
+      })
+      .expect(404)
+      .expect('Content-Type', /json/)
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
     })
 
     it(`get valid of the preview fail because the creator is not self`, function(done) {
-
+      ScreenModal.updateMany({
+        name: COMMON_API
+      }, {
+        user: ObjectId('8f63270f005f1c1a0d9448ca')
+      })
+      .then(_ => {
+        return Request
+        .get(GET_VALID_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: screenId.toString(),
+        })
+        .expect(404)
+        .expect('Content-Type', /json/)
+      })
+      .then(_ => {
+        return ScreenModal.updateMany({
+          name: COMMON_API,
+        }, {
+          user: ObjectId('8f63270f005f1c1a0d9448ca')
+        })
+      })
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
     })
 
   })

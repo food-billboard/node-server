@@ -25,7 +25,9 @@ router
     _id: ObjectId(_id),
     user: ObjectId(id)
   }, {
-    enable: true 
+    $set: {
+      enable: true 
+    }
   })
   .then(data => {
 
@@ -64,7 +66,9 @@ router
     _id: ObjectId(_id),
     user: ObjectId(id)
   }, {
-    enable: false  
+    $set: {
+      enable: false  
+    }
   })
   .then(data => {
 

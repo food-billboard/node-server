@@ -1,49 +1,40 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { UserModel, VideoModel, ImageModel } = require('@src/utils')
-const { Request, commonValidate, mockCreateUser, mockCreateImage, mockCreateVideo, parseResponse, deepParseResponse, mockCreateScreen } = require('@test/utils')
+const { UserModel, ScreenModal } = require('@src/utils')
+const { Request, mockCreateUser, mockCreateScreen } = require('@test/utils')
 
 const COMMON_API = '/api/screen/enable'
 
 describe(`${COMMON_API} test`, () => {
 
   let userInfo
+  let screenId
   let selfToken
-  let videoData
-  let imageId 
   let getToken
 
   before(function(done) {
 
-    const { model } = mockCreateImage({
-      name: COMMON_API,
-      src: COMMON_API
+    const { model, signToken } = mockCreateUser({
+      username: COMMON_API
     })
+
+    getToken = signToken
 
     model.save()
-    .then(data => {
-      imageId = data._id 
-      const { model } = mockCreateVideo({
-        name: COMMON_API,
-        poster: imageId,
-        src: `/static/image/${COMMON_API}`
-      })
-      return model.save()
-    })
-    .then((video) => {
-      videoData = video
-
-      const { model: user, signToken } = mockCreateUser({
-        username: COMMON_API
-      })
-
-      getToken = signToken
-
-      return user.save()
-    })
     .then((user) => {
       userInfo = user
       selfToken = getToken(userInfo._id)
+
+      const { model } = mockCreateScreen({
+        name: COMMON_API,
+        user: userInfo._id 
+      })
+
+      return model.save()
+
+    })
+    .then(data => {
+      screenId = data._id 
     })
     .then(_ => {
       done()
@@ -57,15 +48,12 @@ describe(`${COMMON_API} test`, () => {
   after(function(done) {
 
     Promise.all([
-      VideoModel.deleteMany({
+      ScreenModal.deleteMany({
         name: COMMON_API
       }),
       UserModel.deleteMany({
         username: COMMON_API
       }),
-      ImageModel.deleteMany({
-        name: COMMON_API
-      })
     ])
     .then(_ => {
       done()
@@ -80,24 +68,38 @@ describe(`${COMMON_API} test`, () => {
 
     it(`enable the screen success`, function(done) {
 
-      Request
-      .get(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
+      ScreenModal.updateMany({
+        name: COMMON_API
+      }, {
+        $set: {
+          enable: false 
+        }
       })
-      .query({
-        src: videoData.src,
-        type: "video"
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .then(function(res) {
-        let obj = parseResponse(res)
-        responseExpect(obj, (target) => {
-          expect(target.length).to.be.not.equals(0)
-          expect(target.some(item => item._id === videoData._id.toString())).to.be.true 
+      .then(_ => {
+        return Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
         })
+        .send({
+          _id: screenId.toString() 
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+      })
+      .then(_ => {
+        return ScreenModal.findOne({
+          name: COMMON_API,
+          enable: true 
+        })
+        .select({
+          _id: 1 
+        })
+        .exec() 
+      })
+      .then(data => {
+        expect(!!data).to.be.true
       })
       .then(_ => {
         done()
@@ -113,11 +115,46 @@ describe(`${COMMON_API} test`, () => {
   describe(`enable the screen fail test -> ${COMMON_API}`, function() {
 
     it(`enable screen fail because the id is not valid`, function(done) {
-
+      Request
+      .put(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        _id: screenId.toString().slice(1)
+      })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
     })
 
     it(`enable screen fail because the id is not found`, function(done) {
 
+      const id = screenId.toString()
+
+      Request
+      .put(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        _id: `${(id.slice(0, 1) + 4) % 10}${id.slice(1)}`
+      })
+      .expect(403)
+      .expect('Content-Type', /json/)
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
     })
 
   })
@@ -126,24 +163,38 @@ describe(`${COMMON_API} test`, () => {
 
     it(`disable the screen success`, function(done) {
 
-      Request
-      .get(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
+      ScreenModal.updateOne({
+        name: COMMON_API
+      }, {
+        $set: {
+          enable: true  
+        }
       })
-      .query({
-        src: videoData.src,
-        type: "video"
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .then(function(res) {
-        let obj = parseResponse(res)
-        responseExpect(obj, (target) => {
-          expect(target.length).to.be.not.equals(0)
-          expect(target.some(item => item._id === videoData._id.toString())).to.be.true 
+      .then(_ => {
+        return Request
+        .delete(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
         })
+        .query({
+          _id: screenId.toString() 
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+      })
+      .then(_ => {
+        return ScreenModal.findOne({
+          name: COMMON_API,
+          enable: false 
+        })
+        .select({
+          _id: 1 
+        })
+        .exec() 
+      })
+      .then(data => {
+        expect(!!data).to.be.true
       })
       .then(_ => {
         done()
@@ -159,11 +210,45 @@ describe(`${COMMON_API} test`, () => {
   describe(`disable the screen fail test -> ${COMMON_API}`, function() {
 
     it(`disable screen fail because the id is not valid`, function(done) {
-
+      Request
+      .delete(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        _id: screenId.toString().slice(1)
+      })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
     })
 
     it(`disable screen fail because the id is not found`, function(done) {
+      const id = screenId.toString()
 
+      Request
+      .delete(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        _id: `${(id.slice(0, 1) + 4) % 10}${id.slice(1)}`
+      })
+      .expect(403)
+      .expect('Content-Type', /json/)
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
     })
 
   })

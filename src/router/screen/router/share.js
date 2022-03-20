@@ -71,9 +71,9 @@ router
   const redisClient = getClient()
 
   const data = await redisClient.get(_id)
-  .then(notFound)
   .then(data => {
-    const { auth, password } = data 
+    if(!data) return Promise.reject({ errMsg: 'not found', status: 404 })
+    const { auth, password } = JSON.parse(data) 
     return {
       data: {
         auth,
@@ -111,16 +111,19 @@ router
   const redisClient = getClient()
 
   const data = await redisClient.get(_id)
-  .then(notFound)
   .then(data => {
-    const { password: realPassword } = data 
+    if(!data) return Promise.reject({ errMsg: 'not found', status: 404 })
+    const { password: realPassword } = JSON.parse(data) 
     const isValid = password === realPassword
+
+    ctx.status = 200 
 
     // * 设置分享cookie用于查询大屏详情时无须登录信息
     setCookie(ctx, {
       parse: false,
       key: SHARE_COOKIE_KEY,
-      value: getUserAgent(ctx)
+      value: getUserAgent(ctx),
+      type: 'set'
     })
 
     return {
@@ -153,6 +156,11 @@ router
     name: 'time',
     validator: [
       data => typeof data === 'number' && data > 0 
+    ]
+  }, {
+    name: 'password',
+    validator: [
+      data => typeof data === 'string' ? !data.length || (data.length > 8 && data.length < 20) : data === undefined
     ]
   })
 

@@ -51,7 +51,7 @@ router
 })
 .get('/valid', async (ctx) => {
   
-  const check = Params.body(ctx, {
+  const check = Params.query(ctx, {
     name: '_id',
     validator: [
       data => ObjectId.isValid(data)

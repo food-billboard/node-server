@@ -23,7 +23,8 @@ const {
   ERROR_ORIGIN_TYPE,
   ERROR_TYPE,
   USER_HOT_HISTORY_TYPE,
-  MESSAGE_POST_STATUS
+  MESSAGE_POST_STATUS,
+  SCREEN_TYPE
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -1634,7 +1635,7 @@ const ScreenSchema = new Schema({
   },
   flag: {
     type: String,
-    enum: ['PC' | 'H5'],
+    enum: Object.keys(SCREEN_TYPE),
     default: 'PC'
   },
   name: String,
