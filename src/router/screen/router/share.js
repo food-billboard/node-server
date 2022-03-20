@@ -93,11 +93,6 @@ router
 // 验证
 .post('/valid', async (ctx) => {
   const check = Params.body(ctx, {
-    name: 'password',
-    validator: [
-      data => !!data
-    ]
-  }, {
     name: '_id',
     validator: [
       data => ObjectId.isValid(data)
@@ -106,7 +101,7 @@ router
 
   if(check) return 
 
-  const { password, _id } = ctx.request.body
+  const { password='', _id } = ctx.request.body
 
   const redisClient = getClient()
 
