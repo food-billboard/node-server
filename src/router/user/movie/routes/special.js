@@ -44,7 +44,7 @@ router
     },
     {
       $unwind: {
-        path: "$info.avatar",
+        path: "$poster",
         preserveNullAndEmptyArrays: true 
       }
     },
