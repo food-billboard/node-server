@@ -73,11 +73,13 @@ router
   const data = await redisClient.get(_id)
   .then(data => {
     if(!data) return Promise.reject({ errMsg: 'not found', status: 404 })
-    const { auth, password } = JSON.parse(data) 
+    const { auth, password, time, timestamps } = JSON.parse(data) 
     return {
       data: {
         auth,
-        password: !!password
+        password: !!password,
+        time,
+        timestamps,
       }
     }
   })
@@ -184,7 +186,8 @@ router
         password,
         auth,
         time,
-        _id 
+        _id,
+        timestamps: Date.now()
       })
       redisClient.setex(_id, time / 1000, jsonString, (err) => {
         if (err) {

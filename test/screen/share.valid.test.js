@@ -97,7 +97,8 @@ describe(`${COMMON_API} test`, () => {
         password: COMMON_API,
         auth: MEDIA_AUTH.PRIVATE,
         time: 3000,
-        _id: screenId.toString()
+        _id: screenId.toString(),
+        timestamps: Date.now()
       }
 
       const jsonString = JSON.stringify(json)
@@ -126,9 +127,11 @@ describe(`${COMMON_API} test`, () => {
       })
       .then(function(res) {
         let obj = deepParseResponse(res)
-        expect(obj).to.be.a('object').and.includes.all.keys('auth', 'password')
+        expect(obj).to.be.a('object').and.includes.all.keys('auth', 'password', 'time', 'timestamps')
         expect(obj.auth).to.be.equal(json.auth)
         expect(obj.password).to.be.true
+        expect(obj.time).to.be.equal(json.time)
+        expect(obj.timestamps).to.be.equal(json.timestamps)
       })
       .then(_ => {
         done()

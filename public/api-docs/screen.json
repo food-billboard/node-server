@@ -396,7 +396,7 @@
         ]
       }
     },
-    "/api/screen/share/detail": {
+    "/api/screen/share/valid": {
       "get": {
         "tags": [
           "screen"
@@ -799,6 +799,14 @@
                     "password": {
                       "type": "string",
                       "description": "是否存在密码"
+                    },
+                    "timestamps": {
+                      "type": "integer",
+                      "description": "创建时间戳"
+                    },
+                    "time": {
+                      "type": "integer",
+                      "description": "总的有效时间"
                     }
                   }
                 }
