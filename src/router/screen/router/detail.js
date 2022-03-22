@@ -20,9 +20,15 @@ router
 
   const [, token] = verifyTokenToData(ctx)
   let isValid = !!token  
-  const agentHeaderData = getUserAgent(ctx)
-  const agentCookie = getCookie(ctx, SHARE_COOKIE_KEY)
-  isValid = isValid || agentHeaderData === agentCookie
+  if(!isValid) {
+    try {
+      const agentHeaderData = getUserAgent(ctx)
+      const agentCookie = getCookie(ctx, SHARE_COOKIE_KEY)
+      isValid = agentHeaderData === agentCookie
+    }catch(err) {
+      isValid = false 
+    }
+  }
 
   const { _id } = ctx.query
 

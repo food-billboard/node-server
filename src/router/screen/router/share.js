@@ -10,6 +10,7 @@ const {
   MEDIA_AUTH, 
   loginAuthorization,
   setCookie,
+  cookieDomainSet
 } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const { SHARE_COOKIE_KEY, getUserAgent } = require('./constants')
@@ -103,24 +104,27 @@ router
 
   if(check) return 
 
-  const { password='', _id } = ctx.request.body
+  const { password='', _id, env='prod' } = ctx.request.body
 
   const redisClient = getClient()
 
   const data = await redisClient.get(_id)
   .then(data => {
     if(!data) return Promise.reject({ errMsg: 'not found', status: 404 })
-    const { password: realPassword } = JSON.parse(data) 
+    const { password: realPassword, time } = JSON.parse(data) 
     const isValid = password === realPassword
 
     ctx.status = 200 
-
     // * 设置分享cookie用于查询大屏详情时无须登录信息
     setCookie(ctx, {
       parse: false,
       key: SHARE_COOKIE_KEY,
       value: getUserAgent(ctx),
-      type: 'set'
+      type: 'set',
+      options: {
+        maxAge: parseInt(time),
+        domain: cookieDomainSet(env)
+      }
     })
 
     return {
@@ -142,17 +146,21 @@ router
   const check = Params.body(ctx, {
     name: '_id',
     validator: [
-      data => ObjectId.isValid(data)
+      data => {
+        return ObjectId.isValid(data)
+      }
     ]
   }, {
     name: 'auth',
     validator: [
-      data => !!MEDIA_AUTH[data]
+      data => {
+        return !!MEDIA_AUTH[data]
+      }
     ]
   }, {
     name: 'time',
     validator: [
-      data => typeof data === 'number' && data > 0 
+      data => data > 0 
     ]
   }, {
     name: 'password',
@@ -198,6 +206,11 @@ router
       })
     })
 
+  })
+  .then(data => {
+    return {
+      data
+    }
   })
   .catch(dealErr(ctx))
 
