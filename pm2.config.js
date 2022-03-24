@@ -29,8 +29,8 @@ module.exports = {
       host: "47.97.27.23",
       ssh_options: "StrictHostKeyChecking=no",
       ref: "master",
-      repo: "git@github.com:food-billboard/node-server.git",
-      // repo: "https://github.com.cnpmjs.org/food-billboard/node-server",
+      // repo: "git@github.com:food-billboard/node-server.git",
+      repo: "https://github.com/food-billboard/node-server.git",
       path: "/home",
       "post-deploy":
         "git pull origin master && source ~/.nvm/nvm.sh && npm install yarn -g && yarn install", //&& pm2 startOrRestart pm2.config.js 
