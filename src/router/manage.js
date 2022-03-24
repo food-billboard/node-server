@@ -22,6 +22,10 @@ const STATIC_PAGE_MAP = [
     path: "moviet5"
   },
   {
+    regexp: /(?<=.+\/screen\/).+$/,
+    path: "screen"
+  },
+  {
     regexp: /(?<=.+\/swagger\/).+$/,
     path: "api-docs"
   },
