@@ -17,9 +17,11 @@ const {
   ClassifyModel
 } = require('@src/utils/mongodb/mongo.lib')
 
+const COMMON_PUPPETEER_ARGS = { headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] }
+
 async function searchActorData(item) {
   const { id } = item 
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch(COMMON_PUPPETEER_ARGS);
   const page = await browser.newPage();
 
   let districtId 
@@ -319,7 +321,7 @@ async function fetchDouData({
 }
 
 async function fetchImages(movieId) {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch(COMMON_PUPPETEER_ARGS);
   const page = await browser.newPage();
   let image 
   try {
@@ -341,7 +343,7 @@ async function fetchImages(movieId) {
 }
 
 async function fetchVideo(movieId) {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch(COMMON_PUPPETEER_ARGS);
   const page = await browser.newPage();
   let video 
   try {
@@ -366,7 +368,7 @@ async function fetchVideo(movieId) {
 }
 
 async function fetchBaseInfo(movieId) {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch(COMMON_PUPPETEER_ARGS);
   const page = await browser.newPage();
   let result 
   try {
