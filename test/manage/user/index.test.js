@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { UserModel, ImageModel, FriendsModel, MemberModel } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateImage, createMobile } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateImage, createMobile, parseResponse } = require('@test/utils')
 const Day = require('dayjs')
 
 const COMMON_API = '/api/manage/user'
@@ -47,6 +47,7 @@ function responseExpect(res, validate=[]) {
 describe(`${COMMON_API} test`, function() {
 
   let userInfo 
+  let anotherUserId 
   let selfToken
   let imageId
   let getToken
@@ -63,7 +64,6 @@ describe(`${COMMON_API} test`, function() {
 
       const { model, signToken } = mockCreateUser({
         username: COMMON_API,
-        // avatar: imageId
       })
 
       getToken = signToken
@@ -74,10 +74,26 @@ describe(`${COMMON_API} test`, function() {
     .then(data => {
       userInfo = data
       selfToken = getToken(userInfo._id)
+    })
+    .then(_ => {
+      return new Promise(resolve => {
+        setTimeout(resolve, 1000)
+      })
+    })
+    .then(_ => {
+      const { model } = mockCreateUser({
+        username: COMMON_API,
+      })
+      return model.save()
+    })
+    .then(data => {
+      anotherUserId = data._id 
+    })
+    .then(_ => {
       done()
     })
     .catch(err => {
-      console.log('oops: ', err)
+      done(err)
     })
 
   })
@@ -104,7 +120,7 @@ describe(`${COMMON_API} test`, function() {
       done()
     })
     .catch(err => {
-      console.log('oops: ', err)
+      done(err)
     })
 
   })
@@ -125,15 +141,19 @@ describe(`${COMMON_API} test`, function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if(err) return done(err)
-          const { res: { text } } = res
-          let obj
-          try{
-            obj = JSON.parse(text)
-          }catch(_) {
-            console.log(_)
-          }
+          let obj = parseResponse(res)
           responseExpect(obj, target => {
             expect(target.list.length).to.not.be.equals(0)
+            let firstIndex = -1 
+            let secondIndex = -1 
+            target.list.forEach((item, index) => {
+              if(item._id === anotherUserId.toString()) {
+                firstIndex = index 
+              }else if(item._id === userInfo._id.toString()) {
+                secondIndex = index 
+              }
+            })
+            expect(firstIndex < secondIndex).to.be.true 
           })
           done()
         })

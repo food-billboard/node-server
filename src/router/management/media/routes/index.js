@@ -1,5 +1,6 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
+const Day = require('dayjs')
 const { MEDIA_MAP } = require('../utils')
 const { Auth } = require('../auth')
 const { dealErr, responseDataDeal, Params, MEDIA_AUTH, MEDIA_STATUS, MEDIA_ORIGIN_TYPE, STATIC_FILE_PATH, notFound } = require('@src/utils')
@@ -171,6 +172,40 @@ router
         data: data >= 0 ? +data : 30
       })
     ]
+  }, {
+    name: 'start_date',
+    sanitizers: [
+      data => {
+        if(typeof data === 'string' && !!data) return {
+          done: true,
+          data: {
+            createdAt: {
+              $gte: Day(data)
+            }
+          }
+        }
+        return {
+          done: false 
+        }
+      }
+    ]
+  }, {
+    name: 'end_date',
+    sanitizers: [
+      data => {
+        if(typeof data === 'string' && !!data) return {
+          done: true,
+          data: {
+            createdAt: {
+              $gte: Day(data)
+            }
+          }
+        }
+        return {
+          done: false 
+        }
+      }
+    ]
   }, true)
 
   const query = Object.values(nextParams).reduce((acc, cur) => {
@@ -199,6 +234,11 @@ router
   ]
 
   const aggregate = [
+    {
+      $sort: {
+        createdAt: -1 
+      }
+    },
     {
       $match: query
     },

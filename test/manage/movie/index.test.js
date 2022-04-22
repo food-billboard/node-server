@@ -126,7 +126,12 @@ describe(`${COMMON_API} test`, function() {
           ...(item === 'sourceType' ? { source_type: 'USER' } : {}),
           author_description: COMMON_API
         })
-        return model.save()
+        return new Promise(resolve => {
+          setTimeout(resolve, 500)
+        })
+        .then(_ => {
+          return model.save()
+        })
       }))
     })
     .then(([classify, status, sourceType]) => {
@@ -136,7 +141,7 @@ describe(`${COMMON_API} test`, function() {
       done()
     })
     .catch(err => {
-      console.log('oops: ', err)
+      done(err)
     })
 
   })
@@ -161,7 +166,7 @@ describe(`${COMMON_API} test`, function() {
       done()
     })
     .catch(err => {
-      console.log('oops: ', err)
+      done(err)
     })
 
   })
@@ -172,6 +177,32 @@ describe(`${COMMON_API} test`, function() {
   })
 
   describe(`${COMMON_API} success test`, function() {
+
+    describe(`get the movie list success normal -> ${COMMON_API}`, function() {
+      it(`get the movie list success`, function(done) {
+
+        Request
+        .get(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          let obj = parseResponse(res)
+          responseExpect(obj, (target) => {
+            const { list } = target
+            expect(list.length >= 2).to.be.true 
+            const [ first, second ] = list 
+            expect(Day(first.createdAt).valueOf() > Day(second.createdAt).valueOf()).to.be.true 
+          })
+          done()
+        })
+
+      })
+    })
 
     describe(`get the movie list success with classify -> ${COMMON_API}`, function() {
 

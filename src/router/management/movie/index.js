@@ -237,6 +237,12 @@ router
         $match: match
       },
       {
+        $sort: {
+          updatedAt: -1,
+          createdAt: -1 
+        }
+      },  
+      {
         $skip: currPage * pageSize
       },  
       {

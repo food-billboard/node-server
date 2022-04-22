@@ -1,7 +1,7 @@
 require('module-alias/register')
 const { UserModel, ImageModel, MEDIA_ORIGIN_TYPE, MEDIA_AUTH, MEDIA_STATUS } = require('@src/utils')
 const { expect } = require('chai')
-const { Request, commonValidate, mockCreateUser, mockCreateImage } = require('@test/utils')
+const { Request, commonValidate, mockCreateUser, mockCreateImage, parseResponse } = require('@test/utils')
 
 const COMMON_API = '/api/manage/media'
 
@@ -58,6 +58,7 @@ describe(`${COMMON_API} test`, () => {
   let selfToken
   let imageId
   let getToken
+  let anotherImageId 
   const imageSize = 1024
 
   before(function(done) {
@@ -101,6 +102,26 @@ describe(`${COMMON_API} test`, () => {
       })
     })
     .then(_ => {
+      return new Promise(resolve => {
+        setTimeout(resolve, 1000)
+      })
+    })
+    .then(_ => {
+      const { model } = mockCreateImage({
+        src: COMMON_API,
+        name: COMMON_API,
+        auth: MEDIA_AUTH.PUBLIC,
+        origin: userInfo._id,
+        info: {
+          size: imageSize
+        }
+      })
+      return model.save()
+    })
+    .then(data => {
+      anotherImageId = data._id 
+    })
+    .then(_ => {
       done()
     })
     .catch(err => {
@@ -137,6 +158,39 @@ describe(`${COMMON_API} test`, () => {
   })
   
   describe(`get the media list success test -> ${COMMON_API}`, function() {
+
+    it(`get the media success and sort`, function(done) {
+
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        type: 0,
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
+        if(err) return done(err)
+        let obj = parseResponse(res)
+        responseExpect(obj, (target) => {
+          let firstIndex = -1 
+          let secondIndex = -1 
+          target.list.forEach((item, index) => {
+            if(item._id === anotherImageId.toString()) {
+              firstIndex = index 
+            }else if(item._id === imageId.toString()) {
+              secondIndex = index 
+            }
+          })
+          expect(firstIndex < secondIndex).to.be.true 
+        })
+        done()
+      })
+
+    })
 
     it(`get the media success with id`, function(done) {
 
@@ -395,6 +449,60 @@ describe(`${COMMON_API} test`, () => {
             return _id == imageId.toString()
           })
           expect(allNotEq).to.be.true
+        })
+        done()
+      })
+
+    })
+
+    it(`get the media success and with start_date,`, function(done) {
+
+      const date = new Date()
+
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        type: 0,
+        start_date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() + 1}`
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
+        if(err) return done(err)
+        const obj = parseResponse(res)
+        responseExpect(obj, (target) => {
+          expect(target.list.length).to.be.eq(0)
+        })
+        done()
+      })
+
+    })
+
+    it(`get the media success and with end_date,`, function(done) {
+
+      const date = new Date()
+
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        type: 0,
+        start_date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() - 1}`
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
+        if(err) return done(err)
+        const obj = parseResponse(res)
+        responseExpect(obj, (target) => {
+          expect(target.list.length).to.be.eq(0)
         })
         done()
       })
