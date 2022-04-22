@@ -131,6 +131,11 @@ router
         $match: match
       },
       {
+        $sort: {
+          updatedAt: -1 
+        }
+      },  
+      {
         $skip: currPage * pageSize
       },
       {
