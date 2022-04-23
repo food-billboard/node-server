@@ -229,6 +229,209 @@
         ]
       }
     },
+    "/api/screen/model": {
+      "post": {
+        "tags": [
+          "screen"
+        ],
+        "summary": "新增大屏模板",
+        "description": "",
+        "operationId": "screen_model_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"大屏模板名称"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "string",
+            "description":"大屏模板描述"
+          },
+          {
+            "name": "poster",
+            "in": "body",
+            "type": "string",
+            "description":"大屏模板封面",
+            "required": true
+          },
+          {
+            "name": "flag",
+            "in": "body",
+            "type": "string",
+            "description":"大屏模板类型",
+            "enum": ["PC", "h5"],
+            "required": true
+          },
+          {
+            "name": "data",
+            "in": "body",
+            "type": "string",
+            "description":"大屏模板数据",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "screen"
+        ],
+        "summary": "大屏模板列表",
+        "description": "",
+        "operationId": "screen_model_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "content",
+            "in": "query",
+            "type": "string",
+            "description":"大屏模板名称"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_model_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "screen"
+        ],
+        "summary": "删除大屏模板",
+        "description": "",
+        "operationId": "screen_model_delete",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description":"大屏模板id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "screen"
+        ],
+        "summary": "修改大屏模板",
+        "description": "",
+        "operationId": "screen_model_put",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"大屏模板id"
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"大屏模板名称"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "string",
+            "description":"大屏模板描述"
+          },
+          {
+            "name": "poster",
+            "in": "body",
+            "type": "string",
+            "description":"大屏模板封面",
+            "required": true
+          },
+          {
+            "name": "flag",
+            "in": "body",
+            "type": "string",
+            "description":"大屏模板类型",
+            "enum": ["PC", "h5"],
+            "required": true
+          },
+          {
+            "name": "data",
+            "in": "body",
+            "type": "string",
+            "description":"大屏模板数据",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
     "/api/screen/detail": {
       "get": {
         "tags": [
@@ -734,6 +937,12 @@
       },
       "xml": {
         "name": "screen_list_get"
+      }
+    },
+    "screen_model_get": {
+      "$ref":"#/definitions/screen_list_get",
+      "xml": {
+        "name": "screen_model_get"
       }
     },
     "screen_preview_detail_get": {

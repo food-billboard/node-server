@@ -1645,6 +1645,31 @@ const ScreenSchema = new Schema({
   ...defaultConfig
 })
 
+const ScreenModelSchema = new Schema({
+  user: {
+    type: ObjectId,
+    required: true 
+  },
+  data: {
+    type: String,
+    required: true,
+  },
+  enable: {
+    type: Boolean,
+    default: false 
+  },
+  flag: {
+    type: String,
+    enum: Object.keys(SCREEN_TYPE),
+    default: 'PC'
+  },
+  name: String,
+  poster: String,
+  description: String 
+}, {
+  ...defaultConfig
+})
+
 
 // ------------------------------------大屏 ------------------------------------
 
@@ -1733,6 +1758,7 @@ const FriendsModel = model('friend', FriendsSchema)
 const MemberModel = model('member', MemberSchema)
 const ErrorModel = model('error', ErrorSchema)
 const ScreenModal = model('screen', ScreenSchema)
+const ScreenModelModal = model('screen_model', ScreenModelSchema)
 
 module.exports = {
   UserModel,
@@ -1761,6 +1787,7 @@ module.exports = {
   MemberModel,
   ErrorModel,
   ScreenModal,
+  ScreenModelModal,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1786,5 +1813,6 @@ module.exports = {
   FriendsSchema,
   MemberSchema,
   ErrorSchema,
-  ScreenSchema
+  ScreenSchema,
+  ScreenModelSchema
 }
