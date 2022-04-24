@@ -19,6 +19,14 @@
         "description": "Find out more",
         "url": "http://swagger.io"
       }
+    },
+    {
+      "name": "model",
+      "description": "大屏模板",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
     }
   ],
   "schemes": [
@@ -232,7 +240,7 @@
     "/api/screen/model": {
       "post": {
         "tags": [
-          "screen"
+          "model"
         ],
         "summary": "新增大屏模板",
         "description": "",
@@ -294,7 +302,7 @@
       },
       "get": {
         "tags": [
-          "screen"
+          "model"
         ],
         "summary": "大屏模板列表",
         "description": "",
@@ -330,7 +338,7 @@
       },
       "delete": {
         "tags": [
-          "screen"
+          "model"
         ],
         "summary": "删除大屏模板",
         "description": "",
@@ -364,7 +372,7 @@
       },
       "put": {
         "tags": [
-          "screen"
+          "model"
         ],
         "summary": "修改大屏模板",
         "description": "",
@@ -458,6 +466,45 @@
             "description": "成功",
             "schema": {
               "$ref": "#/definitions/screen_get_detail"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/screen/model/detail": {
+      "get": {
+        "tags": [
+          "model"
+        ],
+        "summary": "大屏模板详情",
+        "description": "",
+        "operationId": "screen_get_model_detail",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters":[
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "description":"大屏模板id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_get_model_detail"
             }
           }
         },
@@ -732,7 +779,7 @@
             "name": "_id",
             "in": "query",
             "type": "string",
-            "description":"房间id",
+            "description":"大屏id",
             "required": true 
           }
         ],
@@ -806,6 +853,151 @@
             "in": "query",
             "type": "string",
             "description":"大屏id",
+            "required": true 
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/screen/model/preview": {
+      "get": {
+        "tags": [
+          "model"
+        ],
+        "summary": "大屏模板预览",
+        "description": "",
+        "operationId": "screen_model_preview_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "description":"大屏模板id",
+            "required": true 
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/screen/model/preview/detail": {
+      "get": {
+        "tags": [
+          "model"
+        ],
+        "summary": "大屏模板预览检查验证",
+        "description": "",
+        "operationId": "screen_model_preview_detail_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "description":"大屏模板id",
+            "required": true 
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_model_preview_detail_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/screen/model/enable": {
+      "put": {
+        "tags": [
+          "model"
+        ],
+        "summary": "启用大屏模板",
+        "description": "",
+        "operationId": "screen_model_enable_put",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "description":"大屏模板id",
+            "required": true 
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "model"
+        ],
+        "summary": "禁用大屏模板",
+        "description": "",
+        "operationId": "screen_model_enable_delete",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "description":"大屏模板id",
             "required": true 
           }
         ],
@@ -943,6 +1135,18 @@
       "$ref":"#/definitions/screen_list_get",
       "xml": {
         "name": "screen_model_get"
+      }
+    },
+    "screen_get_model_detail": {
+      "$ref":"#/definitions/screen_get_detail",
+      "xml": {
+        "name": "screen_model_get"
+      }
+    },
+    "screen_model_preview_detail_get": {
+      "$ref":"#/definitions/screen_preview_detail_get",
+      "xml": {
+        "name": "screen_model_preview_detail_get"
       }
     },
     "screen_preview_detail_get": {

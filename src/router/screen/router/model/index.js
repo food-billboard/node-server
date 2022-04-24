@@ -1,11 +1,17 @@
 const Router = require('@koa/router')
 const { verifyTokenToData, dealErr, Params, responseDataDeal, ScreenModelModal, loginAuthorization, getCookie, SCREEN_TYPE } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
+const Enable = require('./enable')
+const Detail = require('./detail')
+const Preview = require('./preview')
 
 const router = new Router()
 
 router
 .use(loginAuthorization())
+.use('/detail', Detail.routes(), Detail.allowedMethods())
+.use('/preview', Preview.routes(), Preview.allowedMethods())
+.use('/enable', Enable.routes(), Enable.allowedMethods())
 // 列表
 .get('/', async (ctx) => {
 

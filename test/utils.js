@@ -38,7 +38,8 @@ const {
   STATIC_FILE_PATH,
   STATIC_FILE_PATH_NO_WRAPPER,
   downloadVideo,
-  fileEncoded
+  fileEncoded,
+  ScreenModelModal
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
@@ -506,6 +507,25 @@ function mockCreateScreen(values) {
   return { model }
 }
 
+// 创建大屏模板
+function mockCreateScreenModel(values) {
+  let baseModel = {
+    user: ObjectId('8f63270f005f1c1a0d9448ca'),
+    data: JSON.stringify({
+      
+    }),
+    enable: false,
+    flag: 'PC',
+    name: '测试大屏模板名称',
+    poster: 'http://22222.png',
+    description: '测试描述' 
+  }
+
+  baseModel = mergeConfig(baseModel, values, true)
+  const model = new ScreenModelModal(baseModel)
+  return { model }
+}
+
 //创建查询参数etag
 function createEtag(query={}) {
   return Object.keys(query).reduce((acc, cur) => {
@@ -689,5 +709,6 @@ module.exports = {
   deepParseResponse,
   mockCreateRealVideo,
   mockCreateScreen,
-  commonMovieValid
+  commonMovieValid,
+  mockCreateScreenModel
 }
