@@ -20,8 +20,8 @@ router
     return 
   }
 
-  const [ _id ] = Params.sanitizers(ctx.body, {
-    name: 'currPage',
+  const [ _id ] = Params.sanitizers(ctx.request.body, {
+    name: '_id',
     sanitizers: [
       data => data.split(',').map(item => ObjectId(item.trim()))
     ]
@@ -42,13 +42,17 @@ router
   ])
   .then(data => {
     return Promise.all(data.map(item => {
-      const model = new ScreenModal(pick(item, ['user', 'data', 'flag', 'name', 'poster', 'description']))
+      const data = pick(item, ['data', 'flag', 'name', 'poster', 'description'])
+      const model = new ScreenModal({
+        ...data,
+        user: ObjectId(item.user) 
+      })
       return model.save()
       .then(data => data._id)
     }))
   })
   .then(data => {
-    if(data.length) return Promise.reject({ errMsg: 'not found', status: 404 })
+    if(!data.length) return Promise.reject({ errMsg: 'not found', status: 404 })
     return {
       data  
     }

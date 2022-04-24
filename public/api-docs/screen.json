@@ -237,6 +237,42 @@
         ]
       }
     },
+    "/api/screen/copy": {
+      "post": {
+        "tags": [
+          "screen"
+        ],
+        "summary": "大屏复制",
+        "description": "",
+        "operationId": "screen_copy_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "description":"大屏id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
     "/api/screen/model": {
       "post": {
         "tags": [
