@@ -2,6 +2,7 @@ const mongoose = require("mongoose")
 const chalk = require('chalk')
 const Lib = require("./mongo.lib")
 const { initAuthMapData } = require('../auth')
+const { scheduleConstructor } = require('../schedule')
 const { connectTry } = require('../tool')
 
 let instance = false
@@ -17,6 +18,8 @@ async function MongoDB(url="mongodb://127.0.0.1:27017/movie") {
     .then(_ => {
       // initAuthMapData()
       console.log(chalk.bgGreen('the mongodb server is run in port 27017'))
+      //定时任务
+      scheduleConstructor.init()
     })
     // .catch(err => {
     //   console.log(chalk.bgRed('the mongodb server is run in error'))

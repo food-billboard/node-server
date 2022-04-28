@@ -1,6 +1,5 @@
 require('module-alias/register')
-const { scheduleConstructor, UserModel, SCHEDULE_STATUS } = require('@src/utils')
-const CacheJson = require('@src/utils/schedule/cache.json')
+const { UserModel, SCHEDULE_STATUS, ScheduleModel } = require('@src/utils')
 const { expect } = require('chai')
 const { Request, commonValidate, parseResponse, mockCreateUser } = require('@test/utils')
 
@@ -38,6 +37,7 @@ describe(`${COMMON_API} test`, function() {
   let userInfo 
   let selfToken
   let getToken
+  let scheduleId
 
   before(function(done) {
 
@@ -54,6 +54,16 @@ describe(`${COMMON_API} test`, function() {
     })
     .then(_ => {
       return new Promise(resolve => setTimeout(resolve, 1000))
+    })
+    .then(_ => {
+      return ScheduleModel.findOne({})
+      .select({
+        _id: 1,
+      })
+      .exec() 
+    })
+    .then(data => {
+      scheduleId = data._id 
     })
     .then(_ => {
       done()
@@ -118,7 +128,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          name: Object.keys(CacheJson)[0],
+          _id: scheduleId.toString(),
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -134,30 +144,53 @@ describe(`${COMMON_API} test`, function() {
     describe(`change the schedule deal time success test -> ${COMMON_TIME_API}`, function() {
 
       let targetName
-      const newTime = "* * * * * *"
+      const newTime = "* * * * * 2"
       let prevTime 
 
       before(function(done) {
-        const [ target ] = Object.values(CacheJson)
 
-        const { name, time } = target
-
-        targetName = name 
-        prevTime = time
-
-        done()
+        ScheduleModel.findOne({
+          _id: scheduleId
+        })
+        .select({
+          time: 1,
+          name: 1 
+        })
+        .exec()
+        .then(data => {
+          prevTime = data.time 
+          targetName = data.name 
+        })
+        .then(_ => {
+          done() 
+        })
+        .catch(err => {
+          done(err)
+        })
 
       })
 
       after(function(done) {
 
-        const { time, status } = scheduleConstructor.getScheduleConfig(targetName) || {}
-
-        expect(time).to.be.equal(newTime)
-        expect(status).to.be.equal(SCHEDULE_STATUS.SCHEDULING)
-
-        scheduleConstructor.setScheduleConfig(targetName, {
-          time: prevTime
+        ScheduleModel.findOne({
+          _id: scheduleId
+        })
+        .select({
+          time: 1,
+          status: 1 
+        })
+        .exec()
+        .then(data => {
+          const { time, status } = data 
+          expect(time).to.be.equal(newTime)
+          expect(status).to.be.equal(SCHEDULE_STATUS.SCHEDULING)
+          return ScheduleModel.updateOne({
+            _id: scheduleId
+          }, {
+            $set: {
+              time: prevTime
+            }
+          })
         })
         .then(_ => {
           done()
@@ -177,7 +210,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          name: targetName,
+          _id: scheduleId.toString(),
           time: newTime
         })
         .expect(200)
@@ -196,29 +229,56 @@ describe(`${COMMON_API} test`, function() {
       let targetName
 
       before(function(done) {
-        const [ target ] = Object.values(CacheJson)
 
-        const { name } = target
-        
-        const { status } = scheduleConstructor.getScheduleConfig(name) || {}
-
-        expect(status).to.be.equals(SCHEDULE_STATUS.SCHEDULING)
-
-        targetName = name 
-
-        done()
+        ScheduleModel.findOne({
+          _id: scheduleId
+        })
+        .select({
+          name: 1,
+          status: 1 
+        })
+        .exec()
+        .then(data => {
+          targetName = data.name 
+        })
+        .then(() => {
+          done() 
+        })
+        .catch(err => {
+          done(err)
+        })
 
       })
 
       after(function(done) {
 
-        const { status } = scheduleConstructor.getScheduleConfig(targetName) || {}
-
-        expect(status).to.be.equal(SCHEDULE_STATUS.CANCEL)
-
-        scheduleConstructor.restartSchedule({ name: targetName })
-
-        done()
+        ScheduleModel.findOne({
+          _id: scheduleId  
+        })
+        .select({
+          status: 1 
+        })
+        .exec() 
+        .then(data => {
+          expect(data.status).to.be.equal(SCHEDULE_STATUS.CANCEL)
+          return Request
+          .put(COMMON_API)
+          .set({
+            Accept: 'Application/json',
+            Authorization: `Basic ${selfToken}`
+          })
+          .send({
+            _id: scheduleId.toString(),
+          })
+          .expect(200)
+          .expect('Content-Type', /json/)
+        })
+        .then(function() {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
 
       })
 
@@ -231,7 +291,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          name: targetName,
+          _id: scheduleId.toString(),
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -249,29 +309,44 @@ describe(`${COMMON_API} test`, function() {
       let targetName
 
       before(function(done) {
-        const [ target ] = Object.values(CacheJson)
 
-        const { name } = target
-
-        targetName = name 
-
-        scheduleConstructor.cancelSchedule({ name })
-
-        const { status } = scheduleConstructor.getScheduleConfig(name)
-
-        expect(status).to.be.equals(SCHEDULE_STATUS.CANCEL)
-
-        done()
+        Request
+        .delete(COMMON_API)
+        .set({
+          Accept: 'Application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .query({
+          _id: scheduleId.toString(),
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .then(data => {
+          done() 
+        })
+        .catch(err => {
+          done(err)
+        })
 
       })
 
       after(function(done) {
 
-        const { status } = scheduleConstructor.getScheduleConfig(targetName) || {}
-
-        expect(status).to.be.equal(SCHEDULE_STATUS.SCHEDULING)
-
-        done()
+        ScheduleModel.findOne({
+          _id: scheduleId,
+          status: SCHEDULE_STATUS.SCHEDULING 
+        })
+        .select({
+          _id: 1
+        })
+        .exec() 
+        .then(data => {
+          expect(!!data).to.be.true
+          done()  
+        })
+        .catch(err => {
+          done(err)
+        }) 
 
       })
 
@@ -284,7 +359,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          name: targetName,
+          _id: scheduleId.toString(),
         })
         .expect(200)
         .expect('Content-Type', /json/)
@@ -297,7 +372,7 @@ describe(`${COMMON_API} test`, function() {
 
     })
 
-    describe(`resume all schedule deal success test -> ${COMMON_RESUME_API}`, function() {
+    describe.skip(`resume all schedule deal success test -> ${COMMON_RESUME_API}`, function() {
 
       it(`resume all schedule deal success`, function(done) {
 
@@ -324,7 +399,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`post schedule deal immediately fail test -> ${COMMON_API}`, function() {
 
-      it(`post schedule deal immediately fail because the name is not exists`, function(done) {
+      it(`post schedule deal immediately fail because the _id is not exists`, function(done) {
 
         Request
         .post(COMMON_API)
@@ -333,9 +408,9 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          name: ""
+          _id: "8f63270f005f1c1a0d9448ca"
         })
-        .expect(400)
+        .expect(404)
         .expect('Content-Type', /json/)
         .then(_ => {
           done()
@@ -350,7 +425,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`restart the schedule deal fail test -> ${COMMON_API}`, function() {
 
-      it(`restart the schedule deal fail because the name is not exists`, function(done) {
+      it(`restart the schedule deal fail because the _id is not exists`, function(done) {
         
         Request
         .put(COMMON_API)
@@ -359,9 +434,9 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          name: ""
+          _id: "8f63270f005f1c1a0d9448ca"
         })
-        .expect(400)
+        .expect(404)
         .expect('Content-Type', /json/)
         .then(data => {
           done()
@@ -376,7 +451,7 @@ describe(`${COMMON_API} test`, function() {
 
     describe(`cancel the schedule deal fail test -> ${COMMON_API}`, function() {
 
-      it(`cancel the schedule deal fail because the name is not exists`, function(done) {
+      it(`cancel the schedule deal fail because the _id is not exists`, function(done) {
 
         Request
         .delete(COMMON_API)
@@ -385,9 +460,9 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .query({
-          name: ""
+          _id: "8f63270f005f1c1a0d9448ca"
         })
-        .expect(400)
+        .expect(404)
         .expect('Content-Type', /json/)
         .then(_ => {
           done()
@@ -407,17 +482,28 @@ describe(`${COMMON_API} test`, function() {
 
       before((done) => {
 
-        const [ target ] = Object.values(CacheJson)
-        const { time, name } = target
+        ScheduleModel.findOne({
+          _id: scheduleId.toString() 
+        })
+        .select({
+          time: 1,
+          name: 1 
+        })
+        .exec() 
+        .then(data => {
+          const { time, name } = data
 
-        targetName = name 
-        targetTime = time 
-
-        done()
+          targetName = name 
+          targetTime = time 
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
 
       })
 
-      it(`change the schedule deal time fail because the name is not exists`, function(done) {
+      it(`change the schedule deal time fail because the _id is not exists`, function(done) {
         
         Request
         .put(COMMON_TIME_API)
@@ -426,10 +512,10 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          name: "",
-          time: "* * * * * *"
+          _id: "8f63270f005f1c1a0d9448ca",
+          time: "* * * * * 3"
         })
-        .expect(400)
+        .expect(404)
         .expect('Content-Type', /json/)
         .then(_ => {
           done()
@@ -449,7 +535,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          name: "",
+          _id: scheduleId.toString(),
           time: "* * * * * *"
         })
         .expect(400)
@@ -472,7 +558,7 @@ describe(`${COMMON_API} test`, function() {
           Authorization: `Basic ${selfToken}`
         })
         .send({
-          name: targetName,
+          _id: scheduleId.toString(),
           time: targetTime
         })
         .expect(400)

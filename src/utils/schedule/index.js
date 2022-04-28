@@ -2,12 +2,14 @@ const fs = require("fs-extra")
 const path = require("path")
 const { omit } = require("lodash")
 const mime = require("mime")
-const { log4Error } = require('../../config/winston')
-const CacheJson = require('./cache.json')
 const { SCHEDULE_STATUS } = require('../constant')
+const { log4Error } = require('../../config/winston')
+const { ScheduleModel } = require('../mongodb/mongo.lib')
+const CacheJson = require('./default.cache.json')
 
 const SCHEDULE_MAP = {}
 
+// 拉取所有定时任务依赖文件
 function requireAllSchedule(scheduleFileList, retryTimes=5) {
   try {
     return scheduleFileList.reduce((acc, schedule) => {
@@ -49,6 +51,37 @@ async function collectAllSchedule(dir=__dirname, currentRelativeDir=".", retryTi
   }
 }
 
+// 重试重新生成对应的数据库数据
+async function retryGenerateScheduleDatabase() {
+  let times = 100 
+  function generate() {
+    return Promise.all(Object.entries(SCHEDULE_MAP).map(item => {
+      const [ key, value ] = item
+      return ScheduleModel.findOne({
+        name: key 
+      })
+      .exec()
+      .then(data => {
+        if(!data) {
+          const model = new ScheduleModel({
+            name: value.name,
+            time: value.time,
+            description: value.description,
+            status: SCHEDULE_STATUS.SCHEDULING 
+          })
+          return model.save() 
+        }
+      })
+    }))
+    .catch(err => {
+      console.error(err)
+      times -- 
+      if(times > 0) return generate() 
+    })
+  }
+  return generate() 
+}
+
 class Schedule {
 
   async init() {
@@ -64,6 +97,7 @@ class Schedule {
         ...CacheJson[name]
       }
     }
+    retryGenerateScheduleDatabase() 
   }
 
   async setScheduleConfig(name, value={}) {
@@ -117,7 +151,7 @@ class Schedule {
         return numberData >= 0 && numberData <= 6
       },
     ]
-    return !Object.values(SCHEDULE_MAP).some(item => item.time === formatTime) && formatTime.split(" ").every((item, index) => {
+    return !formatTime.split(" ").every(item => item.trim() === '*') && !Object.values(SCHEDULE_MAP).some(item => item.time === formatTime) && formatTime.split(" ").every((item, index) => {
       if(item === "*") return true 
       if(item.includes(".")) return false 
       return TIME_VALID_MAP[index](item)
@@ -132,27 +166,18 @@ class Schedule {
     const { name, time } = params
     const { schedule } = SCHEDULE_MAP[name]
     const result = schedule.schedule(time)
-    if(result) {
-      await this.setScheduleConfig(name, { time, status: SCHEDULE_STATUS.SCHEDULING })
-    }
     return result 
   }
 
   async cancelSchedule(params={}) {
-    const { name } = params
-    const { schedule, status, time } = SCHEDULE_MAP[name]
-    if(status === SCHEDULE_STATUS.CANCEL) return true 
+    const { name, time } = params
+    const { schedule } = SCHEDULE_MAP[name]
     const result = schedule.cancel(time)
-    if(result) {
-      await this.setScheduleConfig(name, { status: SCHEDULE_STATUS.CANCEL })
-    }
     return result 
   }
 
   async restartSchedule(params) {
-    const { name } = params
-    const { time, status } = SCHEDULE_MAP[name]
-    if(status === SCHEDULE_STATUS.SCHEDULING) return true 
+    const { name, time } = params
     return await this.changeScheduleTime({
       name,
       time

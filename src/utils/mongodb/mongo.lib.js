@@ -24,7 +24,8 @@ const {
   ERROR_TYPE,
   USER_HOT_HISTORY_TYPE,
   MESSAGE_POST_STATUS,
-  SCREEN_TYPE
+  SCREEN_TYPE,
+  SCHEDULE_STATUS
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -1618,6 +1619,24 @@ const ErrorSchema = new Schema({
   ...defaultConfig
 })
 
+const ScheduleSchema = new Schema({
+  name: {
+    type: String,
+    required: true 
+  },
+  description: {
+    type: String 
+  },
+  time: {
+    type: String,
+    required: true 
+  },
+  status: {
+    type: String,
+    enum: Object.keys(SCHEDULE_STATUS)
+  }
+})
+
 // ------------------------------------大屏 ------------------------------------
 
 const ScreenSchema = new Schema({
@@ -1757,6 +1776,7 @@ const BehaviourModel = model('behaviour', BehaviourSchema)
 const FriendsModel = model('friend', FriendsSchema)
 const MemberModel = model('member', MemberSchema)
 const ErrorModel = model('error', ErrorSchema)
+const ScheduleModel = model('schedule', ScheduleSchema)
 const ScreenModal = model('screen', ScreenSchema)
 const ScreenModelModal = model('screen_model', ScreenModelSchema)
 
@@ -1786,6 +1806,7 @@ module.exports = {
   FriendsModel,
   MemberModel,
   ErrorModel,
+  ScheduleModel,
   ScreenModal,
   ScreenModelModal,
   UserSchema,
@@ -1814,5 +1835,6 @@ module.exports = {
   MemberSchema,
   ErrorSchema,
   ScreenSchema,
-  ScreenModelSchema
+  ScreenModelSchema,
+  ScheduleSchema
 }

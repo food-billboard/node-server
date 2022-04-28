@@ -4386,10 +4386,10 @@
         ],
         "parameters": [
           {
-            "name": "name",
+            "name": "_id",
             "in": "body",
             "required": true,
-            "description": "任务名称",
+            "description": "任务id",
             "type": "string"
           }
         ]
@@ -4407,10 +4407,10 @@
         ],
         "parameters": [
           {
-            "name": "name",
+            "name": "_id",
             "in": "body",
             "required": true,
-            "description": "任务名称",
+            "description": "任务id",
             "type": "string"
           }
         ]
@@ -4428,10 +4428,10 @@
         ],
         "parameters": [
           {
-            "name": "name",
+            "name": "_id",
             "in": "body",
             "required": true,
-            "description": "任务名称",
+            "description": "任务id",
             "type": "string"
           }
         ]
@@ -4451,10 +4451,10 @@
         ],
         "parameters": [
           {
-            "name": "name",
+            "name": "_id",
             "in": "body",
             "required": true,
-            "description": "任务名称",
+            "description": "任务id",
             "type": "string"
           },
           {
@@ -4478,7 +4478,8 @@
         "produces": [
           "application/xml",
           "application/json"
-        ]
+        ],
+        "deprecated": true
       }
     }
   },
