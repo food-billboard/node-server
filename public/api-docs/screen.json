@@ -55,6 +55,13 @@
             "description":"大屏名称"
           },
           {
+            "name": "version",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"版本号"
+          },
+          {
             "name": "description",
             "in": "body",
             "type": "string",
@@ -187,6 +194,13 @@
             "description":"大屏id"
           },
           {
+            "name": "version",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"版本号"
+          },
+          {
             "name": "name",
             "in": "body",
             "type": "string",
@@ -292,6 +306,13 @@
             "type": "string",
             "required": true,
             "description":"大屏模板名称"
+          },
+          {
+            "name": "version",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"版本号"
           },
           {
             "name": "description",
@@ -424,6 +445,13 @@
             "type": "string",
             "required": true,
             "description":"大屏模板id"
+          },
+          {
+            "name": "version",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"版本号"
           },
           {
             "name": "name",

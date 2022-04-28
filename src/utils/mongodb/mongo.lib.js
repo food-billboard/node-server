@@ -1644,6 +1644,11 @@ const ScreenSchema = new Schema({
     type: ObjectId,
     required: true 
   },
+  version: {
+    type: String,
+    required: true,
+    default: '1.0'
+  },
   data: {
     type: String,
     required: true,
@@ -1668,6 +1673,11 @@ const ScreenModelSchema = new Schema({
   user: {
     type: ObjectId,
     required: true 
+  },
+  version: {
+    type: String,
+    required: true,
+    default: '1.0'
   },
   data: {
     type: String,

@@ -499,7 +499,8 @@ function mockCreateScreen(values) {
     flag: 'PC',
     name: '测试名称',
     poster: 'http://22222.png',
-    description: '测试描述' 
+    description: '测试描述',
+    version: '1.1'
   }
 
   baseModel = mergeConfig(baseModel, values, true)
@@ -518,7 +519,8 @@ function mockCreateScreenModel(values) {
     flag: 'PC',
     name: '测试大屏模板名称',
     poster: 'http://22222.png',
-    description: '测试描述' 
+    description: '测试描述',
+    version: '1.1'
   }
 
   baseModel = mergeConfig(baseModel, values, true)

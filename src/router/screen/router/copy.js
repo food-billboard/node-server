@@ -42,7 +42,7 @@ router
   ])
   .then(data => {
     return Promise.all(data.map(item => {
-      const data = pick(item, ['data', 'flag', 'name', 'poster', 'description'])
+      const data = pick(item, ['data', 'flag', 'name', 'poster', 'description', 'version'])
       const model = new ScreenModal({
         ...data,
         user: ObjectId(item.user) 

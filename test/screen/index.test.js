@@ -177,7 +177,8 @@ describe(`${COMMON_API} test`, () => {
         data: JSON.stringify({
           components: []
         }),
-        poster: 'http://sss.png'
+        poster: 'http://sss.png',
+        version: '1.1'
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -224,7 +225,8 @@ describe(`${COMMON_API} test`, () => {
         data: JSON.stringify({
           components: []
         }),
-        poster: 'http://333.png'
+        poster: 'http://333.png',
+        version: '1.1'
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -315,7 +317,8 @@ describe(`${COMMON_API} test`, () => {
         data: JSON.stringify({
           components: []
         }),
-        poster: 'http://sss.png'
+        poster: 'http://sss.png',
+        version: '1.1'
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -342,7 +345,8 @@ describe(`${COMMON_API} test`, () => {
         data: JSON.stringify({
           components: []
         }),
-        poster: 'http://sss.png'
+        poster: 'http://sss.png',
+        version: '1.1'
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -366,7 +370,8 @@ describe(`${COMMON_API} test`, () => {
         description: COMMON_API,
         flag: SCREEN_TYPE.PC,
         data: '',
-        poster: 'http://sss.png'
+        poster: 'http://sss.png',
+        version: '1.1'
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -392,7 +397,8 @@ describe(`${COMMON_API} test`, () => {
         data: JSON.stringify({
           components: []
         }),
-        poster: 'http://sss.png'
+        poster: 'http://sss.png',
+        version: '1.1'
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -418,7 +424,35 @@ describe(`${COMMON_API} test`, () => {
         data: JSON.stringify({
           components: []
         }),
-        poster: ''
+        poster: '',
+        version: '1.1'
+      })
+      .expect(400)
+      .expect('Content-Type', /json/)
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+    })
+
+    it(`post screen fail because lack of the version`, (done) => {
+      Request
+      .post(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        name: COMMON_API,
+        description: COMMON_API,
+        flag: SCREEN_TYPE.PC,
+        data: JSON.stringify({
+          components: []
+        }),
+        poster: 'http://sss.png',
+        version: ''
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -450,7 +484,8 @@ describe(`${COMMON_API} test`, () => {
         data: JSON.stringify({
           components: []
         }),
-        poster: 'http://333.png'
+        poster: 'http://333.png',
+        version: '1.1'
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -485,7 +520,8 @@ describe(`${COMMON_API} test`, () => {
           data: JSON.stringify({
             components: []
           }),
-          poster: 'http://333.png'
+          poster: 'http://333.png',
+          version: '1.1'
         })
         .expect(403)
         .expect('Content-Type', /json/)

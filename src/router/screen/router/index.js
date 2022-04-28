@@ -211,6 +211,11 @@ router
     validator: [
       data => typeof data === 'string' && !!data.length
     ]
+  }, {
+    name: 'version',
+    validator: [
+      data => typeof data === 'string' && !!data.length
+    ]
   })
 
   if(check) {
@@ -226,7 +231,7 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
-  const { description, name, data: componentData, flag, poster } = ctx.request.body
+  const { description, name, data: componentData, flag, poster, version } = ctx.request.body
 
   const model = new ScreenModal({
     name,
@@ -235,7 +240,8 @@ router
     flag,
     enable: false,
     poster,
-    description
+    description,
+    version
   })
 
   const data = await model.save()
@@ -267,7 +273,7 @@ router
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
-  const { description, name, data: componentData, flag, poster, _id } = ctx.request.body
+  const { description, name, data: componentData, flag, poster, _id, version } = ctx.request.body
 
   const data = await ScreenModal.updateOne({
     _id: ObjectId(_id),
@@ -279,7 +285,8 @@ router
       name,
       data: componentData,
       flag,
-      poster
+      poster,
+      version
     }
   })
   .exec()
