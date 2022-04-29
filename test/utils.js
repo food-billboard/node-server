@@ -39,7 +39,8 @@ const {
   STATIC_FILE_PATH_NO_WRAPPER,
   downloadVideo,
   fileEncoded,
-  ScreenModelModal
+  ScreenModelModal,
+  MEDIA_STATUS
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
@@ -248,7 +249,7 @@ function mockCreateImage(values={}) {
     origin: ObjectId('8f63270f005f1c1a0d9448ca'),
     info: {
       mime: 'jpg',
-      status: 'COMPLETE',
+      status: MEDIA_STATUS.COMPLETE,
       md5: '测试md5',
       size: 100
     },
@@ -304,7 +305,7 @@ function mockCreateVideo(values={}) {
     origin: ObjectId('8f63270f005f1c1a0d9448ca'),
     info: {
       mime: 'mp4',
-      status: 'COMPLETE',
+      status: MEDIA_STATUS.COMPLETE,
       md5: '测试md5',
       size: 1024 * 1024
     },

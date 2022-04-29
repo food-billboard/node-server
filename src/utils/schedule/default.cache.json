@@ -70,5 +70,11 @@
     "time": "0 0 19 * * 6",
     "description": "数据标签定时器",
     "status": "SCHEDULING"
+  },
+  "unUseMediaSchedule": {
+    "name": "unUseMediaSchedule",
+    "time": "0 0 20 * * 6",
+    "description": "无引用媒体资源定时清除",
+    "status": "SCHEDULING"
   }
 }

@@ -85,32 +85,21 @@
       }
     }
   ],
-  "schemes": [
-    "https",
-    "http"
-  ],
+  "schemes": ["https", "http"],
   "paths": {
     "/api/manage/dashboard/nav": {
       "get": {
-        "tags": [
-          "dashboard"
-        ],
+        "tags": ["dashboard"],
         "summary": "获取首页导航卡片信息",
         "description": "",
         "operationId": "manage_dashboard_get_nav",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
         "responses": {
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_dashboard_get_nav"
+              "$ref": "#/definitions/manage_dashboard_get_nav"
             }
           }
         }
@@ -118,38 +107,33 @@
     },
     "/api/manage/dashboard/statistics/movie": {
       "get": {
-        "tags": [
-          "dashboard"
-        ],
+        "tags": ["dashboard"],
         "summary": "首页电影上传汇总图",
         "description": "",
         "operationId": "manage_dashboard_get_statistics_movie",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "date_type",
             "in": "query",
             "type": "string",
-            "description":"日期范围类型",
-            "enum": [ "year", "month", "week", "day" ],
+            "description": "日期范围类型",
+            "enum": ["year", "month", "week", "day"],
             "default": "month"
           },
           {
             "name": "start_date",
             "in": "query",
             "type": "string",
-            "description":"起始日期",
+            "description": "起始日期",
             "default": "month"
           },
           {
             "name": "end_date",
             "in": "query",
             "type": "string",
-            "format":"date-time",
-            "description":"结束日期"
+            "format": "date-time",
+            "description": "结束日期"
           }
         ],
         "responses": {
@@ -162,48 +146,40 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/manage/dashboard/statistics/user": {
       "get": {
-        "tags": [
-          "dashboard"
-        ],
+        "tags": ["dashboard"],
         "summary": "注册用户统计",
         "description": "",
         "operationId": "manage_dashboard_statistics_user",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "date_type",
             "in": "query",
             "type": "string",
-            "description":"日期范围类型",
-            "enum": [ "year", "month", "week", "day" ],
+            "description": "日期范围类型",
+            "enum": ["year", "month", "week", "day"],
             "default": "month"
           },
           {
             "name": "start_date",
             "in": "query",
             "type": "string",
-            "description":"起始日期",
+            "description": "起始日期",
             "default": "month"
           },
           {
             "name": "end_date",
             "in": "query",
             "type": "string",
-            "format":"date-time",
-            "description":"结束日期"
+            "format": "date-time",
+            "description": "结束日期"
           }
         ],
         "responses": {
@@ -216,48 +192,40 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/manage/dashboard/statistics/visit": {
       "get": {
-        "tags": [
-          "dashboard"
-        ],
+        "tags": ["dashboard"],
         "summary": "用户时间访问量统计图",
         "description": "",
         "operationId": "manage_dashboard_statistics_visit",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "date_type",
             "in": "query",
             "type": "string",
-            "description":"日期范围类型",
-            "enum": [ "year", "month", "week", "day" ],
+            "description": "日期范围类型",
+            "enum": ["year", "month", "week", "day"],
             "default": "month"
           },
           {
             "name": "start_date",
             "in": "query",
             "type": "string",
-            "description":"起始日期",
+            "description": "起始日期",
             "default": "month"
           },
           {
             "name": "end_date",
             "in": "query",
             "type": "string",
-            "format":"date-time",
-            "description":"结束日期"
+            "format": "date-time",
+            "description": "结束日期"
           }
         ],
         "responses": {
@@ -270,26 +238,18 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/manage/dashboard/search/keyword": {
       "get": {
-        "tags": [
-          "dashboard"
-        ],
+        "tags": ["dashboard"],
         "summary": "关键字搜索统计",
         "description": "",
         "operationId": "manage_dashboard_movie_keyword",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -308,70 +268,54 @@
             "in": "query",
             "description": "排序(以英文逗号分隔 user=1,trend=-1, 1升序,-1降序)",
             "type": "string",
-            "enum": [ "user", "trend" ]
+            "enum": ["user", "trend"]
           }
         ],
         "responses": {
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_dashboard_movie_keyword"
+              "$ref": "#/definitions/manage_dashboard_movie_keyword"
             }
           }
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/manage/dashboard/search/type": {
       "get": {
-        "tags": [
-          "dashboard"
-        ],
+        "tags": ["dashboard"],
         "summary": "电影搜索各类型占比图",
         "description": "",
         "operationId": "manage_dashboard_movie_type",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [],
         "responses": {
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_dashboard_movie_type"
+              "$ref": "#/definitions/manage_dashboard_movie_type"
             }
           }
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/manage/movie": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影列表筛选",
         "description": "",
         "operationId": "manage_movie_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -402,28 +346,28 @@
             "in": "query",
             "description": "电影状态",
             "type": "string",
-            "enum":[ "VERIFY", "COMPLETE", "NOT_VERIFY" ]
+            "enum": ["VERIFY", "COMPLETE", "NOT_VERIFY"]
           },
           {
             "name": "source_type",
             "in": "query",
             "description": "电影来源类型",
             "type": "string",
-            "enum":[ "ORIGIN", "USER" ]
+            "enum": ["ORIGIN", "USER"]
           },
           {
             "name": "start_date",
             "in": "query",
             "description": "起始时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
             "name": "end_date",
             "in": "query",
             "description": "结束时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
             "name": "_id",
@@ -447,19 +391,12 @@
         ]
       },
       "post": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "新增电影",
         "description": "",
         "operationId": "manage_movie_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "consumes": [
-          "multipart/form-data"
-        ],
+        "produces": ["application/xml", "application/json"],
+        "consumes": ["multipart/form-data"],
         "parameters": [
           {
             "name": "video",
@@ -538,7 +475,7 @@
             "required": true,
             "type": "string",
             "description": "上映时间",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
             "name": "description",
@@ -588,26 +525,17 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "put": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "编辑电影",
         "description": "",
         "operationId": "manage_movie_put_manage",
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "produces": [
-          "application/json"
-        ],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -693,7 +621,7 @@
             "required": true,
             "type": "string",
             "description": "上映时间",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
             "name": "description",
@@ -743,23 +671,16 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "delete": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "删除发布的电影",
         "description": "",
         "operationId": "manage_movie_delete_manage",
-        "produces": [
-          "application/json"
-        ],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -783,16 +704,11 @@
     },
     "/api/manage/movie/edit": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影详情信息(修改)",
         "description": "",
         "operationId": "manage_movie_edit_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -814,16 +730,11 @@
     },
     "/api/manage/movie/detail": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影详情信息",
         "description": "",
         "operationId": "manage_movie_detail_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -845,16 +756,11 @@
     },
     "/api/manage/movie/detail/douban": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "获取豆瓣电影数据",
         "description": "",
         "operationId": "manage_movie_detail_get_douban",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "id",
@@ -876,16 +782,11 @@
     },
     "/api/manage/movie/detail/douban/detail": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "豆瓣电影临时数据详情",
         "description": "",
         "operationId": "manage_movie_detail_get_douban_detail",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "id",
@@ -907,16 +808,11 @@
     },
     "/api/manage/movie/detail/comment": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影评论列表",
         "description": "",
         "operationId": "manage_movie_detail_get_comment",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -956,21 +852,21 @@
             "in": "query",
             "description": "人气排序",
             "type": "integer",
-            "enum": [ "1", "-1" ]
+            "enum": ["1", "-1"]
           },
           {
             "name": "time",
             "in": "query",
             "description": "时间排序",
             "type": "integer",
-            "enum": [ "1", "-1" ]
+            "enum": ["1", "-1"]
           },
           {
             "name": "comment",
             "in": "query",
             "description": "评论数量排序",
             "type": "integer",
-            "enum": [ "1", "-1" ]
+            "enum": ["1", "-1"]
           }
         ],
         "responses": {
@@ -983,16 +879,11 @@
         }
       },
       "post": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "新增电影评论列表",
         "description": "新增电影评论列表",
         "operationId": "manage_movie_detail_post_comment",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1007,9 +898,7 @@
             "description": "源类型",
             "type": "string",
             "required": true,
-            "enum": [
-              "movie", "comment"
-            ]
+            "enum": ["movie", "comment"]
           },
           {
             "name": "content",
@@ -1039,16 +928,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "删除电影评论列表",
         "description": "删除电影评论列表",
         "operationId": "manage_movie_detail_delete_comment",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1067,16 +951,11 @@
     },
     "/api/manage/movie/detail/comment/detail": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影评论列表详情",
         "description": "",
         "operationId": "manage_movie_detail_get_comment_detail",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1116,21 +995,21 @@
             "in": "query",
             "description": "人气排序",
             "type": "integer",
-            "enum": [ "1", "-1" ]
+            "enum": ["1", "-1"]
           },
           {
             "name": "time",
             "in": "query",
             "description": "时间排序",
             "type": "integer",
-            "enum": [ "1", "-1" ]
+            "enum": ["1", "-1"]
           },
           {
             "name": "comment",
             "in": "query",
             "description": "评论数量排序",
             "type": "integer",
-            "enum": [ "1", "-1" ]
+            "enum": ["1", "-1"]
           }
         ],
         "responses": {
@@ -1145,16 +1024,11 @@
     },
     "/api/manage/movie/detail/tag": {
       "put": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "修改tag状态",
         "description": "",
         "operationId": "manage_movie_detail_put_tag",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1178,16 +1052,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "删除tag",
         "description": "",
         "operationId": "manage_movie_detail_delete_tag",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1204,16 +1073,11 @@
         }
       },
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "获取tag列表",
         "description": "",
         "operationId": "manage_movie_detail_get_tag",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1255,8 +1119,8 @@
         "responses": {
           "200": {
             "description": "成功",
-            "schema":{
-              "$ref":"#/definitions/manage_movie_detail_get_tag"
+            "schema": {
+              "$ref": "#/definitions/manage_movie_detail_get_tag"
             }
           }
         }
@@ -1264,16 +1128,11 @@
     },
     "/api/manage/movie/detail/tag/update": {
       "put": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "更新电影标签",
         "description": "",
         "operationId": "manage_movie_detail_put_tag_update",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1292,16 +1151,11 @@
     },
     "/api/manage/movie/detail/valid": {
       "put": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "通过电影审核",
         "description": "",
         "operationId": "manage_movie_detail_put_movie",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1318,16 +1172,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "不通过电影审核",
         "description": "",
         "operationId": "manage_movie_detail_delete_movie",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1346,16 +1195,11 @@
     },
     "/api/manage/movie/detail/user": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影访问用户列表",
         "description": "",
         "operationId": "manage_movie_detail_get_user",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1395,21 +1239,28 @@
             "in": "query",
             "description": "用户状态",
             "type": "string",
-            "enum": [ "SIGNIN", "SIGNOUT", "FREEZE" ]
+            "enum": ["SIGNIN", "SIGNOUT", "FREEZE"]
           },
           {
             "name": "roles",
             "in": "query",
             "description": "角色",
             "type": "string",
-            "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+            "enum": [
+              "SUPER_ADMIN",
+              "ADMIN",
+              "DEVELOPMENT",
+              "SUB_DEVELOPMENT",
+              "CUSTOMER",
+              "USER"
+            ]
           }
         ],
         "responses": {
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_movie_detail_get_user"
+              "$ref": "#/definitions/manage_movie_detail_get_user"
             }
           }
         }
@@ -1417,16 +1268,11 @@
     },
     "/api/manage/movie/detail/store": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影收藏用户列表",
         "description": "",
         "operationId": "manage_movie_detail_get_store",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1473,21 +1319,28 @@
             "in": "query",
             "description": "用户状态",
             "type": "string",
-            "enum": [ "SIGNIN", "SIGNOUT", "FREEZE" ]
+            "enum": ["SIGNIN", "SIGNOUT", "FREEZE"]
           },
           {
             "name": "roles",
             "in": "query",
             "description": "角色",
             "type": "string",
-            "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+            "enum": [
+              "SUPER_ADMIN",
+              "ADMIN",
+              "DEVELOPMENT",
+              "SUB_DEVELOPMENT",
+              "CUSTOMER",
+              "USER"
+            ]
           }
         ],
         "responses": {
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_movie_detail_get_store"
+              "$ref": "#/definitions/manage_movie_detail_get_store"
             }
           }
         }
@@ -1495,16 +1348,11 @@
     },
     "/api/manage/movie/detail/info/actor": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "演员信息",
         "description": "",
         "operationId": "manage_movie_detail_get_info_actor",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1519,19 +1367,19 @@
             "type": "string"
           },
           {
-            "name":"currPage",
+            "name": "currPage",
             "in": "query",
             "description": "当前页",
             "type": "integer"
           },
           {
-            "name":"pageSize",
+            "name": "pageSize",
             "in": "query",
             "description": "每页数量",
             "type": "integer"
           },
           {
-            "name":"all",
+            "name": "all",
             "in": "query",
             "description": "是否全部(1, -1)",
             "type": "integer"
@@ -1541,22 +1389,17 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_movie_detail_get_info_actor"
+              "$ref": "#/definitions/manage_movie_detail_get_info_actor"
             }
           }
         }
       },
       "put": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "修改演员信息",
         "description": "",
         "operationId": "manage_movie_detail_put_info_actor",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1601,16 +1444,11 @@
         }
       },
       "post": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "新增演员",
         "description": "",
         "operationId": "manage_movie_detail_post_info_actor",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "avatar",
@@ -1655,16 +1493,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "删除演员",
         "description": "",
         "operationId": "manage_movie_detail_delete_info_actor",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1683,16 +1516,11 @@
     },
     "/api/manage/movie/detail/info/director": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "导演信息",
         "description": "",
         "operationId": "manage_movie_detail_get_info_director",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1707,19 +1535,19 @@
             "type": "string"
           },
           {
-            "name":"currPage",
+            "name": "currPage",
             "in": "query",
             "description": "当前页",
             "type": "integer"
           },
           {
-            "name":"pageSize",
+            "name": "pageSize",
             "in": "query",
             "description": "每页数量",
             "type": "integer"
           },
           {
-            "name":"all",
+            "name": "all",
             "in": "query",
             "description": "是否全部(1, -1)",
             "type": "integer"
@@ -1729,22 +1557,17 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_movie_detail_get_info_director"
+              "$ref": "#/definitions/manage_movie_detail_get_info_director"
             }
           }
         }
       },
       "put": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "修改导演信息",
         "description": "",
         "operationId": "manage_movie_detail_put_info_director",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1789,16 +1612,11 @@
         }
       },
       "post": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "新增导演",
         "description": "",
         "operationId": "manage_movie_detail_post_info_director",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "avatar",
@@ -1836,16 +1654,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "删除导演",
         "description": "",
         "operationId": "manage_movie_detail_delete_info_director",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1864,16 +1677,11 @@
     },
     "/api/manage/movie/detail/info/district": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "地区信息",
         "description": "",
         "operationId": "manage_movie_detail_get_info_district",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1888,19 +1696,19 @@
             "type": "string"
           },
           {
-            "name":"currPage",
+            "name": "currPage",
             "in": "query",
             "description": "当前页",
             "type": "integer"
           },
           {
-            "name":"pageSize",
+            "name": "pageSize",
             "in": "query",
             "description": "每页数量",
             "type": "integer"
           },
           {
-            "name":"all",
+            "name": "all",
             "in": "query",
             "description": "是否全部(1, -1)",
             "type": "integer"
@@ -1910,22 +1718,17 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_movie_detail_get_info_district"
+              "$ref": "#/definitions/manage_movie_detail_get_info_district"
             }
           }
         }
       },
       "put": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "修改地区信息",
         "description": "",
         "operationId": "manage_movie_detail_put_info_district",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1949,16 +1752,11 @@
         }
       },
       "post": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "新增地区",
         "description": "",
         "operationId": "manage_movie_detail_post_info_district",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "name",
@@ -1975,16 +1773,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "删除地区",
         "description": "",
         "operationId": "manage_movie_detail_delete_info_district",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2003,16 +1796,11 @@
     },
     "/api/manage/movie/detail/info/language": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "语言信息",
         "description": "",
         "operationId": "manage_movie_detail_get_info_language",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2027,19 +1815,19 @@
             "type": "string"
           },
           {
-            "name":"currPage",
+            "name": "currPage",
             "in": "query",
             "description": "当前页",
             "type": "integer"
           },
           {
-            "name":"pageSize",
+            "name": "pageSize",
             "in": "query",
             "description": "每页数量",
             "type": "integer"
           },
           {
-            "name":"all",
+            "name": "all",
             "in": "query",
             "description": "是否全部(1, -1)",
             "type": "integer"
@@ -2049,22 +1837,17 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_movie_detail_get_info_language"
+              "$ref": "#/definitions/manage_movie_detail_get_info_language"
             }
           }
         }
       },
       "put": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "修改语言信息",
         "description": "",
         "operationId": "manage_movie_detail_put_info_language",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2088,16 +1871,11 @@
         }
       },
       "post": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "新增语言",
         "description": "",
         "operationId": "manage_movie_detail_post_info_language",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "name",
@@ -2114,16 +1892,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "删除语言",
         "description": "",
         "operationId": "manage_movie_detail_delete_info_language",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2142,16 +1915,11 @@
     },
     "/api/manage/movie/detail/info/classify": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "分类信息",
         "description": "",
         "operationId": "manage_movie_detail_get_info_classify",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2166,19 +1934,19 @@
             "type": "string"
           },
           {
-            "name":"currPage",
+            "name": "currPage",
             "in": "query",
             "description": "当前页",
             "type": "integer"
           },
           {
-            "name":"pageSize",
+            "name": "pageSize",
             "in": "query",
             "description": "每页数量",
             "type": "integer"
           },
           {
-            "name":"all",
+            "name": "all",
             "in": "query",
             "description": "是否全部(1, -1)",
             "type": "integer"
@@ -2188,22 +1956,17 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_movie_detail_get_info_classify"
+              "$ref": "#/definitions/manage_movie_detail_get_info_classify"
             }
           }
         }
       },
       "put": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "修改分类信息",
         "description": "",
         "operationId": "manage_movie_detail_put_info_classify",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2234,16 +1997,11 @@
         }
       },
       "post": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "新增分类",
         "description": "",
         "operationId": "manage_movie_detail_post_info_classify",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "icon",
@@ -2267,16 +2025,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "删除分类",
         "description": "",
         "operationId": "manage_movie_detail_delete_info_classify",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2295,56 +2048,58 @@
     },
     "/api/manage/user": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "用户列表筛选",
         "description": "",
         "operationId": "manage_user_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
-            "name":"currPage",
+            "name": "currPage",
             "in": "query",
             "description": "当前页",
             "type": "integer"
           },
           {
-            "name":"pageSize",
+            "name": "pageSize",
             "in": "query",
             "description": "每页数量",
             "type": "integer"
           },
           {
-            "name":"start_date",
+            "name": "start_date",
             "in": "query",
             "description": "起始时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
-            "name":"end_end",
+            "name": "end_end",
             "in": "query",
             "description": "结束时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
-            "name":"role",
+            "name": "role",
             "in": "query",
             "description": "角色",
             "type": "string",
-            "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+            "enum": [
+              "SUPER_ADMIN",
+              "ADMIN",
+              "DEVELOPMENT",
+              "SUB_DEVELOPMENT",
+              "CUSTOMER",
+              "USER"
+            ]
           },
           {
-            "name":"status",
+            "name": "status",
             "in": "query",
             "description": "状态",
             "type": "string",
-            "enum": [ "SIGNIN", "SIGNOUT", "FREEZE" ]
+            "enum": ["SIGNIN", "SIGNOUT", "FREEZE"]
           },
           {
             "name": "content",
@@ -2357,68 +2112,70 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_user_get"
+              "$ref": "#/definitions/manage_user_get"
             }
           }
         }
       },
       "post": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "新增用户",
         "description": "",
         "operationId": "manage_user_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
-            "name":"mobile",
+            "name": "mobile",
             "in": "body",
             "required": true,
             "description": "手机",
             "type": "integer"
           },
           {
-            "name":"password",
+            "name": "password",
             "in": "body",
             "required": true,
             "description": "密码",
             "type": "string"
           },
           {
-            "name":"email",
+            "name": "email",
             "in": "body",
             "required": true,
             "description": "邮箱",
             "type": "string"
           },
           {
-            "name":"username",
+            "name": "username",
             "in": "body",
             "description": "用户名",
             "type": "string"
           },
           {
-            "name":"avatar",
+            "name": "avatar",
             "in": "body",
             "description": "头像",
             "type": "string"
           },
           {
-            "name":"description",
+            "name": "description",
             "in": "body",
             "description": "描述",
             "type": "string"
           },
           {
-            "name":"roles",
+            "name": "roles",
             "in": "body",
             "description": "角色, 多个用,分隔",
             "type": "string",
-            "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+            "enum": [
+              "SUPER_ADMIN",
+              "ADMIN",
+              "DEVELOPMENT",
+              "SUB_DEVELOPMENT",
+              "CUSTOMER",
+              "USER"
+            ]
           }
         ],
         "responses": {
@@ -2428,19 +2185,14 @@
         }
       },
       "delete": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "删除用户",
         "description": "",
         "operationId": "manage_user_delete",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
-            "name":"_id",
+            "name": "_id",
             "in": "query",
             "description": "用户id(多个用,分隔)",
             "type": "string"
@@ -2453,67 +2205,69 @@
         }
       },
       "put": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "修改用户信息",
         "description": "",
         "operationId": "manage_user_put",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
-            "name":"_id",
+            "name": "_id",
             "in": "body",
             "required": true,
             "description": "id",
             "type": "string"
           },
           {
-            "name":"mobile",
+            "name": "mobile",
             "in": "body",
             "description": "手机",
             "type": "integer"
           },
           {
-            "name":"password",
+            "name": "password",
             "in": "body",
             "description": "密码",
             "type": "string"
           },
           {
-            "name":"email",
+            "name": "email",
             "in": "body",
             "description": "邮箱",
             "type": "string"
           },
           {
-            "name":"username",
+            "name": "username",
             "in": "body",
             "description": "用户名",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
-            "name":"avatar",
+            "name": "avatar",
             "in": "body",
             "description": "头像",
             "type": "string"
           },
           {
-            "name":"description",
+            "name": "description",
             "in": "body",
             "description": "描述",
             "type": "string"
           },
           {
-            "name":"roles",
+            "name": "roles",
             "in": "body",
             "description": "角色,多个用,分隔",
             "type": "string",
-            "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+            "enum": [
+              "SUPER_ADMIN",
+              "ADMIN",
+              "DEVELOPMENT",
+              "SUB_DEVELOPMENT",
+              "CUSTOMER",
+              "USER"
+            ]
           }
         ],
         "responses": {
@@ -2525,16 +2279,11 @@
     },
     "/api/manage/user/detail": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "用户详情",
         "description": "",
         "operationId": "manage_user_get_detail",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "body",
@@ -2547,7 +2296,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_user_get_detail"
+              "$ref": "#/definitions/manage_user_get_detail"
             }
           }
         }
@@ -2555,16 +2304,11 @@
     },
     "/api/manage/user/detail/comment": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "用户发布的评论列表",
         "description": "",
         "operationId": "manage_user_detail_get_comment",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2597,14 +2341,14 @@
             "in": "query",
             "description": "结束时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
             "name": "source_type",
             "in": "query",
             "description": "来源类型",
             "type": "string",
-            "enum": [ "comment", "movie" ]
+            "enum": ["comment", "movie"]
           },
           {
             "name": "like",
@@ -2629,16 +2373,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "删除用户发布的评论",
         "description": "",
         "operationId": "manage_user_detail_delete_comment",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2657,16 +2396,11 @@
     },
     "/api/manage/user/detail/feedback": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "用户的反馈列表",
         "description": "",
         "operationId": "manage_user_detail_get_feedback",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2699,36 +2433,31 @@
             "in": "query",
             "description": "结束时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
             "name": "status",
             "in": "query",
             "description": "状态",
             "type": "string",
-            "enum": [ "DEALING", "DEAL" ]
+            "enum": ["DEALING", "DEAL"]
           }
         ],
         "responses": {
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_user_detail_get_feedback"
+              "$ref": "#/definitions/manage_user_detail_get_feedback"
             }
           }
         }
       },
       "put": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "修改反馈状态",
         "description": "",
         "operationId": "manage_user_detail_put_feedback",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2748,7 +2477,7 @@
             "in": "query",
             "description": "状态",
             "type": "string",
-            "enum": [ "DEALING", "DEAL" ]
+            "enum": ["DEALING", "DEAL"]
           }
         ],
         "responses": {
@@ -2758,16 +2487,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "删除反馈",
         "description": "",
         "operationId": "manage_user_detail_delete_feedback",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2786,16 +2510,11 @@
     },
     "/api/manage/user/detail/issue": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "用户上传的电影列表",
         "description": "",
         "operationId": "manage_user_detail_get_issue",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2828,21 +2547,21 @@
             "in": "query",
             "description": "结束时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
             "name": "status",
             "in": "query",
             "description": "状态",
             "type": "string",
-            "enum": [ "COMPLETE", "NOT_VERIFY", "VERIFY" ]
+            "enum": ["COMPLETE", "NOT_VERIFY", "VERIFY"]
           }
         ],
         "responses": {
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/manage_user_detail_get_issue"
+              "$ref": "#/definitions/manage_user_detail_get_issue"
             }
           }
         }
@@ -2850,16 +2569,11 @@
     },
     "/api/manage/user/detail/rate": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "用户评分的电影列表",
         "description": "",
         "operationId": "manage_user_detail_get_rate",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2892,7 +2606,7 @@
             "in": "query",
             "description": "结束时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
             "name": "value",
@@ -2913,16 +2627,11 @@
     },
     "/api/manage/user/detail/fans": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "用户粉丝列表",
         "description": "",
         "operationId": "manage_user_detail_get_fans",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -2932,44 +2641,51 @@
             "type": "string"
           },
           {
-            "name":"currPage",
+            "name": "currPage",
             "in": "query",
             "description": "当前页",
             "type": "integer"
           },
           {
-            "name":"pageSize",
+            "name": "pageSize",
             "in": "query",
             "description": "每页数量",
             "type": "integer"
           },
           {
-            "name":"start_date",
+            "name": "start_date",
             "in": "query",
             "description": "起始时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
-            "name":"end_end",
+            "name": "end_end",
             "in": "query",
             "description": "结束时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
-            "name":"role",
+            "name": "role",
             "in": "query",
             "description": "角色",
             "type": "string",
-            "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+            "enum": [
+              "SUPER_ADMIN",
+              "ADMIN",
+              "DEVELOPMENT",
+              "SUB_DEVELOPMENT",
+              "CUSTOMER",
+              "USER"
+            ]
           },
           {
-            "name":"status",
+            "name": "status",
             "in": "query",
             "description": "状态",
             "type": "string",
-            "enum": [ "SIGNIN", "SIGNOUT", "FREEZE" ]
+            "enum": ["SIGNIN", "SIGNOUT", "FREEZE"]
           },
           {
             "name": "content",
@@ -2990,16 +2706,11 @@
     },
     "/api/manage/user/detail/attentions": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "用户关注列表",
         "description": "",
         "operationId": "manage_user_detail_get_fans",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -3009,44 +2720,51 @@
             "type": "string"
           },
           {
-            "name":"currPage",
+            "name": "currPage",
             "in": "query",
             "description": "当前页",
             "type": "integer"
           },
           {
-            "name":"pageSize",
+            "name": "pageSize",
             "in": "query",
             "description": "每页数量",
             "type": "integer"
           },
           {
-            "name":"start_date",
+            "name": "start_date",
             "in": "query",
             "description": "起始时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
-            "name":"end_end",
+            "name": "end_end",
             "in": "query",
             "description": "结束时间",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
-            "name":"role",
+            "name": "role",
             "in": "query",
             "description": "角色",
             "type": "string",
-            "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+            "enum": [
+              "SUPER_ADMIN",
+              "ADMIN",
+              "DEVELOPMENT",
+              "SUB_DEVELOPMENT",
+              "CUSTOMER",
+              "USER"
+            ]
           },
           {
-            "name":"status",
+            "name": "status",
             "in": "query",
             "description": "状态",
             "type": "string",
-            "enum": [ "SIGNIN", "SIGNOUT", "FREEZE" ]
+            "enum": ["SIGNIN", "SIGNOUT", "FREEZE"]
           },
           {
             "name": "content",
@@ -3067,16 +2785,11 @@
     },
     "/api/manage/admin": {
       "get": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "summary": "本人信息",
         "description": "",
         "operationId": "manage_admin_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [],
         "responses": {
           "200": {
@@ -3088,16 +2801,11 @@
         }
       },
       "put": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "summary": "修改本人信息",
         "description": "",
         "operationId": "manage_admin_put",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "username",
@@ -3150,16 +2858,11 @@
     },
     "/api/manage/admin/upload": {
       "get": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "summary": "本人上传的电影列表",
         "description": "",
         "operationId": "manage_admin_get_upload",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -3186,16 +2889,11 @@
     },
     "/api/manage/admin/comment": {
       "get": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "summary": "本人发布的评论列表",
         "description": "",
         "operationId": "manage_admin_get_comment",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -3234,16 +2932,11 @@
     },
     "/api/manage/instance/info": {
       "get": {
-        "tags": [
-          "instance"
-        ],
+        "tags": ["instance"],
         "summary": "实例信息列表",
         "description": "",
         "operationId": "manage_instance_get_info",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -3268,16 +2961,11 @@
         }
       },
       "post": {
-        "tags": [
-          "instance"
-        ],
+        "tags": ["instance"],
         "summary": "新增实例",
         "description": "",
         "operationId": "manage_instance_post_info",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "info",
@@ -3307,16 +2995,11 @@
         }
       },
       "put": {
-        "tags": [
-          "instance"
-        ],
+        "tags": ["instance"],
         "summary": "修改实例",
         "description": "",
         "operationId": "manage_instance_put_info",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "info",
@@ -3351,16 +3034,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "instance"
-        ],
+        "tags": ["instance"],
         "summary": "删除实例",
         "description": "",
         "operationId": "manage_instance_delete_info",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -3378,16 +3056,11 @@
     },
     "/api/manage/instance/special": {
       "get": {
-        "tags": [
-          "instance"
-        ],
+        "tags": ["instance"],
         "summary": "专题信息列表",
         "description": "",
         "operationId": "manage_instance_get_special",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -3436,16 +3109,11 @@
         }
       },
       "post": {
-        "tags": [
-          "instance"
-        ],
+        "tags": ["instance"],
         "summary": "新增专题",
         "description": "",
         "operationId": "manage_instance_post_special",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "movie",
@@ -3488,16 +3156,11 @@
         }
       },
       "put": {
-        "tags": [
-          "instance"
-        ],
+        "tags": ["instance"],
         "summary": "修改专题",
         "description": "",
         "operationId": "manage_instance_put_special",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "movie",
@@ -3544,16 +3207,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "instance"
-        ],
+        "tags": ["instance"],
         "summary": "删除实例",
         "description": "",
         "operationId": "manage_instance_delete_info",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -3571,16 +3229,11 @@
     },
     "/api/manage/media": {
       "get": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "媒体资源列表",
         "description": "",
         "operationId": "manage_media_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -3619,21 +3272,21 @@
             "in": "query",
             "description": "来源类型",
             "type": "string",
-            "enum":["USER", "SYSTEM"]
+            "enum": ["USER", "SYSTEM"]
           },
           {
             "name": "auth",
             "in": "query",
             "description": "权限",
             "type": "string",
-            "enum":["PRIVATE", "PUBLIC"]
+            "enum": ["PRIVATE", "PUBLIC"]
           },
           {
             "name": "status",
             "in": "query",
             "description": "状态",
             "type": "string",
-            "enum":["ERROR", "COMPLETE", "UPLOADING"]
+            "enum": ["ERROR", "COMPLETE", "UPLOADING"]
           },
           {
             "name": "size",
@@ -3664,16 +3317,11 @@
         }
       },
       "put": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "修改专题",
         "description": "",
         "operationId": "manage_instance_put_special",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -3687,7 +3335,7 @@
             "in": "query",
             "description": "媒体类型(图片，视频，其他)",
             "type": "string",
-            "enum":[ "0", "1", "2" ],
+            "enum": ["0", "1", "2"],
             "required": true
           },
           {
@@ -3701,14 +3349,14 @@
             "in": "body",
             "description": "权限",
             "type": "string",
-            "enum": [ "PRIVATE", "PUBLIC" ]
+            "enum": ["PRIVATE", "PUBLIC"]
           },
           {
             "name": "status",
             "in": "body",
             "description": "状态",
             "type": "string",
-            "enum":[ "ERROR", "COMPLETE", "UPLOADING" ]
+            "enum": ["ERROR", "COMPLETE", "UPLOADING"]
           }
         ],
         "responses": {
@@ -3718,16 +3366,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "删除媒体资源",
         "description": "",
         "operationId": "manage_media_delete",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -3741,7 +3384,7 @@
             "in": "query",
             "description": "媒体类型(图片，视频，其他)",
             "type": "string",
-            "enum":[ "0", "1", "2" ],
+            "enum": ["0", "1", "2"],
             "required": true
           }
         ],
@@ -3754,16 +3397,11 @@
     },
     "/api/manage/media/valid": {
       "get": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "媒体是否完成上传验证",
         "description": "",
         "operationId": "manage_media_get_valid",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -3777,7 +3415,7 @@
             "in": "query",
             "description": "媒体类型(图片，视频，其他)",
             "type": "string",
-            "enum":[ "0", "1", "2" ],
+            "enum": ["0", "1", "2"],
             "required": true
           },
           {
@@ -3799,16 +3437,11 @@
     },
     "/api/manage/media/person": {
       "delete": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "删除指定媒体白名单用户",
         "description": "",
         "operationId": "manage_media_delete_person",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -3822,7 +3455,7 @@
             "in": "query",
             "description": "媒体类型(图片，视频，其他)",
             "type": "string",
-            "enum":[ "0", "1", "2" ],
+            "enum": ["0", "1", "2"],
             "required": true
           },
           {
@@ -3840,16 +3473,11 @@
         }
       },
       "get": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "媒体白名单列表",
         "description": "",
         "operationId": "manage_media_get_person",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -3863,7 +3491,7 @@
             "in": "query",
             "description": "媒体类型(图片，视频，其他)",
             "type": "string",
-            "enum":[ "0", "1", "2" ],
+            "enum": ["0", "1", "2"],
             "required": true
           }
         ],
@@ -3877,16 +3505,11 @@
         }
       },
       "post": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "媒体白名单新增",
         "description": "",
         "operationId": "manage_media_post_person",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -3900,7 +3523,7 @@
             "in": "body",
             "description": "媒体类型(图片，视频，其他)",
             "type": "string",
-            "enum":[ "0", "1", "2" ],
+            "enum": ["0", "1", "2"],
             "required": true
           },
           {
@@ -3920,16 +3543,11 @@
     },
     "/api/manage/chat/room": {
       "get": {
-        "tags": [
-          "chat"
-        ],
+        "tags": ["chat"],
         "summary": "聊天室列表",
         "description": "",
         "operationId": "manage_chat_get_room",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -3991,16 +3609,11 @@
         }
       },
       "post": {
-        "tags": [
-          "chat"
-        ],
+        "tags": ["chat"],
         "summary": "新增聊天室(只能新增系统聊天室)",
         "description": "",
         "operationId": "manage_chat_post_room",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "name",
@@ -4036,23 +3649,18 @@
         }
       },
       "put": {
-        "tags": [
-          "chat"
-        ],
+        "tags": ["chat"],
         "summary": "修改聊天室",
         "description": "",
         "operationId": "manage_chat_put_room",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "description": "聊天室id",
             "type": "string",
-            "required": true 
+            "required": true
           },
           {
             "name": "members",
@@ -4086,16 +3694,11 @@
         }
       },
       "delete": {
-        "tags": [
-          "chat"
-        ],
+        "tags": ["chat"],
         "summary": "删除聊天室",
         "description": "",
         "operationId": "manage_chat_delete_room",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -4113,16 +3716,11 @@
     },
     "/api/manage/chat/message": {
       "get": {
-        "tags": [
-          "chat"
-        ],
+        "tags": ["chat"],
         "summary": "消息列表",
         "description": "",
         "operationId": "manage_chat_get_message",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -4141,7 +3739,7 @@
             "in": "query",
             "description": "聊天室id",
             "type": "string",
-            "required": true 
+            "required": true
           }
         ],
         "responses": {
@@ -4154,16 +3752,11 @@
         }
       },
       "post": {
-        "tags": [
-          "chat"
-        ],
+        "tags": ["chat"],
         "summary": "发送消息(只能发送系统消息)",
         "description": "",
         "operationId": "manage_chat_post_message",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "content",
@@ -4184,7 +3777,7 @@
             "in": "body",
             "description": "房间id",
             "type": "string",
-            "required": true 
+            "required": true
           },
           {
             "name": "point_to",
@@ -4200,23 +3793,18 @@
         }
       },
       "delete": {
-        "tags": [
-          "chat"
-        ],
+        "tags": ["chat"],
         "summary": "删除消息",
         "description": "",
         "operationId": "manage_chat_delete_message",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "description": "消息id(多个用,分隔, 也可聊天室id,聊天室id会清空聊天室所有消息)",
             "type": "string",
-            "required": true 
+            "required": true
           },
           {
             "name": "type",
@@ -4234,16 +3822,11 @@
     },
     "/api/manage/chat/member": {
       "get": {
-        "tags": [
-          "chat"
-        ],
+        "tags": ["chat"],
         "summary": "成员列表",
         "description": "",
         "operationId": "manage_chat_get_member",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -4280,16 +3863,11 @@
         }
       },
       "post": {
-        "tags": [
-          "chat"
-        ],
+        "tags": ["chat"],
         "summary": "新增成员(将成员添加进聊天室, 只能是系统聊天室)",
         "description": "",
         "operationId": "manage_chat_post_room",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -4313,30 +3891,25 @@
         }
       },
       "delete": {
-        "tags": [
-          "chat"
-        ],
+        "tags": ["chat"],
         "summary": "剔除成员(将成员从聊天室中移除)",
         "description": "",
         "operationId": "manage_chat_delete_member",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "description": "成员id(多个用,分隔)",
             "type": "string",
-            "required": true 
+            "required": true
           },
           {
             "name": "room",
             "in": "query",
             "description": "聊天室id",
             "type": "string",
-            "required": true 
+            "required": true
           },
           {
             "name": "is_delete",
@@ -4354,16 +3927,11 @@
     },
     "/api/manage/schedule": {
       "get": {
-        "tags": [
-          "schedule"
-        ],
+        "tags": ["schedule"],
         "summary": "任务列表",
         "description": "",
         "operationId": "manage_schedule_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "responses": {
           "200": {
             "description": "成功",
@@ -4374,16 +3942,11 @@
         }
       },
       "put": {
-        "tags": [
-          "schedule"
-        ],
+        "tags": ["schedule"],
         "summary": "恢复任务执行",
         "description": "",
         "operationId": "manage_schedule_put",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -4395,16 +3958,11 @@
         ]
       },
       "post": {
-        "tags": [
-          "schedule"
-        ],
+        "tags": ["schedule"],
         "summary": "立即执行任务",
         "description": "",
         "operationId": "manage_schedule_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -4416,16 +3974,11 @@
         ]
       },
       "delete": {
-        "tags": [
-          "schedule"
-        ],
+        "tags": ["schedule"],
         "summary": "取消任务执行",
         "description": "",
         "operationId": "manage_schedule_delete",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -4439,16 +3992,11 @@
     },
     "/api/manage/schedule/time": {
       "put": {
-        "tags": [
-          "schedule"
-        ],
+        "tags": ["schedule"],
         "summary": "修改任务执行时间",
         "description": "",
         "operationId": "manage_schedule_put_time",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -4469,16 +4017,11 @@
     },
     "/api/manage/schedule/resume": {
       "post": {
-        "tags": [
-          "schedule"
-        ],
+        "tags": ["schedule"],
         "summary": "恢复所有任务为默认状态",
         "description": "",
         "operationId": "manage_schedule_post_resume",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "deprecated": true
       }
     }
@@ -4532,7 +4075,7 @@
                       "description": "今日新增用户量"
                     }
                   }
-                },  
+                },
                 "visit_day": {
                   "type": "object",
                   "properties": {
@@ -4645,7 +4188,7 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"object",
+              "type": "object",
               "properties": {
                 "data": {
                   "type": "array",
@@ -4702,7 +4245,7 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"object",
+              "type": "object",
               "properties": {
                 "data": {
                   "type": "array",
@@ -4763,7 +4306,7 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"array",
+              "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
@@ -4796,7 +4339,7 @@
           "type": "object",
           "properties": {
             "total": {
-              "type":"integer",
+              "type": "integer",
               "description": "总搜索量"
             },
             "average": {
@@ -4804,15 +4347,15 @@
               "description": "人均搜索量"
             },
             "count_total_day": {
-              "type":"integer",
+              "type": "integer",
               "description": "日同比"
             },
             "count_average_day": {
-              "type":"integer",
+              "type": "integer",
               "description": "日同比"
             },
             "total_chart": {
-              "type":"array",
+              "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
@@ -4829,7 +4372,7 @@
               }
             },
             "average_chart": {
-              "type":"array",
+              "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
@@ -4977,12 +4520,12 @@
                       "source_type": {
                         "type": "string",
                         "description": "电影来源类型",
-                        "enum": [ "ORIGIN", "USER" ]
+                        "enum": ["ORIGIN", "USER"]
                       },
                       "status": {
                         "type": "string",
                         "description": "电影状态",
-                        "enum": [ "VERIFY", "COMPLETE", "NOT_VERIFY" ]
+                        "enum": ["VERIFY", "COMPLETE", "NOT_VERIFY"]
                       },
                       "comment_count": {
                         "type": "integer",
@@ -5076,7 +4619,7 @@
                 "screen_time": {
                   "type": "string",
                   "description": "上映时间",
-                  "format":"date-time"
+                  "format": "date-time"
                 },
                 "description": {
                   "type": "string",
@@ -5178,12 +4721,12 @@
                 "source_type": {
                   "type": "string",
                   "description": "电影来源类型",
-                  "enum": [ "ORIGIN", "USER" ]
+                  "enum": ["ORIGIN", "USER"]
                 },
                 "status": {
                   "type": "string",
                   "description": "电影状态",
-                  "enum": [ "VERIFY", "NOT_VERIFY", "COMPLETE" ]
+                  "enum": ["VERIFY", "NOT_VERIFY", "COMPLETE"]
                 },
                 "barrage_count": {
                   "type": "integer",
@@ -5283,7 +4826,7 @@
                 "screen_time": {
                   "type": "string",
                   "description": "上映时间",
-                  "format":"date-time"
+                  "format": "date-time"
                 },
                 "description": {
                   "type": "string",
@@ -5373,7 +4916,7 @@
                       "source_type": {
                         "type": "string",
                         "description": "原始类型",
-                        "enum": [ "movie", "comment" ]
+                        "enum": ["movie", "comment"]
                       },
                       "user_info": {
                         "type": "object",
@@ -5479,7 +5022,7 @@
                       "source_type": {
                         "type": "string",
                         "description": "原始类型",
-                        "enum": [ "movie", "comment" ]
+                        "enum": ["movie", "comment"]
                       },
                       "user_info": {
                         "type": "object",
@@ -5600,12 +5143,19 @@
                 "status": {
                   "type": "string",
                   "description": "用户状态",
-                  "enum": [ "SIGNIN", "SIGNOUT", "FREEZE" ]
+                  "enum": ["SIGNIN", "SIGNOUT", "FREEZE"]
                 },
                 "roles": {
                   "type": "array",
                   "description": "角色",
-                  "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+                  "enum": [
+                    "SUPER_ADMIN",
+                    "ADMIN",
+                    "DEVELOPMENT",
+                    "SUB_DEVELOPMENT",
+                    "CUSTOMER",
+                    "USER"
+                  ]
                 },
                 "glance_date": {
                   "type": "integer",
@@ -5649,7 +5199,7 @@
               "type": "object",
               "properties": {
                 "store_date": {
-                  "type":"string",
+                  "type": "string",
                   "description": "收藏时间"
                 },
                 "_id": {
@@ -5686,12 +5236,19 @@
                 "status": {
                   "type": "string",
                   "description": "用户状态",
-                  "enum": [ "SIGNIN", "SIGNOUT", "FREEZE" ]
+                  "enum": ["SIGNIN", "SIGNOUT", "FREEZE"]
                 },
                 "roles": {
                   "type": "array",
                   "description": "角色",
-                  "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+                  "enum": [
+                    "SUPER_ADMIN",
+                    "ADMIN",
+                    "DEVELOPMENT",
+                    "SUB_DEVELOPMENT",
+                    "CUSTOMER",
+                    "USER"
+                  ]
                 },
                 "movie_name": {
                   "type": "string",
@@ -5768,7 +5325,7 @@
                       "source_type": {
                         "type": "array",
                         "description": "来源类型",
-                        "enum": [ "ORIGIN", "USER" ]
+                        "enum": ["ORIGIN", "USER"]
                       },
                       "country": {
                         "type": "object",
@@ -5803,10 +5360,10 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"object",
+              "type": "object",
               "properties": {
                 "total": {
-                  "type":"integer",
+                  "type": "integer",
                   "list": {
                     "type": "array",
                     "items": {
@@ -5842,7 +5399,7 @@
                         "source_type": {
                           "type": "array",
                           "description": "来源类型",
-                          "enum": [ "ORIGIN", "USER" ]
+                          "enum": ["ORIGIN", "USER"]
                         },
                         "country": {
                           "type": "object",
@@ -5878,10 +5435,10 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"object",
+              "type": "object",
               "properties": {
                 "total": {
-                  "type":"integer"
+                  "type": "integer"
                 },
                 "list": {
                   "type": "array",
@@ -5910,7 +5467,7 @@
                       "source_type": {
                         "type": "array",
                         "description": "来源类型",
-                        "enum": [ "ORIGIN", "USER" ]
+                        "enum": ["ORIGIN", "USER"]
                       }
                     }
                   }
@@ -5934,10 +5491,10 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"object",
+              "type": "object",
               "properties": {
                 "total": {
-                  "type":"integer"
+                  "type": "integer"
                 },
                 "list": {
                   "type": "array",
@@ -5966,7 +5523,7 @@
                       "source_type": {
                         "type": "array",
                         "description": "来源类型",
-                        "enum": [ "ORIGIN", "USER" ]
+                        "enum": ["ORIGIN", "USER"]
                       }
                     }
                   }
@@ -6028,7 +5585,7 @@
                     "source_type": {
                       "type": "array",
                       "description": "来源类型",
-                      "enum": [ "ORIGIN", "USER" ]
+                      "enum": ["ORIGIN", "USER"]
                     }
                   }
                 }
@@ -6106,7 +5663,14 @@
                         "description": "角色",
                         "items": {
                           "type": "string",
-                          "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+                          "enum": [
+                            "SUPER_ADMIN",
+                            "ADMIN",
+                            "DEVELOPMENT",
+                            "SUB_DEVELOPMENT",
+                            "CUSTOMER",
+                            "USER"
+                          ]
                         }
                       },
                       "createdAt": {
@@ -6120,9 +5684,7 @@
                       "status": {
                         "type": "string",
                         "description": "用户状态",
-                        "enum": [
-                          "SIGNIN", "SIGNOUT", "FREEZE"
-                        ]
+                        "enum": ["SIGNIN", "SIGNOUT", "FREEZE"]
                       }
                     }
                   }
@@ -6192,7 +5754,14 @@
                   "description": "角色",
                   "items": {
                     "type": "string",
-                    "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+                    "enum": [
+                      "SUPER_ADMIN",
+                      "ADMIN",
+                      "DEVELOPMENT",
+                      "SUB_DEVELOPMENT",
+                      "CUSTOMER",
+                      "USER"
+                    ]
                   }
                 },
                 "createdAt": {
@@ -6206,9 +5775,7 @@
                 "status": {
                   "type": "string",
                   "description": "用户状态",
-                  "enum": [
-                    "SIGNIN", "SIGNOUT", "FREEZE"
-                  ]
+                  "enum": ["SIGNIN", "SIGNOUT", "FREEZE"]
                 }
               }
             }
@@ -6278,7 +5845,7 @@
                       "source_type": {
                         "type": "string",
                         "description": "来源类型",
-                        "enum": [ "comment", "movie" ]
+                        "enum": ["comment", "movie"]
                       },
                       "content": {
                         "type": "object",
@@ -6360,7 +5927,7 @@
                       "status": {
                         "type": "string",
                         "description": "状态",
-                        "enum": [ "DEAL", "DEALING" ]
+                        "enum": ["DEAL", "DEALING"]
                       },
                       "content": {
                         "type": "object",
@@ -6462,7 +6029,7 @@
                       "status": {
                         "type": "string",
                         "description": "电影状态",
-                        "enum": [ "VERIFY", "COMPLETE", "NOT_VERIFY" ]
+                        "enum": ["VERIFY", "COMPLETE", "NOT_VERIFY"]
                       },
                       "comment_count": {
                         "type": "integer",
@@ -6539,7 +6106,7 @@
                       "source_type": {
                         "type": "string",
                         "description": "来源类型",
-                        "enum": [ "ORIGIN", "USER" ]
+                        "enum": ["ORIGIN", "USER"]
                       }
                     }
                   }
@@ -6621,7 +6188,14 @@
                   "description": "角色",
                   "items": {
                     "type": "string",
-                    "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+                    "enum": [
+                      "SUPER_ADMIN",
+                      "ADMIN",
+                      "DEVELOPMENT",
+                      "SUB_DEVELOPMENT",
+                      "CUSTOMER",
+                      "USER"
+                    ]
                   }
                 },
                 "createdAt": {
@@ -6699,7 +6273,7 @@
                 "status": {
                   "type": "string",
                   "description": "电影状态",
-                  "enum": [ "VERIFY", "NOT_VERIFY", "COMPLETE" ]
+                  "enum": ["VERIFY", "NOT_VERIFY", "COMPLETE"]
                 },
                 "barrage_count": {
                   "type": "integer",
@@ -6769,7 +6343,7 @@
                       "source_type": {
                         "type": "string",
                         "description": "来源类型",
-                        "enum": [ "comment", "movie" ]
+                        "enum": ["comment", "movie"]
                       },
                       "content": {
                         "type": "object",
@@ -6999,10 +6573,10 @@
                       "origin_type": {
                         "type": "string",
                         "description": "来源类型",
-                        "enum":["USER", "SYSTEM"]
+                        "enum": ["USER", "SYSTEM"]
                       },
                       "origin": {
-                        "type":"object",
+                        "type": "object",
                         "properties": {
                           "name": {
                             "type": "string",
@@ -7016,10 +6590,10 @@
                       "auth": {
                         "type": "string",
                         "description": "权限",
-                        "enum":["PUBLIC", "PRIVATE"]
+                        "enum": ["PUBLIC", "PRIVATE"]
                       },
                       "info": {
-                        "type":"object",
+                        "type": "object",
                         "properties": {
                           "md5": {
                             "type": "string",
@@ -7028,7 +6602,7 @@
                           "status": {
                             "type": "string",
                             "description": "状态",
-                            "enum":["ERROR", "COMPLETE", "UPLOADING"]
+                            "enum": ["ERROR", "COMPLETE", "UPLOADING"]
                           },
                           "size": {
                             "type": "integer",
@@ -7140,7 +6714,14 @@
                         "description": "角色",
                         "items": {
                           "type": "string",
-                          "enum": [ "SUPER_ADMIN", "ADMIN", "DEVELOPMENT", "SUB_DEVELOPMENT", "CUSTOMER", "USER" ]
+                          "enum": [
+                            "SUPER_ADMIN",
+                            "ADMIN",
+                            "DEVELOPMENT",
+                            "SUB_DEVELOPMENT",
+                            "CUSTOMER",
+                            "USER"
+                          ]
                         }
                       },
                       "createdAt": {
@@ -7154,9 +6735,7 @@
                       "status": {
                         "type": "string",
                         "description": "用户状态",
-                        "enum": [
-                          "SIGNIN", "SIGNOUT", "FREEZE"
-                        ]
+                        "enum": ["SIGNIN", "SIGNOUT", "FREEZE"]
                       }
                     }
                   }
@@ -7222,8 +6801,8 @@
                             "type": "string"
                           },
                           "name": {
-                            "type":"string",
-                            "description":"名称"
+                            "type": "string",
+                            "description": "名称"
                           }
                         }
                       }
@@ -7296,20 +6875,20 @@
                             "type": "string"
                           },
                           "username": {
-                            "type":"string",
-                            "description":"名称"
+                            "type": "string",
+                            "description": "名称"
                           },
                           "description": {
-                            "type":"string",
-                            "description":"描述"
+                            "type": "string",
+                            "description": "描述"
                           },
                           "avatar": {
-                            "type":"string",
-                            "description":"头像"
+                            "type": "string",
+                            "description": "头像"
                           },
                           "member": {
-                            "type":"string",
-                            "description":"成员id"
+                            "type": "string",
+                            "description": "成员id"
                           }
                         }
                       },
@@ -7321,12 +6900,12 @@
                             "type": "string"
                           },
                           "name": {
-                            "type":"string",
-                            "description":"名称"
+                            "type": "string",
+                            "description": "名称"
                           },
                           "description": {
-                            "type":"string",
-                            "description":"描述"
+                            "type": "string",
+                            "description": "描述"
                           }
                         }
                       },
@@ -7392,12 +6971,12 @@
                           "type": "string"
                         },
                         "name": {
-                          "type":"string",
-                          "description":"名称"
+                          "type": "string",
+                          "description": "名称"
                         },
                         "description": {
-                          "type":"string",
-                          "description":"描述"
+                          "type": "string",
+                          "description": "描述"
                         }
                       }
                     },
@@ -7436,20 +7015,20 @@
                             "type": "string"
                           },
                           "username": {
-                            "type":"string",
-                            "description":"名称"
+                            "type": "string",
+                            "description": "名称"
                           },
                           "description": {
-                            "type":"string",
-                            "description":"描述"
+                            "type": "string",
+                            "description": "描述"
                           },
                           "avatar": {
-                            "type":"string",
-                            "description":"头像"
+                            "type": "string",
+                            "description": "头像"
                           },
                           "member": {
-                            "type":"string",
-                            "description":"成员id"
+                            "type": "string",
+                            "description": "成员id"
                           }
                         }
                       },
@@ -7481,25 +7060,25 @@
                         "properties": {
                           "text": {
                             "type": "string",
-                            "description":"文本"
+                            "description": "文本"
                           },
                           "video": {
-                            "type":"string",
-                            "description":"视频"
+                            "type": "string",
+                            "description": "视频"
                           },
                           "image": {
-                            "type":"string",
-                            "description":"图片"
+                            "type": "string",
+                            "description": "图片"
                           },
                           "audio": {
-                            "type":"string",
-                            "description":"音频"
+                            "type": "string",
+                            "description": "音频"
                           }
                         }
                       },
                       "media_type": {
-                        "type":"string",
-                        "description":"媒体类型",
+                        "type": "string",
+                        "description": "媒体类型",
                         "enum": ["IMAGE", "VIDEO", "AUDIO", "TEXT"]
                       }
                     }
@@ -7554,16 +7133,16 @@
                             "type": "string"
                           },
                           "username": {
-                            "type":"string",
-                            "description":"名称"
+                            "type": "string",
+                            "description": "名称"
                           },
                           "description": {
-                            "type":"string",
-                            "description":"描述"
+                            "type": "string",
+                            "description": "描述"
                           },
                           "avatar": {
-                            "type":"string",
-                            "description":"头像"
+                            "type": "string",
+                            "description": "头像"
                           },
                           "friend__id": {
                             "type": "string"
@@ -7588,12 +7167,12 @@
                               "type": "string"
                             },
                             "name": {
-                              "type":"string",
-                              "description":"名称"
+                              "type": "string",
+                              "description": "名称"
                             },
                             "description": {
-                              "type":"string",
-                              "description":"描述"
+                              "type": "string",
+                              "description": "描述"
                             }
                           }
                         }
@@ -7624,6 +7203,9 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
                   "name": {
                     "type": "string",
                     "description": "任务名称"
@@ -7639,7 +7221,15 @@
                   "status": {
                     "type": "string",
                     "description": "状态",
-                    "enum": [ "CANCEL", "SCHEDULING" ]
+                    "enum": ["CANCEL", "SCHEDULING"]
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
                   }
                 }
               }
