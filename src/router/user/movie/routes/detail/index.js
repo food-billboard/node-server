@@ -161,6 +161,7 @@ router
           avatar: avatarGet(author.avatar)
         },
         rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
+        rate_person,
         info: {
           ...nextInfo,
           actor: actor.map(item => {

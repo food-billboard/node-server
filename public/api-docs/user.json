@@ -2403,6 +2403,10 @@
                   "type": "integer",
                   "description": "作者评分"
                 },
+                "rate_person": {
+                  "type": "integer",
+                  "description": "评分人数"
+                },
                 "comment": {
                   "type": "array",
                   "description": "评论列表",

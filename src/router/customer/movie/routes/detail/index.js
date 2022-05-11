@@ -154,6 +154,7 @@ router
         store,
         video: video ? video.src : null,
         rate: Number.isNaN(rate) ? 0 : parseFloat(rate).toFixed(1),
+        rate_person,
         poster: poster ? poster.src : null,
         images: images.filter(i => i && !!i.src).map(i => i.src),
         comment: comment.map(com => {

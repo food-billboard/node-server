@@ -41,7 +41,7 @@ function responseExpect(res, validate=[]) {
   expect(target).to.be.a('object').and.that.includes.all.keys(
     'author', 'author_description', 'author_rate', 'comment',
     'createdAt', 'updatedAt', 'glance', 'hot', 'images', 'info', 'name',
-    'poster', 'rate', 'same_film', 'store', 'tag', 'video', '_id'
+    'poster', 'rate', 'same_film', 'store', 'tag', 'video', '_id', 'rate_person'
   )
 
   expect(target.author).to.be.a('object').and.that.includes.any.keys("username", "_id", "avatar")
@@ -50,6 +50,7 @@ function responseExpect(res, validate=[]) {
   commonValidate.objectId(target.author._id)
   commonValidate.string(target.author_description, function() { return true })
   commonValidate.number(target.author_rate)
+  commonValidate.number(target.rate_person)
   expect(target.comment).to.be.a('array')
   target.comment.forEach(item => {
     expect(item).to.be.a('object').that.includes.all.keys('user_info', 'content', "_id")
