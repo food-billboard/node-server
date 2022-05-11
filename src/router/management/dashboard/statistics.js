@@ -32,7 +32,10 @@ router
         $group: group
       },
       {
-        $sort: sort
+        $sort: {
+          createdAt: -1,
+          ...sort
+        }
       }
     ])
     .exec(),
@@ -55,7 +58,8 @@ router
       {
         $sort: {
           issue_count: -1,
-          hot: -1
+          hot: -1,
+          createdAt: -1 
         }
       },
       {
@@ -138,7 +142,10 @@ router
         $group: group
       },
       {
-        $sort: sort
+        $sort: {
+          createdAt: -1,
+          ...sort,
+        }
       }
     ])
     .exec(),
@@ -156,6 +163,7 @@ router
       },
       {
         $sort: {
+          createdAt: -1,
           count: -1
         }
       },
@@ -231,7 +239,10 @@ router
       $group: group
     },
     {
-      $sort: sort
+      $sort: {
+        createdAt: -1,
+        ...sort
+      }
     }
   ])
   .then(visit_count => {

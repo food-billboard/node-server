@@ -21,7 +21,8 @@ router.get('/', async(ctx) => {
     },
     {
       $sort: {
-        hot: -1
+        createdAt: -1,
+        hot: -1 
       }
     },
     {

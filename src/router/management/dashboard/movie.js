@@ -87,7 +87,8 @@ router
       },
       {
         $sort: {
-          "_id.day": 1
+          "_id.day": 1,
+          createdAt: -1 
         }
       }
     ]),
@@ -110,7 +111,8 @@ router
       },
       {
         $sort: {
-          hot
+          hot,
+          createdAt: -1 
         }
       },
       {
@@ -268,7 +270,8 @@ router
       },
       {
         $sort: {
-          count: -1
+          count: -1,
+          createdAt: -1 
         }
       },
       {

@@ -643,7 +643,7 @@ router
             }
           },
           ...(Object.values(commentSort).length ? [{
-            $sort: commentSort 
+            $sort: commentSort
           }] : []) 
         ],
         as: "comment" 

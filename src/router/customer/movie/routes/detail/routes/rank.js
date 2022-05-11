@@ -123,7 +123,10 @@ router
               }
             },
             ...(Object.keys(sortPipeline).length ? [{
-              $sort: sortPipeline
+              $sort: {
+                createdAt: -1,
+                ...sortPipeline
+              }
             }] : []),
             {
               $skip: currPage * pageSize 

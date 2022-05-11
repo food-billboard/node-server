@@ -135,7 +135,9 @@ router
           $sort: sort.reduce((acc, cur) => {
             acc[cur[0]] = cur[1]
             return acc
-          }, {}) 
+          }, {
+            createdAt: -1 
+          }) 
         }
       ]
     : 
@@ -265,11 +267,7 @@ router
       data
     }
   })
-  .catch(err => {
-    console.log(err, 2222)
-    return dealErr(ctx)(err)
-  })
-  // .catch(dealErr(ctx))
+  .catch(dealErr(ctx))
 
   responseDataDeal({
     ctx,
