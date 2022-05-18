@@ -1,3 +1,4 @@
+const { cookieDomainSet } = require('../tool')
 let crypto;
 try {
   crypto = require('crypto')
@@ -92,15 +93,22 @@ const setCookie = async (ctx, { key, value, options, type, parse }) => {
   // })
   // if(!needToEdit) return
   // const { action } = config
-
   return SET_TYPE[type](ctx, getCookieName(key, parse), value, options)
 }
 
 const getCookie = (ctx, key) => SET_TYPE.get(ctx, key)
 
+const coverLoginCookie = (ctx) => {
+  // 覆盖设置cookie
+  // 临时设置，需要修改
+  const token = getCookie(ctx, TOKEN_COOKIE)
+  setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set', options: { domain: cookieDomainSet(), overwrite: true } })
+}
+
 module.exports = {
   setCookie,
   getCookie,
+  coverLoginCookie,
   TOKEN_COOKIE
   // getCookieName,
   // setCookieName

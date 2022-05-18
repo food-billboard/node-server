@@ -7,7 +7,7 @@ const Feedback = require('./routes/feedback')
 const Black = require('./routes/black')
 const Friends = require('./routes/friends')
 const Info = require('./routes/info')
-const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal, avatarGet } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal, avatarGet, coverLoginCookie } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -63,6 +63,11 @@ router
   .then(notFound)
   .then(data => {
     const { fans, attentions, avatar, ...nextData } = data
+  
+    //重置默认的koa状态码
+    ctx.status = 200
+    coverLoginCookie(ctx)
+
     return {
       data: {
         ...nextData,

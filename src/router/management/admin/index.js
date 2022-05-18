@@ -3,7 +3,7 @@ const { merge } = require('lodash')
 const { Types: { ObjectId } } = require('mongoose')
 const Upload = require('./upload')
 const Comment = require('./comment')
-const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal, Params, avatarGet, encoded } = require('@src/utils')
+const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal, Params, avatarGet, encoded, coverLoginCookie } = require('@src/utils')
 const { auth } = require('./auth')
 
 const router = new Router()
@@ -47,6 +47,11 @@ router
   .then(auth)
   .then(data => {
     const { fans, attentions, issue, comment, store, avatar, ...nextData } = data
+
+    //重置默认的koa状态码
+    ctx.status = 200
+    coverLoginCookie(ctx)
+
     return {
       data: {
         ...nextData,
