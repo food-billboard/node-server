@@ -64,7 +64,7 @@ const MOVIE_DATE = async (page) => {
 const MOVIE_LANGUAGE = async (page) => {
   const language = await page.$$eval(`${BASE_INFO_WRAPPER} #info .pl`, value => {
     const target = value.find(item => {
-      return item.innerHTML.startsWith('制片国家')
+      return item.innerHTML.startsWith('语言')
     })
     return target.nextSibling.textContent
   })
@@ -77,7 +77,7 @@ const MOVIE_LANGUAGE = async (page) => {
 const MOVIE_DISTRICT = async (page) => {
   const district = await page.$$eval(`${BASE_INFO_WRAPPER} #info .pl`, value => {
     const target = value.find(item => {
-      return item.innerHTML.startsWith('语言')
+      return item.innerHTML.startsWith('制片国家')
     })
     return target.nextSibling.textContent
   })
