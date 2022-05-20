@@ -6,6 +6,7 @@ const Share = require('./router/share')
 const Enable = require('./router/enable')
 const Copy = require('./router/copy')
 const Model = require('./router/model')
+const Pre = require('./router/pre')
 const { loginAuthorization } = require('@src/utils')
 
 const router = new Router()
@@ -20,5 +21,6 @@ router
 .use('/preview', Preview.routes(), Preview.allowedMethods())
 .use('/enable', Enable.routes(), Enable.allowedMethods())
 .use('/copy', Copy.routes(), Copy.allowedMethods())
+.use('/pre', Pre.routes(), Pre.allowedMethods())
 
 module.exports = router
