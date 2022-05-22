@@ -96,7 +96,6 @@ const mergeChunkFile = async ({
   let chunkList = await getChunkFileList(templateFolder)
   chunkList.sort((suffixA, suffixB) => Number(suffixA.split('-')[1]) - Number(suffixB.split('-')[1]))
   if(!chunkList.every((chunk, index) => index == Number(chunk.split('-')[1]))) return Promise.reject({ errMsg: 'not complete', status: 403 })
-  
   //文件合并
   const mergeTasks = async () => {
     for(let i = 0; i < chunkList.length; i ++) {
@@ -496,7 +495,7 @@ const patchRequestDeal = async (options) => {
     .then(_ => success())
     .then(_ => ({ status: 204, success: true, offset }))
     .catch(err => {
-      console.log(err)
+      console.error(err)
       return error()
       .then(_ => Promise.reject({
         status: 500,

@@ -241,7 +241,7 @@ const headRequestMediaDeal = {
   
     const defaultModel = {
       name: name || md5,
-      src: path.join('/static', 'video', `${md5}.${Mime.getExtension(mime)}`),
+      src: path.join('/static', 'other', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
       white_list: [_id],
       origin: _id,
