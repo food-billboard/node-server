@@ -34,6 +34,149 @@
     "http"
   ],
   "paths": {
+    "/api/screen/pre/request": {
+      "post": {
+        "tags": [
+          "screen"
+        ],
+        "summary": "后端数据请求",
+        "description": "",
+        "operationId": "screen_pre_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "url",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"请求地址"
+          },
+          {
+            "name": "method",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"请求方法"
+          },
+          {
+            "name": "header",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"请求头"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "type": "string",
+            "description":"请求参数",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/screen/pre/leadin": {
+      "post": {
+        "tags": [
+          "screen"
+        ],
+        "summary": "导入",
+        "description": "",
+        "operationId": "screen_pre_leadin",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"文件id"
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"导入类型(screen | model)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/screen/pre/export": {
+      "post": {
+        "tags": [
+          "screen"
+        ],
+        "summary": "导出",
+        "description": "",
+        "operationId": "screen_pre_export",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"大屏或模板id"
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"导出类型(screen | model)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
     "/api/screen/list": {
       "post": {
         "tags": [

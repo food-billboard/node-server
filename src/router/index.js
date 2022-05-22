@@ -7,7 +7,10 @@ const Manage = require('./manage')
 const Media = require('./media')
 const Screen = require('./screen')
 const { Types: { ObjectId } } = require('mongoose')
-const { dealErr, responseDataDeal } = require('@src/utils')
+const { dealErr, responseDataDeal, STATIC_FILE_PATH } = require('@src/utils')
+
+const path = require('path')
+const fs = require('fs-extra')
 
 const router = new Router()
 

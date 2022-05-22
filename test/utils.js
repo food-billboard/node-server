@@ -40,7 +40,8 @@ const {
   downloadVideo,
   fileEncoded,
   ScreenModelModal,
-  MEDIA_STATUS
+  MEDIA_STATUS,
+  OtherMediaModel
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
@@ -258,6 +259,29 @@ function mockCreateImage(values={}) {
   baseModel = mergeConfig(baseModel, values, true)
 
   const model = new ImageModel(baseModel)
+
+  return { model }
+}
+
+//创建图片
+function mockCreateOtherMedia(values={}) {
+  let baseModel = {
+    name: '测试其他媒体名称',
+    src: '测试地址' + Math.random(),
+    auth: 'PUBLIC',
+    origin_type: 'USER',
+    origin: ObjectId('8f63270f005f1c1a0d9448ca'),
+    info: {
+      mime: 'json',
+      status: MEDIA_STATUS.COMPLETE,
+      md5: '测试md5',
+      size: 100
+    },
+  }
+
+  baseModel = mergeConfig(baseModel, values, true)
+
+  const model = new OtherMediaModel(baseModel)
 
   return { model }
 }
@@ -713,5 +737,6 @@ module.exports = {
   mockCreateRealVideo,
   mockCreateScreen,
   commonMovieValid,
-  mockCreateScreenModel
+  mockCreateScreenModel,
+  mockCreateOtherMedia
 }

@@ -1,7 +1,6 @@
 const Router = require('@koa/router')
 const { verifyTokenToData, dealErr, Params, responseDataDeal, ScreenModal, notFound, loginAuthorization, getCookie, SCREEN_TYPE } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
-const { getUserAgent, SHARE_COOKIE_KEY } = require('./constants')
 
 const router = new Router()
 

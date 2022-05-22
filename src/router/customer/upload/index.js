@@ -60,6 +60,7 @@ const METADATA = {
 }
 
 async function postFile(deal, ctx) {
+
   const { request: { headers } } = ctx
 
   const metadataKey = Object.keys(pick(METADATA, ['md5']))
