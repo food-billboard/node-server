@@ -413,6 +413,13 @@
             "type": "string",
             "description":"大屏id",
             "required": true
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "description":"类型(screen|model)",
+            "required": true
           }
         ],
         "responses": {

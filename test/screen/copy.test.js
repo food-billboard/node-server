@@ -1,8 +1,8 @@
 require('module-alias/register')
 const { expect } = require('chai')
 const { Types: { ObjectId } } = require('mongoose')
-const { UserModel, ScreenModal } = require('@src/utils')
-const { Request, mockCreateUser, mockCreateScreen, deepParseResponse } = require('@test/utils')
+const { UserModel, ScreenModal, ScreenModelModal } = require('@src/utils')
+const { Request, mockCreateUser, mockCreateScreen, deepParseResponse, mockCreateScreenModel } = require('@test/utils')
 
 const COMMON_API = '/api/screen/copy'
 
@@ -10,6 +10,7 @@ describe(`${COMMON_API} test`, () => {
 
   let userInfo
   let screenId
+  let modelId 
   let selfToken
   let getToken
 
@@ -30,12 +31,20 @@ describe(`${COMMON_API} test`, () => {
         name: COMMON_API,
         user: userInfo._id 
       })
+      const { model: screenModel } = mockCreateScreenModel({
+        name: COMMON_API,
+        user: userInfo._id 
+      })
 
-      return model.save()
+      return Promise.all([
+        model.save(),
+        screenModel.save() 
+      ])
 
     })
-    .then(data => {
+    .then(([data, model]) => {
       screenId = data._id 
+      modelId = model._id 
     })
     .then(_ => {
       done()
@@ -55,6 +64,9 @@ describe(`${COMMON_API} test`, () => {
       UserModel.deleteMany({
         username: COMMON_API
       }),
+      ScreenModelModal.deleteMany({
+        name: COMMON_API
+      })
     ])
     .then(_ => {
       done()
@@ -76,7 +88,8 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: screenId.toString() 
+        _id: screenId.toString(),
+        type: 'screen'
       })
       .expect(200)
       .expect('Content-Type', /json/)
@@ -103,6 +116,41 @@ describe(`${COMMON_API} test`, () => {
 
     })
 
+    it(`copy the model success`, function(done) {
+      Request
+      .post(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        _id: modelId.toString(),
+        type: 'model'
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(data => {
+        const value = deepParseResponse(data)
+
+        return ScreenModal.findOne({
+          _id: ObjectId(value[0])
+        })
+        .select({
+          _id: 1 
+        })
+        .exec() 
+      })
+      .then(data => {
+        expect(!!data).to.be.true
+      })
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+    })
+
   })
 
   describe(`copy the screen model fail test -> ${COMMON_API}`, function() {
@@ -115,7 +163,8 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: screenId.toString().slice(1)
+        _id: screenId.toString().slice(1),
+        type: 'screen'
       })
       .expect(400)
       .expect('Content-Type', /json/)
@@ -138,9 +187,31 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .send({
-        _id: '8f63270f005f1c1a0d9448ca'
+        _id: '8f63270f005f1c1a0d9448ca',
+        type: 'screen'
       })
       .expect(404)
+      .expect('Content-Type', /json/)
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+    })
+
+    it(`copy screen model fail because the type is not valid`, function(done) {
+      Request
+      .post(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .send({
+        _id: screenId.toString(),
+        type: ''
+      })
+      .expect(400)
       .expect('Content-Type', /json/)
       .then(_ => {
         done()

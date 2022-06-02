@@ -1,6 +1,6 @@
 const Router = require('@koa/router')
 const { pick } = require('lodash')
-const { verifyTokenToData, dealErr, Params, responseDataDeal, ScreenModal, notFound, loginAuthorization, getCookie, SCREEN_TYPE } = require('@src/utils')
+const { verifyTokenToData, dealErr, Params, responseDataDeal, ScreenModal, ScreenModelModal } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -14,23 +14,35 @@ router
     validator: [
       data => data.split(',').every(item => ObjectId.isValid(item.trim()))
     ]
+  }, {
+    name: 'type',
+    validator: [
+      data => ['screen', 'model'].includes(data.toLowerCase().trim())
+    ]
   })
 
   if(check) {
     return 
   }
 
-  const [ _id ] = Params.sanitizers(ctx.request.body, {
+  const [ _id, type ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => data.split(',').map(item => ObjectId(item.trim()))
+    ]
+  }, {
+    name: 'type',
+    sanitizers: [
+      data => data.toLowerCase().trim() 
     ]
   })
 
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
-  const data = await ScreenModal.aggregate([
+  const model = type === 'screen' ? ScreenModal : ScreenModelModal
+
+  const data = await model.aggregate([
     {
       $match: {
         _id: {
