@@ -22,6 +22,10 @@ const STATIC_PAGE_MAP = [
     path: "moviet5"
   },
   {
+    regexp: /(?<=.+\/create-chart-docs\/).+$/,
+    path: "create-chart-docs"
+  },
+  {
     regexp: /(?<=.+\/screen\/).+$/,
     path: "screen"
   },
