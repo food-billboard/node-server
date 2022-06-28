@@ -25,7 +25,14 @@ const {
   USER_HOT_HISTORY_TYPE,
   MESSAGE_POST_STATUS,
   SCREEN_TYPE,
-  SCHEDULE_STATUS
+  SCHEDULE_STATUS,
+  SCREEN_MOCK_TYPE,
+  SCREEN_MOCK_DATA_TYPE,
+  SCREEN_MOCK_CONFIG_DATA_TYPE,
+  SCREEN_MOCK_CONFIG_DATE_TYPE,
+  SCREEN_MOCK_CONFIG_ADDRESS_TYPE,
+  SCREEN_MOCK_CONFIG_LANGUAGE_TYPE,
+  SCREEN_MOCK_CONFIG_TEXT_TYPE
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -1699,6 +1706,90 @@ const ScreenModelSchema = new Schema({
   ...defaultConfig
 })
 
+const ScreenMockSchema = new Schema({
+  // mock的数据类型
+  data_kind: {
+    type: String,
+    enum: Object.keys(SCREEN_MOCK_TYPE)
+  },
+  // mock的数据，在初始化或修改时生成
+  mock_data: String,
+  // js数据类型
+  data_type: {
+    type: String, 
+    enum: Object.keys(SCREEN_MOCK_DATA_TYPE)
+  },
+  // 配置
+  config_type: {
+    type: String, 
+    enum: Object.keys(SCREEN_MOCK_CONFIG_DATA_TYPE)
+  },
+  // color: {
+
+  // },
+  // web: {
+
+  // },
+  // boolean: {
+
+  // },
+  date: {
+    date_type: {
+      type: String, 
+      enum: Object.keys(SCREEN_MOCK_CONFIG_DATE_TYPE)
+    },
+    format: String,
+    rangeStart: Number,
+    rangeEnd: Number 
+  },
+  address: {
+    address_type: {
+      type: String, 
+      enum: Object.keys(SCREEN_MOCK_CONFIG_ADDRESS_TYPE)
+    },
+    prefix: Boolean 
+  },
+  name: {
+    language_type: {
+      type: String, 
+      enum: Object.keys(SCREEN_MOCK_CONFIG_LANGUAGE_TYPE)
+    },
+    name_type: {
+      type: String, 
+      enum: Object.keys(SCREEN_MOCK_CONFIG_NAME_TYPE)
+    }
+  },
+  text: {
+    min: Number,
+    max: Number,
+    language_type: {
+      type: String, 
+      enum: Object.keys(SCREEN_MOCK_CONFIG_LANGUAGE_TYPE)
+    },
+    text_type: {
+      type: String, 
+      enum: Object.keys(SCREEN_MOCK_CONFIG_TEXT_TYPE)
+    }
+  },
+  image: {
+    width: Number,
+    height: Number,
+    color: String,
+    word: String,
+    word_color: String 
+  },
+  number: {
+    min: Number,
+    max: Number,
+    decimal: Boolean,
+    dmin: Number,
+    dmax: Number 
+  },
+  
+}, {
+  ...defaultConfig
+})
+
 
 // ------------------------------------大屏 ------------------------------------
 
@@ -1789,6 +1880,7 @@ const ErrorModel = model('error', ErrorSchema)
 const ScheduleModel = model('schedule', ScheduleSchema)
 const ScreenModal = model('screen', ScreenSchema)
 const ScreenModelModal = model('screen_model', ScreenModelSchema)
+const ScreenMockModel = model('screen_mock', ScreenMockSchema)
 
 module.exports = {
   UserModel,
@@ -1819,6 +1911,7 @@ module.exports = {
   ScheduleModel,
   ScreenModal,
   ScreenModelModal,
+  ScreenMockModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1846,5 +1939,6 @@ module.exports = {
   ErrorSchema,
   ScreenSchema,
   ScreenModelSchema,
-  ScheduleSchema
+  ScheduleSchema,
+  ScreenMockSchema
 }

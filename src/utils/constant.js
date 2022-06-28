@@ -187,6 +187,58 @@ const SCREEN_TYPE = {
   H5: 'H5'
 }
 
+const SCREEN_MOCK_TYPE = {
+
+}
+
+const SCREEN_MOCK_DATA_TYPE = {
+  string: 'string',
+  number: 'number'
+}
+
+const SCREEN_MOCK_CONFIG_DATA_TYPE = {
+  color: 'color',
+  date: 'date',
+  address: 'address',
+  url: 'url',
+  text: 'text',
+  image: 'image',
+  number: 'number',
+  boolean: 'boolean',
+  name: 'name'
+}
+
+const SCREEN_MOCK_CONFIG_DATE_TYPE = {
+  date: 'date',
+  time: 'time',
+  datetime: 'datetime'
+}
+
+const SCREEN_MOCK_CONFIG_ADDRESS_TYPE = {
+  region: 'region',
+  province: 'province',
+  city: 'city',
+  country: 'country'
+}
+
+const SCREEN_MOCK_CONFIG_LANGUAGE_TYPE = {
+  chinese: 'chinese',
+  english: 'english'
+}
+
+const SCREEN_MOCK_CONFIG_NAME_TYPE = {
+  first: 'first',
+  last: 'last',
+  'first-last': 'first-last'
+}
+
+const SCREEN_MOCK_CONFIG_TEXT_TYPE = {
+  paragraph: 'paragraph',
+  sentence: 'sentence',
+  word: 'word',
+  title: 'title'
+}
+
 module.exports = {
   MESSAGE_MEDIA_TYPE,
   MESSAGE_TYPE,
@@ -223,5 +275,13 @@ module.exports = {
   PRODUCTION_DOMAIN,
   FFMPEG_VERSION,
   SCHEDULE_STATUS,
-  SCREEN_TYPE
+  SCREEN_TYPE,
+  SCREEN_MOCK_TYPE,
+  SCREEN_MOCK_DATA_TYPE,
+  SCREEN_MOCK_CONFIG_DATA_TYPE,
+  SCREEN_MOCK_CONFIG_DATE_TYPE,
+  SCREEN_MOCK_CONFIG_ADDRESS_TYPE,
+  SCREEN_MOCK_CONFIG_LANGUAGE_TYPE,
+  SCREEN_MOCK_CONFIG_NAME_TYPE,
+  SCREEN_MOCK_CONFIG_TEXT_TYPE
 }

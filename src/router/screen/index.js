@@ -7,11 +7,13 @@ const Enable = require('./router/enable')
 const Copy = require('./router/copy')
 const Model = require('./router/model')
 const Pre = require('./router/pre')
+const Mock = require('./router/mock')
 const { loginAuthorization } = require('@src/utils')
 
 const router = new Router()
 
 router
+.use('/mock', Mock.routes(), Mock.allowedMethods())
 .use('/list', Index.routes(), Index.allowedMethods())
 .use('/model', Model.routes(), Model.allowedMethods())
 .use('/detail', Detail.routes(), Detail.allowedMethods())
