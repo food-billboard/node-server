@@ -1,6 +1,7 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, dealErr, Params, responseDataDeal, ScreenMockModel, notFound, loginAuthorization, getCookie, SCREEN_TYPE } = require('@src/utils')
+const { dealErr, Params, responseDataDeal, ScreenMockModel } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
+const { shuffle } = require('lodash')
 
 const router = new Router()
 
@@ -10,8 +11,8 @@ router
 
   function filter(data) {
     return data.filter(item => {
-      const { key, type, dataKind } = item
-      return !!key && [ 'string', 'number' ].includes(type) && ObjectId.isValid(dataKind)
+      const { key, dataKind } = item
+      return !!key && ObjectId.isValid(dataKind)
     })
   }
 
@@ -55,14 +56,36 @@ router
     },
     {
       $project: {
-        mock_data: 1 
+        mock_data: 1,
+        _id: 1 
       }
     }
   ])
   .then(data => {
+
+    const fieldsWithData = fields.map(item => {
+      const { dataKind } = item 
+      const target = data.find(item => item._id.equals(dataKind))
+      let dataSource = []
+      try {
+        dataSource = JSON.parse(target.mock_data)
+      }catch(err) {}
+
+      if(random === '1') dataSource = shuffle(dataSource)
+
+      return {
+        ...item,
+        dataSource
+      }
+    })
+
     return {
       data: new Array(total).fill(0).map((_, index) => {
-        
+        return fieldsWithData.reduce((acc, item) => {
+          const { key, dataSource } = item 
+          acc[key] = dataSource[index]
+          return acc  
+        }, {})
       })
     }
   })
@@ -81,7 +104,8 @@ router
     {
       $project: {
         _id: 1,
-        dataKind: 1 
+        data_kind: 1,
+        description: 1
       }
     }
   ])

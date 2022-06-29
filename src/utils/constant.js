@@ -187,15 +187,6 @@ const SCREEN_TYPE = {
   H5: 'H5'
 }
 
-const SCREEN_MOCK_TYPE = {
-
-}
-
-const SCREEN_MOCK_DATA_TYPE = {
-  string: 'string',
-  number: 'number'
-}
-
 const SCREEN_MOCK_CONFIG_DATA_TYPE = {
   color: 'color',
   date: 'date',
@@ -276,8 +267,6 @@ module.exports = {
   FFMPEG_VERSION,
   SCHEDULE_STATUS,
   SCREEN_TYPE,
-  SCREEN_MOCK_TYPE,
-  SCREEN_MOCK_DATA_TYPE,
   SCREEN_MOCK_CONFIG_DATA_TYPE,
   SCREEN_MOCK_CONFIG_DATE_TYPE,
   SCREEN_MOCK_CONFIG_ADDRESS_TYPE,

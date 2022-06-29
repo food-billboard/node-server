@@ -26,13 +26,12 @@ const {
   MESSAGE_POST_STATUS,
   SCREEN_TYPE,
   SCHEDULE_STATUS,
-  SCREEN_MOCK_TYPE,
-  SCREEN_MOCK_DATA_TYPE,
   SCREEN_MOCK_CONFIG_DATA_TYPE,
   SCREEN_MOCK_CONFIG_DATE_TYPE,
   SCREEN_MOCK_CONFIG_ADDRESS_TYPE,
   SCREEN_MOCK_CONFIG_LANGUAGE_TYPE,
-  SCREEN_MOCK_CONFIG_TEXT_TYPE
+  SCREEN_MOCK_CONFIG_TEXT_TYPE,
+  SCREEN_MOCK_CONFIG_NAME_TYPE
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -1708,21 +1707,18 @@ const ScreenModelSchema = new Schema({
 
 const ScreenMockSchema = new Schema({
   // mock的数据类型
-  data_kind: {
-    type: String,
-    enum: Object.keys(SCREEN_MOCK_TYPE)
-  },
+  data_kind: String,
   // mock的数据，在初始化或修改时生成
   mock_data: String,
-  // js数据类型
-  data_type: {
-    type: String, 
-    enum: Object.keys(SCREEN_MOCK_DATA_TYPE)
-  },
+  description: String, 
   // 配置
   config_type: {
     type: String, 
     enum: Object.keys(SCREEN_MOCK_CONFIG_DATA_TYPE)
+  },
+  user: {
+    type: ObjectId,
+    ref: 'user'
   },
   // color: {
 
@@ -1739,8 +1735,6 @@ const ScreenMockSchema = new Schema({
       enum: Object.keys(SCREEN_MOCK_CONFIG_DATE_TYPE)
     },
     format: String,
-    rangeStart: Number,
-    rangeEnd: Number 
   },
   address: {
     address_type: {

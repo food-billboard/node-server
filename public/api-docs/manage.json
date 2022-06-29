@@ -83,6 +83,14 @@
         "description": "Find out more about our store",
         "url": "http://swagger.io"
       }
+    },
+    {
+      "name": "screen",
+      "description": "数据大屏相关",
+      "externalDocs": {
+        "description": "Find out more about our store",
+        "url": "http://swagger.io"
+      }
     }
   ],
   "schemes": ["https", "http"],
@@ -4024,6 +4032,353 @@
         "produces": ["application/xml", "application/json"],
         "deprecated": true
       }
+    },
+
+    "/api/manage/screen/list": {
+      "get": {
+        "tags": ["screen"],
+        "summary": "大屏列表",
+        "description": "",
+        "operationId": "screen_list_get",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "content",
+            "in": "query",
+            "type": "string",
+            "description": "大屏名称"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "type": "ineger",
+            "description": "当前页"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "type": "integer",
+            "description": "每页数量"
+          },
+          {
+            "name": "enable",
+            "in": "query",
+            "type": "string",
+            "description": "是否启用(0, 1)"
+          },
+          {
+            "name": "createdAt",
+            "in": "query",
+            "type": "array",
+            "description": "创建时间([start, end])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_list_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["screen"],
+        "summary": "删除大屏",
+        "description": "",
+        "operationId": "screen_list_delete",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "大屏id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/screen/model": {
+      "get": {
+        "tags": ["screen"],
+        "summary": "大屏模板列表",
+        "description": "",
+        "operationId": "screen_model_get",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "content",
+            "in": "query",
+            "type": "string",
+            "description": "大屏模板名称"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "type": "ineger",
+            "description": "当前页"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "type": "integer",
+            "description": "每页数量"
+          },
+          {
+            "name": "enable",
+            "in": "query",
+            "type": "string",
+            "description": "是否启用(0, 1)"
+          },
+          {
+            "name": "createdAt",
+            "in": "query",
+            "type": "array",
+            "description": "创建时间([start, end])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_model_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["screen"],
+        "summary": "删除大屏模板",
+        "description": "",
+        "operationId": "screen_model_delete",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "大屏模板id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/screen/mock": {
+      "post": {
+        "tags": ["screen"],
+        "summary": "新增大屏mock数据类型",
+        "description": "",
+        "operationId": "screen_mock_post",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "data_kind",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "mock数据名称"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "string",
+            "description": "mock数据描述"
+          },
+          {
+            "name": "config_type",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "mock数据类型(color, date, address, url, text, image, number, boolean, name)"
+          },
+          {
+            "name": "config",
+            "in": "body",
+            "type": "object",
+            "required": true,
+            "description": "具体配置，详细可以看响应内容"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_mock_post"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "put": {
+        "tags": ["screen"],
+        "summary": "修改大屏mock数据类型",
+        "description": "",
+        "operationId": "screen_mock_put",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "mock数据id"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "string",
+            "description": "mock数据描述"
+          },
+          {
+            "name": "data_kind",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "mock数据名称"
+          },
+          {
+            "name": "config_type",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "mock数据类型(color, date, address, url, text, image, number, boolean, name)"
+          },
+          {
+            "name": "config",
+            "in": "body",
+            "type": "object",
+            "required": true,
+            "description": "具体配置"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "get": {
+        "tags": ["screen"],
+        "summary": "获取大屏mock数据类型",
+        "description": "",
+        "operationId": "screen_mock_get",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "content",
+            "in": "query",
+            "type": "string",
+            "description": "mock数据名称"
+          },
+          {
+            "name": "date_type",
+            "in": "query",
+            "type": "string",
+            "description": "数据类型（color, date, address, url, text, image, number, boolean, name）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_mock_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["screen"],
+        "summary": "删除大屏mock数据类型",
+        "description": "",
+        "operationId": "screen_mock_delete",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "mock数据id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/screen/mock/params": {
+      "get": {
+        "tags": ["mock"],
+        "summary": "大屏mock数据参数类型",
+        "description": "",
+        "operationId": "screen_mock_params_get",
+        "produces": ["application/xml", "application/json"],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_mock_params_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
     }
   },
   "securityDefinitions": {
@@ -4043,6 +4398,291 @@
     }
   },
   "definitions": {
+    "screen_mock_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "data_kind": {
+                        "type": "string",
+                        "description": "mock名称"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "config_type": {
+                        "type": "string",
+                        "description": "数据格式类型"
+                      },
+                      "config": {
+                        "type": "object",
+                        "description": "详细配置，可以查看新增接口"
+                      },
+                      "user": {
+                        "type": "object",
+                        "description": "创建用户",
+                        "properties": {
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
+                          },
+                          "_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "screen_mock_get"
+      }
+    },
+    "screen_mock_post": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "object",
+          "description": "日期配置",
+          "properties": {
+            "date_type": {
+              "type": "string",
+              "description": "日期类型",
+              "enum": [ "date", "time", "datetime" ]
+            },
+            "format": {
+              "type": "string",
+              "description": "格式类型"
+            }
+          }
+        },
+        "number": {
+          "type": "object",
+          "description": "数字配置",
+          "properties": {
+            "min": {
+              "type": "integer",
+              "description": "最小值"
+            },
+            "max": {
+              "type": "integer",
+              "description": "最大值"
+            },
+            "decimal": {
+              "type": "boolean",
+              "description": "是否有小数"
+            },
+            "dmin": {
+              "type": "integer",
+              "description": "小数最小值"
+            },
+            "dmax": {
+              "type": "integer",
+              "description": "小数最大值"
+            }
+          }
+        },
+        "address": {
+          "type": "object",
+          "description": "地址配置",
+          "properties": {
+            "address_type": {
+              "type": "string",
+              "description": "地址类型",
+              "enum": [ "region", "province", "city", "country" ]
+            },
+            "prefix": {
+              "type": "string",
+              "description": "携带前缀（city, country）"
+            }
+          }
+        },
+        "name": {
+          "type": "object",
+          "description": "名字配置",
+          "properties": {
+            "language_type": {
+              "type": "string",
+              "description": "语言类型",
+              "enum": [ "english", "chinese" ]
+            },
+            "name_type": {
+              "type": "string",
+              "description": "名字类型",
+              "enum": [ "first", "last", "first-last" ]
+            }
+          }
+        },
+        "text": {
+          "type": "object",
+          "description": "文字配置",
+          "properties": {
+            "min": {
+              "type": "integer",
+              "description": "最小长度"
+            },
+            "max": {
+              "type": "integer",
+              "description": "最大长度"
+            },
+            "language_type": {
+              "type": "string",
+              "description": "语言类型",
+              "enum": [ "english", "chinese" ]
+            },
+            "text_type": {
+              "type": "string",
+              "description": "文字类型",
+              "enum": [ "paragraph", "sentence", "word", "title" ]
+            }
+          }
+        },
+        "image": {
+          "type": "object",
+          "description": "图片配置",
+          "properties": {
+            "width": {
+              "type": "integer",
+              "description": "宽度"
+            },
+            "height": {
+              "type": "integer",
+              "description": "高度"
+            },
+            "color": {
+              "type": "string",
+              "description": "颜色"
+            },
+            "word": {
+              "type": "string",
+              "description": "文字"
+            },
+            "word_color": {
+              "type": "string",
+              "description": "颜色"
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "screen_mock_post"
+      }
+    },
+    "screen_list_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "flag": {
+                        "type": "string",
+                        "description": "大屏类型",
+                        "enum": ["PC", "H5"]
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "大屏名称"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "user": {
+                        "type": "object",
+                        "description": "创建用户",
+                        "properties": {
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
+                          },
+                          "_id": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "enable": {
+                        "type": "object",
+                        "description": "是否启用"
+                      },
+                      "poster": {
+                        "type": "integer",
+                        "description": "封面"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "screen_list_get"
+      }
+    },
+    "screen_model_get": {
+      "$ref": "#/definitions/screen_list_get",
+      "xml": {
+        "name": "screen_model_get"
+      }
+    },
     "manage_dashboard_get_nav": {
       "type": "object",
       "properties": {

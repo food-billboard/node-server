@@ -27,6 +27,14 @@
         "description": "Find out more",
         "url": "http://swagger.io"
       }
+    },
+    {
+      "name": "mock",
+      "description": "大屏mock数据",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
     }
   ],
   "schemes": [
@@ -264,6 +272,18 @@
             "in": "query",
             "type": "string",
             "description":"大屏名称"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "type": "ineger",
+            "description":"当前页"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "type": "integer",
+            "description":"每页数量"
           }
         ],
         "responses": {
@@ -524,6 +544,18 @@
             "in": "query",
             "type": "string",
             "description":"大屏模板名称"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "type": "ineger",
+            "description":"当前页"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "type": "integer",
+            "description":"每页数量"
           }
         ],
         "responses": {
@@ -1229,6 +1261,85 @@
           }
         ]
       }
+    },
+    "/api/screen/mock": {
+      "post": {
+        "tags": [
+          "mock"
+        ],
+        "summary": "大屏mock数据获取",
+        "description": "",
+        "operationId": "screen_mock_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "total",
+            "in": "body",
+            "type": "integer",
+            "description":"数据总数",
+            "required": true 
+          },
+          {
+            "name": "fields",
+            "in": "body",
+            "type": "object",
+            "description":"数据字段({ key: string, dataKind: string })",
+            "required": true 
+          },
+          {
+            "name": "random",
+            "in": "body",
+            "type": "string",
+            "description":"是否随机获取(0,1)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/screen/mock/params": {
+      "get": {
+        "tags": [
+          "mock"
+        ],
+        "summary": "大屏mock数据参数类型",
+        "description": "",
+        "operationId": "screen_mock_params_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_mock_params_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
     }
   },
   "definitions": {
@@ -1444,6 +1555,43 @@
       },
       "xml": {
         "name": "screen_share_detail_get"
+      }
+    },
+    "screen_mock_params_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "data_kind": {
+                      "type": "string",
+                      "description": "名称"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "描述"
+                    },
+                    "_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "screen_mock_params_get"
       }
     }
   },
