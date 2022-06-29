@@ -41,7 +41,8 @@ const {
   fileEncoded,
   ScreenModelModal,
   MEDIA_STATUS,
-  OtherMediaModel
+  OtherMediaModel,
+  ScreenMockModel
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
@@ -553,6 +554,32 @@ function mockCreateScreenModel(values) {
   return { model }
 }
 
+//创建语言
+function mockCreateScreenMock(values={}) {
+  let baseModel = {
+    data_kind: '测试名称',
+    mock_data: JSON.stringify([
+      "测试1",
+      "测试2",
+      "测试3"
+    ]),
+    description: "测试描述", 
+    config_type: "text",
+    user: ObjectId('8f63270f005f1c1a0d9448ca'),
+    text: {
+      min: 1,
+      max: 20,
+      language_type: 'chinese',
+      text_type: "title"
+    },
+  }
+  baseModel = mergeConfig(baseModel, values, true)
+
+  const model = new ScreenMockModel(baseModel)
+
+  return { model }
+}
+
 //创建查询参数etag
 function createEtag(query={}) {
   return Object.keys(query).reduce((acc, cur) => {
@@ -738,5 +765,6 @@ module.exports = {
   mockCreateScreen,
   commonMovieValid,
   mockCreateScreenModel,
-  mockCreateOtherMedia
+  mockCreateOtherMedia,
+  mockCreateScreenMock
 }
