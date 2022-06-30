@@ -50,7 +50,7 @@ router
     {
       $match: {
         _id: {
-          $in: fields.map(item => item.dataKind)
+          $in: fields.map(item => ObjectId(item.dataKind))
         }
       }
     },
@@ -65,11 +65,15 @@ router
 
     const fieldsWithData = fields.map(item => {
       const { dataKind } = item 
-      const target = data.find(item => item._id.equals(dataKind))
+      const target = data.find(item => {
+        return item._id.equals(dataKind)
+      })
       let dataSource = []
       try {
         dataSource = JSON.parse(target.mock_data)
-      }catch(err) {}
+      }catch(err) {
+
+      }
 
       if(random === '1') dataSource = shuffle(dataSource)
 

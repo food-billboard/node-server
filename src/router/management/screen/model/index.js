@@ -8,7 +8,7 @@ const router = new Router()
 router
 .get('/', async (ctx) => {
 
-  const [ content, enable, createdAt, currPage, pageSize ] = Params.sanitizers(ctx.query, {
+  const { content, enable, createdAt, currPage, pageSize } = Params.sanitizers(ctx.query, {
     name: 'content',
     sanitizers: [
       data => {
@@ -63,7 +63,7 @@ router
     name: 'createdAt',
     sanitizers: [
       data => {
-        if(Array.isArray(data) && !data.every(isDateValid)) {
+        if(!Array.isArray(data) || !data.every(isDateValid)) {
           return {
             done: false,
           }

@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { dealErr, Params, responseDataDeal, ScreenModel, isDateValid } = require('@src/utils')
+const { dealErr, Params, responseDataDeal, ScreenModal, isDateValid } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
 
@@ -8,7 +8,7 @@ const router = new Router()
 router
 .get('/', async (ctx) => {
 
-  const [ content, enable, createdAt, currPage, pageSize ] = Params.sanitizers(ctx.query, {
+  const { content, enable, createdAt, currPage, pageSize } = Params.sanitizers(ctx.query, {
     name: 'content',
     sanitizers: [
       data => {
@@ -63,7 +63,7 @@ router
     name: 'createdAt',
     sanitizers: [
       data => {
-        if(Array.isArray(data) && !data.every(isDateValid)) {
+        if(!Array.isArray(data) || !data.every(isDateValid)) {
           return {
             done: false,
           }
@@ -132,7 +132,7 @@ router
         }
       }
     ]),
-    ScreenModel.aggregate([
+    ScreenModal.aggregate([
       {
         $match: {
           ...content,

@@ -1,6 +1,5 @@
 require('module-alias/register')
 const { expect } = require('chai')
-const { Types: { ObjectId } } = require('mongoose')
 const { ScreenMockModel } = require('@src/utils')
 const { Request, mockCreateScreenMock, deepParseResponse } = require('@test/utils')
 
@@ -9,11 +8,14 @@ const COMMON_API = '/api/screen/mock'
 describe(`${COMMON_API} test`, () => {
 
   let mockId 
+  const fieldKey = COMMON_API.split('/').join('')
+  const mockData = new Array(4).fill(0).map((_, index) => `${COMMON_API}-${index}`)
 
   before(function(done) {
 
     const { model } = mockCreateScreenMock({
-      data_kind: COMMON_API
+      data_kind: COMMON_API,
+      mock_data: JSON.stringify(mockData)
     })
 
     model.save()
@@ -52,28 +54,23 @@ describe(`${COMMON_API} test`, () => {
       Request
       .post(COMMON_API)
       .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
+        Accept: 'application/json'
       })
       .send({
-        _id: screenId.toString(),
-        type: 'screen'
+        fields: [
+          {
+            key: fieldKey,
+            dataKind: mockId.toString()
+          }
+        ],
       })
       .expect(200)
       .expect('Content-Type', /json/)
       .then(data => {
         const value = deepParseResponse(data)
-
-        return ScreenModal.findOne({
-          _id: ObjectId(value[0])
-        })
-        .select({
-          _id: 1 
-        })
-        .exec() 
-      })
-      .then(data => {
-        expect(!!data).to.be.true
+        expect(value).to.be.a('array')
+        expect(value.length).to.be.equals(1)
+        expect(!!value[0][fieldKey]).to.be.true
       })
       .then(_ => {
         done()
@@ -89,28 +86,23 @@ describe(`${COMMON_API} test`, () => {
       Request
       .post(COMMON_API)
       .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
+        Accept: 'application/json'
       })
       .send({
-        _id: screenId.toString(),
-        type: 'screen'
+        fields: [
+          {
+            key: fieldKey,
+            dataKind: mockId.toString()
+          }
+        ],
+        total: 3 
       })
       .expect(200)
       .expect('Content-Type', /json/)
       .then(data => {
         const value = deepParseResponse(data)
-
-        return ScreenModal.findOne({
-          _id: ObjectId(value[0])
-        })
-        .select({
-          _id: 1 
-        })
-        .exec() 
-      })
-      .then(data => {
-        expect(!!data).to.be.true
+        expect(value).to.be.a('array')
+        expect(value.length).to.be.equals(3)
       })
       .then(_ => {
         done()
@@ -126,28 +118,25 @@ describe(`${COMMON_API} test`, () => {
       Request
       .post(COMMON_API)
       .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
+        Accept: 'application/json'
       })
       .send({
-        _id: screenId.toString(),
-        type: 'screen'
+        fields: [
+          {
+            key: COMMON_API,
+            dataKind: mockId.toString()
+          }
+        ],
+        random: '1'
       })
       .expect(200)
       .expect('Content-Type', /json/)
       .then(data => {
         const value = deepParseResponse(data)
-
-        return ScreenModal.findOne({
-          _id: ObjectId(value[0])
-        })
-        .select({
-          _id: 1 
-        })
-        .exec() 
-      })
-      .then(data => {
-        expect(!!data).to.be.true
+        expect(value).to.be.a('array')
+        expect(value.every((item, index) => {
+          return item[COMMON_API] == mockData[index]
+        })).to.be.false 
       })
       .then(_ => {
         done()
@@ -166,12 +155,15 @@ describe(`${COMMON_API} test`, () => {
       Request
       .post(COMMON_API)
       .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
+        Accept: 'application/json'
       })
       .send({
-        _id: screenId.toString().slice(1),
-        type: 'screen'
+        fields: [
+          {
+            key: COMMON_API,
+            dataKind: mockId.toString().slice(1)
+          }
+        ]
       })
       .expect(400)
       .expect('Content-Type', /json/)

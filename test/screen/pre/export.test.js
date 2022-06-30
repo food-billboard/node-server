@@ -78,7 +78,6 @@ describe(`${COMMON_API} test`, () => {
         type: 'screen'
       })
       .expect(200)
-      .expect('Content-Type', /json/)
       .then(_ => {
         done()
       })
@@ -104,7 +103,6 @@ describe(`${COMMON_API} test`, () => {
         type: 'screen'
       })
       .expect(400)
-      .expect('Content-Type', /json/)
       .then(_ => {
         done()
       })
@@ -126,7 +124,6 @@ describe(`${COMMON_API} test`, () => {
         type: 'screen'
       })
       .expect(404)
-      .expect('Content-Type', /json/)
       .then(_ => {
         done()
       })
@@ -147,7 +144,6 @@ describe(`${COMMON_API} test`, () => {
         type: ''
       })
       .expect(400)
-      .expect('Content-Type', /json/)
       .then(_ => {
         done()
       })

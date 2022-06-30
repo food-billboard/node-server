@@ -2,6 +2,7 @@ require('module-alias/register')
 const { expect } = require('chai')
 const { UserModel, ScreenModelModal, SCREEN_TYPE } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
+const Day = require('dayjs')
 const { Request, commonValidate, mockCreateUser, parseResponse, mockCreateScreenModel } = require('@test/utils')
 
 const COMMON_API = '/api/manage/screen/model'
@@ -58,7 +59,8 @@ describe(`${COMMON_API} test`, () => {
       selfToken = getToken(userInfo._id)
       const { model } = mockCreateScreenModel({
         name: COMMON_API,
-        user: userInfo._id 
+        user: userInfo._id,
+        enable: true 
       }) 
       return model.save()  
     })
@@ -93,9 +95,9 @@ describe(`${COMMON_API} test`, () => {
 
   })
   
-  describe(`get the screen list success test -> ${COMMON_API}`, function() {
+  describe(`get the screen model list success test -> ${COMMON_API}`, function() {
 
-    it(`get the screen list success with content`, function(done) {
+    it(`get the screen model list success with content`, function(done) {
 
       Request
       .get(COMMON_API)
@@ -114,6 +116,65 @@ describe(`${COMMON_API} test`, () => {
           const { total, list } = target 
           expect(total).to.be.not.equals(0)
           expect(list.some(item => item._id === screenId.toString())).to.be.true 
+        })
+      })
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+
+    })
+
+    it(`get the screen model list success with enable`, function(done) {
+
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        enable: '1'
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(function(res) {
+        let obj = parseResponse(res)
+        responseExpect(obj, (target) => {
+          const { total, list } = target 
+          expect(total).to.be.not.equals(0)
+          expect(list.some(item => item._id === screenId.toString())).to.be.true 
+        })
+      })
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+
+    })
+
+    it(`get the screen model list success with createdAt`, function(done) {
+
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        createdAt: [Day().add(1, 'day').format('YYYY-MM-DD'), Day().add(2, 'day').format('YYYY-MM-DD')]
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(function(res) {
+        let obj = parseResponse(res)
+        responseExpect(obj, (target) => {
+          const { total, list } = target 
+          expect(total).to.be.equals(0)
         })
       })
       .then(_ => {
@@ -160,99 +221,6 @@ describe(`${COMMON_API} test`, () => {
 
   })
 
-  describe('post screen success test', function() {
-
-    it('post screen success', function(done) {
-
-      Request
-      .post(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        name: COMMON_API,
-        description: COMMON_API,
-        flag: SCREEN_TYPE.PC,
-        data: JSON.stringify({
-          components: []
-        }),
-        poster: 'http://sss.png',
-        version: '1.1'
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .then(_ => {
-        return ScreenModelModal.findOne({
-          name: COMMON_API,
-          description: COMMON_API
-        })
-        .select({
-          _id: 1
-        })
-        .exec()
-      })
-      .then(data => {
-        expect(!!data).to.be.true 
-      })
-      .then(_ => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-      
-    })
-
-  })
-
-  describe('put screen success test', function() {
-
-    it('put screen success', function(done) {
-      const newData = COMMON_API + 'edit'
-
-      Request
-      .put(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        _id: screenId.toString(),
-        name: COMMON_API,
-        description: newData,
-        flag: SCREEN_TYPE.PC,
-        data: JSON.stringify({
-          components: []
-        }),
-        poster: 'http://333.png',
-        version: '1.1'
-      })
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .then(_ => {
-        return ScreenModelModal.findOne({
-          name: COMMON_API,
-          description: newData
-        })
-        .select({
-          _id: 1
-        })
-        .exec()
-      })
-      .then(data => {
-        expect(!!data).to.be.true 
-      })
-      .then(_ => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-    })
-
-  })
-
   describe(`delete the screen fail test -> ${COMMON_API}`, function() {
 
     it(`delete screen fail because the id is not valid`, function(done) {
@@ -290,248 +258,6 @@ describe(`${COMMON_API} test`, () => {
       })
       .expect(403)
       .expect('Content-Type', /json/)
-      .then(_ => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-    })
-
-  })
-
-  describe(`post screen fail test`, function() {
-
-    it(`post screen fail because the name's length is too short`, (done) => {
-
-      Request
-      .post(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        name: '',
-        description: COMMON_API,
-        flag: SCREEN_TYPE.PC,
-        data: JSON.stringify({
-          components: []
-        }),
-        poster: 'http://sss.png',
-        version: '1.1'
-      })
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .then(_ => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-
-    })
-
-    it(`post screen fail because the name's length is too long`, (done) => {
-      Request
-      .post(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        name: COMMON_API.repeat(20),
-        description: COMMON_API,
-        flag: SCREEN_TYPE.PC,
-        data: JSON.stringify({
-          components: []
-        }),
-        poster: 'http://sss.png',
-        version: '1.1'
-      })
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .then(_ => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-    })
-
-    it(`post screen fail because the data is not json`, (done) => {
-      Request
-      .post(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        name: COMMON_API,
-        description: COMMON_API,
-        flag: SCREEN_TYPE.PC,
-        data: '',
-        poster: 'http://sss.png',
-        version: '1.1'
-      })
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .then(_ => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-    })
-
-    it(`post screen fail because the flag is not valid`, (done) => {
-      Request
-      .post(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        name: COMMON_API,
-        description: COMMON_API,
-        flag: '',
-        data: JSON.stringify({
-          components: []
-        }),
-        poster: 'http://sss.png',
-        version: '1.1'
-      })
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .then(_ => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-    })
-
-    it(`post screen fail because the poster is not valid`, (done) => {
-      Request
-      .post(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        name: COMMON_API,
-        description: COMMON_API,
-        flag: SCREEN_TYPE.PC,
-        data: JSON.stringify({
-          components: []
-        }),
-        poster: '',
-        version: '1.1'
-      })
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .then(_ => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-    })
-
-    it(`post screen fail because lack of the version`, (done) => {
-      Request
-      .post(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        name: COMMON_API,
-        description: COMMON_API,
-        flag: SCREEN_TYPE.PC,
-        data: JSON.stringify({
-          components: []
-        }),
-        poster: 'http://333.png',
-      })
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .then(_ => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-    })
-
-  })
-
-  describe(`put screen fail test`, function() {
-
-    it(`put screen fail because the id is not valid`, (done) => {
-      const newData = COMMON_API + 'edit'
-      Request
-      .put(COMMON_API)
-      .set({
-        Accept: 'application/json',
-        Authorization: `Basic ${selfToken}`
-      })
-      .send({
-        _id: screenId.toString().slice(1),
-        name: COMMON_API,
-        description: newData,
-        flag: SCREEN_TYPE.PC,
-        data: JSON.stringify({
-          components: []
-        }),
-        poster: 'http://333.png',
-        version: '1.1'
-      })
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .then(_ => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-    })
-
-    it(`put screen fail because the screen creator is not self`, (done) => {
-      const newData = COMMON_API + 'edit'
-
-      ScreenModelModal.updateMany({
-        name: COMMON_API
-      }, {
-        user: ObjectId('8f63270f005f1c1a0d9448ca')
-      })
-      .then(_ => {
-        return Request
-        .put(COMMON_API)
-        .set({
-          Accept: 'application/json',
-          Authorization: `Basic ${selfToken}`
-        })
-        .send({
-          _id: screenId.toString(),
-          name: COMMON_API,
-          description: newData,
-          flag: SCREEN_TYPE.PC,
-          data: JSON.stringify({
-            components: []
-          }),
-          poster: 'http://333.png',
-          version: '1.1'
-        })
-        .expect(403)
-        .expect('Content-Type', /json/)
-      })
-      .then(_ => {
-        return ScreenModelModal.updateMany({
-          name: COMMON_API,
-        }, {
-          user: ObjectId('8f63270f005f1c1a0d9448ca')
-        })
-      })
       .then(_ => {
         done()
       })

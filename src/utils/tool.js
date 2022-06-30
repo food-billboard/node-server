@@ -249,7 +249,7 @@ function withTry(func) {
 }
 
 function isDateValid(value) {
-  return ((typeof value === 'string' && (new Date(value)).toString() == 'Invalid Date') || typeof value === 'undefined')
+  return !((typeof value === 'string' && (new Date(value)).toString() == 'Invalid Date') || typeof value === 'undefined')
 }
 
 module.exports = {

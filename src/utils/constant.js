@@ -191,7 +191,7 @@ const SCREEN_MOCK_CONFIG_DATA_TYPE = {
   color: 'color',
   date: 'date',
   address: 'address',
-  url: 'url',
+  web: 'web',
   text: 'text',
   image: 'image',
   number: 'number',

@@ -87,6 +87,10 @@ const ROLES_DATABASE_MAP = [
           methods: '*', //or [ get, post ]
           url: `${PREFIX_URL}manage\\/schedule.?`
         },
+        {
+          methods: "*",
+          url: `${PREFIX_URL}manage\\/screen.?`
+        },
       ]
     }
   },
@@ -158,7 +162,11 @@ const ROLES_DATABASE_MAP = [
         {
           methods: [ "get" ],
           url: `${PREFIX_URL}manage\\/chat\\/member$`
-        }
+        },
+        {
+          methods: "*",
+          url: `${PREFIX_URL}manage\\/screen.?`
+        },
       ]
     }
   },
@@ -226,7 +234,11 @@ const ROLES_DATABASE_MAP = [
         {
           methods: [ "get" ],
           url: `${PREFIX_URL}manage\\/chat\\/member$`
-        }
+        },
+        {
+          methods: "*",
+          url: `${PREFIX_URL}manage\\/screen.?`
+        },
       ]
     }
   },

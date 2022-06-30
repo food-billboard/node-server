@@ -31,13 +31,13 @@ const valueGenerate = {
       return Mock.mock('@color')
     }) 
   },
-  date: (value) => {
+  date: (value={}) => {
     try {
       const { date_type, format } = value
       const realFormat = format || 'YYYY-MM-DD'
       const realDateType = date_type || 'date'
+      let str = `@${realDateType}("${realFormat}")`
       return new Array(DATE_MAX).fill(0).map(() => {
-        let str = `@${realDateType}("${realFormat}")`
         let data = Mock.mock(str)
         return data
       })
@@ -45,11 +45,11 @@ const valueGenerate = {
       return []
     }
   },
-  address: (value) => {
+  address: (value={}) => {
     try {
       const { address_type, prefix=true } = value 
       return new Array(DATE_MAX).fill(0).map(() => {
-        let str = `@${address_type}("${(address_type === 'ciry' || address_type === 'county') ? prefix : ''}")`
+        let str = `@${address_type}("${(address_type === 'city' || address_type === 'county') ? prefix : ''}")`
         let data = Mock.mock(str)
         return data
       })
@@ -62,11 +62,11 @@ const valueGenerate = {
       return Mock.mock('@url')
     }) 
   },
-  text: (value) => {
+  text: (value={}) => {
     try {
-      const { min=1, max=100, language_type='chinese', text_type='title' } = value 
+      const { min=1, max=20, language_type='chinese', text_type='title' } = value 
+      let str = `@${(language_type === 'chinese') ? ('c' + text_type) : text_type}(${min},${max})`
       return new Array(DATE_MAX).fill(0).map(() => {
-        let str = `@${(language_type === 'chinese') ? ('c' + text_type) : text_type}("${min},${max}")`
         let data = Mock.mock(str)
         return data
       })
@@ -74,7 +74,7 @@ const valueGenerate = {
       return [] 
     }
   },
-  image: (value) => {
+  image: (value={}) => {
     try {
       const { width=200, height=200, color, word, word_color } = value 
       return new Array(DATE_MAX).fill(0).map(() => {
@@ -85,7 +85,7 @@ const valueGenerate = {
       return [] 
     }
   },
-  number: (value) => {
+  number: (value={}) => {
     try {
       const defaultMax = Math.pow(2, 30)
       const { min=-defaultMax, max=defaultMax, decimal=false, dmin=0, dmax=10 } = value 
@@ -102,7 +102,7 @@ const valueGenerate = {
       return Mock.mock('@boolean')
     }) 
   },
-  name: (value) => {
+  name: (value={}) => {
     try {
       const { language_type='chinese', name_type='first-last' } = value 
       let realName = name_type 
@@ -120,7 +120,7 @@ const valueGenerate = {
 router
 .get('/', async (ctx) => {
 
-  const [ content, date_type ] = Params.sanitizers(ctx.query, {
+  const { content, date_type } = Params.sanitizers(ctx.query, {
     name: 'content',
     sanitizers: [
       data => {
@@ -166,7 +166,7 @@ router
         return {
           done: true,
           data: {
-            data_kind: {
+            config_type: {
               $in: data.split(',').map(item => item.trim())
             }
           }
@@ -223,7 +223,7 @@ router
     {
       $project: {
         _id: 1,
-        date_kind: 1,
+        data_kind: 1,
         description: 1,
         user: {
           username: "$user.username",
@@ -245,10 +245,8 @@ router
   ])
   .then(data => {
     return {
-      data: {
-        total: data.length,
-        list: data 
-      }
+      total: data.length,
+      list: data 
     }
   })
   .catch(dealErr(ctx))
@@ -276,7 +274,7 @@ router
     _id: ObjectId(_id)
   })
   .then(data => {
-    if(data && data.deletedCount == 0) return Promise.reject({ errMsg: 'forbidden', status: 403 })
+    if(data && data.deletedCount == 0) return Promise.reject({ errMsg: 'not found', status: 404 })
 
     return {
       data: _id 
@@ -291,8 +289,7 @@ router
   })
 
 })
-.post('/', async (ctx) => {
-
+.use(async (ctx, next) => {
   const check = Params.body(ctx, {
     name: 'data_kind',
     validator: [
@@ -307,7 +304,12 @@ router
 
   if(check) return 
 
-  const { data_kind, config_type, config } = ctx.request.body
+  await next() 
+
+})
+.post('/', async (ctx) => {
+
+  const { data_kind, config_type, config={}, description } = ctx.request.body
 
   const mock_data = valueGenerate[config_type] ? valueGenerate[config_type](config[config_type]) : []
   const targetConfig = valueCollection[config_type] ? valueCollection[config_type].reduce((acc, cur) => {
@@ -319,7 +321,8 @@ router
     data_kind,
     config_type,
     mock_data: JSON.stringify(mock_data),
-    [config_type]: targetConfig
+    [config_type]: targetConfig,
+    description
   })
 
   const data = await model.save()
@@ -341,16 +344,6 @@ router
 .put('/', async (ctx) => {
 
   const check = Params.body(ctx, {
-    name: 'data_kind',
-    validator: [
-      data => typeof data === 'string' && !!data 
-    ]
-  }, {
-    name: 'config_type',
-    validator: [
-      data => Object.keys(SCREEN_MOCK_CONFIG_DATA_TYPE).includes(data)
-    ]
-  }, {
     name: '_id',
     validator: [
       data => ObjectId.isValid(data)
@@ -366,7 +359,7 @@ router
     ]
   })
 
-  const { data_kind, config_type, config } = ctx.request.body
+  const { data_kind, config_type, config={}, description } = ctx.request.body
 
   const mock_data = valueGenerate[config_type] ? valueGenerate[config_type](config[config_type]) : []
   const targetConfig = valueCollection[config_type] ? valueCollection[config_type].reduce((acc, cur) => {
@@ -381,6 +374,7 @@ router
       data_kind,
       config_type,
       mock_data: JSON.stringify(mock_data),
+      description,
       [config_type]: targetConfig
     }
   })
