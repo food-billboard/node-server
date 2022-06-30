@@ -4051,7 +4051,7 @@
           {
             "name": "currPage",
             "in": "query",
-            "type": "ineger",
+            "type": "integer",
             "description": "当前页"
           },
           {
@@ -4069,7 +4069,7 @@
           {
             "name": "createdAt",
             "in": "query",
-            "type": "array",
+            "type": "string",
             "description": "创建时间([start, end])"
           }
         ],
@@ -4131,7 +4131,7 @@
           {
             "name": "currPage",
             "in": "query",
-            "type": "ineger",
+            "type": "integer",
             "description": "当前页"
           },
           {
@@ -4149,7 +4149,7 @@
           {
             "name": "createdAt",
             "in": "query",
-            "type": "array",
+            "type": "string",
             "description": "创建时间([start, end])"
           }
         ],

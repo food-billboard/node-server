@@ -1,6 +1,7 @@
 require('module-alias/register')
-const { UserModel, ScreenModal } = require('@src/utils')
-const { Request, mockCreateUser, deepParseResponse, mockCreateScreen } = require('@test/utils')
+const { UserModel, ScreenModal, ROLES_NAME_MAP } = require('@src/utils')
+const { Types: { ObjectId} } = require('mongoose')
+const { Request, mockCreateUser, mockCreateScreen } = require('@test/utils')
 
 const COMMON_API = '/api/screen/pre/export'
 
@@ -87,6 +88,55 @@ describe(`${COMMON_API} test`, () => {
 
     })
 
+    it(`export the screen and the screen is not self success`, function(done) {
+
+      Promise.all([
+        ScreenModal.updateOne({
+          _id: screenId
+        }, {
+          $set: {
+            user: ObjectId('8f63270f005f1c1a0d9448ca')
+          }
+        }),
+        UserModel.updateOne({
+          _id: userInfo._id 
+        }, {
+          $set: {
+            roles: [ROLES_NAME_MAP.SUPER_ADMIN]
+          }
+        })
+      ])
+      .then(_ => {
+        Request
+        .post(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          _id: screenId.toString(),
+          type: 'screen'
+        })
+        .expect(200)
+      })
+      .then(_ => {
+        return ScreenModal.updateOne({
+          _id: screenId
+        }, {
+          $set: {
+            user: userInfo._id 
+          }
+        })
+      })
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+      
+    })
+
   })
 
   describe(`export the screen model fail test -> ${COMMON_API}`, function() {
@@ -144,6 +194,62 @@ describe(`${COMMON_API} test`, () => {
         type: ''
       })
       .expect(400)
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+    })
+
+    it(`export the screen and the screen is not self fail because is not the auth`, function(done) {
+      Promise.all([
+        ScreenModal.updateOne({
+          _id: screenId
+        }, {
+          $set: {
+            user: ObjectId('8f63270f005f1c1a0d9448ca')
+          }
+        }),
+        UserModel.updateOne({
+          _id: userInfo._id 
+        }, {
+          $set: {
+            roles: [ROLES_NAME_MAP.CUSTOMER]
+          }
+        })
+      ])
+      .then(_ => {
+        Request
+        .post(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          _id: screenId.toString(),
+          type: 'screen'
+        })
+        .expect(404)
+      })
+      .then(_ => {
+        return Promise.all([
+          ScreenModal.updateOne({
+            _id: screenId
+          }, {
+            $set: {
+              user: userInfo._id 
+            }
+          }),
+          UserModel.updateOne({
+            _id: userInfo._id 
+          }, {
+            $set: {
+              roles: [ROLES_NAME_MAP.SUPER_ADMIN]
+            }
+          })
+        ])
+      })
       .then(_ => {
         done()
       })
