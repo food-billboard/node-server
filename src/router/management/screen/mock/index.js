@@ -6,6 +6,7 @@ const {
   responseDataDeal, 
   ScreenMockModel, 
   SCREEN_MOCK_CONFIG_DATA_TYPE, 
+  verifyTokenToData
 } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -225,6 +226,7 @@ router
         _id: 1,
         data_kind: 1,
         description: 1,
+        config_type: 1,
         user: {
           username: "$user.username",
           avatar: "$user.avatar.src",
@@ -245,8 +247,10 @@ router
   ])
   .then(data => {
     return {
-      total: data.length,
-      list: data 
+      data: {
+        total: data.length,
+        list: data 
+      }
     }
   })
   .catch(dealErr(ctx))
@@ -309,6 +313,9 @@ router
 })
 .post('/', async (ctx) => {
 
+  const [, token] = verifyTokenToData(ctx)
+  const { id } = token
+
   const { data_kind, config_type, config={}, description } = ctx.request.body
 
   const mock_data = valueGenerate[config_type] ? valueGenerate[config_type](config[config_type]) : []
@@ -322,7 +329,8 @@ router
     config_type,
     mock_data: JSON.stringify(mock_data),
     [config_type]: targetConfig,
-    description
+    description,
+    user: ObjectId(id)
   })
 
   const data = await model.save()
