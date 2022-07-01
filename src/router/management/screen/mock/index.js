@@ -91,7 +91,7 @@ const valueGenerate = {
       const { min=-defaultMax, max=defaultMax, decimal=false, dmin=0, dmax=10 } = value 
       return new Array(DATE_MAX).fill(0).map(() => {
         if(decimal) return Mock.mock(`@float(${min}, ${max}, ${dmin}, ${dmax})`)
-        return Mock.mock(`@integer(${min}, ${max}`)
+        return Mock.mock(`@integer(${min}, ${max})`)
       })
     }catch(err) {
       return [] 
