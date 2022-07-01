@@ -35,7 +35,7 @@ function findData(res) {
 
 function responseExpect(res, validate = []) {
   const {
-    res: { list, total },
+    res: { data: { list, total } },
   } = res
 
   commonValidate.number(total)
@@ -147,7 +147,7 @@ describe(`${COMMON_API} test`, () => {
         .then((res) => {
           let obj = parseResponse(res)
           responseExpect(obj, (target) => {
-            const { total, list } = target
+            const { total, list } = target.data 
             expect(total).to.be.not.equals(0)
             expect(list.some((item) => item._id === mockId.toString())).to.be
               .true
@@ -175,7 +175,7 @@ describe(`${COMMON_API} test`, () => {
         .then((res) => {
           let obj = parseResponse(res)
           responseExpect(obj, (target) => {
-            const { total, list } = target
+            const { total, list } = target.data 
             expect(total).to.be.not.equals(0)
             expect(list.some((item) => item._id === mockId.toString())).to.be
               .true
