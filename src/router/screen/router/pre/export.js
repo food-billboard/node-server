@@ -1,5 +1,5 @@
 const Router = require('@koa/router')
-const { dealErr, Params, responseDataDeal, ScreenModal, ScreenModelModal, verifyTokenToData, notFound, STATIC_FILE_PATH } = require('@src/utils')
+const { dealErr, Params, responseDataDeal, ScreenModal, ScreenModelModal, verifyTokenToData, notFound, STATIC_FILE_PATH, ROLES_MAP, UserModel } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 const path = require('path')
 const fs = require('fs-extra')
@@ -44,19 +44,30 @@ router
   let filePath 
   let fileName 
 
-  const data = await model.findOne({
-    _id,
-    user: ObjectId(id)
+  const data = await UserModel.findOne({
+    _id: ObjectId(id)
   })
   .select({
-    version: 1,
-    data: 1,
-    flag: 1,
-    name: 1,
-    poster: 1,
-    description: 1
+    roles: 1
   })
   .exec()
+  .then(data => {
+    const maxRole = Math.min(...data.roles.map(item => ROLES_MAP[item]))
+    let query = {
+      _id 
+    }
+    if(typeof maxRole !== 'number' || Number.isNaN(maxRole) || ROLES_MAP.SUB_DEVELOPMENT < maxRole) query.user = ObjectId(id)
+    return model.findOne(query)
+    .select({
+      version: 1,
+      data: 1,
+      flag: 1,
+      name: 1,
+      poster: 1,
+      description: 1
+    })
+    .exec()
+  })
   .then(notFound)
   .then(data => {
     const { _id, ...nextData } = data 
