@@ -7,7 +7,7 @@ const { Request, commonValidate, mockCreateUser, parseResponse, mockCreateScreen
 const COMMON_API = '/api/manage/screen/list'
 
 function responseExpect(res, validate=[]) {
-  const { res: { list, total } } = res
+  const { res: { data: { list, total } } } = res
 
   commonValidate.number(total)
   expect(list).to.be.a("array")
@@ -112,7 +112,7 @@ describe(`${COMMON_API} test`, () => {
       .then(function(res) {
         let obj = parseResponse(res)
         responseExpect(obj, (target) => {
-          const { total, list } = target 
+          const { total, list } = target.data 
           expect(total).to.be.not.equals(0)
           expect(list.some(item => item._id === screenId.toString())).to.be.true 
         })
@@ -142,7 +142,7 @@ describe(`${COMMON_API} test`, () => {
       .then(function(res) {
         let obj = parseResponse(res)
         responseExpect(obj, (target) => {
-          const { total, list } = target 
+          const { total, list } = target.data 
           expect(total).to.be.not.equals(0)
           expect(list.some(item => item._id === screenId.toString())).to.be.true 
         })
@@ -172,7 +172,7 @@ describe(`${COMMON_API} test`, () => {
       .then(function(res) {
         let obj = parseResponse(res)
         responseExpect(obj, (target) => {
-          const { total, list } = target 
+          const { total, list } = target.data 
           expect(total).to.be.equals(0)
         })
       })
