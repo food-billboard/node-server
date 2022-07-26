@@ -1373,6 +1373,10 @@
                 "components": {
                   "type": "string",
                   "format": "大屏数据"
+                },
+                "version": {
+                  "type": "string",
+                  "format": "大屏或模板版本"
                 }
               }
             }

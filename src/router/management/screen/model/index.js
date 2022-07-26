@@ -28,6 +28,9 @@ router
             {
               description: reg(data)
             },
+            {
+              version: reg(data)
+            },
           ]
 
           return {
@@ -209,7 +212,8 @@ router
           description: 1,
           poster: 1,
           createdAt: 1,
-          updatedAt: 1
+          updatedAt: 1,
+          version: 1 
         }
       }
     ])

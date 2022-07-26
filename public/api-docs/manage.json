@@ -4664,6 +4664,10 @@
                       "updatedAt": {
                         "type": "string",
                         "format": "date-time"
+                      },
+                      "version": {
+                        "type": "string",
+                        "format": "版本"
                       }
                     }
                   }

@@ -9,10 +9,11 @@ const COMMON_API = '/api/screen/detail'
 function responseExpect(res, validate=[]) {
   const { res: { data: target } } = res
 
-  expect(target).to.be.a("object").and.that.includes.any.keys('_id', 'name', 'description', 'poster', 'components')
+  expect(target).to.be.a("object").and.that.includes.any.keys('_id', 'name', 'description', 'poster', 'components', 'version')
   commonValidate.objectId(target._id)
   commonValidate.string(target.name)
   commonValidate.string(target.description)
+  commonValidate.string(target.version)
   commonValidate.poster(target.poster)
   expect(target.components).to.be.a('object')
 

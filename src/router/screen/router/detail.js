@@ -48,14 +48,15 @@ router
       data: 1,
       name: 1,
       poster: 1,
-      description: 1
+      description: 1,
+      version: 1
     })
     .exec()
   })
   .then(notFound)
   .then((result) => {
 
-    const { data, _id, name, poster, description } = result 
+    const { data, _id, name, poster, description, version } = result 
 
     return {
       data: {
@@ -63,7 +64,8 @@ router
         name, 
         poster, 
         description,
-        components: JSON.parse(data)
+        components: JSON.parse(data),
+        version
       }
     }
   })
