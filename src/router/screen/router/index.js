@@ -1,6 +1,7 @@
 const Router = require('@koa/router')
-const { verifyTokenToData, dealErr, Params, responseDataDeal, ScreenModal, notFound, loginAuthorization, getCookie, SCREEN_TYPE } = require('@src/utils')
+const { verifyTokenToData, dealErr, Params, responseDataDeal, ScreenModal, loginAuthorization, SCREEN_TYPE } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
+const savePool = require('./save-pool')
 
 const router = new Router()
 
@@ -305,5 +306,7 @@ router
   })
 
 })
+// 流式保存
+.use('/pool', savePool.routes(), savePool.allowedMethods())
 
 module.exports = router
