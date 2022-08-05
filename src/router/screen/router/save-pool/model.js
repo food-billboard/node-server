@@ -2,7 +2,10 @@ const Router = require('@koa/router')
 const { verifyTokenToData, dealErr, Params, responseDataDeal, ScreenModelModal, loginAuthorization, getCookie, SCREEN_TYPE } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
-const savePool = async (ctx) => {
+const router = new Router()
+
+router
+.put('/', async (ctx) => {
 
   const check = Params.body(ctx, {
     name: '_id',
@@ -47,4 +50,6 @@ const savePool = async (ctx) => {
     needCache: false 
   })
 
-}
+})
+
+module.exports = router 

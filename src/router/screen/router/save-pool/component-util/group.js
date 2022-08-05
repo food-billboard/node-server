@@ -1,4 +1,4 @@
-const { get, set, merge, pick } = require('lodash');
+const { get, set, merge, pick, isNil } = require('lodash');
 const { useIdPathMap, useComponentPath } = require('./hook');
 const {
   getParentComponent,
@@ -274,7 +274,7 @@ class GroupUtil {
     const idPathMap = useIdPathMap();
     const { parent } = clickTarget;
 
-    const path = idPathMap[parent]?.path;
+    const path = (idPathMap[parent] || {}).path;
     const parentComponent = get(components, path);
 
     const addComponents = select.map((item) => {
@@ -341,10 +341,10 @@ class GroupUtil {
         return {
           config: {
             style: {
-              left: item.value.config?.style?.left || 0,
-              top: item.value.config?.style?.top || 0,
-              width: item.value.config?.style?.width || 0,
-              height: item.value.config?.style?.height || 0,
+              left: get(item, "value.config.style.left") || 0,
+              top: get(item, "value.config.style.top") || 0,
+              width: get(item, "value.config.style.width") || 0,
+              height: get(item, "value.config.style.height") || 0,
             },
           },
         };
@@ -354,7 +354,7 @@ class GroupUtil {
     );
     // 创建新组
     const newGroupComponent = createGroupComponent({
-      parent: parentComponent?.id,
+      parent: (parentComponent || {}).id,
       config: {
         style: {
           left: groupComponentLeft,
@@ -370,8 +370,8 @@ class GroupUtil {
         parent: newGroupComponent.id,
         config: {
           style: {
-            left: (item.value.config?.style?.left || 0) - groupComponentLeft,
-            top: (item.value.config?.style?.top || 0) - groupComponentTop,
+            left: (get(item, "value.config.style.left") || 0) - groupComponentLeft,
+            top: (get(item, "value.config.style.top") || 0) - groupComponentTop,
           },
         },
       });
@@ -394,7 +394,7 @@ class GroupUtil {
       },
     );
 
-    callback?.(newGroupComponent.id);
+    callback && callback(newGroupComponent.id);
 
     return realResult;
   };
@@ -504,7 +504,7 @@ class GroupUtil {
     const idPathMap = useIdPathMap();
 
     const originGroupComponentPath =
-      idPathMap[originGroupComponentId]?.path || '';
+      (idPathMap[originGroupComponentId] || {}).path || '';
     const path = originGroupComponentPath.split('.')[0];
 
     const topParentComponent =
@@ -683,7 +683,10 @@ class GroupUtil {
 
       // 目标组
       if (originGroupComponentId === id) {
-        const path = idPathMap[id]?.path;
+        const path = (idPathMap[id] || {}).path;
+
+        const scaleX = get(item, 'config.attr.scaleX')
+        const scaleY = get(item, 'config.attr.scaleY')
 
         result.push(
           ...addComponents.map((item, index) => {
@@ -703,9 +706,9 @@ class GroupUtil {
                   },
                   attr: {
                     scaleX:
-                      (get(item, 'config.attr.scaleX') ?? 1) / calculateScaleX,
+                      (isNil(scaleX) ? 1 : scaleX) / calculateScaleX,
                     scaleY:
-                      (get(item, 'config.attr.scaleY') ?? 1) / calculateScaleY,
+                      (isNil(scaleY) ? 1 : scaleY) / calculateScaleY,
                   },
                 },
               }),
@@ -724,4 +727,4 @@ class GroupUtil {
   };
 }
 
-export default new GroupUtil();
+module.exports = new GroupUtil();

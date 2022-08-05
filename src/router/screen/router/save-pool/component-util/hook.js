@@ -42,7 +42,7 @@ function useComponentPath(
         path: currentPath,
         disabled: curComponentDisabled,
         lock: !!cur.config.attr.lock,
-        filter: cur.config.data?.filter,
+        filter: (cur.config.data || {}).filter || [],
         name: cur.name,
       };
 

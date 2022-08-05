@@ -188,6 +188,8 @@ router
   })
 
 })
+// 流式保存
+.use('/pool', savePool.routes(), savePool.allowedMethods())
 .use('/', async (ctx, next) => {
 
   const check = Params.body(ctx, {
@@ -306,7 +308,5 @@ router
   })
 
 })
-// 流式保存
-.use('/pool', savePool.routes(), savePool.allowedMethods())
 
 module.exports = router

@@ -1,8 +1,26 @@
-const arrayMove = require('array-move');
 const { set, get, merge, pick, isNil, omit } = require('lodash');
 const { useComponentPath, useIdPathMap } = require('./hook');
-import GroupUtil from './group';
+const GroupUtil = require('./group');
 const { isGroupComponent, isComponentParentEqual } = require('./component');
+
+function arrayMoveMutable(array, fromIndex, toIndex) {
+	const startIndex = fromIndex < 0 ? array.length + fromIndex : fromIndex;
+
+	if (startIndex >= 0 && startIndex < array.length) {
+		const endIndex = toIndex < 0 ? array.length + toIndex : toIndex;
+
+		const [item] = array.splice(fromIndex, 1);
+		array.splice(endIndex, 0, item);
+	}
+}
+
+function arrayMoveImmutable(array, fromIndex, toIndex) {
+	const newArray = [...array];
+	arrayMoveMutable(newArray, fromIndex, toIndex);
+	return newArray;
+}
+
+const arrayMove = arrayMoveImmutable
 
 function mergeWithoutArray(...args) {
   // @ts-ignore
@@ -14,7 +32,7 @@ function mergeWithoutArray(...args) {
 }
 
 // get parentPath
-export const getParentPath = (path) => {
+const getParentPath = (path) => {
   const pathList = path.split('.');
   const parentPath = pathList.slice(0, -1).join('.');
   return parentPath;
@@ -47,7 +65,7 @@ class ComponentUtil {
     extra,
   ) {
     const idPathMap = useIdPathMap();
-    const calParentPath = idPathMap[newValue.parent]?.path;
+    const calParentPath = (idPathMap[newValue.parent] || {}).path;
     const realCalParentPath = `${calParentPath}.components`;
     const targetAddParentComponents = calParentPath
       ? get(components, realCalParentPath)
@@ -71,7 +89,7 @@ class ComponentUtil {
     } else {
       components = targetAddParentComponents;
     }
-    value.callback?.(components, newValue);
+    value.callback && value.callback(components, newValue);
     return components;
   }
 
@@ -87,7 +105,7 @@ class ComponentUtil {
     const { id, index: targetIndex } = value;
 
     // inner
-    if (target?.parent) {
+    if ((target || {}).parent) {
       const parent = get(components, parentPath);
       const index = parent.findIndex((item) => item.id === id);
       const realIndex = this.getRealIndex(parent, targetIndex, index);
@@ -111,7 +129,7 @@ class ComponentUtil {
       components[realIndex] = mergeWithoutArray(target, newValue);
     }
 
-    value.callback?.(components, newValue);
+    value.callback && value.callback(components, newValue);
 
     return components;
   }
@@ -138,7 +156,7 @@ class ComponentUtil {
       components = targetDeleteParentComponents;
     }
 
-    value.callback?.(components, id);
+    value.callback && value.callback(components, id);
 
     return components;
   }
@@ -179,7 +197,7 @@ class ComponentUtil {
       components = targetUpdateParentComponents;
     }
 
-    value.callback?.(components, targetUpdateParentComponents);
+    value.callback && value.callback(components, targetUpdateParentComponents);
 
     return components;
   }
@@ -193,7 +211,7 @@ class ComponentUtil {
     newValue
   ) {
     const { id, ...nextNewValue } = newValue;
-    const select = id?.split(',') || [];
+    const select = (id || '').split(',') || [];
     const realNewValue = {
       ...nextNewValue,
       id: select[0],
@@ -210,7 +228,7 @@ class ComponentUtil {
       },
     });
 
-    value.callback?.(components, groupId);
+    value.callback && value.callback(components, groupId);
 
     return newComponents;
   }
@@ -228,7 +246,7 @@ class ComponentUtil {
       components,
       select: [newValue.id],
     });
-    value.callback?.(newComponents, null);
+    value.callback && value.callback(newComponents, null);
     return newComponents;
   }
 
@@ -275,7 +293,7 @@ class ComponentUtil {
     const data = [...components];
 
     // Find dragObject
-    const dragPath = idPathMap[dragKey]?.path;
+    const dragPath = (idPathMap[dragKey] || {}).path;
     let dragObj = get(components, dragPath);
 
     if (!dropToGap) {
@@ -331,17 +349,17 @@ class ComponentUtil {
     // 拖拽放置的组件或组
     const dropPath = idPathMap[originDropKey].path;
     const dropComponent = get(components, dropPath);
-    const dropComponentParent = dropComponent?.parent;
+    const dropComponentParent = (dropComponent || {}).parent;
     // 放置组下的直接子id
     let dropComponentDirectChildrenIds = [];
     if (isGroupComponent(dropComponent)) {
-      dropComponentDirectChildrenIds = (dropComponent?.components || []).map(
+      dropComponentDirectChildrenIds = ((dropComponent || {}).components || []).map(
         (item) => item.id,
       );
     } else if (dropComponentParent) {
       const dropPath = idPathMap[dropComponentParent].path;
       const dropComponent = get(components, dropPath);
-      dropComponentDirectChildrenIds = (dropComponent?.components || []).map(
+      dropComponentDirectChildrenIds = ((dropComponent || {}).components || []).map(
         (item) => item.id,
       );
     } else {
@@ -446,29 +464,29 @@ class ComponentUtil {
     });
 
     const coverUpdateResultStyle = get(
-      coverUpdateResult?.value,
-      'config.style',
+      coverUpdateResult,
+      'value.config.style',
     );
 
     // 放置在最外的最前
     if (dropIndex === -1) {
       realUpdateResult.push(
-        ...((coverUpdateResult?.value.components || [])
-          .filter((item) => item?.id !== originDropKey)
+        ...((get(coverUpdateResult, "value.components") || [])
+          .filter((item) => (item || {}).id !== originDropKey)
           .map((item, index) => {
             return {
               action: 'add',
-              id: item?.id,
+              id: (item || {}).id,
               value: merge({}, omit(item, 'parent'), {
                 parent: undefined,
                 config: {
                   style: {
                     left:
-                      (item?.config?.style?.left || 0) +
-                      (coverUpdateResultStyle?.left || 0),
+                      (get(item, "config.style.left") || 0) +
+                      ((coverUpdateResultStyle || {}).left || 0),
                     top:
-                      (item?.config?.style?.top || 0) +
-                      (coverUpdateResultStyle?.top || 0),
+                      (get(item, "config.style.top") || 0) +
+                      ((coverUpdateResultStyle || {}).top || 0),
                   },
                 },
               }),
@@ -487,9 +505,9 @@ class ComponentUtil {
       const scaleY = get(dropComponent, 'config.attr.scaleY') || 1;
 
       realUpdateResult.push(
-        ...((coverUpdateResult?.value.components || []).map((item, index) => {
+        ...((get(coverUpdateResult, "value.components") || []).map((item, index) => {
           let value = {};
-          const isOriginDropItem = item?.id === originDropKey;
+          const isOriginDropItem = (item || {}).id === originDropKey;
           if (isOriginDropItem) {
             value = {
               parent: dropComponentParent,
@@ -508,21 +526,21 @@ class ComponentUtil {
               config: {
                 style: {
                   // * 因为没有做过特殊处理，需要单独处理当前层级的缩放
-                  width: (item?.config?.style?.width || 0) / scaleX,
-                  height: (item?.config?.style?.height || 0) / scaleY,
+                  width: (get(item, "config.style.width") || 0) / scaleX,
+                  height: (get(item, "config.style.height") || 0) / scaleY,
                   left:
-                    (item?.config?.style?.left || 0) / scaleX +
-                    (coverUpdateResultStyle?.left || 0),
+                    (get(item, "config.style.left")|| 0) / scaleX +
+                    ((coverUpdateResultStyle || {}).left || 0),
                   top:
-                    (item?.config?.style?.top || 0) / scaleY +
-                    (coverUpdateResultStyle?.top || 0),
+                    (get(item, "config.style.top") || 0) / scaleY +
+                    ((coverUpdateResultStyle || {}).top || 0),
                 },
               },
             });
           }
           return {
             action: isOriginDropItem ? 'update' : ('add'),
-            id: item?.id,
+            id: (item || {}).id,
             value,
             path: `${dropPath}.components`,
             extra: {
@@ -534,26 +552,26 @@ class ComponentUtil {
     } else {
       let nearComponentId = dropComponent.id;
       realUpdateResult.push(
-        ...((coverUpdateResult?.value.components || []).map((item, index) => {
+        ...((get(coverUpdateResult, "value.components") || []).map((item, index) => {
           const nearComponent = nearComponentId;
 
-          if (item?.id !== originDropKey) {
+          if ((item || {}).id !== originDropKey) {
             nearComponentId = item.id;
           }
 
           return {
-            action: item?.id === originDropKey ? 'update' : ('add'),
-            id: item?.id,
+            action: (item || {}).id === originDropKey ? 'update' : ('add'),
+            id: (item || {}).id,
             value: merge({}, omit(item, 'parent'), {
-              parent: parentUpdateResult?.id || dropKey,
+              parent: (parentUpdateResult || {}).id || dropKey,
               config: {
                 style: {
                   left:
-                    (item?.config?.style?.left || 0) +
-                    (coverUpdateResultStyle?.left || 0),
+                    (get(item, "config.style.left") || 0) +
+                    ((coverUpdateResultStyle || {}).left || 0),
                   top:
-                    (item?.config?.style?.top || 0) +
-                    (coverUpdateResultStyle?.top || 0),
+                    (get(item, "config.style.top") || 0) +
+                    ((coverUpdateResultStyle || {}).top || 0),
                 },
               },
             }),
@@ -605,8 +623,7 @@ class ComponentUtil {
     );
   };
 
-  setComponent(state, action) {
-    const { payload } = action;
+  setComponent(state, payload) {
 
     let changeComponents =
       Array.isArray(payload) ? payload : [payload];
@@ -643,7 +660,7 @@ class ComponentUtil {
         case 'add':
           components = this.addComponent(
             component,
-            componentPath ?? path,
+            isNil(componentPath) ? path : componentPath, 
             parentPath,
             components,
             valueWithId,
@@ -720,7 +737,7 @@ class ComponentUtil {
           components = this.setComponent(state, {
             payload: newActionComponents4Drag,
           });
-          component.callback?.(components, null);
+          component.callback && component.callback(components, null);
           break;
       }
     });
@@ -732,4 +749,8 @@ class ComponentUtil {
   }
 }
 
-export default ComponentUtil;
+module.exports = {
+  ComponentUtil: new ComponentUtil(),
+  getParentPath,
+  mergeWithoutArray
+}

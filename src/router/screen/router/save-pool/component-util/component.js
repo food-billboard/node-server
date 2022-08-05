@@ -20,17 +20,17 @@ const getParentComponentIds = (
     components = sourceComponents;
   } else {
     const state = getDvaGlobalModelData();
-    components = state?.components || [];
+    components = state ? state.components : [];
   }
   const idPathMap = useIdPathMap();
 
   let parentIds = [];
-  let path = idPathMap[id]?.path;
+  let path = (idPathMap[id] || {}).path;
   let target = get(components, path);
 
-  while (target?.parent) {
+  while ((target || {}).parent) {
     parentIds.push(target.parent);
-    path = idPathMap[target.parent]?.path;
+    path = (idPathMap[target.parent] || {}).path;
     target = get(components, path);
   }
 

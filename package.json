@@ -26,7 +26,6 @@
   "dependencies": {
     "@koa/router": "^9.0.1",
     "app-root-path": "^3.0.0",
-    "array-move": "^4.0.0",
     "axios": "^0.24.0",
     "chalk": "^4.1.0",
     "commander": "^6.2.1",
@@ -56,6 +55,7 @@
     "nodemailer": "^6.7.1",
     "pinyin": "^2.10.2",
     "puppeteer": "^13.3.1",
+    "react-undo-component": "^1.0.1",
     "shelljs": "^0.8.4",
     "socket.io": "^4.0.2",
     "validator": "^13.7.0",
