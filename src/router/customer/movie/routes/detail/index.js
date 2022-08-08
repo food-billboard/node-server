@@ -138,10 +138,10 @@ router
     .then(notFound)
   })
   .then(data => {
-    const { author, info, poster, video, images, comment, total_rate, rate_person, same_film, tag, ...nextData } = data
+    const { author, info, poster, video, images, comment, total_rate, rate_person, same_film, tag, author_rate, ...nextData } = data
     const { actor, director, district, language, classify, ...nextInfo } = info
 
-    const rate = total_rate / rate_person
+    const rate = (total_rate + author_rate ) / rate_person
 
     return {
       data: {

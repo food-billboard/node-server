@@ -139,6 +139,7 @@ router
       rate_person,
       same_film,
       video,
+      author_rate,
       author,
       ...nextNewData
     } = newData
@@ -151,7 +152,7 @@ router
       ...nextInfo
     } = info
 
-    const rate = total_rate / rate_person
+    const rate = (total_rate + author_rate) / rate_person
 
     return {
       data: {
