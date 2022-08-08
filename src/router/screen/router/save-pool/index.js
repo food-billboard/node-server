@@ -4,7 +4,6 @@ const {
 	dealErr,
 	Params,
 	responseDataDeal,
-	getClient,
 	ScreenModal,
 	ScreenModelModal,
 	notFound,
@@ -12,37 +11,10 @@ const {
 const {
 	Types: { ObjectId },
 } = require("mongoose")
-const { cloneDeep, set } = require("lodash")
-const History = require("./component-util/history")
-const { ComponentUtil, mergeWithoutArray } = require('./component-util')
+const { ScreenPoolUtil } = require('./component-util/history')
 const CommonUpdate = require('./component-util/update')
 
 const router = new Router()
-
-// 最大的流式保存有效时间
-const MAX_POOL_LIVE_TIME = 1000 * 60 * 10
-// 最大等待存活接口时间
-const MAX_WAITING_LIVE_TIME = 1000 * 4
-
-const generateUndoKey = () => Date.now() + "_" + Math.random()
-const generateCheckLiveKey = (id) => id + 'CHECK_LIVE_KEY'
-
-// redis 数据结构
-/*
-{
-  dataPool: {
-    [undoKey]: JSON.parse(data)
-  },
-  version,
-  _id,
-  history: {
-    history,
-    isUndoDisabled: true,
-    isRedoDisabled: true,
-    value: undoKey
-  }
-}
-*/
 
 router
 .use(async (ctx, next) => {
@@ -88,22 +60,24 @@ router
 
 	const [, token] = verifyTokenToData(ctx)
 	const { id } = token
-	const client = getClient()
 	const model = type === "screen" ? ScreenModal : ScreenModelModal
 
-	const data = await client
-		.get(_id)
+	const data = await new Promise((resolve, reject) => {
+		try {
+			resolve(ScreenPoolUtil.isOvertime(_id))
+		}catch(err) {
+			reject(err)
+		}
+	})
 		.then((data) => {
-			if (data) {
-				return client.get(generateCheckLiveKey(_id))
-				.then(data => {
-					if(data) {
-						return Promise.reject({
-							status: 400,
-							errMsg: "有用户正在编辑",
-						})
-					}
-				})
+			if(!data) {
+				const result = ScreenPoolUtil.isCheckTimestampsOvertime(_id)
+				if(!result) {
+					return Promise.reject({
+						status: 400,
+						errMsg: "有用户正在编辑",
+					})
+				}
 			}
 		})
 		.then(() => {
@@ -121,22 +95,7 @@ router
 		})
 		.then(notFound)
 		.then((result) => {
-			const { data, version } = result
-			const undoKey = generateUndoKey()
-			const history = new History()
-			return client.setex(_id, MAX_POOL_LIVE_TIME / 1000, {
-				dataPool: {
-					[undoKey]: JSON.parse(data),
-				},
-				version,
-				_id,
-				history: {
-					history,
-					isUndoDisabled: true,
-					isRedoDisabled: true,
-					value: undoKey,
-				},
-			})
+			ScreenPoolUtil.createScreenPool(_id, result)
 		})
 		.then(() => {
 			return {
@@ -154,14 +113,17 @@ router
 .get("/", async (ctx) => {
 	const { _id } = ctx.query
 
-	const client = getClient()
-
-	const data = await client
-		.get(_id)
+	const data = await new Promise((resolve, reject) => {
+		try {
+			resolve(ScreenPoolUtil.isOvertime(_id))
+		}catch(err) {
+			reject(err)
+		}
+	})
 		.then((data) => {
-			if(data) client.setex(generateCheckLiveKey(_id), MAX_WAITING_LIVE_TIME / 1000, _id)
+			if(!data) ScreenPoolUtil.updateScreenPoolCheckTimestamps(_id)
 			return {
-				data: !!data,
+				data: !data,
 			}
 		})
 		.catch(dealErr(ctx))

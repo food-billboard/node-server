@@ -7,15 +7,7 @@ const {
   isGroupComponent,
   getParentComponentIds,
 } = require('./component');
-
-function mergeWithoutArray(...args) {
-  // @ts-ignore
-  return mergeWith(...args, (value, srcValue) => {
-    if (Array.isArray(value)) {
-      return srcValue;
-    }
-  });
-}
+const { mergeWithoutArray } = require('./constants')
 
 class GroupUtil {
   getComponentPosition = (
@@ -635,7 +627,7 @@ class GroupUtil {
       isRelationGroupComponent &&
         !!id &&
         result.push(
-          ...groupChildren.reduce<any>((acc, item) => {
+          ...groupChildren.reduce((acc, item) => {
             // 未改变且为组件
             if (!isConfigChanged && !isGroupComponent(item)) return acc;
 
@@ -685,11 +677,10 @@ class GroupUtil {
       if (originGroupComponentId === id) {
         const path = (idPathMap[id] || {}).path;
 
-        const scaleX = get(item, 'config.attr.scaleX')
-        const scaleY = get(item, 'config.attr.scaleY')
-
         result.push(
           ...addComponents.map((item, index) => {
+            const scaleX = get(item, 'config.attr.scaleX')
+            const scaleY = get(item, 'config.attr.scaleY')
             return {
               value: merge({}, item, {
                 parent: id,

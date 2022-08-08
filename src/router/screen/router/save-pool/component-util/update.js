@@ -2,10 +2,11 @@ const {
 	dealErr,
 	Params,
 	responseDataDeal,
-	getClient
 } = require("@src/utils")
 const { cloneDeep, set } = require("lodash")
-const { ComponentUtil, mergeWithoutArray } = require('./index')
+const { ScreenPoolUtil } = require('./history')
+const { ComponentUtil } = require('./index')
+const { mergeWithoutArray } = require('./constants')
 
 module.exports = async (ctx, callback) => {
   const check = Params.body(ctx, {
@@ -30,17 +31,22 @@ module.exports = async (ctx, callback) => {
 		type,
 		action 
 	} = ctx.request.body
-	const client = getClient()
 
-	const data = await client.get(_id)
-	.then(data => {
-		if(!data) return Promise.reject({ status: 400, errMsg: 'overtime' })
-		return data 
+	const data = await new Promise((resolve, reject) => {
+		try {
+			resolve(ScreenPoolUtil.isCheckTimestampsOvertime(_id))
+		}catch(err) {	
+			reject(err)
+		}
 	})
 	.then(data => {
-		const { dataPool, version: prevVersion, _id, history } = data
+		if(data) return Promise.reject({ status: 400, errMsg: 'overtime' })
+		return ScreenPoolUtil.getState(_id) 
+	})
+	.then(data => {
+		const { version: prevVersion, _id, history } = data
 		const { isUndoDisabled, isRedoDisabled, value } = history
-		const currentScreenData = dataPool[value]
+		const currentScreenData = history.history.state || value 
 
 		if(!currentScreenData) return Promise.reject({ errMsg: 'not found', status: 404 })
 
@@ -69,9 +75,6 @@ module.exports = async (ctx, callback) => {
 				},
 			}
 		}else {
-			const undoKey = generateUndoKey() 
-
-			const newData = history.history.enqueue(data, undoKey, history.value)
 
 			let newScreenData = cloneDeep(currentScreenData)
 
@@ -82,18 +85,16 @@ module.exports = async (ctx, callback) => {
 			}else if(type === 'guideLine') {
 				set(newScreenData, 'config.attr.guideLine', action)
 			}else {
-				newScreenData = ComponentUtil.setComponent(newScreenData, action)
+				newScreenData.components = ComponentUtil.setComponent(newScreenData, action)
 			}
+
+			const newData = history.history.enqueue(data, newScreenData, currentScreenData)
 	
 			newRedisConfig = {
 				...data,
-				dataPool: {
-					...dataPool,
-					[undoKey]: newScreenData,
-				},
 				history: {
 					...newData.history,
-					value: undoKey,
+					value: newScreenData
 				},
 			}
 		}
@@ -106,12 +107,12 @@ module.exports = async (ctx, callback) => {
 	})
 	.then(redisConfig => {
 
-    const { dataPool, version, _id, history: { value } } = redisConfig
-    const screenData = dataPool[value]
+    const { version, _id, history: { value } } = redisConfig
+    const screenData = value
 
     return callback(screenData, _id, version)
     .then(() => {
-      return client.setex(_id, MAX_POOL_LIVE_TIME / 1000, redisConfig)
+      ScreenPoolUtil.updateScreenPoolData(_id, redisConfig)
     })
 	})
 	.then(() => {
@@ -119,7 +120,11 @@ module.exports = async (ctx, callback) => {
 			data: _id 
 		}
 	})
-	.catch(dealErr(ctx))
+	// .catch(dealErr(ctx))
+	.catch(err => {
+		console.log(err, 22777)
+		return dealErr(ctx)(err)
+	})
 
 	responseDataDeal({
 		ctx,

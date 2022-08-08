@@ -1,3 +1,12 @@
+const { get } = require('lodash')
+const { nanoid } = require('nanoid')
+const { useIdPathMap } = require('./hook');
+const { DEFAULT_CONFIG, DEFAULT_CONDITION_CONFIG, mergeWithoutArray } = require('./constants')
+
+const EComponentType = {
+  GROUP_COMPONENT: "GROUP_COMPONENT",
+  COMPONENT: "COMPONENT"
+}
 
 function isComponentParentEqual(targetA, targetB) {
   if (typeof targetA === 'string' && typeof targetB === 'string')
@@ -58,7 +67,7 @@ const createGroupComponent = (
       description: name,
       name,
       type: EComponentType.GROUP_COMPONENT,
-      componentType: EComponentSelfType.GROUP_COMPONENT,
+      componentType: "GROUP_COMPONENT",
       config: {
         ...DEFAULT_CONFIG,
         options: {

@@ -2,6 +2,7 @@ const { set, get, merge, pick, isNil, omit } = require('lodash');
 const { useComponentPath, useIdPathMap } = require('./hook');
 const GroupUtil = require('./group');
 const { isGroupComponent, isComponentParentEqual } = require('./component');
+const { mergeWithoutArray } = require('./constants')
 
 function arrayMoveMutable(array, fromIndex, toIndex) {
 	const startIndex = fromIndex < 0 ? array.length + fromIndex : fromIndex;
@@ -21,15 +22,6 @@ function arrayMoveImmutable(array, fromIndex, toIndex) {
 }
 
 const arrayMove = arrayMoveImmutable
-
-function mergeWithoutArray(...args) {
-  // @ts-ignore
-  return mergeWith(...args, (value, srcValue) => {
-    if (Array.isArray(value)) {
-      return srcValue;
-    }
-  });
-}
 
 // get parentPath
 const getParentPath = (path) => {
@@ -752,5 +744,4 @@ class ComponentUtil {
 module.exports = {
   ComponentUtil: new ComponentUtil(),
   getParentPath,
-  mergeWithoutArray
 }
