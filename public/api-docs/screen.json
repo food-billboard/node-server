@@ -414,6 +414,137 @@
         ]
       }
     },
+    "/api/screen/pool": {
+      "post": {
+        "tags": [
+          "screen"
+        ],
+        "summary": "创建链式大屏保存",
+        "description": "",
+        "operationId": "screen_pool_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"id"
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"类型(screen|model)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "screen"
+        ],
+        "summary": "链式大屏保存活跃判断",
+        "description": "",
+        "operationId": "screen_pool_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "description":"id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "screen"
+        ],
+        "summary": "链式修改大屏",
+        "description": "",
+        "operationId": "screen_pool_put",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"大屏id"
+          },
+          {
+            "name": "version",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"版本号"
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"保存数据类型('component' | 'undo' | 'redo' | 'guideLine' | 'callback' | 'screen')"
+          },
+          {
+            "name": "action",
+            "in": "body",
+            "type": "object",
+            "description":"保存的数据",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
     "/api/screen/copy": {
       "post": {
         "tags": [
