@@ -146,6 +146,7 @@ router
     return {
       data: {
         ...nextData,
+        author_rate,
         author: {
           _id: author._id,
           username: author.username,

@@ -414,7 +414,7 @@
         ]
       }
     },
-    "/api/screen/pool": {
+    "/api/screen/list/pool": {
       "post": {
         "tags": [
           "screen"

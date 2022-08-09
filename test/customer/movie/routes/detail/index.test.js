@@ -25,7 +25,7 @@ function responseExpect(res, validate=[]) {
 
   const { res: { data: target } } = res 
 
-  expect(target).to.be.a('object').and.that.includes.all.keys(
+  expect(target).to.be.a('object').and.that.includes.any.keys(
     'author', 'author_description', 'author_rate', 'comment',
     'createdAt', 'updatedAt', 'glance', 'hot', 'images', 'info', 'name',
     'poster', 'rate', 'same_film', 'store', 'tag', 'video', '_id', 'rate_person'
@@ -252,7 +252,7 @@ describe(`${COMMON_API} test`, function() {
       done()
     })
     .catch(err => {
-      console.log('oops: ', err)
+      done(err)
     })
   })
 
@@ -297,7 +297,7 @@ describe(`${COMMON_API} test`, function() {
       done()
     })
     .catch(err => {
-      console.log('oops: ', err)
+      done(err)
     })
 
   })
@@ -542,7 +542,7 @@ describe(`${COMMON_API} test`, function() {
           done()
         })
         .catch(err => {
-          console.log('oops: ', err)
+          done(err)
         })
 
       })

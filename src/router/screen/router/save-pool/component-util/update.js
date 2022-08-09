@@ -3,7 +3,7 @@ const {
 	Params,
 	responseDataDeal,
 } = require("@src/utils")
-const { cloneDeep, set } = require("lodash")
+const { cloneDeep, set, isNil } = require("lodash")
 const { ScreenPoolUtil } = require('./history')
 const { ComponentUtil } = require('./index')
 const { mergeWithoutArray } = require('./constants')
@@ -14,13 +14,6 @@ module.exports = async (ctx, callback) => {
 		validator: [
 			(data) => ['component', 'undo', 'redo', 'guideLine', 'callback', 'screen'].includes(data)
 		],
-	}, {
-		name: 'action',
-		validator: [
-			(data, origin) => {
-				return ['undo', 'redo'].includes(origin.type) || !!data
-			}
-		]
 	})
 
 	if (check) return
@@ -79,13 +72,19 @@ module.exports = async (ctx, callback) => {
 			let newScreenData = cloneDeep(currentScreenData)
 
 			if(type === 'callback') {
-				set(newScreenData, 'config.attr.filter', action)
+				set(newScreenData, 'components.config.attr.filter', action)
 			}else if(type === 'screen') {
-				newScreenData = mergeWithoutArray({}, newScreenData, action)
+				newScreenData.components = mergeWithoutArray({}, newScreenData.components, action)
+				const changeConfigKeys = [
+					'name', 'poster', 'description'
+				]
+				changeConfigKeys.forEach(item => {
+					if(!isNil(action[item])) newScreenData[item] = action[item]
+				})
 			}else if(type === 'guideLine') {
-				set(newScreenData, 'config.attr.guideLine', action)
+				set(newScreenData, 'components.config.attr.guideLine', action)
 			}else {
-				newScreenData.components = ComponentUtil.setComponent(newScreenData, action)
+				newScreenData.components.components = ComponentUtil.setComponent(newScreenData, action)
 			}
 
 			const newData = history.history.enqueue(data, newScreenData, currentScreenData)
@@ -120,11 +119,7 @@ module.exports = async (ctx, callback) => {
 			data: _id 
 		}
 	})
-	// .catch(dealErr(ctx))
-	.catch(err => {
-		console.log(err, 22777)
-		return dealErr(ctx)(err)
-	})
+	.catch(dealErr(ctx))
 
 	responseDataDeal({
 		ctx,

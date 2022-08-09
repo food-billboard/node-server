@@ -33,6 +33,25 @@ class ScreenPoolUtil {
     return result 
   }
 
+  // ? 这是一个单元测试用的方法
+  mockCretaeScreenPool = () => {
+    const id = Date.now() + '_' + Math.random()
+    const history = new HistoryUtil()
+    this.DATASOUCE[id] = {
+      timestamps: Date.now() - MAX_POOL_LIVE_TIME * 2,
+      checktimestamps: Date.now() - MAX_WAITING_LIVE_TIME,
+      version: '1.8',
+      _id: id,
+      history: {
+        history,
+        isUndoDisabled: true,
+        isRedoDisabled: true,
+        value: "{}",
+      },
+    }
+    return id 
+  }
+
   createScreenPool = (id, screenData) => {
     const { data, version } = screenData
     const history = new HistoryUtil()
@@ -67,6 +86,13 @@ class ScreenPoolUtil {
       ...config,
       timestamps: Date.now(),
     } 
+  }
+
+  clear = (all=false) => {
+    if(all) this.DATASOUCE = {} 
+    Object.keys(this.DATASOUCE).forEach(screenId => {
+      this.isOvertime(screenId)
+    })
   }
 
 }
@@ -125,5 +151,6 @@ class HistoryUtil {
 module.exports = {
   HistoryUtil,
   MAX_LIMIT_COUNT: 10,
+  MAX_WAITING_LIVE_TIME,
   ScreenPoolUtil: new ScreenPoolUtil()
 }

@@ -252,7 +252,12 @@ function isDateValid(value) {
   return !((typeof value === 'string' && (new Date(value)).toString() == 'Invalid Date') || typeof value === 'undefined')
 }
 
+function sleep(time=1000) {
+  return new Promise(resolve => setTimeout(resolve, time))
+}
+
 module.exports = {
+  sleep,
   isType,
   isEmpty,
   flat,

@@ -85,10 +85,15 @@ router
     {
       $lookup: {
         from: 'movies', 
-        // localField: 'movie', 
-        // foreignField: '_id', 
-        // let: { movie: "$movie" },
+        let: { movies: "$movie" },
         pipeline: [
+          {
+            $match: {
+              $expr: {
+                "$in": [ "$_id", "$$movies" ]
+              }
+            }
+          },
           {
             $lookup: {
               from: 'images',

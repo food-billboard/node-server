@@ -75,7 +75,9 @@ router
 
       }
 
-      if(random === '1') dataSource = shuffle(dataSource)
+      if(random === '1') {
+        dataSource = shuffle(dataSource)
+      }
 
       return {
         ...item,

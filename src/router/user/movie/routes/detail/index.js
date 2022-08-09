@@ -157,6 +157,7 @@ router
     return {
       data: {
         ...nextNewData,
+        author_rate,
         author: {
           ...pick(author, ['username', '_id']),
           avatar: avatarGet(author.avatar)

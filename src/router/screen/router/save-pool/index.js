@@ -115,7 +115,7 @@ router
 
 	const data = await new Promise((resolve, reject) => {
 		try {
-			resolve(ScreenPoolUtil.isOvertime(_id))
+			resolve(ScreenPoolUtil.isOvertime(_id) || ScreenPoolUtil.isCheckTimestampsOvertime(_id))
 		}catch(err) {
 			reject(err)
 		}

@@ -76,5 +76,11 @@
     "time": "0 0 20 * * 6",
     "description": "无引用媒体资源定时清除",
     "status": "SCHEDULING"
+  },
+  "unUseScreenSchedule": {
+    "name": "unUseScreenSchedule",
+    "time": "0 20 * * * *",
+    "description": "无引用大屏保存缓存定时清除",
+    "status": "SCHEDULING"
   }
 }
