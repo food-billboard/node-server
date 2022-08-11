@@ -4,7 +4,6 @@ const { Types: { ObjectId } } = require('mongoose')
 const Enable = require('./enable')
 const Detail = require('./detail')
 const Preview = require('./preview')
-const savePool = require('../save-pool/model')
 
 const router = new Router()
 
@@ -194,8 +193,6 @@ router
   })
 
 })
-// 流式保存
-.use('/pool', savePool.routes(), savePool.allowedMethods())
 .use('/', async (ctx, next) => {
 
   const check = Params.body(ctx, {

@@ -5,7 +5,7 @@ const UndoHistory = require('react-undo-component/lib/Component/history').defaul
 const MAX_POOL_LIVE_TIME = 1000 * 60 * 10
 
 // 最大等待存活接口时间
-const MAX_WAITING_LIVE_TIME = 1000 * 4
+const MAX_WAITING_LIVE_TIME = 1000 * 20
 class ScreenPoolUtil {
 
 
@@ -93,6 +93,14 @@ class ScreenPoolUtil {
     Object.keys(this.DATASOUCE).forEach(screenId => {
       this.isOvertime(screenId)
     })
+  }
+
+  clearPool = (id) => {
+    delete this.DATASOUCE[id]
+  }
+
+  isExists = (id) => {
+    return !!this.DATASOUCE[id]
   }
 
 }

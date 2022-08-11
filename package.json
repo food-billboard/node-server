@@ -16,7 +16,7 @@
     "restart:pm2": "pm2 restart app & pm2 restart media",
     "prod:docker": "node app.js && node media.js",
     "test": "echo hello node-server",
-    "internal_test": "mocha --recursive --timeout 20000",
+    "internal_test": "mocha --recursive --timeout 25000",
     "coverage": "nyc npm run internal_test",
     "docker:restart": "docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d",
     "docker:restart-local": "docker-compose -f docker-compose-local.yml pull;docker-compose -f docker-compose-local.yml up -d"

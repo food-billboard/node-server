@@ -3,7 +3,9 @@ const { dealErr, Params, responseDataDeal, MovieModel, MOVIE_STATUS } = require(
 
 const router = new Router()
 
-router.get('/', async(ctx) => {
+router
+.get('/', async(ctx) => {
+  console.log(11111111)
   const [ count ] = Params.sanitizers(ctx.query, {
     name: 'count',
     _default: 3,

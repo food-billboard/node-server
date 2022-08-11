@@ -7,6 +7,7 @@ const {
 	ScreenModal,
 	ScreenModelModal,
 	notFound,
+	loginAuthorization
 } = require("@src/utils")
 const {
 	Types: { ObjectId },
@@ -17,6 +18,49 @@ const CommonUpdate = require('./component-util/update')
 const router = new Router()
 
 router
+// 关闭流式保存
+.post("/close", async(ctx) => {
+
+	let requestBody = ctx.request.body
+	
+	try {
+		requestBody = JSON.parse(requestBody)
+	}catch(err) {}
+
+	const { _id, type, user } = requestBody
+
+	const model = type === "screen" ? ScreenModal : ScreenModelModal
+
+	const data = await model.findOne({
+		_id: ObjectId(_id),
+		user: ObjectId(user)
+	})
+	.select({
+		_id: 1
+	})
+	.exec() 
+	.then(notFound)
+	.then(() => {
+		ScreenPoolUtil.clearPool(_id.toString()) 
+	})
+	.then(() => {
+		return {
+			data: _id 
+		}
+	})
+	.catch((err) => {
+		return {
+			data: null 
+		}
+	})
+
+	responseDataDeal({
+		ctx,
+		data,
+	})
+
+})
+.use(loginAuthorization())
 .use(async (ctx, next) => {
 	const method = ctx.request.method.toLowerCase()
 	const validKeys = {
@@ -160,6 +204,34 @@ router
 		})
 	})
 	
+})
+.put('/model', async (ctx) => {
+
+  const [, token] = verifyTokenToData(ctx)
+	const { id } = token
+
+	await CommonUpdate(ctx, (screenData, _id, version) => {
+
+		const { description, name, poster } = screenData
+
+		return ScreenModelModal.updateOne({
+			_id: ObjectId(_id),
+			user: ObjectId(id),
+			enable: false 
+		}, {
+			$set: {
+				description,
+				name,
+				poster,
+				version,
+				data: JSON.stringify(screenData)
+			}
+		})
+		.then(data => {
+			if(data && data.nModified == 0) return Promise.reject({ errMsg: 'notFound', status: 404 })
+		})
+	})
+
 })
 
 module.exports = router

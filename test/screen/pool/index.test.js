@@ -7,6 +7,7 @@ const { Request, mockCreateUser, mockCreateScreen, deepParseResponse } = require
 const { MOCK_SCREEN_DATA } = require('./utils')
 
 const COMMON_API = '/api/screen/list/pool'
+const COMMON_API_DELETE = '/api/screen/list/pool/close'
 
 describe(`${COMMON_API} test`, () => {
 
@@ -20,7 +21,7 @@ describe(`${COMMON_API} test`, () => {
     const { model, signToken } = mockCreateUser({
       username: COMMON_API
     }, {
-      expiresIn: '20s'
+      expiresIn: '100s'
     })
 
     getToken = signToken
@@ -710,6 +711,31 @@ describe(`${COMMON_API} test`, () => {
         done(err)
       })
 
+    })
+
+  })
+
+  describe(`delete the screen save pool success test -> ${COMMON_API_DELETE}`, () => {
+
+    it(`delete the screen save pool success`, (done) => {
+      Request
+      .post(COMMON_API_DELETE)
+      .send({
+        _id: screenId.toString(),
+        user: userInfo._id,
+        type: 'screen'
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(res => {
+        expect(ScreenPoolUtil.isExists(screenId.toString())).to.be.false
+      })
+      .then(() => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
     })
 
   })
