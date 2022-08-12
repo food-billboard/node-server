@@ -72,19 +72,13 @@ module.exports = async (ctx, callback) => {
 			let newScreenData = cloneDeep(currentScreenData)
 
 			if(type === 'callback') {
-				set(newScreenData, 'components.config.attr.filter', action)
+				set(newScreenData, 'config.attr.filter', action)
 			}else if(type === 'screen') {
-				newScreenData.components = mergeWithoutArray({}, newScreenData.components, action)
-				const changeConfigKeys = [
-					'name', 'poster', 'description'
-				]
-				changeConfigKeys.forEach(item => {
-					if(!isNil(action[item])) newScreenData[item] = action[item]
-				})
+				newScreenData = mergeWithoutArray({}, newScreenData, action)
 			}else if(type === 'guideLine') {
-				set(newScreenData, 'components.config.attr.guideLine', action)
+				set(newScreenData, 'config.attr.guideLine', action)
 			}else {
-				newScreenData.components.components = ComponentUtil.setComponent(newScreenData, action)
+				newScreenData.components = ComponentUtil.setComponent(newScreenData, action)
 			}
 
 			const newData = history.history.enqueue(data, newScreenData, currentScreenData)

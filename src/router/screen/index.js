@@ -13,6 +13,47 @@ const { loginAuthorization } = require('@src/utils')
 const router = new Router()
 
 router
+// .get('/test', async (ctx) => {
+//   const { _id } = ctx.query
+
+//   const { ScreenModal, dealErr, responseDataDeal } = require('@src/utils')
+//   const { Types: { ObjectId } } = require('mongoose') 
+
+//   const data = await ScreenModal.findOne({
+//     _id: ObjectId(_id)
+//   })
+//   .select({
+//     _id: 1,
+//     data: 1,
+//     name: 1,
+//     poster: 1,
+//     description: 1,
+//     version: 1
+//   })
+//   .exec()
+//   .then((result) => {
+
+//     const { data, _id, name, poster, description, version } = result 
+
+//     return {
+//       data: {
+//         _id, 
+//         name, 
+//         poster, 
+//         description,
+//         components: JSON.parse(data),
+//         version
+//       }
+//     }
+//   })
+//   .catch(dealErr(ctx))
+
+//   responseDataDeal({
+//     ctx,
+//     data
+//   })
+
+// })
 .use('/mock', Mock.routes(), Mock.allowedMethods())
 .use('/list', Index.routes(), Index.allowedMethods())
 .use('/model', Model.routes(), Model.allowedMethods())
