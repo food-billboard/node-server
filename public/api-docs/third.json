@@ -1,0 +1,116 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "这是一些第三方接口封装的后端api接口文档，有兴趣可以去github上给个鼓励  github at [https://github.com/food-billboard?tab=repositories) ",
+    "version": "1.0.0",
+    "title": "第三方接口",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host": "petstore.swagger.io",
+  "basePath": "/v2",
+  "tags": [
+    {
+      "name": "base",
+      "description": "基础",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/api/third/weather": {
+      "post": {
+        "tags": [
+          "base"
+        ],
+        "summary": "天气信息查询",
+        "description": "",
+        "operationId": "base_weather_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "city",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"城市名称"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功(详情查看https://www.juhe.cn/docs/api/id/73)"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "screen_get_detail": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type":"object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "大屏名称"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
+                },
+                "poster": {
+                  "type": "string",
+                  "description": "封面"
+                },
+                "components": {
+                  "type": "string",
+                  "format": "大屏数据"
+                },
+                "version": {
+                  "type": "string",
+                  "format": "大屏或模板版本"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "screen_get_detail"
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  }
+}

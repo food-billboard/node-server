@@ -6,6 +6,7 @@ const Management = require('./management')
 const Manage = require('./manage')
 const Media = require('./media')
 const Screen = require('./screen')
+const Third = require('./third')
 const { Types: { ObjectId } } = require('mongoose')
 const { dealErr, responseDataDeal, STATIC_FILE_PATH } = require('@src/utils')
 
@@ -15,6 +16,7 @@ const fs = require('fs-extra')
 const router = new Router()
 
 router
+.use('/third', Third.routes(), Third.allowedMethods())
 .use(async(ctx, next) => {
 
   const { body: { _id:dataId }={} } = ctx.request

@@ -19,6 +19,9 @@ const EMAIL_REGEXP = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
 const STATIC_FILE_PATH_NO_WRAPPER = path.resolve(__dirname, '../../')
 
+// 相关token的文件地址
+const THIRD_PARTY_AUTH_TOKEN_CONFIG_PATH = path.join(__dirname, '../../', 'public/secrets/index.json')
+
 //最大单次发送文件大小
 const MAX_FILE_SINGLE_RESPONSE_SIZE = 1024 * 1024 * 5
 
@@ -272,5 +275,6 @@ module.exports = {
   SCREEN_MOCK_CONFIG_ADDRESS_TYPE,
   SCREEN_MOCK_CONFIG_LANGUAGE_TYPE,
   SCREEN_MOCK_CONFIG_NAME_TYPE,
-  SCREEN_MOCK_CONFIG_TEXT_TYPE
+  SCREEN_MOCK_CONFIG_TEXT_TYPE,
+  THIRD_PARTY_AUTH_TOKEN_CONFIG_PATH
 }
