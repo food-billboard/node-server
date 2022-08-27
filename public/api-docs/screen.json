@@ -1517,7 +1517,7 @@
             "name": "fields",
             "in": "body",
             "type": "object",
-            "description":"数据字段({ key: string, dataKind: string })",
+            "description":"数据字段({ key: string, dataKind: string, type?: normal | object | array, children?: any })",
             "required": true 
           },
           {

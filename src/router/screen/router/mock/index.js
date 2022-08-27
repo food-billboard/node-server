@@ -11,7 +11,7 @@ router
 
   function filter(data) {
     return data.filter(item => {
-      const { key, dataKind } = item
+      const { key, dataKind, type } = item
       return !!key && ObjectId.isValid(dataKind)
     })
   }
