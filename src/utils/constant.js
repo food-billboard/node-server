@@ -233,6 +233,20 @@ const SCREEN_MOCK_CONFIG_TEXT_TYPE = {
   title: 'title'
 }
 
+const THIRD_PARTY_REQUEST_METHOD = {
+  POST: 'POST',
+  GET: 'GET'
+}
+
+const THIRD_PARTY_REQUEST_PARAMS_TYPE = {
+  number: 'number',
+  string: 'string',
+  object: 'object',
+  'normal-array': 'normal-array',
+  'object-array': 'object-array',
+  boolean: 'boolean'
+}
+
 module.exports = {
   MESSAGE_MEDIA_TYPE,
   MESSAGE_TYPE,
@@ -276,5 +290,7 @@ module.exports = {
   SCREEN_MOCK_CONFIG_LANGUAGE_TYPE,
   SCREEN_MOCK_CONFIG_NAME_TYPE,
   SCREEN_MOCK_CONFIG_TEXT_TYPE,
-  THIRD_PARTY_AUTH_TOKEN_CONFIG_PATH
+  THIRD_PARTY_AUTH_TOKEN_CONFIG_PATH,
+  THIRD_PARTY_REQUEST_METHOD,
+  THIRD_PARTY_REQUEST_PARAMS_TYPE
 }

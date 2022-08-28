@@ -31,7 +31,9 @@ const {
   SCREEN_MOCK_CONFIG_ADDRESS_TYPE,
   SCREEN_MOCK_CONFIG_LANGUAGE_TYPE,
   SCREEN_MOCK_CONFIG_TEXT_TYPE,
-  SCREEN_MOCK_CONFIG_NAME_TYPE
+  SCREEN_MOCK_CONFIG_NAME_TYPE,
+  THIRD_PARTY_REQUEST_METHOD,
+  THIRD_PARTY_REQUEST_PARAMS_TYPE
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -1784,6 +1786,37 @@ const ScreenMockSchema = new Schema({
   ...defaultConfig
 })
 
+const ThirdPartySchema = new Schema({
+  name: String,
+  description: String, 
+  url: String,
+  method: {
+    type: String, 
+    enum: Object.keys(THIRD_PARTY_REQUEST_METHOD)
+  },
+  headers: Object,
+  getter: String,
+  user: ObjectId,
+  params: [{
+    name: String,
+    description: String,
+    data_type: {
+      type: String,
+      enum: Object.keys(THIRD_PARTY_REQUEST_PARAMS_TYPE)
+    },
+    children: [Object],
+    default_value: Schema.Types.Mixed,
+    validate_data: {
+      type: String,
+      required: false 
+    } 
+  }],
+}, {
+  ...defaultConfig
+})
+
+
+
 
 // ------------------------------------大屏 ------------------------------------
 
@@ -1875,6 +1908,7 @@ const ScheduleModel = model('schedule', ScheduleSchema)
 const ScreenModal = model('screen', ScreenSchema)
 const ScreenModelModal = model('screen_model', ScreenModelSchema)
 const ScreenMockModel = model('screen_mock', ScreenMockSchema)
+const ThirdPartyModel = model('third_party', ThirdPartySchema)
 
 module.exports = {
   UserModel,
@@ -1906,6 +1940,7 @@ module.exports = {
   ScreenModal,
   ScreenModelModal,
   ScreenMockModel,
+  ThirdPartyModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1934,5 +1969,6 @@ module.exports = {
   ScreenSchema,
   ScreenModelSchema,
   ScheduleSchema,
-  ScreenMockSchema
+  ScreenMockSchema,
+  ThirdPartySchema
 }

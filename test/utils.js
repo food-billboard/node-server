@@ -40,9 +40,12 @@ const {
   downloadVideo,
   fileEncoded,
   ScreenModelModal,
+  ThirdPartyModel,
   MEDIA_STATUS,
   OtherMediaModel,
-  ScreenMockModel
+  ScreenMockModel,
+  THIRD_PARTY_REQUEST_METHOD,
+  THIRD_PARTY_REQUEST_PARAMS_TYPE
 } = require('@src/utils')
 const App = require('../app')
 const Request = require('supertest').agent(App.listen())
@@ -580,6 +583,60 @@ function mockCreateScreenMock(values={}) {
   return { model }
 }
 
+//创建第三方接口
+function mockCreateThird(values={}) {
+  let baseModel = {
+    name: '测试第三方名称',
+    description: '测试第三方名称',
+    url: '/api/third',
+    method: THIRD_PARTY_REQUEST_METHOD.POST,
+    headers: {},
+    getter: '',
+    user: ObjectId('8f63270f005f1c1a0d9448ca'),
+    params: [
+      {
+        name: 'a',
+        data_type: THIRD_PARTY_REQUEST_PARAMS_TYPE.number 
+      },
+      {
+        name: 'b',
+        data_type: THIRD_PARTY_REQUEST_PARAMS_TYPE.object,
+        children: [
+          {
+            name: 'c',
+            data_type: THIRD_PARTY_REQUEST_PARAMS_TYPE.number 
+          },
+          {
+            name: 'd',
+            data_type: THIRD_PARTY_REQUEST_PARAMS_TYPE['normal-array'],
+            children: [
+              {
+                name: 'e',
+                data_type: THIRD_PARTY_REQUEST_PARAMS_TYPE.number 
+              }
+            ] 
+          }
+        ] 
+      },
+      {
+        name: 'f',
+        data_type: THIRD_PARTY_REQUEST_PARAMS_TYPE['object-array'],
+        children: [
+          {
+            name: 'e',
+            data_type: THIRD_PARTY_REQUEST_PARAMS_TYPE.string  
+          }
+        ] 
+      }
+    ]
+  }
+  baseModel = mergeConfig(baseModel, values, true)
+
+  const model = new ThirdPartyModel(baseModel)
+
+  return { model }
+}
+
 //创建查询参数etag
 function createEtag(query={}) {
   return Object.keys(query).reduce((acc, cur) => {
@@ -766,5 +823,6 @@ module.exports = {
   commonMovieValid,
   mockCreateScreenModel,
   mockCreateOtherMedia,
-  mockCreateScreenMock
+  mockCreateScreenMock,
+  mockCreateThird
 }
