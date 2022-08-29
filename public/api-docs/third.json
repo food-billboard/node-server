@@ -110,6 +110,12 @@
             "description":"接口请求头"
           },
           {
+            "name": "example",
+            "in": "body",
+            "type": "string",
+            "description":"示例数据"
+          },
+          {
             "name": "getter",
             "in": "body",
             "type": "string",
@@ -275,6 +281,12 @@
             "in": "body",
             "type": "string",
             "description":"数据获取getter(参考lodash的get)"
+          },
+          {
+            "name": "example",
+            "in": "body",
+            "type": "string",
+            "description":"示例数据"
           },
           {
             "name": "params",

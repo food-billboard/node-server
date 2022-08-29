@@ -8,8 +8,8 @@ const router = new Router()
 
 const filterParams = (params) => {
   return params.filter(item => {
-    const { name, date_type, children } = item 
-    return !!name && !!THIRD_PARTY_REQUEST_PARAMS_TYPE[date_type] && ((date_type === THIRD_PARTY_REQUEST_PARAMS_TYPE.object || date_type === THIRD_PARTY_REQUEST_PARAMS_TYPE['normal-array'] || date_type === THIRD_PARTY_REQUEST_PARAMS_TYPE['object-array']) && typeof children === 'object')
+    const { name, data_type, children } = item 
+    return !!name && !!THIRD_PARTY_REQUEST_PARAMS_TYPE[data_type] && ((data_type === THIRD_PARTY_REQUEST_PARAMS_TYPE.object || data_type === THIRD_PARTY_REQUEST_PARAMS_TYPE['normal-array'] || data_type === THIRD_PARTY_REQUEST_PARAMS_TYPE['object-array']) ? Array.isArray(children) : true)
   })
 }
 
@@ -72,7 +72,7 @@ router
       [paramsMap[method.toLowerCase()]]: format(params, realData)
     })
     .then(data => {
-      return get(data.data, getter)
+      return getter ? get(data.data, getter) : data.data 
     })
   })
   .then(data => {
@@ -325,7 +325,7 @@ router
   const check = Params.body(ctx, {
     name: 'name',
     validator: [
-      data => typeof data === 'string' && data.length >= 6 && data.length <= 20
+      data => typeof data === 'string' && data.length >= 2 && data.length <= 20
     ]
   }, {
     name: 'url',
