@@ -52,9 +52,9 @@ jobs:
             cd ${{ secrets.REMOTE_PATH }}
             npm install pm2 yarn -g 
             yarn 
-            # 获取weather token
-            # 脚本地址 天气的token
-            node ${{ secrets.LOAD_SECRETS_PATH }} --code ${{ secrets.WEATHER_AUTH_TOKEN }} --name weather
+            # # 获取weather token
+            # # 脚本地址 天气的token
+            # node ${{ secrets.LOAD_SECRETS_PATH }} --code ${{ secrets.WEATHER_AUTH_TOKEN }} --name weather
             docker-compose -f docker-compose.yml pull
             docker-compose -f docker-compose.yml up -d
             pm2 startOrRestart pm2.config.js
