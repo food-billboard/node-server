@@ -40,7 +40,7 @@ describe(`${COMMON_API} test`, function() {
           done()
         })
         .catch(err => {
-          console.log('oops: ', err)
+          done(err)
         })
       })
   
@@ -52,7 +52,7 @@ describe(`${COMMON_API} test`, function() {
           done()
         })
         .catch(err => {
-          console.log('oops: ', err)
+          done(err)
         })
       })
 
@@ -70,7 +70,7 @@ describe(`${COMMON_API} test`, function() {
           try{
             obj = JSON.parse(text)
           }catch(_) {
-            console.log(_)
+            
           }
           responseExpect(obj)
           done()

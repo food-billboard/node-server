@@ -16,6 +16,15 @@ const filterParams = (params) => {
 router
 .post('/request', async (ctx) => {
 
+  const check = Params.body(ctx, {
+    name: '_id',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  })
+
+  if(check) return 
+
   const { _id, params: realData } = ctx.request.body
 
   const data = await ThirdPartyModel.findOne({
@@ -58,7 +67,7 @@ router
         return acc 
       }, {})
     }
-    return axios[method](url, {
+    return axios[method.toLowerCase()](url, {
       headers,
       [paramsMap[method.toLowerCase()]]: format(params, realData)
     })
