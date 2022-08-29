@@ -590,9 +590,10 @@ function mockCreateThird(values={}) {
     description: '测试第三方名称',
     url: '/api/third',
     method: THIRD_PARTY_REQUEST_METHOD.POST,
-    headers: {},
+    headers: "{}",
     getter: '',
     user: ObjectId('8f63270f005f1c1a0d9448ca'),
+    example: "{}",
     params: [
       {
         name: 'a',

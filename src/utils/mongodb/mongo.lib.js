@@ -1794,9 +1794,10 @@ const ThirdPartySchema = new Schema({
     type: String, 
     enum: Object.keys(THIRD_PARTY_REQUEST_METHOD)
   },
-  headers: Object,
+  headers: String,
   getter: String,
   user: ObjectId,
+  example: String,
   params: [{
     name: String,
     description: String,
@@ -1809,7 +1810,7 @@ const ThirdPartySchema = new Schema({
     validate_data: {
       type: String,
       required: false 
-    } 
+    },
   }],
 }, {
   ...defaultConfig

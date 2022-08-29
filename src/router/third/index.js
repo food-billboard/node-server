@@ -68,7 +68,7 @@ router
       }, {})
     }
     return axios[method.toLowerCase()](url, {
-      headers,
+      headers: JSON.parse(headers || "{}"),
       [paramsMap[method.toLowerCase()]]: format(params, realData)
     })
     .then(data => {
@@ -249,7 +249,8 @@ router
           createdAt: 1,
           updatedAt: 1,
           headers: 1,
-          getter: 1
+          getter: 1,
+          example: 1,
         }
       }
     ])
@@ -345,7 +346,7 @@ router
 })
 .post('/', async (ctx) => {
 
-  const { name, description, params=[], url, method, headers={}, getter='' } = ctx.request.body
+  const { name, description, params=[], url, method, headers='', getter='', example='' } = ctx.request.body
 
   const [,token] = verifyTokenToData(ctx)
   const { id } = token 
@@ -358,7 +359,8 @@ router
     user: ObjectId(id),
     params: filterParams(params),
     headers,
-    getter
+    getter,
+    example
   })
 
   const data = await model.save()
@@ -374,7 +376,7 @@ router
 })
 .put('/', async (ctx) => {
 
-  const { name, description, params=[], url, method, _id, headers={}, getter } = ctx.request.body
+  const { name, description, params=[], url, method, _id, headers='', getter, example } = ctx.request.body
 
   const [,token] = verifyTokenToData(ctx)
   const { id } = token 
@@ -390,7 +392,8 @@ router
       url, 
       method,
       headers,
-      getter
+      getter,
+      example
     }
   })
   .then(data => {

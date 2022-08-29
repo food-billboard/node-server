@@ -59,12 +59,321 @@
               "read:pets"
             ]
           }
+        ],
+        "deprecated": true
+      }
+    },
+    "/api/third": {
+      "post": {
+        "tags": [
+          "base"
+        ],
+        "summary": "新增第三方接口",
+        "description": "",
+        "operationId": "base_third_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"接口名称"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "string",
+            "description":"描述"
+          },
+          {
+            "name": "url",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"接口地址"
+          },
+          {
+            "name": "method",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"接口方法"
+          },
+          {
+            "name": "headers",
+            "in": "body",
+            "type": "string",
+            "description":"接口请求头"
+          },
+          {
+            "name": "getter",
+            "in": "body",
+            "type": "string",
+            "description":"数据获取getter(参考lodash的get)"
+          },
+          {
+            "name": "params",
+            "in": "body",
+            "type": "string",
+            "description":"接口参数schema（具体查看下面的base_third_post_params）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "base"
+        ],
+        "summary": "第三方接口列表",
+        "description": "",
+        "operationId": "base_third_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "currPage",
+            "in": "query",
+            "type": "integer",
+            "description":"当前页"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "type": "integer",
+            "description":"每页数量"
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "type": "string",
+            "description":"模糊查询"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/base_third_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "base"
+        ],
+        "summary": "删除第三方接口",
+        "description": "",
+        "operationId": "base_third_delete",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description":"id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "base"
+        ],
+        "summary": "修改第三方接口",
+        "description": "",
+        "operationId": "base_third_put",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"接口id"
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"接口名称"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "string",
+            "description":"描述"
+          },
+          {
+            "name": "url",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"接口地址"
+          },
+          {
+            "name": "method",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"接口方法"
+          },
+          {
+            "name": "headers",
+            "in": "body",
+            "type": "string",
+            "description":"接口请求头"
+          },
+          {
+            "name": "getter",
+            "in": "body",
+            "type": "string",
+            "description":"数据获取getter(参考lodash的get)"
+          },
+          {
+            "name": "params",
+            "in": "body",
+            "type": "string",
+            "description":"接口参数schema（具体查看下面的base_third_post_params）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/third/request": {
+      "post": {
+        "tags": [
+          "base"
+        ],
+        "summary": "第三方接口数据请求",
+        "description": "",
+        "operationId": "base_third_request_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"接口id"
+          },
+          {
+            "name": "params",
+            "in": "body",
+            "type": "array",
+            "description":"接口参数（详情查看base_third_post_params）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
         ]
       }
     }
   },
   "definitions": {
-    "screen_get_detail": {
+    "base_third_post_params": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "名称key"
+          },
+          "description": {
+            "type": "string",
+            "description": "描述"
+          },
+          "data_type": {
+            "type": "string",
+            "description": "数据格式(number, string, boolean, normal-array, object-array, object)"
+          },
+          "children": {
+            "type": "array",
+            "description": "递归嵌套-base_third_post_params"
+          },
+          "default_value": {
+            "type": "object",
+            "description": "当前字段的默认值"
+          }
+        }
+      },
+      "xml": {
+        "name": "base_third_post_params"
+      }
+    },
+    "base_third_get" : {
       "type": "object",
       "properties": {
         "success": {
@@ -74,30 +383,70 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"object",
-              "properties": {
-                "_id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string",
-                  "description": "大屏名称"
-                },
-                "description": {
-                  "type": "string",
-                  "description": "描述"
-                },
-                "poster": {
-                  "type": "string",
-                  "description": "封面"
-                },
-                "components": {
-                  "type": "string",
-                  "format": "大屏数据"
-                },
-                "version": {
-                  "type": "string",
-                  "format": "大屏或模板版本"
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "请求地址"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "大屏名称"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "描述"
+                  },
+                  "user": {
+                    "type": "object",
+                    "description": "创建用户",
+                    "properties": {
+                      "username": {
+                        "type": "string",
+                        "description": "用户名"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "description": "头像"
+                      },
+                      "_id": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "请求方法"
+                  },
+                  "headers": {
+                    "type": "string",
+                    "description": "请求头"
+                  },
+                  "getter": {
+                    "type": "string",
+                    "description": "获取数据getter"
+                  },
+                  "example": {
+                    "type": "string",
+                    "description": "示例数据"
+                  },
+                  "params" : {
+                    "type": "array",
+                    "description": "请求参数schema（详情查看base_third_post_params）"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
                 }
               }
             }
@@ -105,7 +454,7 @@
         }
       },
       "xml": {
-        "name": "screen_get_detail"
+        "name": "base_third_get"
       }
     }
   },
