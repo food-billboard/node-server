@@ -354,7 +354,7 @@
             "in": "query",
             "description": "电影状态",
             "type": "string",
-            "enum": ["VERIFY", "COMPLETE", "NOT_VERIFY"]
+            "enum": ["VERIFY", "COMPLETE", "NOT_VERIFY", "DRAFT"]
           },
           {
             "name": "source_type",
@@ -524,6 +524,12 @@
               "type": "string",
               "description": "截图id"
             }
+          },
+          {
+            "name": "draft",
+            "in": "body",
+            "type": "boolean",
+            "description": "是否为草稿"
           }
         ],
         "responses": {
@@ -670,6 +676,12 @@
               "type": "string",
               "description": "截图id"
             }
+          },
+          {
+            "name": "draft",
+            "in": "body",
+            "type": "boolean",
+            "description": "是否为草稿"
           }
         ],
         "responses": {
@@ -5169,7 +5181,7 @@
                       "status": {
                         "type": "string",
                         "description": "电影状态",
-                        "enum": ["VERIFY", "COMPLETE", "NOT_VERIFY"]
+                        "enum": ["VERIFY", "COMPLETE", "NOT_VERIFY", "DRAFT"]
                       },
                       "comment_count": {
                         "type": "integer",

@@ -10,6 +10,8 @@ const router = new Router()
 
 //参数检查
 const checkParams = (ctx, ...validator) => {
+  const { draft } = ctx.request.body 
+  if(draft) return 
   return Params.body(ctx, {
     name: 'name',
     validator: [
@@ -86,27 +88,27 @@ const sanitizersParams = (ctx, ...sanitizers) => {
   return Params.sanitizers(ctx.request.body, {
     name: 'actor',
     sanitizers: [
-      data => data.map(d => ObjectId(d))
+      data => (data || []).map(d => ObjectId(d))
     ]
   }, {
     name: 'director',
     sanitizers: [
-      data => data.map(d => ObjectId(d))
+      data => (data || []).map(d => ObjectId(d))
     ]
   }, {
     name: 'district',
     sanitizers: [
-      data => data.map(d => ObjectId(d))
+      data => (data || []).map(d => ObjectId(d))
     ]
   }, {
     name: 'classify',
     sanitizers: [
-      data => data.map(d => ObjectId(d))
+      data => (data || []).map(d => ObjectId(d))
     ]
   }, {
     name: 'language',
     sanitizers: [
-      data => data.map(d => ObjectId(d))
+      data => (data || []).map(d => ObjectId(d))
     ]
   }, {
     name: 'screen_time',
@@ -116,17 +118,17 @@ const sanitizersParams = (ctx, ...sanitizers) => {
   }, {
     name: 'video',
     sanitizers: [
-      data => ObjectId(data)
+      data => data ? ObjectId(data) : data 
     ]
   }, {
     name: 'images',
     sanitizers: [
-      data => data.map(d => ObjectId(d))
+      data => (data || []).map(d => ObjectId(d))
     ]
   }, {
     name: 'poster',
     sanitizers: [
-      data => ObjectId(data)
+      data => data ? ObjectId(data) : data
     ]
   }, {
     name: 'author_description',
@@ -136,7 +138,7 @@ const sanitizersParams = (ctx, ...sanitizers) => {
   }, {
     name: 'author_rate',
     sanitizers: [
-      data => parseInt(data)
+      data => parseInt(data) || 0
     ]
   }, ...sanitizers)
 }
@@ -359,7 +361,7 @@ router
     author_rate
   ] = sanitizersParams(ctx)
 
-  const { body: { name, alias, description } } = ctx.request
+  const { body: { name, alias, description, draft } } = ctx.request
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
 
@@ -396,7 +398,7 @@ router
       author_description,
       author_rate,
       source_type: role == ROLES_MAP.SUPER_ADMIN ? MOVIE_SOURCE_TYPE.ORIGIN : MOVIE_SOURCE_TYPE.USER,
-      status: MOVIE_STATUS.VERIFY
+      status: draft ? MOVIE_STATUS.DRAFT : MOVIE_STATUS.VERIFY
     })
     return model.save()
   })
@@ -453,7 +455,13 @@ router
   const { body: { name, alias, description } } = ctx.request
 
   const data = await MovieModel.updateOne({
-    _id
+    _id,
+    status: {
+      $in: [
+        MOVIE_STATUS.VERIFY,
+        MOVIE_STATUS.DRAFT
+      ]
+    }
   }, {
     $set: {
       name,
@@ -503,7 +511,10 @@ router
   })
 
   const data = await MovieModel.deleteMany({
-    _id: { $in: _ids }
+    _id: { $in: _ids },
+    status: {
+      $nin: Object.values(MOVIE_STATUS).filter(item => item !== MOVIE_STATUS.COMPLETE) 
+    }
   })
   .then(_ => ({ data: _ids }))
   .catch(dealErr(ctx))

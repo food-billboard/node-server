@@ -57,7 +57,10 @@ router
     foreignField: '_id', 
     as: 'video'
   })
-  .unwind("video")
+  .unwind({
+    path: "$video",
+    preserveNullAndEmptyArrays: true 
+  })
   .lookup({
     from: 'classifies', 
     localField: 'info.classify', 

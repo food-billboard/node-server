@@ -300,7 +300,10 @@ async function fetchDouData({
     return downloadFile(item, 'webp', userId)
   }))
 
-  const idVideo = await downloadFile(video, 'mp4', userId, idPoster)
+  let idVideo 
+  if(video) {
+    idVideo = await downloadFile(video, 'mp4', userId, idPoster)
+  }
 
   const newActor = await findAndCreateActor(actor, userId)
   const newDirector = await findAndCreateDirector(director, userId)
@@ -349,15 +352,17 @@ async function fetchVideo(movieId) {
   try {
     await page.goto(`https://movie.douban.com/subject/${movieId}/trailer#trailer`);
     const videoSrc = await page.$eval(`#content .article .mod .video-list li a`, value => {
-      return value.href
+      return value ? value.href : ''
     })
     page.close()
 
-    const previewPage = await browser.newPage();
-    await previewPage.goto(videoSrc)
-    video = await previewPage.$eval('.video-js video source', value => {
-      return value.src
-    })
+    if(videoSrc) {
+      const previewPage = await browser.newPage();
+      await previewPage.goto(videoSrc)
+      video = await previewPage.$eval('.video-js video source', value => {
+        return value.src
+      })
+    }
 
   }catch(err) {
     
@@ -511,9 +516,9 @@ module.exports = {
 
 // console.log(Date.now())
 // fetchDouData({
-//   movieId: '35295405',
+//   movieId: '4315388',
 //   userId: ObjectId('8f63270f005f1c1a0d9448ca')
 // })
 // .then(_ => {
-//   console.log(Date.now())
+//   console.log(Date.now(), _)
 // })
