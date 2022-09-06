@@ -10,6 +10,10 @@ const router = new Router()
 
 const STATIC_PAGE_MAP = [
   {
+    regexp: /(?<=.+\/three-model\/).+$/,
+    path: "three-model"
+  },
+  {
     regexp: /(?<=.+\/tool-box\/).+$/,
     path: "tool-box"
   },
