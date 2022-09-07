@@ -1,5 +1,5 @@
 require('module-alias/register')
-const { MovieModel, UserModel, ClassifyModel, ImageModel } = require('@src/utils')
+const { MovieModel, UserModel, ClassifyModel, ImageModel, MOVIE_STATUS } = require('@src/utils')
 const { expect } = require('chai')
 const { Request, commonValidate, mockCreateMovie, mockCreateClassify, mockCreateUser, mockCreateImage, parseResponse } = require('@test/utils')
 const { Types: { ObjectId } } = require("mongoose")
@@ -122,6 +122,7 @@ describe(`${COMMON_API} test`, function() {
           name: `${COMMON_API}-${item}`,
           author: userInfo._id,
           info,
+          status: MOVIE_STATUS.VERIFY,
           ...(item === 'status' ? { status: 'NOT_VERIFY' } : {}),
           ...(item === 'sourceType' ? { source_type: 'USER' } : {}),
           author_description: COMMON_API
@@ -521,6 +522,28 @@ describe(`${COMMON_API} test`, function() {
 
       })
 
+      it(`post the movie draft success`, function(done) {
+
+        Request
+        .post(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          ...newMovie,
+          draft: true,
+          video: undefined
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if(err) return done(err)
+          done()
+        })
+
+      })
+
     })
 
     describe(`put the movie success -> ${COMMON_API}`, function() {
@@ -573,6 +596,29 @@ describe(`${COMMON_API} test`, function() {
 
         return res ? Promise.resolve() : Promise.reject()
 
+      })
+
+      it(`put the movie success and save draft`, function(done) {
+        Request
+        .put(COMMON_API)
+        .set({
+          Accept: 'application/json',
+          Authorization: `Basic ${selfToken}`
+        })
+        .send({
+          ...newMovie,
+          video: undefined,
+          draft: true,
+          _id: sourceTypeId.toString()
+        })
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .then(() => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
       })
 
       it(`put the movie success and the author is not self but self has the auth`, async function() {

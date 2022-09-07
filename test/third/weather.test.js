@@ -3,7 +3,7 @@ const { Request } = require('@test/utils')
 
 const COMMON_API = '/api/third/weather'
 
-describe(`${COMMON_API} test`, () => {
+describe.skip(`${COMMON_API} test`, () => {
   
   describe(`get the weather data success test -> ${COMMON_API}`, function() {
 

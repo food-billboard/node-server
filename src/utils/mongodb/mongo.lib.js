@@ -752,7 +752,6 @@ const MovieSchema = new Schema({
   video: {
     type: ObjectId,
     ref: 'video',
-    required: true
   },
   images: [{
     type: ObjectId,
@@ -761,7 +760,6 @@ const MovieSchema = new Schema({
   poster: {
     type: ObjectId,
     ref: 'image',
-    required: true
   },
   barrage: [{
     type: ObjectId,

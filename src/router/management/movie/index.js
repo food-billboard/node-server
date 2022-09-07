@@ -11,7 +11,12 @@ const router = new Router()
 //参数检查
 const checkParams = (ctx, ...validator) => {
   const { draft } = ctx.request.body 
-  if(draft) return 
+  if(draft) return Params.body(ctx, {
+    name: 'name',
+    validator: [
+      data => typeof data === 'string' && data.length > 0
+    ]
+  })
   return Params.body(ctx, {
     name: 'name',
     validator: [

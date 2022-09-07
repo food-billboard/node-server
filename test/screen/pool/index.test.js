@@ -406,7 +406,7 @@ describe(`${COMMON_API} test`, () => {
         .then(value => {
           const { data } = value
           const result = JSON.parse(data)
-          const currCallback = get(result, 'components.config.attr.filter')
+          const currCallback = get(result, 'config.attr.filter')
           const [ callback ] = currCallback.slice(-1)
           expect(callback.name).to.be.equal(COMMON_API)
           done()
@@ -455,7 +455,7 @@ describe(`${COMMON_API} test`, () => {
         .then(value => {
           const { data } = value
           const result = JSON.parse(data)
-          const currGuideLine = get(result, 'components.config.attr.guideLine')
+          const currGuideLine = get(result, 'config.attr.guideLine')
           const [ guideLine ] = currGuideLine.value.slice(-1)
           expect(guideLine.type).to.be.equal('dashed')
           done()
@@ -497,7 +497,7 @@ describe(`${COMMON_API} test`, () => {
         .then(value => {
           const { data } = value
           const result = JSON.parse(data)
-          const currGuideLine = get(result, 'components.config.attr.guideLine')
+          const currGuideLine = get(result, 'config.attr.guideLine')
           expect(currGuideLine.show).to.be.false 
         })
       })
@@ -526,7 +526,7 @@ describe(`${COMMON_API} test`, () => {
         .then(value => {
           const { data } = value
           const result = JSON.parse(data)
-          const currGuideLine = get(result, 'components.config.attr.guideLine')
+          const currGuideLine = get(result, 'config.attr.guideLine')
           expect(currGuideLine.show).to.be.true 
           done()
         })
@@ -595,7 +595,7 @@ describe(`${COMMON_API} test`, () => {
         .then(value => {
           const { data } = value
           const result = JSON.parse(data)
-          const currGuideLine = get(result, 'components.config.attr.guideLine')
+          const currGuideLine = get(result, 'config.attr.guideLine')
           expect(currGuideLine.show).to.be.false 
           done()
         })
