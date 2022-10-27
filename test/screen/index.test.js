@@ -126,6 +126,36 @@ describe(`${COMMON_API} test`, () => {
 
     })
 
+    it(`get the screen list success with flag`, function(done) {
+
+      Request
+      .get(COMMON_API)
+      .set({
+        Accept: 'application/json',
+        Authorization: `Basic ${selfToken}`
+      })
+      .query({
+        flag: 'H5'
+      })
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then(function(res) {
+        let obj = parseResponse(res)
+        responseExpect(obj, (target) => {
+          const { list } = target 
+          console.log(list, 22222)
+          expect(list.some(item => item.flag === 'PC')).to.be.false 
+        })
+      })
+      .then(_ => {
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+
+    })
+
   })
 
   describe('delete screen success', function() {

@@ -29,7 +29,7 @@ router
     ]
   })
 
-  const { content='' } = ctx.query
+  const { content='', flag='' } = ctx.query
 
   const data = await Promise.all([
     ScreenModal.aggregate([
@@ -39,7 +39,12 @@ router
             $regex: content,
             $options: 'gi'
           },
-          user: ObjectId(id)
+          user: ObjectId(id),
+          ...(flag ? {
+            flag: {
+              $in: [flag]
+            }
+          } : {})
         }
       },
       {
@@ -66,7 +71,12 @@ router
           },
           user: {
             $in: [ObjectId(id)]
-          }
+          },
+          ...(flag ? {
+            flag: {
+              $in: [flag]
+            }
+          } : {})
         }
       },
       {
