@@ -168,7 +168,7 @@ router
   }, {
     name: 'password',
     validator: [
-      data => typeof data === 'string' ? !data.length || (data.length > 8 && data.length < 20) : data === undefined
+      data => typeof data === 'string' ? !data.length || (data.length >= 8 && data.length < 20) : data === undefined
     ]
   })
 
