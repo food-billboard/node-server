@@ -1,7 +1,8 @@
 const path = require('path')
 
 const DEVELOPMENT_API_DOMAIN = 'http://localhost:4000'
-const PRODUCTION_DOMAIN = "47.97.27.23"
+// const PRODUCTION_DOMAIN = "47.97.27.23"
+const PRODUCTION_DOMAIN = "glfswy.top"
 const PRODUCTION_API_DOMAIN = `http://${PRODUCTION_DOMAIN}`
 
 const FFMPEG_VERSION = "jrottenberg/ffmpeg:4.1-centos"
