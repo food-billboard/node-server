@@ -12,7 +12,7 @@ describe(SCHEDULE_PREFIX, function() {
   before(function(done) {
 
     try {
-      screenId = ScreenPoolUtil.mockCretaeScreenPool()
+      screenId = ScreenPoolUtil.mockCreateScreenPool()
       done()
     }catch(err) {
       done(err)
