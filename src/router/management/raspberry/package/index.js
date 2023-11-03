@@ -248,6 +248,7 @@ router
       name: "_id",
       sanitizers: [(data) => ObjectId(data)],
     });
+    let actionType = ''
 
     await RaspberryModel.findOne({
       $or: [
@@ -277,10 +278,14 @@ router
         if (data.url !== url) {
           removePackage(data.folder);
           createPackage(url, folder);
+          actionType = 'rebuild'
         }
         // 目录不同就直接改个名字就行了
         else if (data.folder !== folder) {
           updatePackageFolder(folder, data.folder);
+          actionType = 'rename'
+        }else {
+          actionType = 'database'
         }
 
         return RaspberryModel.updateOne(
@@ -304,6 +309,7 @@ router
         return {
           data: {
             data: _id.toString(),
+            actionType
           },
         };
       })

@@ -44,6 +44,7 @@ const {
   MEDIA_STATUS,
   OtherMediaModel,
   ScreenMockModel,
+  RaspberryModel,
   THIRD_PARTY_REQUEST_METHOD,
   THIRD_PARTY_REQUEST_PARAMS_TYPE
 } = require('@src/utils')
@@ -517,6 +518,21 @@ function mockCreateSearch(values) {
   return { model }
 }
 
+// 创建树莓派本地模块
+function mockCreateRaspberryPackage(values) {
+  let baseModel = {
+    user: ObjectId('8f63270f005f1c1a0d9448ca'),
+    name: 'mock-raspberry-package',
+    url: 'git@github.com:food-billboard/tool-box.git',
+    folder: 'mock-test-raspberry-package',
+    description: '测试描述',
+  }
+
+  baseModel = mergeConfig(baseModel, values, true)
+  const model = new RaspberryModel(baseModel)
+  return { model }
+}
+
 // 创建大屏
 function mockCreateScreen(values) {
   let baseModel = {
@@ -825,5 +841,6 @@ module.exports = {
   mockCreateScreenModel,
   mockCreateOtherMedia,
   mockCreateScreenMock,
-  mockCreateThird
+  mockCreateThird,
+  mockCreateRaspberryPackage
 }
