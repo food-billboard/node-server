@@ -4,6 +4,8 @@ const path = require('path')
 const mime = require('mime')
 const { path: root } = require('app-root-path')
 
+// /api/backend/swagger/manage.html
+
 const API_PATH = path.join(root, 'public')
 
 const router = new Router()

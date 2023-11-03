@@ -16,6 +16,9 @@ const EMAIL_AUTH = {
 //邮箱正则
 const EMAIL_REGEXP = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
 
+// 前端模块目录
+const FRONT_END_PACKAGE_PATH = path.resolve(__dirname, '../../public')
+
 //静态资源目录
 const STATIC_FILE_PATH = path.resolve(__dirname, '../../static')
 const STATIC_FILE_PATH_NO_WRAPPER = path.resolve(__dirname, '../../')
@@ -294,5 +297,6 @@ module.exports = {
   SCREEN_MOCK_CONFIG_TEXT_TYPE,
   THIRD_PARTY_AUTH_TOKEN_CONFIG_PATH,
   THIRD_PARTY_REQUEST_METHOD,
-  THIRD_PARTY_REQUEST_PARAMS_TYPE
+  THIRD_PARTY_REQUEST_PARAMS_TYPE,
+  FRONT_END_PACKAGE_PATH
 }

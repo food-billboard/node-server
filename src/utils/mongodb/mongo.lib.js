@@ -1814,8 +1814,15 @@ const ThirdPartySchema = new Schema({
   ...defaultConfig
 })
 
-
-
+const RaspberrySchema = new Schema({
+  name: String,
+  description: String, 
+  url: String,
+  folder: String,
+  user: ObjectId,
+}, {
+  ...defaultConfig
+})
 
 // ------------------------------------大屏 ------------------------------------
 
@@ -1908,6 +1915,7 @@ const ScreenModal = model('screen', ScreenSchema)
 const ScreenModelModal = model('screen_model', ScreenModelSchema)
 const ScreenMockModel = model('screen_mock', ScreenMockSchema)
 const ThirdPartyModel = model('third_party', ThirdPartySchema)
+const RaspberryModel = model('raspberry', RaspberrySchema)
 
 module.exports = {
   UserModel,
@@ -1940,6 +1948,7 @@ module.exports = {
   ScreenModelModal,
   ScreenMockModel,
   ThirdPartyModel,
+  RaspberryModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1969,5 +1978,6 @@ module.exports = {
   ScreenModelSchema,
   ScheduleSchema,
   ScreenMockSchema,
-  ThirdPartySchema
+  ThirdPartySchema,
+  RaspberrySchema
 }

@@ -36,20 +36,6 @@ yarn-error.log*
 package-lock.json
 
 # assets 
-/public/chat/
-/public/manage/
-/public/movie5/
-/public/moviet5/
-/public/screen/
-/public/manage-prev/
-/public/movie5-prev/
-/public/moviet5-prev/
-/public/screen-prev/
-/public/threejs-study-prev/
-/public/threejs-study/
-/public/create-chart-docs-prev/
-/public/create-chart-docs/
-/public/tool-box-prev/
-/public/tool-box/
-/public/secrets/
-/public/three-model/
+public/**
+!public/api-docs/
+!public/test/

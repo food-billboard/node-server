@@ -91,6 +91,14 @@
         "description": "Find out more about our store",
         "url": "http://swagger.io"
       }
+    },
+    {
+      "name": "raspberry",
+      "description": "树莓派相关",
+      "externalDocs": {
+        "description": "Find out more about our store",
+        "url": "http://swagger.io"
+      }
     }
   ],
   "schemes": ["https", "http"],
@@ -4391,6 +4399,184 @@
           }
         ]
       }
+    },
+
+    "/api/manage/raspberry/package": {
+      "get": {
+        "tags": ["raspberry"],
+        "summary": "本地模块列表",
+        "description": "构建在树莓派本地的前端模块",
+        "operationId": "raspberry_list_get",
+        "produces": ["application/xml", "application/json"],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/raspberry_list_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["raspberry"],
+        "summary": "删除本地模块",
+        "description": "",
+        "operationId": "raspberry_list_delete",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "模块id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "put": {
+        "tags": ["raspberry"],
+        "summary": "修改本地模块配置",
+        "description": "",
+        "operationId": "raspberry_list_put",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "模块id"
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "模块名称"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "模块描述"
+          },
+          {
+            "name": "url",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "模块的git地址"
+          },
+          {
+            "name": "folder",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "模块在树莓派上的目录名称"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "post": {
+        "tags": ["raspberry"],
+        "summary": "新增本地模块",
+        "description": "",
+        "operationId": "raspberry_list_post",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "模块名称"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "模块描述"
+          },
+          {
+            "name": "url",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "模块的git地址"
+          },
+          {
+            "name": "folder",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "模块在树莓派上的目录名称"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/raspberry/package/build": {
+      "post": {
+        "tags": ["raspberry"],
+        "summary": "重新构建模块",
+        "description": "",
+        "operationId": "raspberry_list_rebuild",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "模块id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
     }
   },
   "securityDefinitions": {
@@ -4608,6 +4794,79 @@
         "name": "screen_mock_post"
       }
     },
+    "raspberry_list_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string",
+                        "description": "模块git地址"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "大屏名称"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "user": {
+                        "type": "object",
+                        "description": "创建用户",
+                        "properties": {
+                          "username": {
+                            "type": "string",
+                            "description": "用户名"
+                          },
+                          "avatar": {
+                            "type": "string",
+                            "description": "头像"
+                          },
+                          "_id": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "folder": {
+                        "type": "string",
+                        "description": "本地目录名称"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "raspberry_list_get"
+      }
+    },
     "screen_list_get": {
       "type": "object",
       "properties": {
@@ -4666,7 +4925,7 @@
                         "description": "是否启用"
                       },
                       "poster": {
-                        "type": "integer",
+                        "type": "string",
                         "description": "封面"
                       },
                       "createdAt": {

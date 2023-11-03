@@ -9,6 +9,7 @@ const Media = require('./media')
 const Chat = require('./chat')
 const Schedule = require('./schedule')
 const Screen = require('./screen')
+const Raspberry = require('./raspberry')
 const { loginAuthorization } = require('@src/utils')
 
 const router = new Router()
@@ -26,5 +27,6 @@ router
 .use('/chat', Chat.routes(), Chat.allowedMethods())
 .use('/schedule', Schedule.routes(), Schedule.allowedMethods())
 .use('/screen', Screen.routes(), Screen.allowedMethods())
+.use('/raspberry', Raspberry.routes(), Raspberry.allowedMethods())
 
 module.exports = router
