@@ -1,5 +1,15 @@
 # MongoDB
 
+## 常用命令 
+
+- show dbs  
+
+- use xxx 
+
+- show collections   
+
+- db.xx.xxx.findOne
+
 ## aggregate 
 1. $filter   
 ```javascript 

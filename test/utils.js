@@ -523,7 +523,7 @@ function mockCreateRaspberryPackage(values) {
   let baseModel = {
     user: ObjectId('8f63270f005f1c1a0d9448ca'),
     name: 'mock-raspberry-package',
-    url: 'git@github.com:food-billboard/tool-box.git',
+    url: '2222222222',
     folder: 'mock-test-raspberry-package',
     description: '测试描述',
   }

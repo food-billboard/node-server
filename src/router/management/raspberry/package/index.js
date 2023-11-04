@@ -22,21 +22,27 @@ router
     });
     if (check) return;
 
-    const [_id] = sanitizersParams(ctx, {
+    const [_id] = Params.sanitizers(ctx.request.body, {
       name: "_id",
       sanitizers: [(data) => ObjectId(data)],
     });
+    const { wait } = ctx.request.body
 
-    await RaspberryModel.findOne({
+    const data = await RaspberryModel.findOne({
       _id,
     })
       .select({
         folder: 1,
       })
+      .exec()
       .then(notFound)
-      .then((data) => {
+      .then(async (data) => {
         removePackage(data.folder);
-        createPackage(url, folder);
+        if(wait) {
+          await createPackage(url, folder, true);
+        }else {
+          createPackage(url, folder);
+        }
 
         return {
           data: {
@@ -53,7 +59,7 @@ router
     });
   })
   .get("/", async (ctx) => {
-    await RaspberryModel.aggregate([
+    const data = await RaspberryModel.aggregate([
       {
         $sort: {
           updatedAt: -1,
@@ -114,13 +120,11 @@ router
         },
       },
     ])
-      .then(([total_data, data]) => {
-        const [total = { total: 0 }] = total_data;
+      .then(data => {
 
         return {
           data: {
             list: data,
-            total: total.total,
           },
         };
       })
@@ -137,36 +141,38 @@ router
       ctx,
       {
         name: "name",
-        type: ["isEmpty"],
         validator: [
-          (data) =>
-            typeof data === "string" && data.length > 0 && data.length < 40,
+          (data) => {
+            return typeof data === "string" && data.length > 0 && data.length < 60
+          },
         ],
       },
       {
         name: "description",
-        type: ["isEmpty"],
         validator: [
-          (data) =>
-            typeof data === "string" && data.length > 0 && data.length < 60,
+          (data) => {
+            return typeof data === "string" && data.length > 0 && data.length < 60
+          }
         ],
       },
       {
         name: "url",
-        type: ["isEmpty"],
-        validator: [(data) => typeof data === "string" && data.length > 0],
+        validator: [(data) => {
+          return typeof data === "string" && data.length > 0
+        }],
       },
       {
         name: "folder",
-        type: ["isEmpty"],
-        validator: [(data) => typeof data === "string" && isFolderExist(data)],
+        validator: [(data) => {
+          return typeof data === "string" && !isFolderExist(data)
+        }],
       }
     );
     if (check) return;
 
-    const { name, description, url, folder } = ctx.request.body;
+    const { name, description, url, folder, wait } = ctx.request.body;
 
-    await RaspberryModel.findOne({
+    const data = await RaspberryModel.findOne({
       $or: [
         {
           name,
@@ -176,6 +182,12 @@ router
         },
       ],
     })
+    .select({
+      _id: 1,
+      name: 1,
+      url: 1
+    })
+    .exec()
       .then((data) => {
         if (data) return Promise.reject({ status: 403, errMsg: "exist" });
         const model = new RaspberryModel({
@@ -186,11 +198,15 @@ router
         });
         return model.save();
       })
-      .then((data) => {
+      .then(async (data) => {
         if (!data)
           return Promise.reject({ errMsg: "unknown error", status: 500 });
 
-        createPackage(url, folder);
+        if(wait) {
+          await createPackage(url, folder, true);
+        }else {
+          createPackage(url, folder);
+        }
 
         return {
           data: {
@@ -216,15 +232,13 @@ router
       },
       {
         name: "name",
-        type: ["isEmpty"],
         validator: [
           (data) =>
-            typeof data === "string" && data.length > 0 && data.length < 40,
+            typeof data === "string" && data.length > 0 && data.length < 60,
         ],
       },
       {
         name: "description",
-        type: ["isEmpty"],
         validator: [
           (data) =>
             typeof data === "string" && data.length > 0 && data.length < 60,
@@ -232,31 +246,32 @@ router
       },
       {
         name: "url",
-        type: ["isEmpty"],
         validator: [(data) => typeof data === "string" && data.length > 0],
       },
       {
         name: "folder",
-        type: ["isEmpty"],
         validator: [(data) => typeof data === "string" && data.length > 0],
       }
     );
     if (check) return;
 
-    const { name, description, url, folder } = ctx.request.body;
-    const [_id] = sanitizersParams(ctx, {
+    const { name, description, url, folder, wait } = ctx.request.body;
+    const [_id] = Params.sanitizers(ctx.request.body, {
       name: "_id",
       sanitizers: [(data) => ObjectId(data)],
     });
     let actionType = ''
 
-    await RaspberryModel.findOne({
+    const data = await RaspberryModel.findOne({
       $or: [
         {
           name,
         },
         {
           url,
+        },
+        {
+          folder,
         },
         {
           _id,
@@ -269,15 +284,21 @@ router
         url: 1,
         folder: 1,
       })
+      .exec()
       .then(notFound)
-      .then((data) => {
+      .then(async (data) => {
         if (data._id.toString() !== _id.toString())
           return Promise.reject({ status: 403, errMsg: "exist" });
 
         // 地址不同则直接删掉重新下
         if (data.url !== url) {
+          console.log(data.url, url, 2888)
           removePackage(data.folder);
-          createPackage(url, folder);
+          if(wait) {
+            await createPackage(url, folder, true);
+          }else {
+            createPackage(url, folder);
+          }
           actionType = 'rebuild'
         }
         // 目录不同就直接改个名字就行了
@@ -337,6 +358,7 @@ router
     })
       .select({ folder: 1 })
       .exec()
+      .then(notFound)
       .then((data) => {
         folder = data.folder;
         return RaspberryModel.deleteOne({
@@ -347,9 +369,7 @@ router
         if (data && data.deletedCount == 0)
           return Promise.reject({ errMsg: "forbidden", status: 403 });
 
-        const success = removePackage(folder);
-        if (!success)
-          return Promise.reject({ errMsg: "notFound", status: 404 });
+        removePackage(folder);
 
         return {
           data: _id,

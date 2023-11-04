@@ -18,7 +18,7 @@ const removePackage = (folder) => {
 }
 
 // 创建模块
-const createPackage = async (url, folder) => {
+const createPackage = async (url, folder, wait=false) => {
   try {
     // 模块名称
     const [ packageName ] = url.split('/').slice(-1)[0].split('.git')
@@ -30,6 +30,10 @@ const createPackage = async (url, folder) => {
     const templateInternalFolder = path.join(templateFolder, packageName)
     // 打包目录名称
     let distName = 'dist'
+
+    if(wait) {
+      return fs.mkdirp(packagePath)
+    }
 
     fs.mkdirpSync(templateFolder)
 
@@ -73,7 +77,7 @@ const createPackage = async (url, folder) => {
 }
 
 // 修改模块名称
-const updatePackageFolder = async (folder, previousFolder) => {
+const updatePackageFolder = (folder, previousFolder) => {
   try {
     fs.renameSync(path.join(FRONT_END_PACKAGE_PATH, previousFolder), path.join(FRONT_END_PACKAGE_PATH, folder))
   }catch(err) {}
