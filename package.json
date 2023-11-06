@@ -34,6 +34,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "formidable": "^1.2.6",
     "fs-extra": "^10.0.0",
+    "glob": "^10.3.10",
     "ioredis": "^4.28.0",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.13.4",
@@ -68,6 +69,8 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "nyc": "^15.1.0",
+    "ora": "^7.0.1",
+    "ssh2-sftp-client": "^9.1.0",
     "supertest": "^6.1.3"
   }
 }
