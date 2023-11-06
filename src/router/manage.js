@@ -20,6 +20,10 @@ const STATIC_PAGE_MAP = [
     path: "tool-box"
   },
   {
+    regexp: /(?<=.+\/my-home\/).+$/,
+    path: "my-home"
+  },
+  {
     regexp: /(?<=.+\/communicate\/).+$/,
     path: "chat"
   },
