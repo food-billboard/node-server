@@ -39,3 +39,5 @@ package-lock.json
 public/**
 !public/api-docs/
 !public/test/
+
+deploy.config.json
