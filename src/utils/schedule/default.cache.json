@@ -82,5 +82,11 @@
     "time": "0 20 * * * *",
     "description": "无引用大屏保存缓存定时清除",
     "status": "SCHEDULING"
+  },
+  "initialAdminSchedule": {
+    "name": "initialAdminSchedule",
+    "time": "0 0 18 * * *",
+    "description": "初始化一个admin账号",
+    "status": "SCHEDULING"
   }
 }
