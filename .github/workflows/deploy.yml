@@ -2,7 +2,7 @@ name: Deploy server to aliyun
 on: 
   push:
     branches:
-      - master 
+      - master-deprecated # ? 没有服务器了，暂时不需要自动部署了
 jobs:
   deploy-and-start:
     runs-on: ubuntu-latest # 运行环境
