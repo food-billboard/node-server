@@ -21,7 +21,8 @@ function scheduleMethod({
     // roles: {
     //   $in: [ROLES_NAME_MAP.SUPER_ADMIN]
     // }
-    _id: ObjectId('5edb3c7b4f88da14ca419e61')
+    // _id: ObjectId('5edb3c7b4f88da14ca419e61')
+    mobile: '18358995425'
   })
   .select({
     _id: 1

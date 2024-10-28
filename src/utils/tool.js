@@ -238,7 +238,8 @@ function cookieDomainSet(env, ctx) {
     case 'prod':
       return PRODUCTION_DOMAIN
     case RASPBERRY_ENV_NAME:
-      return ctx.request.header.origin.replace(/https?:\/\//, '')
+      const { hostname } = new URL(ctx.request.header.origin || ctx.request.header.referer)
+      return hostname
     default:
       return 'localhost'
   }
