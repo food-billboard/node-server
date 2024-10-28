@@ -1,4 +1,5 @@
 const { cookieDomainSet } = require('../tool')
+const { RASPBERRY_ENV_NAME } = require('../constant')
 let crypto;
 try {
   crypto = require('crypto')
@@ -102,7 +103,7 @@ const coverLoginCookie = (ctx) => {
   // 覆盖设置cookie
   // 临时设置，需要修改
   const token = getCookie(ctx, TOKEN_COOKIE)
-  setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set', options: { domain: cookieDomainSet(), overwrite: true } })
+  setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set', options: { domain: cookieDomainSet(require('os').hostname() === 'raspberrypi' ? RASPBERRY_ENV_NAME : null, ctx), overwrite: true } })
 }
 
 module.exports = {

@@ -5,7 +5,7 @@ var isoWeek = require('dayjs/plugin/isoWeek')
 const { pick } = require('lodash')
 const { Types: { ObjectId } } = require('mongoose')
 const fs = require('fs')
-const { DIR_LIST, PRODUCTION_DOMAIN, API_DOMAIN } = require('./constant')
+const { DIR_LIST, PRODUCTION_DOMAIN, API_DOMAIN, RASPBERRY_ENV_NAME } = require('./constant')
 
 const fsPromise = fs.promises
 
@@ -232,9 +232,16 @@ function parseUrl(url) {
   }
 }
 
-function cookieDomainSet(env) {
+function cookieDomainSet(env, ctx) {
   const nodeEnv = env || (process.env.NODE_ENV === 'production' ? 'prod' : 'env')
-  return nodeEnv.toLowerCase() == 'prod' ? PRODUCTION_DOMAIN : 'localhost'
+  switch(nodeEnv.toLowerCase()) {
+    case 'prod':
+      return PRODUCTION_DOMAIN
+    case RASPBERRY_ENV_NAME:
+      return ctx.request.header.origin
+    default:
+      return 'localhost'
+  }
 }
 
 function withTry(func) {

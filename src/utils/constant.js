@@ -1,6 +1,7 @@
 const path = require('path')
 
 const DEVELOPMENT_API_DOMAIN = 'http://localhost:4000'
+const RASPBERRY_ENV_NAME = 'prod-local'
 const PRODUCTION_DOMAIN = "47.97.27.23"
 // const PRODUCTION_DOMAIN = "www.glfswy.top"
 const PRODUCTION_API_DOMAIN = `http://${PRODUCTION_DOMAIN}`
@@ -278,6 +279,7 @@ module.exports = {
   PRODUCTION_API_DOMAIN,
   API_DOMAIN: process.env.NODE_ENV === 'production' ? PRODUCTION_API_DOMAIN : DEVELOPMENT_API_DOMAIN,
   BEHAVIOUR_URL_TYPE_MAP,
+  RASPBERRY_ENV_NAME,
   FRIEND_STATUS,
   ERROR_ORIGIN_TYPE,
   ERROR_TYPE,

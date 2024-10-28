@@ -14,7 +14,7 @@ const { getCookie, TOKEN_COOKIE } = cookie
 //秘钥
 const SECRET = "________SE__C_R__E_T"
 
-const MIDDEL = "MIDDEL"
+const MIDDLE = "MIDDLE"
 
 //密码加密
 const encoded = (password) => {
@@ -46,7 +46,7 @@ const signToken = ({ id, mobile, friend_id }, options={expiresIn: '1d'}, callbac
   return jwt.sign({
     id,
     mobile,
-    middel: MIDDEL,
+    middle: MIDDLE,
     friend_id
   }, SECRET, newOptions)
 }
@@ -144,8 +144,8 @@ const verifySocketIoToken = token => {
   // const { handshake: { headers: { authorization } } } = socket
   // return getToken(authorization)
   try { 
-    const { middel, ...nextToken } = verifyToken(token)
-    if(middel !== MIDDEL) return ['401', null]
+    const { middle, ...nextToken } = verifyToken(token)
+    if(middle !== MIDDLE) return ['401', null]
     return [null, nextToken]
   }catch(err) {
     return [err, null]
@@ -163,8 +163,8 @@ const getToken = (authorization) => {
   if(tokenData[0]) return tokenData 
   const [, token] = tokenData
   try { 
-    const { middel, ...nextToken } = verifyToken(token)
-    if(middel !== MIDDEL) return ['401', null]
+    const { middle, ...nextToken } = verifyToken(token)
+    if(middle !== MIDDLE) return ['401', null]
     return [null, nextToken]
   }catch(err) {
     return ['401', null]

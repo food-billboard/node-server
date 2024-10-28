@@ -125,7 +125,7 @@ router
         type: 'set',
         options: {
           maxAge: parseInt(time),
-          domain: cookieDomainSet(env)
+          domain: cookieDomainSet(env, ctx)
         }
       })
     }

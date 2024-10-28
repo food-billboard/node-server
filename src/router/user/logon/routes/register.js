@@ -85,7 +85,7 @@ router
     ctx.status = 200
     //设置cookie
     //临时设置，需要修改
-    setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set', options: { domain: cookieDomainSet(env) } })
+    setCookie(ctx, { key: TOKEN_COOKIE, value: token, type: 'set', options: { domain: cookieDomainSet(env, ctx) } })
     
     return {
       data: {

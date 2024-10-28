@@ -96,6 +96,12 @@ const isAccessLimit = async (ctx) => {
 
 const dealRedis = async (opera) => {
   return await opera(client)
+  .catch(error => {
+    return Promise.reject({
+      errMsg: error.toString(),
+      status: 500
+    })
+  })
 }
 
 const getClient = () => {
