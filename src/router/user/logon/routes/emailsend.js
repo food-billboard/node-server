@@ -65,7 +65,10 @@ router
       }
       sendMail(send_mail_template, function(error, _) {
         if(error) {
-          reject(error)
+          reject({
+            status: 500,
+            errMsg: error.toString()
+          })
         }else {
           resolve()
         }
