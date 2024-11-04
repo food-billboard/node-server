@@ -44,6 +44,8 @@ const {
   MEDIA_STATUS,
   OtherMediaModel,
   ScreenMockModel,
+  ScreenMediaModel,
+  ScreenMediaClassifyModel,
   RaspberryModel,
   THIRD_PARTY_REQUEST_METHOD,
   THIRD_PARTY_REQUEST_PARAMS_TYPE
@@ -599,6 +601,32 @@ function mockCreateScreenMock(values={}) {
   return { model }
 }
 
+// 创建大屏媒体资源分类
+function mockCreateScreenMediaClassify(values={}) {
+  let baseModel = {
+    name: '测试名称',
+    user: ObjectId('8f63270f005f1c1a0d9448ca'),
+  }
+  baseModel = mergeConfig(baseModel, values, true)
+
+  const model = new ScreenMediaClassifyModel(baseModel)
+
+  return { model }
+}
+
+// 创建大屏媒体资源
+function mockCreateScreenMedia(values={}) {
+  let baseModel = {
+    image: ObjectId('8f63270f005f1c1a0d9448ca'),
+    classify: ObjectId('8f63270f005f1c1a0d9448ca'),
+  }
+  baseModel = mergeConfig(baseModel, values, true)
+
+  const model = new ScreenMediaModel(baseModel)
+
+  return { model }
+}
+
 //创建第三方接口
 function mockCreateThird(values={}) {
   let baseModel = {
@@ -842,5 +870,7 @@ module.exports = {
   mockCreateOtherMedia,
   mockCreateScreenMock,
   mockCreateThird,
-  mockCreateRaspberryPackage
+  mockCreateRaspberryPackage,
+  mockCreateScreenMediaClassify,
+  mockCreateScreenMedia
 }

@@ -21,6 +21,14 @@
       }
     },
     {
+      "name": "media",
+      "description": "媒体资源",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
       "name": "model",
       "description": "大屏模板",
       "externalDocs": {
@@ -282,7 +290,7 @@
           {
             "name": "currPage",
             "in": "query",
-            "type": "ineger",
+            "type": "integer",
             "description":"当前页"
           },
           {
@@ -403,6 +411,291 @@
             "type": "string",
             "description":"大屏数据",
             "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/screen/media-classify": {
+      "post": {
+        "tags": [
+          "media"
+        ],
+        "summary": "新增媒体资源分类",
+        "description": "",
+        "operationId": "screen_media_classify_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"分类名称"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "media"
+        ],
+        "summary": "媒体资源分类列表",
+        "description": "",
+        "operationId": "screen_media_classify_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "content",
+            "in": "query",
+            "type": "string",
+            "description":"媒体资源名称"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "type": "integer",
+            "description":"当前页"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "type": "integer",
+            "description":"每页数量"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_media_classify_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "media"
+        ],
+        "summary": "删除媒体资源分类",
+        "description": "",
+        "operationId": "screen_media_classify_delete",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description":"媒体分类id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "media"
+        ],
+        "summary": "修改媒体分类",
+        "description": "",
+        "operationId": "screen_media_classify_put",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"媒体分类id"
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"媒体分类名称"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/screen/media": {
+      "post": {
+        "tags": [
+          "media"
+        ],
+        "summary": "新增媒体资源",
+        "description": "",
+        "operationId": "screen_media_post",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "image",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"媒体资源id"
+          },
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"媒体资源分类id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "media"
+        ],
+        "summary": "媒体资源列表",
+        "description": "",
+        "operationId": "screen_media_get",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description":"媒体资源分类名称"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "type": "integer",
+            "description":"当前页"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "type": "integer",
+            "description":"每页数量"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_media_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "media"
+        ],
+        "summary": "删除媒体资源",
+        "description": "",
+        "operationId": "screen_media_delete",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description":"媒体id"
           }
         ],
         "responses": {
@@ -791,7 +1084,7 @@
           {
             "name": "currPage",
             "in": "query",
-            "type": "ineger",
+            "type": "integer",
             "description":"当前页"
           },
           {
@@ -1628,6 +1921,90 @@
       },
       "xml": {
         "name": "screen_get_detail"
+      }
+    },
+    "screen_media_classify_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "分类名称"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "screen_media_classify_get"
+      }
+    },
+    "screen_media_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "classify": {
+                    "type": "string"
+                  },
+                  "src": {
+                    "type": "string",
+                    "description": "媒体地址"
+                  },
+                  "image_id": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "screen_media_get"
       }
     },
     "screen_list_get" : {

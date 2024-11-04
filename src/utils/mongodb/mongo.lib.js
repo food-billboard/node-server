@@ -1228,6 +1228,40 @@ const ClassifySchema = new Schema({
   minimize: false
 })
 
+const ScreenMediaClassifySchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+    validator: {
+      validate: (v) => {
+        return v.length < 100
+      }
+    }
+  },
+  user: {
+    type: ObjectId,
+    ref: 'user'
+  }
+}, {
+  ...defaultConfig,
+  minimize: false
+})
+
+const ScreenMediaSchema = new Schema({
+  image: {
+    type: ObjectId,
+    ref: 'image'
+  },
+  classify: {
+    type: ObjectId,
+    ref: 'screen_media'
+  }
+}, {
+  ...defaultConfig,
+  minimize: false
+})
+
 const LanguageSchema = new Schema({
   name: {
     type: String,
@@ -1916,6 +1950,8 @@ const ScreenModelModal = model('screen_model', ScreenModelSchema)
 const ScreenMockModel = model('screen_mock', ScreenMockSchema)
 const ThirdPartyModel = model('third_party', ThirdPartySchema)
 const RaspberryModel = model('raspberry', RaspberrySchema)
+const ScreenMediaClassifyModel = model('screen_media_classify', ScreenMediaClassifySchema)
+const ScreenMediaModel = model('screen_media', ScreenMediaSchema)
 
 module.exports = {
   UserModel,
@@ -1949,6 +1985,8 @@ module.exports = {
   ScreenMockModel,
   ThirdPartyModel,
   RaspberryModel,
+  ScreenMediaClassifyModel,
+  ScreenMediaModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -1979,5 +2017,7 @@ module.exports = {
   ScheduleSchema,
   ScreenMockSchema,
   ThirdPartySchema,
-  RaspberrySchema
+  RaspberrySchema,
+  ScreenMediaClassifySchema,
+  ScreenMediaSchema
 }
