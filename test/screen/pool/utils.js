@@ -2,7 +2,7 @@ const MOCK_SCREEN_DATA = {
 	_id: "62f1d071cb7c2d2b23844998",
 	name: "灌篮高手22222",
 	poster:
-		"http://47.97.27.23/static/image/f6543dfd1e15f8e0ae4e5e1d4e7c975e.jpeg",
+		`http://${process.env.SERVICE_IP}/static/image/f6543dfd1e15f8e0ae4e5e1d4e7c975e.jpeg`,
 	description: "",
 	components: {
 		name: "灌篮高手22222",
@@ -2243,7 +2243,7 @@ const MOCK_SCREEN_DATA = {
 			},
 		],
 		poster:
-			"http://47.97.27.23/static/image/f6543dfd1e15f8e0ae4e5e1d4e7c975e.jpeg",
+			`http://${process.env.SERVICE_IP}/static/image/f6543dfd1e15f8e0ae4e5e1d4e7c975e.jpeg`,
 		config: {
 			style: { width: 1920, height: 1080 },
 			attr: {

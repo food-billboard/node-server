@@ -5,6 +5,7 @@ node_modules
 /test/assets/
 
 # local env files
+.env
 .env.local
 .env.*.local
 

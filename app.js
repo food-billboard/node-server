@@ -1,3 +1,4 @@
+require('dotenv').config()
 const Koa = require('koa')
 const Day = require('dayjs')
 const Utc = require('dayjs/plugin/utc')
