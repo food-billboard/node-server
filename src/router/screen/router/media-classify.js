@@ -122,11 +122,21 @@ router
   .then(notFound)
   .then(data => {
     const { _id } = data
-    const model = new ScreenMediaClassifyModel({
-      name,
-      user: _id
+    return ScreenMediaClassifyModel.findOne({
+      name 
     })
-    return model.save()
+    .select({
+      _id: 1
+    })
+    .exec()
+    .then(data => {
+      if(data) return Promise.reject({ errMsg: '重复的分类名称', status: 400 })
+      const model = new ScreenMediaClassifyModel({
+        name,
+        user: _id
+      })
+      return model.save()
+    })  
   })
   .then(data => {
     if(!data) return Promise.reject({ errMsg: 'unknown error', status: 500 })
@@ -158,12 +168,20 @@ router
   })
   const { request: { body: { name } } } = ctx
   
-  const data = await ScreenMediaClassifyModel.updateOne({
-    _id
-  }, {
-    $set: {
-      name,
-    }
+  const data = await ScreenMediaClassifyModel.find({name})
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => {
+    if(data.some(item => !_id.equals(item._id))) return Promise.reject({ errMsg: '重复的分类名称', status: 400 })
+    return ScreenMediaClassifyModel.updateOne({
+      _id
+    }, {
+      $set: {
+        name,
+      }
+    })
   })
   .then(data => {
     if(data.nModified == 0) return Promise.reject({ errMsg: 'not found', status: 404 })

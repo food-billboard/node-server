@@ -131,12 +131,21 @@ router
 
   verifyTokenToData(ctx)
 
-  const model = new ScreenMediaModel({
+  const modelQuery = {
     image: ObjectId(image),
     classify: ObjectId(_id),
-  })
+  }
   
-  const data = await model.save()
+  const data = await ScreenMediaModel.findOne(modelQuery)
+  .select({
+    _id: 1
+  })
+  .exec()
+  .then(data => {
+    if(data) return Promise.reject({ errMsg: '已经上传过的资源', status: 400 })
+    const model = new ScreenMediaModel(modelQuery)
+    return model.save()
+  })
   .then(data => {
     if(!data) return Promise.reject({ errMsg: 'unknown error', status: 500 })
 
