@@ -45,50 +45,42 @@
       }
     }
   ],
-  "schemes": [
-    "https",
-    "http"
-  ],
+  "schemes": ["https", "http"],
   "paths": {
     "/api/screen/pre/request": {
       "post": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "后端数据请求",
         "description": "",
         "operationId": "screen_pre_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "url",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"请求地址"
+            "description": "请求地址"
           },
           {
             "name": "method",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"请求方法"
+            "description": "请求方法"
           },
           {
             "name": "header",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"请求头"
+            "description": "请求头"
           },
           {
             "name": "body",
             "in": "body",
             "type": "string",
-            "description":"请求参数",
+            "description": "请求参数",
             "required": true
           }
         ],
@@ -99,40 +91,32 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/pre/leadin": {
       "post": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "导入",
         "description": "",
         "operationId": "screen_pre_leadin",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"文件id"
+            "description": "文件id"
           },
           {
             "name": "type",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"导入类型(screen | model)"
+            "description": "导入类型(screen | model)"
           }
         ],
         "responses": {
@@ -142,40 +126,32 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/pre/export": {
       "post": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "导出",
         "description": "",
         "operationId": "screen_pre_export",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"大屏或模板id"
+            "description": "大屏或模板id"
           },
           {
             "name": "type",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"导出类型(screen | model)"
+            "description": "导出类型(screen | model)"
           }
         ],
         "responses": {
@@ -185,59 +161,51 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/list": {
       "post": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "新增大屏",
         "description": "",
         "operationId": "screen_list_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "name",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"大屏名称"
+            "description": "大屏名称"
           },
           {
             "name": "version",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"版本号"
+            "description": "版本号"
           },
           {
             "name": "description",
             "in": "body",
             "type": "string",
-            "description":"大屏描述"
+            "description": "大屏描述"
           },
           {
             "name": "poster",
             "in": "body",
             "type": "string",
-            "description":"大屏封面",
+            "description": "大屏封面",
             "required": true
           },
           {
             "name": "flag",
             "in": "body",
             "type": "string",
-            "description":"大屏类型",
+            "description": "大屏类型",
             "enum": ["PC", "h5"],
             "required": true
           },
@@ -245,7 +213,7 @@
             "name": "data",
             "in": "body",
             "type": "string",
-            "description":"大屏数据",
+            "description": "大屏数据",
             "required": true
           }
         ],
@@ -256,48 +224,40 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "get": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "大屏列表",
         "description": "",
         "operationId": "screen_list_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "content",
             "in": "query",
             "type": "string",
-            "description":"大屏名称"
+            "description": "大屏名称"
           },
           {
             "name": "flag",
             "in": "query",
             "type": "string",
-            "description":"大屏类型(PC | H5)"
+            "description": "大屏类型(PC | H5)"
           },
           {
             "name": "currPage",
             "in": "query",
             "type": "integer",
-            "description":"当前页"
+            "description": "当前页"
           },
           {
             "name": "pageSize",
             "in": "query",
             "type": "integer",
-            "description":"每页数量"
+            "description": "每页数量"
           }
         ],
         "responses": {
@@ -310,31 +270,23 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "delete": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "删除大屏",
         "description": "",
         "operationId": "screen_list_delete",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
             "required": true,
-            "description":"大屏id"
+            "description": "大屏id"
           }
         ],
         "responses": {
@@ -344,64 +296,56 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "put": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "修改大屏",
         "description": "",
         "operationId": "screen_list_put",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"大屏id"
+            "description": "大屏id"
           },
           {
             "name": "version",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"版本号"
+            "description": "版本号"
           },
           {
             "name": "name",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"大屏名称"
+            "description": "大屏名称"
           },
           {
             "name": "description",
             "in": "body",
             "type": "string",
-            "description":"大屏描述"
+            "description": "大屏描述"
           },
           {
             "name": "poster",
             "in": "body",
             "type": "string",
-            "description":"大屏封面",
+            "description": "大屏封面",
             "required": true
           },
           {
             "name": "flag",
             "in": "body",
             "type": "string",
-            "description":"大屏类型",
+            "description": "大屏类型",
             "enum": ["PC", "h5"],
             "required": true
           },
@@ -409,7 +353,7 @@
             "name": "data",
             "in": "body",
             "type": "string",
-            "description":"大屏数据",
+            "description": "大屏数据",
             "required": true
           }
         ],
@@ -420,33 +364,25 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
-    "/api/screen/media-classify": {
+    "/api/screen/shot": {
       "post": {
-        "tags": [
-          "media"
-        ],
-        "summary": "新增媒体资源分类",
+        "tags": ["screen"],
+        "summary": "新增快照",
         "description": "",
-        "operationId": "screen_media_classify_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "operationId": "screen_shot_post",
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
-            "name": "name",
+            "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"分类名称"
+            "description": "大屏id"
           }
         ],
         "responses": {
@@ -456,42 +392,295 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "get": {
-        "tags": [
-          "media"
-        ],
-        "summary": "媒体资源分类列表",
+        "tags": ["screen"],
+        "summary": "大屏快照列表",
         "description": "",
-        "operationId": "screen_media_classify_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "operationId": "screen_shot_get",
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "content",
             "in": "query",
             "type": "string",
-            "description":"媒体资源名称"
+            "description": "大屏快照名称"
+          },
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "description": "大屏id",
+            "required": true 
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_shot_get"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["screen"],
+        "summary": "删除大屏快照",
+        "description": "",
+        "operationId": "screen_shot_delete",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "大屏快照id"
+          },
+          {
+            "name": "screen",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "大屏id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "put": {
+        "tags": ["screen"],
+        "summary": "更新大屏快照信息",
+        "description": "一些描述信息",
+        "operationId": "screen_shot_put",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "大屏快照id"
+          },
+          {
+            "name": "screen",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "大屏id"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "string",
+            "description": "描述"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/screen/shot/use": {
+      "post": {
+        "tags": ["screen"],
+        "summary": "使用大屏快照",
+        "description": "",
+        "operationId": "screen_shot_use",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "大屏快照id"
+          },
+          {
+            "name": "screen",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "大屏id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "get": {
+        "tags": ["screen"],
+        "summary": "当前大屏快照id",
+        "description": "",
+        "operationId": "screen_shot_use_get",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "大屏id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/screen/shot/cover": {
+      "post": {
+        "tags": ["screen"],
+        "summary": "覆盖大屏快照",
+        "description": "",
+        "operationId": "screen_shot_cover",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "大屏快照id"
+          },
+          {
+            "name": "screen",
+            "in": "body",
+            "type": "string",
+            "description": "大屏id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/screen/shot/detail": {
+      "get": {
+        "tags": ["screen"],
+        "summary": "大屏快照详情",
+        "description": "",
+        "operationId": "screen_shot_detail",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "大屏id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/screen_shot_detail"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/screen/media-classify": {
+      "post": {
+        "tags": ["media"],
+        "summary": "新增媒体资源分类",
+        "description": "",
+        "operationId": "screen_media_classify_post",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description": "分类名称"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "get": {
+        "tags": ["media"],
+        "summary": "媒体资源分类列表",
+        "description": "",
+        "operationId": "screen_media_classify_get",
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "content",
+            "in": "query",
+            "type": "string",
+            "description": "媒体资源名称"
           },
           {
             "name": "currPage",
             "in": "query",
             "type": "integer",
-            "description":"当前页"
+            "description": "当前页"
           },
           {
             "name": "pageSize",
             "in": "query",
             "type": "integer",
-            "description":"每页数量"
+            "description": "每页数量"
           }
         ],
         "responses": {
@@ -504,31 +693,23 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "delete": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "删除媒体资源分类",
         "description": "",
         "operationId": "screen_media_classify_delete",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
             "required": true,
-            "description":"媒体分类id"
+            "description": "媒体分类id"
           }
         ],
         "responses": {
@@ -538,38 +719,30 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "put": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "修改媒体分类",
         "description": "",
         "operationId": "screen_media_classify_put",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"媒体分类id"
+            "description": "媒体分类id"
           },
           {
             "name": "name",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"媒体分类名称"
+            "description": "媒体分类名称"
           }
         ],
         "responses": {
@@ -579,40 +752,32 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/media": {
       "post": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "新增媒体资源",
         "description": "",
         "operationId": "screen_media_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "image",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"媒体资源id"
+            "description": "媒体资源id"
           },
           {
             "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"媒体资源分类id"
+            "description": "媒体资源分类id"
           }
         ],
         "responses": {
@@ -622,43 +787,35 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "get": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "媒体资源列表",
         "description": "",
         "operationId": "screen_media_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "required": true,
             "type": "string",
-            "description":"媒体资源分类名称"
+            "description": "媒体资源分类名称"
           },
           {
             "name": "currPage",
             "in": "query",
             "type": "integer",
-            "description":"当前页"
+            "description": "当前页"
           },
           {
             "name": "pageSize",
             "in": "query",
             "type": "integer",
-            "description":"每页数量"
+            "description": "每页数量"
           }
         ],
         "responses": {
@@ -671,31 +828,23 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "delete": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "summary": "删除媒体资源",
         "description": "",
         "operationId": "screen_media_delete",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
             "required": true,
-            "description":"媒体id"
+            "description": "媒体id"
           }
         ],
         "responses": {
@@ -705,40 +854,32 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/list/pool": {
       "post": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "创建链式大屏保存",
         "description": "",
         "operationId": "screen_pool_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"id"
+            "description": "id"
           },
           {
             "name": "type",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"类型(screen|model)"
+            "description": "类型(screen|model)"
           }
         ],
         "responses": {
@@ -748,30 +889,22 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "get": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "链式大屏保存活跃判断",
         "description": "",
         "operationId": "screen_pool_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
-            "description":"id"
+            "description": "id"
           }
         ],
         "responses": {
@@ -781,51 +914,43 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "put": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "链式修改大屏",
         "description": "",
         "operationId": "screen_pool_put",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"大屏id"
+            "description": "大屏id"
           },
           {
             "name": "version",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"版本号"
+            "description": "版本号"
           },
           {
             "name": "type",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"保存数据类型('component' | 'undo' | 'redo' | 'guideLine' | 'callback' | 'screen')"
+            "description": "保存数据类型('component' | 'undo' | 'redo' | 'guideLine' | 'callback' | 'screen')"
           },
           {
             "name": "action",
             "in": "body",
             "type": "object",
-            "description":"保存的数据",
+            "description": "保存的数据",
             "required": true
           }
         ],
@@ -836,53 +961,45 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/list/pool/model": {
       "put": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "链式修改大屏模板",
         "description": "",
         "operationId": "screen_pool_put",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"大屏模板id"
+            "description": "大屏模板id"
           },
           {
             "name": "version",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"版本号"
+            "description": "版本号"
           },
           {
             "name": "type",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"保存数据类型('component' | 'undo' | 'redo' | 'guideLine' | 'callback' | 'screen')"
+            "description": "保存数据类型('component' | 'undo' | 'redo' | 'guideLine' | 'callback' | 'screen')"
           },
           {
             "name": "action",
             "in": "body",
             "type": "object",
-            "description":"保存的数据",
+            "description": "保存的数据",
             "required": true
           }
         ],
@@ -893,40 +1010,32 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/list/pool/close": {
       "post": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "关闭链式大屏保存",
         "description": "",
         "operationId": "screen_pool_close_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"id"
+            "description": "id"
           },
           {
             "name": "type",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"类型(screen|model)"
+            "description": "类型(screen|model)"
           }
         ],
         "responses": {
@@ -936,39 +1045,31 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/copy": {
       "post": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "大屏复制",
         "description": "",
         "operationId": "screen_copy_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
-            "description":"大屏id",
+            "description": "大屏id",
             "required": true
           },
           {
             "name": "type",
             "in": "body",
             "type": "string",
-            "description":"类型(screen|model)",
+            "description": "类型(screen|model)",
             "required": true
           }
         ],
@@ -979,59 +1080,51 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/model": {
       "post": {
-        "tags": [
-          "model"
-        ],
+        "tags": ["model"],
         "summary": "新增大屏模板",
         "description": "",
         "operationId": "screen_model_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "name",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"大屏模板名称"
+            "description": "大屏模板名称"
           },
           {
             "name": "version",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"版本号"
+            "description": "版本号"
           },
           {
             "name": "description",
             "in": "body",
             "type": "string",
-            "description":"大屏模板描述"
+            "description": "大屏模板描述"
           },
           {
             "name": "poster",
             "in": "body",
             "type": "string",
-            "description":"大屏模板封面",
+            "description": "大屏模板封面",
             "required": true
           },
           {
             "name": "flag",
             "in": "body",
             "type": "string",
-            "description":"大屏模板类型",
+            "description": "大屏模板类型",
             "enum": ["PC", "h5"],
             "required": true
           },
@@ -1039,7 +1132,7 @@
             "name": "data",
             "in": "body",
             "type": "string",
-            "description":"大屏模板数据",
+            "description": "大屏模板数据",
             "required": true
           }
         ],
@@ -1050,48 +1143,40 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "get": {
-        "tags": [
-          "model"
-        ],
+        "tags": ["model"],
         "summary": "大屏模板列表",
         "description": "",
         "operationId": "screen_model_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "content",
             "in": "query",
             "type": "string",
-            "description":"大屏模板名称"
+            "description": "大屏模板名称"
           },
           {
             "name": "flag",
             "in": "query",
             "type": "string",
-            "description":"大屏类型(PC | H5)"
+            "description": "大屏类型(PC | H5)"
           },
           {
             "name": "currPage",
             "in": "query",
             "type": "integer",
-            "description":"当前页"
+            "description": "当前页"
           },
           {
             "name": "pageSize",
             "in": "query",
             "type": "integer",
-            "description":"每页数量"
+            "description": "每页数量"
           }
         ],
         "responses": {
@@ -1104,31 +1189,23 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "delete": {
-        "tags": [
-          "model"
-        ],
+        "tags": ["model"],
         "summary": "删除大屏模板",
         "description": "",
         "operationId": "screen_model_delete",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
             "required": true,
-            "description":"大屏模板id"
+            "description": "大屏模板id"
           }
         ],
         "responses": {
@@ -1138,64 +1215,56 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "put": {
-        "tags": [
-          "model"
-        ],
+        "tags": ["model"],
         "summary": "修改大屏模板",
         "description": "",
         "operationId": "screen_model_put",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"大屏模板id"
+            "description": "大屏模板id"
           },
           {
             "name": "version",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"版本号"
+            "description": "版本号"
           },
           {
             "name": "name",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"大屏模板名称"
+            "description": "大屏模板名称"
           },
           {
             "name": "description",
             "in": "body",
             "type": "string",
-            "description":"大屏模板描述"
+            "description": "大屏模板描述"
           },
           {
             "name": "poster",
             "in": "body",
             "type": "string",
-            "description":"大屏模板封面",
+            "description": "大屏模板封面",
             "required": true
           },
           {
             "name": "flag",
             "in": "body",
             "type": "string",
-            "description":"大屏模板类型",
+            "description": "大屏模板类型",
             "enum": ["PC", "h5"],
             "required": true
           },
@@ -1203,7 +1272,7 @@
             "name": "data",
             "in": "body",
             "type": "string",
-            "description":"大屏模板数据",
+            "description": "大屏模板数据",
             "required": true
           }
         ],
@@ -1214,32 +1283,24 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/detail": {
       "get": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "大屏详情",
         "description": "",
         "operationId": "screen_get_detail",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters":[
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
-            "description":"大屏id",
+            "description": "大屏id",
             "required": true
           }
         ],
@@ -1253,32 +1314,24 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/model/detail": {
       "get": {
-        "tags": [
-          "model"
-        ],
+        "tags": ["model"],
         "summary": "大屏模板详情",
         "description": "",
         "operationId": "screen_get_model_detail",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters":[
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
-            "description":"大屏模板id",
+            "description": "大屏模板id",
             "required": true
           }
         ],
@@ -1292,33 +1345,25 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/share": {
       "get": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "分享地址心跳验证",
         "description": "",
         "operationId": "screen_share_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
             "required": true,
-            "description":"大屏id"
+            "description": "大屏id"
           }
         ],
         "responses": {
@@ -1331,38 +1376,30 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "post": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "分享地址请求",
         "description": "",
         "operationId": "screen_share_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"大屏id"
+            "description": "大屏id"
           },
           {
             "name": "auth",
             "in": "body",
             "type": "string",
             "required": true,
-            "description":"大屏权限",
+            "description": "大屏权限",
             "enum": ["PUBLIC", "PRIVATE"]
           },
           {
@@ -1370,13 +1407,13 @@
             "in": "body",
             "type": "integer",
             "required": true,
-            "description":"有效时间"
+            "description": "有效时间"
           },
           {
             "name": "password",
             "in": "body",
             "type": "string",
-            "description":"密码"
+            "description": "密码"
           }
         ],
         "responses": {
@@ -1386,31 +1423,23 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "delete": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "取消分享",
         "description": "",
         "operationId": "screen_share_delete",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
             "required": true,
-            "description":"大屏id"
+            "description": "大屏id"
           }
         ],
         "responses": {
@@ -1420,33 +1449,25 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/share/valid": {
       "get": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "分享的权限信息获取",
         "description": "",
         "operationId": "screen_share_detail_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
-            "description":"大屏id",
-            "required": true 
+            "description": "大屏id",
+            "required": true
           }
         ],
         "responses": {
@@ -1459,38 +1480,30 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "post": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "大屏权限验证",
         "description": "",
         "operationId": "screen_share_detail_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
-            "description":"大屏id",
-            "required": true 
+            "description": "大屏id",
+            "required": true
           },
           {
             "name": "password",
             "in": "body",
             "type": "string",
-            "description":"大屏密码",
-            "required": true 
+            "description": "大屏密码",
+            "required": true
           }
         ],
         "responses": {
@@ -1500,33 +1513,25 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/preview": {
       "get": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "大屏预览",
         "description": "",
         "operationId": "screen_preview_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
-            "description":"大屏id",
-            "required": true 
+            "description": "大屏id",
+            "required": true
           }
         ],
         "responses": {
@@ -1536,33 +1541,25 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/preview/detail": {
       "get": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "大屏预览检查验证",
         "description": "",
         "operationId": "screen_preview_detail_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
-            "description":"大屏id",
-            "required": true 
+            "description": "大屏id",
+            "required": true
           }
         ],
         "responses": {
@@ -1575,33 +1572,25 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/enable": {
       "put": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "启用大屏",
         "description": "",
         "operationId": "screen_enable_put",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
-            "description":"大屏id",
-            "required": true 
+            "description": "大屏id",
+            "required": true
           }
         ],
         "responses": {
@@ -1611,31 +1600,23 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "delete": {
-        "tags": [
-          "screen"
-        ],
+        "tags": ["screen"],
         "summary": "禁用大屏",
         "description": "",
         "operationId": "screen_enable_delete",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
-            "description":"大屏id",
-            "required": true 
+            "description": "大屏id",
+            "required": true
           }
         ],
         "responses": {
@@ -1645,33 +1626,25 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/model/preview": {
       "get": {
-        "tags": [
-          "model"
-        ],
+        "tags": ["model"],
         "summary": "大屏模板预览",
         "description": "",
         "operationId": "screen_model_preview_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "body",
             "type": "string",
-            "description":"大屏模板id",
-            "required": true 
+            "description": "大屏模板id",
+            "required": true
           }
         ],
         "responses": {
@@ -1681,33 +1654,25 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/model/preview/detail": {
       "get": {
-        "tags": [
-          "model"
-        ],
+        "tags": ["model"],
         "summary": "大屏模板预览检查验证",
         "description": "",
         "operationId": "screen_model_preview_detail_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
-            "description":"大屏模板id",
-            "required": true 
+            "description": "大屏模板id",
+            "required": true
           }
         ],
         "responses": {
@@ -1720,33 +1685,25 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/model/enable": {
       "put": {
-        "tags": [
-          "model"
-        ],
+        "tags": ["model"],
         "summary": "启用大屏模板",
         "description": "",
         "operationId": "screen_model_enable_put",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
-            "description":"大屏模板id",
-            "required": true 
+            "description": "大屏模板id",
+            "required": true
           }
         ],
         "responses": {
@@ -1756,31 +1713,23 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       },
       "delete": {
-        "tags": [
-          "model"
-        ],
+        "tags": ["model"],
         "summary": "禁用大屏模板",
         "description": "",
         "operationId": "screen_model_enable_delete",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
             "in": "query",
             "type": "string",
-            "description":"大屏模板id",
-            "required": true 
+            "description": "大屏模板id",
+            "required": true
           }
         ],
         "responses": {
@@ -1790,46 +1739,38 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/mock": {
       "post": {
-        "tags": [
-          "mock"
-        ],
+        "tags": ["mock"],
         "summary": "大屏mock数据获取",
         "description": "",
         "operationId": "screen_mock_post",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "total",
             "in": "body",
             "type": "integer",
-            "description":"数据总数",
-            "required": true 
+            "description": "数据总数",
+            "required": true
           },
           {
             "name": "fields",
             "in": "body",
             "type": "object",
-            "description":"数据字段({ key: string, dataKind: string })",
-            "required": true 
+            "description": "数据字段({ key: string, dataKind: string })",
+            "required": true
           },
           {
             "name": "random",
             "in": "body",
             "type": "string",
-            "description":"是否随机获取(0,1)"
+            "description": "是否随机获取(0,1)"
           }
         ],
         "responses": {
@@ -1839,26 +1780,18 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/screen/mock/params": {
       "get": {
-        "tags": [
-          "mock"
-        ],
+        "tags": ["mock"],
         "summary": "大屏mock数据参数类型",
         "description": "",
         "operationId": "screen_mock_params_get",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "responses": {
           "200": {
             "description": "成功",
@@ -1869,10 +1802,7 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
@@ -1889,7 +1819,7 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"object",
+              "type": "object",
               "properties": {
                 "_id": {
                   "type": "string"
@@ -2007,7 +1937,68 @@
         "name": "screen_media_get"
       }
     },
-    "screen_list_get" : {
+    "screen_shot_get": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "isUse": {
+                    "type": "boolean",
+                    "description": "是否正在使用"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "大屏名称"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "描述"
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "用户名"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "description": "头像"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "screen_shot_get"
+      }
+    },
+    "screen_shot_detail": {
+      "$ref": "#/definitions/screen_get_detail",
+      "xml": {
+        "name": "screen_model_get"
+      }
+    },
+    "screen_list_get": {
       "type": "object",
       "properties": {
         "success": {
@@ -2027,7 +2018,7 @@
                   "flag": {
                     "type": "string",
                     "description": "大屏类型",
-                    "enum": [ "PC", "H5" ]
+                    "enum": ["PC", "H5"]
                   },
                   "name": {
                     "type": "string",
@@ -2058,7 +2049,7 @@
                     "type": "object",
                     "description": "是否启用"
                   },
-                  "poster" : {
+                  "poster": {
                     "type": "integer",
                     "description": "封面"
                   },
@@ -2081,19 +2072,19 @@
       }
     },
     "screen_model_get": {
-      "$ref":"#/definitions/screen_list_get",
+      "$ref": "#/definitions/screen_list_get",
       "xml": {
         "name": "screen_model_get"
       }
     },
     "screen_get_model_detail": {
-      "$ref":"#/definitions/screen_get_detail",
+      "$ref": "#/definitions/screen_get_detail",
       "xml": {
         "name": "screen_model_get"
       }
     },
     "screen_model_preview_detail_get": {
-      "$ref":"#/definitions/screen_preview_detail_get",
+      "$ref": "#/definitions/screen_preview_detail_get",
       "xml": {
         "name": "screen_model_preview_detail_get"
       }
@@ -2108,7 +2099,7 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"boolean",
+              "type": "boolean",
               "description": "是否正确"
             }
           }
@@ -2118,7 +2109,7 @@
         "name": "screen_preview_detail_get"
       }
     },
-    "screen_share_get" :{
+    "screen_share_get": {
       "type": "object",
       "properties": {
         "success": {
@@ -2128,7 +2119,7 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"boolean",
+              "type": "boolean",
               "description": "是否验证通过"
             }
           }
@@ -2148,7 +2139,7 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"object",
+              "type": "object",
               "properties": {
                 "data": {
                   "type": "object",
@@ -2156,7 +2147,7 @@
                     "auth": {
                       "type": "string",
                       "description": "权限类型",
-                      "enum": [ "PUBLIC", "PRIVATE" ]
+                      "enum": ["PUBLIC", "PRIVATE"]
                     },
                     "password": {
                       "type": "string",
@@ -2191,7 +2182,7 @@
           "type": "object",
           "properties": {
             "data": {
-              "type":"object",
+              "type": "object",
               "properties": {
                 "data": {
                   "type": "array",

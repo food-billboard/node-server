@@ -1262,6 +1262,27 @@ const ScreenMediaSchema = new Schema({
   minimize: false
 })
 
+const ScreenShotSchema = new Schema({
+  screen: {
+    type: ObjectId,
+    ref: 'screen'
+  },
+  user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  description: {
+    type: String
+  },
+  data: {
+    type: String,
+    required: true 
+  }
+}, {
+  ...defaultConfig,
+  minimize: false
+})
+
 const LanguageSchema = new Schema({
   name: {
     type: String,
@@ -1704,7 +1725,11 @@ const ScreenSchema = new Schema({
   },
   name: String,
   poster: String,
-  description: String 
+  description: String,
+  screen_shot: {
+    type: ObjectId,
+    ref: 'screen_shot'
+  }
 }, {
   ...defaultConfig
 })
@@ -1952,6 +1977,7 @@ const ThirdPartyModel = model('third_party', ThirdPartySchema)
 const RaspberryModel = model('raspberry', RaspberrySchema)
 const ScreenMediaClassifyModel = model('screen_media_classify', ScreenMediaClassifySchema)
 const ScreenMediaModel = model('screen_media', ScreenMediaSchema)
+const ScreenShotModel = model('screen_shot', ScreenShotSchema)
 
 module.exports = {
   UserModel,
@@ -1987,6 +2013,7 @@ module.exports = {
   RaspberryModel,
   ScreenMediaClassifyModel,
   ScreenMediaModel,
+  ScreenShotModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -2019,5 +2046,6 @@ module.exports = {
   ThirdPartySchema,
   RaspberrySchema,
   ScreenMediaClassifySchema,
-  ScreenMediaSchema
+  ScreenMediaSchema,
+  ScreenShotSchema
 }

@@ -30,6 +30,7 @@ const {
   ScreenModal,
   mergeConfig,
   FriendsModel,
+  ScreenShotModel,
   ROOM_USER_NET_STATUS,
   MESSAGE_MEDIA_TYPE,
   ROOM_TYPE,
@@ -627,6 +628,23 @@ function mockCreateScreenMedia(values={}) {
   return { model }
 }
 
+// 创建大屏快照资源
+function mockCreateScreenShot(values={}) {
+  let baseModel = {
+    image: ObjectId('8f63270f005f1c1a0d9448ca'),
+    classify: ObjectId('8f63270f005f1c1a0d9448ca'),
+    screen: ObjectId('8f63270f005f1c1a0d9448ca'),
+    user: ObjectId('8f63270f005f1c1a0d9448ca'),
+    description: '测试描述',
+    data: "{}"
+  }
+  baseModel = mergeConfig(baseModel, values, true)
+
+  const model = new ScreenShotModel(baseModel)
+
+  return { model }
+}
+
 //创建第三方接口
 function mockCreateThird(values={}) {
   let baseModel = {
@@ -872,5 +890,6 @@ module.exports = {
   mockCreateThird,
   mockCreateRaspberryPackage,
   mockCreateScreenMediaClassify,
-  mockCreateScreenMedia
+  mockCreateScreenMedia,
+  mockCreateScreenShot
 }
