@@ -8,7 +8,8 @@ const {
   verifyTokenToData,
   ScreenModal,
   parseData,
-  MAX_SCREEN_SHOT_COUNT
+  MAX_SCREEN_SHOT_COUNT,
+  loginAuthorization
 } = require('@src/utils')
 const { Types: { ObjectId } } = require('mongoose')
 
@@ -24,6 +25,79 @@ const checkParams = (ctx, ...params) => {
 }
 
 router
+  // 快照详情
+  .get('/detail', async (ctx) => {
+    const check = Params.query(ctx, {
+      name: '_id',
+      validator: [
+        data => ObjectId.isValid(data)
+      ]
+    })
+
+    if (check) return
+
+    const { request: { query: { _id } } } = ctx
+    
+    let originSCreenData 
+
+    const data = await ScreenModal.findOne({
+      _id: ObjectId(_id)
+    })
+      .select({
+        screen_shot: 1,
+        _id: 1,
+        data: 1,
+        name: 1,
+        poster: 1,
+        description: 1,
+        version: 1
+      })
+      .exec()
+      .then(notFound)
+      .then(data => {
+        originSCreenData = data 
+        const { screen_shot } = data 
+        return ScreenShotModel.findOne({
+          _id: ObjectId(screen_shot)
+        })
+        .select({
+          _id: 1,
+          data: 1,
+        })
+        .exec()
+        .then(parseData)
+      })
+      .then(data => {
+        if(!data) {
+          const { data, ...nextData } = originSCreenData
+          return {
+            data: {
+              ...nextData,
+              components: JSON.parse(data)
+            }
+          }
+        }
+        const { data: screenData } = data 
+          const objectScreenData = JSON.parse(screenData)
+          const { data: components, ...nextScreenData } = objectScreenData
+          return {
+            data: {
+              ...nextScreenData,
+              components: JSON.parse(components)
+            }
+          }
+      })
+      .catch(dealErr(ctx))
+
+    responseDataDeal({
+      ctx,
+      data,
+      needCache: false
+    })
+
+
+  })
+  .use(loginAuthorization())
   // 快照列表
   .get('/', async (ctx) => {
 
@@ -480,53 +554,6 @@ router
       data,
       needCache: false
     })
-
-  })
-  // 快照详情
-  .get('/detail', async (ctx) => {
-    const check = Params.query(ctx, {
-      name: '_id',
-      validator: [
-        data => ObjectId.isValid(data)
-      ]
-    })
-
-    if (check) return
-
-    const { request: { query: { _id } } } = ctx
-
-    const [, token] = verifyTokenToData(ctx)
-    const { id } = token
-
-    const data = await ScreenShotModel.findOne({
-      user: ObjectId(id),
-      _id: ObjectId(_id)
-    })
-      .select({
-        _id: 1,
-        data: 1,
-      })
-      .exec()
-      .then(notFound)
-      .then(data => {
-        const { data: screenData } = data 
-        const objectScreenData = JSON.parse(screenData)
-        const { data: components, ...nextScreenData } = objectScreenData
-        return {
-          data: {
-            ...nextScreenData,
-            components: JSON.parse(components)
-          }
-        }
-      })
-      .catch(dealErr(ctx))
-
-    responseDataDeal({
-      ctx,
-      data,
-      needCache: false
-    })
-
 
   })
 

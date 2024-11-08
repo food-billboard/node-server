@@ -63,9 +63,9 @@ router
 .use('/model', Model.routes(), Model.allowedMethods())
 .use('/detail', Detail.routes(), Detail.allowedMethods())
 .use('/share', Share.routes(), Share.allowedMethods())
+.use('/shot', screenShot.routes(), screenShot.allowedMethods())
 //登录判断
 .use(loginAuthorization())
-.use('/shot', screenShot.routes(), screenShot.allowedMethods())
 .use('/media-classify', mediaClassify.routes(), mediaClassify.allowedMethods())
 .use('/media', media.routes(), media.allowedMethods())
 .use('/preview', Preview.routes(), Preview.allowedMethods())

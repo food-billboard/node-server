@@ -1,8 +1,8 @@
 require('module-alias/register')
-const mongoose = require('mongoose')
 const { 
   UserModel, 
-  ScreenShotModel
+  ScreenShotModel,
+  ScreenModal
 } = require('@src/utils')
 const { expect } = require('chai')
 const { 
@@ -10,9 +10,8 @@ const {
   commonValidate, 
   mockCreateUser, 
   mockCreateScreenShot,
+  mockCreateScreen
 } = require('@test/utils')
-
-const { Types: { ObjectId } } = mongoose
 
 const COMMON_API = '/api/screen/shot/detail'
 
@@ -41,6 +40,7 @@ describe(`${COMMON_API} test`, () => {
   let userInfo
   let selfToken
   let shotId
+  let screenId
   let getToken
 
   before(function(done) {
@@ -55,12 +55,20 @@ describe(`${COMMON_API} test`, () => {
     .then((user) => {
       userInfo = user 
       selfToken = getToken(userInfo._id)
+      const { model } = mockCreateScreen({
+        user: userInfo._id,
+        name: COMMON_API
+      })
+      return model.save()
+    })
+    .then(screen => {
+      screenId = screen._id 
       const { model: shot } = mockCreateScreenShot({
-        screen: ObjectId('8f63270f005f1c1a0d9448ca'),
+        screen: screenId,
         user: userInfo._id,
         description: COMMON_API,
         data: JSON.stringify({
-          _id: '8f63270f005f1c1a0d9448ca',
+          _id: screenId.toString(),
           data: JSON.stringify({ a: 1 }),
           name: COMMON_API,
           poster: COMMON_API,
@@ -72,6 +80,15 @@ describe(`${COMMON_API} test`, () => {
     })
     .then((shot) => {
       shotId = shot._id 
+      return ScreenModal.updateOne({
+        _id: screenId 
+      }, {
+        $set: {
+          screen_shot: shotId
+        }
+      })
+    })
+    .then(() => {
       done()
     })
     .catch(err => {
@@ -87,9 +104,10 @@ describe(`${COMMON_API} test`, () => {
         username: COMMON_API
       }),
       ScreenShotModel.deleteMany({
-        user: {
-          $in: [userInfo._id]
-        }
+        user: userInfo._id
+      }),
+      ScreenModal.deleteMany({
+        user: userInfo._id
       })
     ])
     .then(_ => {
@@ -112,7 +130,7 @@ describe(`${COMMON_API} test`, () => {
         Authorization: `Basic ${selfToken}`
       })
       .query({
-        _id: shotId.toString()
+        _id: screenId.toString()
       })
       .expect(200)
       .expect('Content-Type', /json/)
