@@ -291,7 +291,6 @@ router
   const data = await ScreenModal.updateOne({
     _id: ObjectId(_id),
     user: ObjectId(id),
-    enable: false 
   }, {
     $set: {
       description,

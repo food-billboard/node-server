@@ -129,7 +129,6 @@ router
 				.findOne({
 					_id: ObjectId(_id),
 					user: ObjectId(id),
-					enable: false,
 				})
 				.select({
 					data: 1,
@@ -189,7 +188,6 @@ router
 		return ScreenModal.updateOne({
 			_id: ObjectId(_id),
 			user: ObjectId(id),
-			enable: false 
 		}, {
 			$set: {
 				description,
