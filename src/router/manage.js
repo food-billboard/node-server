@@ -48,6 +48,10 @@ const STATIC_PAGE_MAP = [
     path: "blog"
   },
   {
+    regexp: /(?<=.+\/simple-practice\/).+$/,
+    path: "blog"
+  },
+  {
     regexp: /(?<=.+\/swagger\/).+$/,
     path: "api-docs"
   },
