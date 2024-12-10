@@ -4,7 +4,7 @@ networks:
     driver: bridge
 services:
   ffmpeg:
-    image: jrottenberg/ffmpeg:4.1-centos
+    image: jrottenberg/ffmpeg:7.1-scratch
     container_name: ffmpeg 
   # node-media-server:
   #   image: illuspas/node-media-server:latest

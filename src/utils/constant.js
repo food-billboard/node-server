@@ -6,7 +6,7 @@ const PRODUCTION_DOMAIN = process.env.SERVICE_IP
 // const PRODUCTION_DOMAIN = "www.glfswy.top"
 const PRODUCTION_API_DOMAIN = `http://${PRODUCTION_DOMAIN}`
 
-const FFMPEG_VERSION = "jrottenberg/ffmpeg:4.1-centos"
+const FFMPEG_VERSION = "jrottenberg/ffmpeg:7.1-scratch"
 
 const EMAIL_AUTH = {
   pass: 'hgldcifqqwmlbajd',

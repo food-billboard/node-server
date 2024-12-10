@@ -103,7 +103,7 @@ router
       .then(data => {
         // 视频截图  
         return new Promise((resolve, reject) => {
-          const cmd = `docker run -v ${STATIC_FILE_PATH_NO_WRAPPER}:/run/project ${FFMPEG_VERSION} -ss ${time} -i ${path.join("/run/project", data.src)} -y -f image2 -t 0.001 ${path.join("/run/project/static/image", `/${posterName}${suffix}`)}`
+          const cmd = `docker run --rm -v ${STATIC_FILE_PATH_NO_WRAPPER}:/run/project ${FFMPEG_VERSION} -ss ${time} -i ${path.join("/run/project", data.src)} -y -f image2 -t 0.001 ${path.join("/run/project/static/image", `/${posterName}${suffix}`)}`
           exec(cmd, function(err) {
             if(err) {
               reject({
