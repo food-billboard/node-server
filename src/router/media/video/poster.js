@@ -18,7 +18,8 @@ const {
   MEDIA_ORIGIN_TYPE, 
   MEDIA_STATUS,
   fileEncoded,
-  FFMPEG_VERSION
+  FFMPEG_VERSION,
+  isRaspberry
 } = require('@src/utils')
 
 const router = new Router()
@@ -103,7 +104,13 @@ router
       .then(data => {
         // 视频截图  
         return new Promise((resolve, reject) => {
-          const cmd = `docker run --rm -v ${STATIC_FILE_PATH_NO_WRAPPER}:/run/project ${FFMPEG_VERSION} -ss ${time} -i ${path.join("/run/project", data.src)} -y -f image2 -t 0.001 ${path.join("/run/project/static/image", `/${posterName}${suffix}`)}`
+          let cmd = ''
+          // 树莓派环境
+          if(isRaspberry()) {
+            cmd = `ffmpeg -ss ${time} -i ${path.join(STATIC_FILE_PATH_NO_WRAPPER, data.src)} -y -f image2 -t 0.001 ${path.join(STATIC_FILE_PATH_NO_WRAPPER, "/static/image", `/${posterName}${suffix}`)}`
+          }else {
+            cmd = `docker run --rm -v ${STATIC_FILE_PATH_NO_WRAPPER}:/run/project ${FFMPEG_VERSION} -ss ${time} -i ${path.join("/run/project", data.src)} -y -f image2 -t 0.001 ${path.join("/run/project/static/image", `/${posterName}${suffix}`)}`
+          }          
           exec(cmd, function(err) {
             if(err) {
               reject({

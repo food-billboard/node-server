@@ -5,6 +5,7 @@ var isoWeek = require('dayjs/plugin/isoWeek')
 const { pick } = require('lodash')
 const { Types: { ObjectId } } = require('mongoose')
 const fs = require('fs')
+const os = require('os')
 const { DIR_LIST, PRODUCTION_DOMAIN, API_DOMAIN, RASPBERRY_ENV_NAME } = require('./constant')
 
 const fsPromise = fs.promises
@@ -264,7 +265,13 @@ function sleep(time=1000) {
   return new Promise(resolve => setTimeout(resolve, time))
 }
 
+// 判断是否为树莓派环境
+function isRaspberry() {
+  return process.cwd().startsWith('/home/raspberry')
+}
+
 module.exports = {
+  isRaspberry,
   sleep,
   isType,
   isEmpty,
