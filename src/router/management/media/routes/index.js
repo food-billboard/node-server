@@ -265,6 +265,8 @@ router
     ...(type == 1) ? videoConfig : [],
     {
       $project: {
+        file_name: 1,
+        description: 1,
         _id: 1,
         createdAt: 1,
         updatedAt: 1,
@@ -360,6 +362,36 @@ router
           done: true,
           data: {
             name: data
+          }
+        }
+        return {
+          done: false
+        }
+      }
+    ]
+  }, {
+    name: 'file_name',
+    sanitizers: [
+      data => {
+        if(typeof data === 'string' && !!data.length) return {
+          done: true,
+          data: {
+            file_name: data
+          }
+        }
+        return {
+          done: false
+        }
+      }
+    ]
+  }, {
+    name: 'description',
+    sanitizers: [
+      data => {
+        if(typeof data === 'string' && !!data.length) return {
+          done: true,
+          data: {
+            description: data
           }
         }
         return {

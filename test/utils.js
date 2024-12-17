@@ -251,6 +251,8 @@ function mockCreateDistrict(values={}) {
 //创建图片
 function mockCreateImage(values={}) {
   let baseModel = {
+    file_name: '测试图片名称',
+    description: '测试图片描述',
     name: '测试图片名称',
     src: '测试地址' + Math.random(),
     auth: 'PUBLIC',
@@ -271,9 +273,11 @@ function mockCreateImage(values={}) {
   return { model }
 }
 
-//创建图片
+//创建其他资源
 function mockCreateOtherMedia(values={}) {
   let baseModel = {
+    file_name: '测试其他媒体名称',
+    description: '测试其他媒体描述',
     name: '测试其他媒体名称',
     src: '测试地址' + Math.random(),
     auth: 'PUBLIC',
@@ -313,6 +317,8 @@ async function mockCreateRealVideo(values={}) {
 
   return {
     ...mockCreateVideo(mergeConfig({
+      file_name: '测试视频名称',
+      description: '测试视频描述',
       src,
       info: {
         mime: mime.getType(filename),

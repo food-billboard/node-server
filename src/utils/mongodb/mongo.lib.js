@@ -1337,6 +1337,12 @@ const VideoSchema = new Schema({
     uppercase: true,
     get: function(v) { return v ? v.toLowerCase() : v }
   },
+  description: {
+    type: String 
+  },
+  file_name: {
+    type: String
+  },
   origin: {
     type: ObjectId,
     ref: 'user'
@@ -1424,6 +1430,12 @@ const ImageSchema = new Schema({
     uppercase: true,
     get: function(v) { return v ? v.toLowerCase() : v }
   },
+  description: {
+    type: String 
+  },
+  file_name: {
+    type: String
+  },
   info: {
     md5: {
       type: String,
@@ -1468,6 +1480,12 @@ const OtherMediaSchema = new Schema({
     required: true,
     unique: true,
     get: formatMediaUrl
+  },
+  description: {
+    type: String 
+  },
+  file_name: {
+    type: String
   },
   origin_type: {
     required: true,

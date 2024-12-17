@@ -2272,7 +2272,7 @@
           {
             "name": "upload-metadata",
             "in": "header",
-            "description": "上传相关信息，以','分隔的 'key value' 格式的字符串，value用base64编码，当前包括( md5-文件加密标识符, auth-权限, size-文件大小, mime-文件类型, name-文件名称, chunk-分片大小 )",
+            "description": "上传相关信息，以','分隔的 'key value' 格式的字符串，value用base64编码，当前包括( md5-文件加密标识符, auth-权限, size-文件大小, mime-文件类型, name-文件名称, chunk-分片大小, file_name-文件名称, description-文件描述 )",
             "type": "string"
           },
           {

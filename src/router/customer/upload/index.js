@@ -56,6 +56,14 @@ const METADATA = {
   'name': {
     validator: () => true,
     sanitizers: data => data.slice(0, 20)
+  },
+  'file_name': {
+    validator: () => true,
+    sanitizers: data => data.slice(0, 20)
+  },
+  'description': {
+    validator: () => true,
+    sanitizers: data => data.slice(0, 100)
   }
 }
 

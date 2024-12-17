@@ -26,12 +26,14 @@ const headRequestMediaDeal = {
     user
   }) => {
   
-    const { md5, auth, size, mime, name, chunk } = metadata
+    const { md5, auth, size, mime, name, chunk, file_name, description } = metadata
     const { roles, _id } = user
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
 
   
     const defaultModel = {
+      file_name, 
+      description,
       name: name || md5,
       src: path.join('/static', 'image', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
@@ -139,11 +141,13 @@ const headRequestMediaDeal = {
     metadata,
     user
   }) => {
-    const { md5, auth, size, mime, name, chunk } = metadata
+    const { md5, auth, size, mime, name, chunk, file_name, description } = metadata
     const { roles, _id } = user
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
 
     const defaultModel = {
+      file_name, 
+      description,
       name: name || md5,
       src: path.join('/static', 'video', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,
@@ -235,11 +239,13 @@ const headRequestMediaDeal = {
     metadata,
     user
   }) => {
-    const { md5, auth, size, mime, name, chunk } = metadata
+    const { md5, auth, size, mime, name, chunk, file_name, description } = metadata
     const { roles, _id } = user
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
   
     const defaultModel = {
+      file_name, 
+      description,
       name: name || md5,
       src: path.join('/static', 'other', `${md5}.${Mime.getExtension(mime)}`),
       origin_type,

@@ -3346,7 +3346,7 @@
       },
       "put": {
         "tags": ["media"],
-        "summary": "修改专题",
+        "summary": "修改媒体资源信息",
         "description": "",
         "operationId": "manage_instance_put_special",
         "produces": ["application/xml", "application/json"],
@@ -3370,6 +3370,18 @@
             "name": "name",
             "in": "body",
             "description": "名称",
+            "type": "string"
+          },
+          {
+            "name": "file_name",
+            "in": "body",
+            "description": "文件名称",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "description": "文件描述",
             "type": "string"
           },
           {
@@ -7464,6 +7476,14 @@
                       "src": {
                         "type": "string",
                         "description": "地址"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "description": "文件名称"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "文件描述"
                       },
                       "poster": {
                         "type": "string",
