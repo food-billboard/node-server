@@ -276,6 +276,9 @@ function scheduleMethod({
   test=false
 }={}) {
 
+  // ? 暂时不要去删除文件
+  return 
+
   console.log(chalk.yellow(CacheJson.unUseMediaSchedule.description))
 
   return Promise.all([

@@ -17,7 +17,7 @@ const {
   MEDIA_AUTH,
   parseUrl,
 } = require('@src/utils')
-const { headRequestDeal, patchRequestDeal, postMediaDeal, postRequstDeal } = require('./utils')
+const { headRequestDeal, patchRequestDeal, postMediaDeal, postRequestDeal } = require('./utils')
 
 const models = [ImageModel, VideoModel, OtherMediaModel]
 
@@ -208,7 +208,10 @@ router
     ]
   })
 
-  if(check || !!metadataKey.length) {
+  if(check) {
+    return 
+  }
+  if(!!metadataKey.length) {
     return ctx.status = 404
   }
 
@@ -264,7 +267,7 @@ router
 
 })
 //文件上传-小程序
-.post('/weapp', postFile.bind(this, postRequstDeal))
+.post('/weapp', postFile.bind(this, postRequestDeal))
 //分片上传
 .patch('/', postFile.bind(this, patchRequestDeal))
 //restore|load ?load=...

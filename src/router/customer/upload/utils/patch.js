@@ -447,7 +447,7 @@ const patchRequestDeal = async (options) => {
   const { ctx } = options
 
   return promiseAny(Object.values(pathMediaDeal).map(deal => deal(options)))
-  .then(({
+  .then(async ({
     folder,
     filePath,
     realFilePath,
@@ -510,10 +510,10 @@ const patchRequestDeal = async (options) => {
 
 }
 
-const postRequstDeal = patchRequestDeal
+const postRequestDeal = patchRequestDeal
 
 module.exports = {
   patchRequestDeal,
-  postRequstDeal,
+  postRequestDeal,
   getChunkFileList
 }
