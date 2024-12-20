@@ -21,6 +21,14 @@
       }
     },
     {
+      "name": "eat_what",
+      "description": "今天吃什么相关",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
       "name": "customer",
       "description": "用户相关",
       "externalDocs": {
@@ -111,6 +119,285 @@
               "name": "response",
               "items": {
                 "$ref": "#/definitions/user_get_barrage"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/user/eat_what": {
+      "get": {
+        "tags": [
+          "eat_what"
+        ],
+        "summary": "获取今天吃什么列表",
+        "description": "",
+        "operationId": "user_get_eat_list",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "date",
+            "description": "日期",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "content",
+            "description": "模糊查询",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "menu_type",
+            "description": "餐别类型",
+            "type": "string",
+            "enum": ["BREAKFAST", "LUNCH", "DINNER", "NIGHT_SNACK"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "array",
+              "name": "response",
+              "items": {
+                "$ref": "#/definitions/user_get_eat_list"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "eat_what"
+        ],
+        "summary": "新增今天吃什么",
+        "description": "",
+        "operationId": "user_post_eat_list",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "title",
+            "description": "标题",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "description",
+            "description": "描述",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "date",
+            "description": "日期",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "content",
+            "description": "内容",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "menu_type",
+            "description": "餐别类型",
+            "type": "string",
+            "enum": ["BREAKFAST", "LUNCH", "DINNER", "NIGHT_SNACK"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+     "put": {
+        "tags": [
+          "eat_what"
+        ],
+        "summary": "新增今天吃什么",
+        "description": "",
+        "operationId": "user_put_eat_list",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "_id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "title",
+            "description": "标题",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "description",
+            "description": "描述",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "date",
+            "description": "日期",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "content",
+            "description": "内容",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "menu_type",
+            "description": "餐别类型",
+            "type": "string",
+            "enum": ["BREAKFAST", "LUNCH", "DINNER", "NIGHT_SNACK"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "eat_what"
+        ],
+        "summary": "获取今天吃什么列表",
+        "description": "",
+        "operationId": "user_delete_eat_list",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "_id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/user/eat_what/detail": {
+      "get": {
+        "tags": [
+          "eat_what"
+        ],
+        "summary": "获取今天吃什么详情",
+        "description": "",
+        "operationId": "user_get_eat_detail",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "_id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "array",
+              "name": "response",
+              "items": {
+                "$ref": "#/definitions/user_get_eat_detail"
               }
             }
           }
@@ -1655,6 +1942,105 @@
       },
       "xml": {
         "name": "customer_get_barrage"
+      }
+    },
+    "user_get_eat_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "标题"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "内容"
+                },
+                "menu_type": {
+                  "type": "string",
+                  "description": "餐别类型"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format":"date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format":"date-time"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "user_get_eat_list"
+      }
+    },
+    "user_get_eat_detail": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "标题"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "描述"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "内容"
+                  },
+                  "menu_type": {
+                    "type": "string",
+                    "description": "餐别类型"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format":"date-time"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format":"date-time"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "user_get_eat_detail"
       }
     },
     "user_get_customer": {

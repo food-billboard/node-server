@@ -13,6 +13,7 @@ const {
   MOVIE_SOURCE_TYPE, 
   ROLES_MAP, 
   FEEDBACK_STATUS, 
+  EAT_WHAT_MENU_TYPE,
   COMMENT_SOURCE_TYPE, 
   MEDIA_STATUS, 
   MEDIA_AUTH,  
@@ -1585,6 +1586,32 @@ const FeedbackSchema = new Schema({
   ...defaultConfig
 })
 
+const EatWhatSchema = new Schema({
+  user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  content: {
+    type: String,
+  },
+  description: {
+    type: String,
+  },
+  title: {
+    type: String,
+  },
+  menu_type: {
+    type: String,
+    enum: Object.keys(EAT_WHAT_MENU_TYPE),
+    default: 'BREAKFAST'
+  },
+  date: {
+    type: String 
+  },
+}, {
+  ...defaultConfig
+})
+
 const AuthSchema = new Schema({
   roles: [{
     required: true,
@@ -1983,6 +2010,7 @@ const OtherMediaModel = model('other_media', OtherMediaSchema)
 const FeedbackModel = model('feedback', FeedbackSchema)
 const BarrageModel = model('barrage', BarrageSchema)
 const AuthModel = model('auth', AuthSchema)
+const EatWhatModel = model('eat_what', EatWhatSchema)
 const BehaviourModel = model('behaviour', BehaviourSchema)
 const FriendsModel = model('friend', FriendsSchema)
 const MemberModel = model('member', MemberSchema)
@@ -2032,6 +2060,7 @@ module.exports = {
   ScreenMediaClassifyModel,
   ScreenMediaModel,
   ScreenShotModel,
+  EatWhatModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -2065,5 +2094,6 @@ module.exports = {
   RaspberrySchema,
   ScreenMediaClassifySchema,
   ScreenMediaSchema,
-  ScreenShotSchema
+  ScreenShotSchema,
+  EatWhatSchema
 }

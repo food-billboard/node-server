@@ -88,6 +88,13 @@ const FEEDBACK_STATUS = {
   DEAL: 'DEAL'
 }
 
+const EAT_WHAT_MENU_TYPE = {
+  BREAKFAST: 'BREAKFAST',
+  LUNCH: 'LUNCH',
+  DINNER: 'DINNER',
+  NIGHT_SNACK: 'NIGHT_SNACK'
+}
+
 const COMMENT_SOURCE_TYPE = {
   movie: 'movie', 
   comment: 'comment'
@@ -273,6 +280,7 @@ module.exports = {
   MOVIE_SOURCE_TYPE,
   ROLES_MAP,
   FEEDBACK_STATUS,
+  EAT_WHAT_MENU_TYPE,
   COMMENT_SOURCE_TYPE,
   MEDIA_STATUS,
   MEDIA_AUTH,
