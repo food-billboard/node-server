@@ -19,8 +19,12 @@ router
     name: 'date',
     sanitizers: [
       function(data) {
-        const date = dayjs(data)
-        return date.isValid() ? date.format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD')
+        const [start, end] = (data || '').split(',').map(item => item.trim())
+        try {
+          return [dayjs(start).toDate(), dayjs(end).toDate()]
+        }catch(err) {
+          return [dayjs().toDate(), dayjs().toDate()]
+        }
       }
     ]
   }, {
@@ -31,10 +35,13 @@ router
       }
     ]
   })
-  const { content } = ctx.query 
+  const { content, currPage, pageSize } = ctx.query 
 
   let findQuery = {
-    date
+    date: {
+      $lte: date[1],
+      $gte: date[0]
+    }
   }
   if(content) {
     findQuery = {
@@ -66,27 +73,59 @@ router
   }
 
   //database
-  const data = await EatWhatModel.aggregate([
-    {
-      $match: findQuery
-    },
-    {
-      $project: {
-        _id: 1,
-        content: 1,
-        description: 1,
-        title: 1,
-        menu_type: 1,
-        date: 1,
-        createdAt: 1,
-        updatedAt: 1,
+  const data = await Promise.all([
+    EatWhatModel.aggregate([
+      {
+        $match: findQuery
+      },
+      ...(typeof currPage !== 'undefined' ? [
+        {
+          $skip: currPage * pageSize
+        },
+        {
+          $limit: +pageSize
+        },
+      ] : []),
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1
+          }
+        }
       }
-    }
+    ]),
+    EatWhatModel.aggregate([
+      {
+        $match: findQuery
+      },
+      ...(typeof currPage !== 'undefined' ? [
+        {
+          $skip: currPage * pageSize
+        },
+        {
+          $limit: +pageSize
+        },
+      ] : []),
+      {
+        $project: {
+          _id: 1,
+          content: 1,
+          description: 1,
+          title: 1,
+          menu_type: 1,
+          date: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        }
+      }
+    ])
   ])
-  .then(data => {
+  .then(([total, data]) => {
     return {
       data: {
         list: data,
+        total: !!total.length ? total[0].total || 0 : 0,
       }
     }
   })
@@ -105,11 +144,6 @@ router
       validator: [
         data => !!data
       ]
-    }, {
-      name: 'content',
-      validator: [
-        data => !!data 
-      ]
     })
     if(check) return
   
@@ -117,7 +151,7 @@ router
       name: 'date',
       sanitizers: [
         function(data) {
-          return dayjs(data).isValid() ? dayjs(data).format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD')
+          return dayjs(data).isValid() ? dayjs(data).toDate() : dayjs().toDate()
         }
       ]
     }, {
@@ -160,11 +194,6 @@ router
         data => !!data
       ]
     }, {
-      name: 'content',
-      validator: [
-        data => !!data 
-      ]
-    }, {
       name: '_id',
       validator: [
         data => ObjectId.isValid(data) 
@@ -176,7 +205,7 @@ router
       name: 'date',
       sanitizers: [
         function(data) {
-          return dayjs(data).isValid() ? dayjs(data).format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD')
+          return dayjs(data).isValid() ? dayjs(data).toDate() : dayjs().toDate()
         }
       ]
     }, {

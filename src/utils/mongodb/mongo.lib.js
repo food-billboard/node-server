@@ -1606,7 +1606,7 @@ const EatWhatSchema = new Schema({
     default: 'BREAKFAST'
   },
   date: {
-    type: String 
+    type: Date 
   },
 }, {
   ...defaultConfig

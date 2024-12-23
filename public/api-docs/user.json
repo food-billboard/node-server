@@ -165,6 +165,18 @@
           },
           {
             "in": "query",
+            "name": "pageSize",
+            "description": "每页数量",
+            "type": "integer"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "in": "query",
             "name": "menu_type",
             "description": "餐别类型",
             "type": "string",
