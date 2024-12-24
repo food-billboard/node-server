@@ -25,7 +25,7 @@ router
       name: 'menu_type',
       sanitizers: [
         function(data) {
-          return EAT_WHAT_MENU_TYPE[data] || EAT_WHAT_MENU_TYPE.BREAKFAST
+          return data.split(',').map(item => EAT_WHAT_MENU_TYPE[item.trim()] || EAT_WHAT_MENU_TYPE.BREAKFAST)
         }
       ]
     })
@@ -71,7 +71,7 @@ router
       name: 'menu_type',
       sanitizers: [
         function(data) {
-          return EAT_WHAT_MENU_TYPE[data] || EAT_WHAT_MENU_TYPE.BREAKFAST
+          return data.split(',').map(item => EAT_WHAT_MENU_TYPE[item.trim()] || EAT_WHAT_MENU_TYPE.BREAKFAST)
         }
       ]
     }, {

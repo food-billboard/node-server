@@ -1635,11 +1635,11 @@ const EatWhatClassifySchema = new Schema({
   title: {
     type: String,
   },
-  menu_type: {
+  menu_type: [{
     type: String,
     enum: Object.keys(EAT_WHAT_MENU_TYPE),
     default: 'BREAKFAST'
-  },
+  }],
 }, {
   ...defaultConfig
 })
