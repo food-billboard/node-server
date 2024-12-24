@@ -139,6 +139,17 @@ const PRE_USER_FIND = [
    }
  }, 
 ]
+const PRE_EAT_WHAT_FIND = [
+  {
+    path: 'classify',
+    select: {
+     title: 1,
+     description: 1,
+     content: 1,
+     _id: 1
+    }
+  }, 
+ ]
 const PRE_GLOBAL_FIND = []
 const PRE_ROOM_FIND = [
   {
@@ -1591,6 +1602,30 @@ const EatWhatSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   },
+  description: {
+    type: String,
+  },
+  classify: {
+    type: ObjectId,
+    ref: 'eat_what_classify'
+  },
+  date: {
+    type: Date 
+  },
+  menu_type: {
+    type: String,
+    enum: Object.keys(EAT_WHAT_MENU_TYPE),
+    default: 'BREAKFAST'
+  },
+}, {
+  ...defaultConfig
+})
+
+const EatWhatClassifySchema = new Schema({
+  user: {
+    type: ObjectId,
+    ref: 'user'
+  },
   content: {
     type: String,
   },
@@ -1604,9 +1639,6 @@ const EatWhatSchema = new Schema({
     type: String,
     enum: Object.keys(EAT_WHAT_MENU_TYPE),
     default: 'BREAKFAST'
-  },
-  date: {
-    type: Date 
   },
 }, {
   ...defaultConfig
@@ -1962,6 +1994,7 @@ FIND_OPERATION_LIB.forEach(op => {
   OtherMediaSchema.pre(op, prePopulate(PRE_OTHER_FIND))
   BarrageSchema.pre(op, prePopulate(PRE_BARRAGE_FIND))
   BehaviourSchema.pre(op, prePopulate(PRE_BEHAVIOUR_FIND))
+  EatWhatSchema.pre(op, prePopulate(PRE_EAT_WHAT_FIND))
 })
 
 //完成处理
@@ -2011,6 +2044,7 @@ const FeedbackModel = model('feedback', FeedbackSchema)
 const BarrageModel = model('barrage', BarrageSchema)
 const AuthModel = model('auth', AuthSchema)
 const EatWhatModel = model('eat_what', EatWhatSchema)
+const EatWhatClassifyModel = model('eat_what_classify', EatWhatClassifySchema)
 const BehaviourModel = model('behaviour', BehaviourSchema)
 const FriendsModel = model('friend', FriendsSchema)
 const MemberModel = model('member', MemberSchema)
@@ -2061,6 +2095,7 @@ module.exports = {
   ScreenMediaModel,
   ScreenShotModel,
   EatWhatModel,
+  EatWhatClassifyModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -2095,5 +2130,6 @@ module.exports = {
   ScreenMediaClassifySchema,
   ScreenMediaSchema,
   ScreenShotSchema,
-  EatWhatSchema
+  EatWhatSchema,
+  EatWhatClassifySchema
 }

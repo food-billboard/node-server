@@ -5,6 +5,7 @@ const Error = require('./error')
 const Movie = require('./movie')
 const User = require('./user')
 const Instance = require('./instance')
+const EatWhat = require('./eat-what')
 const Media = require('./media')
 const Chat = require('./chat')
 const Schedule = require('./schedule')
@@ -28,5 +29,6 @@ router
 .use('/schedule', Schedule.routes(), Schedule.allowedMethods())
 .use('/screen', Screen.routes(), Screen.allowedMethods())
 .use('/raspberry', Raspberry.routes(), Raspberry.allowedMethods())
+.use('/eat_what', EatWhat.routes(), EatWhat.allowedMethods())
 
 module.exports = router
