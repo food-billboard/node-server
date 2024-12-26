@@ -150,49 +150,36 @@ router
 .post('/', async (ctx) => {
     //validate params
     const check = Params.body(ctx, {
-      name: 'classify',
+      name: 'value_list',
       validator: [
-        data => ObjectId.isValid(data)
+        (data) => {
+          return data.every(item => ObjectId.isValid(item.classify))
+        }
       ]
     })
     if(check) return
   
-    const [ date, classify, menu_type ] = Params.sanitizers(ctx.request.body, {
-      name: 'date',
+    const [ value_list ] = Params.sanitizers(ctx.request.body, {
+      name: 'value_list',
       sanitizers: [
         function(data) {
-          return dayjs(data).isValid() ? dayjs(data).toDate() : dayjs().toDate()
-        }
-      ]
-    }, {
-      name: 'classify',
-      sanitizers: [
-        function(data) {
-          return ObjectId(data)
-        }
-      ]
-    }, {
-      name: 'menu_type',
-      sanitizers: [
-        function(data) {
-          return EAT_WHAT_MENU_TYPE[data] || EAT_WHAT_MENU_TYPE.BREAKFAST
+          return data.map(item => {
+            const { date, classify, menu_type, _id, ...nextItem } = item
+            return {
+              ...nextItem,
+              date: dayjs(date).isValid() ? dayjs(date).toDate() : dayjs().toDate(),
+              classify: ObjectId(classify),
+              menu_type: EAT_WHAT_MENU_TYPE[menu_type] || EAT_WHAT_MENU_TYPE.BREAKFAST
+            } 
+          })
         }
       ]
     })
 
-    const { description } = ctx.request.body 
-  
-    //database
-    const model = new EatWhatModel({
-      date,
-      description,
-      classify,
-      menu_type
-    })
-    const data = await model.save()
+    const data = await EatWhatModel.create(value_list)
     .then(data => {
       return {
-        data: data._id 
+        data: data.map(item => item._id)
       }
     })
     .catch(dealErr(ctx))
@@ -498,7 +485,6 @@ router
     description: 1,
     title: 1,
     menu_type: 1,
-    date: 1,
     createdAt: 1,
     updatedAt: 1,
   })
@@ -507,6 +493,105 @@ router
   .then(data => {
     return {
       data
+    }
+  })
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data
+  })
+})
+.get('/random', async (ctx) => {
+  //validate params
+  const check = Params.query(ctx, {
+    name: 'breakfast',
+    validator: [
+      data => !Number.isNaN(data)
+    ]
+  }, {
+    name: 'lunch',
+    validator: [
+      data => !Number.isNaN(data)
+    ]
+  }, {
+    name: 'dinner',
+    validator: [
+      data => !Number.isNaN(data)
+    ]
+  }, {
+    name: 'night_snack',
+    validator: [
+      data => !Number.isNaN(data)
+    ]
+  })
+  if(check) return
+
+  const { breakfast, lunch, dinner, night_snack, ignore='' } = ctx.query
+
+  const ignoreIds = ignore.split(',').filter(item => !!item.trim()).map(item => ObjectId(item.trim()))
+
+  function task(menu_type, count) {
+    if(!count) return []
+    return EatWhatClassifyModel.aggregate([
+      {
+        $match: {
+          menu_type: {
+            $in: [menu_type]
+          },
+          _id: {
+            $nin: ignoreIds
+          }
+        }
+      },
+      { 
+        $sample: { 
+          size: count 
+        } 
+      },
+      {
+        $project: {
+          _id: 1,
+          content: 1,
+          description: 1,
+          title: 1,
+          menu_type: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        }
+      }
+    ])
+  }
+
+  //database
+  const data = await Promise.all([
+    {
+      count: +breakfast,
+      field: 'breakfast'
+    },
+    {
+      count: +lunch,
+      field: 'lunch'
+    },
+    {
+      count: +dinner,
+      field: 'dinner'
+    },
+    {
+      count: +night_snack,
+      field: 'night_snack'
+    }
+  ].map(item => {
+    return task(item.field.toUpperCase(), item.count)
+  }))
+  .then(([breakfast, lunch, dinner, night_snack]) => {
+    return {
+      data: {
+        breakfast, 
+        lunch, 
+        dinner, 
+        night_snack
+      }
     }
   })
   .catch(dealErr(ctx))

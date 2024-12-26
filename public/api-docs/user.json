@@ -69,27 +69,16 @@
       }
     }
   ],
-  "schemes": [
-    "https",
-    "http"
-  ],
+  "schemes": ["https", "http"],
   "paths": {
     "/api/user/barrage": {
       "get": {
-        "tags": [
-          "barrage"
-        ],
+        "tags": ["barrage"],
         "summary": "获取电影的弹幕列表",
         "description": "",
         "operationId": "user_get_barrage",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "query",
@@ -125,30 +114,208 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/user/eat_what": {
       "get": {
-        "tags": [
-          "eat_what"
-        ],
+        "tags": ["eat_what"],
         "summary": "获取今天吃什么列表",
         "description": "",
         "operationId": "user_get_eat_list",
-        "consumes": [
-          "application/json",
-          "application/xml"
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "date",
+            "description": "日期",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "description": "每页数量",
+            "type": "integer"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "menu_type",
+            "description": "餐别类型",
+            "type": "string",
+            "enum": ["BREAKFAST", "LUNCH", "DINNER", "NIGHT_SNACK"]
+          }
         ],
-        "produces": [
-          "application/xml",
-          "application/json"
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "array",
+              "name": "response",
+              "items": {
+                "$ref": "#/definitions/user_get_eat_list"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "post": {
+        "tags": ["eat_what"],
+        "summary": "修改今天吃什么",
+        "description": "",
+        "operationId": "user_post_eat_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "value_list",
+            "description": "数据列表({ description: 描述, date: 日期, classify: 分类id, menu_type: 餐别类型(BREAKFAST, LUNCH, DINNER, NIGHT_SNACK) })",
+            "required": true,
+            "type": "string"
+          }
         ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "put": {
+        "tags": ["eat_what"],
+        "summary": "新增今天吃什么",
+        "description": "",
+        "operationId": "user_put_eat_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "_id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "description",
+            "description": "描述",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "date",
+            "description": "日期",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "classify",
+            "description": "分类id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["eat_what"],
+        "summary": "删除今天吃什么",
+        "description": "",
+        "operationId": "user_delete_eat_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "_id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/user/eat_what/detail": {
+      "get": {
+        "tags": ["eat_what"],
+        "summary": "获取今天吃什么详情",
+        "description": "",
+        "operationId": "user_get_eat_detail",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "_id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "array",
+              "name": "response",
+              "items": {
+                "$ref": "#/definitions/user_get_eat_detail"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/user/eat_what/classify": {
+      "get": {
+        "tags": ["eat_what"],
+        "summary": "获取今天吃什么分类列表",
+        "description": "",
+        "operationId": "user_get_eat_classify_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "query",
@@ -190,214 +357,31 @@
               "type": "array",
               "name": "response",
               "items": {
-                "$ref": "#/definitions/user_get_eat_list"
+                "$ref": "#/definitions/user_get_eat_classify_list"
               }
             }
           }
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "eat_what"
-        ],
-        "summary": "新增今天吃什么",
-        "description": "",
-        "operationId": "user_post_eat_list",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "title",
-            "description": "标题",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "description",
-            "description": "描述",
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "date",
-            "description": "日期",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "content",
-            "description": "内容",
-            "type": "string",
-            "required": true
-          },
-          {
-            "in": "body",
-            "name": "menu_type",
-            "description": "餐别类型",
-            "type": "string",
-            "enum": ["BREAKFAST", "LUNCH", "DINNER", "NIGHT_SNACK"]
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功"
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-     "put": {
-        "tags": [
-          "eat_what"
-        ],
-        "summary": "新增今天吃什么",
-        "description": "",
-        "operationId": "user_put_eat_list",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "_id",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "title",
-            "description": "标题",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "description",
-            "description": "描述",
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "date",
-            "description": "日期",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "content",
-            "description": "内容",
-            "type": "string",
-            "required": true
-          },
-          {
-            "in": "body",
-            "name": "menu_type",
-            "description": "餐别类型",
-            "type": "string",
-            "enum": ["BREAKFAST", "LUNCH", "DINNER", "NIGHT_SNACK"]
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功"
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "eat_what"
-        ],
-        "summary": "获取今天吃什么列表",
-        "description": "",
-        "operationId": "user_delete_eat_list",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "_id",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功"
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
-    "/api/user/eat_what/detail": {
+    "/api/user/eat_what/classify/detail": {
       "get": {
-        "tags": [
-          "eat_what"
-        ],
-        "summary": "获取今天吃什么详情",
+        "tags": ["eat_what"],
+        "summary": "获取今天吃什么分类详情",
         "description": "",
-        "operationId": "user_get_eat_detail",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "operationId": "user_get_eat_classify_detail",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "query",
             "name": "_id",
+            "description": "id",
             "required": true,
             "type": "string"
           }
@@ -409,33 +393,89 @@
               "type": "array",
               "name": "response",
               "items": {
-                "$ref": "#/definitions/user_get_eat_detail"
+                "$ref": "#/definitions/user_get_eat_classify_detail"
               }
             }
           }
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/user/eat_what/random": {
+      "get": {
+        "tags": ["eat_what"],
+        "summary": "随机生成吃什么菜单",
+        "description": "",
+        "operationId": "user_get_eat_list_random",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "breakfast",
+            "description": "早餐",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "lunch",
+            "description": "午餐",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "dinner",
+            "description": "晚餐",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "night_snack",
+            "description": "夜宵",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "ignore",
+            "description": "忽略的菜单id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "array",
+              "name": "response",
+              "items": {
+                "$ref": "#/definitions/user_get_eat_list_random"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/user/customer": {
       "get": {
-        "tags": [
-          "customer"
-        ],
+        "tags": ["customer"],
         "summary": "获取用户信息",
         "description": "获取非本用户的基本信息",
         "operationId": "user_get_customer",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "query",
@@ -458,26 +498,18 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/user/customer/attention": {
       "get": {
-        "tags": [
-          "customer"
-        ],
+        "tags": ["customer"],
         "summary": "用户关注",
         "description": "获取非本用户关注的人员列表",
         "operationId": "user_get_customer_attention",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -504,32 +536,24 @@
             "description": "成功",
             "schema": {
               "type": "object",
-              "$ref":"#/definitions/user_get_customer_attention"
+              "$ref": "#/definitions/user_get_customer_attention"
             }
           }
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/user/customer/fans": {
       "get": {
-        "tags": [
-          "customer"
-        ],
+        "tags": ["customer"],
         "summary": "用户粉丝",
         "description": "获取用户的粉丝列表",
         "operationId": "user_customer_get_fans",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -568,19 +592,12 @@
     },
     "/api/user/customer/comment": {
       "get": {
-        "tags": [
-          "customer"
-        ],
+        "tags": ["customer"],
         "summary": "评论列表",
         "description": "用户发布的评论列表",
         "operationId": "user_customer_get_comment",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -613,29 +630,19 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/user/customer/movie": {
       "get": {
-        "tags": [
-          "customer"
-        ],
+        "tags": ["customer"],
         "summary": "发布电影",
         "description": "发布用户自己定义的电影",
         "operationId": "user_customer_get_movie",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "consumes": [
-          "multipart/form-data"
-        ],
+        "produces": ["application/xml", "application/json"],
+        "consumes": ["multipart/form-data"],
         "parameters": [
           {
             "name": "_id",
@@ -661,32 +668,24 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_customer_get_movie"
+              "$ref": "#/definitions/user_customer_get_movie"
             }
           }
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/api/user/customer/movie/store": {
       "get": {
-        "tags": [
-          "customer"
-        ],
+        "tags": ["customer"],
         "summary": "收藏电影列表",
         "description": "获取非本人用户收藏的电影列表",
         "operationId": "user_customer_get_store",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -720,16 +719,11 @@
     },
     "/api/user/customer/movie/browser": {
       "get": {
-        "tags": [
-          "customer"
-        ],
+        "tags": ["customer"],
         "summary": "浏览记录",
         "description": "非本人用户浏览过的电影记录",
         "operationId": "user_customer_get_browser",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -755,7 +749,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_customer_get_browser"
+              "$ref": "#/definitions/user_customer_get_browser"
             }
           }
         }
@@ -763,20 +757,15 @@
     },
     "/api/user/home/daily": {
       "get": {
-        "tags": [
-          "home"
-        ],
+        "tags": ["home"],
         "summary": "每日上新",
         "description": "首页每日上新电影列表",
         "operationId": "user_home_get_daily",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "count",
-            "in":"query",
+            "in": "query",
             "description": "数量"
           }
         ],
@@ -784,7 +773,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_home_get_daily"
+              "$ref": "#/definitions/user_home_get_daily"
             }
           }
         }
@@ -792,16 +781,11 @@
     },
     "/api/user/home/hot": {
       "get": {
-        "tags": [
-          "home"
-        ],
+        "tags": ["home"],
         "summary": "热搜",
         "description": "首页热搜电影信息",
         "operationId": "user_home_get_hot",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "count",
@@ -813,7 +797,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_home_get_hot"
+              "$ref": "#/definitions/user_home_get_hot"
             }
           }
         }
@@ -821,22 +805,17 @@
     },
     "/api/user/home/notice": {
       "get": {
-        "tags": [
-          "home"
-        ],
+        "tags": ["home"],
         "summary": "跑马灯",
         "description": "首页跑马灯内容",
         "operationId": "user_home_get_notice",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [],
         "responses": {
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_home_get_notice"
+              "$ref": "#/definitions/user_home_get_notice"
             }
           }
         }
@@ -844,16 +823,11 @@
     },
     "/api/user/home/rank": {
       "get": {
-        "tags": [
-          "home"
-        ],
+        "tags": ["home"],
         "summary": "排行榜",
         "description": "首页排行榜",
         "operationId": "user_home_get_rank",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "query",
@@ -865,7 +839,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_home_get_rank"
+              "$ref": "#/definitions/user_home_get_rank"
             }
           }
         }
@@ -873,16 +847,11 @@
     },
     "/api/user/home/special": {
       "get": {
-        "tags": [
-          "home"
-        ],
+        "tags": ["home"],
         "summary": "专题列表",
         "description": "",
         "operationId": "user_home_get_special",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "query",
@@ -894,7 +863,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_home_get_special"
+              "$ref": "#/definitions/user_home_get_special"
             }
           }
         }
@@ -902,16 +871,11 @@
     },
     "/api/user/home/swiper": {
       "get": {
-        "tags": [
-          "home"
-        ],
+        "tags": ["home"],
         "summary": "轮播图",
         "description": "首页轮播图",
         "operationId": "user_home_get_swiper",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "query",
@@ -923,7 +887,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_home_get_swiper"
+              "$ref": "#/definitions/user_home_get_swiper"
             }
           }
         }
@@ -931,16 +895,11 @@
     },
     "/api/user/logon/account": {
       "post": {
-        "tags": [
-          "logon"
-        ],
+        "tags": ["logon"],
         "summary": "登录",
         "description": "",
         "operationId": "user_logon_post_account",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "body",
@@ -964,16 +923,11 @@
     },
     "/api/user/logon/register": {
       "post": {
-        "tags": [
-          "logon"
-        ],
+        "tags": ["logon"],
         "summary": "注册",
         "description": "",
         "operationId": "user_logon_post_register",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "body",
@@ -1024,16 +978,11 @@
     },
     "/api/user/logon/forget": {
       "put": {
-        "tags": [
-          "logon"
-        ],
+        "tags": ["logon"],
         "summary": "重置密码",
         "description": "",
         "operationId": "user_logon_put_forger",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "body",
@@ -1063,16 +1012,11 @@
     },
     "/api/user/logon/signout": {
       "post": {
-        "tags": [
-          "logon"
-        ],
+        "tags": ["logon"],
         "summary": "退出登录",
         "description": "",
         "operationId": "user_logon_post_signout",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [],
         "responses": {
           "200": {
@@ -1083,16 +1027,11 @@
     },
     "/api/user/logon/email": {
       "post": {
-        "tags": [
-          "logon"
-        ],
+        "tags": ["logon"],
         "summary": "验证码发送",
         "description": "",
         "operationId": "user_logon_post_sendmail",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "body",
@@ -1119,16 +1058,11 @@
     },
     "/api/user/movie/classify": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "分类",
         "description": "电影分类列表",
         "operationId": "user_movie_get_classify",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1154,8 +1088,8 @@
           "200": {
             "description": "成功",
             "schema": {
-              "type":"object",
-              "$ref":"#/definitions/user_movie_get_classify"
+              "type": "object",
+              "$ref": "#/definitions/user_movie_get_classify"
             }
           }
         }
@@ -1163,16 +1097,11 @@
     },
     "/api/user/movie/classify/specDropList": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影分类名称列表",
         "description": "",
         "operationId": "user_movie_get_classify_specDropList",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "count",
@@ -1186,7 +1115,7 @@
             "description": "successful operation",
             "schema": {
               "type": "object",
-              "$ref":"#/definitions/user_movie_get_classify_specDropList"
+              "$ref": "#/definitions/user_movie_get_classify_specDropList"
             }
           }
         }
@@ -1194,16 +1123,11 @@
     },
     "/api/user/movie/special": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "专题列表",
         "description": "电影专题列表",
         "operationId": "user_movie_get_special",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -1222,8 +1146,8 @@
           "200": {
             "description": "成功",
             "schema": {
-              "type":"object",
-              "$ref":"#/definitions/user_movie_get_special"
+              "type": "object",
+              "$ref": "#/definitions/user_movie_get_special"
             }
           }
         }
@@ -1231,16 +1155,11 @@
     },
     "/api/user/movie/detail": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影详情",
         "description": "电影详情",
         "operationId": "user_movie_get_detail",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1254,7 +1173,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_movie_get_detail"
+              "$ref": "#/definitions/user_movie_get_detail"
             }
           }
         }
@@ -1262,16 +1181,11 @@
     },
     "/api/user/movie/detail/comment": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影评论列表",
         "description": "电影评论简易",
         "operationId": "user_movie_get_comment_simple",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1291,7 +1205,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "type":"object",
+              "type": "object",
               "$ref": "#/definitions/user_movie_get_comment_simple"
             }
           }
@@ -1300,16 +1214,11 @@
     },
     "/api/user/movie/detail/simple": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影信息",
         "description": "电影的简易信息",
         "operationId": "user_movie_get_simple",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1331,16 +1240,11 @@
     },
     "/api/user/movie/detail/comment/list": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "评论列表",
         "description": "关于指定电影的评论列表",
         "operationId": "user_movie_get_comment",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1374,16 +1278,11 @@
     },
     "/api/user/movie/detail/comment/detail": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "评论详情",
         "description": "",
         "operationId": "user_movie_get_comment_detail",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1417,16 +1316,11 @@
     },
     "/api/user/movie/rank": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "排行榜",
         "description": "电影排行榜列表",
         "operationId": "user_movie_get_rank",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "_id",
@@ -1482,7 +1376,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_movie_get_rank"
+              "$ref": "#/definitions/user_movie_get_rank"
             }
           }
         }
@@ -1490,16 +1384,11 @@
     },
     "/api/user/movie/rank/specDropList": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "排行榜名称列表",
         "description": "",
         "operationId": "user_movie_get_rank_specDropList",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "count",
@@ -1512,7 +1401,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_movie_get_rank_specDropList"
+              "$ref": "#/definitions/user_movie_get_rank_specDropList"
             }
           }
         }
@@ -1520,16 +1409,11 @@
     },
     "/api/user/movie/language": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "语言列表",
         "description": "",
         "operationId": "user_movie_get_language",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "count",
@@ -1550,16 +1434,11 @@
     },
     "/api/user/movie/actor": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "演员列表",
         "description": "",
         "operationId": "user_movie_get_actor",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "count",
@@ -1581,16 +1460,11 @@
     },
     "/api/user/movie/director": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "导演列表",
         "description": "",
         "operationId": "user_movie_get_director",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "count",
@@ -1603,7 +1477,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref":"#/definitions/user_movie_get_director"
+              "$ref": "#/definitions/user_movie_get_director"
             }
           }
         }
@@ -1611,16 +1485,11 @@
     },
     "/api/user/movie/district": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "地区列表",
         "description": "",
         "operationId": "user_movie_get_district",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "count",
@@ -1641,16 +1510,11 @@
     },
     "/api/user/movie/search": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影搜索",
         "description": "",
         "operationId": "user_movie_get_search",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "name": "currPage",
@@ -1705,7 +1569,7 @@
             "in": "query",
             "description": "上映时间(start_end)",
             "type": "string",
-            "format":"date-time"
+            "format": "date-time"
           },
           {
             "name": "sort",
@@ -1727,16 +1591,11 @@
     },
     "/api/user/movie/order": {
       "get": {
-        "tags": [
-          "movie"
-        ],
+        "tags": ["movie"],
         "summary": "电影排序字段列表",
         "description": "",
         "operationId": "user_movie_get_order",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "responses": {
           "200": {
             "description": "成功",
@@ -1749,16 +1608,11 @@
     },
     "/api/user/setting/info": {
       "get": {
-        "tags": [
-          "setting"
-        ],
+        "tags": ["setting"],
         "summary": "小程序信息",
         "description": "",
         "operationId": "user_setting_get_info",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [],
         "responses": {
           "200": {
@@ -1772,16 +1626,11 @@
     },
     "/api/user/setting/info/notice": {
       "get": {
-        "tags": [
-          "setting"
-        ],
+        "tags": ["setting"],
         "summary": "小程序跑马灯信息",
         "description": "",
         "operationId": "user_setting_get_info_notice",
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
+        "produces": ["application/xml", "application/json"],
         "parameters": [],
         "responses": {
           "200": {
@@ -1820,24 +1669,24 @@
           "description": "文字内容"
         },
         "image": {
-          "type":"array",
+          "type": "array",
           "description": "图片",
           "items": {
-            "type":"string"
+            "type": "string"
           }
         },
         "video": {
-          "type":"array",
+          "type": "array",
           "description": "视频",
           "items": {
-            "type":"object",
+            "type": "object",
             "properties": {
               "src": {
-                "type":"string",
+                "type": "string",
                 "description": "地址"
               },
               "poster": {
-                "type":"string",
+                "type": "string",
                 "description": "海报地址"
               }
             }
@@ -1850,7 +1699,7 @@
       "properties": {
         "comment_users": {
           "type": "array",
-          "description":"评论人",
+          "description": "评论人",
           "items": {
             "type": "object",
             "properties": {
@@ -1869,7 +1718,7 @@
           }
         },
         "content": {
-          "$ref":"#/definitions/media_content"
+          "$ref": "#/definitions/media_content"
         },
         "createdAt": {
           "type": "string",
@@ -1944,7 +1793,7 @@
                   },
                   "updatedAt": {
                     "type": "string",
-                    "format":"date-time"
+                    "format": "date-time"
                   }
                 }
               }
@@ -1979,6 +1828,14 @@
                   "type": "string",
                   "description": "描述"
                 },
+                "classify_description": {
+                  "type": "string",
+                  "description": "分类描述"
+                },
+                "classify": {
+                  "type": "string",
+                  "description": "分类id"
+                },
                 "content": {
                   "type": "string",
                   "description": "内容"
@@ -1989,11 +1846,11 @@
                 },
                 "createdAt": {
                   "type": "string",
-                  "format":"date-time"
+                  "format": "date-time"
                 },
                 "updatedAt": {
                   "type": "string",
-                  "format":"date-time"
+                  "format": "date-time"
                 }
               }
             }
@@ -2002,6 +1859,91 @@
       },
       "xml": {
         "name": "user_get_eat_list"
+      }
+    },
+    "user_get_eat_classify_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "标题"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "内容"
+                },
+                "menu_type": {
+                  "type": "string",
+                  "description": "餐别类型"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "user_get_eat_classify_list"
+      }
+    },
+    "user_get_eat_list_random": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "breakfast": {
+                  "type": "array",
+                  "description": "早饭"
+                },
+                "lunch": {
+                  "type": "array",
+                  "description": "中饭"
+                },
+                "dinner": {
+                  "type": "array",
+                  "description": "晚饭"
+                },
+                "night_snack": {
+                  "type": "array",
+                  "description": "夜宵"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "user_get_eat_list_random"
       }
     },
     "user_get_eat_detail": {
@@ -2014,37 +1956,34 @@
           "type": "object",
           "properties": {
             "data": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "_id": {
-                    "type": "string"
-                  },
-                  "title": {
-                    "type": "string",
-                    "description": "标题"
-                  },
-                  "description": {
-                    "type": "string",
-                    "description": "描述"
-                  },
-                  "content": {
-                    "type": "string",
-                    "description": "内容"
-                  },
-                  "menu_type": {
-                    "type": "string",
-                    "description": "餐别类型"
-                  },
-                  "createdAt": {
-                    "type": "string",
-                    "format":"date-time"
-                  },
-                  "updatedAt": {
-                    "type": "string",
-                    "format":"date-time"
-                  }
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "标题"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "内容"
+                },
+                "menu_type": {
+                  "type": "string",
+                  "description": "餐别类型"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
                 }
               }
             }
@@ -2053,6 +1992,54 @@
       },
       "xml": {
         "name": "user_get_eat_detail"
+      }
+    },
+    "user_get_eat_classify_detail": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "标题"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "描述"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "内容"
+                },
+                "menu_type": {
+                  "type": "string",
+                  "description": "餐别类型"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "user_get_eat_classify_detail"
       }
     },
     "user_get_customer": {
@@ -2154,11 +2141,11 @@
             "comment": {
               "type": "array",
               "items": {
-                "type":"object",
+                "type": "object",
                 "properties": {
                   "content": {
                     "type": "object",
-                    "$ref":"#/definitions/media_content"
+                    "$ref": "#/definitions/media_content"
                   },
                   "createdAt": {
                     "type": "string",
@@ -2255,7 +2242,7 @@
         "publish_time": {
           "type": "string",
           "description": "上映时间",
-          "format":"date-time"
+          "format": "date-time"
         },
         "hot": {
           "type": "integer",
@@ -2275,7 +2262,7 @@
             "issue": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/user_movie_list" 
+                "$ref": "#/definitions/user_movie_list"
               }
             }
           }
@@ -2531,7 +2518,7 @@
                   "movie": {
                     "type": "array",
                     "items": {
-                      "$ref":"#/definitions/user_movie_list"
+                      "$ref": "#/definitions/user_movie_list"
                     }
                   }
                 }
@@ -2752,7 +2739,7 @@
                     "type": "string"
                   },
                   "key": {
-                    "type":"string",
+                    "type": "string",
                     "description": "首字母"
                   }
                 }
@@ -2781,15 +2768,15 @@
                   "type": "object",
                   "properties": {
                     "username": {
-                      "type":"string",
+                      "type": "string",
                       "description": "作者名称"
                     },
                     "avatar": {
-                      "type":"string",
+                      "type": "string",
                       "description": "头像"
                     },
                     "_id": {
-                      "type":"string"
+                      "type": "string"
                     }
                   }
                 },
@@ -2809,24 +2796,24 @@
                   "type": "array",
                   "description": "评论列表",
                   "items": {
-                    "type":"object",
+                    "type": "object",
                     "properties": {
                       "_id": {
-                        "type":"string"
+                        "type": "string"
                       },
                       "user_info": {
                         "type": "object",
                         "properties": {
                           "avatar": {
-                            "type":"string",
+                            "type": "string",
                             "description": "头像"
                           },
                           "username": {
-                            "type":"string",
+                            "type": "string",
                             "description": "用户名"
                           },
                           "description": {
-                            "type":"string",
+                            "type": "string",
                             "description": "描述"
                           }
                         }
@@ -3043,7 +3030,7 @@
               "type": "object",
               "properties": {
                 "comment": {
-                  "type":"array",
+                  "type": "array",
                   "items": {
                     "type": "object",
                     "properties": {
@@ -3158,11 +3145,11 @@
                 "properties": {
                   "comment_users": {
                     "type": "integer",
-                    "description":"评论人数"
+                    "description": "评论人数"
                   },
                   "content": {
                     "type": "object",
-                    "$ref":"#/definitions/media_content"
+                    "$ref": "#/definitions/media_content"
                   },
                   "createdAt": {
                     "type": "string",
@@ -3206,7 +3193,7 @@
             "sub": {
               "type": "object",
               "description": "子评论信息",
-              "$ref":"#/definitions/comment_data"
+              "$ref": "#/definitions/comment_data"
             }
           }
         }
@@ -3279,7 +3266,7 @@
                   "publish_time": {
                     "type": "string",
                     "description": "上映时间",
-                    "format":"date-time"
+                    "format": "date-time"
                   },
                   "hot": {
                     "type": "integer",
@@ -3358,7 +3345,7 @@
             "data": {
               "type": "array",
               "items": {
-                "$ref":"#/definitions/movie_info_list"
+                "$ref": "#/definitions/movie_info_list"
               }
             }
           }
@@ -3380,7 +3367,7 @@
             "data": {
               "type": "array",
               "items": {
-                "$ref":"#/definitions/movie_info_list"
+                "$ref": "#/definitions/movie_info_list"
               }
             }
           }
@@ -3402,7 +3389,7 @@
             "data": {
               "type": "array",
               "items": {
-                "$ref":"#/definitions/movie_info_list"
+                "$ref": "#/definitions/movie_info_list"
               }
             }
           }
@@ -3424,7 +3411,7 @@
             "data": {
               "type": "array",
               "items": {
-                "$ref":"#/definitions/movie_info_list"
+                "$ref": "#/definitions/movie_info_list"
               }
             }
           }
@@ -3447,7 +3434,7 @@
               "type": "object",
               "properties": {
                 "info": {
-                  "type":"string",
+                  "type": "string",
                   "description": "内容"
                 }
               }
@@ -3472,7 +3459,7 @@
               "type": "object",
               "properties": {
                 "notice": {
-                  "type":"string",
+                  "type": "string",
                   "description": "内容"
                 }
               }
@@ -3499,29 +3486,29 @@
                 "type": "object",
                 "properties": {
                   "_id": {
-                    "type":"string"
+                    "type": "string"
                   },
                   "glance": {
-                    "type":"integer",
+                    "type": "integer",
                     "description": "浏览人数"
                   },
                   "hot": {
-                    "type":"integer",
+                    "type": "integer",
                     "description": "人气"
                   },
                   "name": {
-                    "type":"string",
+                    "type": "string",
                     "description": "名称"
                   },
                   "source_type": {
                     "type": "string",
                     "description": "来源类型",
-                    "enum": [ "comment", "movie" ]
+                    "enum": ["comment", "movie"]
                   },
                   "status": {
                     "type": "string",
                     "description": "电影状态",
-                    "enum": [ "VERIFY", "COMPLETE", "NOT_VERIFY" ]
+                    "enum": ["VERIFY", "COMPLETE", "NOT_VERIFY"]
                   },
                   "createdAt": {
                     "type": "string",
@@ -3565,7 +3552,7 @@
                     }
                   },
                   "description": {
-                    "type":"string",
+                    "type": "string",
                     "description": "描述"
                   },
                   "rate": {
