@@ -398,14 +398,6 @@ router
       {
         $match: findQuery
       },
-      ...(typeof currPage !== 'undefined' ? [
-        {
-          $skip: currPage * pageSize
-        },
-        {
-          $limit: +pageSize
-        },
-      ] : []),
       {
         $group: {
           _id: null,
