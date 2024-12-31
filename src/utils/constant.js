@@ -95,6 +95,13 @@ const EAT_WHAT_MENU_TYPE = {
   NIGHT_SNACK: 'NIGHT_SNACK'
 }
 
+const EAT_WHAT_FOOD_TYPE = {
+  MEAT: 'MEAT',
+  VEGETABLE: 'VEGETABLE',
+  SOUP: 'SOUP',
+  OTHER: 'OTHER'
+}
+
 const COMMENT_SOURCE_TYPE = {
   movie: 'movie', 
   comment: 'comment'
@@ -264,6 +271,7 @@ const THIRD_PARTY_REQUEST_PARAMS_TYPE = {
 const MAX_SCREEN_SHOT_COUNT = 5
 
 module.exports = {
+  EAT_WHAT_FOOD_TYPE,
   MESSAGE_MEDIA_TYPE,
   MESSAGE_TYPE,
   ROOM_USER_NET_STATUS,

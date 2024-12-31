@@ -7,6 +7,7 @@ const {
   responseDataDeal, 
   notFound,
   EAT_WHAT_MENU_TYPE,
+  EAT_WHAT_FOOD_TYPE,
   EatWhatModel,
   EatWhatClassifyModel
 } = require("@src/utils")
@@ -352,11 +353,18 @@ router
 })
 .get('/classify', async (ctx) => {
 
-  const [ menu_type ] = Params.sanitizers(ctx.query, {
+  const [ menu_type, food_type ] = Params.sanitizers(ctx.query, {
     name: 'menu_type',
     sanitizers: [
       function(data) {
         return EAT_WHAT_MENU_TYPE[data] || ''
+      }
+    ]
+  }, {
+    name: 'food_type',
+    sanitizers: [
+      function(data) {
+        return EAT_WHAT_FOOD_TYPE[data] || ''
       }
     ]
   })
@@ -390,6 +398,9 @@ router
   }
   if(menu_type) {
     findQuery.menu_type = menu_type
+  }
+  if(food_type) {
+    findQuery.food_type = food_type
   }
 
   //database
@@ -426,6 +437,7 @@ router
           description: 1,
           title: 1,
           menu_type: 1,
+          food_type: 1,
           createdAt: 1,
           updatedAt: 1,
         }
@@ -504,12 +516,12 @@ router
   }, {
     name: 'lunch',
     validator: [
-      data => !Number.isNaN(data)
+      data => data.split(',').every(item => !Number.isNaN(item.trim()))
     ]
   }, {
     name: 'dinner',
     validator: [
-      data => !Number.isNaN(data)
+      data => data.split(',').every(item => !Number.isNaN(item.trim()))
     ]
   }, {
     name: 'night_snack',
@@ -520,21 +532,29 @@ router
   if(check) return
 
   const { breakfast, lunch, dinner, night_snack, ignore='' } = ctx.query
+  const [ lunchMeat, lunchVegetable ] = lunch.split(',').map(item => +item.trim())
+  const [ dinnerMeat, dinnerVegetable ] = dinner.split(',').map(item => +item.trim())
 
   const ignoreIds = ignore.split(',').filter(item => !!item.trim()).map(item => ObjectId(item.trim()))
 
-  function task(menu_type, count) {
+  function task(menu_type, count, food_type) {
     if(!count) return []
+    const query = {
+      menu_type: {
+        $in: [menu_type]
+      },
+      _id: {
+        $nin: ignoreIds
+      },
+    }
+    if(food_type) {
+      query.food_type = {
+        $in: [food_type]
+      }
+    }
     return EatWhatClassifyModel.aggregate([
       {
-        $match: {
-          menu_type: {
-            $in: [menu_type]
-          },
-          _id: {
-            $nin: ignoreIds
-          }
-        }
+        $match: query
       },
       { 
         $sample: { 
@@ -553,36 +573,63 @@ router
         }
       }
     ])
+    .then(data => {
+      return {
+        value: data,
+        field: menu_type.toLowerCase()
+      }
+    })
   }
 
   //database
   const data = await Promise.all([
     {
+      count: +lunchMeat,
+      field: 'lunch',
+      food_type: 'MEAT'
+    },
+    {
+      count: +lunchVegetable,
+      field: 'lunch',
+      food_type: 'VEGETABLE'
+    },
+    {
+      count: +dinnerMeat,
+      field: 'dinner',
+      food_type: 'MEAT'
+    },
+    {
+      count: +dinnerVegetable,
+      field: 'dinner',
+      food_type: 'VEGETABLE'
+    },
+    {
       count: +breakfast,
       field: 'breakfast'
-    },
-    {
-      count: +lunch,
-      field: 'lunch'
-    },
-    {
-      count: +dinner,
-      field: 'dinner'
     },
     {
       count: +night_snack,
       field: 'night_snack'
     }
   ].map(item => {
-    return task(item.field.toUpperCase(), item.count)
+    return task(item.field.toUpperCase(), item.count, item.food_type)
   }))
-  .then(([breakfast, lunch, dinner, night_snack]) => {
+  .then(([lunchMeat, lunchVegetable, dinnerMeat, dinnerVegetable, ...nextData]) => {
     return {
       data: {
-        breakfast, 
-        lunch, 
-        dinner, 
-        night_snack
+        lunch: [
+          ...lunchMeat.value,
+          ...lunchVegetable.value 
+        ], 
+        dinner: [
+          ...dinnerMeat.value,
+          ...dinnerVegetable.value 
+        ], 
+        ...nextData.reduce((acc, cur) => {
+          const { value, field } = cur
+          acc[field] = value  
+          return acc 
+        }, {})
       }
     }
   })

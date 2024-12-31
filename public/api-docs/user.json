@@ -348,6 +348,13 @@
             "description": "餐别类型",
             "type": "string",
             "enum": ["BREAKFAST", "LUNCH", "DINNER", "NIGHT_SNACK"]
+          },
+          {
+            "in": "query",
+            "name": "food_type",
+            "description": "菜单类型",
+            "type": "string",
+            "enum": ["MEAT", "VEGETABLE", "SOUP", "OTHER"]
           }
         ],
         "responses": {
@@ -424,16 +431,16 @@
           {
             "in": "query",
             "name": "lunch",
-            "description": "午餐",
-            "type": "integer",
+            "description": "午餐(肉菜数量,素菜数量)",
+            "type": "string",
             "required": true
           },
           {
             "in": "query",
             "name": "dinner",
-            "description": "晚餐",
+            "description": "晚餐(肉菜数量,素菜数量",
             "required": true,
-            "type": "integer"
+            "type": "string"
           },
           {
             "in": "query",
@@ -1891,6 +1898,10 @@
                 "menu_type": {
                   "type": "string",
                   "description": "餐别类型"
+                },
+                "food_type": {
+                  "type": "string",
+                  "description": "菜单类型"
                 },
                 "createdAt": {
                   "type": "string",

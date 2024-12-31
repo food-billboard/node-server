@@ -34,7 +34,8 @@ const {
   SCREEN_MOCK_CONFIG_TEXT_TYPE,
   SCREEN_MOCK_CONFIG_NAME_TYPE,
   THIRD_PARTY_REQUEST_METHOD,
-  THIRD_PARTY_REQUEST_PARAMS_TYPE
+  THIRD_PARTY_REQUEST_PARAMS_TYPE,
+  EAT_WHAT_FOOD_TYPE
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -1634,12 +1635,19 @@ const EatWhatClassifySchema = new Schema({
   },
   title: {
     type: String,
+    unique: true,
+    required: true
   },
   menu_type: [{
     type: String,
     enum: Object.keys(EAT_WHAT_MENU_TYPE),
     default: 'BREAKFAST'
   }],
+  food_type: [{
+    type: String,
+    enum: Object.keys(EAT_WHAT_FOOD_TYPE),
+    default: 'OTHER'
+  }]
 }, {
   ...defaultConfig
 })

@@ -146,6 +146,14 @@
             "type": "array",
             "required": true,
             "enum": ["BREAKFAST", "LUNCH", "DINNER", "NIGHT_SNACK"]
+          },
+          {
+            "in": "body",
+            "name": "food_type",
+            "description": "餐别分类",
+            "type": "string",
+            "required": true,
+            "enum": ["MEAT", "VEGETABLE", "SOUP", "OTHER"]
           }
         ],
         "responses": {
@@ -200,6 +208,14 @@
             "type": "array",
             "required": true,
             "enum": ["BREAKFAST", "LUNCH", "DINNER", "NIGHT_SNACK"]
+          },
+          {
+            "in": "body",
+            "name": "food_type",
+            "description": "餐别分类",
+            "type": "string",
+            "required": true,
+            "enum": ["MEAT", "VEGETABLE", "SOUP", "OTHER"]
           }
         ],
         "responses": {
