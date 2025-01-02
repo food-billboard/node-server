@@ -120,8 +120,8 @@ router
     }
     const data = await EatWhatClassifyModel.findOne({
       title,
-      $not: {
-        _id
+      _id: {
+        $nin: [_id]
       }
     })
       .exec()
