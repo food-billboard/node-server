@@ -538,7 +538,10 @@ router
   const ignoreIds = ignore.split(',').filter(item => !!item.trim()).map(item => ObjectId(item.trim()))
 
   function task(menu_type, count, food_type) {
-    if(!count) return []
+    if(!count) return {
+      value: [],
+      field: menu_type.toLowerCase()
+    }
     const query = {
       menu_type: {
         $in: [menu_type]
