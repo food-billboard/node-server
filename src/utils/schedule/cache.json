@@ -61,7 +61,7 @@
   },
   "expireMediaSchedule": {
     "name": "expireMediaSchedule",
-    "time": "0 0 20 * * 0",
+    "time": "0 40 * * * *",
     "description": "过期媒体资源定时器",
     "status": "SCHEDULING"
   },
