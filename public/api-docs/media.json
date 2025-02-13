@@ -155,6 +155,51 @@
           }
         ]
       }
+    },
+    "/api/media/video/corp": {
+      "post": {
+        "tags": [
+          "video"
+        ],
+        "summary": "截取视频",
+        "description": "",
+        "operationId": "media_video_post_corp",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"视频的id"
+          },
+          {
+            "name": "time",
+            "in": "body",
+            "type": "array",
+            "description":"截取图片的视频时间([[00:00:10, 00:00:11], [00:00:20, 00:00:21]])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/media_video_post_corp"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
     }
   },
   "definitions": {
@@ -177,6 +222,43 @@
                 "src": {
                   "type": "string",
                   "description": "图片地址"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "media_video_put_poster"
+      }
+    },
+    "media_video_post_corp": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type":"object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "是否成功",
+                    "enum": ["fulfilled", "rejected"]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "description": "错误原因"
+                  },
+                  "value": {
+                    "type": "string",
+                    "description": "视频地址"
+                  }
                 }
               }
             }

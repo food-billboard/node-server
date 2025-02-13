@@ -294,8 +294,6 @@ function scheduleMethod({
 
 }
 
-scheduleMethod(true)
-
 const unUseMediaSchedule = () => {
   const { name, time } = CacheJson.unUseMediaSchedule 
   const schedule = nodeSchedule.scheduleJob(name, time, scheduleMethod)

@@ -1,5 +1,6 @@
 const path = require('path')
 const Mime = require('mime')
+const dayjs = require('dayjs')
 const fs = require('fs').promises
 const { ImageModel, VideoModel, OtherMediaModel, MEDIA_AUTH, ROLES_MAP, MEDIA_ORIGIN_TYPE, findMostRole, MEDIA_STATUS, STATIC_FILE_PATH } = require('@src/utils')
 const { getChunkFileList } = require('./patch')
@@ -26,12 +27,13 @@ const headRequestMediaDeal = {
     user
   }) => {
   
-    const { md5, auth, size, mime, name, chunk, file_name, description } = metadata
+    const { md5, auth, size, mime, name, chunk, file_name, description, expire } = metadata
     const { roles, _id } = user
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
 
   
     const defaultModel = {
+      expire: expire ? dayjs(expire).toDate() : undefined,
       file_name, 
       description,
       name: name || md5,
@@ -141,11 +143,12 @@ const headRequestMediaDeal = {
     metadata,
     user
   }) => {
-    const { md5, auth, size, mime, name, chunk, file_name, description } = metadata
+    const { md5, auth, size, mime, name, chunk, file_name, description, expire } = metadata
     const { roles, _id } = user
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
 
     const defaultModel = {
+      expire: expire ? dayjs(expire).toDate() : undefined,
       file_name, 
       description,
       name: name || md5,
@@ -239,11 +242,12 @@ const headRequestMediaDeal = {
     metadata,
     user
   }) => {
-    const { md5, auth, size, mime, name, chunk, file_name, description } = metadata
+    const { md5, auth, size, mime, name, chunk, file_name, description, expire } = metadata
     const { roles, _id } = user
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
   
     const defaultModel = {
+      expire: expire ? dayjs(expire).toDate() : undefined,
       file_name, 
       description,
       name: name || md5,

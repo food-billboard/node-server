@@ -49,7 +49,7 @@ const METADATA = {
   'size': {
     validator: data => {
       const _data = parseInt(data)
-      return typeof _data === 'number' && _data > 0 && _data <= MAX_FILE_SIZE * 20 
+      return typeof _data === 'number' && _data > 0 && _data <= MAX_FILE_SIZE * 400 
     },
     sanitizers: data => parseInt(data)
   },

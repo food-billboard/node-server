@@ -59,6 +59,12 @@
     "description": "媒体资源定时器",
     "status": "SCHEDULING"
   },
+  "expireMediaSchedule": {
+    "name": "expireMediaSchedule",
+    "time": "0 0 20 * * 0",
+    "description": "过期媒体资源定时器",
+    "status": "SCHEDULING"
+  },
   "movieSchedule": {
     "name": "movieSchedule",
     "time": "0 0 21 * * 5",

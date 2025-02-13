@@ -1329,6 +1329,7 @@ const LanguageSchema = new Schema({
 })
 
 const VideoSchema = new Schema({
+  expire: Date,
   name: {
     type: String,
     required: true,
@@ -1379,19 +1380,23 @@ const VideoSchema = new Schema({
       required: true,
       // unique: true
     },
+    // 完成情况
     complete: [{
       type: Number,
       // required: true,
       min: 0
     }],
+    // 分片大小
     chunk_size: {
       type: Number,
       min: 1
     },
+    // 文件大小
     size: {
       type: Number,
       min: 1
     },
+    // 文件mime
     mime: {
       type: String,
       enum: [],
@@ -1399,6 +1404,7 @@ const VideoSchema = new Schema({
       required: true,
       get: function(v) { return v ? v.toLowerCase() : v }
     },
+    // 上传状态
     status: {
       type: String,
       enum: Object.keys(MEDIA_STATUS),
@@ -1412,6 +1418,7 @@ const VideoSchema = new Schema({
 })
 
 const ImageSchema = new Schema({
+  expire: Date,
   name: String,
   src: {
     type: String,
@@ -1487,6 +1494,7 @@ const ImageSchema = new Schema({
 })
 
 const OtherMediaSchema = new Schema({
+  expire: Date,
   name: String,
   src: {
     type: String,
