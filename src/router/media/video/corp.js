@@ -138,10 +138,7 @@ router
             }
           })
           .then(() => {
-            return {
-              ...item,
-              value: item.value.src 
-            } 
+            return item.value.src 
           })
         }))
       })
