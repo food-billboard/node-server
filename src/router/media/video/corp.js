@@ -14,7 +14,7 @@ const {
   notFound,
   MEDIA_ORIGIN_TYPE,
   MEDIA_STATUS,
-  fileEncoded,
+  fileAsyncMd5,
   FFMPEG_VERSION,
   isRaspberry,
   STATIC_FILE_PATH_NO_WRAPPER
@@ -127,7 +127,7 @@ router
           const absolutePath = path.join(STATIC_FILE_PATH_NO_WRAPPER, src)
           const stats = await fs.stat(absolutePath);
           const data = fs.readFileSync(absolutePath)
-          const md5 = fileEncoded(data)
+          const md5 = await fileAsyncMd5(data)
           return VideoModel.updateOne({
             _id,
           }, {
