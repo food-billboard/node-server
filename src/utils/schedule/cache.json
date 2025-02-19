@@ -65,6 +65,12 @@
     "description": "过期媒体资源定时器",
     "status": "SCHEDULING"
   },
+  "noDatabaseMediaSchedule": {
+    "name": "noDatabaseMediaSchedule",
+    "time": "0 0 20 * * *",
+    "description": "清除未存储数据库的媒体资源定时器",
+    "status": "SCHEDULING"
+  },
   "movieSchedule": {
     "name": "movieSchedule",
     "time": "0 0 21 * * 5",
