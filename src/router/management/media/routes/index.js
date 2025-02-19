@@ -206,6 +206,23 @@ router
         }
       }
     ]
+  }, {
+    name: 'expire',
+    sanitizers: [
+      data => {
+        if(typeof data === 'string' && !!data) return {
+          done: true,
+          data: {
+            expire: {
+              $lte: Day(data)
+            }
+          }
+        }
+        return {
+          done: false 
+        }
+      }
+    ]
   }, true)
 
   const query = Object.values(nextParams).reduce((acc, cur) => {
@@ -265,6 +282,7 @@ router
     ...(type == 1) ? videoConfig : [],
     {
       $project: {
+        expire:1 ,
         file_name: 1,
         description: 1,
         _id: 1,

@@ -3486,6 +3486,12 @@
             "in": "query",
             "description": "结束日期(YYYY-MM-DD)",
             "type": "string"
+          },
+          {
+            "name": "expire",
+            "in": "query",
+            "description": "过期时间(YYYY-MM-DD)，这个时间之前过期的，没有过期时间的不会显示",
+            "type": "string"
           }
         ],
         "responses": {
@@ -7629,6 +7635,10 @@
                       "src": {
                         "type": "string",
                         "description": "地址"
+                      },
+                      "expire": {
+                        "type": "date",
+                        "description": "过期时间"
                       },
                       "file_name": {
                         "type": "string",
