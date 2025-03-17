@@ -22,6 +22,7 @@ const dealErr = (ctx) => {
 
     //日志写入
     log4Error(ctx, err)
+    console.error(err)
 
     return {
       err: true,

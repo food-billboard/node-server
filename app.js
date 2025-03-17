@@ -79,7 +79,7 @@ app
   // }
 }))
 // 设置超时时间为15s
-.use(koaTimeout(15000))
+.use(koaTimeout(45000))
 //api访问权限
 .use(authMiddleware)
 //静态资源访问权限
