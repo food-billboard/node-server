@@ -15,6 +15,7 @@ const chalk = require('chalk')
 const helmet = require('koa-helmet')
 const app = new Koa()
 const { 
+  koaTimeout,
   MongoDB, 
   StaticMiddleware, 
   initStaticFileDir, 
@@ -77,6 +78,8 @@ app
   //   },
   // }
 }))
+// 设置超时时间为15s
+.use(koaTimeout(15000))
 //api访问权限
 .use(authMiddleware)
 //静态资源访问权限

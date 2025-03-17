@@ -1,5 +1,6 @@
 const path = require('path')
 const Day = require('dayjs')
+const co = require('co')
 const fse = require('fs-extra')
 var isoWeek = require('dayjs/plugin/isoWeek')
 const { pick } = require('lodash')
@@ -270,7 +271,33 @@ function isRaspberry() {
   return process.cwd().startsWith('/home/raspberry')
 }
 
+function koaTimeout(timeout) {
+  return function *(next) {
+    var ctx = this;
+    var tmr = null;
+    yield Promise.race([
+      new Promise(function(resolve, reject) {
+        tmr = setTimeout(function() {
+          var e = new Error('Request timeout');
+          e.status = 408;
+          reject(e);
+        }, timeout);
+      }),
+      new Promise(function(resolve, reject) {
+        co(function*() {
+          yield *next;
+        }).call(ctx, function(err) {
+          clearTimeout(tmr);
+          if(err) reject(err);
+          resolve();
+        });
+      })
+    ]);
+  };
+};
+
 module.exports = {
+  koaTimeout,
   isRaspberry,
   sleep,
   isType,
