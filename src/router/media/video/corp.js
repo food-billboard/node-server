@@ -94,6 +94,7 @@ router
           const [ _start, _end ] = item 
           const start = `${_start}.0000`
           const end = `${_end}.0000`
+          console.log(start, end)
           return new Promise((resolve, reject) => {
             let cmd = ''
             // 树莓派环境
@@ -105,6 +106,7 @@ router
             }
             exec(cmd, function (err) {
               if (err) {
+                console.error(err)
                 reject({
                   errMsg: err, 
                   status: 500
@@ -126,8 +128,7 @@ router
           const { src, _id } = value 
           const absolutePath = path.join(STATIC_FILE_PATH_NO_WRAPPER, src)
           const stats = await fs.stat(absolutePath);
-          const data = fs.readFileSync(absolutePath)
-          const md5 = await fileAsyncMd5(data)
+          const md5 = await fileAsyncMd5(absolutePath)
           return VideoModel.updateOne({
             _id,
           }, {
@@ -143,6 +144,7 @@ router
         }))
       })
       .then(data => {
+        console.log(data, 2222)
         return {
           data 
         }
