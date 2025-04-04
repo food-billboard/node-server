@@ -94,7 +94,6 @@ router
           const [ _start, _end ] = item 
           const start = `${_start}.0000`
           const end = `${_end}.0000`
-          console.log(start, end)
           return new Promise((resolve, reject) => {
             let cmd = ''
             // 树莓派环境
@@ -144,7 +143,6 @@ router
         }))
       })
       .then(data => {
-        console.log(data, 2222)
         return {
           data 
         }
