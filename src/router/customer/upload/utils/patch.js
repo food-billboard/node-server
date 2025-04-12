@@ -5,7 +5,18 @@ const Mime = require('mime')
 const { pipeline } = require('stream');
 const { promisify } = require('util');
 const formidable = require('formidable')
-const { ImageModel, VideoModel, OtherMediaModel, notFound, STATIC_FILE_PATH, MEDIA_STATUS, checkAndCreateDir, checkDir, createPoster } = require('@src/utils')
+const {
+  ImageModel,
+  VideoModel,
+  OtherMediaModel,
+  notFound,
+  STATIC_FILE_PATH, 
+  MEDIA_STATUS, 
+  checkAndCreateDir, 
+  checkDir, 
+  createPoster,
+  getClient
+} = require('@src/utils')
 const { promiseAny } = require('./util')
 
 const pipelineAsync = promisify(pipeline);
@@ -13,8 +24,13 @@ const fs = fsBase.promises
 
 const base64Reg = /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*?)\s*$/i
 
+// 是否是大文件
+function isLargeFile(size) {
+  return size >= 1024 * 1024 * 200
+}
+
 //获取分片文件
-const getChunkFileList = (chunk_path) => {
+const getChunkFileList = async (chunk_path) => {
   if (!checkDir(chunk_path)) {
     return fs.readdir(chunk_path)
       .then(data => data.filter(f => path.extname(f) === '' && f.includes('-')))
@@ -84,35 +100,18 @@ const conserveBlob = async ({
   }
 }
 
-async function mergeFilesStream(inputDir, outputFile) {
-  try {
-    const outputStream = fs.createWriteStream(outputFile);
-
-    for (const file of files) {
-      const filePath = path.join(inputDir, file);
-      const inputStream = fs.createReadStream(filePath);
-
-      await pipelineAsync(
-        inputStream,
-        outputStream,
-        { end: false } // 保持输出流打开以便继续写入下一个文件
-      );
-
-      console.log(`已合并: ${file}`);
-    }
-
-    outputStream.end();
-    console.log(`所有文件已合并到 ${outputFile}`);
-  } catch (err) {
-    console.error('合并文件时出错:', err);
-  }
-}
-
 //文件合并
 const mergeChunkFile = async ({
   folder: templateFolder,
-  realFilePath
+  realFilePath,
+  // 文件类型 video、other、image
+  type,
+  // 元数据
+  metadata
 }) => {
+
+  const { md5 } = metadata
+  const redisClient = getClient()
 
   try {
     if (!fsSync.existsSync(templateFolder)) return Promise.reject({ errMsg: 'not found', status: 404 })
@@ -126,7 +125,10 @@ const mergeChunkFile = async ({
   chunkList.sort((suffixA, suffixB) => Number(suffixA.split('-')[1]) - Number(suffixB.split('-')[1]))
   if (!chunkList.every((chunk, index) => index == Number(chunk.split('-')[1]))) return Promise.reject({ errMsg: 'not complete', status: 403 })
   //文件合并
-  const mergeTasks = async () => {
+  const mergeTasks = async ({
+    needMergeMemory,
+    fileSize
+  }) => {
     const outputStream = fsBase.createWriteStream(realFilePath);
 
     for (let i = 0; i < chunkList.length; i++) {
@@ -140,6 +142,17 @@ const mergeChunkFile = async ({
         { end: false } // 保持输出流打开以便继续写入下一个文件
       );
 
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      // 将进度记录进redis方便后期查询
+      if(needMergeMemory) {
+        redisClient.setex(md5, 10 * 60, JSON.stringify({
+          current: i + 1,
+          total: chunkList.length,
+          size: fileSize
+        }))
+      }
+
       // ! 速度太慢了，换成了上面的方法
       // await fs.readFile(path.resolve(templateFolder, chunk))
       //   .then(data => {
@@ -151,11 +164,31 @@ const mergeChunkFile = async ({
     }
 
     outputStream.end();
+
+    await fs.rm(templateFolder, { recursive: true, force: true })
   }
 
   return fs.writeFile(realFilePath, '')
-    .then(_ => mergeTasks())
-    .then(_ => fs.rm(templateFolder, { recursive: true, force: true }))
+    .then(_ => {
+      const { size, md5, offset } = metadata
+      // 大文件选择不等待的响应方式
+      if (isLargeFile(size)) {
+        redisClient.setex(md5, 10 * 60, JSON.stringify({
+          current: 0,
+          total: chunkList.length,
+          size,
+        }))
+        mergeTasks({
+          needMergeMemory: true,
+          fileSize: size 
+        })
+      } else {
+        return mergeTasks({
+          needMergeMemory: false,
+          fileSize: size 
+        })
+      }
+    })
     .catch(err => {
       console.log(err)
       return {
@@ -255,6 +288,7 @@ const pathMediaDeal = {
 
         //返回文件相关信息
         const result = {
+          size,
           filePath: path.join(basePath, `${md5}-${multiple}`),
           folder: basePath,
           realFilePath: path.join(STATIC_FILE_PATH, 'image', `${md5}.${Mime.getExtension(mime)}`),
@@ -349,6 +383,7 @@ const pathMediaDeal = {
 
         //返回文件相关信息
         const result = {
+          size,
           filePath: path.join(basePath, `${md5}-${multiple}`),
           folder: basePath,
           realFilePath,
@@ -444,6 +479,7 @@ const pathMediaDeal = {
 
         //返回文件相关信息
         const result = {
+          size,
           filePath: path.join(basePath, `${md5}-${multiple}`),
           folder: basePath,
           realFilePath: path.join(STATIC_FILE_PATH, 'other', `${md5}.${Mime.getExtension(mime)}`),
@@ -491,7 +527,7 @@ const pathMediaDeal = {
 const patchRequestDeal = async (options) => {
 
   const form = formidable({ multiples: true })
-  const { ctx } = options
+  const { ctx, metadata } = options
 
   return promiseAny(Object.values(pathMediaDeal).map(deal => deal(options)))
     .then(async ({
@@ -505,6 +541,7 @@ const patchRequestDeal = async (options) => {
       complete,
       success,
       error,
+      size,
     }) => {
       //文件获取
       return new Promise((resolve, reject) => {
@@ -534,13 +571,20 @@ const patchRequestDeal = async (options) => {
         })
         .then(_ => {
           //文件合并
-          if (complete) return mergeChunkFile({
-            folder,
-            realFilePath,
-          })
+          if (complete) {
+            return mergeChunkFile({
+              folder,
+              realFilePath,
+              type,
+              metadata: {
+                ...metadata,
+                size 
+              }
+            })
+          }
         })
         .then(_ => success())
-        .then(_ => ({ status: 204, success: true, offset }))
+        .then(_ => ({ status: 204, success: true, offset, complete, size, isLargeFile: isLargeFile(size) }))
         .catch(err => {
           console.error(err)
           return error()
