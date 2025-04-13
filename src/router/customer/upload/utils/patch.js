@@ -10,10 +10,10 @@ const {
   VideoModel,
   OtherMediaModel,
   notFound,
-  STATIC_FILE_PATH, 
-  MEDIA_STATUS, 
-  checkAndCreateDir, 
-  checkDir, 
+  STATIC_FILE_PATH,
+  MEDIA_STATUS,
+  checkAndCreateDir,
+  checkDir,
   createPoster,
   getClient
 } = require('@src/utils')
@@ -129,41 +129,26 @@ const mergeChunkFile = async ({
     needMergeMemory,
     fileSize
   }) => {
-    const outputStream = fsBase.createWriteStream(realFilePath);
 
     for (let i = 0; i < chunkList.length; i++) {
       const chunk = chunkList[i]
       const filePath = path.join(templateFolder, chunk);
-      const inputStream = fsBase.createReadStream(filePath);
 
-      await pipelineAsync(
-        inputStream,
-        outputStream,
-        { end: false } // 保持输出流打开以便继续写入下一个文件
-      );
-
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // ! 速度太慢了，换成了上面的方法
+      await fs.readFile(filePath)
+        .then(data => {
+          return fs.appendFile(realFilePath, data)
+        })
 
       // 将进度记录进redis方便后期查询
-      if(needMergeMemory) {
+      if (needMergeMemory) {
         redisClient.setex(md5, 10 * 60, JSON.stringify({
           current: i + 1,
           total: chunkList.length,
           size: fileSize
         }))
       }
-
-      // ! 速度太慢了，换成了上面的方法
-      // await fs.readFile(path.resolve(templateFolder, chunk))
-      //   .then(data => {
-      //     return fs.appendFile(realFilePath, data)
-      //   })
-      //   .then(_ => {
-      //     return fs.unlink(path.resolve(templateFolder, chunk))
-      //   })
     }
-
-    outputStream.end();
 
     await fs.rm(templateFolder, { recursive: true, force: true })
   }
@@ -180,12 +165,12 @@ const mergeChunkFile = async ({
         }))
         mergeTasks({
           needMergeMemory: true,
-          fileSize: size 
+          fileSize: size
         })
       } else {
         return mergeTasks({
           needMergeMemory: false,
-          fileSize: size 
+          fileSize: size
         })
       }
     })
@@ -578,7 +563,7 @@ const patchRequestDeal = async (options) => {
               type,
               metadata: {
                 ...metadata,
-                size 
+                size
               }
             })
           }
