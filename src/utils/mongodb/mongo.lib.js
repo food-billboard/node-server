@@ -4,6 +4,7 @@ const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
 const { 
+  SCORE_EXCHANGE_CYCLE_TYPE,
   BEHAVIOUR_URL_TYPE_MAP, 
   EMAIL_REGEXP, 
   MEDIA_ORIGIN_TYPE, 
@@ -320,6 +321,9 @@ const PRE_BEHAVIOUR_FIND = []
 
 //user
 const UserSchema = new Schema({
+  score: {
+    type: Number 
+  },
 	mobile: {
     type: Number,
     unique: true,
@@ -1966,6 +1970,8 @@ const ThirdPartySchema = new Schema({
   ...defaultConfig
 })
 
+// ------------------------------------大屏 ------------------------------------
+
 const RaspberrySchema = new Schema({
   name: String,
   description: String, 
@@ -1976,7 +1982,99 @@ const RaspberrySchema = new Schema({
   ...defaultConfig
 })
 
-// ------------------------------------大屏 ------------------------------------
+const ScoreClassifySchema = new Schema({
+  create_user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  description: String,
+}, {
+  ...defaultConfig,
+})
+
+// 积分奖品
+const ScoreAwardSchema = new Schema({
+  // 库存
+  inventory: {
+    type: Number
+  },
+  // 所需积分
+  exchange_score: {
+    type: Number
+  },
+  // 奖品图片
+  award_image_list: [{
+    type: ObjectId,
+    ref: 'image'
+  }],
+  // 兑换周期
+  award_cycle: {
+    type: String,
+    required: true,
+    type: String,
+    enum: Object.keys(SCORE_EXCHANGE_CYCLE_TYPE),
+    uppercase: true,
+  },
+  // 兑换周期次数
+  award_cycle_count: {
+    type: Number
+  },
+  award_name: {
+    type: String,
+    required: true,
+  },
+  award_description: String,
+}, {
+  ...defaultConfig,
+})
+
+// 积分兑换记录
+const ExchangeMemorySchema = new Schema({
+  exchange_user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  // 奖品id
+  award: {
+    type: ObjectId,
+    required: true,
+    ref: 'score_award'
+  },
+}, {
+  ...defaultConfig,
+})
+
+// 积分记录
+const ScoreMemorySchema = new Schema({
+  // 积分对象
+  target_user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  // 积分数量
+  target_score: {
+    type: Number 
+  },
+  // 积分人
+  create_user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  // 积分原因
+  create_content: {
+    type: String 
+  },
+  // 积分原因描述
+  create_description: {
+    type: String 
+  }
+}, {
+  ...defaultConfig,
+})
 
 const FIND_OPERATION_LIB = [
   'find',
@@ -2074,6 +2172,10 @@ const RaspberryModel = model('raspberry', RaspberrySchema)
 const ScreenMediaClassifyModel = model('screen_media_classify', ScreenMediaClassifySchema)
 const ScreenMediaModel = model('screen_media', ScreenMediaSchema)
 const ScreenShotModel = model('screen_shot', ScreenShotSchema)
+const ScoreClassifyModel = model('score_classify', ScoreClassifySchema)
+const ScoreAwardModel = model('score_award', ScoreAwardSchema)
+const ExchangeMemoryModel = model('exchange_memory', ExchangeMemorySchema)
+const ScoreMemoryModel = model('score_memory', ScoreMemorySchema)
 
 module.exports = {
   UserModel,
@@ -2112,6 +2214,10 @@ module.exports = {
   ScreenShotModel,
   EatWhatModel,
   EatWhatClassifyModel,
+  ScoreClassifyModel,
+  ScoreAwardModel,
+  ExchangeMemoryModel,
+  ScoreMemoryModel,
   UserSchema,
   GlobalSchema,
   RoomSchema,
@@ -2147,5 +2253,9 @@ module.exports = {
   ScreenMediaSchema,
   ScreenShotSchema,
   EatWhatSchema,
-  EatWhatClassifySchema
+  EatWhatClassifySchema,
+  ScoreClassifySchema,
+  ScoreAwardSchema,
+  ExchangeMemorySchema,
+  ScoreMemorySchema
 }
