@@ -200,6 +200,73 @@
           }
         ]
       }
+    },
+    "/api/media/video/create": {
+      "post": {
+        "tags": [
+          "video"
+        ],
+        "summary": "创建视频数据库",
+        "description": "",
+        "operationId": "media_video_post_create",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"媒体类型，现在默认就是video"
+          },
+          {
+            "name": "expire",
+            "in": "body",
+            "type": "string",
+            "description":"过期时间YYYY-MM-DD HH:mm:ss"
+          },
+          {
+            "name": "file_name",
+            "in": "body",
+            "type": "string",
+            "description":"文件名称"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "string",
+            "description":"描述"
+          },
+          {
+            "name": "poster",
+            "in": "body",
+            "type": "string",
+            "description":"视频海报"
+          },
+          {
+            "name": "src",
+            "in": "body",
+            "type": "string",
+            "description":"视频地址",
+            "required": true 
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
     }
   },
   "definitions": {
