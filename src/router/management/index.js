@@ -11,6 +11,7 @@ const Chat = require('./chat')
 const Schedule = require('./schedule')
 const Screen = require('./screen')
 const Raspberry = require('./raspberry')
+const Score = require('./score')
 const { loginAuthorization } = require('@src/utils')
 
 const router = new Router()
@@ -30,5 +31,6 @@ router
 .use('/screen', Screen.routes(), Screen.allowedMethods())
 .use('/raspberry', Raspberry.routes(), Raspberry.allowedMethods())
 .use('/eat_what', EatWhat.routes(), EatWhat.allowedMethods())
+.use('/score', Score.routes(), Score.allowedMethods())
 
 module.exports = router

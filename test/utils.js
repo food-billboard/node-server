@@ -83,7 +83,8 @@ function mockCreateUser(values={}, tokenSetting={}) {
     rate: [],
     allow_many: false,
     status: 'SIGNOUT',
-    roles: [ 'SUPER_ADMIN' ]
+    roles: [ 'SUPER_ADMIN' ],
+    score: 0
   }
   baseModel = mergeConfig(baseModel, values, true)
 

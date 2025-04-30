@@ -29,6 +29,14 @@
       }
     },
     {
+      "name": "score",
+      "description": "积分系统",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
       "name": "eat_what",
       "description": "今天吃什么相关",
       "externalDocs": {
@@ -111,6 +119,664 @@
   ],
   "schemes": ["https", "http"],
   "paths": {
+    "/api/manage/score/memory/obtain": {
+      "post": {
+        "tags": ["score"],
+        "summary": "积分",
+        "description": "",
+        "operationId": "manage_post_score",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "target_user",
+            "description": "积分目标人",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "create_content",
+            "description": "积分原因",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "create_description",
+            "description": "积分原因描述",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "target_score",
+            "description": "积分数量",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "get": {
+        "tags": ["score"],
+        "summary": "积分记录列表",
+        "description": "",
+        "operationId": "manage_get_score_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content",
+            "type": "string",
+            "description": "模糊查询(积分人、积分原因、积分对象)"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "description": "起始日期",
+            "default": "month"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date-time",
+            "description": "结束日期"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_get_score_list"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/score/memory/exchange": {
+      "post": {
+        "tags": ["score"],
+        "summary": "兑换",
+        "description": "",
+        "operationId": "manage_post_memory_exchange",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "target_user",
+            "description": "兑换目标人",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "award",
+            "description": "奖品",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "put": {
+        "tags": ["score"],
+        "summary": "兑换核销",
+        "description": "",
+        "operationId": "manage_put_memory_exchange",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "_id",
+            "description": "兑换记录id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "get": {
+        "tags": ["score"],
+        "summary": "兑换记录列表",
+        "description": "",
+        "operationId": "manage_get_memory_exchange_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content",
+            "type": "string",
+            "description": "模糊查询(兑换人、兑换奖品、兑换对象)"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "description": "起始日期",
+            "default": "month"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date-time",
+            "description": "结束日期"
+          },
+          {
+            "name": "check_start_date",
+            "in": "query",
+            "type": "string",
+            "description": "起始日期",
+            "default": "month"
+          },
+          {
+            "name": "check_end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date-time",
+            "description": "结束日期"
+          },
+          {
+            "name": "checked",
+            "in": "query",
+            "type": "boolean",
+            "description": "是否核销"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_get_memory_exchange_list"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/score/classify": {
+      "post": {
+        "tags": ["score"],
+        "summary": "新增积分分类",
+        "description": "",
+        "operationId": "manage_post_score_classify",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "content",
+            "description": "内容",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "description",
+            "description": "描述",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "put": {
+        "tags": ["score"],
+        "summary": "修改积分分类",
+        "description": "",
+        "operationId": "manage_put_score_classify",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "content",
+            "description": "内容",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "description",
+            "description": "描述",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "get": {
+        "tags": ["score"],
+        "summary": "积分分类列表",
+        "description": "",
+        "operationId": "manage_get_score_classify_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content",
+            "type": "string",
+            "description": "模糊查询(内容，描述)"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "description": "起始日期",
+            "default": "month"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date-time",
+            "description": "结束日期"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_get_score_classify_list"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["score"],
+        "summary": "删除积分分类",
+        "description": "",
+        "operationId": "manage_delete_score_classify",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "_id",
+            "type": "string",
+            "description": "分类id(多个用,分隔)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/score/memory/award": {
+      "post": {
+        "tags": ["score"],
+        "summary": "新增积分奖品",
+        "description": "",
+        "operationId": "manage_post_score_award",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "award_name",
+            "description": "奖品名称",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "award_description",
+            "description": "奖品描述",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "award_image_list",
+            "description": "奖品图片(多个用,分隔)",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "award_cycle",
+            "description": "兑换周期",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "NONE",
+              "WEEK按周",
+              "DAY按天",
+              "MONTH按月",
+              "YEAR按年",
+              "QUARTER按季度"
+            ]
+          },
+          {
+            "in": "body",
+            "name": "award_cycle_count",
+            "description": "兑换周期次数",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "inventory",
+            "description": "库存",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "exchange_score",
+            "description": "所需积分",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "put": {
+        "tags": ["score"],
+        "summary": "修改积分奖品",
+        "description": "",
+        "operationId": "manage_put_score_award",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "_id",
+            "description": "奖品id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "award_name",
+            "description": "奖品名称",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "award_description",
+            "description": "奖品描述",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "award_image_list",
+            "description": "奖品图片(多个用,分隔)",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "award_cycle",
+            "description": "兑换周期",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "NONE",
+              "WEEK按周",
+              "DAY按天",
+              "MONTH按月",
+              "YEAR按年",
+              "QUARTER按季度"
+            ]
+          },
+          {
+            "in": "body",
+            "name": "award_cycle_count",
+            "description": "兑换周期次数",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "inventory",
+            "description": "库存",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "exchange_score",
+            "description": "所需积分",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "get": {
+        "tags": ["score"],
+        "summary": "积分奖品列表",
+        "description": "",
+        "operationId": "manage_get_score_award_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content",
+            "type": "string",
+            "description": "模糊查询(名称、描述)"
+          },
+          {
+            "name": "inventory",
+            "in": "query",
+            "type": "integer",
+            "description": "库存数量"
+          },
+          {
+            "name": "exchange_score",
+            "in": "query",
+            "type": "integer",
+            "description": "所需积分"
+          },
+          {
+            "in": "query",
+            "name": "award_cycle",
+            "description": "兑换周期",
+            "type": "string",
+            "enum": [
+              "NONE",
+              "WEEK按周",
+              "DAY按天",
+              "MONTH按月",
+              "YEAR按年",
+              "QUARTER按季度"
+            ]
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "description": "起始日期"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date-time",
+            "description": "结束日期"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_get_score_award_list"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["score"],
+        "summary": "删除积分奖品",
+        "description": "",
+        "operationId": "manage_delete_score_award",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "_id",
+            "type": "string",
+            "description": "分类id(多个用,分隔)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
     "/api/user/eat_what/classify": {
       "post": {
         "tags": ["eat_what"],
@@ -4845,7 +5511,7 @@
             "date_type": {
               "type": "string",
               "description": "日期类型",
-              "enum": [ "date", "time", "datetime" ]
+              "enum": ["date", "time", "datetime"]
             },
             "format": {
               "type": "string",
@@ -4886,7 +5552,7 @@
             "address_type": {
               "type": "string",
               "description": "地址类型",
-              "enum": [ "region", "province", "city", "country" ]
+              "enum": ["region", "province", "city", "country"]
             },
             "prefix": {
               "type": "string",
@@ -4901,12 +5567,12 @@
             "language_type": {
               "type": "string",
               "description": "语言类型",
-              "enum": [ "english", "chinese" ]
+              "enum": ["english", "chinese"]
             },
             "name_type": {
               "type": "string",
               "description": "名字类型",
-              "enum": [ "first", "last", "first-last" ]
+              "enum": ["first", "last", "first-last"]
             }
           }
         },
@@ -4925,12 +5591,12 @@
             "language_type": {
               "type": "string",
               "description": "语言类型",
-              "enum": [ "english", "chinese" ]
+              "enum": ["english", "chinese"]
             },
             "text_type": {
               "type": "string",
               "description": "文字类型",
-              "enum": [ "paragraph", "sentence", "word", "title" ]
+              "enum": ["paragraph", "sentence", "word", "title"]
             }
           }
         },
@@ -4963,6 +5629,301 @@
       },
       "xml": {
         "name": "screen_mock_post"
+      }
+    },
+    "manage_get_score_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "target_user": {
+                        "type": "string",
+                        "description": "积分对象"
+                      },
+                      "target_user_name": {
+                        "type": "string",
+                        "description": "积分对象姓名"
+                      },
+                      "create_user": {
+                        "type": "string",
+                        "description": "积分人"
+                      },
+                      "create_user_name": {
+                        "type": "string",
+                        "description": "积分人姓名"
+                      },
+                      "target_score": {
+                        "type": "string",
+                        "description": "积分分数"
+                      },
+                      "create_content": {
+                        "type": "string",
+                        "description": "积分原因"
+                      },
+                      "create_description": {
+                        "type": "string",
+                        "description": "积分描述"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "积分时间"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_get_score_list"
+      }
+    },
+    "manage_get_memory_exchange_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "exchange_user": {
+                        "type": "string",
+                        "description": "兑换人"
+                      },
+                      "exchange_user_name": {
+                        "type": "string",
+                        "description": "兑换人姓名"
+                      },
+                      "exchange_target": {
+                        "type": "string",
+                        "description": "兑换目标人"
+                      },
+                      "exchange_target_name": {
+                        "type": "string",
+                        "description": "兑换目标人姓名"
+                      },
+                      "award_name": {
+                        "type": "string",
+                        "description": "奖品名称"
+                      },
+                      "award_exchange_score": {
+                        "type": "string",
+                        "description": "奖品积分"
+                      },
+                      "award_image_list": {
+                        "type": "array",
+                        "description": "奖品图片"
+                      },
+                      "check_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "核销时间"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "兑换时间"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_get_memory_exchange_list"
+      }
+    },
+    "manage_get_score_classify_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "create_user": {
+                        "type": "string",
+                        "description": "创建人"
+                      },
+                      "create_user_name": {
+                        "type": "string",
+                        "description": "创建人姓名"
+                      },
+                      "content": {
+                        "type": "string",
+                        "description": "内容"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_get_score_classify_list"
+      }
+    },
+    "manage_get_score_award_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "create_user": {
+                        "type": "string",
+                        "description": "创建用户id"
+                      },
+                      "create_user_name": {
+                        "type": "string",
+                        "description": "创建用户名"
+                      },
+                      "inventory": {
+                        "type": "integer",
+                        "description": "库存"
+                      },
+                      "exchange_score": {
+                        "type": "integer",
+                        "description": "所需积分"
+                      },
+                      "award_image_list": {
+                        "type": "array",
+                        "description": "奖品图片"
+                      },
+                      "award_name": {
+                        "type": "string",
+                        "description": "奖品名称"
+                      },
+                      "award_cycle": {
+                        "type": "string",
+                        "description": "兑换周期",
+                        "enum":  [
+                          "NONE",
+                          "WEEK按周",
+                          "DAY按天",
+                          "MONTH按月",
+                          "YEAR按年",
+                          "QUARTER按季度"
+                        ]
+                      },
+                      "award_cycle_count": {
+                        "type": "string",
+                        "description": "兑换周期次数"
+                      },
+                      "award_description": {
+                        "type": "string",
+                        "description": "奖品描述"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_get_score_award_list"
       }
     },
     "raspberry_list_get": {

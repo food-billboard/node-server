@@ -49,7 +49,8 @@ function scheduleMethod({
       rate: [],
       allow_many: false,
       status: 'SIGNOUT',
-      roles: [ ROLES_NAME_MAP.SUPER_ADMIN ]
+      roles: [ ROLES_NAME_MAP.SUPER_ADMIN ],
+      score: 0
     })
     return user.save()
   })

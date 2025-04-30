@@ -319,6 +319,16 @@ const PRE_BARRAGE_FIND = [
 ]
 const PRE_BEHAVIOUR_FIND = []
 
+const PRE_SCORE_AWARD_FIND = [
+  {
+    path: 'award_image_list',
+    select: {
+      _id: 1,
+      src: 1
+    }
+  },
+]
+
 //user
 const UserSchema = new Schema({
   score: {
@@ -2028,13 +2038,23 @@ const ScoreAwardSchema = new Schema({
     required: true,
   },
   award_description: String,
+  create_user: {
+    type: ObjectId,
+    ref: 'user'
+  }
 }, {
   ...defaultConfig,
 })
 
 // 积分兑换记录
 const ExchangeMemorySchema = new Schema({
+  // 兑换人
   exchange_user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  // 兑换目标 拿到东西的人
+  exchange_target: {
     type: ObjectId,
     ref: 'user'
   },
@@ -2044,6 +2064,10 @@ const ExchangeMemorySchema = new Schema({
     required: true,
     ref: 'score_award'
   },
+  // 核销时间
+  check_date: {
+    type: Date 
+  }
 }, {
   ...defaultConfig,
 })
@@ -2109,6 +2133,7 @@ FIND_OPERATION_LIB.forEach(op => {
   BarrageSchema.pre(op, prePopulate(PRE_BARRAGE_FIND))
   BehaviourSchema.pre(op, prePopulate(PRE_BEHAVIOUR_FIND))
   EatWhatSchema.pre(op, prePopulate(PRE_EAT_WHAT_FIND))
+  // ScoreAwardSchema.post(op, prePopulate(PRE_SCORE_AWARD_FIND))
 })
 
 //完成处理
@@ -2131,9 +2156,10 @@ SAVE_OPERATION_LIB.forEach(op => {
   VideoSchema.post(op, postMiddleware)
   ImageSchema.post(op, postMiddleware)
   OtherMediaSchema.post(op, postMiddleware)
-  BarrageSchema.post(op, postMiddleware),
-  AuthSchema.post(op, postMiddleware),
+  BarrageSchema.post(op, postMiddleware)
+  AuthSchema.post(op, postMiddleware)
   BehaviourSchema.post(op, postMiddleware)
+  ScoreAwardSchema.post(op, postMiddleware)
 })
 
 const UserModel = model('user', UserSchema)

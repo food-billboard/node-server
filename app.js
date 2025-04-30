@@ -3,6 +3,7 @@ const Koa = require('koa')
 const Day = require('dayjs')
 const Utc = require('dayjs/plugin/utc')
 const Timezone = require('dayjs/plugin/timezone')
+const QuarterOfYear = require('dayjs/plugin/quarterOfYear');
 require('module-alias/register')
 const Router = require('./src/index')
 const Cors = require('koa-cors')
@@ -29,6 +30,7 @@ const { request, middleware4Uuid } = require('@src/config/winston')
 //时区设置
 Day.extend(Utc)
 Day.extend(Timezone)
+Day.extend(QuarterOfYear)
 Day.tz.setDefault("China/BeiJing")
 
 //数据库启动

@@ -34,6 +34,7 @@ function createInitialUserInfo({ mobile, password, username, avatar, description
     allow_many: false,
     status: 'SIGNIN',
     roles: [ROLES_NAME_MAP.CUSTOMER],
+    score: 0,
     ...nextData
   }
   if(ObjectId.isValid(avatar)) defaultModel.avatar = avatar 
