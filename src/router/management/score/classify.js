@@ -211,8 +211,6 @@ router
     }
   }
 
-  console.log(findQuery, 22222)
-
   //database
   const data = await Promise.all([
     ScoreClassifyModel.aggregate([

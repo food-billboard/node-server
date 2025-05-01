@@ -36,7 +36,7 @@ router
       sanitizers: [
         function (data) {
           try {
-            if(!data) return null 
+            if (!data) return null
             const date = dayjs(data)
             return date.isValid() ? date.toDate() : null
           } catch (err) {
@@ -49,7 +49,7 @@ router
       sanitizers: [
         function (data) {
           try {
-            if(!data) return null 
+            if (!data) return null
             const date = dayjs(data)
             return date.isValid() ? date.toDate() : null
           } catch (err) {
@@ -204,8 +204,10 @@ router
         const [total = { total: 0 }] = total_data
 
         return {
-          list: data,
-          total: total.total
+          data: {
+            list: data,
+            total: total.total
+          }
         }
       })
       .catch(dealErr(ctx))
@@ -275,7 +277,7 @@ router
       .exec()
       .then()
       .then((data) => {
-        if(data) return Promise.reject({ status: 400, errMsg: '名称重复' })
+        if (data) return Promise.reject({ status: 400, errMsg: '名称重复' })
         const model = new ScoreAwardModel({
           create_user: ObjectId(id),
           award_description,
@@ -302,44 +304,44 @@ router
 
   })
   // 删除
-.delete('/', async (ctx) => {
-  //validate params
-  const check = Params.query(ctx, {
-    name: '_id',
-    validator: [
-      data => data.split(',').every(data => ObjectId.isValid(data))
-    ]
-  })
-  if (check) return
+  .delete('/', async (ctx) => {
+    //validate params
+    const check = Params.query(ctx, {
+      name: '_id',
+      validator: [
+        data => data.split(',').every(data => ObjectId.isValid(data))
+      ]
+    })
+    if (check) return
 
-  const [_id] = Params.sanitizers(ctx.query, {
-    name: '_id',
-    sanitizers: [
-      function (data) {
-        return data.split(',').map(data => ObjectId(data))
-      }
-    ]
-  })
+    const [_id] = Params.sanitizers(ctx.query, {
+      name: '_id',
+      sanitizers: [
+        function (data) {
+          return data.split(',').map(data => ObjectId(data))
+        }
+      ]
+    })
 
-  //database
-  const data = await ScoreAwardModel.deleteMany({
-    _id: {
-      $in: _id
-    }
-  })
-    .then(data => {
-      if (data.deletedCount === 0) return Promise.reject({ errMsg: 'not found', status: 404 })
-      return {
-        data: null
+    //database
+    const data = await ScoreAwardModel.deleteMany({
+      _id: {
+        $in: _id
       }
     })
-    .catch(dealErr(ctx))
+      .then(data => {
+        if (data.deletedCount === 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+        return {
+          data: null
+        }
+      })
+      .catch(dealErr(ctx))
 
-  responseDataDeal({
-    ctx,
-    data
+    responseDataDeal({
+      ctx,
+      data
+    })
   })
-})
   // 修改
   .put('/', async (ctx) => {
     const check = Params.body(ctx, {

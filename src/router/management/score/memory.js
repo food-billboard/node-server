@@ -26,7 +26,7 @@ router
       sanitizers: [
         function (data) {
           try {
-            if(!data) return null 
+            if (!data) return null
             const date = dayjs(data)
             return date.isValid() ? date.toDate() : null
           } catch (err) {
@@ -39,7 +39,7 @@ router
       sanitizers: [
         function (data) {
           try {
-            if(!data) return null 
+            if (!data) return null
             const date = dayjs(data)
             return date.isValid() ? date.toDate() : null
           } catch (err) {
@@ -318,11 +318,11 @@ router
         }, {
           $inc: { score: target_score }
         })
-        .then(() => {
-          return {
-            data: data._id
-          }
-        })
+          .then(() => {
+            return {
+              data: data._id
+            }
+          })
       })
       .catch(dealErr(ctx))
 
@@ -340,7 +340,7 @@ router
       sanitizers: [
         function (data) {
           try {
-            if(!data) return null 
+            if (!data) return null
             const date = dayjs(data)
             return date.isValid() ? date.toDate() : null
           } catch (err) {
@@ -353,7 +353,7 @@ router
       sanitizers: [
         function (data) {
           try {
-            if(!data) return null 
+            if (!data) return null
             const date = dayjs(data)
             return date.isValid() ? date.toDate() : null
           } catch (err) {
@@ -366,7 +366,7 @@ router
       sanitizers: [
         function (data) {
           try {
-            if(!data) return null 
+            if (!data) return null
             const date = dayjs(data)
             return date.isValid() ? date.toDate() : null
           } catch (err) {
@@ -379,7 +379,7 @@ router
       sanitizers: [
         function (data) {
           try {
-            if(!data) return null 
+            if (!data) return null
             const date = dayjs(data)
             return date.isValid() ? date.toDate() : null
           } catch (err) {
@@ -441,7 +441,7 @@ router
         let match = {}
         if (!isNil(checked)) {
           match.check_date = {
-            $exists: !!checked 
+            $exists: !!checked
           }
         }
         if (start_date) {
@@ -659,8 +659,10 @@ router
         const [total = { total: 0 }] = total_data
 
         return {
-          list: data,
-          total: total.total
+          data: {
+            list: data,
+            total: total.total
+          }
         }
       })
       .catch(dealErr(ctx))
@@ -702,7 +704,7 @@ router
 
     const [, token] = verifyTokenToData(ctx)
     const { id } = token
-    
+
     let _exchange_score = 0
 
     const data = await ScoreAwardModel.findOne({
@@ -794,11 +796,11 @@ router
         }, {
           $inc: { score: -_exchange_score }
         })
-        .then(() => {
-          return {
-            data: data._id
-          }
-        })
+          .then(() => {
+            return {
+              data: data._id
+            }
+          })
       })
       .catch(dealErr(ctx))
 
@@ -829,11 +831,11 @@ router
     const data = await ExchangeMemoryModel.updateOne({
       _id,
       check_date: {
-        $exists: false 
+        $exists: false
       }
     }, {
       $set: {
-        check_date: new Date() 
+        check_date: new Date()
       }
     })
       .then(data => {
