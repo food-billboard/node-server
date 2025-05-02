@@ -248,8 +248,10 @@ router
         const [total = { total: 0 }] = total_data
 
         return {
-          list: data,
-          total: total.total
+          data: {
+            list: data,
+            total: total.total
+          }
         }
       })
       .catch(dealErr(ctx))
