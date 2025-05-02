@@ -154,7 +154,7 @@ router
               $lookup: {
                 from: 'users',
                 let: {
-                  create_user_id: "$crate_user"
+                  create_user_id: "$create_user"
                 },
                 pipeline: [
                   {
@@ -179,12 +179,12 @@ router
                     }
                   },
                 ],
-                as: 'crate_user'
+                as: 'create_user'
               }
             },
             {
               $unwind: {
-                path: "$crate_user",
+                path: "$create_user",
                 preserveNullAndEmptyArrays: true
               }
             },
@@ -244,7 +244,6 @@ router
         ])
       })
       .then(([total_data, data]) => {
-
         const [total = { total: 0 }] = total_data
 
         return {
@@ -608,7 +607,7 @@ router
             },
             {
               $lookup: {
-                from: 'score_award',
+                from: 'score_awards',
                 let: {
                   award_id: "$award"
                 },
@@ -641,7 +640,8 @@ router
             {
               $project: {
                 _id: 1,
-                award_name: "$award.name",
+                award: "$award",
+                award_name: "$award.award_name",
                 award_exchange_score: "$award.exchange_score",
                 award_image_list: "$award.award_image_list.src",
                 check_date: 1,
