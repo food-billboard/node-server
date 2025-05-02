@@ -782,13 +782,15 @@ router
           .then(data => {
             const { score } = data
             if (score < exchange_score) return Promise.reject({ status: 400, errMsg: '积分不足' })
-            const model = new ExchangeMemoryModel({
-              exchange_target: target_user,
-              exchange_user: id,
-              award,
-            })
-            return model.save()
           })
+      })
+      .then(() => {
+        const model = new ExchangeMemoryModel({
+          exchange_target: target_user,
+          exchange_user: id,
+          award,
+        })
+        return model.save()
       })
       .then(data => {
         return UserModel.updateOne({
