@@ -30,7 +30,7 @@ async function scheduleMethod({
       {
         $match: {
           expire: {
-            $lte: Date(),
+            $lte: new Date(),
           } 
         }
       }
@@ -42,9 +42,9 @@ async function scheduleMethod({
             $in: data.map(item => item._id)
           }
         }),
-        fs.remove(data.map(item => {
-          return path.join(STATIC_FILE_PATH_NO_WRAPPER, item.src)
-        }))
+        ...data.map(item => {
+          return fs.remove(path.join(STATIC_FILE_PATH_NO_WRAPPER, item.src))
+        })
       ])
     })
   }))
