@@ -51,6 +51,11 @@ const checkParams = (ctx, ...nextCheck) => {
     validator: [
       data => typeof data === 'string' ? data.split(',').every(item => Object.keys(ROLES_MAP).includes(item.trim().toUpperCase()))  : typeof data === 'undefined'
     ]
+  }, {
+    name: 'birthday',
+    validator: [
+      data => !!data && Day(data).isValid()
+    ]
   }, ...nextCheck)
 }
 
@@ -165,6 +170,8 @@ router
           hot: 1,
           status: 1,
           roles: 1,
+          birthday: 1,
+          score: 1,
           avatar: "$avatar.src",
           fans_count: {
             $size: {
@@ -238,25 +245,32 @@ router
   if(check) return
 
   let userModel = {}
-  const [ roles ] = Params.sanitizers(ctx.request.body, {
+  const [ roles, birthday ] = Params.sanitizers(ctx.request.body, {
     name: 'roles',
     sanitizers: [
       data => {
         return (typeof data === 'string') ? data.split(',') : ["USER"]
       }
     ]
+  }, {
+    name: 'birthday',
+    sanitizers: [
+      data => {
+        return Day(data).toDate()
+      }
+    ]
   })
-  const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'roles' ]
+  const sanitizersData = {
+    roles,
+    birthday
+  }
+  const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'roles', 'birthday' ]
   const { request: { body } } = ctx
   const { mobile: newUserMobile, email } = body
 
   userModel = Object.keys(body).reduce((acc, cur) => {
     if(params.includes(cur)) {
-      if(cur === 'roles') {
-        acc.roles = roles
-      }else if(typeof body[cur] != 'undefined') {
-        acc[cur] = body[cur]
-      }
+      acc[cur] = sanitizersData[cur] || body[cur]
     }
     return acc
   }, {})
@@ -309,7 +323,7 @@ router
   if(check) return
 
   let editModel = {}
-  const [ _id, roles ] = Params.sanitizers(ctx.request.body, {
+  const [ _id, roles, birthday ] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       data => ObjectId(data)
@@ -323,6 +337,14 @@ router
         return false 
       }
     ]
+  }, {
+    name: 'birthday',
+    sanitizers: [
+      data => {
+        if(!data || !Day(data).isValid()) return false 
+        return Day(data).toDate() 
+      }
+    ]
   })
   const params = [ 'mobile', 'password', 'email', 'username', 'description', 'avatar', 'roles' ]
   const { request: { body } } = ctx
@@ -331,6 +353,8 @@ router
     if(params.includes(cur)) {
       if(cur == 'roles') {
         if(!!roles) acc.roles = roles
+      }else if(cur === 'birthday') {
+        acc[cur] = birthday
       }else if(cur === 'password') {
         if(VALIDATOR_MAP.password(body[cur])) acc[cur] = encoded(body[cur])
       }else if(cur == 'avatar') {

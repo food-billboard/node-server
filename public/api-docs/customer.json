@@ -2834,6 +2834,14 @@
                   "type": "string",
                   "description": "手机号"
                 },
+                "score": {
+                  "type": "string",
+                  "description": "积分"
+                },
+                "birthday": {
+                  "type": "string",
+                  "description": "出生年月"
+                },
                 "description": {
                   "type": "string",
                   "description": "描述"
@@ -3867,6 +3875,14 @@
                 "avatar": {
                   "type": "string",
                   "description": "头像"
+                },
+                "score": {
+                  "type": "string",
+                  "description": "积分"
+                },
+                "birthday": {
+                  "type": "string",
+                  "description": "出生年月"
                 },
                 "description": {
                   "type": "string",

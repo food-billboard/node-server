@@ -5,6 +5,7 @@ const {
   Params,
   responseDataDeal,
   ScoreClassifyModel,
+  ScorePrimaryClassifyModel
 } = require('@src/utils')
 const dayjs = require('dayjs')
 const { Types: { ObjectId } } = require('mongoose')
@@ -19,10 +20,22 @@ router
     validator: [
       data => !!data
     ]
+  }, {
+    name: 'primary',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
   })
   if (check) return
 
-  const { description, content } = ctx.request.body
+  const { description, content,  } = ctx.request.body
+
+  const [ primary ] = Params.sanitizers(body, {
+    name: 'primary',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
 
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
@@ -38,7 +51,8 @@ router
       const model = new ScoreClassifyModel({
         content,
         description,
-        create_user: ObjectId(id)
+        create_user: ObjectId(id),
+        primary
       })
       return model.save()
     })
@@ -66,17 +80,27 @@ router
     validator: [
       data => ObjectId.isValid(data)
     ]
+  }, {
+    name: 'primary',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
   })
   if (check) return
 
-  const [_id] = Params.sanitizers(ctx.request.body, {
+  const [_id, primary] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       function (data) {
         return ObjectId(data)
       }
     ]
-  }, )
+  }, {
+    name: 'primary',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  })
 
   const { description, content } = ctx.request.body
 
@@ -84,6 +108,7 @@ router
   let updateQuery = {
     description,
     content,
+    primary
   }
   const data = await ScoreClassifyModel.findOne({
     content,
@@ -153,7 +178,7 @@ router
 })
 .get('/', async (ctx) => {
 
-  const [ start_date, end_date ] = Params.sanitizers(ctx.query, {
+  const [ start_date, end_date, primary_id ] = Params.sanitizers(ctx.query, {
     name: 'start_date',
     sanitizers: [
       function(data) {
@@ -179,10 +204,20 @@ router
         }
       }
     ]
+  }, {
+    name: 'primary_id',
+    sanitizers: [
+      function (data) {
+        try {
+          if(!data) return null 
+          return ObjectId(data)
+        }catch(err) {
+          return null 
+        }
+      }
+    ]
   })
   const { content, currPage, pageSize } = ctx.query 
-
-  console.log(start_date, 222222)
 
   let findQuery = {}
   if(start_date) {
@@ -190,6 +225,9 @@ router
       $lte: end_date,
       $gte: start_date 
     }
+  }
+  if(primary_id) {
+    findQuery.primary = primary_id
   }
   if(content) {
     findQuery = {
@@ -251,12 +289,28 @@ router
         }
       },
       {
+        $lookup: {
+          from: 'score_primary_classifies',
+          as: 'primary',
+          foreignField: "_id",
+          localField: "primary"
+        }
+      },
+      {
+        $unwind: {
+          path: "$primary",
+          preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
         $project: {
           _id: 1,
           description: 1,
           content: 1,
           create_user: "$create_user._id",
           create_user_name: "$create_user.username",
+          primary_content: "$primary.content",
+          primary_id: "$primary._id",
           createdAt: 1,
           updatedAt: 1,
         }
@@ -279,5 +333,58 @@ router
   })
 
 })
+.get('/primary', async (ctx) => {
+
+  const { content } = ctx.query 
+
+  let findQuery = {}
+  if(content) {
+    findQuery = {
+      ...findQuery,
+      $or: [
+        {
+          content: {
+            $regex: content,
+            $options: 'gi'
+          }
+        },
+      ]
+    }
+  }
+
+  //database
+  const data = await ScorePrimaryClassifyModel.aggregate([
+    {
+      $match: findQuery
+    },
+    {
+      $limit: 999
+    },
+    {
+      $project: {
+        _id: 1,
+        content: 1,
+        createdAt: 1,
+        updatedAt: 1,
+      }
+    }
+  ])
+  .then((data) => {
+    return {
+      data: {
+        list: data,
+        total: data.length,
+      }
+    }
+  })
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data
+  })
+
+})
+
 
 module.exports = router

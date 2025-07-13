@@ -334,6 +334,9 @@ const UserSchema = new Schema({
   score: {
     type: Number 
   },
+  birthday: {
+    type: Date
+  },
 	mobile: {
     type: Number,
     unique: true,
@@ -1992,6 +1995,19 @@ const RaspberrySchema = new Schema({
   ...defaultConfig
 })
 
+const ScorePrimaryClassifySchema = new Schema({
+  create_user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  content: {
+    type: String,
+    required: true,
+  }
+}, {
+  ...defaultConfig,
+})
+
 const ScoreClassifySchema = new Schema({
   create_user: {
     type: ObjectId,
@@ -2002,6 +2018,12 @@ const ScoreClassifySchema = new Schema({
     required: true,
   },
   description: String,
+  classify: {
+    type: ObjectId,
+    ref: 'score_primary_classify'
+  },
+  max_age: Number,
+  min_age: Number
 }, {
   ...defaultConfig,
 })
@@ -2202,8 +2224,10 @@ const ScoreClassifyModel = model('score_classify', ScoreClassifySchema)
 const ScoreAwardModel = model('score_award', ScoreAwardSchema)
 const ExchangeMemoryModel = model('exchange_memory', ExchangeMemorySchema)
 const ScoreMemoryModel = model('score_memory', ScoreMemorySchema)
+const ScorePrimaryClassifyModel = model('score_primary_classify', ScorePrimaryClassifySchema)
 
 module.exports = {
+  ScorePrimaryClassifyModel,
   UserModel,
   GlobalModel,
   RoomModel,
@@ -2244,6 +2268,7 @@ module.exports = {
   ScoreAwardModel,
   ExchangeMemoryModel,
   ScoreMemoryModel,
+  ScorePrimaryClassifySchema,
   UserSchema,
   GlobalSchema,
   RoomSchema,

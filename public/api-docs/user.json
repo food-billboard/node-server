@@ -974,6 +974,12 @@
             "in": "body",
             "name": "avatar",
             "description": "头像(图片id)"
+          },
+          {
+            "in": "body",
+            "name": "birthday",
+            "description": "出生年月",
+            "required": true
           }
         ],
         "responses": {
@@ -2071,6 +2077,10 @@
                 "hot": {
                   "type": "integer",
                   "description": "被点赞次数"
+                },
+                "birthday": {
+                  "type": "date",
+                  "description": "出生年月"
                 },
                 "attentions": {
                   "type": "integer",

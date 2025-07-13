@@ -31,10 +31,15 @@ router
   {
     name: 'captcha',
     validator: [data => typeof data === 'string' && data.length === 6]
+  }, {
+    name: 'birthday',
+    validator: data => {
+      return data && dayjs(data).isValid()
+    }
   })
   if(check) return
 
-  const [ password, uid, mobile ] = Params.sanitizers(ctx.request.body, {
+  const [ password, uid, mobile, birthday ] = Params.sanitizers(ctx.request.body, {
     name: 'password',
     type: ['trim'],
   }, {
@@ -43,6 +48,11 @@ router
   }, {
     name: 'mobile',
     type: ['toInt']
+  }, {
+    name: 'birthday',
+    sanitizers: [
+      data => dayjs(data).toDate()
+    ]
   })
   const { request: { body: { email, captcha, username, description, avatar, env } } } = ctx
 
@@ -74,11 +84,17 @@ router
 
     //创建用户
     return initialUserData({
-      mobile, password, email, username, description, avatar
+      mobile, 
+      password, 
+      email, 
+      username, 
+      description, 
+      avatar,
+      birthday
     })
   })
   .then(data => {
-    const { avatar, _id, username, createdAt, updatedAt } = data
+    const { avatar, _id, username, createdAt, updatedAt, birthday } = data
     const token = signToken({ mobile, id: _id })
 
     //重置默认的koa状态码
@@ -97,7 +113,8 @@ router
         attentions:0,
         hot: 0,
         _id,
-        token
+        token,
+        birthday
       }
     }
   })

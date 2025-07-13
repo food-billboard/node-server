@@ -382,6 +382,12 @@
             "name": "description",
             "description": "描述",
             "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "primary",
+            "description": "一级分类id",
+            "type": "string"
           }
         ],
         "responses": {
@@ -415,6 +421,18 @@
             "name": "description",
             "description": "描述",
             "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "primary",
+            "description": "一级分类id",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "_id",
+            "description": "分类id",
+            "type": "string"
           }
         ],
         "responses": {
@@ -441,6 +459,12 @@
             "name": "content",
             "type": "string",
             "description": "模糊查询(内容，描述)"
+          },
+          {
+            "in": "query",
+            "name": "primary_id",
+            "type": "string",
+            "description": "一级分类id"
           },
           {
             "name": "start_date",
@@ -501,6 +525,37 @@
         "responses": {
           "200": {
             "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/score/classify/primary": {
+      "get": {
+        "tags": ["score"],
+        "summary": "积分一级分类列表",
+        "description": "",
+        "operationId": "manage_get_score_primary_classify_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content",
+            "type": "string",
+            "description": "模糊查询(内容，描述)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_get_score_primary_classify_list"
+            }
           }
         },
         "security": [
@@ -2986,6 +3041,13 @@
             "type": "string"
           },
           {
+            "name": "birthday",
+            "in": "body",
+            "required": true,
+            "description": "出生年月（YYYY-MM-DD）",
+            "type": "string"
+          },
+          {
             "name": "email",
             "in": "body",
             "required": true,
@@ -3070,6 +3132,12 @@
             "in": "body",
             "description": "手机",
             "type": "integer"
+          },
+          {
+            "name": "birthday",
+            "in": "body",
+            "description": "出生年月（YYYY-MM-DD）",
+            "type": "string"
           },
           {
             "name": "password",
@@ -3660,6 +3728,13 @@
             "required": true,
             "description": "用户名",
             "type": "string"
+          },
+          {
+            "name": "birthday",
+            "in": "body",
+            "required": true,
+            "description": "出生年月",
+            "type": "date"
           },
           {
             "name": "avatar",
@@ -5815,6 +5890,14 @@
                         "type": "string",
                         "description": "内容"
                       },
+                      "primary_content": {
+                        "type": "string",
+                        "description": "一级分类名称"
+                      },
+                      "primary_id": {
+                        "type": "string",
+                        "description": "一级分类id"
+                      },
                       "description": {
                         "type": "string",
                         "description": "描述"
@@ -5837,6 +5920,53 @@
       },
       "xml": {
         "name": "manage_get_score_classify_list"
+      }
+    },
+    "manage_get_score_primary_classify_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "content": {
+                        "type": "string",
+                        "description": "内容"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_get_score_primary_classify_list"
       }
     },
     "manage_get_score_award_list": {
@@ -7697,6 +7827,14 @@
                         "type": "string",
                         "description": "用户名"
                       },
+                      "score": {
+                        "type": "string",
+                        "description": "积分"
+                      },
+                      "birthday": {
+                        "type": "string",
+                        "description": "出生年月"
+                      },
                       "mobile": {
                         "type": "integer",
                         "description": "手机"
@@ -7787,6 +7925,14 @@
                 "username": {
                   "type": "string",
                   "description": "用户名"
+                },
+                "score": {
+                  "type": "string",
+                  "description": "积分"
+                },
+                "birthday": {
+                  "type": "string",
+                  "description": "出生年月"
                 },
                 "mobile": {
                   "type": "integer",
@@ -8221,6 +8367,14 @@
                 "username": {
                   "type": "string",
                   "description": "用户名"
+                },
+                "score": {
+                  "type": "string",
+                  "description": "积分"
+                },
+                "birthday": {
+                  "type": "string",
+                  "description": "出生年月"
                 },
                 "mobile": {
                   "type": "integer",
