@@ -25,13 +25,23 @@ router
     validator: [
       data => ObjectId.isValid(data)
     ]
+  }, {
+    name: 'image',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
   })
   if (check) return
 
   const { description, content,  } = ctx.request.body
 
-  const [ primary ] = Params.sanitizers(body, {
+  const [ primary, image ] = Params.sanitizers(body, {
     name: 'primary',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
+  }, {
+    name: 'image',
     sanitizers: [
       data => ObjectId(data)
     ]
@@ -52,7 +62,8 @@ router
         content,
         description,
         create_user: ObjectId(id),
-        primary
+        primary,
+        image
       })
       return model.save()
     })
@@ -85,10 +96,15 @@ router
     sanitizers: [
       data => ObjectId(data)
     ]
+  }, {
+    name: 'image',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
   })
   if (check) return
 
-  const [_id, primary] = Params.sanitizers(ctx.request.body, {
+  const [_id, primary, image] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       function (data) {
@@ -100,6 +116,11 @@ router
     sanitizers: [
       data => ObjectId(data)
     ]
+  }, {
+    name: 'image',
+    sanitizers: [
+      data => ObjectId(data)
+    ]
   })
 
   const { description, content } = ctx.request.body
@@ -108,7 +129,8 @@ router
   let updateQuery = {
     description,
     content,
-    primary
+    primary,
+    image
   }
   const data = await ScoreClassifyModel.findOne({
     content,
@@ -276,6 +298,20 @@ router
       },
       {
         $lookup: {
+          from: 'images',
+          as: 'image',
+          foreignField: "_id",
+          localField: "image"
+        }
+      },
+      {
+        $unwind: {
+          path: "$image",
+          preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
+        $lookup: {
           from: 'users',
           as: 'create_user',
           foreignField: "_id",
@@ -307,6 +343,7 @@ router
           _id: 1,
           description: 1,
           content: 1,
+          image: "$image",
           create_user: "$create_user._id",
           create_user_name: "$create_user.username",
           primary_content: "$primary.content",

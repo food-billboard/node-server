@@ -2018,6 +2018,10 @@ const ScoreClassifySchema = new Schema({
     required: true,
   },
   description: String,
+  image: {
+    type: ObjectId,
+    ref: 'image'
+  },
   classify: {
     type: ObjectId,
     ref: 'score_primary_classify'

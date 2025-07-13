@@ -388,6 +388,12 @@
             "name": "primary",
             "description": "一级分类id",
             "type": "string"
+          }, 
+          {
+            "in": "body",
+            "name": "image",
+            "description": "图片",
+            "type": "string"
           }
         ],
         "responses": {
@@ -432,6 +438,12 @@
             "in": "body",
             "name": "_id",
             "description": "分类id",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "image",
+            "description": "图片",
             "type": "string"
           }
         ],
@@ -5881,6 +5893,10 @@
                       "create_user": {
                         "type": "string",
                         "description": "创建人"
+                      },
+                      "image": {
+                        "type": "string",
+                        "description": "图片"
                       },
                       "create_user_name": {
                         "type": "string",
