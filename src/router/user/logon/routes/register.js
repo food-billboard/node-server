@@ -31,11 +31,6 @@ router
   {
     name: 'captcha',
     validator: [data => typeof data === 'string' && data.length === 6]
-  }, {
-    name: 'birthday',
-    validator: data => {
-      return data && dayjs(data).isValid()
-    }
   })
   if(check) return
 
