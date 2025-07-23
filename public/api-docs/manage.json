@@ -120,18 +120,18 @@
   "schemes": ["https", "http"],
   "paths": {
     "/api/manage/score/memory/obtain": {
-      "post": {
+      "put": {
         "tags": ["score"],
-        "summary": "积分",
+        "summary": "修改积分",
         "description": "",
-        "operationId": "manage_post_score",
+        "operationId": "manage_put_score",
         "consumes": ["application/json", "application/xml"],
         "produces": ["application/xml", "application/json"],
         "parameters": [
           {
             "in": "body",
-            "name": "target_user",
-            "description": "积分目标人",
+            "name": "_id",
+            "description": "积分记录id",
             "required": true,
             "type": "string"
           },
@@ -154,6 +154,14 @@
             "description": "积分数量",
             "required": true,
             "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "score_type",
+            "description": "积分类型",
+            "enum": ["DONE", "DEAL", "TODO"],
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -206,6 +214,25 @@
             "in": "query",
             "description": "每页数量",
             "type": "integer"
+          },
+          {
+            "name": "target_score",
+            "in": "query",
+            "description": "分数",
+            "type": "integer"
+          },
+          {
+            "name": "target_classify",
+            "in": "query",
+            "description": "分类id",
+            "type": "string"
+          },
+          {
+            "name": "score_type",
+            "in": "query",
+            "description": "积分类型",
+            "enum": ["DONE", "DEAL", "TODO"],
+            "type": "string"
           }
         ],
         "responses": {
@@ -5757,6 +5784,26 @@
                         "type": "string",
                         "description": "积分人姓名"
                       },
+                      "target_classify": {
+                        "type": "string",
+                        "description": "分类id"
+                      },
+                      "target_classify_name": {
+                        "type": "string",
+                        "description": "分类名称"
+                      },
+                      "target_classify_image": {
+                        "type": "string",
+                        "description": "分类图片"
+                      },
+                      "target_primary_classify": {
+                        "type": "string",
+                        "description": "一级分类id"
+                      },
+                      "target_primary_classify_name": {
+                        "type": "string",
+                        "description": "一级分类名称"
+                      },
                       "target_score": {
                         "type": "string",
                         "description": "积分分数"
@@ -5768,6 +5815,11 @@
                       "create_description": {
                         "type": "string",
                         "description": "积分描述"
+                      },
+                      "score_type": {
+                        "type": "string",
+                        "description": "积分类型",
+                        "enum": ["DONE", "DEAL", "TODO"]
                       },
                       "createdAt": {
                         "type": "string",

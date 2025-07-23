@@ -36,7 +36,8 @@ const {
   SCREEN_MOCK_CONFIG_NAME_TYPE,
   THIRD_PARTY_REQUEST_METHOD,
   THIRD_PARTY_REQUEST_PARAMS_TYPE,
-  EAT_WHAT_FOOD_TYPE
+  EAT_WHAT_FOOD_TYPE,
+  SCORE_TYPE
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -2105,14 +2106,25 @@ const ScoreMemorySchema = new Schema({
     type: ObjectId,
     ref: 'user'
   },
-  // 积分数量
+  // 积分分数
   target_score: {
     type: Number 
+  },
+  // 积分类型
+  score_type: {
+    type: String,
+    // 完成 未完成 不评分 待定
+    enum: Object.keys(SCORE_TYPE)
   },
   // 积分人
   create_user: {
     type: ObjectId,
     ref: 'user'
+  },
+  // 积分分类id
+  target_classify: {
+    type: ObjectId,
+    ref: 'score_classify'
   },
   // 积分原因
   create_content: {

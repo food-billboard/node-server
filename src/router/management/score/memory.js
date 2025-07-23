@@ -9,7 +9,8 @@ const {
   ScoreMemoryModel,
   UserModel,
   notFound,
-  SCORE_EXCHANGE_CYCLE_TYPE
+  SCORE_EXCHANGE_CYCLE_TYPE,
+  SCORE_TYPE
 } = require('@src/utils')
 const dayjs = require('dayjs')
 const { isNil, isInteger } = require('lodash')
@@ -21,7 +22,7 @@ router
   // 积分记录列表
   .get('/obtain', async (ctx) => {
 
-    const [start_date, end_date, currPage, pageSize] = Params.sanitizers(ctx.query, {
+    const [start_date, end_date, currPage, pageSize, target_classify] = Params.sanitizers(ctx.query, {
       name: 'start_date',
       sanitizers: [
         function (data) {
@@ -59,9 +60,21 @@ router
       sanitizers: [
         data => data >= 0 ? +data : 30
       ]
+    }, {
+      name: 'target_classify',
+      sanitizers: [
+        function (data) {
+          try {
+            if (!data) return null
+            return ObjectId(data)
+          } catch (err) {
+            return null
+          }
+        }
+      ]
     })
 
-    const { content = '' } = ctx.query
+    const { content = '', score_type, target_score } = ctx.query
 
     const data = await (content ? UserModel.aggregate([
       {
@@ -85,6 +98,24 @@ router
               $lte: end_date,
               $gte: start_date
             }
+          }
+        }
+        if(target_classify) {
+          match = {
+            ...match,
+            target_classify
+          }
+        }
+        if(!Number.isNaN(target_score)) {
+          match = {
+            ...match,
+            target_score: parseInt(target_score)
+          }
+        }
+        if(SCORE_TYPE[score_type]) {
+          match = {
+            ...match,
+            score_type: SCORE_TYPE[score_type]
           }
         }
         let $or = []
@@ -227,6 +258,58 @@ router
               }
             },
             {
+              $lookup: {
+                from: 'score_classifies',
+                let: {
+                  target_id: "$target_classify"
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        "$eq": ["$_id", "$$target_id"]
+                      },
+                    }
+                  },
+                  {
+                    $lookup: {
+                      from: 'score_primary_classifies',
+                      as: 'classify',
+                      foreignField: "_id",
+                      localField: "classify"
+                    }
+                  },
+                  {
+                    $unwind: {
+                      path: "$classify",
+                      preserveNullAndEmptyArrays: true
+                    }
+                  },
+                  {
+                    $lookup: {
+                      from: 'images',
+                      as: 'image',
+                      foreignField: "_id",
+                      localField: "image"
+                    }
+                  },
+                  {
+                    $unwind: {
+                      path: "$image",
+                      preserveNullAndEmptyArrays: true
+                    }
+                  },
+                ],
+                as: 'target_classify'
+              }
+            },
+            {
+              $unwind: {
+                path: "$target_classify",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
               $project: {
                 _id: 1,
                 target_score: 1,
@@ -238,6 +321,12 @@ router
                 target_user_name: "$target_user.username",
                 createdAt: 1,
                 updatedAt: 1,
+                score_type: 1,
+                target_classify: "$target_classify._id",
+                target_classify_image: "$target_classify.image",
+                target_classify_name: "$target_classify.content",
+                target_primary_classify: "$target_classify.classify._id",
+                target_primary_classify_name: "$target_classify.classify.content"
               }
             }
           ])
@@ -262,29 +351,29 @@ router
 
   })
   // 积分
-  .post('/obtain', async (ctx) => {
+  .put('/obtain', async (ctx) => {
 
     const check = Params.body(ctx, {
-      name: 'target_user',
+      name: '_id',
       validator: [
         data => ObjectId.isValid(data)
       ]
     }, {
-      name: 'create_content',
-      validator: [
-        data => !!data
-      ]
-    }, {
       name: 'target_score',
       validator: [
-        data => data > 0 && isInteger(data)
+        data => isInteger(data)
+      ]
+    }, {
+      name: 'score_type',
+      validator: [
+        data => !!SCORE_TYPE[data]
       ]
     })
 
     if (check) return
 
-    const [target_user, target_score] = Params.sanitizers(ctx.request.body, {
-      name: 'target_user',
+    const [_id, target_score] = Params.sanitizers(ctx.request.body, {
+      name: '_id',
       sanitizers: [
         data => ObjectId(data)
       ]
@@ -292,39 +381,66 @@ router
       name: 'target_score',
       _default: 1,
       sanitizers: [
-        data => data >= 0 ? +data : 1
+        data => Math.abs(data) || 0
       ]
     })
 
     const {
       create_description = '',
-      create_content = ''
+      create_content = '',
+      score_type
     } = ctx.request.body
 
     const [, token] = verifyTokenToData(ctx)
     const { id } = token
 
-    const model = new ScoreMemoryModel({
-      create_description,
-      create_content,
-      target_user,
+    let updateData = {
+      score_type,
       target_score,
-      create_user: ObjectId(id)
-    })
+    }
+    if(create_content) {
+      updateData = {
+        ...updateData,
+        create_content
+      }
+    }
+    if(create_description) {
+      updateData = {
+        ...updateData,
+        create_description
+      }
+    }
 
-    const data = await model.save()
+    const data = await ScoreMemoryModel.findOne({
+      _id
+    })
+    .select({
+      target_score: 1,
+      target_user: 1
+    })
+    .exec()
+    .then(notFound)
+    .then(data => {
+      const { target_score: originScore, target_user } = data 
+      return ScoreMemoryModel.updateOne({
+        _id 
+      }, {
+        $set: updateData
+      })
       .then(data => {
-        return UserModel.updateOne({
-          _id: target_user
-        }, {
-          $inc: { score: target_score }
-        })
-          .then(() => {
-            return {
-              data: data._id
-            }
+        if(data.nModified === 0) return Promise.reject({ errMsg: 'error', status: 404 })
+          return UserModel.updateOne({
+            _id: target_user
+          }, {
+            $inc: { score: target_score - originScore }
           })
       })
+    })
+    .then(() => {
+      return {
+        data: _id 
+      }
+    })
       .catch(dealErr(ctx))
 
     responseDataDeal({
