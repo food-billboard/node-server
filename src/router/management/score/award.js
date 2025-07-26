@@ -239,7 +239,7 @@ router
     }, {
       name: 'award_image_list',
       validator: [
-        data => data.every(item => ObjectId.isValid(item))
+        data => data.split(',').every(item => ObjectId.isValid(item))
       ]
     })
 
@@ -253,7 +253,7 @@ router
     }, {
       name: 'award_image_list',
       sanitizers: [
-        data => data.map(item => ObjectId(item))
+        data => data.split(',').map(item => ObjectId(item))
       ]
     })
 
@@ -367,7 +367,7 @@ router
     }, {
       name: 'award_image_list',
       validator: [
-        data => data.every(item => ObjectId.isValid(item))
+        data => data.split(',').every(item => ObjectId.isValid(item))
       ]
     })
 
@@ -381,7 +381,7 @@ router
     }, {
       name: 'award_image_list',
       sanitizers: [
-        data => data.map(item => ObjectId(item))
+        data => data.split(',').map(item => ObjectId(item))
       ]
     }, {
       name: '_id',
