@@ -399,6 +399,20 @@
         "parameters": [
           {
             "in": "body",
+            "name": "min_age",
+            "description": "最小年龄",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "max_age",
+            "description": "最大年龄",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "in": "body",
             "name": "content",
             "description": "内容",
             "type": "string",
@@ -442,6 +456,20 @@
         "consumes": ["application/json", "application/xml"],
         "produces": ["application/xml", "application/json"],
         "parameters": [
+          {
+            "in": "body",
+            "name": "min_age",
+            "description": "最小年龄",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "max_age",
+            "description": "最大年龄",
+            "type": "integer",
+            "required": true
+          },
           {
             "in": "body",
             "name": "content",
@@ -5821,6 +5849,16 @@
                         "description": "积分类型",
                         "enum": ["DONE", "DEAL", "TODO"]
                       },
+                      "start_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "开始时间"
+                      },
+                      "end_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "结束时间"
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time",
@@ -5969,6 +6007,14 @@
                       "description": {
                         "type": "string",
                         "description": "描述"
+                      },
+                      "max_age": {
+                        "type": "string",
+                        "description": "最大年龄"
+                      },
+                      "min_age": {
+                        "type": "string",
+                        "description": "最小年龄"
                       },
                       "createdAt": {
                         "type": "string",

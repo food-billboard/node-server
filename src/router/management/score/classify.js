@@ -30,12 +30,22 @@ router
     validator: [
       data => ObjectId.isValid(data)
     ]
+  }, {
+    name: 'max_age',
+    sanitizers: [
+      data => Number.isNaN(+data)
+    ]
+  }, {
+    name: 'min_age',
+    sanitizers: [
+      data => Number.isNaN(+data)
+    ]
   })
   if (check) return
 
   const { description, content,  } = ctx.request.body
 
-  const [ primary, image ] = Params.sanitizers(body, {
+  const [ primary, image, max_age, min_age ] = Params.sanitizers(ctx.request.body, {
     name: 'primary',
     sanitizers: [
       data => ObjectId(data)
@@ -44,6 +54,16 @@ router
     name: 'image',
     sanitizers: [
       data => ObjectId(data)
+    ]
+  }, {
+    name: 'max_age',
+    sanitizers: [
+      data => Math.abs(parseInt(data))
+    ]
+  }, {
+    name: 'min_age',
+    sanitizers: [
+      data => Math.abs(parseInt(data))
     ]
   })
 
@@ -62,8 +82,10 @@ router
         content,
         description,
         create_user: ObjectId(id),
-        primary,
-        image
+        classify: primary,
+        image,
+        max_age,
+        min_age
       })
       return model.save()
     })
@@ -104,7 +126,7 @@ router
   })
   if (check) return
 
-  const [_id, primary, image] = Params.sanitizers(ctx.request.body, {
+  const [_id, primary, image, max_age, min_age] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       function (data) {
@@ -121,6 +143,16 @@ router
     sanitizers: [
       data => ObjectId(data)
     ]
+  }, {
+    name: 'max_age',
+    sanitizers: [
+      data => Math.abs(parseInt(data))
+    ]
+  }, {
+    name: 'min_age',
+    sanitizers: [
+      data => Math.abs(parseInt(data))
+    ]
   })
 
   const { description, content } = ctx.request.body
@@ -129,8 +161,10 @@ router
   let updateQuery = {
     description,
     content,
-    primary,
-    image
+    classify: primary,
+    image,
+    max_age,
+    min_age
   }
   const data = await ScoreClassifyModel.findOne({
     content,
@@ -200,7 +234,7 @@ router
 })
 .get('/', async (ctx) => {
 
-  const [ start_date, end_date, primary_id ] = Params.sanitizers(ctx.query, {
+  const [ start_date, end_date, primary_id, currPage, pageSize ] = Params.sanitizers(ctx.query, {
     name: 'start_date',
     sanitizers: [
       function(data) {
@@ -238,8 +272,21 @@ router
         }
       }
     ]
+  }, { 
+    name: 'currPage',
+    _default: 0,
+    sanitizers: [
+      data => data >= 0 ? +data : 0
+    ]
+  }, {
+    name: 'pageSize',
+    _default: 30,
+    sanitizers: [
+      data => data >= 0 ? +data : 30
+    ]
   })
-  const { content, currPage, pageSize } = ctx.query 
+
+  const { content } = ctx.query 
 
   let findQuery = {}
   if(start_date) {
@@ -249,7 +296,7 @@ router
     }
   }
   if(primary_id) {
-    findQuery.primary = primary_id
+    findQuery.classify = primary_id
   }
   if(content) {
     findQuery = {
@@ -327,14 +374,14 @@ router
       {
         $lookup: {
           from: 'score_primary_classifies',
-          as: 'primary',
+          as: 'classify',
           foreignField: "_id",
-          localField: "primary"
+          localField: "classify"
         }
       },
       {
         $unwind: {
-          path: "$primary",
+          path: "$classify",
           preserveNullAndEmptyArrays: true 
         }
       },
@@ -343,13 +390,15 @@ router
           _id: 1,
           description: 1,
           content: 1,
-          image: "$image",
+          image: "$image.src",
           create_user: "$create_user._id",
           create_user_name: "$create_user.username",
-          primary_content: "$primary.content",
-          primary_id: "$primary._id",
+          primary_content: "$classify.content",
+          primary_id: "$classify._id",
           createdAt: 1,
           updatedAt: 1,
+          max_age: 1,
+          min_age: 1
         }
       }
     ])

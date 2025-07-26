@@ -326,7 +326,9 @@ router
                 target_classify_image: "$target_classify.image",
                 target_classify_name: "$target_classify.content",
                 target_primary_classify: "$target_classify.classify._id",
-                target_primary_classify_name: "$target_classify.classify.content"
+                target_primary_classify_name: "$target_classify.classify.content",
+                start_time: 1,
+                end_time: 1
               }
             }
           ])
