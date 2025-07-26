@@ -5,6 +5,7 @@ const Upload = require('./upload')
 const Comment = require('./comment')
 const { verifyTokenToData, UserModel, dealErr, notFound, responseDataDeal, Params, avatarGet, encoded, coverLoginCookie } = require('@src/utils')
 const { auth } = require('./auth')
+const dayjs = require('dayjs')
 
 const router = new Router()
 
@@ -34,7 +35,9 @@ router
     updatedAt: 1,
     mobile: 1,
     description: 1,
-    friends: 1
+    friends: 1,
+    score: 1,
+    birthday: 1
   })
   .populate({
     path: 'avatar',
@@ -80,6 +83,7 @@ router
    * mobile
    * email
    * password
+   * birthday
    */
 
   const check = Params.body(ctx, {
@@ -107,15 +111,23 @@ router
     validator: [
       data => typeof data === 'string' && /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(data)
     ]
+  }, {
+    name: 'birthday',
+    validator: [
+      data => !!data && dayjs(data).isValid()
+    ]
   })
 
   if(check) return
 
   const [, token] = verifyTokenToData(ctx)
   const { id } = token
-  const { request: { body: { username, description, avatar, mobile, email, password } } } = ctx
+  const { request: { body: { birthday, username, description, avatar, mobile, email, password } } } = ctx
 
   let updateField = {}
+  if(birthday) updateField = merge({}, updateField, {
+    birthday: dayjs(birthday).toDate()
+  })
   if(username) updateField = merge({}, updateField, { username })
   if(avatar) updateField = merge({}, updateField, { avatar: ObjectId(avatar) })
   if(description) updateField = merge({}, updateField, { description })

@@ -127,6 +127,15 @@ const SCORE_EXCHANGE_CYCLE_TYPE = {
   QUARTER: 'QUARTER'
 }
 
+const SCORE_TYPE = {
+  // 完成
+  DONE: 'DONE',
+  // 未完成 | 未评分
+  DEAL: 'DEAL',
+  // 待定
+  TODO: 'TODO',
+}
+
 const MEDIA_ORIGIN_TYPE = MOVIE_SOURCE_TYPE
 
 const NETWORK = process.env.NODE_ENV !== 'production' ? 'localhost' : PRODUCTION_DOMAIN
@@ -330,5 +339,6 @@ module.exports = {
   THIRD_PARTY_REQUEST_METHOD,
   THIRD_PARTY_REQUEST_PARAMS_TYPE,
   FRONT_END_PACKAGE_PATH,
-  MAX_SCREEN_SHOT_COUNT
+  MAX_SCREEN_SHOT_COUNT,
+  SCORE_TYPE
 }

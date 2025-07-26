@@ -44,7 +44,9 @@ router
     fans: 1,
     attention:1,
     roles: 1,
-    friend_id: 1
+    friend_id: 1,
+    birthday: 1,
+    score: 1
   })
   .exec()
   .then(parseData)

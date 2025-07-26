@@ -49,6 +49,8 @@ router
         email: 1,
         username: 1,
         description: 1,
+        birthday: 1,
+        score: 1,
         avatar: "$avatar.src",
         hot: 1,
         status: 1,
