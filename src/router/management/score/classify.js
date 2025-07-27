@@ -5,9 +5,12 @@ const {
   Params,
   responseDataDeal,
   ScoreClassifyModel,
-  ScorePrimaryClassifyModel
+  ScorePrimaryClassifyModel,
+  ScoreClassifyDesignModel,
+  SCORE_TASK_REPEAT_TYPE
 } = require('@src/utils')
 const dayjs = require('dayjs')
+const { isNil } = require('lodash')
 const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
@@ -30,12 +33,22 @@ router
     validator: [
       data => ObjectId.isValid(data)
     ]
+  }, {
+    name: 'max_age',
+    sanitizers: [
+      data => Number.isNaN(+data)
+    ]
+  }, {
+    name: 'min_age',
+    sanitizers: [
+      data => Number.isNaN(+data)
+    ]
   })
   if (check) return
 
   const { description, content,  } = ctx.request.body
 
-  const [ primary, image ] = Params.sanitizers(body, {
+  const [ primary, image, max_age, min_age ] = Params.sanitizers(ctx.request.body, {
     name: 'primary',
     sanitizers: [
       data => ObjectId(data)
@@ -44,6 +57,16 @@ router
     name: 'image',
     sanitizers: [
       data => ObjectId(data)
+    ]
+  }, {
+    name: 'max_age',
+    sanitizers: [
+      data => Math.abs(parseInt(data))
+    ]
+  }, {
+    name: 'min_age',
+    sanitizers: [
+      data => Math.abs(parseInt(data))
     ]
   })
 
@@ -62,8 +85,10 @@ router
         content,
         description,
         create_user: ObjectId(id),
-        primary,
-        image
+        classify: primary,
+        image,
+        max_age,
+        min_age
       })
       return model.save()
     })
@@ -104,7 +129,7 @@ router
   })
   if (check) return
 
-  const [_id, primary, image] = Params.sanitizers(ctx.request.body, {
+  const [_id, primary, image, max_age, min_age] = Params.sanitizers(ctx.request.body, {
     name: '_id',
     sanitizers: [
       function (data) {
@@ -121,6 +146,16 @@ router
     sanitizers: [
       data => ObjectId(data)
     ]
+  }, {
+    name: 'max_age',
+    sanitizers: [
+      data => Math.abs(parseInt(data))
+    ]
+  }, {
+    name: 'min_age',
+    sanitizers: [
+      data => Math.abs(parseInt(data))
+    ]
   })
 
   const { description, content } = ctx.request.body
@@ -129,8 +164,10 @@ router
   let updateQuery = {
     description,
     content,
-    primary,
-    image
+    classify: primary,
+    image,
+    max_age,
+    min_age
   }
   const data = await ScoreClassifyModel.findOne({
     content,
@@ -421,6 +458,240 @@ router
     data
   })
 
+})
+.get('/design', async (ctx) => {
+
+  const check = Params.query(ctx, {
+    name: 'target_user',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  })
+  if(check) return 
+
+  const { content, classify, holiday, repeat_type, currPage, pageSize, target_user } = ctx.query 
+
+  let findQuery = {
+    target_user: ObjectId(target_user)
+  }
+  if(classify) {
+    findQuery = {
+      ...findQuery,
+      classify: ObjectId(classify)
+    }
+  }
+  if(typeof holiday === 'boolean') {
+    findQuery = {
+      ...findQuery,
+      holiday
+    }
+  }
+  if(repeat_type) {
+    findQuery = {
+      ...findQuery,
+      repeat_type
+    }
+  }
+  let contentQuery = []
+  if(content) {
+    contentQuery = [
+      {
+        $lookup: {
+          from: 'score_classifies',
+          as: 'classify',
+          foreignField: "_id",
+          localField: "classify"
+        }
+      },
+      {
+        $unwind: {
+          path: "$classify",
+          preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
+        $match: {
+          $or: [
+            {
+              "classify.content": {
+                $regex: content,
+                $options: 'gi'
+              }
+            },
+          ]
+        }
+      },
+    ]
+  }
+
+  //database
+  const data = await Promise.all([
+    ScoreClassifyDesignModel.aggregate([
+      {
+        $match: findQuery
+      },
+      ...contentQuery,
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1
+          }
+        }
+      }
+    ]),
+    ScoreClassifyDesignModel.aggregate([
+      {
+        $match: findQuery
+      },
+      ...contentQuery,
+      {
+        $skip: currPage * pageSize
+      },
+      {
+        $limit: +pageSize
+      },
+      {
+        $lookup: {
+          from: 'users',
+          as: 'create_user',
+          foreignField: "_id",
+          localField: "create_user"
+        }
+      },
+      {
+        $unwind: {
+          path: "$create_user",
+          preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
+        $lookup: {
+          from: 'score_classifies',
+          as: 'classify',
+          foreignField: "_id",
+          localField: "classify"
+        }
+      },
+      {
+        $unwind: {
+          path: "$classify",
+          preserveNullAndEmptyArrays: true 
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          holiday: 1,
+          repeat_type: 1,
+          repeat: 1,
+          max_age: 1,
+          min_age: 1,
+          create_user: "$create_user._id",
+          create_user_name: "$create_user.username",
+          classify_content: "$classify.content",
+          classify_id: "$classify._id",
+          createdAt: 1,
+          updatedAt: 1,
+        }
+      }
+    ])
+  ])
+  .then(([total, data]) => {
+    return {
+      data: {
+        list: data,
+        total: !!total.length ? total[0].total || 0 : 0,
+      }
+    }
+  })
+  .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data
+  })
+})
+.post('/design', async(ctx) => {
+   //validate params
+   const check = Params.body(ctx, {
+    name: 'repeat_type',
+    validator: [
+      data => !!SCORE_TASK_REPEAT_TYPE[data]
+    ]
+  }, {
+    name: 'classify',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  }, {
+    name: 'target_user',
+    validator: [
+      data => ObjectId.isValid(data)
+    ]
+  }, {
+    name: 'repeat',
+    validator: [
+      data => Array.isArray(data)
+    ]
+  }, {
+    name: 'max_age',
+    sanitizers: [
+      data => Math.abs(parseInt(data))
+    ]
+  }, {
+    name: 'min_age',
+    sanitizers: [
+      data => Math.abs(parseInt(data))
+    ]
+  })
+  if (check) return
+
+  const { holiday, target_user, classify, repeat_type, repeat, max_age, min_age } = ctx.request.body
+
+  const [, token] = verifyTokenToData(ctx)
+  const { id } = token
+
+  const data = await ScoreClassifyDesignModel.findOneAndUpdate({
+    target_user: ObjectId(target_user),
+    classify: ObjectId(classify)
+  }, {
+    $set: {
+      holiday, 
+      repeat_type, 
+      repeat, 
+      max_age: Math.abs(parseInt(max_age)), 
+      min_age: Math.abs(parseInt(min_age))
+    }
+  })
+    .exec()
+    .then(data => !!data)
+    .then((data) => {
+      if(data) return data 
+      //database
+      const model = new ScoreClassifyDesignModel({
+        holiday, 
+        target_user, 
+        create_user: ObjectId(id),
+        classify, 
+        repeat_type, 
+        repeat, 
+        max_age: Math.abs(parseInt(max_age)), 
+        min_age: Math.abs(parseInt(min_age))
+      })
+      return model.save()
+    })
+    .then(data => {
+      return {
+        data: data._id
+      }
+    })
+    .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data
+  })
 })
 
 

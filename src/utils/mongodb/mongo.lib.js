@@ -37,7 +37,8 @@ const {
   THIRD_PARTY_REQUEST_METHOD,
   THIRD_PARTY_REQUEST_PARAMS_TYPE,
   EAT_WHAT_FOOD_TYPE,
-  SCORE_TYPE
+  SCORE_TYPE,
+  SCORE_TASK_REPEAT_TYPE
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -2009,6 +2010,33 @@ const ScorePrimaryClassifySchema = new Schema({
   ...defaultConfig,
 })
 
+const ScoreClassifyDesignSchema = new Schema({
+  create_user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  holiday: Boolean,
+  target_user: {
+     type: ObjectId,
+    ref: 'user'
+  },
+  classify: {
+    type: ObjectId,
+    ref: 'score_classify'
+  },
+  repeat_type: {
+    type: String,
+    enum: Object.keys(SCORE_TASK_REPEAT_TYPE),
+  },
+  repeat: [{
+    type: Number
+  }],
+  max_age: Number,
+  min_age: Number
+}, {
+  ...defaultConfig,
+})
+
 const ScoreClassifySchema = new Schema({
   create_user: {
     type: ObjectId,
@@ -2241,6 +2269,7 @@ const ScoreAwardModel = model('score_award', ScoreAwardSchema)
 const ExchangeMemoryModel = model('exchange_memory', ExchangeMemorySchema)
 const ScoreMemoryModel = model('score_memory', ScoreMemorySchema)
 const ScorePrimaryClassifyModel = model('score_primary_classify', ScorePrimaryClassifySchema)
+const ScoreClassifyDesignModel = model('score_classify_design', ScoreClassifyDesignSchema)
 
 module.exports = {
   ScorePrimaryClassifyModel,
@@ -2284,6 +2313,7 @@ module.exports = {
   ScoreAwardModel,
   ExchangeMemoryModel,
   ScoreMemoryModel,
+  ScoreClassifyDesignModel,
   ScorePrimaryClassifySchema,
   UserSchema,
   GlobalSchema,
@@ -2324,5 +2354,6 @@ module.exports = {
   ScoreClassifySchema,
   ScoreAwardSchema,
   ExchangeMemorySchema,
-  ScoreMemorySchema
+  ScoreMemorySchema,
+  ScoreClassifyDesignSchema
 }
