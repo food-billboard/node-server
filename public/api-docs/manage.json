@@ -632,6 +632,228 @@
         ]
       }
     },
+    "/api/manage/score/classify/design": {
+      "get": {
+        "tags": ["score"],
+        "summary": "积分分类定制列表",
+        "description": "",
+        "operationId": "manage_get_score_design_classify_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content",
+            "type": "string",
+            "description": "模糊查询(内容，描述)"
+          },
+          {
+            "in": "query",
+            "name": "classify",
+            "type": "string",
+            "description": "分类id"
+          },
+          {
+            "in": "query",
+            "name": "holiday",
+            "type": "boolean",
+            "description": "假期模式"
+          },
+          {
+            "in": "query",
+            "name": "repeat_type",
+            "type": "string",
+            "description": "重复类型",
+            "enum": ["MONTH","WEEK"]
+          },
+          {
+            "in": "query",
+            "name": "target_user",
+            "type": "string",
+            "description": "目标用户"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_get_score_design_classify_list"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "post": {
+        "tags": ["score"],
+        "summary": "新增修改积分分类定制",
+        "description": "",
+        "operationId": "manage_post_score_classify_design",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "type": "boolean",
+            "description": "假期模式",
+            "in": "body",
+            "name": "holiday",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "重复类型",
+            "enum": ["WEEK", "MONTH"],
+            "name": "repeat_type",
+            "required": true,
+            "in": "body"
+          },
+          {
+            "type": "array",
+            "description": "重复日期",
+            "name": "repeat",
+            "required": true,
+            "in": "body"
+          },
+          {
+            "type": "integer",
+            "description": "最大年龄",
+            "name": "max_age",
+            "required": true,
+            "in": "body"
+          },
+          {
+            "type": "integer",
+            "description": "最小年龄",
+            "name": "min_age",
+            "required": true,
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "创建人id",
+            "name": "create_user",
+            "required": true,
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "创建人名称",
+            "name": "create_user",
+            "required": true,
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "分类id",
+            "name": "classify",
+            "required": true,
+            "in": "body"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/score/classify/join-task": {
+      "get": {
+        "tags": ["score"],
+        "summary": "参与任务人员列表",
+        "description": "",
+        "operationId": "manage_put_score_user",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content",
+            "type": "string",
+            "description": "模糊查询(内容，描述)"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_put_score_user"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "put": {
+        "tags": ["score"],
+        "summary": "参与任务人员修改",
+        "description": "",
+        "operationId": "manage_put_score_user",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "type": "boolean",
+            "description": "是否参与",
+            "name": "join_task",
+            "required": true,
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "人员id",
+            "name": "_id",
+            "required": true,
+            "in": "body"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
     "/api/manage/score/memory/award": {
       "post": {
         "tags": ["score"],
@@ -6081,6 +6303,141 @@
       },
       "xml": {
         "name": "manage_get_score_primary_classify_list"
+      }
+    },
+    "manage_get_score_design_classify_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "holiday": {
+                        "type": "boolean",
+                        "description": "假期模式"
+                      },
+                      "repeat_type": {
+                        "type": "string",
+                        "description": "重复类型",
+                        "enum": ["WEEK", "MONTH"]
+                      },
+                      "repeat": {
+                        "type": "array",
+                        "description": "重复日期"
+                      },
+                      "max_age": {
+                        "type": "integer",
+                        "description": "最大年龄"
+                      },
+                      "min_age": {
+                        "type": "integer",
+                        "description": "最小年龄"
+                      },
+                      "create_user": {
+                        "type": "boolean",
+                        "description": "创建人id"
+                      },
+                      "create_user_name": {
+                        "type": "boolean",
+                        "description": "创建人名称"
+                      },
+                      "classify_id": {
+                        "type": "boolean",
+                        "description": "分类id"
+                      },
+                      "classify_content": {
+                        "type": "boolean",
+                        "description": "分类名称"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_get_score_design_classify_list"
+      }
+    },
+    "manage_put_score_user": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "boolean",
+                        "description": "用户名"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "avatar": {
+                        "type": "array",
+                        "description": "头像"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_put_score_user"
       }
     },
     "manage_get_score_award_list": {

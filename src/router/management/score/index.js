@@ -2,17 +2,7 @@ const Router = require('@koa/router')
 const Award = require('./award')
 const Memory = require('./memory')
 const Classify = require('./classify')
-const { 
-  verifyTokenToData, 
-  dealErr, 
-  Params, 
-  responseDataDeal, 
-  ScreenModal, 
-  loginAuthorization, 
-  SCREEN_TYPE 
-} = require('@src/utils')
-const { Types: { ObjectId } } = require('mongoose')
-
+const JoinTask = require('./join-task')
 const router = new Router()
 
 router
@@ -22,5 +12,7 @@ router
 .use('/memory', Memory.routes(), Memory.allowedMethods())
 // 积分分类
 .use('/classify', Classify.routes(), Classify.allowedMethods())
+// 任务参与
+.use('/join-task', JoinTask.routes(), JoinTask.allowedMethods())
 
 module.exports = router
