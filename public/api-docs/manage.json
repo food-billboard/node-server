@@ -716,23 +716,100 @@
             "in": "body"
           },
           {
-            "type": "boolean",
+            "type": "string",
             "description": "创建人id",
             "name": "create_user",
             "required": true,
             "in": "body"
           },
           {
-            "type": "boolean",
+            "type": "string",
             "description": "创建人名称",
             "name": "create_user",
             "required": true,
             "in": "body"
           },
           {
-            "type": "boolean",
+            "type": "string",
             "description": "分类id",
             "name": "classify",
+            "required": true,
+            "in": "body"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/score/classify/join-task": {
+      "get": {
+        "tags": ["score"],
+        "summary": "参与任务人员列表",
+        "description": "",
+        "operationId": "manage_put_score_user",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content",
+            "type": "string",
+            "description": "模糊查询(内容，描述)"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_put_score_user"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "put": {
+        "tags": ["score"],
+        "summary": "参与任务人员修改",
+        "description": "",
+        "operationId": "manage_put_score_user",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "type": "boolean",
+            "description": "是否参与",
+            "name": "join_task",
+            "required": true,
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "人员id",
+            "name": "_id",
             "required": true,
             "in": "body"
           }
@@ -6260,6 +6337,61 @@
       },
       "xml": {
         "name": "manage_get_score_design_classify_list"
+      }
+    },
+    "manage_put_score_user": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "boolean",
+                        "description": "用户名"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "avatar": {
+                        "type": "array",
+                        "description": "头像"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_put_score_user"
       }
     },
     "manage_get_score_award_list": {

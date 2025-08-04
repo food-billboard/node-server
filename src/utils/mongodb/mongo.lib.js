@@ -336,6 +336,10 @@ const UserSchema = new Schema({
   score: {
     type: Number 
   },
+  join_task: {
+    type: Boolean,
+    default: false 
+  },
   birthday: {
     type: Date
   },
