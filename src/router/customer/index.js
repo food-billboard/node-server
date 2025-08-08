@@ -4,6 +4,7 @@ const Movie = require('./movie')
 const User = require("./user")
 const Upload = require('./upload')
 const Barrage = require('./barrage')
+const Timeout = require('./timeout')
 const { verifyTokenToData, dealErr, responseDataDeal } = require("@src/utils")
 
 const router = new Router()
@@ -29,5 +30,6 @@ router
 .use("/user", User.routes(), User.allowedMethods())
 .use('/upload', Upload.routes(), Upload.allowedMethods())
 .use('/barrage', Barrage.routes(), Barrage.allowedMethods())
+.use('/timeout', Timeout.routes(), Timeout.allowedMethods())
 
 module.exports = router

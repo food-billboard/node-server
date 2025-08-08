@@ -37,6 +37,14 @@
       }
     },
     {
+      "name": "timeout",
+      "description": "倒数日",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
       "name": "eat_what",
       "description": "今天吃什么相关",
       "externalDocs": {
@@ -119,6 +127,389 @@
   ],
   "schemes": ["https", "http"],
   "paths": {
+    "/api/manage/timeout": {
+      "post": {
+        "tags": ["timeout"],
+        "summary": "新增事件",
+        "description": "",
+        "operationId": "manage_post_timeout",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "event_name",
+            "description": "事件名称",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "start_date",
+            "description": "开始时间",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "event_background",
+            "description": "事件背景图片id",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "event_cover",
+            "description": "事件封面图品id",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "put": {
+        "tags": ["timeout"],
+        "summary": "修改事件",
+        "description": "",
+        "operationId": "manage_put_timeout",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "_id",
+            "description": "事件id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "event_name",
+            "description": "事件名称",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "start_date",
+            "description": "开始时间",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "event_background",
+            "description": "事件背景图片id",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "event_cover",
+            "description": "事件封面图品id",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "get": {
+        "tags": ["timeout"],
+        "summary": "倒数日列表",
+        "description": "",
+        "operationId": "manage_get_timeout_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content",
+            "type": "string",
+            "description": "模糊查询(名称、描述)"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "description": "起始日期"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date-time",
+            "description": "结束日期"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_get_timeout_list"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["timeout"],
+        "summary": "删除事件",
+        "description": "",
+        "operationId": "manage_delete_timeout",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "_id",
+            "type": "string",
+            "description": "事件id(多个用,分隔)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/timeout/image": {
+      "post": {
+        "tags": ["timeout"],
+        "summary": "新增事件图片",
+        "description": "",
+        "operationId": "manage_post_timeout_image",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "description",
+            "description": "图片描述",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "address",
+            "description": "图片定位",
+            "type": "string[]"
+          },
+          {
+            "in": "body",
+            "name": "create_date",
+            "description": "创建时间",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "event",
+            "description": "事件id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "image",
+            "description": "图片id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "put": {
+        "tags": ["timeout"],
+        "summary": "修改事件图片",
+        "description": "",
+        "operationId": "manage_put_timeout_image",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "_id",
+            "description": "事件id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "description",
+            "description": "图片描述",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "address",
+            "description": "图片定位",
+            "type": "string[]"
+          },
+          {
+            "in": "body",
+            "name": "create_date",
+            "description": "创建时间",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "event",
+            "description": "事件id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "image",
+            "description": "图片id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "get": {
+        "tags": ["timeout"],
+        "summary": "倒数日图片列表",
+        "description": "",
+        "operationId": "manage_get_timeout_image_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "event",
+            "type": "string",
+            "description": "事件id",
+            "required": true 
+          },
+          {
+            "in": "query",
+            "name": "content",
+            "type": "string",
+            "description": "模糊查询(描述)"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "description": "起始日期"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date-time",
+            "description": "结束日期"
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_get_timeout_list"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["timeout"],
+        "summary": "删除事件",
+        "description": "",
+        "operationId": "manage_delete_timeout_image",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "_id",
+            "type": "string",
+            "description": "事件图片id(多个用,分隔)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
     "/api/manage/score/memory/obtain": {
       "put": {
         "tags": ["score"],
@@ -6438,6 +6829,66 @@
       },
       "xml": {
         "name": "manage_put_score_user"
+      }
+    },
+    "manage_get_timeout_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "create_user": {
+                        "type": "string",
+                        "description": "创建用户id"
+                      },
+                      "create_user_name": {
+                        "type": "string",
+                        "description": "创建用户名"
+                      },
+                      "event_name": {
+                        "type": "string",
+                        "description": "事件名称"
+                      },
+                      "start_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "开始时间"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_get_timeout_list"
       }
     },
     "manage_get_score_award_list": {

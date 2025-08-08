@@ -2178,6 +2178,47 @@ const ScoreMemorySchema = new Schema({
   ...defaultConfig,
 })
 
+// 倒数日
+const TimeoutSchema = new Schema({
+  create_user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  event_name: {
+    type: String,
+    required: true,
+  },
+  event_background: {
+    type: ObjectId,
+    ref: 'timeout_image'
+  },
+  event_cover: {
+    type: ObjectId,
+    ref: 'timeout_image'
+  },
+  start_date: String,
+}, {
+  ...defaultConfig,
+})
+
+const TimeoutImageSchema = new Schema({
+  event: {
+    type: ObjectId,
+    ref: 'timeout'
+  },
+  description: String,
+  image: {
+    type: ObjectId,
+    ref: 'image'
+  },
+  address: [{
+    type: String 
+  }],
+  create_date: String,
+}, {
+  ...defaultConfig,
+})
+
 const FIND_OPERATION_LIB = [
   'find',
   'findOne',
@@ -2282,6 +2323,8 @@ const ExchangeMemoryModel = model('exchange_memory', ExchangeMemorySchema)
 const ScoreMemoryModel = model('score_memory', ScoreMemorySchema)
 const ScorePrimaryClassifyModel = model('score_primary_classify', ScorePrimaryClassifySchema)
 const ScoreClassifyDesignModel = model('score_classify_design', ScoreClassifyDesignSchema)
+const TimeoutModel = model('timeout', TimeoutSchema)
+const TimeoutImageModel = model('timeout_image', TimeoutImageSchema)
 
 module.exports = {
   ScorePrimaryClassifyModel,
@@ -2326,6 +2369,8 @@ module.exports = {
   ExchangeMemoryModel,
   ScoreMemoryModel,
   ScoreClassifyDesignModel,
+  TimeoutModel,
+  TimeoutImageModel,
   ScorePrimaryClassifySchema,
   UserSchema,
   GlobalSchema,
@@ -2367,5 +2412,7 @@ module.exports = {
   ScoreAwardSchema,
   ExchangeMemorySchema,
   ScoreMemorySchema,
-  ScoreClassifyDesignSchema
+  ScoreClassifyDesignSchema,
+  TimeoutSchema,
+  TimeoutImageSchema
 }
