@@ -473,7 +473,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref": "#/definitions/manage_get_timeout_list"
+              "$ref": "#/definitions/manage_get_timeout_image_list"
             }
           }
         },
@@ -6889,6 +6889,74 @@
       },
       "xml": {
         "name": "manage_get_timeout_list"
+      }
+    },
+    "manage_get_timeout_image_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "描述"
+                      },
+                      "event": {
+                        "type": "string",
+                        "description": "事件id"
+                      },
+                      "event_name": {
+                        "type": "string",
+                        "description": "事件名称"
+                      },
+                      "start_date": {
+                        "type": "string",
+                        "description": "事件创建时间"
+                      },
+                      "image": {
+                        "type": "string",
+                        "description": "图片"
+                      },
+                      "create_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "创建日期"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_get_timeout_image_list"
       }
     },
     "manage_get_score_award_list": {

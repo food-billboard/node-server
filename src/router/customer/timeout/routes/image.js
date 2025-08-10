@@ -143,6 +143,20 @@ router
           }
         },
         {
+          $lookup: {
+            from: 'timeouts',
+            localField: 'event',
+            foreignField: '_id',
+            as: 'event'
+          }
+        },
+        {
+          $unwind: {
+            path: "$event",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
           $project: {
             _id: 1,
             description: 1,
@@ -150,6 +164,9 @@ router
             create_date: 1,
             createdAt: 1,
             updatedAt: 1,
+            event: "$event._id",
+            event_name: "$event.event_name",
+            start_date: "$event.start_date"
           }
         }
       ])
