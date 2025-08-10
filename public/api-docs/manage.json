@@ -402,13 +402,6 @@
             "description": "事件id",
             "required": true,
             "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "image",
-            "description": "图片id",
-            "required": true,
-            "type": "string"
           }
         ],
         "responses": {
@@ -435,6 +428,13 @@
             "name": "event",
             "type": "string",
             "description": "事件id",
+            "required": true 
+          },
+          {
+            "in": "query",
+            "name": "_id",
+            "type": "string",
+            "description": "图片id",
             "required": true 
           },
           {
@@ -6933,6 +6933,10 @@
                       "image": {
                         "type": "string",
                         "description": "图片"
+                      },
+                      "image_id": {
+                        "type": "string",
+                        "description": "图片id"
                       },
                       "create_date": {
                         "type": "string",

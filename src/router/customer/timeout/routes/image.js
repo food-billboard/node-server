@@ -5,7 +5,6 @@ const {
   Params,
   responseDataDeal,
   TimeoutImageModel,
-  SCORE_EXCHANGE_CYCLE_TYPE
 } = require('@src/utils')
 const dayjs = require('dayjs')
 const { Types: { ObjectId } } = require('mongoose')
@@ -73,9 +72,13 @@ router
 
     const {
       content = '',
+      _id 
     } = ctx.query
 
     let match = {}
+    if(_id) {
+      match._id = ObjectId(_id)
+    }
     if (content) {
       match.$or = [
         {
@@ -161,6 +164,7 @@ router
             _id: 1,
             description: 1,
             image: "$image.src",
+            image_id: "$image._id",
             create_date: 1,
             createdAt: 1,
             updatedAt: 1,
@@ -201,12 +205,12 @@ router
     }, {
       name: 'event',
       validator: [
-        data => ObjectId(data).isValid()
+        data => ObjectId.isValid(data)
       ]
     }, {
       name: 'image',
       validator: [
-        data => ObjectId(data).isValid()
+        data => ObjectId.isValid(data)
       ]
     })
 
@@ -324,18 +328,13 @@ router
     }, {
       name: 'event',
       validator: [
-        data => ObjectId(data).isValid()
-      ]
-    }, {
-      name: 'image',
-      validator: [
-        data => ObjectId(data).isValid()
+        data => ObjectId.isValid(data)
       ]
     })
 
     if (check) return
 
-    const [_id, create_date, event, image] = Params.sanitizers(ctx.request.body, {
+    const [_id, create_date, event] = Params.sanitizers(ctx.request.body, {
       name: '_id',
       sanitizers: [
         data => ObjectId(data)
@@ -350,11 +349,6 @@ router
       sanitizers: [
         data => ObjectId(data)
       ]
-    }, {
-      name: 'image',
-      sanitizers: [
-        data => ObjectId(data)
-      ]
     })
 
     const {
@@ -366,7 +360,6 @@ router
     const { id } = token
 
     const data = await TimeoutImageModel.findOne({
-      image,
       event,
       _id: {
         $nin: [_id]
@@ -385,7 +378,6 @@ router
             address: address || [],
             description,
             create_date,
-            image 
           }
         })
       })

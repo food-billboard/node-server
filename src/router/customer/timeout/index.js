@@ -4,7 +4,8 @@ const {
   verifyTokenToData,
   dealErr,
   responseDataDeal,
-  TimeoutModel
+  TimeoutModel,
+  Params
 } = require('@src/utils')
 const dayjs = require('dayjs')
 const { Types: { ObjectId } } = require('mongoose')
