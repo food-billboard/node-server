@@ -150,7 +150,9 @@ router
     })
     .then(() => {
       // 更换成md5
-      return fs.move(absolutePath, path.join(STATIC_FILE_PATH_NO_WRAPPER, database.src)).catch(() =>{})
+      return fs.move(absolutePath, path.join(STATIC_FILE_PATH_NO_WRAPPER, database.src)).catch((err) =>{
+        console.error(err)
+      })
     })
       .then(() => {
         return {
