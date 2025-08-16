@@ -75,7 +75,9 @@ router
       _id 
     } = ctx.query
 
-    let match = {}
+    let match = {
+      event
+    }
     if(_id) {
       match._id = ObjectId(_id)
     }
