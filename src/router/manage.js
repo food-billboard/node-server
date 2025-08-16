@@ -32,6 +32,10 @@ const STATIC_PAGE_MAP = [
     path: "movie5"
   },
   {
+    regexp: /(?<=.+\/timeout\/).+$/,
+    path: "timeout"
+  },
+  {
     regexp: /(?<=.+\/moviet5\/).+$/,
     path: "moviet5"
   },
