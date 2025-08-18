@@ -2196,7 +2196,7 @@ const TimeoutSchema = new Schema({
     type: ObjectId,
     ref: 'timeout_image'
   },
-  start_date: String,
+  start_date: Date,
 }, {
   ...defaultConfig,
 })
