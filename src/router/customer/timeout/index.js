@@ -109,7 +109,7 @@ router
         },
         {
           $sort: {
-            createdAt: 1
+            start_date: -1
           }
         },
         {
@@ -229,7 +229,7 @@ router
         const database = {
           create_user: ObjectId(id),
           event_name,
-          start_date: dayjs(start_date).format('YYYY-MM-DD HH:mm:ss')
+          start_date: dayjs(start_date).toDate()
         }
         if (event_background) {
           database.event_background = ObjectId(event_background)
@@ -345,7 +345,7 @@ router
         if (data) return Promise.reject({ errMsg: '标题重复', status: 400 })
         const updateData = {
           event_name,
-          start_date: dayjs(start_date).format('YYYY-MM-DD HH:mm:ss')
+          start_date: dayjs(start_date).toDate()
         }
         if (event_background) {
           updateData.event_background = ObjectId(event_background)
