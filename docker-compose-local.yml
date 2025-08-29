@@ -29,14 +29,15 @@ services:
       - RABBITMQ_DEFAULT_USER="admin"
       - RABBITMQ_DEFAULT_PASS="admin"
   mongo:
-    container_name: mongo
-    image: mongo:4.0.3
+    # container_name: mongo 
+    container_name: mongodb_44
+    image: mongo:4.4
     restart: always
     ports:
       - 27017:27017
     volumes:
-      - /usr/local/etc/mongodb:/data/db
-      - /usr/local/mongodb/log:/var/log/mongodb
+      - ./bin/mongodb/data:/data/db 
+      - ./bin/mongodb/log:/var/log/mongodb
   redis:
     image: redis
     container_name: redis

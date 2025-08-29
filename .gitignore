@@ -42,3 +42,6 @@ public/**
 !public/test/
 
 deploy.config.json
+
+./bin/mongodb/*
+./bin/temp_mongo/*
