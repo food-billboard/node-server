@@ -19,7 +19,7 @@
     "coverage": "nyc npm run internal_test",
     "docker:restart": "docker-compose -f docker-compose.yml pull;docker-compose -f docker-compose.yml up -d",
     "docker:restart-local": "docker compose -f docker-compose-local.yml pull;docker compose -f docker-compose-local.yml up -d",
-    "docker:raspberry": "docker-compose -f docker-compose-raspberry.yml pull;docker-compose -f docker-compose-local.yml up -d"
+    "docker:raspberry": "docker-compose -f docker-compose-raspberry.yml pull;docker-compose -f docker-compose-raspberry.yml up -d"
   },
   "author": "GLF",
   "license": "ISC",
