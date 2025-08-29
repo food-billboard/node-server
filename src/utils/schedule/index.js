@@ -197,8 +197,6 @@ class Schedule {
 
 }
 
-require('./score/task_create').scheduleMethod()
-
 const scheduleConstructor = new Schedule()
 
 module.exports = {

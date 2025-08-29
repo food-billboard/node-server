@@ -45,6 +45,14 @@
       }
     },
     {
+      "name": "longtime_task",
+      "description": "耗时任务相关",
+      "externalDocs": {
+        "description": "Find out more about our store",
+        "url": "http://swagger.io"
+      }
+    },
+    {
       "name": "user",
       "description": "游客相关",
       "externalDocs": {
@@ -58,6 +66,62 @@
     "http"
   ],
   "paths": {
+    "/api/customer/task": {
+      "get": {
+        "tags": ["longtime_task"],
+        "summary": "耗时任务列表",
+        "description": "",
+        "operationId": "mustomer_get_longtime_task_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "description": "执行状态",
+            "type": "string",
+            "enum": [
+              "PROCESS 执行中",
+              "SUCCESS 成功",
+              "FAIL 失败"
+            ]
+          },
+          {
+            "in": "query",
+            "name": "app",
+            "description": "应用",
+            "required": true,
+            "type": "string",
+            "enum": ["SUCCESS", "FAIL", "PROCESS"]
+          },
+          {
+            "name": "currPage",
+            "in": "query",
+            "description": "当前页",
+            "type": "integer"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/mustomer_get_longtime_task_list"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
     "/api/customer/barrage": {
       "get": {
         "tags": [
@@ -2743,6 +2807,83 @@
             }
           }
         }
+      }
+    },
+    "mustomer_get_longtime_task_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string"
+                  },
+                  "app": {
+                    "type": "string",
+                    "description": "应用",
+                    "enum": ["MANAGE", "MOVIE", "SCREEN"]
+                  },
+                  "page": {
+                    "type": "string",
+                    "description": "页面"
+                  },
+                  "create_user": {
+                    "type": "string",
+                    "description": "创建人id"
+                  },
+                  "create_user_avatar": {
+                    "type": "string",
+                    "description": "创建人头像"
+                  },
+                  "create_user_name": {
+                    "type": "string",
+                    "description": "创建人名称"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "状态",
+                    "enum": ["SUCCESS", "FAIL", "PROCESS"]
+                  },
+                  "request_url": {
+                    "type": "string",
+                    "description": "请求地址"
+                  },
+                  "request_method": {
+                    "type": "string",
+                    "description": "请求方法"
+                  },
+                  "request_data": {
+                    "type": "string",
+                    "description": "请求数据"
+                  },
+                  "deal_time": {
+                    "type": "string",
+                    "description": "完成时间"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "description": "创建时间"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "description": "更新时间"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "mustomer_get_longtime_task_list"
       }
     },
     "customer_get_barrage": {

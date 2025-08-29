@@ -112,5 +112,11 @@
     "time": "0 0 23 * * 6",
     "description": "定时备份mongodb数据",
     "status": "SCHEDULING"
+  },
+  "taskMemorySchedule": {
+    "name": "taskMemorySchedule",
+    "time": "0 0 17 * * 5",
+    "description": "删除耗时任务执行记录",
+    "status": "SCHEDULING"
   }
 }

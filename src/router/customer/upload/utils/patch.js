@@ -156,6 +156,7 @@ const mergeChunkFile = async ({
   return fs.writeFile(realFilePath, '')
     .then(_ => {
       const { size, md5, offset } = metadata
+      console.log(`is large file? ${size}`)
       // 大文件选择不等待的响应方式
       if (isLargeFile(size)) {
         redisClient.setex(md5, 10 * 60, JSON.stringify({

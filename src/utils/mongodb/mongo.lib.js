@@ -38,7 +38,9 @@ const {
   THIRD_PARTY_REQUEST_PARAMS_TYPE,
   EAT_WHAT_FOOD_TYPE,
   SCORE_TYPE,
-  SCORE_TASK_REPEAT_TYPE
+  SCORE_TASK_REPEAT_TYPE,
+  APP_TYPE,
+  TASK_STATUS
 } = require('../constant')
 const { formatMediaUrl } = require('../tool')
 
@@ -2225,6 +2227,50 @@ const TimeoutImageSchema = new Schema({
   ...defaultConfig,
 })
 
+// 任务列表
+const LongTimeTaskSchema = new Schema({
+  // 创建人
+  create_user: {
+    type: ObjectId,
+    ref: 'user'
+  },
+  // 应用名
+  app: {
+    type: String,
+    enum: Object.keys(APP_TYPE)
+  },
+  // 页面
+  page: {
+    type: String,
+  },
+  // 状态
+  status: {
+    type: String,
+    enum: Object.keys(TASK_STATUS)
+  },
+  // 完成时间
+  dealTime: {
+    type: Date,
+  },
+  request_url: {
+    type: String
+  },
+  request_method: {
+    type: String
+  },
+  // 接口数据
+  // [{
+  //     label: 'xxxx',
+  //     value: 'xxx',
+  //     type: 'string number boolean object array'
+  // }]
+  request_data: {
+    type: String,
+  },
+}, {
+  ...defaultConfig,
+})
+
 const FIND_OPERATION_LIB = [
   'find',
   'findOne',
@@ -2331,6 +2377,7 @@ const ScorePrimaryClassifyModel = model('score_primary_classify', ScorePrimaryCl
 const ScoreClassifyDesignModel = model('score_classify_design', ScoreClassifyDesignSchema)
 const TimeoutModel = model('timeout', TimeoutSchema)
 const TimeoutImageModel = model('timeout_image', TimeoutImageSchema)
+const LongTimeTaskModel = model('task', LongTimeTaskSchema)
 
 module.exports = {
   ScorePrimaryClassifyModel,
@@ -2377,6 +2424,7 @@ module.exports = {
   ScoreClassifyDesignModel,
   TimeoutModel,
   TimeoutImageModel,
+  LongTimeTaskModel,
   ScorePrimaryClassifySchema,
   UserSchema,
   GlobalSchema,
@@ -2420,5 +2468,6 @@ module.exports = {
   ScoreMemorySchema,
   ScoreClassifyDesignSchema,
   TimeoutSchema,
-  TimeoutImageSchema
+  TimeoutImageSchema,
+  LongTimeTaskSchema
 }
