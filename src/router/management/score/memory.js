@@ -94,7 +94,7 @@ router
         if (start_date) {
           match = {
             ...match,
-            createdAt: {
+            date: {
               $lte: end_date,
               $gte: start_date
             }
@@ -311,6 +311,7 @@ router
             },
             {
               $project: {
+                date: 1,
                 _id: 1,
                 target_score: 1,
                 create_content: 1,
@@ -399,6 +400,7 @@ router
     let updateData = {
       score_type,
       target_score,
+      create_user: ObjectId(id)
     }
     if(create_content) {
       updateData = {

@@ -1115,7 +1115,7 @@
           },
           {
             "type": "array",
-            "description": "重复日期",
+            "description": "重复日期 0-6 1-31",
             "name": "repeat",
             "required": true,
             "in": "body"
@@ -6471,6 +6471,11 @@
                         "type": "string",
                         "format": "date-time",
                         "description": "结束时间"
+                      },
+                      "date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "任务时间"
                       },
                       "createdAt": {
                         "type": "string",

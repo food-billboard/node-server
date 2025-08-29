@@ -2032,6 +2032,7 @@ const ScoreClassifyDesignSchema = new Schema({
     type: String,
     enum: Object.keys(SCORE_TASK_REPEAT_TYPE),
   },
+  // 0-6 1-31
   repeat: [{
     type: Number
   }],
@@ -2133,6 +2134,10 @@ const ExchangeMemorySchema = new Schema({
 
 // 积分记录
 const ScoreMemorySchema = new Schema({
+  // 任务日期
+  date: {
+    type: Date
+  },
   // 积分对象
   target_user: {
     type: ObjectId,
@@ -2166,6 +2171,7 @@ const ScoreMemorySchema = new Schema({
   create_description: {
     type: String 
   },
+  // 表示做任务的开始时间和结束时间，用来统计完成这个任务花费的时间
   // 开始时间
   start_time: {
     type: String 
