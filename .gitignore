@@ -43,5 +43,5 @@ public/**
 
 deploy.config.json
 
-./bin/mongodb/*
-./bin/temp_mongo/*
+/bin/mongodb/*
+/bin/temp_mongo/*
