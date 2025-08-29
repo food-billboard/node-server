@@ -116,7 +116,7 @@ async function scheduleMethod({
       }
 
       // 生成任务
-      for (let subIndex; subIndex < createTaskList.length; subIndex++) {
+      for (let subIndex = 0; subIndex < createTaskList.length; subIndex++) {
         const { classify } = createTaskList[subIndex]
         const model = new ScoreMemoryModel({
           date: dayjs().toDate(),
@@ -135,7 +135,8 @@ async function scheduleMethod({
 
     }
   } catch (err) {
-    !!test && log4Error({
+    console.error(err)
+    !test && log4Error({
       __request_log_id__: CacheJson.createScoreTaskSchedule.description
     }, err)
   }

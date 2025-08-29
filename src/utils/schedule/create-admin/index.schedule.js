@@ -50,7 +50,9 @@ function scheduleMethod({
       allow_many: false,
       status: 'SIGNOUT',
       roles: [ ROLES_NAME_MAP.SUPER_ADMIN ],
-      score: 0
+      score: 0,
+      join_task: false,
+      birthday: new Date()
     })
     return user.save()
   })
