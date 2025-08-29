@@ -45,3 +45,5 @@ deploy.config.json
 
 /bin/mongodb/*
 /bin/temp_mongo/*
+
+mongodb-backup.gz
