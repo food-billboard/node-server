@@ -106,7 +106,7 @@ router
             target_classify
           }
         }
-        if(!Number.isNaN(target_score)) {
+        if(!Number.isNaN(parseInt(target_score))) {
           match = {
             ...match,
             target_score: parseInt(target_score)
