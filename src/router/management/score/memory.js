@@ -78,11 +78,13 @@ router
 
     const data = await (content ? UserModel.aggregate([
       {
-        username: {
-          $regex: content,
-          $options: 'gi'
-        }
-      },
+        $match: {
+          username: {
+            $regex: content,
+            $options: 'gi'
+          }
+        },
+      },  
       {
         $project: {
           _id: 1
