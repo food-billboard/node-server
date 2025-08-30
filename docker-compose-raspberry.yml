@@ -33,7 +33,7 @@ services:
       - /usr/local/etc/mongodb:/data/db
       - /usr/local/mongodb/log:/var/log/mongodb
   redis:
-    image: redis:6.2.7
+    image: redis:7.2-alpine
     container_name: redis
     volumes:
       - /usr/local/redis/redis.conf:/usr/local/etc/redis/redis.conf

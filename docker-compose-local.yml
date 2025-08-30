@@ -39,7 +39,7 @@ services:
       - ./bin/mongodb/data:/data/db 
       - ./bin/mongodb/log:/var/log/mongodb
   redis:
-    image: redis
+    image: redis:7.2-alpine
     container_name: redis
     volumes:
       - /usr/local/redis/redis.conf:/usr/local/etc/redis/redis.conf
