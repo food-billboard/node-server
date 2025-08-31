@@ -102,6 +102,7 @@ async function scheduleMethod({
           },
           {
             $project: {
+              classify: "$_id",
               _id: 1,
               content: 1,
               description: 1,
