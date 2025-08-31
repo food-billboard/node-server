@@ -28,7 +28,7 @@ router
         function (data) {
           try {
             if (!data) return null
-            const date = dayjs(data)
+            const date = dayjs(data).startOf('day')
             return date.isValid() ? date.toDate() : null
           } catch (err) {
             return null
@@ -41,7 +41,7 @@ router
         function (data) {
           try {
             if (!data) return null
-            const date = dayjs(data)
+            const date = dayjs(data).endOf('day')
             return date.isValid() ? date.toDate() : null
           } catch (err) {
             return null
@@ -326,7 +326,7 @@ router
                 updatedAt: 1,
                 score_type: 1,
                 target_classify: "$target_classify._id",
-                target_classify_image: "$target_classify.image",
+                target_classify_image: "$target_classify.image.src",
                 target_classify_name: "$target_classify.content",
                 target_primary_classify: "$target_classify.classify._id",
                 target_primary_classify_name: "$target_classify.classify.content",
