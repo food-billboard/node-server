@@ -41,7 +41,8 @@ router
     createdAt: 1,
     updatedAt: 1,
     description: 1,
-    birthday: 1
+    birthday: 1,
+    score: 1,
   })
   .exec()
   .then(parseData)
