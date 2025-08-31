@@ -868,7 +868,7 @@ router
           {
             $match: {
               award,
-              created: {
+              createdAt: {
                 $gte: targetDate
               }
             }
@@ -890,7 +890,7 @@ router
         ])
           .then(data => {
             const [total = { total: 0 }] = data
-            if (total >= award_cycle_count) return Promise.reject({ errMsg: '超过兑换次数' })
+            if (total.total >= award_cycle_count) return Promise.reject({ errMsg: '超过兑换次数', status: 400 })
           })
           .then(() => {
             if (!inventory) return Promise.reject({ status: 400, errMsg: '库存不足' })
