@@ -386,7 +386,7 @@ router
       name: 'target_score',
       _default: 1,
       sanitizers: [
-        data => Math.abs(data) || 0
+        data => data || 0
       ]
     })
 
