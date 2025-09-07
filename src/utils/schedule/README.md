@@ -11,3 +11,6 @@
 
 ## cache.json  
 任务执行永久性存储  
+
+## 定时任务文件命名规则  
+`xxx.schedule.js`  
