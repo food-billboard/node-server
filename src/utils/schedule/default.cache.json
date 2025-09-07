@@ -101,8 +101,8 @@
     "description": "初始化一个admin账号",
     "status": "SCHEDULING"
   },
-  "createScoreTask": {
-    "name": "createScoreTask",
+  "createScoreTaskSchedule": {
+    "name": "createScoreTaskSchedule",
     "time": "0 0 0 * * *",
     "description": "创建每日积分任务",
     "status": "SCHEDULING"
