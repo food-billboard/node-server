@@ -2249,7 +2249,7 @@ const LongTimeTaskSchema = new Schema({
     enum: Object.keys(TASK_STATUS)
   },
   // 完成时间
-  dealTime: {
+  deal_time: {
     type: Date,
   },
   request_url: {
@@ -2258,11 +2258,13 @@ const LongTimeTaskSchema = new Schema({
   request_method: {
     type: String
   },
+  response: String,
   // 接口数据
   // [{
   //     label: 'xxxx',
   //     value: 'xxx',
-  //     type: 'string number boolean object array'
+  //     type: 'string number boolean object array',
+  //     required: true,
   // }]
   request_data: {
     type: String,

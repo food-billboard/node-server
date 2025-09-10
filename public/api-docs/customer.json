@@ -71,7 +71,7 @@
         "tags": ["longtime_task"],
         "summary": "耗时任务列表",
         "description": "",
-        "operationId": "mustomer_get_longtime_task_list",
+        "operationId": "customer_get_longtime_task_list",
         "consumes": ["application/json", "application/xml"],
         "produces": ["application/xml", "application/json"],
         "parameters": [
@@ -111,7 +111,7 @@
           "200": {
             "description": "成功",
             "schema": {
-              "$ref": "#/definitions/mustomer_get_longtime_task_list"
+              "$ref": "#/definitions/customer_get_longtime_task_list"
             }
           }
         },
@@ -2809,7 +2809,7 @@
         }
       }
     },
-    "mustomer_get_longtime_task_list": {
+    "customer_get_longtime_task_list": {
       "type": "object",
       "properties": {
         "success": {
@@ -2868,6 +2868,10 @@
                     "type": "string",
                     "description": "完成时间"
                   },
+                  "response": {
+                    "type": "string",
+                    "description": "响应数据json"
+                  },
                   "createdAt": {
                     "type": "string",
                     "description": "创建时间"
@@ -2883,7 +2887,7 @@
         }
       },
       "xml": {
-        "name": "mustomer_get_longtime_task_list"
+        "name": "customer_get_longtime_task_list"
       }
     },
     "customer_get_barrage": {

@@ -24,13 +24,13 @@ function scheduleMethod({
       $or: [
         {
           status: TASK_STATUS.SUCCESS,
-          dealTime: {
+          deal_time: {
             $gte: dayjs().subtract(1, 'hour')
           }
         },
         {
           status: TASK_STATUS.FAIL,
-          dealTime: {
+          deal_time: {
             $gte: dayjs().subtract(5, 'hour')
           }
         }

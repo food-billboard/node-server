@@ -267,6 +267,45 @@
           }
         ]
       }
+    },
+    "/api/media/video/merge": {
+      "post": {
+        "tags": [
+          "video"
+        ],
+        "summary": "视频合并",
+        "description": "目前合并视频仅支持是同一尺寸同一编码的视频",
+        "operationId": "media_video_post_merge",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"视频的id，多个id用,分隔"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/media_video_post_merge"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
     }
   },
   "definitions": {
@@ -333,7 +372,27 @@
         }
       },
       "xml": {
-        "name": "media_video_put_poster"
+        "name": "media_video_post_corp"
+      }
+    },
+    "media_video_post_merge": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "string",
+              "description": "视频地址"
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "media_video_post_merge"
       }
     },
     "media_get": {

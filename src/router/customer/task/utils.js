@@ -28,19 +28,19 @@ function longTimeTaskCreate({
     // [{
     //     label: 'xxxx',
     //     value: 'xxx',
-    //     type: 'string number boolean object array'
+    //     type: 'string number boolean object array',
+    //     required: true ,
     // }]
     request_data: schema
   })
   return model.save()
 }
 
-function updateLongTimeTask(taskId, status) {
+function updateLongTimeTask(taskId, setData) {
+  // status response deal_time 
   return LongTimeTaskModel.updateOne({
     _id: ObjectId(taskId, {
-      $set: {
-        status
-      }
+      $set: setData
     })
   })
 }

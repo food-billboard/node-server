@@ -16,9 +16,11 @@ const {
   fileAsyncMd5,
   STATIC_FILE_PATH_NO_WRAPPER,
   MEDIA_ORIGIN_TYPE,
+  TASK_STATUS
 } = require('@src/utils')
 const dayjs = require('dayjs')
 const { func } = require('./poster')
+const { longTimeTaskCreate, updateLongTimeTask } = require('../../customer/task/utils')
 
 const router = new Router()
 
@@ -32,7 +34,7 @@ router
     const check = Params.body(ctx, {
       name: 'src',
       validator: [
-        data => !!data 
+        data => !!data
       ]
     })
 
@@ -40,10 +42,13 @@ router
 
     const {
       poster,
-      file_name='',
-      description='',
+      file_name = '',
+      description = '',
       expire,
       src,
+      // 以下是不等待接口返回需要的字段
+      page,
+      app,
     } = ctx.request.body
 
     const [, token] = verifyTokenToData(ctx)
@@ -67,96 +72,154 @@ router
       }
     }
     let setOriginData = {}
-    if(dayjs(expire).isValid()) {
+    if (dayjs(expire).isValid()) {
       database.expire = dayjs(expire).toDate()
       setOriginData.expire = database.expire
     }
-    if(file_name) {
+    if (file_name) {
       setOriginData = {
         ...setOriginData,
         file_name: file_name,
-        name: file_name 
+        name: file_name
       }
     }
-    if(poster) {
+    if (poster) {
       setOriginData.poster = ObjectId(poster)
     }
 
-    const data = await fs.stat(absolutePath)
-    .then(fileInfo => {
-      if(!fileInfo.isFile()) return Promise.reject({ errMsg: 'not Found', status: 404 })
-      database = merge(database, {
-        info: {
-          size: fileInfo.size,
-          chunk_size: Math.ceil(fileInfo.size / CHUNK_SIZE)
-        }
-      })
+    function longTimeFunction() {
       return fileAsyncMd5(absolutePath)
-    })
-    .then(md5 => {
-      const [suffix] = src.split('.').slice(-1)
-      database.src = `/static/video/${md5}.${suffix}`
-      database = merge(database, {
-        file_name: file_name || md5,
-        name: file_name || md5,
-        info: {
-          md5 
-        }
-      })
-      return VideoModel.findOne({
-        "info.md5": md5 
-      })
-      .select({
-        src: 1,
-      })
-      .exec()
-      .then(data => {
-        // 存在就直接把源文件删了就行
-        // 如果原文件的大小和实际不一样，直接删掉
-        if(data) {
-          const { src: originSrc } = data 
-          const originAbsolutePath = path.join(STATIC_FILE_PATH_NO_WRAPPER, originSrc)
-          return fs.unlink(originAbsolutePath)
-          .catch(() => {})
-          .then(() => {
-            if(Object.keys(setOriginData).length) {
-              return VideoModel.updateOne({
-                "info.md5": md5
-              }, {
-                $set: setOriginData
-              })
+        .then(md5 => {
+          const [suffix] = src.split('.').slice(-1)
+          database.src = `/static/video/${md5}.${suffix}`
+          database = merge(database, {
+            file_name: file_name || md5,
+            name: file_name || md5,
+            info: {
+              md5
             }
           })
-        }else {
-          if(!poster) {
-            return func({
-              posterName: md5,
-              // 视频地址
-              src,
-              userId: id,
+          return VideoModel.findOne({
+            "info.md5": md5
+          })
+            .select({
+              src: 1,
             })
+            .exec()
             .then(data => {
-              database.poster = data._id 
+              // 存在就直接把源文件删了就行
+              // 如果原文件的大小和实际不一样，直接删掉
+              if (data) {
+                const { src: originSrc } = data
+                const originAbsolutePath = path.join(STATIC_FILE_PATH_NO_WRAPPER, originSrc)
+                return fs.unlink(originAbsolutePath)
+                  .catch(() => { })
+                  .then(() => {
+                    if (Object.keys(setOriginData).length) {
+                      return VideoModel.updateOne({
+                        "info.md5": md5
+                      }, {
+                        $set: setOriginData
+                      })
+                    }
+                  })
+              } else {
+                if (!poster) {
+                  return func({
+                    posterName: md5,
+                    // 视频地址
+                    src,
+                    userId: id,
+                  })
+                    .then(data => {
+                      database.poster = data._id
+                    })
+                    .then(() => {
+                      const newModel = new VideoModel(database)
+                      return newModel.save()
+                    })
+                }
+                const newModel = new VideoModel(database)
+                return newModel.save()
+              }
             })
-            .then(() => {
-              const newModel = new VideoModel(database)
-              return newModel.save()
-            })
+        })
+        .then(async () => {
+          // 更换成md5
+          return fs.move(absolutePath, path.join(STATIC_FILE_PATH_NO_WRAPPER, database.src)).then(() => null)
+        })
+    }
+
+    const data = await fs.stat(absolutePath)
+      .then(fileInfo => {
+        if (!fileInfo.isFile()) return Promise.reject({ errMsg: 'not Found', status: 404 })
+        database = merge(database, {
+          info: {
+            size: fileInfo.size,
+            chunk_size: Math.ceil(fileInfo.size / CHUNK_SIZE)
           }
-          const newModel = new VideoModel(database)
-          return newModel.save()
+        })
+        if (!page && !app) {
+          return longTimeFunction()
+        } else {
+          return longTimeTaskCreate({
+            page,
+            app,
+            userId: id,
+            method: 'POST',
+            url: '/api/media/video/create',
+            schema: JSON.stringify([
+              {
+                label: 'poster',
+                value: poster,
+                type: 'string',
+              },
+              {
+                label: 'file_name',
+                value: file_name,
+                type: 'string',
+              },
+              {
+                label: 'description',
+                value: description,
+                type: 'string',
+              },
+              {
+                label: 'expire',
+                value: expire,
+                type: 'string',
+              },
+              {
+                label: 'src',
+                value: src,
+                type: 'string',
+                required: true
+              }
+            ]),
+          })
+            .then(model => {
+              const { _id } = model
+              longTimeFunction()
+                .then(() => {
+                  return updateLongTimeTask(_id.toString(), {
+                    status: TASK_STATUS.SUCESS,
+                    deal_time: new Date()
+                  })
+                })
+                .catch(err => {
+                  return updateLongTimeTask(_id.toString(), {
+                    status: TASK_STATUS.FAIL,
+                    error_info: err.toString(),
+                    deal_time: new Date()
+                  })
+                })
+              return _id
+            })
         }
       })
-    })
-    .then(() => {
-      // 更换成md5
-      return fs.move(absolutePath, path.join(STATIC_FILE_PATH_NO_WRAPPER, database.src)).catch((err) =>{
-        console.error(err)
-      })
-    })
-      .then(() => {
+      .then((data) => {
         return {
-          data: null 
+          data
         }
       })
       .catch(dealErr(ctx))
