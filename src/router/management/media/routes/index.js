@@ -1,7 +1,7 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
-const { MEDIA_MAP } = require('../../utils')
+const { MEDIA_MAP } = require('../utils')
 const { Auth } = require('../auth')
 const { dealErr, responseDataDeal, Params, MEDIA_AUTH, MEDIA_STATUS, MEDIA_ORIGIN_TYPE, STATIC_FILE_PATH, notFound } = require('@src/utils')
 
@@ -453,12 +453,8 @@ router
       data => {
         if(typeof data === 'string') return {
           done: true,
-          data: !!data ? {
-            expire: Day(data).toDate()
-          } : {
-            $unset: {
-              expire: 1
-            }
+          data: {
+            expire: data ? Day(data).toDate() : null 
           }
         }
         return {
