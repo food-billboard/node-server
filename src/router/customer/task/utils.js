@@ -1,6 +1,8 @@
 const {
   LongTimeTaskModel,
+  TASK_STATUS
 } = require('@src/utils')
+const { Types: { ObjectId } } = require('mongoose')
 
 function longTimeTaskCreate({
   // 调用页面

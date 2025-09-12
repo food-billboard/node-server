@@ -301,7 +301,7 @@ const APP_TYPE = {
 const TASK_STATUS = {
   SUCCESS: "SUCCESS",
   FAIL: "FAIL",
-  PROCESS: "SCREEN",
+  PROCESS: "PROCESS",
 }
 
 module.exports = {
