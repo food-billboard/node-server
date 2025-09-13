@@ -141,6 +141,7 @@ router
             createdAt: 1,
             updatedAt: 1,
             response: 1,
+            checked: 1,
           }
         }
       ])
@@ -163,6 +164,47 @@ router
       data
     })
 
+  })
+  .put('/', async (ctx) => {
+    const check = Params.body(ctx, {
+      name: '_id',
+      validator: [
+        data => ObjectId.isValid(data)
+      ]
+    })
+
+    if (check) return
+
+    const [_id] = Params.sanitizers(ctx.request.body, {
+      name: '_id',
+      sanitizers: [
+        data => ObjectId(data)
+      ]
+    })
+
+    const [, token] = verifyTokenToData(ctx)
+    const { id } = token
+
+    const data = await LongTimeTaskModel.updateOne({
+      _id,
+      create_user: ObjectId(id)
+    }, {
+      $set: {
+        checked: true 
+      }
+    })
+      .then(data => {
+        if (data.nModified === 0) return Promise.reject({ status: 404, errMsg: 'not Found' })
+        return {
+          data: null 
+        }
+      })
+      .catch(dealErr(ctx))
+
+    responseDataDeal({
+      ctx,
+      data
+    })
   })
 
 module.exports = router

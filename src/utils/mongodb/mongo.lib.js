@@ -2252,6 +2252,10 @@ const LongTimeTaskSchema = new Schema({
   deal_time: {
     type: Date,
   },
+  // 是否确认
+  checked: {
+    type: Boolean
+  },
   request_url: {
     type: String
   },

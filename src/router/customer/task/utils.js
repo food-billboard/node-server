@@ -41,9 +41,9 @@ function longTimeTaskCreate({
 function updateLongTimeTask(taskId, setData) {
   // status response deal_time 
   return LongTimeTaskModel.updateOne({
-    _id: ObjectId(taskId, {
-      $set: setData
-    })
+    _id: ObjectId(taskId)
+  }, {
+    $set: setData
   })
 }
 

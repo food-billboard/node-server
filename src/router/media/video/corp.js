@@ -18,7 +18,8 @@ const {
   FFMPEG_VERSION,
   isRaspberry,
   STATIC_FILE_PATH_NO_WRAPPER,
-  TASK_STATUS
+  TASK_STATUS,
+  throwLongTimeTaskErrorFunction
 } = require('@src/utils')
 const dayjs = require('dayjs')
 const { longTimeTaskCreate, updateLongTimeTask } = require('../../customer/task/utils')
@@ -173,10 +174,10 @@ router
           })
             .then(async (model) => {
               const { _id } = model
-              longTimeFunction(data)
+              throwLongTimeTaskErrorFunction(longTimeFunction, 1000 * 60 * 60, data)
                 .then((data) => {
                   return updateLongTimeTask(_id.toString(), {
-                    status: TASK_STATUS.SUCESS,
+                    status: TASK_STATUS.SUCCESS,
                     response: JSON.stringify(data),
                     deal_time: new Date()
                   })

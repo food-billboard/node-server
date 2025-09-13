@@ -120,6 +120,44 @@
             "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
+      },
+      "put": {
+        "tags": [
+          "task"
+        ],
+        "summary": "任务查看确认",
+        "description": "",
+        "operationId": "customer_put_task",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "_id",
+            "description": "电影id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "发送成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
       }
     },
     "/api/customer/barrage": {
@@ -2867,6 +2905,10 @@
                   "deal_time": {
                     "type": "string",
                     "description": "完成时间"
+                  },
+                  "checked": {
+                    "type": "boolean",
+                    "description": "是否确认"
                   },
                   "response": {
                     "type": "string",

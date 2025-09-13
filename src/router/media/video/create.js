@@ -16,7 +16,8 @@ const {
   fileAsyncMd5,
   STATIC_FILE_PATH_NO_WRAPPER,
   MEDIA_ORIGIN_TYPE,
-  TASK_STATUS
+  TASK_STATUS,
+  throwLongTimeTaskErrorFunction
 } = require('@src/utils')
 const dayjs = require('dayjs')
 const { func } = require('./poster')
@@ -199,10 +200,10 @@ router
           })
             .then(model => {
               const { _id } = model
-              longTimeFunction()
+              throwLongTimeTaskErrorFunction(longTimeFunction, 1000 * 60 * 60)
                 .then(() => {
                   return updateLongTimeTask(_id.toString(), {
-                    status: TASK_STATUS.SUCESS,
+                    status: TASK_STATUS.SUCCESS,
                     deal_time: new Date()
                   })
                 })

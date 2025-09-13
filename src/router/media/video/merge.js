@@ -1,8 +1,9 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require("mongoose")
 const fs = require('fs-extra')
-const { exec } = require("child_process")
+const { exec, spawn } = require("child_process")
 const path = require("path")
+const dayjs = require('dayjs')
 const {
   VideoModel,
   dealErr,
@@ -15,7 +16,10 @@ const {
   isRaspberry,
   STATIC_FILE_PATH_NO_WRAPPER,
   fileAsyncMd5,
-  MEDIA_STATUS
+  MEDIA_STATUS,
+  MEDIA_ORIGIN_TYPE,
+  throwLongTimeTaskErrorFunction,
+  MEDIA_AUTH
 } = require('@src/utils')
 const { longTimeTaskCreate, updateLongTimeTask } = require('../../customer/task/utils')
 
@@ -53,36 +57,67 @@ router
       ]
     })
     async function longTimeFunction(data) {
-      const newFileName = Date.now() + '-video-merge' + '.mp4'
+      const filename = Date.now() + '-video-merge'
+      const newFileName = filename + '.mp4'
       const newFilePath = path.join(STATIC_FILE_PATH_NO_WRAPPER, '/static/video', newFileName)
+      const tmpFile = path.join(STATIC_FILE_PATH_NO_WRAPPER, '/static/other', filename + '.txt')
       const filePathList = data.map(item => {
         const { src } = item
+        if (isRaspberry()) {
+          return `file '${path.join(STATIC_FILE_PATH_NO_WRAPPER, src)}'`
+        }
         return `file '${path.join("/run/project", src)}'`
       }).join('\n')
 
-      return new Promise((resolve, reject) => {
-        let cmd = ''
-        // 树莓派环境
-        if (isRaspberry()) {
-          cmd = `bash -c "echo -e \"${filePathList}\" | ffmpeg -f concat -safe 0 -i - -c copy ${path.join(STATIC_FILE_PATH_NO_WRAPPER, "/static/video", newFileName)}"`
-        } else {
-          cmd = `docker run --rm -v ${STATIC_FILE_PATH_NO_WRAPPER}:/run/project ${FFMPEG_VERSION} \
-  bash -c "echo -e \"${filePathList}\" | ffmpeg -f concat -safe 0 -i - -c copy ${path.join(STATIC_FILE_PATH_NO_WRAPPER, "/static/video", newFileName)}"`
-        }
-        exec(cmd, function (err) {
-          if (err) {
-            reject({
-              errMsg: err,
-              status: 500
-            })
-          } else {
-            resolve()
-          }
+      return fs.writeFile(newFilePath, '')
+        .then(() => {
+          return fs.writeFile(tmpFile, filePathList);
         })
-      })
+        .then(() => {
+          return new Promise((resolve, reject) => {
+            let cmd = ''
+            // 树莓派环境
+            if (isRaspberry()) {
+              cmd = `ffmpeg -y -f concat -safe 0 -i ${path.join(STATIC_FILE_PATH_NO_WRAPPER, '/static/other', filename + '.txt')} -c copy ${path.join(STATIC_FILE_PATH_NO_WRAPPER, "/static/video", newFileName)}`
+              exec(cmd, function (err) {
+                fs.unlinkSync(tmpFile);
+                if (err) {
+                  reject({
+                    errMsg: err,
+                    status: 500
+                  })
+                } else {
+                  resolve()
+                }
+              })
+            } else {
+              cmd = [
+                'run', '--rm',
+                '-v', `${STATIC_FILE_PATH_NO_WRAPPER}:/run/project`,
+                FFMPEG_VERSION,
+                '-y',
+                '-f', 'concat',
+                '-safe', '0',
+                '-i', path.join("/run/project", '/static/other', filename + '.txt'),
+                '-c', 'copy',
+                path.join("/run/project", "/static/video", newFileName)
+              ]
+              const process = spawn('docker', cmd);
+
+              process.on('close', (code) => {
+                console.log(code)
+                fs.unlinkSync(tmpFile);
+                resolve()
+              });
+            }
+          })
+        })
         .then(async () => {
           const stats = await fs.stat(newFilePath);
           const md5 = await fileAsyncMd5(newFilePath)
+          const newPath = path.join(STATIC_FILE_PATH_NO_WRAPPER, '/static/video', `${md5}.mp4`)
+          await fs.remove(newPath)
+          await fs.move(newFilePath, newPath)
           const model = new VideoModel({
             expire: dayjs().add(1, 'day').toDate(),
             file_name: newFileName,
@@ -96,7 +131,7 @@ router
               md5: md5,
               complete: [],
               chunk_size: 1024 * 1024 * 5,
-              size: stats.size,
+              size: stats.size || 1,
               mime: 'video/mp4',
               status: MEDIA_STATUS.COMPLETE
             },
@@ -141,10 +176,10 @@ router
           })
             .then(async (model) => {
               const { _id } = model
-              longTimeFunction(data)
+              throwLongTimeTaskErrorFunction(longTimeFunction, 1000 * 60 * 60, data)
                 .then((data) => {
                   return updateLongTimeTask(_id.toString(), {
-                    status: TASK_STATUS.SUCESS,
+                    status: TASK_STATUS.SUCCESS,
                     response: JSON.stringify(data),
                     deal_time: new Date()
                   })

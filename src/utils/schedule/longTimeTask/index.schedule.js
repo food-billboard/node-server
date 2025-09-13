@@ -25,13 +25,19 @@ function scheduleMethod({
         {
           status: TASK_STATUS.SUCCESS,
           deal_time: {
-            $gte: dayjs().subtract(1, 'hour')
+            $gte: dayjs().subtract(24, 'hour')
           }
         },
         {
           status: TASK_STATUS.FAIL,
           deal_time: {
-            $gte: dayjs().subtract(5, 'hour')
+            $gte: dayjs().subtract(48, 'hour')
+          }
+        },
+        {
+          status: TASK_STATUS.PROCESS,
+          deal_time: {
+            $gte: dayjs().subtract(12, 'hour')
           }
         }
       ]

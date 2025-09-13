@@ -296,7 +296,27 @@ function koaTimeout(timeout) {
   };
 };
 
+// 耗时任务设置定时器报错
+const throwLongTimeTaskErrorFunction = (method, time, ...args) => {
+  return new Promise((resolve, reject) => {
+    let timeout 
+    method(...args)
+    .then((data) => {
+      clearTimeout(timeout)
+      return resolve(data)
+    })
+    .catch(err => {
+      clearTimeout(timeout)
+      return reject(err)  
+    })
+    timeout = setTimeout(() => {
+      reject('long time task timeout error')
+    }, time);
+  })
+}
+
 module.exports = {
+  throwLongTimeTaskErrorFunction,
   koaTimeout,
   isRaspberry,
   sleep,
