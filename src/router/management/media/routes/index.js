@@ -1,9 +1,11 @@
 const Router = require('@koa/router')
 const { Types: { ObjectId } } = require('mongoose')
 const Day = require('dayjs')
+const fs = require('fs-extra')
+const path = require('path')
 const { MEDIA_MAP } = require('../utils')
 const { Auth } = require('../auth')
-const { dealErr, responseDataDeal, Params, MEDIA_AUTH, MEDIA_STATUS, MEDIA_ORIGIN_TYPE, STATIC_FILE_PATH, notFound } = require('@src/utils')
+const { dealErr, responseDataDeal, Params, MEDIA_AUTH, MEDIA_STATUS, MEDIA_ORIGIN_TYPE, STATIC_FILE_PATH_NO_WRAPPER, notFound } = require('@src/utils')
 
 const router = new Router()
 
@@ -513,9 +515,26 @@ router
   })
   const model = MEDIA_MAP[type]
 
-  const data = await model.deleteMany({
-    _id: { $in: _ids }
+  const data = await model.aggregate([
+    {
+      $match: {
+        _id: {
+          $in: _ids
+        }
+      }
+    }
+  ])
+  .then(data => {
+    return Promise.allSettled(data.map(item => {
+      const { src } = item
+      return fs.remove(path.join(STATIC_FILE_PATH_NO_WRAPPER, src))
+    }))
   })
+  .then(() => {
+    return model.deleteMany({
+      _id: { $in: _ids }
+    })
+  })  
   .then(data => {
     if(data.deletedCount === 0) return Promise.reject({ errMsg: 'not found', status: 404 })
     return {
