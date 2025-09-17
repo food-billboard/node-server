@@ -3,6 +3,7 @@ const Poster = require('./poster')
 const Merge = require('./merge')
 const Corp = require('./corp')
 const Create = require('./create')
+const Exchange = require('./exchange')
 
 const router = new Router()
 
@@ -11,5 +12,6 @@ router
 .use('/merge', Merge.routes(), Merge.allowedMethods())
 .use('/corp', Corp.routes(), Corp.allowedMethods())
 .use('/create', Create.routes(), Create.allowedMethods())
+.use('/exchange', Exchange.routes(), Exchange.allowedMethods())
 
 module.exports = router

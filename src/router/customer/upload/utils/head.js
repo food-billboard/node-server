@@ -11,12 +11,12 @@ const removeTemplateFolder = (name) => {
   const folder = path.join(STATIC_FILE_PATH, 'template', name)
 
   return getChunkFileList(folder)
-  .then(fileList => Promise.all(fileList.map(file => {
-    return fs.unlink(path.join(folder, file))
-  })))
-  .catch(err => {
-    console.log(err)
-  })
+    .then(fileList => Promise.all(fileList.map(file => {
+      return fs.unlink(path.join(folder, file))
+    })))
+    .catch(err => {
+      console.log(err)
+    })
 
 }
 
@@ -26,15 +26,15 @@ const headRequestMediaDeal = {
     metadata,
     user
   }) => {
-  
+
     const { md5, auth, size, mime, name, chunk, file_name, description, expire } = metadata
     const { roles, _id } = user
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
 
-  
+
     const defaultModel = {
       expire: expire ? dayjs(expire).toDate() : undefined,
-      file_name, 
+      file_name,
       description,
       name: name || md5,
       src: path.join('/static', 'image', `${md5}.${Mime.getExtension(mime)}`),
@@ -51,7 +51,7 @@ const headRequestMediaDeal = {
         status: MEDIA_STATUS.UPLOADING
       },
     }
-  
+
     /*
       如果用户上传一个已经存在且为私有的文件，
       但当前为公开的话，文件即变为公开状态
@@ -73,70 +73,70 @@ const headRequestMediaDeal = {
         } : {}
       )
     })
-    .select({
-      "info.chunk_size": 1,
-      "info.status": 1,
-      "info.complete": 1
-    })
-    .exec()
-    .then(data => {
-      //文件存在则返回对应的offset
-      if(!!data) {
-        const { info: { chunk_size, status, complete }, _id } = data
-        //完成
-        if(status == MEDIA_STATUS.COMPLETE && !complete.length) return {
-          offset: size,
-          id: _id.toString(),
-          size
-        }
-  
-        //分片与当前不同或状态为错误
-        if(chunk != chunk_size || status == MEDIA_STATUS.ERROR) {
-          return removeTemplateFolder(md5)
-          .then(_ => new ImageModel(defaultModel).save())
-          .then(data => ({
-            offset: 0,
-            id: data._id.toString(),
+      .select({
+        "info.chunk_size": 1,
+        "info.status": 1,
+        "info.complete": 1
+      })
+      .exec()
+      .then(data => {
+        //文件存在则返回对应的offset
+        if (!!data) {
+          const { info: { chunk_size, status, complete }, _id } = data
+          //完成
+          if (status == MEDIA_STATUS.COMPLETE && !complete.length) return {
+            offset: size,
+            id: _id.toString(),
             size
-          }))
-        }
-  
-        //部分完成
-        let unCompleteChunk = -1;
-        
-        ([...complete]).sort((a, b) => a - b).some((com, index) => {
-          if(com != index) {
-            unCompleteChunk = com
-            return true
           }
-          return false
-        })
 
-        if(!~unCompleteChunk) unCompleteChunk = complete.length
-        // unCompleteChunk ++
-        unCompleteChunk *= chunk_size
-        return {
-          offset: unCompleteChunk >= size ? size : unCompleteChunk,
-          id: _id.toString(),
-          size
+          //分片与当前不同或状态为错误
+          if (chunk != chunk_size || status == MEDIA_STATUS.ERROR) {
+            return removeTemplateFolder(md5)
+              .then(_ => new ImageModel(defaultModel).save())
+              .then(data => ({
+                offset: 0,
+                id: data._id.toString(),
+                size
+              }))
+          }
+
+          //部分完成
+          let unCompleteChunk = -1;
+
+          ([...complete]).sort((a, b) => a - b).some((com, index) => {
+            if (com != index) {
+              unCompleteChunk = com
+              return true
+            }
+            return false
+          })
+
+          if (!~unCompleteChunk) unCompleteChunk = complete.length
+          // unCompleteChunk ++
+          unCompleteChunk *= chunk_size
+          return {
+            offset: unCompleteChunk >= size ? size : unCompleteChunk,
+            id: _id.toString(),
+            size
+          }
+
         }
-  
-      }
-      //文件不存在则创建
-      else {
-        return new ImageModel(defaultModel).save()
-        .then(data => ({
-          offset: 0,
-          id: data._id.toString(),
-          size
-        }))
-      }
-    })
-    .catch(err => {
-      console.log(err)
-      return false
-    })
-  
+        //文件不存在则创建
+        else {
+          return new ImageModel(defaultModel).save()
+            .then(data => ({
+              offset: 0,
+              id: data._id.toString(),
+              size
+            }))
+        }
+      })
+      .catch(err => {
+        console.log(err)
+        return false
+      })
+
   },
   videoMediaDeal: ({
     ctx,
@@ -147,12 +147,35 @@ const headRequestMediaDeal = {
     const { roles, _id } = user
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
 
+    let realMime = mime
+    let extension = Mime.getExtension(mime)
+    if (!extension) {
+      switch (mime.split('/')[1]) {
+        case 'mkv':
+          realMime = 'video/x-matroska'
+          extension = 'mkv'
+          break
+        case 'rmvb':
+          realMime = 'video/vnd.rn-realvideo'
+          extension = 'rmvb'
+          break
+        case 'avi':
+          realMime = 'video/x-msvideo'
+          extension = 'avi'
+          break
+        case 'mov':
+          realMime = 'video/quicktime'
+          extension = 'mov'
+          break
+      }
+    }
+
     const defaultModel = {
       expire: expire ? dayjs(expire).toDate() : undefined,
-      file_name, 
+      file_name,
       description,
       name: name || md5,
-      src: path.join('/static', 'video', `${md5}.${Mime.getExtension(mime)}`),
+      src: path.join('/static', 'video', `${md5}.${extension}`),
       origin_type,
       white_list: [_id],
       origin: _id,
@@ -162,80 +185,80 @@ const headRequestMediaDeal = {
         complete: [],
         chunk_size: chunk,
         size,
-        mime,
+        mime: realMime,
         status: MEDIA_STATUS.UPLOADING
       },
     }
-  
+
     return VideoModel.findOneAndUpdate({
       "info.md5": md5,
-      "info.mime": mime,
+      "info.mime": realMime,
       "info.size": size
     }, {
       $addToSet: {
         white_list: _id
       }
     })
-    .select({
-      "info.chunk_size": 1,
-      "info.status": 1,
-      "info.complete": 1,
-    })
-    .exec()
-    .then(data => {
-      //文件存在则返回对应的offset
-      if(!!data) {
-        const { info: { chunk_size, status, complete }, _id } = data
-  
-        //完成
-        if(status == MEDIA_STATUS.COMPLETE && !complete.length) return {
-          offset: size,
-          id: _id.toString()
-        }
-        //分片与当前不同或状态为错误
-        if(chunk != chunk_size || status == MEDIA_STATUS.ERROR) {
+      .select({
+        "info.chunk_size": 1,
+        "info.status": 1,
+        "info.complete": 1,
+      })
+      .exec()
+      .then(data => {
+        //文件存在则返回对应的offset
+        if (!!data) {
+          const { info: { chunk_size, status, complete }, _id } = data
 
-          return removeTemplateFolder(md5)
-          .then(_ => new VideoModel(defaultModel).save())
-          .then(data => ({
-            offset: 0,
-            id: data._id.toString()
-          }))
-        }
-  
-        //部分完成
-        let unCompleteChunk = -1;
-
-        ([...complete]).sort((a, b) => a - b).some((com, index) => {
-          if(com != index) {
-            unCompleteChunk = com
-            return true
+          //完成
+          if (status == MEDIA_STATUS.COMPLETE && !complete.length) return {
+            offset: size,
+            id: _id.toString()
           }
-          return false
-        })
+          //分片与当前不同或状态为错误
+          if (chunk != chunk_size || status == MEDIA_STATUS.ERROR) {
 
-        if(!~unCompleteChunk) unCompleteChunk = complete.length
+            return removeTemplateFolder(md5)
+              .then(_ => new VideoModel(defaultModel).save())
+              .then(data => ({
+                offset: 0,
+                id: data._id.toString()
+              }))
+          }
 
-        unCompleteChunk *= chunk_size
-        return {
-          offset: unCompleteChunk >= size ? size : unCompleteChunk,
-          id: _id.toString()
+          //部分完成
+          let unCompleteChunk = -1;
+
+          ([...complete]).sort((a, b) => a - b).some((com, index) => {
+            if (com != index) {
+              unCompleteChunk = com
+              return true
+            }
+            return false
+          })
+
+          if (!~unCompleteChunk) unCompleteChunk = complete.length
+
+          unCompleteChunk *= chunk_size
+          return {
+            offset: unCompleteChunk >= size ? size : unCompleteChunk,
+            id: _id.toString()
+          }
+
         }
-  
-      }
-      //文件不存在则创建
-      else {
-        return new VideoModel(defaultModel).save()
-        .then(data => ({
-          offset: 0,
-          id: data._id.toString()
-        }))
-      }
-    })
-    .catch(err => {
-      console.log(err)
-      return false
-    })
+        //文件不存在则创建
+        else {
+          return new VideoModel(defaultModel).save()
+            .then(data => ({
+              offset: 0,
+              id: data._id.toString()
+            }))
+        }
+      })
+      .catch(err => {
+        console.log(err)
+        return false
+      })
   },
   otherMediaDeal: ({
     ctx,
@@ -245,10 +268,9 @@ const headRequestMediaDeal = {
     const { md5, auth, size, mime, name, chunk, file_name, description, expire } = metadata
     const { roles, _id } = user
     const origin_type = roles === ROLES_MAP.SUPER_ADMIN ? MEDIA_ORIGIN_TYPE.ORIGIN : MEDIA_ORIGIN_TYPE.USER
-  
     const defaultModel = {
       expire: expire ? dayjs(expire).toDate() : undefined,
-      file_name, 
+      file_name,
       description,
       name: name || md5,
       src: path.join('/static', 'other', `${md5}.${Mime.getExtension(mime)}`),
@@ -265,7 +287,6 @@ const headRequestMediaDeal = {
         status: MEDIA_STATUS.UPLOADING
       },
     }
-  
     return OtherMediaModel.findOneAndUpdate({
       "info.md5": md5,
       "info.mime": mime,
@@ -275,63 +296,63 @@ const headRequestMediaDeal = {
         white_list: _id
       }
     })
-    .select({
-      "info.chunk_size": 1,
-      "info.status": 1,
-      "info.complete": 1,
-    })
-    .exec()
-    .then(data => {
-      //文件存在则返回对应的offset
-      if(!!data) {
-        const { info: { chunk_size, status, complete }, _id } = data
-        //完成
-        if(status == MEDIA_STATUS.COMPLETE && !complete.length) return {
-          offset: size,
-          id: _id.toString()
-        }
-        
-        //分片与当前不同或状态为错误
-        if(chunk != chunk_size || status == MEDIA_STATUS.ERROR) {
-          return removeTemplateFolder(md5)
-          .then(_ => new OtherMediaModel(defaultModel).save())
-          .then(data => ({
-            offset: 0,
-            id: data._id.toString()
-          }))
-        }
-  
-        //部分完成
-        let unCompleteChunk = -1;
-        ([...complete]).sort((a, b) => a - b).some((com, index) => {
-          if(com != index) {
-            unCompleteChunk = com
-            return true
+      .select({
+        "info.chunk_size": 1,
+        "info.status": 1,
+        "info.complete": 1,
+      })
+      .exec()
+      .then(data => {
+        //文件存在则返回对应的offset
+        if (!!data) {
+          const { info: { chunk_size, status, complete }, _id } = data
+          //完成
+          if (status == MEDIA_STATUS.COMPLETE && !complete.length) return {
+            offset: size,
+            id: _id.toString()
           }
-          return false
-        })
-        // unCompleteChunk ++
-        if(!~unCompleteChunk) unCompleteChunk = complete.length
-        unCompleteChunk *= chunk_size
-        return {
-          offset: unCompleteChunk >= size ? size : unCompleteChunk,
-          id: _id.toString()
+
+          //分片与当前不同或状态为错误
+          if (chunk != chunk_size || status == MEDIA_STATUS.ERROR) {
+            return removeTemplateFolder(md5)
+              .then(_ => new OtherMediaModel(defaultModel).save())
+              .then(data => ({
+                offset: 0,
+                id: data._id.toString()
+              }))
+          }
+
+          //部分完成
+          let unCompleteChunk = -1;
+          ([...complete]).sort((a, b) => a - b).some((com, index) => {
+            if (com != index) {
+              unCompleteChunk = com
+              return true
+            }
+            return false
+          })
+          // unCompleteChunk ++
+          if (!~unCompleteChunk) unCompleteChunk = complete.length
+          unCompleteChunk *= chunk_size
+          return {
+            offset: unCompleteChunk >= size ? size : unCompleteChunk,
+            id: _id.toString()
+          }
+
         }
-  
-      }
-      //文件不存在则创建
-      else {
-        return new OtherMediaModel(defaultModel).save()
-        .then(data => ({
-          offset: 0,
-          id: data._id.toString()
-        }))
-      }
-    })
-    .catch(err => {
-      console.log(err)
-      return false
-    })
+        //文件不存在则创建
+        else {
+          return new OtherMediaModel(defaultModel).save()
+            .then(data => ({
+              offset: 0,
+              id: data._id.toString()
+            }))
+        }
+      })
+      .catch(err => {
+        console.log(err)
+        return false
+      })
   }
 }
 
@@ -350,19 +371,22 @@ const headRequestDeal = async ({
     roles: role
   }
   const mimeType = mime.toLowerCase()
-  if(/image\/.+/.test(mimeType)) {
+  console.info(`mime: ${mimeType}`)
+  if (/image\/.+/.test(mimeType)) {
     return headRequestMediaDeal.imageMediaDeal({
       ctx,
       metadata,
       user: newUser
     })
-  }else if(/video\/.+/.test(mimeType)) {
+  }
+  // ? 或者的判断包括rmvb格式
+  else if (/video\/.+/.test(mimeType) || ['application/vnd.rn-realmedia-vbr'].includes(mimeType)) {
     return headRequestMediaDeal.videoMediaDeal({
       ctx,
       metadata,
       user: newUser
     })
-  }else {
+  } else {
     return headRequestMediaDeal.otherMediaDeal({
       ctx,
       metadata,

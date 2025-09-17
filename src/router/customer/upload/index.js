@@ -45,7 +45,10 @@ const METADATA = {
     sanitizers: data => parseInt(data)
   },
   'mime': {
-    validator: data => !!Validator.isMimeType(data),
+    validator: data => {
+      console.log(data, 222)
+      return !!Validator.isMimeType(data)
+    },
     sanitizers: data => data.toLowerCase()
   },
   'size': {
