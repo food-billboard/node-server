@@ -306,6 +306,85 @@
           }
         ]
       }
+    },
+    "/api/media/video/exchange": {
+      "post": {
+        "tags": [
+          "video"
+        ],
+        "summary": "视频格式转换",
+        "description": "",
+        "operationId": "media_video_post_exchange",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"视频的id，多个id用,分隔"
+          },
+          {
+            "name": "type",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"转换视频格式，比如mp4"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/media/video/compress": {
+      "post": {
+        "tags": [
+          "video"
+        ],
+        "summary": "视频压缩",
+        "description": "",
+        "operationId": "media_video_post_compress",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "description":"视频的id，多个id用,分隔"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ]
+      }
     }
   },
   "definitions": {
