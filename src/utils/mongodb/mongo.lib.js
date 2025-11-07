@@ -4,6 +4,7 @@ const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
 const { 
+  SCORE_CHECK_STATE_TYPE,
   SCORE_EXCHANGE_CYCLE_TYPE,
   BEHAVIOUR_URL_TYPE_MAP, 
   EMAIL_REGEXP, 
@@ -2129,6 +2130,11 @@ const ExchangeMemorySchema = new Schema({
   // 核销时间
   check_date: {
     type: Date 
+  },
+  // 核销状态
+  check_state: {
+    type: String,
+    enum: Object.keys(SCORE_CHECK_STATE_TYPE),
   }
 }, {
   ...defaultConfig,

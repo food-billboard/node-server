@@ -10,6 +10,7 @@ const {
   UserModel,
   notFound,
   SCORE_EXCHANGE_CYCLE_TYPE,
+  SCORE_CHECK_STATE_TYPE,
   SCORE_TYPE
 } = require('@src/utils')
 const dayjs = require('dayjs')
@@ -563,9 +564,7 @@ router
       .then(([users, awards]) => {
         let match = {}
         if (!isNil(checked)) {
-          match.check_date = {
-            $exists: !!checked
-          }
+          match.check_state = SCORE_CHECK_STATE_TYPE.AGREE
         }
         if (start_date) {
           match = {
@@ -767,6 +766,8 @@ router
                 award_exchange_score: "$award.exchange_score",
                 award_image_list: "$award.award_image_list.src",
                 check_date: 1,
+                check_state: 1,
+                reason: 1,
                 exchange_target: "$exchange_target._id",
                 exchange_target_name: "$exchange_target.username",
                 exchange_user: "$exchange_user._id",
@@ -943,6 +944,11 @@ router
       validator: [
         data => ObjectId.isValid(data)
       ]
+    }, {
+      name: 'check_state',
+      validator: [
+        data => !!SCORE_CHECK_STATE_TYPE[data]
+      ]
     })
 
     if (check) return
@@ -954,6 +960,8 @@ router
       ]
     })
 
+    const { reason='', check_state } = ctx.request.body 
+
     const data = await ExchangeMemoryModel.updateOne({
       _id,
       check_date: {
@@ -961,7 +969,9 @@ router
       }
     }, {
       $set: {
-        check_date: new Date()
+        check_date: new Date(),
+        reason,
+        check_state: check_state || SCORE_CHECK_STATE_TYPE.AGREE
       }
     })
       .then(data => {

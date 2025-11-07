@@ -6121,10 +6121,19 @@
                         "type": "array",
                         "description": "奖品图片"
                       },
+                      "reason": {
+                        "type": "string",
+                        "description": "撤销原因"
+                      },
                       "check_date": {
                         "type": "string",
                         "format": "date-time",
                         "description": "核销时间"
+                      },
+                      "check_state": {
+                        "type": "string",
+                        "description": "核销状态",
+                        "enum": ["AGREE", "DISAGREE"]
                       },
                       "createdAt": {
                         "type": "string",
