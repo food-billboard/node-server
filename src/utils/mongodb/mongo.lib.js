@@ -5,6 +5,7 @@ const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
 const { 
   SCORE_CHECK_STATE_TYPE,
+  SCORE_AWARD_ENABLE_TYPE,
   SCORE_EXCHANGE_CYCLE_TYPE,
   BEHAVIOUR_URL_TYPE_MAP, 
   EMAIL_REGEXP, 
@@ -2090,6 +2091,13 @@ const ScoreAwardSchema = new Schema({
     required: true,
     type: String,
     enum: Object.keys(SCORE_EXCHANGE_CYCLE_TYPE),
+    uppercase: true,
+  },
+  enable: {
+    type: String,
+    required: true,
+    type: String,
+    enum: Object.keys(SCORE_AWARD_ENABLE_TYPE),
     uppercase: true,
   },
   // 兑换周期次数

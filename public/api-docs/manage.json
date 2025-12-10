@@ -415,7 +415,7 @@
             "name": "primary",
             "description": "一级分类id",
             "type": "string"
-          }, 
+          },
           {
             "in": "body",
             "name": "image",
@@ -636,7 +636,7 @@
             "name": "repeat_type",
             "type": "string",
             "description": "重复类型",
-            "enum": ["MONTH","WEEK"]
+            "enum": ["MONTH", "WEEK"]
           },
           {
             "in": "query",
@@ -837,6 +837,17 @@
         "parameters": [
           {
             "in": "body",
+            "name": "enable",
+            "description": "是否启用",
+            "type": "string",
+            "enum": [
+              "ENABLE启用",
+              "DISABLE禁用"
+            ],
+            "required": true 
+          },
+          {
+            "in": "body",
             "name": "award_name",
             "description": "奖品名称",
             "required": true,
@@ -911,6 +922,14 @@
         "consumes": ["application/json", "application/xml"],
         "produces": ["application/xml", "application/json"],
         "parameters": [
+          {
+            "in": "body",
+            "name": "enable",
+            "description": "是否启用",
+            "type": "string",
+            "enum": ["ENABLE启用", "DISABLE禁用"],
+            "required": true
+          },
           {
             "in": "body",
             "name": "_id",
@@ -1025,6 +1044,13 @@
               "YEAR按年",
               "QUARTER按季度"
             ]
+          },
+          {
+            "in": "query",
+            "name": "enable",
+            "description": "是否启用",
+            "type": "string",
+            "enum": ["ENABLE启用", "DISABLE禁用"]
           },
           {
             "name": "start_date",
@@ -6459,7 +6485,7 @@
                       "award_cycle": {
                         "type": "string",
                         "description": "兑换周期",
-                        "enum":  [
+                        "enum": [
                           "NONE",
                           "WEEK按周",
                           "DAY按天",

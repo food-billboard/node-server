@@ -64,9 +64,13 @@ router
       inventory,
       exchange_score,
       award_cycle,
+      enable,
     } = ctx.query
 
     let match = {}
+    if(enable) {
+      match.enable = enable 
+    }
     if (content) {
       match.$or = [
         {
@@ -194,7 +198,8 @@ router
             award_cycle_count: 1,
             createdAt: 1,
             updatedAt: 1,
-            award_image_list: "$award_image_list.src"
+            award_image_list: "$award_image_list.src",
+            enable: 1
           }
         }
       ])
@@ -241,6 +246,11 @@ router
       validator: [
         data => data.split(',').every(item => ObjectId.isValid(item))
       ]
+    }, {
+      name: 'enable',
+      validator: [
+        data => ['ENABLE', 'DISABLE'].includes(data)
+      ]
     })
 
     if (check) return
@@ -263,6 +273,7 @@ router
       award_cycle_count,
       inventory,
       exchange_score,
+      enable 
     } = ctx.request.body
 
     const [, token] = verifyTokenToData(ctx)
@@ -286,7 +297,8 @@ router
           inventory,
           exchange_score,
           award_cycle,
-          award_image_list
+          award_image_list,
+          enable
         })
         return model.save()
       })
@@ -388,6 +400,11 @@ router
       sanitizers: [
         data => ObjectId(data)
       ]
+    }, {
+      name: 'enable',
+      validator: [
+        data => ['ENABLE', 'DISABLE'].includes(data)
+      ]
     })
 
     const {
@@ -396,6 +413,7 @@ router
       award_cycle_count,
       inventory,
       exchange_score,
+      enable 
     } = ctx.request.body
 
     const [, token] = verifyTokenToData(ctx)
@@ -405,7 +423,7 @@ router
       award_name,
       _id: {
         $nin: [_id]
-      }
+      },
     })
       .select({
         _id: 1
@@ -424,7 +442,8 @@ router
             inventory,
             exchange_score,
             award_cycle,
-            award_image_list
+            award_image_list,
+            enable 
           }
         })
       })
