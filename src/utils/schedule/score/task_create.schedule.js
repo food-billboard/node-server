@@ -6,9 +6,10 @@ const CacheJson = require('../cache.json')
 const { log4Error } = require('@src/config/winston')
 const {
   UserModel,
-  ScoreClassifyDesignModel,
+  ScorePrimaryClassifyModel,
   ScoreMemoryModel,
-  ScoreClassifyModel
+  ScoreClassifyModel,
+  ScoreClassifyDesignModel
 } = require('../../mongodb/mongo.lib')
 const { SCORE_TASK_REPEAT_TYPE, SCORE_TYPE } = require('../../constant')
 
@@ -69,6 +70,7 @@ async function scheduleMethod({
         }
       }
     ])
+    // repeat_type 及 holiday 筛选
     const filterDesignTaskList = designTaskList.filter(item => {
       return item.holiday === isHoliday && (item.repeat_type === SCORE_TASK_REPEAT_TYPE.WEEK ? item.repeat.includes(weekDay) : item.repeat.includes(monthDay))
     })
@@ -78,12 +80,29 @@ async function scheduleMethod({
       const { _id: userId, birthday } = joinTaskUserList[index]
       const age = dayjs().diff(dayjs(birthday), 'year') + 1
       const createTaskList = []
+      // 年龄筛选
       const targetUserDesignList = filterDesignTaskList.filter(item => {
         const { max_age, min_age } = item
         return item.target_user === userId && age <= max_age && age >= min_age
       })
 
       createTaskList.push(...targetUserDesignList.slice(0, MAX_TASK_LIST))
+
+      // 批评和表扬类型的任务不用自动生成
+      const criticismAndPraiseTask = await ScorePrimaryClassifyModel.aggregate([
+        {
+          $match: {
+            content: {
+              $in: ['批评', '表扬']
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+          }
+        }
+      ])
 
       // 任务不够则随机补足
       if (createTaskList.length < MAX_TASK_LIST) {
@@ -92,6 +111,10 @@ async function scheduleMethod({
             $match: {
               _id: {
                 $nin: designTaskList.map(item => ObjectId(item.classify))
+              },
+              // 批评和表扬的不用
+              classify: {
+                $nin: criticismAndPraiseTask.map(item => item._id)
               }
             }
           },

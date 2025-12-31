@@ -708,6 +708,44 @@ router
     data
   })
 })
+.delete('/design', async (ctx) => {
+  //validate params
+  const check = Params.query(ctx, {
+    name: '_id',
+    validator: [
+      data => data.split(',').every(data => ObjectId.isValid(data))
+    ]
+  })
+  if (check) return
+
+  const [_id] = Params.sanitizers(ctx.query, {
+    name: '_id',
+    sanitizers: [
+      function (data) {
+        return data.split(',').map(data => ObjectId(data))
+      }
+    ]
+  })
+
+  //database
+  const data = await ScoreClassifyDesignModel.deleteMany({
+    _id: {
+      $in: _id
+    }
+  })
+    .then(data => {
+      if (data.deletedCount === 0) return Promise.reject({ errMsg: 'not found', status: 404 })
+      return {
+        data: null
+      }
+    })
+    .catch(dealErr(ctx))
+
+  responseDataDeal({
+    ctx,
+    data
+  })
+})
 
 
 module.exports = router

@@ -747,6 +747,32 @@
             "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
+      },
+      "delete": {
+        "tags": ["score"],
+        "summary": "删除积分分类定制",
+        "description": "",
+        "operationId": "manage_delete_score_design_classify",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "classify",
+            "type": "string",
+            "description": "定制id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "security": [
+            {
+              "petstore_auth": ["write:pets", "read:pets"]
+            }
+          ]
+        }
       }
     },
     "/api/manage/score/classify/join-task": {
@@ -840,11 +866,8 @@
             "name": "enable",
             "description": "是否启用",
             "type": "string",
-            "enum": [
-              "ENABLE启用",
-              "DISABLE禁用"
-            ],
-            "required": true 
+            "enum": ["ENABLE启用", "DISABLE禁用"],
+            "required": true
           },
           {
             "in": "body",
