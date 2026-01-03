@@ -29,9 +29,17 @@ async function scheduleMethod({
     // 是否节假日
     // TODO 
     const isHoliday = false
+    // 0 表示星期日（Sunday）
+    // 1 表示星期一（Monday）
+    // 2 表示星期二（Tuesday）
+    // 3 表示星期三（Wednesday）
+    // 4 表示星期四（Thursday）
+    // 5 表示星期五（Friday）
+    // 6 表示星期六（Saturday）
     // 星期几
     const weekDay = dayjs().day()
     // 每月的第几天
+    // 1-31
     const monthDay = dayjs().date()
 
     // 1. 找到所有需要生成任务的人

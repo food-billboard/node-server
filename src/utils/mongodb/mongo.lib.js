@@ -2200,6 +2200,16 @@ const ScoreMemorySchema = new Schema({
   ...defaultConfig,
 })
 
+// 假期
+const HolidaySchema = new Schema({
+  year: Number,
+  holiday: [{
+    type: String
+  }],
+}, {
+  ...defaultConfig,
+})
+
 // 倒数日
 const TimeoutSchema = new Schema({
   create_user: {
@@ -2398,6 +2408,7 @@ const ScoreClassifyDesignModel = model('score_classify_design', ScoreClassifyDes
 const TimeoutModel = model('timeout', TimeoutSchema)
 const TimeoutImageModel = model('timeout_image', TimeoutImageSchema)
 const LongTimeTaskModel = model('task', LongTimeTaskSchema)
+const HolidayModel = model('holiday', HolidaySchema)
 
 module.exports = {
   ScorePrimaryClassifyModel,
@@ -2445,6 +2456,8 @@ module.exports = {
   TimeoutModel,
   TimeoutImageModel,
   LongTimeTaskModel,
+  HolidayModel,
+  HolidaySchema,
   ScorePrimaryClassifySchema,
   UserSchema,
   GlobalSchema,

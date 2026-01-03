@@ -115,10 +115,84 @@
         "description": "Find out more about our store",
         "url": "http://swagger.io"
       }
+    },
+    {
+      "name": "other",
+      "description": "其他",
+      "externalDocs": {
+        "description": "Find out more about our store",
+        "url": "http://swagger.io"
+      }
     }
   ],
   "schemes": ["https", "http"],
   "paths": {
+    "/api/manage/other/holiday": {
+      "post": {
+        "tags": ["other"],
+        "summary": "修改假期时间",
+        "description": "",
+        "operationId": "manage_post_holiday",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "holiday",
+            "description": "假期时间(string[])",
+            "required": true,
+            "type": "array"
+          },
+          {
+            "in": "body",
+            "name": "year",
+            "description": "年",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "get": {
+        "tags": ["other"],
+        "summary": "获取假期列表",
+        "description": "",
+        "operationId": "manage_get_holiday_list",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "description": "年",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_get_holiday_list"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
     "/api/manage/score/memory/obtain": {
       "put": {
         "tags": ["score"],
@@ -6117,6 +6191,40 @@
       },
       "xml": {
         "name": "manage_get_score_list"
+      }
+    },
+    "manage_get_holiday_list": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "year": {
+                  "type": "integer",
+                  "description": "年"
+                },
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_get_holiday_list"
       }
     },
     "manage_get_memory_exchange_list": {
