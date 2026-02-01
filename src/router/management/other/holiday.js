@@ -33,8 +33,6 @@ router
         holiday
       }
     })
-      .exec()
-      .then(data => !!data)
       .then((data) => {
         if (data.nModified == 0) {
           //database
