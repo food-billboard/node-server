@@ -3,23 +3,23 @@ const mongoose = require("mongoose")
 const { Schema, model } = mongoose
 const { Types: { ObjectId } } = mongoose
 const { log4Database } = require('@src/config/winston')
-const { 
+const {
   SCORE_CHECK_STATE_TYPE,
   SCORE_AWARD_ENABLE_TYPE,
   SCORE_EXCHANGE_CYCLE_TYPE,
-  BEHAVIOUR_URL_TYPE_MAP, 
-  EMAIL_REGEXP, 
-  MEDIA_ORIGIN_TYPE, 
-  METHOD_MAP, 
-  USER_STATUS, 
-  MOVIE_STATUS, 
-  MOVIE_SOURCE_TYPE, 
-  ROLES_MAP, 
-  FEEDBACK_STATUS, 
+  BEHAVIOUR_URL_TYPE_MAP,
+  EMAIL_REGEXP,
+  MEDIA_ORIGIN_TYPE,
+  METHOD_MAP,
+  USER_STATUS,
+  MOVIE_STATUS,
+  MOVIE_SOURCE_TYPE,
+  ROLES_MAP,
+  FEEDBACK_STATUS,
   EAT_WHAT_MENU_TYPE,
-  COMMENT_SOURCE_TYPE, 
-  MEDIA_STATUS, 
-  MEDIA_AUTH,  
+  COMMENT_SOURCE_TYPE,
+  MEDIA_STATUS,
+  MEDIA_AUTH,
   FRIEND_STATUS,
   ROOM_TYPE,
   MESSAGE_TYPE,
@@ -74,9 +74,9 @@ const isOne = fields => {
 
 //预处理
 function prePopulate(populate) {
-  return function(next) {
+  return function (next) {
     let activePopulate = []
-    const { _fields: fields={} } = this
+    const { _fields: fields = {} } = this
     const zero = isZero(fields)
     let fieldArr = []
     //筛选同字段不同层
@@ -84,9 +84,9 @@ function prePopulate(populate) {
       const index = fieldArr.findIndex(f => {
         field.includes(f)
       })
-      if(!!~index) {
+      if (!!~index) {
         fieldArr.splice(index, 1, field)
-      }else {
+      } else {
         fieldArr.push(field)
       }
     })
@@ -94,24 +94,24 @@ function prePopulate(populate) {
     activePopulate = populate.filter(pop => {
       const { path } = pop
       const pathArr = path.split('.')
-      return zero ? ( 
+      return zero ? (
         !fieldArr.some(field => {
           let fArr = field.split('.')
           let clipArr
-          if(fArr.length > pathArr.length) {
+          if (fArr.length > pathArr.length) {
             clipArr = fArr.slice(0, pathArr.length)
             return pathArr.every((p, i) => p === clipArr[i])
-          }else {
+          } else {
             clipArr = pathArr.slice(0, fArr.length)
             return fArr.every((f, i) => f === clipArr[i])
           }
         })
       )
-        : 
+        :
         fieldArr.some(field => {
           let fArr = field.split('.')
           let clipArr
-          if(fArr.length <= pathArr.length){
+          if (fArr.length <= pathArr.length) {
             clipArr = pathArr.slice(0, fArr.length)
             return fArr.every((f, i) => f === clipArr[i])
           }
@@ -120,7 +120,7 @@ function prePopulate(populate) {
     })
 
     //!! need to test
-    if(!zero) this.select({
+    if (!zero) this.select({
       updatedAt: 1
     })
 
@@ -139,25 +139,25 @@ function postMiddleware(...params) {
 
 //预设
 const PRE_USER_FIND = [
- {
-   path: 'avatar',
-   select: {
-    src: 1,
-    _id: 1
-   }
- }, 
+  {
+    path: 'avatar',
+    select: {
+      src: 1,
+      _id: 1
+    }
+  },
 ]
 const PRE_EAT_WHAT_FIND = [
   {
     path: 'classify',
     select: {
-     title: 1,
-     description: 1,
-     content: 1,
-     _id: 1
+      title: 1,
+      description: 1,
+      content: 1,
+      _id: 1
     }
-  }, 
- ]
+  },
+]
 const PRE_GLOBAL_FIND = []
 const PRE_ROOM_FIND = [
   {
@@ -252,7 +252,7 @@ const PRE_COMMENT_FIND = [
       src: 1,
       _id: 1
     }
-  }, 
+  },
   {
     path: 'content.video',
     select: {
@@ -338,27 +338,27 @@ const PRE_SCORE_AWARD_FIND = [
 //user
 const UserSchema = new Schema({
   score: {
-    type: Number 
+    type: Number
   },
   join_task: {
     type: Boolean,
-    default: false 
+    default: false
   },
   birthday: {
     type: Date
   },
-	mobile: {
+  mobile: {
     type: Number,
     unique: true,
     set: (v) => Number(v),
     required: true,
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         return /^1[3456789]\d{9}$/.test(v);
       },
     },
   },
-	password: {
+  password: {
     type: String,
     required: true
   },
@@ -366,13 +366,13 @@ const UserSchema = new Schema({
     type: String,
     unique: true,
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         return EMAIL_REGEXP.test(v);
       },
     },
     required: true
   },
-	username: {
+  username: {
     type: String,
     default: '默认名称'
   },
@@ -382,7 +382,7 @@ const UserSchema = new Schema({
     min: 0,
     max: 50
   },
-	avatar: {
+  avatar: {
     // default: ObjectId('5edb3c7b4f88da14ca419e61'),
     type: ObjectId,
     ref: 'image'
@@ -406,7 +406,7 @@ const UserSchema = new Schema({
       default: USER_HOT_HISTORY_TYPE['comment']
     }
   }],
-	hot: {
+  hot: {
     type: Number,
     default: 0,
     min: 0,
@@ -489,9 +489,9 @@ const UserSchema = new Schema({
       min: 0,
       max: 10,
       required: true,
-      set: function(rate) {
-        if(rate < 0) return 0
-        if(rate > 10) return 10
+      set: function (rate) {
+        if (rate < 0) return 0
+        if (rate > 10) return 10
         return rate
       }
     },
@@ -538,7 +538,7 @@ const GlobalSchema = new Schema({
   },
   valid: {
     type: Boolean,
-    default: false 
+    default: false
   },
   origin: {
     type: ObjectId,
@@ -549,7 +549,7 @@ const GlobalSchema = new Schema({
   ...defaultConfig
 })
 
-const MemberSchema = new Schema({ 
+const MemberSchema = new Schema({
   user: {
     type: ObjectId,
     // required: true,
@@ -559,7 +559,7 @@ const MemberSchema = new Schema({
     type: String,
   },
   temp_user_id: {
-    type: String 
+    type: String
   },
   // status: {
   //   enum: Object.keys(ROOM_USER_NET_STATUS),
@@ -578,7 +578,7 @@ const MemberSchema = new Schema({
 
 //room
 const RoomSchema = new Schema({
-  type:  {
+  type: {
     type: String,
     required: true,
     enum: Object.keys(ROOM_TYPE),
@@ -597,7 +597,7 @@ const RoomSchema = new Schema({
   },
   deleted: {
     type: Boolean,
-    default: false 
+    default: false
   },
   delete_users: [{
     type: ObjectId,
@@ -818,8 +818,8 @@ const MovieSchema = new Schema({
     ref: 'user',
     required: true,
   },
-	glance: {
-    type:Number,
+  glance: {
+    type: Number,
     default: 0
   },
   author_description: {
@@ -830,7 +830,7 @@ const MovieSchema = new Schema({
     type: Number,
     default: 0,
   },
-	hot: {
+  hot: {
     type: Number,
     default: 0,
   },
@@ -839,7 +839,7 @@ const MovieSchema = new Schema({
     default: 1,
     min: 1
   },
-	total_rate: {
+  total_rate: {
     type: Number,
     default: 0,
   },
@@ -857,7 +857,7 @@ const MovieSchema = new Schema({
     trim: true,
     uppercase: true,
   },
-	related_to: [{
+  related_to: [{
     film: {
       type: ObjectId,
       ref: 'movie',
@@ -865,13 +865,13 @@ const MovieSchema = new Schema({
     },
     related_type: [{
       type: String,
-      enum: [ "DIRECTOR", "ACTOR", "AUTHOR", "CLASSIFY" ],
+      enum: ["DIRECTOR", "ACTOR", "AUTHOR", "CLASSIFY"],
       trim: true,
       uppercase: true,
       required: true,
     }]
   }],
-	same_film: [{
+  same_film: [{
     film: {
       type: ObjectId,
       ref: 'movie',
@@ -879,12 +879,12 @@ const MovieSchema = new Schema({
     },
     same_type: {
       type: String,
-      enum: [ "SERIES", "NAMESAKE" ],
+      enum: ["SERIES", "NAMESAKE"],
       trim: true,
       uppercase: true,
       required: true
     }
-	}]
+  }]
 }, {
   ...defaultConfig
 })
@@ -1096,15 +1096,15 @@ const SearchSchema = new Schema({
     required: true,
     unique: true,
   },
-	match_movies: [{
-		movie: {
+  match_movies: [{
+    movie: {
       type: ObjectId,
       ref: 'movie',
       required: true
     },
-		field: String
-	}],
-	match_texts: [{
+    field: String
+  }],
+  match_texts: [{
     type: String,
     min: 1
   }],
@@ -1133,7 +1133,7 @@ const CommentSchema = new Schema({
     type: ObjectId,
     ref: 'user'
   },
-	sub_comments: [{
+  sub_comments: [{
     type: ObjectId,
     ref: 'comment',
   }],
@@ -1153,13 +1153,13 @@ const CommentSchema = new Schema({
       {
         type: ObjectId,
         ref: 'video',
-      } 
+      }
     ],
     image: [
       {
         type: ObjectId,
         ref: 'image'
-      } 
+      }
     ]
   },
   comment_users: [{
@@ -1212,9 +1212,9 @@ const RankSchema = new Schema({
     field: {
       type: String,
       // enum: [ "GLANCE", 'AUTHOR_RATE', 'HOT', 'TOTAL_RATE', 'CLASSIFY' ],
-      enum: [ 'classify', 'district' ],
+      enum: ['classify', 'district'],
       lowercase: true,
-      get: function(v) {
+      get: function (v) {
         return v
       }
     }
@@ -1316,7 +1316,7 @@ const ScreenShotSchema = new Schema({
   },
   data: {
     type: String,
-    required: true 
+    required: true
   }
 }, {
   ...defaultConfig,
@@ -1376,10 +1376,10 @@ const VideoSchema = new Schema({
     type: String,
     enum: Object.keys(MEDIA_ORIGIN_TYPE),
     uppercase: true,
-    get: function(v) { return v ? v.toLowerCase() : v }
+    get: function (v) { return v ? v.toLowerCase() : v }
   },
   description: {
-    type: String 
+    type: String
   },
   file_name: {
     type: String
@@ -1399,7 +1399,7 @@ const VideoSchema = new Schema({
     type: String,
     enum: Object.keys(MEDIA_AUTH),
     uppercase: true,
-    get: function(v) { return v ? v.toLowerCase() : v }
+    get: function (v) { return v ? v.toLowerCase() : v }
   },
   info: {
     md5: {
@@ -1429,7 +1429,7 @@ const VideoSchema = new Schema({
       enum: [],
       uppercase: true,
       required: true,
-      get: function(v) { return v ? v.toLowerCase() : v }
+      get: function (v) { return v ? v.toLowerCase() : v }
     },
     // 上传状态
     status: {
@@ -1458,7 +1458,7 @@ const ImageSchema = new Schema({
     type: String,
     enum: Object.keys(MEDIA_ORIGIN_TYPE),
     uppercase: true,
-    get: function(v) { return v ? v.toLowerCase() : v }
+    get: function (v) { return v ? v.toLowerCase() : v }
   },
   origin: {
     type: ObjectId,
@@ -1475,10 +1475,10 @@ const ImageSchema = new Schema({
     type: String,
     enum: Object.keys(MEDIA_AUTH),
     uppercase: true,
-    get: function(v) { return v ? v.toLowerCase() : v }
+    get: function (v) { return v ? v.toLowerCase() : v }
   },
   description: {
-    type: String 
+    type: String
   },
   file_name: {
     type: String
@@ -1507,7 +1507,7 @@ const ImageSchema = new Schema({
       enum: [],
       required: true,
       uppercase: true,
-      get: function(v) { return v ? v.toLowerCase() : v }
+      get: function (v) { return v ? v.toLowerCase() : v }
     },
     status: {
       type: String,
@@ -1530,7 +1530,7 @@ const OtherMediaSchema = new Schema({
     get: formatMediaUrl
   },
   description: {
-    type: String 
+    type: String
   },
   file_name: {
     type: String
@@ -1540,7 +1540,7 @@ const OtherMediaSchema = new Schema({
     type: String,
     enum: Object.keys(MEDIA_ORIGIN_TYPE),
     uppercase: true,
-    get: function(v) { return v ? v.toLowerCase() : v }
+    get: function (v) { return v ? v.toLowerCase() : v }
   },
   origin: {
     type: ObjectId,
@@ -1557,7 +1557,7 @@ const OtherMediaSchema = new Schema({
     type: String,
     enum: Object.keys(MEDIA_AUTH),
     uppercase: true,
-    get: function(v) { return v ? v.toLowerCase() : v }
+    get: function (v) { return v ? v.toLowerCase() : v }
   },
   info: {
     md5: {
@@ -1581,7 +1581,7 @@ const OtherMediaSchema = new Schema({
       enum: [],
       uppercase: true,
       required: true,
-      get: function(v) { return v ? v.toLowerCase() : v }
+      get: function (v) { return v ? v.toLowerCase() : v }
     },
     status: {
       type: String,
@@ -1646,7 +1646,7 @@ const EatWhatSchema = new Schema({
     ref: 'eat_what_classify'
   },
   date: {
-    type: Date 
+    type: Date
   },
   menu_type: {
     type: String,
@@ -1691,7 +1691,7 @@ const AuthSchema = new Schema({
   roles: [{
     required: true,
     type: String,
-    enum: Object.keys(ROLES_MAP), 
+    enum: Object.keys(ROLES_MAP),
     set: (v) => {
       return v.toUpperCase()
     }
@@ -1714,7 +1714,7 @@ const AuthSchema = new Schema({
         enum: METHOD_MAP,
         set: (v) => {
           return v.toUpperCase()
-        } 
+        }
       }
     }],
     attributes: [{
@@ -1758,12 +1758,12 @@ const FriendsSchema = new Schema({
   user: {
     type: ObjectId,
     ref: 'user',
-    unique: true 
+    unique: true
   },
   member: {
     type: ObjectId,
     ref: 'member',
-    unique: true 
+    unique: true
   },
   friends: [{
     _id: {
@@ -1771,13 +1771,13 @@ const FriendsSchema = new Schema({
       ref: 'friend'
     },
     timestamps: {
-      type: Number 
+      type: Number
     },
     status: {
       type: String,
       enum: Object.keys(FRIEND_STATUS),
       default: FRIEND_STATUS.TO_AGREE,
-      uppercase: true 
+      uppercase: true
     }
   }]
 }, {
@@ -1794,7 +1794,7 @@ const ErrorSchema = new Schema({
     enum: Object.keys(ERROR_TYPE)
   },
   error_message: {
-    type: String 
+    type: String
   },
 }, {
   ...defaultConfig
@@ -1803,14 +1803,14 @@ const ErrorSchema = new Schema({
 const ScheduleSchema = new Schema({
   name: {
     type: String,
-    required: true 
+    required: true
   },
   description: {
-    type: String 
+    type: String
   },
   time: {
     type: String,
-    required: true 
+    required: true
   },
   status: {
     type: String,
@@ -1823,7 +1823,7 @@ const ScheduleSchema = new Schema({
 const ScreenSchema = new Schema({
   user: {
     type: ObjectId,
-    required: true 
+    required: true
   },
   version: {
     type: String,
@@ -1836,7 +1836,7 @@ const ScreenSchema = new Schema({
   },
   enable: {
     type: Boolean,
-    default: false 
+    default: false
   },
   flag: {
     type: String,
@@ -1857,7 +1857,7 @@ const ScreenSchema = new Schema({
 const ScreenModelSchema = new Schema({
   user: {
     type: ObjectId,
-    required: true 
+    required: true
   },
   version: {
     type: String,
@@ -1870,7 +1870,7 @@ const ScreenModelSchema = new Schema({
   },
   enable: {
     type: Boolean,
-    default: false 
+    default: false
   },
   flag: {
     type: String,
@@ -1879,7 +1879,7 @@ const ScreenModelSchema = new Schema({
   },
   name: String,
   poster: String,
-  description: String 
+  description: String
 }, {
   ...defaultConfig
 })
@@ -1889,10 +1889,10 @@ const ScreenMockSchema = new Schema({
   data_kind: String,
   // mock的数据，在初始化或修改时生成
   mock_data: String,
-  description: String, 
+  description: String,
   // 配置
   config_type: {
-    type: String, 
+    type: String,
     enum: Object.keys(SCREEN_MOCK_CONFIG_DATA_TYPE)
   },
   user: {
@@ -1910,25 +1910,25 @@ const ScreenMockSchema = new Schema({
   // },
   date: {
     date_type: {
-      type: String, 
+      type: String,
       enum: Object.keys(SCREEN_MOCK_CONFIG_DATE_TYPE)
     },
     format: String,
   },
   address: {
     address_type: {
-      type: String, 
+      type: String,
       enum: Object.keys(SCREEN_MOCK_CONFIG_ADDRESS_TYPE)
     },
-    prefix: Boolean 
+    prefix: Boolean
   },
   name: {
     language_type: {
-      type: String, 
+      type: String,
       enum: Object.keys(SCREEN_MOCK_CONFIG_LANGUAGE_TYPE)
     },
     name_type: {
-      type: String, 
+      type: String,
       enum: Object.keys(SCREEN_MOCK_CONFIG_NAME_TYPE)
     }
   },
@@ -1936,11 +1936,11 @@ const ScreenMockSchema = new Schema({
     min: Number,
     max: Number,
     language_type: {
-      type: String, 
+      type: String,
       enum: Object.keys(SCREEN_MOCK_CONFIG_LANGUAGE_TYPE)
     },
     text_type: {
-      type: String, 
+      type: String,
       enum: Object.keys(SCREEN_MOCK_CONFIG_TEXT_TYPE)
     }
   },
@@ -1949,26 +1949,26 @@ const ScreenMockSchema = new Schema({
     height: Number,
     color: String,
     word: String,
-    word_color: String 
+    word_color: String
   },
   number: {
     min: Number,
     max: Number,
     decimal: Boolean,
     dmin: Number,
-    dmax: Number 
+    dmax: Number
   },
-  
+
 }, {
   ...defaultConfig
 })
 
 const ThirdPartySchema = new Schema({
   name: String,
-  description: String, 
+  description: String,
   url: String,
   method: {
-    type: String, 
+    type: String,
     enum: Object.keys(THIRD_PARTY_REQUEST_METHOD)
   },
   headers: String,
@@ -1986,7 +1986,7 @@ const ThirdPartySchema = new Schema({
     default_value: Schema.Types.Mixed,
     validate_data: {
       type: String,
-      required: false 
+      required: false
     },
   }],
 }, {
@@ -1997,7 +1997,7 @@ const ThirdPartySchema = new Schema({
 
 const RaspberrySchema = new Schema({
   name: String,
-  description: String, 
+  description: String,
   url: String,
   folder: String,
   user: ObjectId,
@@ -2025,7 +2025,7 @@ const ScoreClassifyDesignSchema = new Schema({
   },
   holiday: Boolean,
   target_user: {
-     type: ObjectId,
+    type: ObjectId,
     ref: 'user'
   },
   classify: {
@@ -2135,9 +2135,13 @@ const ExchangeMemorySchema = new Schema({
     required: true,
     ref: 'score_award'
   },
+  // 兑换积分
+  exchange_score: {
+    type: Number
+  },
   // 核销时间
   check_date: {
-    type: Date 
+    type: Date
   },
   // 核销状态
   check_state: {
@@ -2161,7 +2165,7 @@ const ScoreMemorySchema = new Schema({
   },
   // 积分分数
   target_score: {
-    type: Number 
+    type: Number
   },
   // 积分类型
   score_type: {
@@ -2181,20 +2185,20 @@ const ScoreMemorySchema = new Schema({
   },
   // 积分原因
   create_content: {
-    type: String 
+    type: String
   },
   // 积分原因描述
   create_description: {
-    type: String 
+    type: String
   },
   // 表示做任务的开始时间和结束时间，用来统计完成这个任务花费的时间
   // 开始时间
   start_time: {
-    type: String 
+    type: String
   },
   // 结束时间
   end_time: {
-    type: String 
+    type: String
   }
 }, {
   ...defaultConfig,
@@ -2244,7 +2248,7 @@ const TimeoutImageSchema = new Schema({
     ref: 'image'
   },
   address: [{
-    type: String 
+    type: String
   }],
   create_date: String,
 }, {
@@ -2353,7 +2357,7 @@ SAVE_OPERATION_LIB.forEach(op => {
   CommentSchema.post(op, postMiddleware)
   RankSchema.post(op, postMiddleware)
   ClassifySchema.post(op, postMiddleware)
-  LanguageSchema.post(op, postMiddleware) 
+  LanguageSchema.post(op, postMiddleware)
   VideoSchema.post(op, postMiddleware)
   ImageSchema.post(op, postMiddleware)
   OtherMediaSchema.post(op, postMiddleware)

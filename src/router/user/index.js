@@ -6,6 +6,7 @@ const Setting = require('./setting')
 const Customer = require("./customer")
 const Barrage = require('./barrage')
 const EatWhat = require('./eat-what')
+const Score = require('./score')
 
 const router = new Router()
 
@@ -17,5 +18,6 @@ router
 .use('/customer', Customer.routes(), Customer.allowedMethods())
 .use('/barrage', Barrage.routes(), Barrage.allowedMethods())
 .use('/eat_what', EatWhat.routes(), EatWhat.allowedMethods())
+.use('/score', Score.routes(), Score.allowedMethods())
 
 module.exports = router

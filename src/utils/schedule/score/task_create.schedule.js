@@ -25,6 +25,8 @@ async function scheduleMethod({
 
   console.log(chalk.yellow(CacheJson.createScoreTaskSchedule.description))
 
+  const taskDate = dayjs().toDate()
+
   try {
     // 是否节假日
     // TODO 
@@ -151,7 +153,7 @@ async function scheduleMethod({
       for (let subIndex = 0; subIndex < createTaskList.length; subIndex++) {
         const { classify } = createTaskList[subIndex]
         const model = new ScoreMemoryModel({
-          date: dayjs().toDate(),
+          date: taskDate,
           target_user: ObjectId(userId),
           // 积分分数
           target_score: 0,

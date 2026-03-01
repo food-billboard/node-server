@@ -914,6 +914,7 @@ router
           exchange_target: target_user,
           exchange_user: id,
           award,
+          exchange_score: _exchange_score
         })
         return model.save()
       })
