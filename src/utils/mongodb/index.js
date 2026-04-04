@@ -21,10 +21,10 @@ async function MongoDB(url="mongodb://127.0.0.1:27017/movie") {
       //定时任务
       scheduleConstructor.init()
     })
-    // .catch(err => {
-    //   console.log(chalk.bgRed('the mongodb server is run in error'))
-    //   console.log(err)
-    // })
+    .catch(err => {
+      console.log(chalk.bgRed('the mongodb server is run in error'))
+      console.log(err)
+    })
   }
   return Promise.resolve()
 }

@@ -197,15 +197,15 @@ const getIp = (ctx) => {
 
 const connectTry = (method, errMsg, times=5, interval=6000) => {
   let _times = 0
-  return async function tryMethod() {
+  return async function tryMethod(...args) {
     try {
-      await method()
+      await method(...args)
       return Promise.resolve()
     }catch(err) {
       if(_times > times) return Promise.reject((errMsg ? errMsg.toString() : 'connect error') + err.toString())
       _times ++
       return setTimeout(async () => {
-        await tryMethod()
+        await tryMethod(...args)
       }, interval);
     }
   }

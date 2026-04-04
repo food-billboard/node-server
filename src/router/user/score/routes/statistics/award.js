@@ -61,6 +61,11 @@ router
 
     const data = await ExchangeMemoryModel.aggregate([
       {
+        $match: {
+          exchange_target: _id
+        }
+      },
+      {
         $group: {
           _id: "$award",
           count: { $sum: 1 }

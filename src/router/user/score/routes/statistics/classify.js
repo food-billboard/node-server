@@ -37,7 +37,7 @@ router
       {
         $match: {
           date: {
-            $gte: dayjs().subtract(dayCount, 'day').startOf('day')
+            $gte: dayjs().subtract(dayCount, 'day').startOf('day').toDate()
           },
           target_user: _id,
           score_type: SCORE_TYPE[state]
@@ -50,7 +50,7 @@ router
             month: { $month: "$date" },
             day: { $dayOfMonth: "$date" },
           },
-          total: { $sum: "$date" }
+          total: { $sum: 1 }
         }
       }
     ])
@@ -58,9 +58,17 @@ router
         return {
           data: {
             list: data.map(item => {
+              const {
+                _id: {
+                  year,
+                  month,
+                  day
+                },
+                total
+              } = item 
               return {
-                label: `${item.year}-${item.month}-${item.day}`,
-                value: item.total
+                label: `${year}-${month}-${day}`,
+                value: total
               }
             })
           }
@@ -97,7 +105,8 @@ router
           date: {
             $gte: dayjs(dayAfter).toDate()
           },
-          score_type: SCORE_TYPE[state]
+          score_type: SCORE_TYPE[state],
+          target_user: _id,
         }
       },
       {
@@ -141,9 +150,11 @@ router
             }
           ])
         ])
-          .then((primaryData, classifyData) => {
+          .then(([primaryData, classifyData]) => {
             const nextStatisticsData = statisticsData.map(item => {
-              const detail = classifyData.find(data => data._id === item._id)
+              const detail = classifyData.find(data => {
+                return data._id.toString() === item._id.toString()
+              })
               return {
                 _id: item._id,
                 value: item.count,
@@ -175,11 +186,6 @@ router
             }
           })
 
-        return {
-          data: {
-            list: data,
-          }
-        }
       })
       .catch(dealErr(ctx))
 
@@ -207,7 +213,8 @@ router
           date: {
             $gte: dayjs().startOf('year').toDate()
           },
-          score_type: SCORE_TYPE[state]
+          score_type: SCORE_TYPE[state],
+          target_user: _id,
         }
       },
       {
@@ -251,7 +258,8 @@ router
           date: {
             $gte: dayjs().startOf('month').toDate()
           },
-          score_type: SCORE_TYPE[state]
+          score_type: SCORE_TYPE[state],
+          target_user: _id,
         }
       },
       {
@@ -295,7 +303,8 @@ router
           date: {
             $gte: dayjs().startOf('week').toDate()
           },
-          score_type: SCORE_TYPE[state]
+          score_type: SCORE_TYPE[state],
+          target_user: _id,
         }
       },
       {
@@ -339,7 +348,8 @@ router
           date: {
             $gte: dayjs().startOf('day').toDate()
           },
-          score_type: SCORE_TYPE[state]
+          score_type: SCORE_TYPE[state],
+          target_user: _id,
         }
       },
       {
@@ -381,6 +391,7 @@ router
           date: {
             $gte: dayjs().startOf('day').toDate()
           },
+          target_user: _id,
         }
       },
       {
