@@ -342,6 +342,12 @@
           },
           {
             "in": "body",
+            "name": "exchange_count",
+            "description": "兑换数量",
+            "type": "integer"
+          },
+          {
+            "in": "body",
             "name": "award",
             "description": "奖品",
             "type": "string",
@@ -452,6 +458,51 @@
             "description": "成功",
             "schema": {
               "$ref": "#/definitions/manage_get_memory_exchange_list"
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/api/manage/score/memory/exchange/check": {
+      "get": {
+        "tags": ["score"],
+        "summary": "是否可以兑换验证",
+        "description": "",
+        "operationId": "manage_get_memory_exchange_check",
+        "consumes": ["application/json", "application/xml"],
+        "produces": ["application/xml", "application/json"],
+        "parameters": [
+          {
+            "name": "award",
+            "in": "query",
+            "type": "string",
+            "description": "奖品id",
+            "required": true
+          },
+          {
+            "name": "target_user",
+            "in": "query",
+            "type": "string",
+            "description": "兑换人id",
+            "required": true
+          },
+          {
+            "name": "exchange_count",
+            "in": "query",
+            "description": "兑换数量(默认1)",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/manage_get_memory_exchange_check"
             }
           }
         },
@@ -6311,6 +6362,59 @@
       },
       "xml": {
         "name": "manage_get_memory_exchange_list"
+      }
+    },
+    "manage_get_memory_exchange_check": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "res": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "inventory": {
+                  "type": "string",
+                  "description": "库存"
+                },
+                "exchange_score": {
+                  "type": "string",
+                  "description": "兑换积分"
+                },
+                "award_cycle": {
+                  "type": "string",
+                  "description": "兑换规则"
+                },
+                "award_cycle_count": {
+                  "type": "string",
+                  "description": "兑换规则的数量"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "兑换时间"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "errMsg": {
+                  "type": "string",
+                  "description": "无法兑换时返回,错误信息"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "manage_get_memory_exchange_check"
       }
     },
     "manage_get_score_classify_list": {

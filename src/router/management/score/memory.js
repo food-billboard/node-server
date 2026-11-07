@@ -19,6 +19,95 @@ const { Types: { ObjectId } } = require('mongoose')
 
 const router = new Router()
 
+async function exchangeCheck({
+  // 奖品id
+  award,
+  // 兑换数量
+  exchange_count = 1,
+  // 兑换人
+  target_user
+}) {
+  let awardDetail = {}
+  return ScoreAwardModel.findOne({
+    _id: award
+  })
+    .select({
+      _id: 1,
+      inventory: 1,
+      exchange_score: 1,
+      award_cycle: 1,
+      award_cycle_count: 1,
+    })
+    .exec()
+    .then(notFound)
+    .then(data => {
+      awardDetail = { ...data }
+      const { inventory, exchange_score, award_cycle, award_cycle_count } = data
+      let targetDate
+      switch (award_cycle) {
+        case SCORE_EXCHANGE_CYCLE_TYPE.DAY:
+          targetDate = dayjs().startOf('day').toDate()
+          break
+        case SCORE_EXCHANGE_CYCLE_TYPE.WEEK:
+          targetDate = dayjs().startOf('week').toDate()
+          break
+        case SCORE_EXCHANGE_CYCLE_TYPE.MONTH:
+          targetDate = dayjs().startOf('month').toDate()
+          break
+        case SCORE_EXCHANGE_CYCLE_TYPE.QUARTER:
+          targetDate = dayjs().startOf('quarter').toDate()
+          break
+        case SCORE_EXCHANGE_CYCLE_TYPE.YEAR:
+          targetDate = dayjs().startOf('year').toDate()
+          break
+      }
+      return award_cycle === SCORE_EXCHANGE_CYCLE_TYPE.NONE ? Promise.resolve(awardDetail) : ExchangeMemoryModel.aggregate([
+        {
+          $match: {
+            award,
+            createdAt: {
+              $gte: targetDate
+            }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: 1
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            total: 1
+          }
+        }
+      ])
+        .then(data => {
+          const [total = { total: 0 }] = data
+          if (total.total >= award_cycle_count) return Promise.reject({ errMsg: '超过兑换次数', status: 400 })
+        })
+        .then(() => {
+          if (!inventory || inventory < exchange_count) return Promise.reject({ status: 400, errMsg: '库存不足' })
+          return UserModel.findOne({
+            _id: target_user
+          })
+            .select({
+              score: 1
+            })
+            .exec()
+            .then(notFound)
+        })
+        .then(data => {
+          const { score } = data
+          if (score < exchange_score * exchange_count) return Promise.reject({ status: 400, errMsg: '积分不足' })
+          return awardDetail
+        })
+    })
+}
+
 router
   // 积分记录列表
   .get('/obtain', async (ctx) => {
@@ -85,7 +174,7 @@ router
             $options: 'gi'
           }
         },
-      },  
+      },
       {
         $project: {
           _id: 1
@@ -103,19 +192,19 @@ router
             }
           }
         }
-        if(target_classify) {
+        if (target_classify) {
           match = {
             ...match,
             target_classify
           }
         }
-        if(!Number.isNaN(parseInt(target_score))) {
+        if (!Number.isNaN(parseInt(target_score))) {
           match = {
             ...match,
             target_score: parseInt(target_score)
           }
         }
-        if(SCORE_TYPE[score_type]) {
+        if (SCORE_TYPE[score_type]) {
           match = {
             ...match,
             score_type: SCORE_TYPE[score_type]
@@ -405,13 +494,13 @@ router
       target_score,
       create_user: ObjectId(id)
     }
-    if(create_content) {
+    if (create_content) {
       updateData = {
         ...updateData,
         create_content
       }
     }
-    if(create_description) {
+    if (create_description) {
       updateData = {
         ...updateData,
         create_description
@@ -421,33 +510,33 @@ router
     const data = await ScoreMemoryModel.findOne({
       _id
     })
-    .select({
-      target_score: 1,
-      target_user: 1
-    })
-    .exec()
-    .then(notFound)
-    .then(data => {
-      const { target_score: originScore, target_user } = data 
-      return ScoreMemoryModel.updateOne({
-        _id 
-      }, {
-        $set: updateData
+      .select({
+        target_score: 1,
+        target_user: 1
       })
+      .exec()
+      .then(notFound)
       .then(data => {
-        if(data.nModified === 0) return Promise.reject({ errMsg: 'error', status: 404 })
-          return UserModel.updateOne({
-            _id: target_user
-          }, {
-            $inc: { score: target_score - originScore }
+        const { target_score: originScore, target_user } = data
+        return ScoreMemoryModel.updateOne({
+          _id
+        }, {
+          $set: updateData
+        })
+          .then(data => {
+            if (data.nModified === 0) return Promise.reject({ errMsg: 'error', status: 404 })
+            return UserModel.updateOne({
+              _id: target_user
+            }, {
+              $inc: { score: target_score - originScore }
+            })
           })
       })
-    })
-    .then(() => {
-      return {
-        data: _id 
-      }
-    })
+      .then(() => {
+        return {
+          data: _id
+        }
+      })
       .catch(dealErr(ctx))
 
     responseDataDeal({
@@ -547,10 +636,9 @@ router
       ScoreAwardModel.aggregate([
         {
           $match: {
-            name: {
+            award_name: {
               $regex: content,
               $options: 'gi'
-
             }
           },
         },
@@ -829,104 +917,36 @@ router
 
     const [, token] = verifyTokenToData(ctx)
     const { id } = token
+    const { exchange_count = 1 } = ctx.request.body
 
     let _exchange_score = 0
 
-    const data = await ScoreAwardModel.findOne({
-      _id: award
+    const data = await exchangeCheck({
+      target_user,
+      exchange_count,
+      award
     })
-      .select({
-        _id: 1,
-        inventory: 1,
-        exchange_score: 1,
-        award_cycle: 1,
-        award_cycle_count: 1,
-      })
-      .exec()
-      .then(notFound)
-      .then(data => {
-        const { inventory, exchange_score, award_cycle, award_cycle_count } = data
-        _exchange_score = exchange_score
-        let targetDate
-        switch (award_cycle) {
-          case SCORE_EXCHANGE_CYCLE_TYPE.DAY:
-            targetDate = dayjs().startOf('day').toDate()
-            break
-          case SCORE_EXCHANGE_CYCLE_TYPE.WEEK:
-            targetDate = dayjs().startOf('week').toDate()
-            break
-          case SCORE_EXCHANGE_CYCLE_TYPE.MONTH:
-            targetDate = dayjs().startOf('month').toDate()
-            break
-          case SCORE_EXCHANGE_CYCLE_TYPE.QUARTER:
-            targetDate = dayjs().startOf('quarter').toDate()
-            break
-          case SCORE_EXCHANGE_CYCLE_TYPE.YEAR:
-            targetDate = dayjs().startOf('year').toDate()
-            break
-        }
-        return award_cycle === SCORE_EXCHANGE_CYCLE_TYPE.NONE ? Promise.resolve() : ExchangeMemoryModel.aggregate([
-          {
-            $match: {
-              award,
-              createdAt: {
-                $gte: targetDate
-              }
-            }
-          },
-          {
-            $group: {
-              _id: null,
-              total: {
-                $sum: 1
-              }
-            }
-          },
-          {
-            $project: {
-              _id: 0,
-              total: 1
-            }
-          }
-        ])
-          .then(data => {
-            const [total = { total: 0 }] = data
-            if (total.total >= award_cycle_count) return Promise.reject({ errMsg: '超过兑换次数', status: 400 })
+      .then((awardDetail) => {
+        _exchange_score = awardDetail.exchange_score
+        return Promise.all(new Array(exchange_count).fill(0).map((_, index) => {
+          const model = new ExchangeMemoryModel({
+            exchange_target: target_user,
+            exchange_user: id,
+            award,
+            exchange_score: _exchange_score
           })
-          .then(() => {
-            if (!inventory) return Promise.reject({ status: 400, errMsg: '库存不足' })
-            return UserModel.findOne({
-              _id: target_user
-            })
-              .select({
-                score: 1
-              })
-              .exec()
-              .then(notFound)
-          })
-          .then(data => {
-            const { score } = data
-            if (score < exchange_score) return Promise.reject({ status: 400, errMsg: '积分不足' })
-          })
-      })
-      .then(() => {
-        const model = new ExchangeMemoryModel({
-          exchange_target: target_user,
-          exchange_user: id,
-          award,
-          exchange_score: _exchange_score
-        })
-        return model.save()
+          return model.save()
+        }))
       })
       .then(data => {
         return UserModel.updateOne({
           _id: target_user
         }, {
-          $inc: { score: -_exchange_score }
+          $inc: { score: -_exchange_score * exchange_count }
         })
           .then(() => {
             return {
-              data: data._id
+              data: data.map(item => item._id)
             }
           })
       })
@@ -936,6 +956,44 @@ router
       ctx,
       data
     })
+
+  })
+  // 是否能兑换的验证
+  .get('/exchange/check', async (ctx) => {
+    const check = Params.query(ctx, {
+      name: '_id',
+      validator: [
+        data => data.split(',').every(data => ObjectId.isValid(data))
+      ]
+    })
+    if (check) return
+
+    const [, token] = verifyTokenToData(ctx)
+    const { id } = token
+    const { exchange_count = 1 } = ctx.query
+
+    const data = await exchangeCheck({
+      target_user: ObjectId(id),
+      award: ObjectId(award),
+      exchange_count
+    })
+      .then(data => {
+        return {
+          data
+        }
+      })
+      .catch(err => {
+        return {
+          data: err
+        }
+      })
+      .catch(dealErr(ctx))
+
+    responseDataDeal({
+      ctx,
+      data
+    })
+
 
   })
   // 核销
@@ -961,7 +1019,7 @@ router
       ]
     })
 
-    const { reason='', check_state } = ctx.request.body 
+    const { reason = '', check_state } = ctx.request.body
 
     const data = await ExchangeMemoryModel.updateOne({
       _id,
