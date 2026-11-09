@@ -651,8 +651,10 @@ router
     ]) : Promise.resolve([]))
       .then(([users, awards]) => {
         let match = {}
-        if (!isNil(checked)) {
+        if (checked) {
           match.check_state = SCORE_CHECK_STATE_TYPE.AGREE
+        }else if(checked === false) {
+          match.check_state = SCORE_CHECK_STATE_TYPE.DISAGREE
         }
         if (start_date) {
           match = {
@@ -849,7 +851,7 @@ router
             {
               $project: {
                 _id: 1,
-                award: "$award",
+                award: "$award._id",
                 award_name: "$award.award_name",
                 award_exchange_score: "$award.exchange_score",
                 award_image_list: "$award.award_image_list.src",
